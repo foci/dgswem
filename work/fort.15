@@ -1,352 +1,44 @@
- sl15v3_2007_r7 katrina 20061020   ! 32 CHARACTER ALPHANUMERIC RUN DESCRIPTION
- padcirc 46.28sb                   ! 24 CHARACTER ALPANUMERIC RUN IDENTIFICATION
- 1    ! NFOVER - NONFATAL ERROR OVERRIDE OPTION
- 0    ! NABOUT - ABREVIATED OUTPUT OPTION PARAMETER
- 100  ! NSCREEN - UNIT 6 OUTPUT OPTION PARAMETER
- 0    ! IHOT - HOT START PARAMETER
- 2    ! ICS - COORDINATE SYSTEM SELECTION PARAMETER
- 0    ! IM - MODEL SELECTION PARAMETER 
- 2    ! NOLIBF - BOTTOM FRICTION TERM SELECTION PARAMETER
- 2    ! NOLIFA - FINITE AMPLITUDE TERM SELECTION PARAMETER
- 1    ! NOLICA - SPATIAL DERIVATIVE CONVECTIVE SELECTION PARAMETER
- 1    ! NOLICAT - TIME DERIVATIVE CONVECTIVE TERM SELECTION PARAMETER
- 7    ! NWP - VARIABLE BOTTOM FRICTION AND LATERAL VISCOSITY OPTION PARAMETER
-surface_submergence_state
-surface_directional_effective_roughness_length
-surface_canopy_coefficient
-mannings_n_at_sea_floor
-sea_surface_height_above_geoid
-primitive_weighting_in_continuity_equation
-average_horizontal_eddy_viscosity_in_sea_water_wrt_depth
- 1    ! NCOR - VARIABLE CORIOLIS IN SPACE OPTION PARAMETER
- 1    ! NTIP - TIDAL POTENTIAL OPTION PARAMETER
--12   ! NWS - WIND STRESS AND BAROMETRIC PRESSURE OPTION PARAMETER
- 1    ! NRAMP - RAMP FUNCTION OPTION
- 9.81 ! G - ACCELERATION DUE TO GRAVITY - DETERMINES UNITS
--3.0  ! TAU0 - WEIGHTING FACTOR IN GWCE
- 0.5  ! DT - TIME STEP (IN SECONDS)
- 0.0  ! STATIM - STARTING TIME (IN DAYS)
- 0.0  ! REFTIM - REFERENCE TIME (IN DAYS)
- 900 600
- 7.0  ! RNDAY - TOTAL LENGTH OF SIMULATION (IN DAYS)
- 2.0  ! DRAMP - DURATION OF RAMP FUNCTION (IN DAYS)
- 0.35 0.30 0.35  ! TIME WEIGHTING FACTORS FOR THE GWCE EQUATION
- 0.10 0 0 0.01    ! H0, NODEDRYMIN, NODEWETMIN, VELMIN
- 265.5 29.0 ! SLAM0,SFEA0 - CENTER OF CPP PROJECTION (NOT USED IF ICS=1, NTIP=0, NCOR=0)
- 0.003 2.0 10 1.33333 !  FFACTOR,HBREAK,FTHETA,FGAMMA
- 50.0 ! ESL - LATERAL EDDY VISCOSITY COEFFICIENT; IGNORED IF NWP =1
- 0.0  ! CORI - CORIOLIS PARAMETER - IGNORED IF NCOR = 1
- 1
- STEADY
- 0.0 0.0 0.0 0.0 0.0
- 1
- STEADY
- 0.0 0.0 0.0
- STEADY
- 0.0 0.0
- 0.0 0.0
- 0.0 0.0
- 0.0 0.0
- 0.0 0.0
- 0.0 0.0
- 0.0 0.0
- 0.0 0.0
- 0.0 0.0
- 0.0 0.0
- 0.0 0.0
- 0.0 0.0
- 0.0 0.0
- 0.0 0.0
- 0.0 0.0
- 0.0 0.0
- 0.0 0.0
- 0.0 0.0
- 0.0 0.0
- 0.0 0.0
- 0.0 0.0
- 0.0 0.0
- 0.0 0.0
- 0.0 0.0
- 0.0 0.0
- 0.0 0.0
- 0.0 0.0
- 0.0 0.0
- 0.0 0.0
- 0.0 0.0
- 0.0 0.0
- 0.0 0.0
- 0.0 0.0
- 0.0 0.0
- 0.0 0.0
- 0.0 0.0
- 0.0 0.0
- 0.0 0.0
- 0.0 0.0
- 0.0 0.0
- 0.0 0.0
- 0.0 0.0
- 0.0 0.0
- 0.0 0.0
- 0.0 0.0
- 0.0 0.0
- 0.0 0.0
- 0.0 0.0
- 0.0 0.0
- 0.0 0.0
- 0.0 0.0
- 0.0 0.0
- 0.0 0.0
- 0.0 0.0
- 0.0 0.0
- 0.0 0.0
- 0.0 0.0
- 0.0 0.0
- 0.0 0.0
- 0.0 0.0
- 0.0 0.0
- 0.0 0.0
- 0.0 0.0
- 0.0 0.0
- 0.0 0.0
- 0.0 0.0
- 0.0 0.0
- 0.0 0.0
- 0.0 0.0
- 0.0 0.0
- 0.0 0.0
- 0.0 0.0
- 0.0 0.0
- 0.0 0.0
- 0.0 0.0
- 0.0 0.0
- 0.0 0.0
- 0.0 0.0
- 0.0 0.0
- 0.0 0.0
- 0.0 0.0
- 0.0 0.0
- 0.0 0.0
- 0.0 0.0
- 0.0 0.0
- 0.0 0.0
- 0.0 0.0
- 0.0 0.0
- 0.0 0.0
- 0.0 0.0
- 0.0 0.0
- 0.0 0.0
- 0.0 0.0
- 0.0 0.0
- 0.0 0.0
- 0.0 0.0
- 0.0 0.0
- 0.0 0.0
- 0.0 0.0
- 0.0 0.0
- 0.0 0.0
- 0.0 0.0
- 0.0 0.0
- 0.0 0.0
- 0.0 0.0
- 0.0 0.0
- 0.0 0.0
- 0.0 0.0
- 0.0 0.0
- 0.0 0.0
- 0.0 0.0
- 0.0 0.0
- 0.0 0.0
- 0.0 0.0
- 0.0 0.0
- 0.0 0.0
- 0.0 0.0
- 0.0 0.0
- 0.0 0.0
- 0.0 0.0
- 0.0 0.0
- 0.0 0.0
- 0.0 0.0
- 0.0 0.0
- 0.0 0.0
- 0.0 0.0
- 0.0 0.0
- 0.0 0.0
- 0.0 0.0
- 0.0 0.0
- 0.0 0.0
- 0.0 0.0
- 0.0 0.0
- 0.0 0.0
- 0.0 0.0
- 0.0 0.0
- 0.0 0.0
- 0.0 0.0
- 0.0 0.0
- 0.0 0.0
- 0.0 0.0
- 0.0 0.0
- 0.0 0.0
- 0.0 0.0
- 0.0 0.0
- 0.0 0.0
- 0.0 0.0
- 0.0 0.0
- 0.0 0.0
- 0.0 0.0
- 0.0 0.0
- 0.0 0.0
- 0.0 0.0
- 0.0 0.0
- 0.0 0.0
- 0.0 0.0
- 0.0 0.0
- 0.0 0.0
- 0.0 0.0
- 0.0 0.0
- 0.0 0.0
- 0.0 0.0
- 0.0 0.0
- 0.0 0.0
- 0.0 0.0
- 0.0 0.0
- 0.0 0.0
- 0.0 0.0
- 0.0 0.0
- 0.0 0.0
- 0.0 0.0
- 0.0 0.0
- 0.0 0.0
- 0.0 0.0
- 0.0 0.0
- 0.0 0.0
- 0.0 0.0
- 0.0 0.0
- 0.0 0.0
- 0.0 0.0
- 0.0 0.0
- 0.0 0.0
- 0.0 0.0
- 0.0 0.0
- 0.0 0.0
- 0.0 0.0
- 0.0 0.0
- 0.0 0.0
- 0.0 0.0
- 0.0 0.0
- 0.0 0.0
- 0.0 0.0
- 0.0 0.0
- 0.0 0.0
- 0.0 0.0
- 0.0 0.0
- 0.0 0.0
- 0.0 0.0
- 0.0 0.0
- 0.0 0.0
- 0.0 0.0
- 0.0 0.0
- 0.0 0.0
- 0.0 0.0
- 0.0 0.0
- 0.0 0.0
- 0.0 0.0
- 0.0 0.0
- 0.0 0.0
- 0.0 0.0
- 0.0 0.0
- 0.0 0.0
- 0.0 0.0
- 0.0 0.0
- 0.0 0.0
- 0.0 0.0
- 0.0 0.0
- 0.0 0.0
- 0.0 0.0
- 0.0 0.0
- 0.0 0.0
- 0.0 0.0
- 0.0 0.0
- 0.0 0.0
- 0.0 0.0
- 0.0 0.0
- 0.0 0.0
- 0.0 0.0
- 0.0 0.0
- 0.0 0.0
- 0.0 0.0
- 0.0 0.0
- 0.0 0.0
- 0.0 0.0
- 0.0 0.0
- 0.0 0.0
- 0.0 0.0
- 0.0 0.0
- 0.0 0.0
- 0.0 0.0
- 0.0 0.0
- 0.0 0.0
- 0.0 0.0
- 0.0 0.0
- 0.0 0.0
- 0.0 0.0
- 0.0 0.0
- 0.0 0.0
- 0.0 0.0
- 0.0 0.0
- 0.0 0.0
- 0.0 0.0
- 0.0 0.0
- 0.0 0.0
- 0.0 0.0
- 0.0 0.0
- 0.0 0.0
- 0.0 0.0
- 0.0 0.0
- 0.0 0.0
- 0.0 0.0
- 0.0 0.0
- 0.0 0.0
- 0.0 0.0
- 0.0 0.0
- 0.0 0.0
- 0.0 0.0
- 0.0 0.0
- 0.0 0.0
- 0.0 0.0
- 0.0 0.0
- 0.0 0.0
- 0.0 0.0
- 0.0 0.0
- 0.0 0.0
- 0.0 0.0
- 0.0 0.0
- 0.0 0.0
- 0.0 0.0
- 0.0 0.0
- 0.0 0.0
- 0.0 0.0
- 0.0 0.0
- 0.0 0.0
- 0.0 0.0
- 0.0 0.0
- 0.0 0.0
- 0.0 0.0
- 0.0 0.0
- 0.0 0.0
- 0.0 0.0
- 0.0 0.0
- 110.0          ! ANGINN : INNER ANGLE THRESHOLD
- 0 0.0 7.0 7200  ! NOUTE,TOUTSE,TOUTFE,NSPOOLE:ELEV STATION OUTPUT INFO (UNIT  61)
- 0              ! TOTAL NUMBER OF ELEVATION RECORDING STATIONS
- 0 0.0 7.0 7200  ! NOUTV,TOUTSV,TOUTFV,NSPOOLV:VEL STATION OUTPUT INFO (UNIT  62)
- 0              ! TOTAL NUMBER OF VELOCITY RECORDING STATIONS
- 0 0.0 7.0 7200  ! NOUTV,TOUTSV,TOUTFV,NSPOOLV:VEL STATION OUTPUT INFO (UNIT  62)
- 0              ! TOTAL NUMBER OF VELOCITY RECORDING STATIONS
- 1 0.0 7.0 7200 ! NOUTGE,TOUTSGE,TOUTFGE,NSPOOLGE : GLOBAL ELEVATION OUTPUT INFO (UNIT  63)
- 1 0.0 7.0 7200 ! NOUTGV,TOUTSGV,TOUTFGV,NSPOOLGV : GLOBAL VELOCITY  OUTPUT INFO (UNIT  64)    
- 1 0.0 7.0 7200 ! NOUTGV,TOUTSGV,TOUTFGV,NSPOOLGV : GLOBAL VELOCITY  OUTPUT INFO (UNIT  64)    
- 0              ! NHARFR - NUMBER OF CONSTITUENTS TO BE INCLUDED IN THE HARMONIC ANALYSIS
- 0.0 50.0 5 0.0 ! THAS,THAF,NHAINC,FMV - HARMONIC ANALYSIS PARAMETERS    
- 0 0 0 0        ! NHASE,NHASV,NHAGE,NHAGV - CONTROL HARMONIC ANALYSIS AND OUTPUT TO UNITS 51,52,53,54
- 0 907200       ! NHSTAR,NHSINC - HOT START FILE GENERATION PARAMETERS 
- 1 0 1.E-7 25 0 ! ITITER, ISLDIA, CONVCR, ITMAX & ILUMP
+ Convection torque               ! RUNDES
+ Run 1                           ! RUNID
+ 1                               ! NFOVER
+ 1                               ! NABOUT
+ 1570 !1256                               ! NSCREEN
+ 0                               ! IHOT
+ 1                               ! ICS
+ 0                               ! IM
+ 1                               ! NOLIBF
+ 1                               ! NOLIFA
+ 1                               ! NOLICA
+ 1                               ! NOLICAT
+ 0                               ! NWP
+ 0                               ! NCOR
+ 0                               ! NTIP
+ 0                               ! NWS
+ 0                               ! NRAMP (=1)
+ 9.80665                         ! G
+ 0.0                            ! TAU0 (GWCE only)
+ 0.0008000                            ! DT (s)
+ 0.0                             ! STATIM (days)
+ 0.0                             ! REFTIME (days)
+ 0.000073685       ! RNDAY (days) (2.7s=0.00003125d)  0.000073685 ; 0.0000002562
+ 0.0                            ! DRAMP (days)
+ 0.35 0.30 0.35                  ! GWCE weights
+ 0 12 12 0.05                 ! H0
+ 629997. -599164.                ! SLAM0,SFEA0
+ 0.0000 1.0000 10.0000 0.3333    ! FFACTOR, HBREAK, FTHETA, FGAMMA
+ 0.0                             ! ESL (later try 7.0)
+ 0.0                             ! CORI
+ 0                               ! NTIF
+ 0                               ! NBFR
+ 90.000                          ! ANGINN (CG only)
+0 0.0 0.1 8000                   ! NOUTE,TOUTSE,TOUTFE,NSPOOLE (fort.61) 
+0
+0 0.0 0.1 8000                   ! NOUTV,TOUTSV,TOUTFV,NSPOOLV (fort.62)
+0
+1 0.0 0.1 1570 !1256                   ! NOUTGE,TOUTSGE,TOUTFGE,NSPOOLGE (fort.63) 
+1 0.0 0.1 1570 !1256                   ! NOUTGV,TOUTSGV,TOUTFGV,NSPOOLGV (fort.64)
+0                                ! NHARF
+0.0 0.0 0 0.0                    ! THAS,THAF,NHAINC,FMV
+0 0 0 0                          ! NHASE,NHASV,NHAGE,NHAGV (fort.51-54)
+0 0                              ! NHSTAR,NHSINC
+1 0 1.0E-5 25                    ! ITITER, ISLDIA, CONVCR, ITMAX

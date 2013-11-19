@@ -1,4 +1,5 @@
 C******************************************************************************
+C PADCIRC VERSION 45.01 09/30/2004                                            *
 C  last changes in this file VERSION 44.18                                    *
 C  S.Bunya changed this file a bit. 07/13/2005                                *
 C****************************************************************************** 
@@ -20,7 +21,7 @@ C--
 #endif
 C
 C--------------------------------------------------------------------------
-C  This module supplies the MPI Message-Passing Interface.
+C  This module supplies the MPI Message-Passing Interface for PADCIRC.
 C
 C  Uses asynchronous and persistent communication with buffer packing
 C  as performance enhancements for "cluster" architectures.

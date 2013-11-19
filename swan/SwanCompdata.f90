@@ -60,8 +60,8 @@ module SwanCompdata
 !
     integer                                    :: nbpol  ! total number of boundary polygons
 !Casey 080907: What if we have more than 100 boundaries?
-!NADC    integer, dimension(100)                    :: nbpt   ! number of boundary vertices for each boundary polygon
-    integer, dimension(10000)                  :: nbpt   ! number of boundary vertices for each boundary polygon
+    integer, dimension(100)                    :: nbpt   ! number of boundary vertices for each boundary polygon
+!ADC    integer, dimension(10000)                  :: nbpt   ! number of boundary vertices for each boundary polygon
 !
     integer, dimension(MICMAX)                 :: vs     ! computational stencil, i.e. set of vertices
                                                          ! needed for the computation of a new value

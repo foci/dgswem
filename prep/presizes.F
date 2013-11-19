@@ -668,7 +668,6 @@ C...This should be fixed, since sed is currently broken-cem
       READ(25,*) !SEDFLAG
       READ(25,*) !Reaction rate
       READ(25,*) !element number
-      READ(25,*) !Artificial Diffusion 
       READ(25,'(a)') !sed_x
       READ(25,'(a)') !sed_y
       CLOSE(25)

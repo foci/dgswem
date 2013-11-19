@@ -1,3 +1,4 @@
-dgswem release 11.13
+Release v22 dg-adcirc
 =========
-Discontinuous Galerkin Shallow Water Equation Model
+
+Discontinuous Galerkin Advanced Circulation Model

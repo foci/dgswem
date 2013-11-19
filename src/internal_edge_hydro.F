@@ -234,10 +234,10 @@ C.....Compute ZE, QX, QY, and HB at each edge Gauss quadrature point
             iota_IN = iota(1,EL_IN,IRK)
             iota_EX = iota(1,EL_EX,IRK)
 
-            TZ_X_IN = TZ(1,1,1,EL_IN)
-            TZ_Y_IN = TZ(1,2,2,EL_IN)
-            TZ_X_EX = TZ(1,1,1,EL_EX)
-            TZ_Y_EX = TZ(1,2,2,EL_EX)
+            TZ_X_IN = HZ(1,1,1,EL_IN)
+            TZ_Y_IN = HZ(1,2,2,EL_IN)
+            TZ_X_EX = HZ(1,1,1,EL_EX)
+            TZ_Y_EX = HZ(1,2,2,EL_EX)
 #endif
 
 #ifdef CHEM
@@ -619,8 +619,7 @@ cnd try adding the penalty term in the LDG method
 #ifdef TRACE
 
             I_HAT_O = I_HAT_O + 0.5D0*(TZ_X_IN+TZ_X_EX)*SFAC_IN*NX + 
-     &           0.5D0*(TZ_Y_IN+TZ_Y_EX)*NY
-      !&           +ESLM*.01D0*(iota_IN-iota_EX)
+     &           0.5D0*(TZ_Y_EX+TZ_Y_EX)*NY
 
 #endif
      

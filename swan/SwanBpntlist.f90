@@ -217,8 +217,8 @@ subroutine SwanBpntlist
           elseif ( vc == vcf ) then        ! end of considered boundary polygon is found
              !
 !Casey 081111: Make Marcel's change to limit endless loops over the boundaries.
-             exit faceloop
-             !
+!ADC             exit faceloop
+!ADC             !
              if ( any( v1 == blistot ) .and. any( v2 == blistot ) ) goto 10
              !
              ! store number of boundary vertices for present polygon
@@ -239,7 +239,7 @@ subroutine SwanBpntlist
              ! give error if more than 100 boundary polygons are found
              !
 !Casey 080907: Why?
-!NADC             if ( nbpol > 100 ) call msgerr ( 2, ' More than 100 boundary polygons are found in grid' )
+             if ( nbpol > 100 ) call msgerr ( 2, ' More than 100 boundary polygons are found in grid' )
              !
           endif
           !
@@ -256,21 +256,21 @@ subroutine SwanBpntlist
     ! store number of boundary vertices for last polygon
     !
 !Casey 081111: Make Marcel's change to limit endless loops over the boundaries.
-!NADC    nbpt(nbpol) = nbptot - nptemp
-    nbpt(nbpol) = k - nptemp
+    nbpt(nbpol) = nbptot - nptemp
+!ADC    nbpt(nbpol) = k - nptemp
     !
     ! check if list contains boundary vertices only
     !
 !Casey 081111: Make Marcel's change to limit endless loops over the boundaries.
-!NADC    do j = 1, nbptot
-    do j = 1, k
+    do j = 1, nbptot
+!ADC    do j = 1, k
        !
        vc = blistot(j)
        if (vert(vc)%atti(VMARKER) /= 1) then
           write (msgstr, '(a,i4,a)') ' Vertex with index ',vc,' in boundary list is not a valid boundary point'
 !Casey 080907: Be more forgiving if stray boundary points are found.
-!NADC          call msgerr( 2, trim(msgstr) )
-          vert(vc)%atti(VMARKER) = 1
+          call msgerr( 2, trim(msgstr) )
+!ADC          vert(vc)%atti(VMARKER) = 1
        endif
        !
     enddo

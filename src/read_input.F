@@ -63,12 +63,12 @@ C
       CLOSE(80)
       IF(IDUM80.NE.MNPROC) THEN
          IF(MYPROC.EQ.0) THEN
-            WRITE(*,'(A)') '*** ERROR IN PARALLEL SETUP!'
+            WRITE(*,'(A)') '*** ERROR IN PARALLEL ADCIRC SETUP!'
             WRITE(*,'(2A,I4,A)') '*** Number of CPUS for submitted job ',
      &           '(NCPU = ',MNPROC,') is not equal to the'
             WRITE(*,'(2A,I4,A)') '*** number of CPUS specified during',
      &           ' ADCPREP (see fort.80: NCPU = ',IDUM80,').'
-            WRITE(*,'(A)') '*** dgswem will now quit!'
+            WRITE(*,'(A)') '*** ADCIRC will now quit!'
          ENDIF
          CALL MESSAGE_FINI()
          STOP
@@ -160,7 +160,6 @@ C.....Read in the fort.dg file
       READ(25,*) SEDFLAG,porosity,SEVDM,layers
       READ(25,*) reaction_rate
       READ(25,*) MNES
-      READ(25,*) artdif,kappa,s0,uniform_dif,tune_by_hand
       READ(25,'(a)') sed_equationX
       READ(25,'(a)') sed_equationY
 
@@ -183,8 +182,8 @@ C.....Print out header for output including version number and copyright
          WRITE(6,1112)
       ENDIF
 
- 1114 FORMAT(//,19X,'dgswem.11.13 ',
-     &     //,5X,'A disconintuous Galerkin shallow water equation model' 
+ 1114 FORMAT(//,19X,'dg_adcirc   Version 22.beta ',
+     &     //,5X,'A disconintuous Galerkin advanced circulation model' 
      &     /,10X,'for coastal seas and estuarine research',
      &     ///,7X,'-  Based off of the ADCIRC model created by',
      &     //,10X,'R.A. Luettich, Jr., University of North Carolina',
@@ -208,7 +207,7 @@ C.....Print out header for output including version number and copyright
 C.....Write out header information describing how code has been set up
 
       WRITE(16,1210)
- 1210 FORMAT(//,1X,'THE SOURCE CODE HAS BEEN CONFIGURED ',
+ 1210 FORMAT(//,1X,'THE ADCIRC SOURCE CODE HAS BEEN CONFIGURED ',
      &     'BY THE PREPROCESSOR AS FOLLOWS:',/)
 
 #ifdef C3DDSS
@@ -321,11 +320,11 @@ C.....Read and process IHOT - hot start option
       ENDIF
       IF (IHOT.NE.0) THEN
          WRITE(16,9733) IHOT
- 9733    FORMAT(/,5X,'dgswem will be hot started using information ',
+ 9733    FORMAT(/,5X,'ADCIRC will be hot started using information ',
      &        'on UNIT ',I2)
       ELSE
          WRITE(16,9734)
- 9734    FORMAT(/,5X,'dgswem will be cold started')
+ 9734    FORMAT(/,5X,'ADCIRC will be cold started')
       ENDIF
 #ifdef SWAN
 Casey 100205: Enable hot-start file generation by SWAN.
@@ -4489,7 +4488,7 @@ C.....Make node-to-elements table
       ENDDO
 C--   
 
-C.....Write table of parameter sizes (vjp 11/28/99)
+C.....Write table of ADCIRC parameter sizes (vjp 11/28/99)
 
       WRITE(16,4010) MNPROC,MNE,MNP,MNEI,MNOPE,MNETA,MNBOU,MNVEL,
      &     MNTIF,MNBFR,MNSTAE,MNSTAV,MNSTAC,MNSTAM,NWLAT,NWLON,MNHARF,MNFFR

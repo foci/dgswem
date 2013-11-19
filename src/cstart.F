@@ -1,4 +1,7 @@
 C**************************************************************************
+C PADCIRC RELEASE VERSION 41.11 09/14/2001 
+C    last changes in this file VERSION 41.11
+C
 C  mod history
 C  v41.06mxxx - date - programmer - describe change 
 C                    - mark change in code with  cinitials-mxxx

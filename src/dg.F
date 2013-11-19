@@ -8,13 +8,12 @@ C     Written by Ethan Kubatko (3-10-05)
 C     
 C-----------------------------------------------------------------------
 C     
-C     Modification history after v9_sb1
+C     Modification history on hp_DG_ADCIRC after v9_sb1
 C     
 C     v9_sb1     - 08/05    - sb - Parallel runs
 C     v9_sb2     - 08/05    - sb - Wetting and drying
 C     v9_sb2.2.1 - 08/16/05 - sb - Hard bottom implementation
 C     v10_sb5      - Oct 03 - sb - Consolidate Ethan's slope limiter
-C     Moving to versioning repo now
 C     
 C***********************************************************************
 
@@ -27,7 +26,7 @@ C.....Use appropriate modules
 C.....Declare integer variables
 
       INTEGER DGFLAG,DGHOT,DGHOTSPOOL,DOF,dofh,dofl,dofx
-      INTEGER EL,MNES,artdif,tune_by_hand
+      INTEGER EL,MNES
       INTEGER IRK
       INTEGER J1, J2, J3,negp_fixed,nagp_fixed
       INTEGER NAGP(8),NCHECK(8), NEGP(8), NEDGES, NRK !42 hardwires for ph=7
@@ -45,14 +44,14 @@ c
 C.....Declare real variables
 
       REAL(SZ) C13, C16, diorism, porosity, SEVDM
-      REAL(SZ) DOT, DHB_X, DHB_Y, DPHIDX, DPHIDY,uniform_dif
+      REAL(SZ) DOT, DHB_X, DHB_Y, DPHIDX, DPHIDY
       Real(SZ) slimit,plimit,pflag2con1,pflag2con2
       REAL(SZ) EFA_GP, EMO_GP,slimit1,slimit2,slimit3
       REAL(SZ) EL_ANG,slimit4, bg_dif,trc_dif,slimit5
       REAL(SZ) FG_L,slope_weight,l2er_global,temperg
       REAL(SZ) HB_IN, HB_EX, H_TRI
       REAL(SZ) MAG1, MAG2
-      REAL(SZ) NX, NY, kappa, s0
+      REAL(SZ) NX, NY
       REAL(SZ) SFAC_IN,SFAC_EX
       REAL(SZ) RAMPDG
       REAL(SZ) S1, S2, SAV, SOURCE_X, SOURCE_Y
@@ -110,7 +109,7 @@ C.....Declare allocatable integer arrays
 C.....Declare allocatable real arrays
       
       REAL(SZ), ALLOCATABLE :: ATVD(:,:), BTVD(:,:), CTVD(:,:)
-      REAL(SZ), ALLOCATABLE :: DTVD(:), MAX_BOA_DT(:),e1(:),balance(:)
+      REAL(SZ), ALLOCATABLE :: DTVD(:), MAX_BOA_DT(:)
       Real(SZ), Allocatable :: RKC_T(:),RKC_U(:),RKC_Tprime(:)
       Real(SZ), Allocatable :: RKC_Tdprime(:),RKC_a(:),RKC_b(:),RKC_c(:)
       Real(SZ), Allocatable :: RKC_mu(:),RKC_tildemu(:),RKC_nu(:),RKC_gamma(:)
@@ -265,7 +264,7 @@ C.....Set DG SWE array sizes
 
       SUBROUTINE ALLOC_DG4()
 Csb-20070228 NRK+1-->NRK+2 --- XX(:,:,NRK+2) will be used by slope limiter
-      ALLOCATE ( HB(DOFH,MNE,NRK+2),e1(layers+5),balance(layers+5) )
+      ALLOCATE ( HB(DOFH,MNE,NRK+2) )
       ALLOCATE ( MANN(DOFH,MNE) ) !,arrayfix(DOFH,MNE,NRK+2) )
       ALLOCATE ( QY(DOFH,MNE,NRK+2), QX(DOFH,MNE,NRK+2) )
       ALLOCATE ( ZE(DOFH,MNE,NRK+2), bed(DOFH,MNE,NRK+2,layers) )

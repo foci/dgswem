@@ -1,4 +1,5 @@
 C**************************************************************************
+C PADCIRC RELEASE VERSION 41.11 09/14/2001 
 C    last changes in this file VERSION 41.11
 C
 C  mod history
@@ -8,6 +9,7 @@ C  v41.06mxxx - date - programmer - describe change
 C                    - mark change in code with  cinitials-mxxx
 C-----------------------------------------------------------------------
 C
+C     Modification history on hp_DG_ADCIRC after v10_sb5
 C     
 C     v10_sb5    - 10/11/05 - sb - Table that associates nodes to elements (NDEL)
 C

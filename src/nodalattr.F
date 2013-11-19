@@ -1,4 +1,5 @@
 C******************************************************************************
+C     PADCIRC VERSION 46.00 xx/xx/2006
 C     last changes in this file VERSION 46.00
 C     
 C     Written for ADCIRC v46.00 by Jason G. Fleming.

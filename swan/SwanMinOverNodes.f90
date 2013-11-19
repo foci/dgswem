@@ -76,12 +76,12 @@ subroutine SwanMinOverNodes ( rval )
     !
     if ( MNPROC==1 ) return
     !
-!TIMG    call SWTSTA(202)
+    call SWTSTA(202)
     minval = 0.
     count  = 1
     call MPI_ALLREDUCE ( rval, minval, count, MPI_REAL, MPI_MIN, MPI_COMM_WORLD, IERR )
     !
     rval = minval
-!TIMG    call SWTSTO(202)
+    call SWTSTO(202)
     !
 end subroutine SwanMinOverNodes

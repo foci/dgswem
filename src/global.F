@@ -1,4 +1,7 @@
 C**************************************************************************
+C PADCIRC RELEASE VERSION 41.11 09/14/2001 
+C    last changes in this file VERSION 41.10
+C
 C  mod history
 C  v41.06mxxx  - date - programmer - describe change 
 C                    - mark change in code with  cinitials-mxxx
@@ -11,6 +14,8 @@ C  v40.02m004b - 05/17 - vjp - corrected dimensioning problem cvjpm004b
 C  v40.02m001  - 12/21 - jjw - add cross barrier pipes cjjwm001
 C-----------------------------------------------------------------------
 C
+C     Modification history on hp_DG_ADCIRC after v9_sb2.2.1
+C     
 C     v9_sb2.2.1 - 08/16/05 - sb - Hard bottom implementation
 C     v10_sb5    - 10/11/05 - sb - Table that associates nodes to elements (NODEELEM)
 C                - 10/27/05 - sb - H0L and H0H are added
@@ -139,7 +144,7 @@ C...
 #endif
 
       INTEGER, ALLOCATABLE ::   pdg_el(:)
-      REAL(SZ),ALLOCATABLE ::   ETAS(:),ETA1(:),ETA2(:),ETAMAX(:),entrop(:,:)
+      REAL(SZ),ALLOCATABLE ::   ETAS(:),ETA1(:),ETA2(:),ETAMAX(:)
       Real(SZ),Allocatable ::   tracer(:),tracer2(:),MassMax(:),bed_int(:,:)
       REAL(SZ),ALLOCATABLE ::   UU1(:),UU2(:),VV1(:),VV2(:), dyn_P(:)
       REAL(SZ),ALLOCATABLE ::   DP(:),DP0(:),DPe(:),SFAC(:) !,STARTDRY(:)
@@ -268,7 +273,7 @@ C
 C...
 C...DECLARE REAL(8) AND CHAR VARIABLES, EQUIVALENCES
 C...
-      REAL(8) STATIM,REFTIM,TIME_A,DTDP,TIMEH,vdtdp,cfl_max
+      REAL(8) STATIM,REFTIM,TIME_A,DTDP,TIMEH
       REAL(8) AVGXY,DIF1R,DIF2R,DIF3R
       REAL(8) AEMIN,AE,AA,A1,A2,A3,X1,X2,X3,X4,Y1,Y2,Y3,Y4
       REAL(8) FDX1,FDX2,FDX3,FDY1,FDY2,FDY3
@@ -443,7 +448,7 @@ C      ALLOCATE ( TAU0VAR(MNP))
       ALLOCATE ( UU2(max(MNP,MNE)))
       ALLOCATE ( VV2(max(MNP,MNE)))
       ALLOCATE ( ETA1(max(MNP,MNE)),ETA2(max(MNP,MNE)), ETAMAX(MNP), MassMax(MNE) )
-      Allocate ( tracer(max(MNP,MNE)), tracer2(max(MNP,MNE)), bed_int(max(mnp,mne),layers), entrop(5,MNE) )
+      Allocate ( tracer(max(MNP,MNE)), tracer2(max(MNP,MNE)), bed_int(max(mnp,mne),layers) )
       ALLOCATE ( CORIF(MNP), dyn_P(max(MNP,MNE)), pdg_el(MNE) )
       ALLOCATE ( QU(MNP),QV(MNP))
       ALLOCATE ( LBCODE(MNP))

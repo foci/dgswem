@@ -1,10 +1,15 @@
 SHELL:=/bin/sh
 #
-#  Makefile to Build DGSWEM and its pre/post-processor 
+#  Makefile to Build PADCIRC and its pre/post-processor 
+#  University of Texas's parallel version of the Hydrodynamics
+#  Modeling program ADCIRC by J.J. Westerink and R.A. Luettich
+#  vjp 3/29/2001
+#  updated JJW 3/17/2003
+#  updated for 3D JGF spring 2003
 
 ########################################################################
 #  Get Canonical Machine NAME from config.guess
-#1
+#
 NAME     := $(shell ./config.guess)
 LIST     := $(subst -, ,$(NAME))
 MACHINE  := $(word 1, $(LIST))
@@ -33,7 +38,7 @@ ifeq ($(BUILDTYPE),adcpost)
   VPATH :=  ../prep
 endif
 #                                      adcirc   
-ifeq ($(BUILDTYPE),dgswem_serial)
+ifeq ($(BUILDTYPE),adcirc)
   CF:= $(PPFC)
   O_DIR:=odir4/
   FFLAGS:= $(FFLAGS3) $(DA) $(IMODS)$(O_DIR)
@@ -42,7 +47,7 @@ ifeq ($(BUILDTYPE),dgswem_serial)
 endif
 #Casey 121126: Add rules for the serial SWAN+ADCIRC.
 #                                      adcswan
-ifeq ($(BUILDTYPE),swemswan)
+ifeq ($(BUILDTYPE),adcswan)
   CF:= $(PPFC)
   O_DIR:=odir44/
   FFLAGS:= $(FFLAGS3) -DSWAN $(DA) $(IMODS) $(O_DIR)
@@ -50,7 +55,7 @@ ifeq ($(BUILDTYPE),swemswan)
   MSG_MOBJ:= $(O_DIR)globalio.o
 endif
 #                                      padcirc   
-ifeq ($(BUILDTYPE),dgswem)
+ifeq ($(BUILDTYPE),padcirc)
   CF:= $(PFC)
   O_DIR:=odir5/
   FFLAGS:= $(FFLAGS4) $(DP) $(IMODS)$(O_DIR)
@@ -60,7 +65,7 @@ ifeq ($(BUILDTYPE),dgswem)
 endif
 #Casey 121126: Add rules for the parallel SWAN+ADCIRC.
 #                                      padcswan
-ifeq ($(BUILDTYPE),dgswemswan)
+ifeq ($(BUILDTYPE),padcswan)
   CF:= $(PFC)
   O_DIR:=odir55/
   FFLAGS:= $(FFLAGS4) -DSWAN $(DP) $(IMODS)$(O_DIR)
@@ -100,7 +105,7 @@ METIS1_SRC =  metis.F
 METIS2_SRC =  metis2.F
 PREP_SRC   =  adcprep.F  decomp.F   read_global.F   prep.F   interp.F  machdep.F
 POST_SRC   =  adcpost.F    post.F  compare.F  diffmerge.F
-ADC_SRC    =  dgswem.F owiwind.F read_input.F cstart.F hstart.F radiation_edge_hydro.F \
+ADC_SRC    =  adcirc.F owiwind.F read_input.F cstart.F hstart.F radiation_edge_hydro.F \
 	ibarrier_edge_hydro.F ebarrier_edge_hydro.F  \
 	calc_normal.F create_edge_data.F detector.F \
 	DG_timestep.F DG_hydro_timestep.F \
@@ -171,12 +176,9 @@ $(O_DIR)%.o  : %.f90
 
 ########################## Executable Targets ##################################
 
-.PHONY: all metis adcprep adcpost dgswem_serial dgswem winds
+.PHONY: all metis adcprep adcpost adcirc padcirc
 
-all :  metis adcprep adcpost dgswem_serial dgswem winds
- 
-winds : 
-	python ./get_winds.py 
+all :  metis adcprep adcpost adcirc padcirc
 
 ifeq ($(MAKELEVEL),0)
    metis:
@@ -190,23 +192,23 @@ ifeq ($(MAKELEVEL),0)
 	$(MAKE) BUILDTYPE=adcprep2 $@ 
    adcpost:
 	$(MAKE) BUILDTYPE=adcpost $@            
-   dgswem_serial:
-	$(MAKE) BUILDTYPE=dgswem_serial  $@
-   dgswem:
-	$(MAKE) BUILDTYPE=dgswem $@
+   adcirc:
+	$(MAKE) BUILDTYPE=adcirc  $@
+   padcirc:
+	$(MAKE) BUILDTYPE=padcirc $@
 #Casey 121126: Added the following lines for coupling to unstructured SWAN.
-   swemswan:
+   adcswan:
 	@perl ../swan/switch.pl -unix -f95 -adcirc ../swan/*.ftn ../swan/*.ftn90
-	$(MAKE) BUILDTYPE=swemswan $@
-   dgswemswan:
+	$(MAKE) BUILDTYPE=adcswan $@
+   padcswan:
 	@perl ../swan/switch.pl -unix -f95 -pun -adcirc ../swan/*.ftn ../swan/*.ftn90
-	$(MAKE) BUILDTYPE=dgswemswan $@
+	$(MAKE) BUILDTYPE=padcswan $@
 else
    adcprep::  $(O_DIR)
    adcprep2:: $(O_DIR)
    adcpost::  $(O_DIR)
-   dgswem_serial::   $(O_DIR)
-   dgswem::  $(O_DIR)
+   adcirc::   $(O_DIR)
+   padcirc::  $(O_DIR)
 
    adcprep ::  $(METIS1_OBJ) $(PREP_OBJ) 
 	$(CF) $(FFLAGS) -o $@  $(O_DIR)*.o  $(LIBS) $(LDFLAGS)
@@ -217,19 +219,19 @@ else
    adcpost ::  $(POST_OBJ) 
 	$(CF) $(FFLAGS) -o $@  $(O_DIR)*.o
 
-   dgswem_serial ::  $(ADC_OBJ) 
+   adcirc ::  $(ADC_OBJ) 
 	$(CF) $(FFLAGS) -o $@  $(O_DIR)*.o
 
-   dgswem ::  $(MSG_MOBJ) $(MSG_OBJ) $(ADC_OBJ) 
+   padcirc ::  $(MSG_MOBJ) $(MSG_OBJ) $(ADC_OBJ) 
 	$(CF) $(FFLAGS) -o $@  $(O_DIR)*.o  $(MSGLIBS)
 
 #Casey 121126: Added the following lines for coupling to unstructured SWAN.
-   swemswan :: $(O_DIR)
-   swemswan :: $(MSG_MOBJ) $(SWAN_MOBJ) $(COUP_MOBJ) $(ADC_OBJ) $(SWAN_OBJ)
+   adcswan :: $(O_DIR)
+   adcswan :: $(MSG_MOBJ) $(SWAN_MOBJ) $(COUP_MOBJ) $(ADC_OBJ) $(SWAN_OBJ)
 	$(CF) $(FFLAGS) -o $@ $(O_DIR)*.o
 
-   dgswemswan :: $(O_DIR)
-   dgswemswan :: $(MSG_MOBJ) $(SWAN_MOBJ) $(COUP_MOBJ) $(MSG_OBJ) $(ADC_OBJ) $(SWAN_OBJ)
+   padcswan :: $(O_DIR)
+   padcswan :: $(MSG_MOBJ) $(SWAN_MOBJ) $(COUP_MOBJ) $(MSG_OBJ) $(ADC_OBJ) $(SWAN_OBJ)
 	$(CF) $(FFLAGS) -o $@ $(O_DIR)*.o $(MSGLIBS)
 endif
 
@@ -239,7 +241,7 @@ clean:
 	 rm -f odir*/*.o  odir*/*.mod 
 clobber:
 	rm -r -f odir*
-	rm -f  graphchk adcprep adcprep2 adcpost dgswem_serial dgswem swemswan dgswemswan \
+	rm -f  graphchk adcprep adcprep2 adcpost adcirc padcirc adcswan padcswan \
                 ../metis/Lib/*.o  ../metis/libmetis.a ../metis/Programs/*.o
 help:
 	@echo "This makefile supports the following:"
@@ -247,11 +249,11 @@ help:
 	@echo "make adcprep  - makes the adcprep  executable"
 	@echo "make adcprep2 - makes the adcprep2  executable"
 	@echo "make adcpost  - makes the adcpost  executable"
-	@echo "make dgswem_serial   - makes the serial dgswem executable"
-	@echo "make dgswem  - makes the dgswem executable"
+	@echo "make adcirc   - makes the serial adcirc executable"
+	@echo "make padcirc  - makes the parallel adcirc executable"
 #Casey 121126: Add text for the SWAN+ADCIRC targets.
-	@echo "make swemswan  - makes the serial SWAN+ADCIRC executable"
-	@echo "make dgswemswan - makes the parallel SWAN+ADCIRC executable"
+	@echo "make adcswan  - makes the serial SWAN+ADCIRC executable"
+	@echo "make padcswan - makes the parallel SWAN+ADCIRC executable"
 
 
 ########################## Defining the DAG  ####################################
@@ -308,7 +310,7 @@ $(O_DIR)owiwind.o   			:  owiwind.F $(ADC_MOBJ)
 $(O_DIR)read_input.o  			:  read_input.F $(ADC_MOBJ) $(HARM_MOBJ) $(WIND_MOBJ)
 $(O_DIR)cstart.o      			:  cstart.F $(ADC_MOBJ)  $(HARM_MOBJ)  $(WIND_MOBJ)
 $(O_DIR)hstart.o      			:  hstart.F $(ADC_MOBJ)  $(HARM_MOBJ)  $(WIND_MOBJ)
-$(O_DIR)dgswem.o      			:  dgswem.F $(ADC_MOBJ)  $(HARM_MOBJ) $(WIND_MOBJ) 
+$(O_DIR)adcirc.o      			:  adcirc.F $(ADC_MOBJ)  $(HARM_MOBJ) $(WIND_MOBJ) 
 $(O_DIR)calc_normal.o         	:  calc_normal.F $(ADC_MOBJ)
 $(O_DIR)create_edge_data.o    	:  create_edge_data.F $(ADC_MOBJ)
 $(O_DIR)detector.o	      	:  detector.F $(ADC_MOBJ)

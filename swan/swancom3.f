@@ -533,8 +533,8 @@
      &                   WX2        ,WY2        ,
      &                   ANYWND     ,SPCDIR     ,                         40.00
 !Casey 110425: Use ADCIRC's new sector-based wind drag.
-!NADC     &                   UX2        ,UY2        ,SPCSIG     )             30.70
-     &                   UX2,UY2,SPCSIG,NodeNumber)
+     &                   UX2        ,UY2        ,SPCSIG     )             30.70
+!ADC     &                   UX2,UY2,SPCSIG,NodeNumber)
 !
 !****************************************************************
 !
@@ -547,7 +547,7 @@
       USE SWCOMM3                                                         40.41
       USE SWCOMM4                                                         40.41
 !Casey 110425: Use ADCIRC's new sector-based wind drag.
-      USE WIND, ONLY: WindDrag
+!ADC      USE WIND, ONLY: WindDrag
 !
 !
 !   --|-----------------------------------------------------------|--
@@ -689,7 +689,7 @@
 !                         account for a bin
 !
 !Casey 110425: Use ADCIRC's new sector-based wind drag.
-      INTEGER, OPTIONAL :: NodeNumber
+!ADC      INTEGER, OPTIONAL :: NodeNumber
 !
 !  7. Common blocks used
 !
@@ -870,16 +870,16 @@
         IF ( WIND10 .GT. 7.5 ) THEN
 !Casey 081013: Apply a cap to the wind drag coefficient.
 !Casey 091217: Lower the wind drag limit from 0.0035 to 0.0020.
-!NADC          UFRIC = WIND10 * SQRT (( 0.8 + 0.065 * WIND10 ) * 0.001 )
-!         CDRAG = 0.001 * (0.8 + 0.065 * WIND10)
-!         IF(CDRAG.GT.0.0020)THEN
-!           CDRAG = 0.0020
-!         ENDIF
-!         UFRIC = WIND10 * SQRT( CDRAG )
+          UFRIC = WIND10 * SQRT (( 0.8 + 0.065 * WIND10 ) * 0.001 )
+!ADC!         CDRAG = 0.001 * (0.8 + 0.065 * WIND10)
+!ADC!         IF(CDRAG.GT.0.0020)THEN
+!ADC!           CDRAG = 0.0020
+!ADC!         ENDIF
+!ADC!         UFRIC = WIND10 * SQRT( CDRAG )
 !Casey 110425: Use ADCIRC's new sector-based wind drag.
-!         CDRAG = WindDrag(DBLE(WIND10),0.002D0,"Powell    ",NodeNumber)
-          CDRAG = WindDrag(DBLE(WIND10),0.002D0,"Garratt   ")
-          UFRIC = WIND10 * SQRT( CDRAG )
+!ADC!         CDRAG = WindDrag(DBLE(WIND10),0.002D0,"Powell    ",NodeNumber)
+!ADC          CDRAG = WindDrag(DBLE(WIND10),0.002D0,"Garratt   ")
+!ADC          UFRIC = WIND10 * SQRT( CDRAG )
         ELSE
           CDRAG = 0.0012873
           UFRIC = SQRT ( CDRAG ) * WIND10

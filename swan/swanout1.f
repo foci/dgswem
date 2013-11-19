@@ -2916,8 +2916,8 @@
               END IF
            END DO
 !Casey 090327: What if ISIGM = MSC?
-!NADC           IF (ISIGM.GT.1) THEN
-           IF (ISIGM.GT.1 .AND. ISIGM.LT.MSC) THEN
+           IF (ISIGM.GT.1) THEN
+!ADC           IF (ISIGM.GT.1 .AND. ISIGM.LT.MSC) THEN
              SIG1 = SPCSIG(ISIGM-1)
              SIG2 = SPCSIG(ISIGM+1)
              SIG3 = SPCSIG(ISIGM  )
@@ -4320,8 +4320,8 @@
 !                      terminated or not
 !     STRACE           Tracing routine for debugging
 !     SWEXCHG          exchanges AC2 at subdomain boundaries
-!TIMG!     SWTSTA           Start timing for a section of code
-!TIMG!     SWTSTO           Stop timing for a section of code
+!     SWTSTA           Start timing for a section of code
+!     SWTSTO           Stop timing for a section of code
 !
       LOGICAL STPNOW
 !
@@ -4382,7 +4382,7 @@
 !         within distributed-memory environment                           40.31
 !
       IF (PARLL) THEN                                                     40.41
-!TIMG         CALL SWTSTA(213)                                                 40.31
+         CALL SWTSTA(213)                                                 40.31
          DO ID = 1, MDC                                                   40.31
             DO IS = 1, MSC                                                40.31
                AC2LOC(:) = AC2(ID,IS,:)                                   40.31
@@ -4390,7 +4390,7 @@
                AC2(ID,IS,:) = AC2LOC(:)                                   40.31
             END DO                                                        40.31
          END DO                                                           40.31
-!TIMG         CALL SWTSTO(213)                                                 40.31
+         CALL SWTSTO(213)                                                 40.31
          IF (STPNOW()) RETURN                                             40.31
       END IF
 !

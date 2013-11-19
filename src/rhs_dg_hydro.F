@@ -421,7 +421,7 @@ C.........Build the rhs
                do ll = 1,layers !only really makes sense for single layer
 
                   RHS_bed(K,L,IRK,ll) = RHS_bed(K,L,IRK,ll) 
-     &                 + XFAC(K,I,L,pa)*(discharge_modelX_IN+MZ_X(ll)*SFACQUAD)
+     &                 + XFAC(K,I,L,pa)*(discharge_modelX_IN+MZ_X(ll))
      &                 + YFAC(K,I,L,pa)*(discharge_modelY_IN+MZ_Y(ll))
 
                enddo
@@ -429,8 +429,8 @@ C.........Build the rhs
 
 #ifdef TRACE
                RHS_iota(K,L,IRK) = RHS_iota(K,L,IRK) 
-     &              + XFAC(K,I,L,pa)*(iota_IN*QX_IN*FH_NL+TZ_X*SFACQUAD) !problems!
-     &              + YFAC(K,I,L,pa)*(iota_IN*QY_IN*FH_NL+TZ_Y) 
+     &              + XFAC(K,I,L,pa)*(iota_IN + TZ_X)*QX_IN*FH_NL 
+     &              + YFAC(K,I,L,pa)*(iota_IN + TZ_Y)*QY_IN*FH_NL 
 #endif
 
 #ifdef CHEM

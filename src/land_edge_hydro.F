@@ -208,7 +208,7 @@ C.....Compute the x and y components of the external state flow
             SFAC_EX = SFAC_IN
 
 #ifdef TRACE
-            iota_EX = 0.D0 !iota_IN
+            iota_EX = iota_IN
             !print*, 'test'
 #endif
 

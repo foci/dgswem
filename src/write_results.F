@@ -278,6 +278,28 @@ C.....to single nodal values
          ENDDO
          
       enddo
+      
+      !temperg = 0.D0
+      !l2e = 0.D0
+
+      temper =  tracer - tracer2
+
+      temperg = maxval(temper(:))
+      l2er_global = iota_int**(1.D0/2.D0)
+
+#ifdef CMPI
+ 
+      Call para_max(temperg)
+      Call para_sum(l2er_global)
+      
+      !call MPI_Allreduce(maxval(temper(:)), temperg, 1, MPI_DOUBLE_PRECISION, MPI_MAX, COMM, ierr);
+      !call MPI_Allreduce( iota_int**(1.D0/2.D0), l2er_global, 1, MPI_DOUBLE_PRECISION, MPI_SUM, COMM, ierr);
+
+#endif
+      IF  (MYPROC.EQ.0) then
+         write(*,*) 'L2nerror('') = ', l2er_global,it,myproc 
+         write(*,*) 'linferror('') = ', temperg,it,myproc
+      endif
 
 C...  
 C...  OUTPUT ELEVATION RECORDING STATION INFORMATION IF NOUTE<>0 AND THE
@@ -570,7 +592,7 @@ C.....time step falls within the specified window
                         write(777,7777)  sqrt(wsx2(i)**2+wsy2(i)**2)
                      enddo
                      do i=1,ne 
-                        write(777,7777)  entrop(4,i) !DBLE(pdg_el(i))
+                        write(777,7777)  DBLE(pdg_el(i))
                      enddo
                      do i=1,ne 
                         write(777,7777)  tracer(i)
@@ -736,7 +758,7 @@ C...
  9633    format(f20.8)
          close(963)
 #ifdef OUT_TEC
-         write(778,*) 'TITLE = "dgswem output"'
+         write(778,*) 'TITLE = "PADCIRC-DG output"'
          write(778,*) 
      $        'VARIABLES = "x", "y", "maxeta"'
          write(778,*) 'ZONE ZONETYPE=FETRIANGLE ',

@@ -1,4 +1,9 @@
-
+C***********************************************************************
+C PADCIRC VERSION 45.12 03/17/2006                                     *
+C last changes in this file VERSION 45.05                              *
+C                                                                      *
+C***********************************************************************
+C
        MODULE WIND
        USE SIZES, ONLY : SZ, LOCALDIR
        USE GLOBAL, ONLY : ScreenUnit

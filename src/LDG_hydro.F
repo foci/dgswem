@@ -37,22 +37,31 @@ C.....Declare local variables
 
 C.....Initialize for viscosity/diffusion
 
-      HZ = 0.D0
-      LZ = 0.D0
+      DO L=1,NE
+         DO K=1,DOFS(L)
+            HZ(K,:,:,L) = 0.d0
+            LZ(K,1,1,L) = 0.d0
+            LZ(K,1,2,L) = 0.d0
+            LZ(K,2,1,L) = 0.d0
+            LZ(K,2,2,L) = 0.d0
 #ifdef TRACE
-      TZ = 0.d0
+            TZ(K,:,:,L) = 0.d0
 #endif
 #ifdef SED_LAY
-      MZ = 0.d0
+            MZ(K,:,:,L) = 0.d0
 #endif
-      
-C.....Loop over interior elements
+         ENDDO
+      ENDDO
 
-      CALL RHS_LDG_HYDRO()
+C.....Initialize for sediment
 
 C.....Compute elevation specified edges
 
       IF (NEEDS.GT.0)  CALL OCEAN_EDGE_LDG_HYDRO()
+
+C.....Compute no-normal flow edges
+
+      IF (NLEDS.GT.0)  CALL LAND_EDGE_LDG_HYDRO()
 
 C.....Compute non-zero flow edges
 
@@ -62,13 +71,40 @@ C.....Compute radiation edges
 
       IF (NREDS.GT.0)  CALL RADIATION_EDGE_LDG_HYDRO()
 
-C.....Compute no-normal flow edges
-
-      IF (NLEDS.GT.0)  CALL LAND_EDGE_LDG_HYDRO()
-
 C.....Compute internal edges
 
       CALL INTERNAL_EDGE_LDG_HYDRO()
+
+C.....Loop over elements
+
+      CALL RHS_LDG_HYDRO()
+
+! Moved internal
+C.....Solve for Z in viscosity and sediment
+
+c$$$      DO L=1,NE
+c$$$         N1 = NM(L,1)
+c$$$         N2 = NM(L,2)
+c$$$         N3 = NM(L,3)
+c$$$         EVMAvg = (EVM(N1)+EVM(N2)+EVM(N3))/3.d0
+c$$$#ifdef SED_LAY
+c$$$         SEVDMAvg = SEVDM !constant scenario
+c$$$         !SEVDMAvg = (SEVDM(N1)+SEVDM(N2)+SEVDM(N3))/3.d0 Would need to set up nodal attributes here!
+c$$$#endif
+c$$$
+c$$$         DO K=1,DOFS(L)
+c$$$            LZ(K,1,1,L) = LZ(K,1,1,L)*EVMAvg
+c$$$            LZ(K,1,2,L) = LZ(K,1,2,L)*EVMAvg
+c$$$            LZ(K,2,1,L) = LZ(K,2,1,L)*EVMAvg
+c$$$            LZ(K,2,2,L) = LZ(K,2,2,L)*EVMAvg
+c$$$#ifdef SED_LAY
+c$$$            do ll=1,layers
+c$$$               MZ(K,1,ll,L) = MZ(K,1,ll,L)*SEVDMAvg
+c$$$               MZ(K,2,ll,L) = MZ(K,2,ll,L)*SEVDMAvg
+c$$$            enddo
+c$$$#endif
+c$$$         ENDDO
+c$$$      ENDDO
 
 #ifdef CMPI
       CALL UPDATELZ_ELEM(HZ)
@@ -87,6 +123,7 @@ C.....Compute internal edges
 
       RETURN
       END SUBROUTINE
+
 
 C***********************************************************************
 C     
@@ -187,17 +224,19 @@ C.....Compute the solution at the interior state
 #endif
 #ifdef SED_LAY
                do ll=1,layers
-                  bed_IN(ll) = bed_IN(ll) 
-     &                 + bed(K,EL_IN,IRK,ll)*PHI_EDGE(K,I,LED,pa)
+                  bed_IN(ll) = bed_IN(ll) + bed(K,EL_IN,IRK,ll)*PHI_EDGE(K,I,LED,pa)
                enddo
 #endif
             ENDDO
             
 C.....Set the exterior state flows equal to the interior state flows
 
+            !ZE_EX = ZE_IN
             QX_EX = QX_IN
             QY_EX = QY_IN
-
+#ifdef TRACE 
+            !iota_EX = iota_IN
+#endif
 #ifdef SED_LAY
             do ll=1,layers
                bed_EX(ll) = bed_IN(ll)
@@ -218,6 +257,11 @@ C.....Take the average
 #endif
 
 C.....Compute the edge integral
+            
+            slimit1 = 0.D0
+            slimit2 = 0.D0
+            slimit3 = 0.D0
+            slimit4 = 0.D0
             
             DO K = 1,DOFS(EL_IN)
                CALL EDGE_INT_LDG_HYDRO
@@ -259,37 +303,30 @@ C***********************************************************************
 
 C.....Use appropriate modules
 
-      USE SIZES,ONLY : SZ,layers
+      USE SIZES,ONLY : layers
       USE GLOBAL
       USE DG
-      USE NodalAttributes, ONLY : EVM
       IMPLICIT NONE
 
 C.....Declare local variables
 
-
-      INTEGER K,L,LED,GED,GP,i,kk,ll
-      REAL(SZ) AREA, IMASS
-      real(sz) ze_sensor1, qx_sensor1, qy_sensor1
-      real(sz) ze_sensor2, qx_sensor2, qy_sensor2
-      real(sz) iota_sensor1,iota_sensor2,lim_by
+      INTEGER L, LED, GED,k,i,ll
       REAL(SZ) TX, TY, QX_AVG, QY_AVG, bed_AVG(layers)
       REAL(SZ) ZE_AVG,iota_AVG
-      logical fl1,fl2,fl3,fl4,fl5
 
       DO 1000 L = 1,NLEDS
          
 C.....Retrieve the global and local edge number
-         
+
          GED = NLEDN(L)
          LED = NEDSD(1,GED)
-         
+
 C.....Retrieve the elements which share the edge
-         
+
          EL_IN = NEDEL(1,GED)
-         
+
          pa = PDG_EL(EL_IN)
-         
+
 #ifdef P0
          if (pa.eq.0) then
             pa = 1
@@ -374,6 +411,11 @@ C.....Take the average
 #endif
 
 C.....Compute the edge integral
+            
+            slimit1 = 0.D0
+            slimit2 = 0.D0
+            slimit3 = 0.D0
+            slimit4 = 0.D0
 
             DO K = 1,DOFS(EL_IN)
                CALL EDGE_INT_LDG_HYDRO
@@ -389,91 +431,6 @@ C.....Compute the edge integral
 
          ENDDO
 
-c$$$C.... We can add viscosity settings if we want (more expensive, not super useful?) -- rec. if your boundary is broken adjust your boundary type
-c$$$         
-c$$$         N1 = NM(EL_IN,1)
-c$$$         N2 = NM(EL_IN,2)
-c$$$         N3 = NM(EL_IN,3)
-c$$$         EVMAvg = (EVM(N1)+EVM(N2)+EVM(N3))/3.d0
-c$$$         bg_dif = 0.D0 
-c$$$         trc_dif = 0.D0 
-c$$$#ifdef SED_LAY
-c$$$         SEVDMAvg = SEVDM
-c$$$#endif
-
-c$$$         
-c$$$#ifdef ARTDIF
-c$$$            fl1 = .false.
-c$$$            fl2 = .false.
-c$$$            fl3 = .false.
-c$$$#ifdef TRACE
-c$$$            fl4 = .false.
-c$$$#endif
-c$$$#ifdef SED_LAY
-c$$$            fl5 = .false.
-c$$$#endif
-c$$$
-c$$$            if (entrop(1,EL_IN).gt.s0+kappa) then
-c$$$               
-c$$$               HZ(:,:,:,EL_IN) = 0.D0 !e1(1)*HZ(:,:,:,EL_IN)
-c$$$               fl1 = .true.
-c$$$               
-c$$$            endif
-c$$$            if ( fl1 == .false. ) then
-c$$$
-c$$$               HZ(:,:,:,EL_IN) = bg_dif*HZ(:,:,:,EL_IN)
-c$$$
-c$$$            endif
-c$$$
-c$$$            if (entrop(2,EL_IN).gt.s0+kappa.or.entrop(3,EL_IN).gt.s0+kappa) 
-c$$$     &           then
-c$$$               
-c$$$               LZ(:,:,:,EL_IN) = 0.D0 !e1(2)*LZ(:,:,:,EL_IN)
-c$$$               fl2 = .true.
-c$$$               fl3 = .true.
-c$$$
-c$$$            endif
-c$$$            if ( fl2 == .false. ) then
-c$$$
-c$$$               LZ(:,:,:,EL_IN) = EVMAvg*LZ(:,:,:,EL_IN)
-c$$$
-c$$$            endif
-c$$$
-c$$$
-c$$$#ifdef TRACE
-c$$$            if (entrop(4,EL_IN).gt.s0+kappa) then
-c$$$               
-c$$$               TZ(:,:,:,EL_IN) = 0.D0 !e1(4)*TZ(:,:,:,EL_IN)            
-c$$$               fl4 = .true.
-c$$$               
-c$$$            endif
-c$$$            
-c$$$            if ( fl4 == .false. ) then
-c$$$               
-c$$$               TZ(:,:,:,EL_IN) = trc_dif*TZ(:,:,:,EL_IN)
-c$$$               
-c$$$            endif
-c$$$#endif
-c$$$
-c$$$#ifdef SEDLAY
-c$$$
-c$$$            if (entrop(5,EL_IN).gt.s0+kappa) then
-c$$$
-c$$$               MZ(:,:,:,EL_IN) = 0.D0 !e1(5)*MZ(:,:,:,EL_IN)
-c$$$               fl5 = .true.
-c$$$
-c$$$            endif
-c$$$
-c$$$            if ( fl5 == .false. ) then
-c$$$
-c$$$               MZ(:,:,:,EL_IN) =  SEVDMAvg*MZ(:,:,:,EL_IN)
-c$$$
-c$$$            endif
-c$$$
-c$$$            
-c$$$#endif
-c$$$#endif
-            
  1000 CONTINUE
       
       RETURN
@@ -628,6 +585,11 @@ C.....Take the average
 #endif
 
 C.....Compute the edge integral
+            
+            slimit1 = 0.D0
+            slimit2 = 0.D0
+            slimit3 = 0.D0
+            slimit4 = 0.D0
 
             DO K = 1,DOFS(EL_IN)
                CALL EDGE_INT_LDG_HYDRO
@@ -743,7 +705,12 @@ C.....Compute the solution at the interior state
             QX_IN = QX_IN*SFACED(I,LED,EL_IN,pa)
 
 C.....Compute the edge integral
-           
+            
+            slimit1 = 0.D0
+            slimit2 = 0.D0
+            slimit3 = 0.D0
+            slimit4 = 0.D0
+
             DO K = 1,DOFS(EL_IN)
                CALL EDGE_INT_LDG_HYDRO
      &              (K,EL_IN,LED,GED,I,iota_IN,ZE_IN,QX_IN,QY_IN,NX,NY,pa)
@@ -791,10 +758,12 @@ C.....Use appropriate modules
 
 C.....Declare local variables
 
-      INTEGER L, LED_IN, LED_EX, GED, GP_IN, GP_EX,k,i,ll
+      INTEGER L, LED_IN, LED_EX, GED, GP_IN, GP_EX,k,i,ll,kk
       REAL(SZ) ZE_AVG,QX_AVG,QY_AVG,bed_AVG(layers),W_IN,W_EX
-      real(sz) iota_AVG,lim_by
-
+      real(sz) ze_sensor1,qx_sensor1,qy_sensor1,iota_AVG
+      real(sz) ze_sensor2,qx_sensor2,qy_sensor2,s0
+      real(sz) iota_sensor1,iota_sensor2,kappa,e1
+      logical fl1,fl2,fl3,fl4
 
       DO 1000 L = 1,NIEDS
 
@@ -871,10 +840,8 @@ C.....Compute ZE, QX, QY, and HB at each edge Gauss quadrature point
 
 #ifdef SED_LAY
                do ll=1,layers
-                  bed_IN(ll) = bed_IN(ll) 
-     &                 + bed(K,EL_IN,IRK,ll)*PHI_EDGE(K,GP_IN,LED_IN,pa)
-                  bed_EX(ll) = bed_EX(ll) 
-     &                 + bed(K,EL_EX,IRK,ll)*PHI_EDGE(K,GP_EX,LED_EX,pa)
+                  bed_IN(ll) = bed_IN(ll) + bed(K,EL_IN,IRK,ll)*PHI_EDGE(K,GP_IN,LED_IN,pa)
+                  bed_EX(ll) = bed_EX(ll) + bed(K,EL_EX,IRK,ll)*PHI_EDGE(K,GP_EX,LED_EX,pa)
                enddo
 #endif
 
@@ -882,14 +849,14 @@ C.....Compute ZE, QX, QY, and HB at each edge Gauss quadrature point
 
 C.....Take the average
 
-            ZE_AVG = 0.5D0*(ZE_IN + ZE_EX)
+            ZE_AVG = 0.5*(ZE_IN + ZE_EX)
 
-            QX_AVG = 0.5D0*(QX_IN*SFACED(I,LED_IN,EL_IN,pa) 
+            QX_AVG = 0.5*(QX_IN*SFACED(I,LED_IN,EL_IN,pa) 
      &           + QX_EX*SFACED(I,LED_EX,EL_EX,pa))
-            QY_AVG = 0.5D0*(QY_IN + QY_EX)
+            QY_AVG = 0.5*(QY_IN + QY_EX)
 
 #ifdef TRACE
-            iota_AVG = 0.5D0*(iota_IN + iota_EX)
+            iota_AVG = 0.5*(iota_IN + iota_EX)
 #endif
 
 #ifdef SED_LAY
@@ -901,7 +868,21 @@ C.....Take the average
 C.....Compute the edge integral
 
             DO K = 1,DOFS(EL)
-
+c$$$#if 0 
+c$$$               CALL EDGE_INT_LDG_HYDRO
+c$$$     &              (K,EL_IN,LED_IN,GED,GP_IN,ZE_AVG,QX_AVG,QY_AVG,NX,NY,pa)
+c$$$     &              (K,EL_EX,LED_EX,GED,GP_EX,ZE_AVG,QX_AVG,QY_AVG,NX,NY,pa
+c$$$#ifdef SED_LAY
+c$$$               do ll=1,layers
+c$$$                  CALL EDGE_INT_LDG_sediment
+c$$$     &                 (K,EL_IN,LED_IN,GED,GP_IN,bed_AVG(ll),NX,NY,pa,
+c$$$                  ll)
+c$$$                  CALL EDGE_INT_LDG_sediment
+c$$$     &                 (K,EL_EX,LED_EX,GED,GP_EX,bed_AVG(ll),NX,NY,pa,
+c$$$                  ll)
+c$$$               enddo
+c$$$#endif
+c$$$#else
                W_IN = 2.0*M_INV(K,pa)/AREAS(EL_IN)*XLEN(GED)*
      &              PHI_EDGE(K,GP_IN,LED_IN,pa)*WEGP(GP_IN,pa)
                W_EX = 2.0*M_INV(K,pa)/AREAS(EL_EX)*XLEN(GED)*
@@ -909,7 +890,6 @@ C.....Compute the edge integral
                
                HZ(K,1,1,EL_IN) = HZ(K,1,1,EL_IN) - ZE_AVG*NX*W_IN
                HZ(K,2,2,EL_IN) = HZ(K,2,2,EL_IN) - ZE_AVG*NY*W_IN
-
                LZ(K,1,1,EL_IN) = LZ(K,1,1,EL_IN) - QX_AVG*NX*W_IN
                LZ(K,1,2,EL_IN) = LZ(K,1,2,EL_IN) - QX_AVG*NY*W_IN
                LZ(K,2,1,EL_IN) = LZ(K,2,1,EL_IN) - QY_AVG*NX*W_IN
@@ -917,7 +897,6 @@ C.....Compute the edge integral
                
                HZ(K,1,1,EL_EX) = HZ(K,1,1,EL_EX) + ZE_AVG*NX*W_EX
                HZ(K,2,2,EL_EX) = HZ(K,2,2,EL_EX) + ZE_AVG*NY*W_EX
-
                LZ(K,1,1,EL_EX) = LZ(K,1,1,EL_EX) + QX_AVG*NX*W_EX
                LZ(K,1,2,EL_EX) = LZ(K,1,2,EL_EX) + QX_AVG*NY*W_EX
                LZ(K,2,1,EL_EX) = LZ(K,2,1,EL_EX) + QY_AVG*NX*W_EX
@@ -932,193 +911,243 @@ C.....Compute the edge integral
 
 #ifdef SED_LAY
                do ll=1,layers
-                  MZ(K,1,ll,EL_IN) = MZ(K,1,ll,EL_IN) 
-     &                 - bed_AVG(ll)*NX*W_IN
-                  MZ(K,2,ll,EL_IN) = MZ(K,2,ll,EL_IN) 
-     &                 - bed_AVG(ll)*NY*W_IN
-                  MZ(K,1,ll,EL_EX) = MZ(K,1,ll,EL_EX) 
-     &                 + bed_AVG(ll)*NX*W_EX
-                  MZ(K,2,ll,EL_EX) = MZ(K,2,ll,EL_EX) 
-     &                 + bed_AVG(ll)*NY*W_EX
+                  MZ(K,1,ll,EL_IN) = MZ(K,1,ll,EL_IN) - bed_AVG(ll)*NX*W_IN
+                  MZ(K,2,ll,EL_IN) = MZ(K,2,ll,EL_IN) - bed_AVG(ll)*NY*W_IN
+                  
+                  MZ(K,1,ll,EL_EX) = MZ(K,1,ll,EL_EX) + bed_AVG(ll)*NX*W_EX
+                  MZ(K,2,ll,EL_EX) = MZ(K,2,ll,EL_EX) + bed_AVG(ll)*NY*W_EX
                enddo
 #endif
 
-            enddo
-         enddo
+C.... We need to retrieve the viscosity settings
+               N1 = NM(EL,1)
+               N2 = NM(EL,2)
+               N3 = NM(EL,3)
+               EVMAvg = (EVM(N1)+EVM(N2)+EVM(N3))/3.d0
+               bg_dif = 0.D0 
+               trc_dif = 0.D0 
 
-C.... We need to retrieve the nodal viscosity/diffusion values
-         N1 = NM(EL,1)
-         N2 = NM(EL,2)
-         N3 = NM(EL,3)
-         EVMAvg = (EVM(N1)+EVM(N2)+EVM(N3))/3.d0
-         bg_dif = 0.D0 
-         trc_dif = 0.D0 
-         
 #ifdef SED_LAY
-         SEVDMAvg = SEVDM 
+               SEVDMAvg = SEVDM 
 #endif
- 
+               
 #ifdef ARTDIF
+               kappa = 2.D0     !This is a tuning parameter
+               e1 = 0.1D0       !This is a tuning parameter
+               s0 = 1.D0/(pa**4.D0)
+               
+               if (k.eq.1) then !problem here Craig: compute only once? Make global.
 
-         lim_by = 1.D0
-  
-         if (entrop(1,EL_IN).gt.s0+kappa) then
-            
-            HZ(:,:,:,EL_IN) = (bg_dif+e1(1)) *
-     &           (abs(lim_by+balance(1)))**pa * HZ(:,:,:,EL_IN)
+                  slimit1 = 0.D0
+                  slimit2 = 0.D0
+                  slimit3 = 0.D0
+                  
+                  fl1 = .false.
+                  fl2 = .false.
+                  fl3 = .false.
+#ifdef TRACE
+                  slimit4 = 0.D0
+                  fl4 = .false.
+#endif
+                  
+                  ze_sensor1 = 0.d0             
+                  qx_sensor1 = 0.d0
+                  qy_sensor1 = 0.d0
+                  ze_sensor2 = 0.d0            
+                  qx_sensor2 = 0.d0
+                  qy_sensor2 = 0.d0
+#ifdef TRACE
+                  iota_sensor1 = 0.d0
+                  iota_sensor2 = 0.d0
+#endif
+                  
+                  do kk =  (pa*(pa+1))/2 + 1, dofs(EL)
+                     ze_sensor1 = ze_sensor1 + abs(ze(kk,EL,irk)* 
+     &                    PHI_EDGE(K,GP_IN,LED_IN,pa))**2.0 * wegp(GP_IN,pa)
+                     qx_sensor1 = qx_sensor1 + abs(qx(kk,EL,irk)* 
+     &                    PHI_EDGE(K,GP_IN,LED_IN,pa))**2.0 * wegp(GP_IN,pa)
+                     qy_sensor1 = qy_sensor1 + abs(qy(kk,EL,irk)* 
+     &                    PHI_EDGE(K,GP_IN,LED_IN,pa))**2.0 * wegp(GP_IN,pa)
+#ifdef TRACE
+                     iota_sensor1 = iota_sensor1 + abs(iota(kk,EL,irk)* 
+     &                    PHI_EDGE(K,GP_IN,LED_IN,pa))**2.0 * wegp(GP_IN,pa)               
+#endif
+                  enddo
+                  
+                  do kk = 1,dofs(EL)
+                     ze_sensor2 = ze_sensor2 + abs(ze(kk,EL,irk)* 
+     &                    PHI_EDGE(K,GP_IN,LED_IN,pa))**2.0 * wegp(GP_IN,pa)
+                     qx_sensor2 = qx_sensor2 + abs(qx(kk,EL,irk)* 
+     &                    PHI_EDGE(K,GP_IN,LED_IN,pa))**2.0 * wegp(GP_IN,pa)
+                     qy_sensor2 = qy_sensor2 + abs(qy(kk,EL,irk)* 
+     &                    PHI_EDGE(K,GP_IN,LED_IN,pa))**2.0 * wegp(GP_IN,pa)
+#ifdef TRACE
+                     iota_sensor2 = iota_sensor2 + abs(iota(kk,EL,irk)* 
+     &                    PHI_EDGE(K,GP_IN,LED_IN,pa))**2.0 * wegp(GP_IN,pa)
+#endif
+                  enddo
+                  
+                  if  (ze_sensor2.gt.1.0e-12.and.ze_sensor1.gt.1.0e-12 ) then
+                     slimit1 = log10( ze_sensor1/ze_sensor2 )
+                  endif
+                  if (qx_sensor2.gt.1.0e-12.and.qx_sensor1.gt.1.0e-12 ) then
+                     slimit2 = log10( qx_sensor1/qx_sensor2 )
+                  endif
+                  if ( qy_sensor2.gt.1.0e-12.and.qy_sensor1.gt.1.0e-12 ) then
+                     slimit3 = log10( qy_sensor1/qy_sensor2 )
+                  endif
+#ifdef TRACE
+                  if  (iota_sensor2.gt.1.0e-12.and.iota_sensor1.gt.1.0e-12 ) then
+                     slimit4 = log10( iota_sensor1/iota_sensor2 )
+                  endif
+#endif
+                  
+               endif
+               
+               if (slimit1.gt.s0+kappa) then
+                  
+                  HZ(K,1,1,EL) = (bg_dif+e1*abs(slimit1))*HZ(K,1,1,EL)
+                  HZ(K,2,2,EL) = (bg_dif+e1*abs(slimit1))*HZ(K,2,2,EL)
 
-         else
+                  fl1 = .true.
 
-            HZ(:,:,:,EL_IN) = bg_dif*HZ(:,:,:,EL_IN)
+               endif
 
-         endif
-         if (entrop(1,EL_EX).gt.s0+kappa) then
-            
-            HZ(:,:,:,EL_EX) = (bg_dif+e1(1)) *
-     &           (abs(lim_by+balance(1)))**pa * HZ(:,:,:,EL_EX)
-            
-         else
+               if (slimit2.gt.s0+kappa) then
+                  
+                  LZ(K,1,1,EL) = (EVMAvg+e1*abs(slimit2))*LZ(K,1,1,EL)
+                  LZ(K,1,2,EL) = (EVMAvg+e1*abs(slimit2))*LZ(K,1,2,EL)
+                  LZ(K,2,1,EL) = (EVMAvg+e1*abs(slimit2))*LZ(K,2,1,EL)
 
-            HZ(:,:,:,EL_EX) = bg_dif*HZ(:,:,:,EL_EX)
-            
-         endif
+                  fl2 = .true. 
 
-         if (entrop(2,EL_IN).gt.s0+kappa) then
-            
-            LZ(:,1,1,EL_IN) = (EVMAvg+e1(2)) * 
-     &           (abs(lim_by+balance(2)))**pa * LZ(:,1,1,EL_IN)
-            LZ(:,1,2,EL_IN) = sqrt( (EVMAvg+e1(2) *
-     &           (abs(lim_by+balance(2)))**pa ) * LZ(:,1,2,EL_IN))
-            LZ(:,2,1,EL_IN) = sqrt( (EVMAvg+e1(2) *
-     &           (abs(lim_by+balance(2)))**pa ) * LZ(:,2,1,EL_IN))
-     
-         else
+               endif
 
-            LZ(:,1,:,EL_IN) = EVMAvg* LZ(:,1,:,EL_IN)
-            LZ(:,2,1,EL_IN) = sqrt(EVMAvg+e1(2) * LZ(:,2,1,EL_IN))
-            
-         endif
-         if (entrop(2,EL_EX).gt.s0+kappa) then
-            
-            LZ(:,1,1,EL_EX) = (EVMAvg+e1(2)) * 
-     &           (abs(lim_by+balance(2)))**pa * LZ(:,1,1,EL_EX)
-            LZ(:,1,2,EL_EX) = sqrt( (EVMAvg+e1(2) *
-     &           (abs(lim_by+balance(2)))**pa ) * LZ(:,1,2,EL_EX))
-            LZ(:,2,1,EL_EX) = sqrt( (EVMAvg+e1(2) *
-     &           (abs(lim_by+balance(2)))**pa ) * LZ(:,2,1,EL_EX))
-     
-         else
+               if (slimit3.gt.s0+kappa) then
 
-            LZ(:,1,:,EL_EX) = EVMAvg* LZ(:,1,:,EL_EX)
-            LZ(:,2,1,EL_EX) = sqrt(EVMAvg * LZ(:,2,1,EL_EX))
-            
-         endif
+                  LZ(K,1,2,EL) = (EVMAvg+e1*abs(slimit3))*LZ(K,1,2,EL)
+                  LZ(K,2,1,EL) = (EVMAvg+e1*abs(slimit3))*LZ(K,2,1,EL)
+                  LZ(K,2,2,EL) = (EVMAvg+e1*abs(slimit3))*LZ(K,2,2,EL)
+                  
+                  fl3 = .true. 
+                  
+               endif
+#ifdef TRACE
 
-         if (entrop(3,EL_IN).gt.s0+kappa) then
-            
-            LZ(:,2,2,EL_IN) = (EVMAvg+e1(3)) * 
-     &           (abs(lim_by+balance(3)))**pa * LZ(:,2,2,EL_IN)
-            LZ(:,2,1,EL_IN) = sqrt( (EVMAvg+e1(3) *
-     &           (abs(lim_by+balance(3)))**pa ) * LZ(:,2,1,EL_IN))
-            LZ(:,1,2,EL_IN) = sqrt( (EVMAvg+e1(3) *
-     &           (abs(lim_by+balance(3)))**pa ) * LZ(:,1,2,EL_IN))
-     
-         else
+               if (slimit4.gt.s0+kappa) then
+                  
+                  TZ(K,1,1,EL) = (trc_dif+e1*abs(slimit1))*TZ(K,1,1,EL)
+                  TZ(K,2,2,EL) = (trc_dif+e1*abs(slimit1))*TZ(K,2,2,EL)
+                  
+                  fl4 = .true.
 
-            LZ(:,1,2,EL_IN) = EVMAvg* LZ(:,1,2,EL_IN)
-            LZ(:,2,:,EL_IN) = sqrt(EVMAvg * LZ(:,2,:,EL_IN))
-            
-         endif
+               endif
+#endif
 
-         if (entrop(3,EL_EX).gt.s0+kappa) then
-            
-            LZ(:,2,2,EL_EX) = (EVMAvg+e1(3)) * 
-     &           (abs(lim_by+balance(3)))**pa * LZ(:,2,2,EL_EX)
-            LZ(:,2,1,EL_EX) = sqrt( (EVMAvg+e1(3) *
-     &           (abs(lim_by+balance(3)))**pa ) * LZ(:,2,1,EL_EX))
-            LZ(:,1,2,EL_EX) = sqrt( (EVMAvg+e1(3) *
-     &           (abs(lim_by+balance(3)))**pa ) * LZ(:,1,2,EL_EX))
-     
-         else
 
-            LZ(:,1,2,EL_EX) = EVMAvg* LZ(:,1,2,EL_EX)
-            LZ(:,2,:,EL_EX) = sqrt(EVMAvg * LZ(:,2,:,EL_IN))
-            
-         endif
 
+c$$$  elseif ( slimit2.le.s0+kappa.and.slimit2.ge.s0-kappa) then
+c$$$  
+c$$$  HZ(K,1,1,EL) = (bg_dif+e1*abs(slimit1))*HZ(K,1,1,EL) !Craig
+c$$$  HZ(K,2,2,EL) = (bg_dif+e1*abs(slimit1))*HZ(K,2,2,EL) !Craig
+c$$$  
+c$$$  LZ(K,1,1,EL) = (EVMAvg 
+c$$$  $           + e1*DMAX1(abs(slimit1),abs(slimit2)))*LZ(K,1,1,EL)
+c$$$  LZ(K,1,2,EL) = (EVMAvg 
+c$$$  &           + e1*DMAX1(abs(slimit1),abs(slimit2)))*LZ(K,1,2,EL)
+c$$$  LZ(K,2,1,EL) = (EVMAvg 
+c$$$  &           + e1*DMAX1(abs(slimit1),abs(slimit2)))*LZ(K,2,1,EL)
+c$$$  LZ(K,2,2,EL) = (EVMAvg 
+c$$$  &           + e1*DMAX1(abs(slimit1),abs(slimit2)))*LZ(K,2,2,EL)
+
+               if ( (fl1 == .false.).and.(fl2 == .false.)
+     &              .and.( fl3==.false.) ) then
+                  
+                  HZ(K,1,1,EL) = bg_dif*HZ(K,1,1,EL)
+                  HZ(K,2,2,EL) = bg_dif*HZ(K,2,2,EL)
+                  
+                  LZ(K,1,1,EL) = EVMAvg*LZ(K,1,1,EL)
+                  LZ(K,1,2,EL) = EVMAvg*LZ(K,1,2,EL)
+                  LZ(K,2,1,EL) = EVMAvg*LZ(K,2,1,EL)
+                  LZ(K,2,2,EL) = EVMAvg*LZ(K,2,2,EL)
+                  
+               endif
+#ifdef TRACE
+               if (fl4==.false.) then
+                  TZ(K,1,1,EL) = trc_dif*TZ(K,1,1,EL)
+                  TZ(K,2,2,EL) = trc_dif*TZ(K,2,2,EL)
+               endif
+#endif
+                  
+               
+#else
+               
+               HZ(K,1,1,EL) = bg_dif*HZ(K,1,1,EL)
+               HZ(K,2,2,EL) = bg_dif*HZ(K,2,2,EL)
+               
+               LZ(K,1,1,EL) = EVMAvg*LZ(K,1,1,EL)
+               LZ(K,1,2,EL) = EVMAvg*LZ(K,1,2,EL)
+               LZ(K,2,1,EL) = EVMAvg*LZ(K,2,1,EL)
+               LZ(K,2,2,EL) = EVMAvg*LZ(K,2,2,EL)
 
 #ifdef TRACE
-         if (entrop(4,EL_IN).gt.s0+kappa) then
-            
-            TZ(:,:,:,EL_IN) = (trc_dif+e1(4)) *
-     &           (abs(lim_by+balance(4)))**pa * TZ(:,:,:,EL_IN)
-
-         else
-
-            TZ(:,:,:,EL_IN) = trc_dif*TZ(:,:,:,EL_IN)
-
-         endif
-
-         if (entrop(4,EL_EX).gt.s0+kappa) then
-
-            TZ(:,:,:,EL_EX) = (trc_dif+e1(4)) *
-     &           (abs(lim_by+balance(4)))**pa * TZ(:,:,:,EL_EX)
-
-         else
-
-            TZ(:,:,:,EL_EX) = trc_dif*TZ(:,:,:,EL_EX)
-
-         endif
-
+               TZ(K,1,1,EL) = trc_dif*TZ(K,1,1,EL)
+               TZ(K,2,2,EL) = trc_dif*TZ(K,2,2,EL)
 #endif
-         
-#else
-         
-         HZ(:,:,:,EL_IN) = bg_dif*HZ(:,:,:,EL_IN)
-         LZ(:,:,:,EL_IN) = EVMAvg*LZ(:,:,:,EL_IN)
-         HZ(:,:,:,EL_EX) = bg_dif*HZ(:,:,:,EL_EX)
-         LZ(:,:,:,EL_EX) = EVMAvg*LZ(:,:,:,EL_EX)
-         
-#ifdef TRACE
-         TZ(:,:,:,EL_IN) = trc_dif*TZ(:,:,:,EL_IN)
-         TZ(:,:,:,EL_EX) = trc_dif*TZ(:,:,:,EL_EX)
+               
 #endif
-         
-#endif
-         
+               
 #ifdef SED_LAY
-
 #ifdef ARTDIF
+               if (k.eq.1) then !Craig, do this once!
 
-         if (entrop(5,EL_IN).gt.s0+kappa) then
-            
-            MZ(:,:,:,EL_IN) = (SEVDMAvg+e1(5)) *
-     &           (abs(lim_by+balance(5)))**pa * MZ(:,:,:,EL_IN)
+                  tbed_sensor1 = 0.d0
+                  tbed_sensor2 = 0.d0
+                  slimit5 = 0.D0
 
-         else
-
-            MZ(:,:,:,EL_IN) = MZ(:,:,:,EL_IN)*SEVDMAvg
-            
-         endif
-
-         if (entrop(5,EL_EX).gt.s0+kappa) then
-            
-            MZ(:,:,:,EL_EX) = (SEVDMAvg+e1(5)) *
-     &           (abs(lim_by+balance(5)))**pa * MZ(:,:,:,EL_EX)
-
-         else
-
-            MZ(:,:,:,EL_EX) = MZ(:,:,:,EL_EX)*SEVDMAvg
-            
-         endif
-
-         
+                  do kk = ((pa)*(pa-1))/2, dofs(EL)
+                     do ll=1,layers
+                        tbed_sensor1 = tbed_sensor1 + abs(bed(kk,EL,irk,ll)* 
+     &                       PHI_EDGE(K,GP_IN,LED_IN,pa))**2.0 * wegp(GP_IN,pa)
+                     enddo
+                  enddo
+                  do kk = 1,dofs(EL)
+                     do ll=1,layers
+                        tbed_sensor2 = tbed_sensor2 + abs(bed(kk,EL,irk,ll)* 
+     &                       PHI_EDGE(K,GP_IN,LED_IN,pa))**2.0 * wegp(GP_IN,pa)
+                     enddo
+                  enddo
+                  if ( tbed_sensor2.gt.1.0e-12.and.tbed_sensor1.gt.1.0e-12 ) then
+                     slimit5 = log10( tbed_sensor1/tbed_sensor2 )
+                  endif
+                  
+                  if (slimit5.gt.s0+kappa) then
+                     do ll=1,layers
+                        MZ(K,1,ll,EL) = MZ(K,1,ll,EL)*(SEVDMAvg+e1*abs(slimit5))
+                        MZ(K,2,ll,EL) = MZ(K,2,ll,EL)*(SEVDMAvg+e1*abs(slimit5))
+                     enddo
+c$$$  elseif ( slimit2.le.s0+kappa.and.slimit2.ge.s0-kappa) then
+c$$$  do ll=1,layers
+c$$$  MZ(K,1,ll,EL) = MZ(K,1,ll,EL)*(SEVDMAvg+abs(sensor))
+c$$$  MZ(K,2,ll,EL) = MZ(K,2,ll,EL)*(SEVDMAvg+abs(sensor))
+c$$$  enddo
+                  else
+                     do ll=1,layers
+                        MZ(K,1,ll,EL) = MZ(K,1,ll,EL)*SEVDMAvg
+                        MZ(K,2,ll,EL) = MZ(K,2,ll,EL)*SEVDMAvg
+                     enddo
+                  endif
+               endif
 #else
-         MZ(:,:,:,EL_IN) = MZ(:,:,:,EL_IN)*SEVDMAvg
-         MZ(:,:,:,EL_EX) = MZ(:,:,:,EL_EX)*SEVDMAvg
+               do ll=1,layers
+                  MZ(K,1,ll,EL) = MZ(K,1,ll,EL)*SEVDMAvg
+                  MZ(K,2,ll,EL) = MZ(K,2,ll,EL)*SEVDMAvg
+               enddo
 #endif
 #endif
-
+            ENDDO
+            
+         ENDDO
          
  1000 CONTINUE
       RETURN
@@ -1143,17 +1172,22 @@ C***********************************************************************
 C.....Use appropriate modules
 
       USE SIZES,ONLY : SZ,layers
-      USE GLOBAL,ONLY : AREAS,nm,entrop
-      USE DG,ONLY : M_INV,XLEN,PHI_EDGE,WEGP,LZ,HZ,TZ
- 
+      USE GLOBAL,ONLY : AREAS,nm
+      USE DG,ONLY : M_INV,XLEN,PHI_EDGE,WEGP,LZ,HZ,TZ,dofs,EVMAvg,ze,qx,qy,
+     & iota,iota2,bed,irk,slimit1,slimit2,slimit3,slimit4
+      USE NodalAttributes, ONLY : EVM
+
       IMPLICIT NONE
       
 C.....Declare local variables
 
-      INTEGER K,EL,LED,GED,GP,i,pa
-      REAL(SZ) AREA, IMASS,n1,n2,n3,QX_Avg,QY_Avg
-      Real(SZ) ZE_Avg,iota_Avg
-      real(sz) NX,NY
+      INTEGER K,EL,LED,GED,GP,i,pa,kk,ll
+      REAL(SZ) AREA, IMASS,n1,n2,n3,QX_Avg,QY_Avg, bg_dif
+      Real(SZ) s0,e1,kappa,ZE_Avg,iota_Avg,trc_dif
+      real(sz) ze_sensor1, qx_sensor1, qy_sensor1,NX,NY
+      real(sz) ze_sensor2, qx_sensor2, qy_sensor2
+      real(sz) iota_sensor1,iota_sensor2
+      logical fl1,fl2,fl3,fl4
       
 C.....Retrieve the element area
       
@@ -1179,9 +1213,184 @@ C.....Comput the edge integral
 
 #ifdef TRACE
       TZ(K,1,1,EL) = TZ(K,1,1,EL)
-     &     - IMASS*XLEN(GED)*0.5D0*iota_Avg*PHI_EDGE(K,GP,LED,pa)*NX*WEGP(GP,pa)
+     &     - IMASS*XLEN(GED)*0.5*iota_Avg*PHI_EDGE(K,GP,LED,pa)*NX*WEGP(GP,pa)
       TZ(K,2,2,EL) = TZ(K,2,2,EL)
-     &     - IMASS*XLEN(GED)*0.5D0*iota_Avg*PHI_EDGE(K,GP,LED,pa)*NY*WEGP(GP,pa)
+     &     - IMASS*XLEN(GED)*0.5*iota_Avg*PHI_EDGE(K,GP,LED,pa)*NY*WEGP(GP,pa)
+
+#endif
+
+C.... We need to retrieve the viscosity settings
+
+      N1 = NM(EL,1)
+      N2 = NM(EL,2)
+      N3 = NM(EL,3)
+      EVMAvg = (EVM(N1)+EVM(N2)+EVM(N3))/3.d0
+      bg_dif = 0.D0 
+      trc_dif = 0.D0 
+      
+#ifdef ARTDIF
+
+      kappa = 2.D0              !This is a tuning parameter
+      e1 = 0.1D0                !This is a tuning parameter
+      s0 = 1.D0/(pa**4.D0)
+
+      if (k.eq.1) then !problem here Craig: compute only once? Make global.
+
+         slimit1 = 0.D0
+         slimit2 = 0.D0
+         slimit3 = 0.D0
+         
+         ze_sensor1 = 0.d0             
+         qx_sensor1 = 0.d0
+         qy_sensor1 = 0.d0
+         ze_sensor2 = 0.d0            
+         qx_sensor2 = 0.d0
+         qy_sensor2 = 0.d0
+         
+         fl1 = .false.
+         fl2 = .false.
+         fl3 = .false.
+#ifdef TRACE
+         fl4 = .false.
+         iota_sensor1 = 0.d0  
+         iota_sensor2 = 0.d0  
+         slimit4 = 0.D0
+#endif
+
+         do kk =  (pa*(pa+1))/2 + 1, dofs(EL)
+            ze_sensor1 = ze_sensor1 + abs(ze(kk,EL,irk)* 
+     &           PHI_EDGE(K,GP,LED,pa))**2.0 * wegp(GP,pa)
+            qx_sensor1 = qx_sensor1 + abs(qx(kk,EL,irk)* 
+     &           PHI_EDGE(K,GP,LED,pa))**2.0 * wegp(GP,pa)
+            qy_sensor1 = qy_sensor1 + abs(qy(kk,EL,irk)* 
+     &           PHI_EDGE(K,GP,LED,pa))**2.0 * wegp(GP,pa)
+#ifdef TRACE
+            iota_sensor1 = iota_sensor1 + abs(iota(kk,EL,irk)* 
+     &           PHI_EDGE(K,GP,LED,pa))**2.0 * wegp(GP,pa)
+#endif
+         enddo
+        
+         do kk = 1,dofs(EL)
+            ze_sensor2 = ze_sensor2 + abs(ze(kk,EL,irk)* 
+     &           PHI_EDGE(K,GP,LED,pa))**2.0 * wegp(GP,pa)
+            qx_sensor2 = qx_sensor2 + abs(qx(kk,EL,irk)* 
+     &           PHI_EDGE(K,GP,LED,pa))**2.0 * wegp(GP,pa)
+            qy_sensor2 = qy_sensor2 + abs(qy(kk,EL,irk)* 
+     &           PHI_EDGE(K,GP,LED,pa))**2.0 * wegp(GP,pa)
+#ifdef TRACE
+            iota_sensor2 = iota_sensor2 + abs(iota(kk,EL,irk)* 
+     &           PHI_EDGE(K,GP,LED,pa))**2.0 * wegp(GP,pa)
+#endif
+         enddo
+
+         if  (ze_sensor2.gt.1.0e-12.and.ze_sensor1.gt.1.0e-12 ) then
+            slimit1 = log10( ze_sensor1/ze_sensor2 )
+         endif
+         if (qx_sensor2.gt.1.0e-12.and.qx_sensor1.gt.1.0e-12 ) then
+            slimit2 = log10( qx_sensor1/qx_sensor2 )
+         endif
+         if ( qy_sensor2.gt.1.0e-12.and.qy_sensor1.gt.1.0e-12 ) then
+            slimit3 = log10( qy_sensor1/qy_sensor2 )
+         endif
+#ifdef TRACE
+         if  (iota_sensor2.gt.1.0e-12.and.iota_sensor1.gt.1.0e-12 ) then
+            slimit4 = log10( iota_sensor1/iota_sensor2 )
+         endif
+#endif
+     
+      endif
+
+         !slimit1 = maxval(sensor) ! Craig No!
+         !slimit2 = minval(sensor) ! Craig No!
+
+         if (slimit1.gt.s0+kappa) then
+
+            HZ(K,1,1,EL) = (bg_dif+e1*abs(slimit1))*HZ(K,1,1,EL)
+            HZ(K,2,2,EL) = (bg_dif+e1*abs(slimit1))*HZ(K,2,2,EL)
+
+            fl1 = .true.
+            
+         endif
+
+         if (slimit2.gt.s0+kappa) then
+            
+            LZ(K,1,1,EL) = (EVMAvg+e1*abs(slimit2))*LZ(K,1,1,EL)
+            LZ(K,1,2,EL) = (EVMAvg+e1*abs(slimit2))*LZ(K,1,2,EL)
+            LZ(K,2,1,EL) = (EVMAvg+e1*abs(slimit2))*LZ(K,2,1,EL)
+ 
+            fl2 = .true.
+            
+         endif
+
+        if (slimit3.gt.s0+kappa) then
+            
+            LZ(K,1,2,EL) = (EVMAvg+e1*abs(slimit3))*LZ(K,1,2,EL)
+            LZ(K,2,1,EL) = (EVMAvg+e1*abs(slimit3))*LZ(K,2,1,EL)
+            LZ(K,2,2,EL) = (EVMAvg+e1*abs(slimit3))*LZ(K,2,2,EL)
+
+            fl3 = .true.
+            
+         endif
+#ifdef TRACE
+         if (slimit4.gt.s0+kappa) then
+            
+            TZ(K,1,1,EL) = (trc_dif+e1*abs(slimit1))*TZ(K,1,1,EL)
+            TZ(K,2,2,EL) = (trc_dif+e1*abs(slimit1))*TZ(K,2,2,EL)
+            
+            fl4 = .true.
+            
+         endif
+#endif
+
+c$$$         elseif ( slimit2.le.s0+kappa.and.slimit2.ge.s0-kappa) then
+c$$$
+c$$$            HZ(K,1,1,EL) = (bg_dif+e1*abs(slimit1))*HZ(K,1,1,EL) !Craig
+c$$$            HZ(K,2,2,EL) = (bg_dif+e1*abs(slimit1))*HZ(K,2,2,EL) !Craig
+c$$$
+c$$$            LZ(K,1,1,EL) = (EVMAvg 
+c$$$     $           + e1*DMAX1(abs(slimit1),abs(slimit2)))*LZ(K,1,1,EL)
+c$$$            LZ(K,1,2,EL) = (EVMAvg 
+c$$$     &           + e1*DMAX1(abs(slimit1),abs(slimit2)))*LZ(K,1,2,EL)
+c$$$            LZ(K,2,1,EL) = (EVMAvg 
+c$$$     &           + e1*DMAX1(abs(slimit1),abs(slimit2)))*LZ(K,2,1,EL)
+c$$$            LZ(K,2,2,EL) = (EVMAvg 
+c$$$     &           + e1*DMAX1(abs(slimit1),abs(slimit2)))*LZ(K,2,2,EL)
+
+         if ( (fl1==.true.).and.(fl2==.true.).and.(fl3==.true.) ) then
+
+            HZ(K,1,1,EL) = bg_dif*HZ(K,1,1,EL)
+            HZ(K,2,2,EL) = bg_dif*HZ(K,2,2,EL)
+
+            LZ(K,1,1,EL) = EVMAvg*LZ(K,1,1,EL)
+            LZ(K,1,2,EL) = EVMAvg*LZ(K,1,2,EL)
+            LZ(K,2,1,EL) = EVMAvg*LZ(K,2,1,EL)
+            LZ(K,2,2,EL) = EVMAvg*LZ(K,2,2,EL)
+
+         endif
+#ifdef TRACE
+         if ( fl4 == .true. ) then
+            
+            TZ(K,1,1,EL) = trc_dif*TZ(K,1,1,EL)
+            TZ(K,2,2,EL) = trc_dif*TZ(K,2,2,EL)
+            
+         endif
+#endif
+
+#else
+
+         HZ(K,1,1,EL) = bg_dif*HZ(K,1,1,EL)
+         HZ(K,2,2,EL) = bg_dif*HZ(K,2,2,EL)
+         
+         LZ(K,1,1,EL) = EVMAvg*LZ(K,1,1,EL)
+         LZ(K,1,2,EL) = EVMAvg*LZ(K,1,2,EL)
+         LZ(K,2,1,EL) = EVMAvg*LZ(K,2,1,EL)
+         LZ(K,2,2,EL) = EVMAvg*LZ(K,2,2,EL)
+#ifdef TRACE
+
+         TZ(K,1,1,EL) = trc_dif*TZ(K,1,1,EL)
+         TZ(K,2,2,EL) = trc_dif*TZ(K,2,2,EL)
+
+#endif
 
 #endif
       
@@ -1206,15 +1415,18 @@ C***********************************************************************
 C.....Use appropriate modules
 
       USE SIZES,ONLY : SZ,layers
-      USE GLOBAL,ONLY : AREAS,entrop
-      USE DG,ONLY : M_INV,XLEN,PHI_EDGE,WEGP,MZ
+      USE GLOBAL,ONLY : AREAS
+      USE DG,ONLY : M_INV,XLEN,PHI_EDGE,WEGP,MZ,dofs,SEVDMAvg,
+     &     SEVDM,bed,irk,slimit5
 
       IMPLICIT NONE
       
 C.....Declare local variables
 
-      INTEGER K, EL, LED, GED, GP,i,pa,ll
+      INTEGER K, EL, LED, GED, GP,i,pa,ll,kk
       REAL(SZ) AREA, IMASS, bed_avg, NX, NY
+      Real(SZ) s0,e1,kappa
+      real(sz) tbed_sensor1, tbed_sensor2
       
 C.....Retrieve the element area
       
@@ -1228,6 +1440,60 @@ C.....Comput the edge integral
      &     - IMASS*XLEN(GED)*0.5*bed_avg*PHI_EDGE(K,GP,LED,pa)*NX*WEGP(GP,pa)
       MZ(K,2,ll,EL) = MZ(K,2,ll,EL)
      &     - IMASS*XLEN(GED)*0.5*bed_avg*PHI_EDGE(K,GP,LED,pa)*NY*WEGP(GP,pa)
+
+      SEVDMAvg = SEVDM 
+      kappa = 2.D0              !This is a tuning parameter
+      e1 = 0.1D0                !This is a tuning parameter
+      S0 = 1.D0/(pa**4.D0)
+#ifdef ARTDIF
+      if (k.eq.1) then          !Craig, do this once!
+
+         slimit5 = 0.D0
+         tbed_sensor1 = 0.d0
+         tbed_sensor2 = 0.d0
+
+         do kk =  (pa*(pa+1))/2 + 1, dofs(EL)
+            do ll=1,layers
+               tbed_sensor1 = tbed_sensor1 + abs(bed(kk,EL,irk,ll)* 
+     &              PHI_EDGE(K,GP,LED,pa))**2.0 * wegp(GP,pa)
+            enddo
+         enddo
+         do kk = 1,dofs(EL)
+            do ll=1,layers
+               tbed_sensor2 = tbed_sensor2 + abs(bed(kk,EL,irk,ll)* 
+     &              PHI_EDGE(K,GP,LED,pa))**2.0 * wegp(GP,pa)
+            enddo
+         enddo
+         if ( tbed_sensor2.gt.1.0e-12.and.tbed_sensor1.gt.1.0e-12 ) then
+            slimit5 = log10( tbed_sensor1/tbed_sensor2 )
+         endif
+         
+         if (slimit5.gt.s0+kappa) then
+            do ll=1,layers
+               MZ(K,1,ll,EL) = MZ(K,1,ll,EL)*(SEVDMAvg+e1*abs(slimit5))
+               MZ(K,2,ll,EL) = MZ(K,2,ll,EL)*(SEVDMAvg+e1*abs(slimit5))
+            enddo
+c$$$  elseif ( slimit2.le.s0+kappa.and.slimit2.ge.s0-kappa) then
+c$$$  do ll=1,layers
+c$$$  MZ(K,1,ll,EL) = MZ(K,1,ll,EL)*(SEVDMAvg+abs(sensor))
+c$$$  MZ(K,2,ll,EL) = MZ(K,2,ll,EL)*(SEVDMAvg+abs(sensor))
+c$$$  enddo
+         else
+            do ll=1,layers
+               MZ(K,1,ll,EL) = MZ(K,1,ll,EL)*SEVDMAvg
+               MZ(K,2,ll,EL) = MZ(K,2,ll,EL)*SEVDMAvg
+            enddo
+         endif
+      endif
+      
+#else
+
+      do ll=1,layers
+         MZ(K,1,ll,EL) = MZ(K,1,ll,EL)*SEVDMAvg
+         MZ(K,2,ll,EL) = MZ(K,2,ll,EL)*SEVDMAvg
+      enddo
+
+#endif
       
       RETURN
       END SUBROUTINE
@@ -1249,21 +1515,23 @@ C***********************************************************************
 C.....Use appropriate modules
 
       USE SIZES,ONLY : layers,SZ
-      USE GLOBAL,ONLY : NE,NM,N1,N2,N3,pdg_el,entrop
+      USE GLOBAL,ONLY : NE,NM,N1,N2,N3,pdg_el
       USE DG,ONLY : QX_IN,QY_IN,LZ,M_INV,SFAC_ELEM,ZE_IN,
-     &     DRPHI,DSPHI,DRDX,DRDY,DSDX,DSDY,bed,mz,hz,
+     &     DRPHI,DSPHI,DRDX,DRDY,DSDX,DSDY,bed,mz,hz,trc_dif,
      &     WAGP,NAGP,DOFS,QX,QY,PHI_AREA,IRK,bed_IN,iota_IN,
-     &     slimit1,slimit2,slimit5,balance,
+     &     EVMAvg,SEVDMAvg,SEVDM,bg_dif,slimit1,slimit2,
      &     ze,iota,iota2,bed,irk,slimit3,slimit4,TZ
+      USE NodalAttributes, ONLY : EVM
 
       IMPLICIT NONE
       
 C.....Declare local variables
       INTEGER L,K,I,pa,ll,kk
+      Real(SZ) s0,e1,kappa
       real(sz) ze_sensor1, qx_sensor1, qy_sensor1
       real(sz) ze_sensor2, qx_sensor2, qy_sensor2
       real(sz) iota_sensor1,iota_sensor2
-      logical fl1,fl2,fl3,fl4,fl5
+      logical fl1,fl2,fl3,fl4
 #ifdef SED_LAY
       real(sz) tbed_sensor1,tbed_sensor2
 #endif
@@ -1279,7 +1547,7 @@ C.....Declare local variables
 #endif
          
 C.....Retrieve the global node numbers for the element
-         
+
          N1 = NM(L,1)
          N2 = NM(L,2)
          N3 = NM(L,3)
@@ -1319,7 +1587,17 @@ C.....Compute ZE, QX, QY, and HB at each area Gauss quadrature point
             ENDDO
 
 C.....Build the rhs
-                
+
+            slimit1 = 0.D0
+            slimit2 = 0.D0
+            slimit3 = 0.D0
+            slimit4 = 0.D0
+
+            fl1 = .false.
+            fl2 = .false.
+            fl3 = .false.
+            fl4 = .false.
+            
             DO K = 1,DOFS(L)
                HZ(K,1,1,L) = HZ(K,1,1,L)
      &              + M_INV(K,pa)*ZE_IN*SFAC_ELEM(I,L,pa)* ! <--- ZE/Mk
@@ -1350,11 +1628,11 @@ C.....Build the rhs
      &              WAGP(I,pa)  ! <--- weight
 #ifdef TRACE
                TZ(K,1,1,L) = TZ(K,1,1,L)
-     &              + M_INV(K,pa)*iota_IN*SFAC_ELEM(I,L,pa)* ! <--- iota*H/Mk
+     &              + M_INV(K,pa)*iota_IN*SFAC_ELEM(I,L,pa)* ! <--- ZE/Mk
      &              ( DRPHI(K,I,pa)*DRDX(L) + DSPHI(K,I,pa)*DSDX(L) )* ! <--- dphi/dx
      &              WAGP(I,pa)  ! <--- weight
                TZ(K,2,2,L) = TZ(K,2,2,L)
-     &              + M_INV(K,pa)*iota_IN* ! <--- iota*H/Mk
+     &              + M_INV(K,pa)*iota_IN* ! <--- ZE/Mk
      &              ( DRPHI(K,I,pa)*DRDY(L) + DSPHI(K,I,pa)*DSDY(L) )* ! <--- dphi/dy
      &              WAGP(I,pa)  ! <--- weight
 #endif
@@ -1372,112 +1650,241 @@ C.....Build the rhs
                enddo
 #endif
 
-            enddo
-         enddo
+C.....We need to retrieve the viscosity settings
+               bg_dif  = 0.d0
+               trc_dif = 0.d0
+               EVMAvg = (EVM(N1)+EVM(N2)+EVM(N3))/3.d0
+#ifdef SED_LAY
+               SEVDMAvg = SEVDM !constant scenario
+C.....SEVDMAvg = (SEVDM(N1)+SEVDM(N2)+SEVDM(N3))/3.d0 Would need to set up nodal attributes here!
+#endif
 
 #ifdef ARTDIF
 
-         slimit1 = -100.D0
-         slimit2 = -100.D0
-         slimit3 = -100.D0
-
-         entrop(:,L) = -100.D0
-            
-         ze_sensor1 = 0.d0             
-         qx_sensor1 = 0.d0
-         qy_sensor1 = 0.d0
-         ze_sensor2 = 0.d0            
-         qx_sensor2 = 0.d0
-         qy_sensor2 = 0.d0
-
-#ifdef TRACE
-         slimit4 = -100.D0 
-         iota_sensor1 = 0.d0
-         iota_sensor2 = 0.d0
-#endif
-         
-#ifdef SED_LAY
-         slimit5 = -100.D0
-         tbed_sensor1 = 0.d0
-         tbed_sensor2 = 0.d0
-#endif
-         
-         do I = 1,NAGP(pa)
-            
-            do kk = 2, dofs(L)  !Compute the first sensor
-               ze_sensor1 = ze_sensor1 + (ze(kk,L,irk)* 
-     &              phi_area(kk,I,pa))**2.D0 * wagp(I,pa)
-               qx_sensor1 = qx_sensor1 + (qx(kk,L,irk)* 
-     &              phi_area(kk,I,pa))**2.D0 * wagp(I,pa)
-               qy_sensor1 = qy_sensor1 + (qy(kk,L,irk)* 
-     &              phi_area(kk,I,pa))**2.D0 * wagp(I,pa)
-#ifdef TRACE
-               iota_sensor1 = iota_sensor1 + (iota(kk,L,irk)
-     &              * phi_area(kk,I,pa))**2.D0 * wagp(I,pa)
-#endif
+               kappa = 2.D0     !This is a tuning parameter
+               e1 = 0.1D0       !This is a tuning parameter
+               s0 = 1.D0/(pa**4.D0)
                
-#ifdef SED_LAY       
-               do ll=1,layers
-                  tbed_sensor1 = tbed_sensor1 + (bed(kk,L,irk,ll)* 
-     &                 phi_area(kk,I,pa))**2.D0 * wagp(I,pa)
-               enddo
-#endif
-
-            enddo
-            
-            do kk = 1,dofs(L) !Compute the second sensor
-               ze_sensor2 = ze_sensor2 + (ze(kk,L,irk)* 
-     &              phi_area(kk,I,pa))**2.D0 * wagp(I,pa)
-               qx_sensor2 = qx_sensor2 + (qx(kk,L,irk)* 
-     &              phi_area(kk,I,pa))**2.D0 * wagp(I,pa)
-               qy_sensor2 = qy_sensor2 + (qy(kk,L,irk)* 
-     &              phi_area(kk,I,pa))**2.D0 * wagp(I,pa)
-#ifdef TRACE
-               iota_sensor2 = iota_sensor2 + (iota(kk,L,irk)
-     &              * phi_area(kk,I,pa))**2.D0 * wagp(I,pa)
-#endif
-               
-#ifdef SED_LAY       
-               do ll=1,layers
-                  tbed_sensor2 = tbed_sensor2 + (bed(kk,L,irk,ll)* !Adjust sensor for multilayers!
-     &                 phi_area(kk,I,pa))**2.D0 * wagp(I,pa)
-               enddo
-#endif
-
-            enddo
-            
-         enddo
-
-         if  (ze_sensor2.gt.1.0e-4.and.ze_sensor1.gt.1.0e-4 ) then
-            slimit1 = log10( ze_sensor1/ze_sensor2 ) + balance(1)
-            entrop(1,L) = slimit1
-         endif
-         if (qx_sensor2.gt.1.0e-4.and.qx_sensor1.gt.1.0e-4 ) then
-            slimit2 = log10( qx_sensor1/qx_sensor2 ) + balance(2)
-            entrop(2,L) = slimit2
-         endif
-         if ( qy_sensor2.gt.1.0e-4.and.qy_sensor1.gt.1.0e-4 ) then
-            slimit3 = log10( qy_sensor1/qy_sensor2 ) + balance(3)
-            entrop(3,L) = slimit3
-         endif
-#ifdef TRACE
-          if ( iota_sensor2.gt.1.0e-4.and.iota_sensor1.gt.1.0e-4 ) then
-            slimit4 = log10( iota_sensor1/iota_sensor2 ) + balance(4)
-            entrop(4,L) = slimit4
-          endif
-#endif
-         
-#ifdef SED_LAY
-         if ( tbed_sensor2.gt.1.0e-4.and.tbed_sensor1.gt.1.0e-4 ) then
-            slimit5 = log10( tbed_sensor1/tbed_sensor2 ) + balance(5)
-            entrop(5,L) = slimit5 
-        endif
-#endif
+               if (k.eq.1) then
                   
-#endif                  
- 
-      ENDDO
+                  ze_sensor1 = 0.d0             
+                  qx_sensor1 = 0.d0
+                  qy_sensor1 = 0.d0
+                  ze_sensor2 = 0.d0            
+                  qx_sensor2 = 0.d0
+                  qy_sensor2 = 0.d0
+#ifdef TRACE
+                  iota_sensor1 = 0.d0
+                  iota_sensor2 = 0.d0
+#endif
 
+#ifdef SED_LAY
+                  tbed_sensor1 = 0.d0
+                  tbed_sensor2 = 0.d0
+#endif
+
+                  do kk = (pa*(pa+1))/2 + 1, dofs(L)
+                     ze_sensor1 = ze_sensor1 + abs(ze(kk,L,irk)* 
+     &                    phi_area(kk,I,pa))**2.0 * wagp(I,pa)
+                     qx_sensor1 = qx_sensor1 + abs(qx(kk,L,irk)* 
+     &                    phi_area(kk,I,pa))**2.0 * wagp(I,pa)
+                     qy_sensor1 = qy_sensor1 + abs(qy(kk,L,irk)* 
+     &                    phi_area(kk,I,pa))**2.0 * wagp(I,pa)
+#ifdef TRACE
+                     iota_sensor1 = iota_sensor1 + abs(iota(kk,L,irk)* 
+     &                    phi_area(kk,I,pa))**2.0 * wagp(I,pa)
+#endif
+                     
+#ifdef SED_LAY       
+                     do ll=1,layers
+                        tbed_sensor1 = tbed_sensor1 + abs(bed(kk,L,irk,ll)* 
+     &                       phi_area(kk,I,pa))**2.0 * wagp(I,pa)
+                     enddo
+#endif
+
+                  enddo
+                  
+                  do kk = 1,dofs(L)
+                     ze_sensor2 = ze_sensor2 + abs(ze(kk,L,irk)* 
+     &                    phi_area(kk,I,pa))**2.0 * wagp(I,pa)
+                     qx_sensor2 = qx_sensor2 + abs(qx(kk,L,irk)* 
+     &                    phi_area(kk,I,pa))**2.0 * wagp(I,pa)
+                     qy_sensor2 = qy_sensor2 + abs(qy(kk,L,irk)* 
+     &                    phi_area(kk,I,pa))**2.0 * wagp(I,pa)
+#ifdef TRACE
+                     iota_sensor2 = iota_sensor2 + abs(iota(kk,L,irk)* 
+     &                    phi_area(kk,I,pa))**2.0 * wagp(I,pa)
+#endif
+                     
+#ifdef SED_LAY       
+                     do ll=1,layers
+                        tbed_sensor2 = tbed_sensor2 + abs(bed(kk,L,irk,ll)* 
+     &                       phi_area(kk,I,pa))**2.0 * wagp(I,pa)
+                     enddo
+#endif
+
+                  enddo
+                  
+                  if  (ze_sensor2.gt.1.0e-12.and.ze_sensor1.gt.1.0e-12 ) then
+                     slimit1 = log10( ze_sensor1/ze_sensor2 )
+                  endif
+                  if (qx_sensor2.gt.1.0e-12.and.qx_sensor1.gt.1.0e-12 ) then
+                     slimit2 = log10( qx_sensor1/qx_sensor2 )
+                  endif
+                  if ( qy_sensor2.gt.1.0e-12.and.qy_sensor1.gt.1.0e-12 ) then
+                     slimit3 = log10( qy_sensor1/qy_sensor2 )
+                  endif
+#ifdef TRACE
+                  if ( iota_sensor2.gt.1.0e-12.and.iota_sensor1.gt.1.0e-12 ) then
+                     slimit4 = log10( iota_sensor1/iota_sensor2 )
+                  endif
+#endif
+
+#ifdef SED_LAY
+                  if ( tbed_sensor2.gt.1.0e-12.and.tbed_sensor1.gt.1.0e-12 ) then
+                     slimit5 = log10( tbed_sensor1/tbed_sensor2 )
+                  endif
+#endif
+
+               endif
+
+               
+
+               if (slimit1.gt.s0+kappa) then
+                  
+                  HZ(K,1,1,L) = (bg_dif+e1*abs(slimit1))*HZ(K,1,1,L)
+                  HZ(K,2,2,L) = (bg_dif+e1*abs(slimit1))*HZ(K,2,2,L)
+
+                  fl1 = .true.
+
+               endif
+
+               if (slimit2.gt.s0+kappa) then
+                  
+                  LZ(K,1,1,L) = (EVMAvg+e1*abs(slimit2))*LZ(K,1,1,L)
+                  LZ(K,1,2,L) = (EVMAvg+e1*abs(slimit2))*LZ(K,1,2,L)
+                  LZ(K,2,1,L) = (EVMAvg+e1*abs(slimit2))*LZ(K,2,1,L)
+                  
+                  fl2 = .true.
+
+               endif
+
+               if (slimit3.gt.s0+kappa) then
+
+                  LZ(K,1,2,L) = (EVMAvg+e1*abs(slimit3))*LZ(K,1,2,L)
+                  LZ(K,2,1,L) = (EVMAvg+e1*abs(slimit3))*LZ(K,2,1,L)
+                  LZ(K,2,2,L) = (EVMAvg+e1*abs(slimit3))*LZ(K,2,2,L)
+                  
+                  fl3 = .true.
+
+               endif
+#ifdef TRACE
+
+
+               if (slimit4.gt.s0+kappa) then
+
+                  TZ(K,1,1,L) = (trc_dif+e1*abs(slimit4))*TZ(K,1,1,L)
+                  TZ(K,2,2,L) = (trc_dif+e1*abs(slimit4))*TZ(K,2,2,L)
+               
+                  fl4 = .true.
+                  
+               endif
+               
+#endif
+               
+#ifdef SED_LAY
+
+               if (slimit5.gt.s0+kappa) then
+
+                  do ll=1,layers
+                     MZ(K,1,ll,L) = MZ(K,1,ll,L)*(SEVDMAvg+abs(slimit4))
+                     MZ(K,2,ll,L) = MZ(K,2,ll,L)*(SEVDMAvg+abs(slimit4))
+                  enddo
+
+                  fl5 = .true.
+
+               endif
+#endif
+c$$$  elseif ( slimit2.le.s0+kappa.and.slimit2.ge.s0-kappa) then
+c$$$  
+c$$$  HZ(K,1,1,L) = (bg_dif 
+c$$$  $                    + e1*DMAX1(abs(slimit1),abs(slimit2)))*HZ(K,1,1,L) !Craig
+c$$$  HZ(K,2,2,L) = (bg_dif 
+c$$$  &                    + e1*DMAX1(abs(slimit1),abs(slimit2)))*HZ(K,2,2,L)
+c$$$  
+c$$$  LZ(K,1,1,L) = (EVMAvg 
+c$$$  $                    + e1*DMAX1(abs(slimit1),abs(slimit2)))*LZ(K,1,1,L)
+c$$$  LZ(K,1,2,L) = (EVMAvg 
+c$$$  &                    + e1*DMAX1(abs(slimit1),abs(slimit2)))*LZ(K,1,2,L)
+c$$$  LZ(K,2,1,L) = (EVMAvg 
+c$$$  &                    + e1*DMAX1(abs(slimit1),abs(slimit2)))*LZ(K,2,1,L)
+c$$$  LZ(K,2,2,L) = (EVMAvg 
+c$$$  &                    + e1*DMAX1(abs(slimit1),abs(slimit2)))*LZ(K,2,2,L)
+c$$$  
+c$$$  
+c$$$  #ifdef SED_LAY
+c$$$  do ll=1,layers
+c$$$  MZ(K,1,ll,L) = MZ(K,1,ll,L)*(SEVDMAvg+abs(sensor(7))) !Craig check all of these
+c$$$  MZ(K,2,ll,L) = MZ(K,2,ll,L)*(SEVDMAvg+abs(sensor(7)))
+c$$$  enddo
+c$$$  #endif
+
+               if ( (fl1==.false.).and.(fl2==.false.).and.(fl3==.false.)
+     &               ) then
+                  
+                  HZ(K,1,1,L) = bg_dif*HZ(K,1,1,L)
+                  HZ(K,2,2,L) = bg_dif*HZ(K,2,2,L)
+                  
+                  LZ(K,1,1,L) = EVMAvg*LZ(K,1,1,L)
+                  LZ(K,1,2,L) = EVMAvg*LZ(K,1,2,L)
+                  LZ(K,2,1,L) = EVMAvg*LZ(K,2,1,L)
+                  LZ(K,2,2,L) = EVMAvg*LZ(K,2,2,L)
+                  
+               endif
+#ifdef TRACE
+               if ( fl4 == .false. ) then
+
+                  TZ(K,1,1,L) = trc_dif*TZ(K,1,1,L)
+                  TZ(K,2,2,L) = trc_dif*TZ(K,2,2,L)
+               
+               endif
+#endif
+               
+#ifdef SED_LAY
+               if ( fl5 == .false. ) then
+                  do ll=1,layers
+                     MZ(K,1,ll,L) = MZ(K,1,ll,L)*SEVDMAvg
+                     MZ(K,2,ll,L) = MZ(K,2,ll,L)*SEVDMAvg
+                  enddo
+               endif
+#endif
+               
+#else
+               
+               HZ(K,1,1,L) = bg_dif*HZ(K,1,1,L)
+               HZ(K,2,2,L) = bg_dif*HZ(K,2,2,L)
+               
+               LZ(K,1,1,L) = EVMAvg*LZ(K,1,1,L)
+               LZ(K,1,2,L) = EVMAvg*LZ(K,1,2,L)
+               LZ(K,2,1,L) = EVMAvg*LZ(K,2,1,L)
+               LZ(K,2,2,L) = EVMAvg*LZ(K,2,2,L)
+
+#ifdef TRACE
+               TZ(K,1,1,L) = trc_dif*TZ(K,1,1,L)
+               TZ(K,2,2,L) = trc_dif*TZ(K,2,2,L)
+#endif
+#ifdef SED_LAY
+               do ll=1,layers
+                  MZ(K,1,ll,L) = MZ(K,1,ll,L)*SEVDMAvg
+                  MZ(K,2,ll,L) = MZ(K,2,ll,L)*SEVDMAvg
+               enddo
+#endif
+               
+#endif                  
+            ENDDO
+         ENDDO
+      ENDDO
+      
       RETURN
       END SUBROUTINE
 

@@ -63,7 +63,7 @@ C.....Declare local variables
       
       INTEGER II,GED,ll,w,IT,kk,jj,MM,fast
       REAL(SZ) DEN, U_AVG, V_AVG, VEL_NORMAL, q_RoeX, q_RoeY, q_Roe
-      Real(SZ) bedX_IN,bedX_EX,dtildeQx(4),dtildeQy(4),eigmax
+      Real(SZ) bedX_IN,bedX_EX,dtildeQx(4),dtildeQy(4)
       Real(SZ) bedY_IN,bedY_EX, bed_AVG(layers),lambda4_IN,lambda4_EX
       Real(SZ) rVncU,rVncV,lambda1_IN,lambda1_EX,lambda2_IN,lambda2_EX
       Real(SZ) lambda3_IN,lambda3_EX,Select_IN,Select_EX
@@ -100,9 +100,6 @@ C.....Evaluate the eigenvalues at the Roe averaged variables
       EIGVAL(2) = (U_ROE*NX + V_ROE*NY)*IFNLCT
       EIGVAL(1) = EIGVAL(2) + C_ROE
       EIGVAL(3) = EIGVAL(2) - C_ROE
-
-      eigmax = max(abs(EIGVAL(1)),abs(EIGVAL(2)),abs(EIGVAL(3)))
-      cfl_max = max(EIGMAX,cfl_max)
       
 C.....Evaluate right eigenvectors at Roe averaged variables
 
@@ -196,12 +193,6 @@ C.....Compute the average flux in the normal direction
       G_AVG = 0.5D0*((GX_IN + GX_EX)*NX + (GY_IN + GY_EX)*NY)
       H_AVG = 0.5D0*((HX_IN + HX_EX)*NX + (HY_IN + HY_EX)*NY)
 
-c$$$      eigmax = max(abs(0.5D0*((FX_IN + FX_EX) + (FY_IN + FY_EX))),
-c$$$     &     abs( 0.5D0*((GX_IN + GX_EX) + (GY_IN + GY_EX))),
-c$$$     &     abs( 0.5D0*((HX_IN + HX_EX) + (HY_IN + HY_EX))) )
-      
-c$$$      cfl_max = max(EIGMAX,cfl_max)
-
 C.....Compute the jump in the variables
 
       JUMP(1) = ZE_EX - ZE_IN
@@ -216,8 +207,6 @@ C.....Compute the Roe flux
      &     A_ROE(2,3)*JUMP(3) )
       H_HAT = H_AVG - 0.5D0*(A_ROE(3,1)*JUMP(1) + A_ROE(3,2)*JUMP(2) +
      &     A_ROE(3,3)*JUMP(3) )
-
-      !cfl_max = max(abs(F_HAT),abs(G_HAT),abs(H_HAT),cfl_max)
 
 #ifdef SED_LAY
 
@@ -1006,7 +995,6 @@ C.....Find the maximum eigenvalue (in absolute value)
       EIGMAX = MAX( EIGVALS(1), EIGVALS(2), EIGVALS(3),
      &     EIGVALS(4), EIGVALS(5), EIGVALS(6) )
 
-      cfl_max = max(EIGMAX,cfl_max)
                                 !print*,eigmax
 
 C.....Compute the Local Lax Friedrichs Fluxes

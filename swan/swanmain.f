@@ -27,8 +27,8 @@
 !***********************************************************************
 !                                                                      *
 !Casey 080110: Turn SWAN into a subroutine.
-!NADC      PROGRAM SWAN
-      SUBROUTINE SWAN
+      PROGRAM SWAN
+!ADC      SUBROUTINE SWAN
 !                                                                      *
 !***********************************************************************
 !
@@ -129,8 +129,8 @@
 !***********************************************************************
 !                                                                      *
 !Casey 080115: ADCIRC will want to pass a time step to this subroutine.
-!NADC      SUBROUTINE SWMAIN                                                   40.31 34.01
-      SUBROUTINE SWMAIN(ITIME,IT)                                         40.31 34.01
+      SUBROUTINE SWMAIN                                                   40.31 34.01
+!ADC      SUBROUTINE SWMAIN(ITIME,IT)                                         40.31 34.01
 !                                                                      *
 !***********************************************************************
 !
@@ -147,13 +147,13 @@
       USE SwanGriddata                                                    40.80
       USE MESSENGER                                                       40.95
 !Casey 080115: Added new modules.
-      USE Couple2Adcirc
-      USE Couple2Swan, ONLY: ComputeRadiationStresses,
-     &                       CouplingInterval
-     &                      ,SwanOutput
-     &                      ,WriteSwanHotStart
-      USE GLOBAL,      ONLY: ADCIRC_DTDP => DTDP,
-     &                       ADCIRC_STATIM => STATIM
+!ADC      USE Couple2Adcirc
+!ADC      USE Couple2Swan, ONLY: ComputeRadiationStresses,
+!ADC     &                       CouplingInterval
+!ADC     &                      ,SwanOutput
+!ADC     &                      ,WriteSwanHotStart
+!ADC      USE GLOBAL,      ONLY: ADCIRC_DTDP => DTDP,
+!ADC     &                       ADCIRC_STATIM => STATIM
 !
       IMPLICIT NONE
 !
@@ -279,27 +279,27 @@
 !
 !Casey 080115: Move some variables to the Couple2Adcirc module,
 !              so that they will persist in memory.
-!NADC      INTEGER   IUNIT                                                     34.01
-!NADC      INTEGER   IOSTAT, IT0, IT, SAVITE, ILEN                             40.30
-      INTEGER   IT
-!NADC      INTEGER   INERR                                                     40.31
-!NADC      INTEGER   ISTAT, IF1, IL1                                           40.41
-!NADC      CHARACTER PTYPE, PNAME *8, COMPUT *4, DTTIWR*18                     40.00
-      CHARACTER DTTIWR*18
-!NADC      CHARACTER*20 NUMSTR, CHARS(1)                                       40.41
-      CHARACTER*20 NUMSTR
-!NADC      CHARACTER*80 MSGSTR                                                 40.41
-!NADC      LOGICAL   LOPEN                                                     34.01
+      INTEGER   IUNIT                                                     34.01
+      INTEGER   IOSTAT, IT0, IT, SAVITE, ILEN                             40.30
+!ADC      INTEGER   IT
+      INTEGER   INERR                                                     40.31
+      INTEGER   ISTAT, IF1, IL1                                           40.41
+      CHARACTER PTYPE, PNAME *8, COMPUT *4, DTTIWR*18                     40.00
+!ADC      CHARACTER DTTIWR*18
+      CHARACTER*20 NUMSTR, CHARS(1)                                       40.41
+!ADC      CHARACTER*20 NUMSTR
+      CHARACTER*80 MSGSTR                                                 40.41
+      LOGICAL   LOPEN                                                     34.01
 
-!NADC      INTEGER, ALLOCATABLE :: CROSS(:)                                    40.80 40.31
-!NADC      INTEGER, ALLOCATABLE :: BGRIDP(:)                                   40.31
-!NADC      REAL   , ALLOCATABLE :: BSPECS(:,:,:,:)                             40.31
-!NADC      REAL   , ALLOCATABLE :: AC1(:,:,:), COMPDA(:,:)                     40.31
+      INTEGER, ALLOCATABLE :: CROSS(:)                                    40.80 40.31
+      INTEGER, ALLOCATABLE :: BGRIDP(:)                                   40.31
+      REAL   , ALLOCATABLE :: BSPECS(:,:,:,:)                             40.31
+      REAL   , ALLOCATABLE :: AC1(:,:,:), COMPDA(:,:)                     40.31
 !
-!NADC      REAL, ALLOCATABLE    :: BLKND(:), BLKNDC(:), OURQT(:)               40.51 40.41
+      REAL, ALLOCATABLE    :: BLKND(:), BLKNDC(:), OURQT(:)               40.51 40.41
 !
 !Casey 090326: Added a new local variable.
-      INTEGER ITIME
+!ADC      INTEGER ITIME
 !
 !  7. Common blocks used
 !
@@ -322,9 +322,9 @@
 !     HSOBND: Generates warning if comp. and prescr. Hs differ more than  32.01
 !             a fraction HSRERR at the up-wave boundary                   32.01
 !     SWOUTP
-!TIMG!     SWPRTI                                                              40.23
-!TIMG!     SWTSTA                                                              40.23
-!TIMG!     SWTSTO                                                              40.23
+!     SWPRTI                                                              40.23
+!     SWTSTA                                                              40.23
+!     SWTSTO                                                              40.23
 !     MSGERR : Handles error messages according to severity               40.41
 !     NUMSTR : Converts integer/real to string                            40.41
 !     TXPBLA : Removes leading and trailing blanks in string              40.41
@@ -372,28 +372,28 @@
 ! 13. Source text
 !
 !Casey 080115: Initialize only on first time step.
-      IF(IT.EQ.0)THEN
+!ADC      IF(IT.EQ.0)THEN
 !
 !     --- initialize various data
-!TIMG
-!TIMG      DCUMTM(:,1:2) = 0D0                                                 40.23
-!TIMG      NCUMTM(:)     = 0                                                   40.23
-!TIMG      CALL SWTSTA(1)                                                      40.23
+
+      DCUMTM(:,1:2) = 0D0                                                 40.23
+      NCUMTM(:)     = 0                                                   40.23
+      CALL SWTSTA(1)                                                      40.23
 
       LEVERR=0                                                            40.23
       MAXERR=1                                                            34.01
       ITRACE=0                                                            40.23
       INERR =0                                                            40.31
 
-!TIMG      CALL SWTSTA(2)                                                      40.23
+      CALL SWTSTA(2)                                                      40.23
       CALL SWINIT (INERR)                                                 40.31 34.01
       IF ( MNPROC>1 ) THEN                                                40.95
-!NADC         CALL SwanReadfort18                                              40.95
+         CALL SwanReadfort18                                              40.95
 !Casey 080819: Call subroutines only if ADCIRC hasn't called them already.
-!NADC         CALL MSG_TABLE()                                                 40.95
-!NADC         CALL MESSAGE_START()                                             40.95
+         CALL MSG_TABLE()                                                 40.95
+         CALL MSG_START()                                                 40.95
       ENDIF                                                               40.95
-!TIMG      CALL SWTSTO(2)                                                      40.23
+      CALL SWTSTO(2)                                                      40.23
       IF (INERR.GT.0) RETURN                                              34.01
       IF (STPNOW()) RETURN                                                34.01
 !
@@ -402,13 +402,13 @@
 !     --- repeat
 
 !Casey 080115: Is there a scenario when ADCIRC would need this loop?
-!NADC      DO
+      DO
 
 !       --- read and process user commands
 
-!TIMG        CALL SWTSTA(3)                                                    40.23
+        CALL SWTSTA(3)                                                    40.23
         CALL SWREAD (COMPUT)                                              40.31 30.90
-!TIMG        CALL SWTSTO(3)                                                    40.23
+        CALL SWTSTO(3)                                                    40.23
         IF (STPNOW()) RETURN                                              34.01
 
 !       --- if last command was STOP then exit from repeat
@@ -441,12 +441,12 @@
 
 !       --- do some preparations before computation                       40.31
 
-!TIMG        CALL SWTSTA(4)                                                    40.23
+        CALL SWTSTA(4)                                                    40.23
         CALL SWPREP ( BSPECS, BGRIDP, CROSS , XCGRID, YCGRID, KGRPNT,     40.31
      &                KGRBND, SPCDIR, SPCSIG )                            40.31
         IF (OPTG.EQ.5) CALL SwanPrepComp ( CROSS )                        40.80
         IF (STPNOW()) RETURN                                              40.80
-!TIMG        CALL SWTSTO(4)                                                    40.23
+        CALL SWTSTO(4)                                                    40.23
 
 !       --- check all possible flags and if necessary change
 !           if option is not correct
@@ -472,9 +472,9 @@
            RETURN                                                         40.41
         END IF                                                            40.41
 
-!TIMG        CALL SWTSTA(5)                                                    40.23
+        CALL SWTSTA(5)                                                    40.23
         CALL SWRBC(COMPDA)                                                40.31
-!TIMG        CALL SWTSTO(5)                                                    40.23
+        CALL SWTSTO(5)                                                    40.23
 
 !       --- allocate AC1 in case of non-stationary situation or in case   40.31
 !           of using the S&L scheme                                       40.31
@@ -529,10 +529,10 @@
 !
 !             --- compute default initial conditions
 !
-!TIMG              CALL SWTSTA(6)                                              40.23
+              CALL SWTSTA(6)                                              40.23
               CALL SWINCO ( AC2   , COMPDA, XCGRID, YCGRID,               40.31
      &                      KGRPNT, SPCDIR, SPCSIG, XYTST )               40.31
-!TIMG              CALL SWTSTO(6)                                              40.23
+              CALL SWTSTO(6)                                              40.23
 !
 !             --- reset ICOND to prevent second computation of
 !                 initial condition
@@ -544,11 +544,11 @@
           ENDIF
 
 !Casey 080116: End the LEVERR.GT.MAXERR IF statement.
-        ENDIF
+!ADC        ENDIF
 !Casey 080116: End the IT.EQ.0 IF statement.
-      ENDIF
+!ADC      ENDIF
 !Casey 080116: Re-open the error IF statement.
-        IF(LEVERR.LE.MAXERR)THEN
+!ADC        IF(LEVERR.LE.MAXERR)THEN
 !
 !         --- synchronize nodes                                           40.30
 
@@ -558,7 +558,7 @@
 !         --- loop over time steps                                        40.00
 
 Casey 080115: Time-stepping in the coupled model is handled elsewhere.
-!NADC          DO 500 IT = IT0, MTC                                            40.00
+          DO 500 IT = IT0, MTC                                            40.00
 !
             IF (LEVERR.GT.MAXERR) THEN                                    30.82
               WRITE (PRINTF, 6030) LEVERR                                 30.82
@@ -566,8 +566,8 @@ Casey 080115: Time-stepping in the coupled model is handled elsewhere.
  6030         FORMAT(' ** No continuation of computation because ',       30.82
      &               'of error level:',I3)                                30.82
 !Casey 080818: The ND compiler does not like this EXIT command.
-!NADC              EXIT                                                        40.30
-              RETURN                                                      40.30
+              EXIT                                                        40.30
+!ADC              RETURN                                                      40.30
             ENDIF                                                         30.82
 
 !           --- synchronize nodes
@@ -577,12 +577,12 @@ Casey 080115: Time-stepping in the coupled model is handled elsewhere.
 !
 !           --- update boundary conditions and input fields
 !
-!TIMG            CALL SWTSTA(7)                                                40.23
+            CALL SWTSTA(7)                                                40.23
             CALL SNEXTI ( BSPECS, BGRIDP, COMPDA, AC1   , AC2   ,         40.31
      &                    SPCSIG, SPCDIR, XCGRID, YCGRID, KGRPNT,         40.31
      &                    XYTST , DEPTH , WLEVL , FRIC  , UXB   ,         40.31
      &                    UYB   , WXI   , WYI   )                         40.31
-!TIMG            CALL SWTSTO(7)                                                40.23
+            CALL SWTSTO(7)                                                40.23
             IF (STPNOW()) RETURN                                          34.01
 !
 !           --- synchronize nodes
@@ -597,7 +597,7 @@ Casey 080115: Time-stepping in the coupled model is handled elsewhere.
 !
 !             --- compute action density for current time step
 !
-!TIMG              CALL SWTSTA(8)                                              40.23
+              CALL SWTSTA(8)                                              40.23
               IF (OPTG.NE.5) THEN                                         40.80
 !                structured grid                                          40.80
                  CALL SWCOMP( AC1   , AC2   , COMPDA, SPCDIR, SPCSIG,     40.31
@@ -609,7 +609,7 @@ Casey 080115: Time-stepping in the coupled model is handled elsewhere.
      &                                  SPCSIG, SPCDIR, XYTST ,           40.80
      &                                  CROSS , IT    )                   40.80
               ENDIF                                                       40.80
-!TIMG              CALL SWTSTO(8)                                              40.23
+              CALL SWTSTO(8)                                              40.23
               IF (STPNOW()) RETURN                                        34.01
 !
 !             --- set ICOND=4 for stationary computation, for next
@@ -637,13 +637,13 @@ Casey 080115: Time-stepping in the coupled model is handled elsewhere.
             IF (IOUTES .GT. ITEST) ITEST = IOUTES
 
 !Casey 090326: Perform output of SWAN quantities.
-            CALL SwanOutput(ITIME,IT)
+!ADC            CALL SwanOutput(ITIME,IT)
 !
 !Casey 100205: Write the SWAN hot-start file, if necessary.
-            IF(WriteSwanHotStart)THEN
-               CALL BACKUP(AC2,SPCSIG,SPCDIR,KGRPNT,XCGRID,YCGRID)
-               WriteSwanHotStart = .FALSE.
-            ENDIF
+!ADC            IF(WriteSwanHotStart)THEN
+!ADC               CALL BACKUP(AC2,SPCSIG,SPCDIR,KGRPNT,XCGRID,YCGRID)
+!ADC               WriteSwanHotStart = .FALSE.
+!ADC            ENDIF
 !
 !           --- synchronize nodes
 
@@ -652,10 +652,10 @@ Casey 080115: Time-stepping in the coupled model is handled elsewhere.
 
 !           --- carry out the output requests
 
-!TIMG            CALL SWTSTA(9)                                                40.30
+            CALL SWTSTA(9)                                                40.30
             CALL SWOUTP ( AC2   , SPCSIG, SPCDIR, COMPDA, XYTST ,         40.31
      &                    KGRPNT, XCGRID, YCGRID, OURQT )                 40.51 40.31
-!TIMG            CALL SWTSTO(9)                                                40.30
+            CALL SWTSTO(9)                                                40.30
             IF (STPNOW()) RETURN                                          40.30
 !
             IF (ERRPTS.GT.0) REWIND(ERRPTS)                               30.50
@@ -671,28 +671,28 @@ Casey 080115: Time-stepping in the coupled model is handled elsewhere.
             ENDIF                                                         40.00
 
 !Casey 080115: Time-stepping in the coupled model is handled elsewhere.
-!NADC 500      CONTINUE
+ 500      CONTINUE
 
           IF (LEVERR.GT.MAXERR) GOTO 900                                  40.30
 
         END IF
 
 !Casey 080115: The outer DO loop does not exist for ADCIRC.
-!NADC      END DO
+      END DO
 !
  900  CONTINUE
 !
 !Casey 080213: Make sure that radiation stresses are up-to-date.
-      IF(IT.NE.MTC)THEN
+!ADC      IF(IT.NE.MTC)THEN
 !Casey 090616: On Jade, we need to pass these three arrays as function
 !              arguments.  The USE statements don't seem to work.
-         CALL ComputeRadiationStresses(AC2,SPCDIR,SPCSIG)
-      ENDIF
+!ADC         CALL ComputeRadiationStresses(AC2,SPCDIR,SPCSIG)
+!ADC      ENDIF
 !
 !Casey 080115: These lines are processed only at the last time step.
-      IF(IT.EQ.MTC)THEN
+!ADC      IF(IT.EQ.MTC)THEN
 !
-!TIMG      CALL SWTSTO(1)                                                      40.23
+      CALL SWTSTO(1)                                                      40.23
 !
       DO IUNIT=1,HIOPEN                                                   34.01
         INQUIRE(UNIT=IUNIT,OPENED=LOPEN)                                  34.01
@@ -703,7 +703,7 @@ Casey 080115: Time-stepping in the coupled model is handled elsewhere.
 !         output requests in case of parallel computation                 40.30
 
       CALL SWSYNC                                                         40.30
-!TIMG      CALL SWTSTA(9)                                                      40.30
+      CALL SWTSTA(9)                                                      40.30
       IF ( PARLL ) THEN                                                   40.30
          ALLOCATE (BLKND(MXC*MYC))                                        40.51 40.41
          BLKND = REAL(INODE)                                              40.41
@@ -718,9 +718,9 @@ Casey 080115: Time-stepping in the coupled model is handled elsewhere.
             DEALLOCATE(BLKNDC)                                            40.41 40.30
          END IF                                                           40.30
       END IF                                                              40.30
-!TIMG      CALL SWTSTO(9)                                                      40.30
+      CALL SWTSTO(9)                                                      40.30
 !
-!TIMG      CALL SWPRTI                                                         40.23
+      CALL SWPRTI                                                         40.23
 !
       INQUIRE(UNIT=PRINTF,OPENED=LOPEN)                                   40.30
       IF (LOPEN) CLOSE(PRINTF)                                            40.30
@@ -737,7 +737,7 @@ Casey 080115: Time-stepping in the coupled model is handled elsewhere.
       CALL SWCLME                                                         40.31
 !
 !Casey 080115: End the IF statement that applies at the last time step.
-      ENDIF
+!ADC      ENDIF
 !
       RETURN                                                              30.82
 !     end of subroutine SWMAIN
@@ -6105,17 +6105,17 @@ Casey 080115: Time-stepping in the coupled model is handled elsewhere.
       USE M_PARALL                                                        40.31
       USE SwanGriddata                                                    40.80
 !Casey 080116: Added information from ADCIRC's module.
-      USE Couple2Swan, ONLY: ADCIRC_ETA2 => SWAN_ETA2,
-     &                       ADCIRC_UU2 => SWAN_UU2,
-     &                       ADCIRC_VV2 => SWAN_VV2,
-     &                       ADCIRC_WX2 => SWAN_WX2,
-     &                       ADCIRC_WY2 => SWAN_WY2,
-     &                       COUPCUR, COUPWIND, COUPWLV,
-     &                       InterpoWeight
+!ADC      USE Couple2Swan, ONLY: ADCIRC_ETA2 => SWAN_ETA2,
+!ADC     &                       ADCIRC_UU2 => SWAN_UU2,
+!ADC     &                       ADCIRC_VV2 => SWAN_VV2,
+!ADC     &                       ADCIRC_WX2 => SWAN_WX2,
+!ADC     &                       ADCIRC_WY2 => SWAN_WY2,
+!ADC     &                       COUPCUR, COUPWIND, COUPWLV,
+!ADC     &                       InterpoWeight
 !Casey 091216: Added these variables for coupling ADCIRC Manning's n values
 !              as Madsen friction lengths.
-     &                      ,ADCIRC_Z0 => SWAN_Z0,
-     &                       COUPFRIC
+!ADC     &                      ,ADCIRC_Z0 => SWAN_Z0,
+!ADC     &                       COUPFRIC
 !
       IMPLICIT NONE
 !
@@ -6322,42 +6322,42 @@ Casey 080115: Time-stepping in the coupled model is handled elsewhere.
 !              then grab them from memory instead of reading them from
 !              the external file.a
 !Casey 090820: Added the REAL() intrinsic function through this section.
-           IF((IGR1.EQ.7).AND.COUPWLV)THEN
-              DO INDX=1,nverts
-                 ARR(INDX) = (1.0 - REAL(InterpoWeight))
-     &                  * REAL(ADCIRC_ETA2(INDX,1))
-     &                  + REAL(InterpoWeight)
-     &                  * REAL(ADCIRC_ETA2(INDX,2))
-              ENDDO
-           ELSEIF((IGR1.EQ.2).AND.COUPCUR)THEN
-              DO INDX=1,nverts
-                 ARR(INDX) = (1.0 - REAL(InterpoWeight))
-     &                  * REAL(ADCIRC_UU2(INDX,1))
-     &                  + REAL(InterpoWeight)
-     &                  * REAL(ADCIRC_UU2(INDX,2))
-              ENDDO
-           ELSEIF((IGR1.EQ.5).AND.COUPWIND)THEN
-              DO INDX=1,nverts
-                 ARR(INDX) = (1.0 - REAL(InterpoWeight)) 
-     &                  * REAL(ADCIRC_WX2(INDX,1))
-     &                  + REAL(InterpoWeight)
-     &                  * REAL(ADCIRC_WX2(INDX,2))
-              ENDDO
+!ADC           IF((IGR1.EQ.7).AND.COUPWLV)THEN
+!ADC              DO INDX=1,nverts
+!ADC                 ARR(INDX) = (1.0 - REAL(InterpoWeight))
+!ADC     &                  * REAL(ADCIRC_ETA2(INDX,1))
+!ADC     &                  + REAL(InterpoWeight)
+!ADC     &                  * REAL(ADCIRC_ETA2(INDX,2))
+!ADC              ENDDO
+!ADC           ELSEIF((IGR1.EQ.2).AND.COUPCUR)THEN
+!ADC              DO INDX=1,nverts
+!ADC                 ARR(INDX) = (1.0 - REAL(InterpoWeight))
+!ADC     &                  * REAL(ADCIRC_UU2(INDX,1))
+!ADC     &                  + REAL(InterpoWeight)
+!ADC     &                  * REAL(ADCIRC_UU2(INDX,2))
+!ADC              ENDDO
+!ADC           ELSEIF((IGR1.EQ.5).AND.COUPWIND)THEN
+!ADC              DO INDX=1,nverts
+!ADC                 ARR(INDX) = (1.0 - REAL(InterpoWeight)) 
+!ADC     &                  * REAL(ADCIRC_WX2(INDX,1))
+!ADC     &                  + REAL(InterpoWeight)
+!ADC     &                  * REAL(ADCIRC_WX2(INDX,2))
+!ADC              ENDDO
 !Casey 091216: Added logic for coupled friction.
-           ELSEIF((IGR1.EQ.4).AND.COUPFRIC)THEN
-              DO INDX=1,nverts
-                 ARR(INDX) = (1.0 - REAL(InterpoWeight)) 
-     &                  * REAL(ADCIRC_Z0(INDX,1))
-     &                  + REAL(InterpoWeight)
-     &                  * REAL(ADCIRC_Z0(INDX,2))
-              ENDDO
-           ELSE
+!ADC           ELSEIF((IGR1.EQ.4).AND.COUPFRIC)THEN
+!ADC              DO INDX=1,nverts
+!ADC                 ARR(INDX) = (1.0 - REAL(InterpoWeight)) 
+!ADC     &                  * REAL(ADCIRC_Z0(INDX,1))
+!ADC     &                  + REAL(InterpoWeight)
+!ADC     &                  * REAL(ADCIRC_Z0(INDX,2))
+!ADC              ENDDO
+!ADC           ELSE
            CALL INAR2D( ARR, MXG(IGR1), MYG(IGR1),                        40.31 40.02
      &                  IFLNDF(IGR1),
      &                  IFLNDS(IGR1), IFLIFM(IGR1), IFLFRM(IGR1),
      &                  IFLIDL(IGR1), IFLFAC(IGR1),
      &                  IFLNHD(IGR1), IFLNHF(IGR1))
-           ENDIF
+!ADC           ENDIF
            IF (STPNOW()) RETURN                                           34.01
         END IF
         CALL SWBROADC(IFLIDL(IGR1),1,SWINT)                               40.30
@@ -6383,26 +6383,26 @@ Casey 080115: Time-stepping in the coupled model is handled elsewhere.
           IF (INODE.EQ.MASTER) THEN                                       40.30
 !Casey 080116: Added these lines to grab the y-components.
 !Casey 090820: Added the REAL() intrinsic function through this section.
-             IF((IGR2.EQ.3).AND.COUPCUR)THEN
-               DO INDX=1,nverts
-                 ARR2(INDX) = (1.0 - REAL(InterpoWeight)) 
-     &                   * REAL(ADCIRC_VV2(INDX,1))
-     &                   + REAL(InterpoWeight)
-     &                   * REAL(ADCIRC_VV2(INDX,2))
-               ENDDO
-             ELSEIF((IGR2.EQ.6).AND.COUPWIND)THEN
-               DO INDX=1,nverts
-                 ARR2(INDX) = (1.0 - REAL(InterpoWeight))
-     &                   * REAL(ADCIRC_WY2(INDX,1))
-     &                   + REAL(InterpoWeight)
-     &                   * REAL(ADCIRC_WY2(INDX,2))
-               ENDDO
-             ELSE
+!ADC             IF((IGR2.EQ.3).AND.COUPCUR)THEN
+!ADC               DO INDX=1,nverts
+!ADC                 ARR2(INDX) = (1.0 - REAL(InterpoWeight)) 
+!ADC     &                   * REAL(ADCIRC_VV2(INDX,1))
+!ADC     &                   + REAL(InterpoWeight)
+!ADC     &                   * REAL(ADCIRC_VV2(INDX,2))
+!ADC               ENDDO
+!ADC             ELSEIF((IGR2.EQ.6).AND.COUPWIND)THEN
+!ADC               DO INDX=1,nverts
+!ADC                 ARR2(INDX) = (1.0 - REAL(InterpoWeight))
+!ADC     &                   * REAL(ADCIRC_WY2(INDX,1))
+!ADC     &                   + REAL(InterpoWeight)
+!ADC     &                   * REAL(ADCIRC_WY2(INDX,2))
+!ADC               ENDDO
+!ADC             ELSE
              CALL INAR2D( ARR2, MXG(IGR2), MYG(IGR2),                     40.31 40.02
      &                    IFLNDF(IGR2),
      &                    IFLNDS(IGR2), IFLIFM(IGR2), IFLFRM(IGR2),
      &                    IFLIDL(IGR2), IFLFAC(IGR2), IFLNHD(IGR2), 0)
-             ENDIF
+!ADC             ENDIF
              IF (STPNOW()) RETURN                                         34.01
           END IF
           CALL SWBROADC(ARR2,MXG(IGR2)*MYG(IGR2),SWREAL)                  40.31 40.30
