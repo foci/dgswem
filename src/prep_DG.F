@@ -466,77 +466,77 @@ C.....Do the L2-projection of the initial conditions
       ydub = 0.d0
       hb1 = 0.D0
 
-c$$$      do k = 1,MNE
-c$$$
-c$$$         
-c$$$         n1 = NM(k,1)
-c$$$         n2 = NM(k,2)
-c$$$         n3 = NM(k,3)
-c$$$                                !Define lagrange transform
-c$$$
-c$$$         do mm = 1,nagp(ph)     !ICs should not have higher order than ph
-c$$$
-c$$$            ell_1 = -0.5D0 * ( xagp(mm,ph) + yagp(mm,ph) )
-c$$$            ell_2 =  0.5D0 * ( xagp(mm,ph) + 1.D0 )
-c$$$            ell_3 =  0.5D0 * ( yagp(mm,ph) + 1.D0 )
-c$$$
-c$$$            XBCbt(k) = x(n1)*ell_1 + x(n2)*ell_2 + x(n3)*ell_3
-c$$$            YBCbt(k) = y(n1)*ell_1 + y(n2)*ell_2 + y(n3)*ell_3
-c$$$
-c$$$
-c$$$            rev =  3.141592653589793D0 / 4.D0
-c$$$
-c$$$            Ox = XBCbt(k)*cos(rev) - YBCbt(k)*sin(rev)
-c$$$            Oy = YBCbt(k)*cos(rev) + XBCbt(k)*sin(rev)
-c$$$
-c$$$            radial(k) = min(sqrt( Ox**2 + (Oy + 0.25D0)**2 ), 0.18D0)/0.18D0
-c$$$
-c$$$
-c$$$            do j = 1,dofh
-c$$$
-c$$$               QX(j,k,1) = QX(j,k,1) + YBCbt(k) * wagp(mm,ph) * phi_area(j,mm,ph)
-c$$$
-c$$$               QY(j,k,1) = QY(j,k,1) - XBCbt(k) * wagp(mm,ph) * phi_area(j,mm,ph)        
-c$$$
-c$$$               iota(j,k,1) = iota(j,k,1) + 0.25D0 *( 1.0D0 + cos(3.141592653589793D0*radial(k)) ) 
-c$$$     &              * wagp(mm,ph) * phi_area(j,mm,ph)  
-c$$$               
-c$$$c$$$               iota(j,k,1) = iota(j,k,1) + 0.5D0 *( exp ( - ( (XBCbt(k)+.05D0)**2 + (YBCbt(k)+.05D0)**2  ) /0.001D0 ) ) 
-c$$$c$$$     &              * wagp(mm,ph) * phi_area(j,mm,ph) 
-c$$$
-c$$$               if( ( sqrt((Ox + 0.25D0 )**2 + Oy**2)).le.0.18D0.and.(sqrt((Ox + 0.25D0 )**2 + 
-c$$$     &              Oy**2)).ge.0.025D0.and.(Ox.le.(-0.23D0) )) then
-c$$$
-c$$$                  iota(j,k,1) = iota(j,k,1) + 1.0D0 * wagp(mm,ph) * phi_area(j,mm,ph) 
-c$$$
-c$$$               elseif(sqrt( (Ox -.25D0)**2 + Oy**2 ).le.0.18D0 ) then
-c$$$
-c$$$                  iota(j,k,1) =  iota(j,k,1) + (1.D0 - ( 1.D0 / 0.18D0 ) * sqrt((Ox -0.25D0)**2 + Oy**2 ) ) 
-c$$$     &                 * wagp(mm,ph) * phi_area(j,mm,ph) 
-c$$$
-c$$$               endif
-c$$$
-c$$$               hb(j,k,1) = hb(j,k,1) + 1.D0*wagp(mm,ph) * phi_area(j,mm,ph)
-c$$$
-c$$$            enddo
-c$$$
-c$$$
-c$$$         enddo
-c$$$
-c$$$                                ! get back the coeffs in each component
-c$$$
-c$$$         do j= 1,dofh
-c$$$
-c$$$            QX(j,k,1) =  QX(j,k,1) * M_inv(j,ph)
-c$$$            QY(j,k,1) =  QY(j,k,1) * M_inv(j,ph)
-c$$$            iota(j,k,1) =  iota(j,k,1) * M_inv(j,ph)
-c$$$            hb(j,k,1) =  hb(j,k,1) * M_inv(j,ph)
-c$$$
-c$$$         enddo
-c$$$
-c$$$      enddo
+      do k = 1,MNE
 
-      !iotaa = iota
+         
+         n1 = NM(k,1)
+         n2 = NM(k,2)
+         n3 = NM(k,3)
+                                !Define lagrange transform
+
+         do mm = 1,nagp(ph)     !ICs should not have higher order than ph
+
+            ell_1 = -0.5D0 * ( xagp(mm,ph) + yagp(mm,ph) )
+            ell_2 =  0.5D0 * ( xagp(mm,ph) + 1.D0 )
+            ell_3 =  0.5D0 * ( yagp(mm,ph) + 1.D0 )
+
+            XBCbt(k) = x(n1)*ell_1 + x(n2)*ell_2 + x(n3)*ell_3
+            YBCbt(k) = y(n1)*ell_1 + y(n2)*ell_2 + y(n3)*ell_3
+
+
+            rev =  3.141592653589793D0 / 4.D0
+
+            Ox = XBCbt(k)*cos(rev) - YBCbt(k)*sin(rev)
+            Oy = YBCbt(k)*cos(rev) + XBCbt(k)*sin(rev)
+
+            radial(k) = min(sqrt( Ox**2 + (Oy + 0.25D0)**2 ), 0.18D0)/0.18D0
+
+
+            do j = 1,dofh
+
+               QX(j,k,1) = QX(j,k,1) + YBCbt(k) * wagp(mm,ph) * phi_area(j,mm,ph)
+
+               QY(j,k,1) = QY(j,k,1) - XBCbt(k) * wagp(mm,ph) * phi_area(j,mm,ph)        
+
+               iota(j,k,1) = iota(j,k,1) + 0.25D0 *( 1.0D0 + cos(3.141592653589793D0*radial(k)) ) 
+     &              * wagp(mm,ph) * phi_area(j,mm,ph)  
+               
+c$$$               iota(j,k,1) = iota(j,k,1) + 0.5D0 *( exp ( - ( (XBCbt(k)+.05D0)**2 + (YBCbt(k)+.05D0)**2  ) /0.001D0 ) ) 
+c$$$     &              * wagp(mm,ph) * phi_area(j,mm,ph) 
+
+               if( ( sqrt((Ox + 0.25D0 )**2 + Oy**2)).le.0.18D0.and.(sqrt((Ox + 0.25D0 )**2 + 
+     &              Oy**2)).ge.0.025D0.and.(Ox.le.(-0.23D0) )) then
+
+                  iota(j,k,1) = iota(j,k,1) + 1.0D0 * wagp(mm,ph) * phi_area(j,mm,ph) 
+
+               elseif(sqrt( (Ox -.25D0)**2 + Oy**2 ).le.0.18D0 ) then
+
+                  iota(j,k,1) =  iota(j,k,1) + (1.D0 - ( 1.D0 / 0.18D0 ) * sqrt((Ox -0.25D0)**2 + Oy**2 ) ) 
+     &                 * wagp(mm,ph) * phi_area(j,mm,ph) 
+
+               endif
+
+               hb(j,k,1) = hb(j,k,1) + 1.D0*wagp(mm,ph) * phi_area(j,mm,ph)
+
+            enddo
+
+
+         enddo
+
+                                ! get back the coeffs in each component
+
+         do j= 1,dofh
+
+            QX(j,k,1) =  QX(j,k,1) * M_inv(j,ph)
+            QY(j,k,1) =  QY(j,k,1) * M_inv(j,ph)
+            iota(j,k,1) =  iota(j,k,1) * M_inv(j,ph)
+            hb(j,k,1) =  hb(j,k,1) * M_inv(j,ph)
+
+         enddo
+
+      enddo
+
+      iotaa = iota
  
       hb(1:dofh,:,1) = hbo(1:dofh,:,1)
       ze(1:dofh,:,1) = zeo(1:dofh,:,1)

@@ -3036,15 +3036,15 @@
       USE M_GENARR                                                        40.31
       USE SwanGriddata                                                    40.80
 !Casey 080115: Added information from ADCIRC's module.
-      USE Couple2Swan, ONLY: ADCIRC_ETA2 => SWAN_ETA2,
-     &                       ADCIRC_UU2 => SWAN_UU2,
-     &                       ADCIRC_VV2 => SWAN_VV2,
-     &                       ADCIRC_WX2 => SWAN_WX2,
-     &                       ADCIRC_WY2 => SWAN_WY2,
-     &                       COUPCUR, COUPWIND, COUPWLV
+!ADC      USE Couple2Swan, ONLY: ADCIRC_ETA2 => SWAN_ETA2,
+!ADC     &                       ADCIRC_UU2 => SWAN_UU2,
+!ADC     &                       ADCIRC_VV2 => SWAN_VV2,
+!ADC     &                       ADCIRC_WX2 => SWAN_WX2,
+!ADC     &                       ADCIRC_WY2 => SWAN_WY2,
+!ADC     &                       COUPCUR, COUPWIND, COUPWLV
 !Casey 091216: Added variables to pass Madsen friction lengths.
-     &                      ,ADCIRC_Z0 => SWAN_Z0,
-     &                       COUPFRIC
+!ADC     &                      ,ADCIRC_Z0 => SWAN_Z0,
+!ADC     &                       COUPFRIC
 !
 !
 !
@@ -3177,7 +3177,7 @@
 ! 13. Source text
 !
 !Casey 080115: Added another counter.
-      INTEGER :: I
+!ADC      INTEGER :: I
 !
       REAL, ALLOCATABLE :: TARR(:)                                        40.31
       LOGICAL    KEYWIS, VECTOR, LOCAL                                    40.95 30.00
@@ -3207,39 +3207,39 @@
         IGR2 = 3
         ICUR = 1
 !Casey 080117: Added this possibility for coupling to ADCIRC currents.
-      ELSE IF (KEYWIS ('ADCCUR')) THEN
-        IGR1 = 2
-        IGR2 = 3
-        ICUR = 1
-        COUPCUR = .TRUE.
-        IFLFAC(IGR1) = 1.0
-        IFLNDF(IGR1) = 0
-        IFLNDS(IGR1) = 22
-        IFLIDL(IGR1) = 1
-        IFLIFM(IGR1) = 2
-        IFLFRM(IGR1) = '(12X,E15.10)'
-        IFLNHF(IGR1) = 2
-        IFLDYN(IGR1) = 1
-        IFLNHD(IGR1) = 1
-        VECTOR = .TRUE.
-        NHEDC = 0
-        IFLFAC(IGR2) = IFLFAC(IGR1)
-        IFLNDF(IGR2) = IFLNDF(IGR1)
-        IFLNDS(IGR2) = IFLNDS(IGR1)
-        IFLIDL(IGR2) = IFLIDL(IGR1)
-        IFLIFM(IGR2) = IFLIFM(IGR1)
-        IFLFRM(IGR2) = IFLFRM(IGR1)
-        IFLNHF(IGR2) = IFLNHF(IGR1)
-        IFLNHD(IGR2) = NHEDC
-        IF (.NOT.ALLOCATED(TARR)) THEN
-          ALLOCATE( TARR(1:nverts) )
-          TARR = 0.
-        ENDIF
+!ADC      ELSE IF (KEYWIS ('ADCCUR')) THEN
+!ADC        IGR1 = 2
+!ADC        IGR2 = 3
+!ADC        ICUR = 1
+!ADC        COUPCUR = .TRUE.
+!ADC        IFLFAC(IGR1) = 1.0
+!ADC        IFLNDF(IGR1) = 0
+!ADC        IFLNDS(IGR1) = 22
+!ADC        IFLIDL(IGR1) = 1
+!ADC        IFLIFM(IGR1) = 2
+!ADC        IFLFRM(IGR1) = '(12X,E15.10)'
+!ADC        IFLNHF(IGR1) = 2
+!ADC        IFLDYN(IGR1) = 1
+!ADC        IFLNHD(IGR1) = 1
+!ADC        VECTOR = .TRUE.
+!ADC        NHEDC = 0
+!ADC        IFLFAC(IGR2) = IFLFAC(IGR1)
+!ADC        IFLNDF(IGR2) = IFLNDF(IGR1)
+!ADC        IFLNDS(IGR2) = IFLNDS(IGR1)
+!ADC        IFLIDL(IGR2) = IFLIDL(IGR1)
+!ADC        IFLIFM(IGR2) = IFLIFM(IGR1)
+!ADC        IFLFRM(IGR2) = IFLFRM(IGR1)
+!ADC        IFLNHF(IGR2) = IFLNHF(IGR1)
+!ADC        IFLNHD(IGR2) = NHEDC
+!ADC        IF (.NOT.ALLOCATED(TARR)) THEN
+!ADC          ALLOCATE( TARR(1:nverts) )
+!ADC          TARR = 0.
+!ADC        ENDIF
 !Casey 090820: Added the REAL() intrinsic function.
-        DO I=1,nverts
-          TARR(I) = REAL(ADCIRC_UU2(I,1))
-        ENDDO
-        GOTO 8116
+!ADC        DO I=1,nverts
+!ADC          TARR(I) = REAL(ADCIRC_UU2(I,1))
+!ADC        ENDDO
+!ADC        GOTO 8116
       ELSE IF (KEYWIS ('FR')) THEN
         IGR1   = 4
         VARFR  = .TRUE.
@@ -3249,33 +3249,33 @@
         ALOCMP = .TRUE.                                                   40.97
 !Casey 091216: Added this possibility for coupling Madsen friction lengths
 !              based on ADCIRC Manning's n values.
-      ELSE IF (KEYWIS ('ADCFRIC')) THEN
-        IGR1 = 4
-        VARFR = .TRUE.
-        MCMVAR = MCMVAR + 2
-        JFRC2  = MCMVAR - 1
-        JFRC3  = MCMVAR
-        ALOCMP = .TRUE.
-        COUPFRIC = .TRUE.
-        IFLFAC(IGR1) = 1.0
-        IFLNDF(IGR1) = 0
-        IFLNDS(IGR1) = 23
-        IFLIDL(IGR1) = 1
-        IFLIFM(IGR1) = 2
-        IFLFRM(IGR1) = '(12X,E20.10)'
-        IFLNHF(IGR1) = 2
-        IFLDYN(IGR1) = 1
-        IFLNHD(IGR1) = 1
-        VECTOR = .FALSE.
-        NHEDC = 0
-        IF (.NOT.ALLOCATED(TARR)) THEN
-          ALLOCATE( TARR(1:nverts) )
-          TARR = 0.
-        ENDIF
-        DO I=1,nverts
-          TARR(I) = REAL(ADCIRC_Z0(I,1))
-        ENDDO
-        GOTO 8116
+!ADC      ELSE IF (KEYWIS ('ADCFRIC')) THEN
+!ADC        IGR1 = 4
+!ADC        VARFR = .TRUE.
+!ADC        MCMVAR = MCMVAR + 2
+!ADC        JFRC2  = MCMVAR - 1
+!ADC        JFRC3  = MCMVAR
+!ADC        ALOCMP = .TRUE.
+!ADC        COUPFRIC = .TRUE.
+!ADC        IFLFAC(IGR1) = 1.0
+!ADC        IFLNDF(IGR1) = 0
+!ADC        IFLNDS(IGR1) = 23
+!ADC        IFLIDL(IGR1) = 1
+!ADC        IFLIFM(IGR1) = 2
+!ADC        IFLFRM(IGR1) = '(12X,E20.10)'
+!ADC        IFLNHF(IGR1) = 2
+!ADC        IFLDYN(IGR1) = 1
+!ADC        IFLNHD(IGR1) = 1
+!ADC        VECTOR = .FALSE.
+!ADC        NHEDC = 0
+!ADC        IF (.NOT.ALLOCATED(TARR)) THEN
+!ADC          ALLOCATE( TARR(1:nverts) )
+!ADC          TARR = 0.
+!ADC        ENDIF
+!ADC        DO I=1,nverts
+!ADC          TARR(I) = REAL(ADCIRC_Z0(I,1))
+!ADC        ENDDO
+!ADC        GOTO 8116
       ELSE IF (KEYWIS ('WI')) THEN
         LWINDR = 2                                                        30.10
         IWIND  = LWINDM                                                   30.10
@@ -3283,69 +3283,69 @@
         IGR2   = 6
         VARWI  = .TRUE.
 !Casey 080424: Added this possibility for coupling to ADCIRC wind speeds.
-      ELSE IF (KEYWIS ('ADCWIND')) THEN
-        LWINDR = 2
-        IWIND  = LWINDM
-        IGR1 = 5
-        IGR2 = 6
-        VARWI = .TRUE.
-        COUPWIND = .TRUE.
-        IFLFAC(IGR1) = 1.0
-        IFLNDF(IGR1) = 0
-        IFLNDS(IGR1) = 22
-        IFLIDL(IGR1) = 1
-        IFLIFM(IGR1) = 2
-        IFLFRM(IGR1) = '(12X,E15.10)'
-        IFLNHF(IGR1) = 2
-        IFLDYN(IGR1) = 1
-        IFLNHD(IGR1) = 1
-        VECTOR = .TRUE.
-        NHEDC = 0
-        IFLFAC(IGR2) = IFLFAC(IGR1)
-        IFLNDF(IGR2) = IFLNDF(IGR1)
-        IFLNDS(IGR2) = IFLNDS(IGR1)
-        IFLIDL(IGR2) = IFLIDL(IGR1)
-        IFLIFM(IGR2) = IFLIFM(IGR1)
-        IFLFRM(IGR2) = IFLFRM(IGR1)
-        IFLNHF(IGR2) = IFLNHF(IGR1)
-        IFLNHD(IGR2) = NHEDC
-        IF (.NOT.ALLOCATED(TARR)) THEN
-          ALLOCATE( TARR(1:nverts) )
-          TARR = 0.
-        ENDIF
+!ADC      ELSE IF (KEYWIS ('ADCWIND')) THEN
+!ADC        LWINDR = 2
+!ADC        IWIND  = LWINDM
+!ADC        IGR1 = 5
+!ADC        IGR2 = 6
+!ADC        VARWI = .TRUE.
+!ADC        COUPWIND = .TRUE.
+!ADC        IFLFAC(IGR1) = 1.0
+!ADC        IFLNDF(IGR1) = 0
+!ADC        IFLNDS(IGR1) = 22
+!ADC        IFLIDL(IGR1) = 1
+!ADC        IFLIFM(IGR1) = 2
+!ADC        IFLFRM(IGR1) = '(12X,E15.10)'
+!ADC        IFLNHF(IGR1) = 2
+!ADC        IFLDYN(IGR1) = 1
+!ADC        IFLNHD(IGR1) = 1
+!ADC        VECTOR = .TRUE.
+!ADC        NHEDC = 0
+!ADC        IFLFAC(IGR2) = IFLFAC(IGR1)
+!ADC        IFLNDF(IGR2) = IFLNDF(IGR1)
+!ADC        IFLNDS(IGR2) = IFLNDS(IGR1)
+!ADC        IFLIDL(IGR2) = IFLIDL(IGR1)
+!ADC        IFLIFM(IGR2) = IFLIFM(IGR1)
+!ADC        IFLFRM(IGR2) = IFLFRM(IGR1)
+!ADC        IFLNHF(IGR2) = IFLNHF(IGR1)
+!ADC        IFLNHD(IGR2) = NHEDC
+!ADC        IF (.NOT.ALLOCATED(TARR)) THEN
+!ADC          ALLOCATE( TARR(1:nverts) )
+!ADC          TARR = 0.
+!ADC        ENDIF
 !Casey 090820: Added the REAL() intrinsic function.
-        DO I=1,nverts
-          TARR(I) = REAL(ADCIRC_WX2(I,1))
-        ENDDO
-        GOTO 8116
+!ADC        DO I=1,nverts
+!ADC          TARR(I) = REAL(ADCIRC_WX2(I,1))
+!ADC        ENDDO
+!ADC        GOTO 8116
       ELSE IF (KEYWIS ('WL')) THEN                                        20.38
         IGR1   = 7
         VARWLV = .TRUE.                                                   20.38
 !Casey 080116: Added this possibility for coupling to ADCIRC water levels.
-      ELSE IF (KEYWIS ('ADCWL')) THEN
-        IGR1 = 7
-        VARWLV = .TRUE.
-        COUPWLV = .TRUE.
-        IFLFAC(IGR1) = 1.0
-        IFLNDF(IGR1) = 0
-        IFLNDS(IGR1) = 23
-        IFLIDL(IGR1) = 1
-        IFLIFM(IGR1) = 2
-        IFLFRM(IGR1) = '(12X,E20.10)'
-        IFLNHF(IGR1) = 2
-        IFLDYN(IGR1) = 1
-        IFLNHD(IGR1) = 1
-        VECTOR = .FALSE.
-        NHEDC = 0
-        IF (.NOT.ALLOCATED(TARR)) THEN
-          ALLOCATE( TARR(1:nverts) )
-          TARR = 0.
-        ENDIF
+!ADC      ELSE IF (KEYWIS ('ADCWL')) THEN
+!ADC        IGR1 = 7
+!ADC        VARWLV = .TRUE.
+!ADC        COUPWLV = .TRUE.
+!ADC        IFLFAC(IGR1) = 1.0
+!ADC        IFLNDF(IGR1) = 0
+!ADC        IFLNDS(IGR1) = 23
+!ADC        IFLIDL(IGR1) = 1
+!ADC        IFLIFM(IGR1) = 2
+!ADC        IFLFRM(IGR1) = '(12X,E20.10)'
+!ADC        IFLNHF(IGR1) = 2
+!ADC        IFLDYN(IGR1) = 1
+!ADC        IFLNHD(IGR1) = 1
+!ADC        VECTOR = .FALSE.
+!ADC        NHEDC = 0
+!ADC        IF (.NOT.ALLOCATED(TARR)) THEN
+!ADC          ALLOCATE( TARR(1:nverts) )
+!ADC          TARR = 0.
+!ADC        ENDIF
 !Casey 090820: Added the REAL() intrinsic function.
-        DO I=1,nverts
-          TARR(I) = REAL(ADCIRC_ETA2(I,1))
-        ENDDO
-        GOTO 8116
+!ADC        DO I=1,nverts
+!ADC          TARR(I) = REAL(ADCIRC_ETA2(I,1))
+!ADC        ENDDO
+!ADC        GOTO 8116
       ELSE IF (KEYWIS ('COOR')) THEN                                      30.21
         IGR1   = 8                                                        30.21
         IGR2   = 9                                                        30.21
@@ -3431,7 +3431,7 @@
      &             IFLIDL(IGR1), IFLFAC(IGR1),
      &             IFLNHD(IGR1), IFLNHF(IGR1))
 !Casey 080116: Added next line.
- 8116 CONTINUE
+!ADC 8116 CONTINUE
       IF (STPNOW()) RETURN                                                34.01
       IF (IGR1.EQ.1) THEN                                                 40.31
          IF (.NOT.ALLOCATED(DEPTH)) ALLOCATE(DEPTH(MXG(IGR1)*MYG(IGR1)))  40.31
@@ -3463,20 +3463,20 @@
         END IF                                                            40.41
 !Casey 080116: Grab the y-component of velocity.
 !Casey 090820: Added the REAL() intrinsic function.
-        IF(IGR2.EQ.3.AND.COUPCUR)THEN
-          DO I=1,nverts
-            TARR(I) = REAL(ADCIRC_VV2(I,1))
-          ENDDO
-        ELSEIF(IGR2.EQ.6.AND.COUPWIND)THEN
-          DO I=1,nverts
-            TARR(I) = REAL(ADCIRC_WY2(I,1))
-          ENDDO
-        ELSE
+!ADC        IF(IGR2.EQ.3.AND.COUPCUR)THEN
+!ADC          DO I=1,nverts
+!ADC            TARR(I) = REAL(ADCIRC_VV2(I,1))
+!ADC          ENDDO
+!ADC        ELSEIF(IGR2.EQ.6.AND.COUPWIND)THEN
+!ADC          DO I=1,nverts
+!ADC            TARR(I) = REAL(ADCIRC_WY2(I,1))
+!ADC          ENDDO
+!ADC        ELSE
         CALL INAR2D( TARR        , MXG(IGR2), MYG(IGR2), IFLNDF(IGR2),    40.31 40.02
      &               IFLNDS(IGR2), IFLIFM(IGR2), IFLFRM(IGR2),
      &               IFLIDL(IGR2), IFLFAC(IGR2),
      &               IFLNHD(IGR2), 0)
-        ENDIF
+!ADC        ENDIF
         IF (STPNOW()) RETURN                                              34.01
         IF (IGR2.EQ.3) THEN                                               40.31
            IF (.NOT.ALLOCATED(UYB)) ALLOCATE(UYB(MXG(IGR2)*MYG(IGR2)))    40.31
@@ -3786,8 +3786,8 @@
 !     STRACE           Tracing routine for debugging                      40.31
 !     SWDECOMP                                                            40.31
 !     SWCOPI                                                              40.31
-!TIMG!     SWTSTA                                                              40.31
-!TIMG!     SWTSTO                                                              40.31
+!     SWTSTA                                                              40.31
+!     SWTSTO                                                              40.31
 !     TXPBLA : Removes leading and trailing blanks in string              40.41
 !
       LOGICAL STPNOW                                                      34.01
@@ -3834,12 +3834,12 @@
 !     --- Carry out domain decomposition meant for                        40.31
 !         distributed-memory approach                                     40.31
 
-!TIMG      CALL SWTSTA(211)                                                    40.31
+      CALL SWTSTA(211)                                                    40.31
       CALL SWDECOMP                                                       40.31
-!TIMG      CALL SWTSTO(211)                                                    40.31
+      CALL SWTSTO(211)                                                    40.31
       IF (STPNOW()) RETURN                                                40.31
 
-!TIMG      CALL SWTSTA(212)                                                    40.31
+      CALL SWTSTA(212)                                                    40.31
 
 !     --- Create copy of parts of KGRPGL for each subdomain -> KGRPNT     40.31
 
@@ -3906,7 +3906,7 @@
       END IF                                                              40.31
       IF(ALLOCATED(IARR)) DEALLOCATE(IARR)                                40.31
 
-!TIMG      CALL SWTSTO(212)                                                    40.31
+      CALL SWTSTO(212)                                                    40.31
 
       IF(.NOT.ALLOCATED(AC2)) ALLOCATE(AC2(MDC,MSC,MCGRD),STAT=ISTAT)     40.41 40.31
       IF ( ISTAT.NE.0 ) THEN                                              40.41
@@ -5456,7 +5456,7 @@
       USE SwanGriddata                                                    40.80
       USE SIZES                                                           40.95
 !Casey 100205: Add variable for coupling to ADCIRC.
-      USE Couple2Swan, ONLY: SwanHotStartUnit
+!ADC      USE Couple2Swan, ONLY: SwanHotStartUnit
 !
 !
 !   --|-----------------------------------------------------------|--
@@ -5554,14 +5554,14 @@
 !     ==================================================================
 !
 !Casey 100205: Edit for coupling of hot-start to ADCIRC.
-!NADC      CALL INCSTR ('FNAME', FILENM, 'REQ', ' ')
-      IF(SwanHotStartUnit.EQ.67)THEN
-         FILENM = "swan.67"
-         SwanHotStartUnit = 68
-      ELSE
-         FILENM = "swan.68"
-         SwanHotStartUnit = 67
-      ENDIF
+      CALL INCSTR ('FNAME', FILENM, 'REQ', ' ')
+!ADC      IF(SwanHotStartUnit.EQ.67)THEN
+!ADC         FILENM = "swan.67"
+!ADC         SwanHotStartUnit = 68
+!ADC      ELSE
+!ADC         FILENM = "swan.68"
+!ADC         SwanHotStartUnit = 67
+!ADC      ENDIF
 !     --- append node number to FILENM in case of parallel computing      40.31
       IF ( PARLL ) THEN                                                   40.31
          ILPOS = INDEX ( FILENM, ' ' )-1                                  40.31

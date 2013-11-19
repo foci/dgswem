@@ -17,7 +17,6 @@ C     v10_sb5 - 10/05    - sb - wetting/drying algorithm is improved
 C     v10_sb5 - 10/05    - sb - Ethan's slope limiter is consolidated
 C     v21     - 11/11    - cem - major update/p_enrich/slope/rkc etc
 C     v22     -  6/12    - cem - major update/sediment/diffusion/fluxes
-C     Moving to versioning control
 C     
 C***********************************************************************
 
@@ -201,12 +200,12 @@ C.......SSP Runge-Kutta Time Scheme
                   enddo
 #endif
 
-                  ZE(K,J,IRK+1) = ZE(K,J,irk+1) + ARK*ZE(K,J,I)
-     &                 + BRK*RHS_ZE(K,J,I) 
-                  QX(K,J,IRK+1) = QX(K,J,irk+1) + ARK*QX(K,J,I)
-     &                 + BRK*RHS_QX(K,J,I)
-                  QY(K,J,IRK+1) = QY(K,J,irk+1) + ATVD(IRK,I)*QY(K,J,I)
-     &                 + BRK*RHS_QY(K,J,I)
+                  ZE(K,J,IRK+1) = ZE(K,J,1) !+ ARK*ZE(K,J,I)
+      !&                 + BRK*RHS_ZE(K,J,I) 
+                  QX(K,J,IRK+1) = QX(K,J,1) !+ ARK*QX(K,J,I)
+      !&                 + BRK*RHS_QX(K,J,I)
+                  QY(K,J,IRK+1) = QY(K,J,1) !+ ATVD(IRK,I)*QY(K,J,I)
+      !&                 + BRK*RHS_QY(K,J,I)
 
 
 C.......Compute the transported tracer term if flagged
@@ -530,6 +529,88 @@ C.......p_enrich soln and update
 
  100  CONTINUE
 
+
+!-------------------------------------------------------------------------------------------------
+      do k = 1,MNE
+     
+         iotaa(:,k,1) = 0.D0
+         
+         n1 = NM(k,1)
+         n2 = NM(k,2)
+         n3 = NM(k,3)
+!Define lagrange transform
+         
+         do mm = 1,nagp(ph)     !ICs should not have higher order than ph
+            
+            ell_1 = -0.5D0 * ( xagp(mm,ph) + yagp(mm,ph) )
+            ell_2 =  0.5D0 * ( xagp(mm,ph) + 1.D0 )
+            ell_3 =  0.5D0 * ( yagp(mm,ph) + 1.D0 )
+            
+            XB(k) = x(n1)*ell_1 + x(n2)*ell_2 + x(n3)*ell_3
+            YB(k) = y(n1)*ell_1 + y(n2)*ell_2 + y(n3)*ell_3
+
+                                !XBCbt(k) = 1.D0/3.D0*( x(nm(k,1)) + x(nm(k,2)) + x(nm(k,3)) )
+                                !YBCbt(k) = 1.D0/3.D0*( y(nm(k,1)) + y(nm(k,2)) + y(nm(k,3)) )
+
+            rev =  3.141592653589793D0 / 4.D0
+
+            Ox = XB(k)*cos(rev) - YB(k)*sin(rev)
+            Oy = YB(k)*cos(rev) + XB(k)*sin(rev)
+
+            tempx = Ox*cos(timedg) - Oy*sin(timedg)
+            tempy = Oy*cos(timedg) + Ox*sin(timedg)
+
+            !tempx = XB(k)*cos(time_a) - YB(k)*sin(time_a)
+            !tempy = YB(k)*cos(time_a) + XB(k)*sin(time_a)
+
+            radial(k) = min(sqrt( tempx**2 + (tempy + 0.25D0)**2 ), 0.18D0)/0.18D0
+
+            !!iotaa(1,k,1) =  0.0025D0 *( 1.0D0 + cos(3.141592653589793D0*radial(k)) ) 
+            
+          do j = 1,dofh
+               
+
+               iotaa(j,k,1) = iotaa(j,k,1) + 0.25D0 *( 1.0D0 + cos(3.141592653589793D0*radial(k)) ) 
+     &              * wagp(mm,ph) * phi_area(j,mm,ph)  
+
+c$$$             iotaa(j,k,1) = iotaa(j,k,1) + 0.5D0 *( exp ( - ( (tempx+.05D0)**2 + (tempy+.05D0)**2  ) /0.001D0 ) ) 
+c$$$     &            * wagp(mm,ph) * phi_area(j,mm,ph) 
+             
+
+               if( ( sqrt((tempx + 0.25D0 )**2 + tempy**2)).le.0.18D0.and.(sqrt((tempx + 0.25D0 )**2 + 
+     &              tempy**2)).ge.0.025D0.and.(tempx.le.(-0.23) )) then
+
+                  iotaa(j,k,1) = iotaa(j,k,1) + 1.0D0 * wagp(mm,ph) * phi_area(j,mm,ph) 
+
+               elseif(sqrt( (tempx -.25D0)**2 + tempy**2 ).le.0.18D0 ) then
+
+                  iotaa(j,k,1) =  iotaa(j,k,1) + (1.D0 - ( 1.D0 / 0.18D0 ) * sqrt((tempx -0.25D0)**2 + tempy**2 ) ) 
+     &                 * wagp(mm,ph) * phi_area(j,mm,ph) 
+
+               endif
+
+
+
+            enddo     
+
+         enddo
+         
+! get back the coeffs in each component
+         
+         do j= 1,dofh
+            
+            iotaa(j,k,1) =  iotaa(j,k,1) * M_inv(j,ph)
+            
+         enddo
+         
+      enddo
+      
+!-------------------------------------------------------------------------------------------------
+
+
+
+
+
 C.....Update variables for next time step
 
 #ifdef FILTER 
@@ -655,6 +736,17 @@ C......Fitler chemistry transported terms if flagged
             ENDDO
          ENDDO
       ENDDO
+
+!Some variable timestepping stuff for a simple uniform CFL stepper
+c$$$#ifdef VAR_TIME
+c$$$#ifdef CMPI
+c$$$      Call para_max(cfl_max)
+c$$$#endif           
+c$$$      !dtdp = (1.D0/64.D0) / ((2.0D0*ph +1.D0)*cfl_max);
+c$$$      IF  (MYPROC.EQ.0) then
+c$$$         print*, dtdp
+c$$$      endif
+c$$$#endif
 
       RETURN
       END SUBROUTINE

@@ -1,6 +1,6 @@
 !Casey 080228: Changed these lines.
-!NADCsubroutine SwanComputeForce ( fx, fy, ac2, dep2, spcsig, spcdir )
-subroutine SwanComputeForce
+subroutine SwanComputeForce ( fx, fy, ac2, dep2, spcsig, spcdir )
+!ADCsubroutine SwanComputeForce
 !
 !   --|-----------------------------------------------------------|--
 !     | Delft University of Technology                            |
@@ -58,31 +58,31 @@ subroutine SwanComputeForce
     use SwanGriddata
     use SwanGridobjects
 !Casey 080228: Added these USE statements.
-    use Couple2Adcirc, only: compda
-    use GLOBAL,        only: rsnx2, rsny2
-    use m_genarr,      only: ac2, spcdir, spcsig
+!ADC    use Couple2Adcirc, only: compda
+!ADC    use GLOBAL,        only: rsnx2, rsny2
+!ADC    use m_genarr,      only: ac2, spcdir, spcsig
 !
     implicit none
 !
 !   Argument variables
 !
 !Casey 080228: Changed this section.
-!NADC    real, dimension(MDC,MSC,nverts), intent(in) :: ac2    ! action density at current time level
-!NADC    real, dimension(nverts), intent(in)         :: dep2   ! water depth at current time level
-!NADC    real, dimension(nverts), intent(out)        :: fx     ! wave-induced force in x-direction
-!NADC    real, dimension(nverts), intent(out)        :: fy     ! wave-induced force in y-direction
-!NADC    real, dimension(MDC,6), intent(in)          :: spcdir ! (*,1): spectral direction bins (radians)
-!NADC                                                          ! (*,2): cosine of spectral directions
-!NADC                                                          ! (*,3): sine of spectral directions
-!NADC                                                          ! (*,4): cosine^2 of spectral directions
-!NADC                                                          ! (*,5): cosine*sine of spectral directions
-!NADC                                                          ! (*,6): sine^2 of spectral directions
-!NADC    real, dimension(MSC), intent(in)            :: spcsig ! relative frequency bins
+    real, dimension(MDC,MSC,nverts), intent(in) :: ac2    ! action density at current time level
+    real, dimension(nverts), intent(in)         :: dep2   ! water depth at current time level
+    real, dimension(nverts), intent(out)        :: fx     ! wave-induced force in x-direction
+    real, dimension(nverts), intent(out)        :: fy     ! wave-induced force in y-direction
+    real, dimension(MDC,6), intent(in)          :: spcdir ! (*,1): spectral direction bins (radians)
+                                                          ! (*,2): cosine of spectral directions
+                                                          ! (*,3): sine of spectral directions
+                                                          ! (*,4): cosine^2 of spectral directions
+                                                          ! (*,5): cosine*sine of spectral directions
+                                                          ! (*,6): sine^2 of spectral directions
+    real, dimension(MSC), intent(in)            :: spcsig ! relative frequency bins
 !
 !Casey 080228: Added this section.
-    real, dimension(nverts)                     :: dep2
-    real, dimension(nverts)                     :: fx
-    real, dimension(nverts)                     :: fy
+!ADC    real, dimension(nverts)                     :: dep2
+!ADC    real, dimension(nverts)                     :: fx
+!ADC    real, dimension(nverts)                     :: fy
 !
 !   Local variables
 !
@@ -142,10 +142,10 @@ subroutine SwanComputeForce
 !   Source text
 !
 !Casey 080228: Move the depths to their own array.
-    do ivert=1,nverts
-       dep2(ivert) = compda(ivert,jdp2)
-    enddo
-    !
+!ADC    do ivert=1,nverts
+!ADC       dep2(ivert) = compda(ivert,jdp2)
+!ADC    enddo
+!ADC    !
     if (ltrace) call strace (ient,'SwanComputeForce')
     !
     ! point to vertex and cell objects
@@ -325,11 +325,11 @@ subroutine SwanComputeForce
     enddo vertexloop
     !
 !Casey 080228: Pass stresses to ADCIRC.
-    do ivert=1,nverts
-       rsnx2(ivert) = fx(ivert)
-       rsny2(ivert) = fy(ivert)
-    enddo
-    !
+!ADC    do ivert=1,nverts
+!ADC       rsnx2(ivert) = fx(ivert)
+!ADC       rsny2(ivert) = fy(ivert)
+!ADC    enddo
+!ADC    !
     ! deallocation of radiation stresses
     !
     deallocate(sxx)

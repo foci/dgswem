@@ -820,8 +820,8 @@
 !MPI!                      to all other processes of the group
 !     MSGERR           Writes error message
 !     STRACE           Tracing routine for debugging
-!TIMG!     SWTSTA           Start timing for a section of code
-!TIMG!     SWTSTO           Stop timing for a section of code
+!     SWTSTA           Start timing for a section of code
+!     SWTSTO           Stop timing for a section of code
 !     TXPBLA           Removes leading and trailing blanks in string
 !
 !  9. Subroutines calling
@@ -847,7 +847,7 @@
 !     --- if not parallel, return
       IF (.NOT.PARLL) RETURN
 
-!TIMG      CALL SWTSTA(201)
+      CALL SWTSTA(201)
 !MPI      CALL MPI_BCAST ( IPTR, ILEN, ITYPE, MASTER-1,
 !MPI     &                 MPI_COMM_WORLD, IERR )
 !MPI      IF ( IERR.NE.MPI_SUCCESS ) THEN
@@ -858,7 +858,7 @@
 !MPI         CALL MSGERR ( 4, MSGSTR )
 !MPI         RETURN
 !MPI      END IF
-!TIMG      CALL SWTSTO(201)
+      CALL SWTSTO(201)
 
       RETURN
       END
@@ -1261,8 +1261,8 @@
 !MPI!                      distribute the result back to all processes
 !     MSGERR           Writes error message
 !     STRACE           Tracing routine for debugging
-!TIMG!     SWTSTA           Start timing for a section of code
-!TIMG!     SWTSTO           Stop timing for a section of code
+!     SWTSTA           Start timing for a section of code
+!     SWTSTO           Stop timing for a section of code
 !     TXPBLA           Removes leading and trailing blanks in string
 !
 !  9. Subroutines calling
@@ -1290,7 +1290,7 @@
 
       ALLOCATE(ITEMP(ILEN))
 
-!TIMG      CALL SWTSTA(202)
+      CALL SWTSTA(202)
 !MPI      CALL MPI_ALLREDUCE ( IARR, ITEMP, ILEN, SWINT,
 !MPI     &                     ITYPRD, MPI_COMM_WORLD, IERR )
 !MPI      IF ( IERR.NE.MPI_SUCCESS ) THEN
@@ -1302,7 +1302,7 @@
 !MPI         RETURN
 !MPI      END IF
       IARR = ITEMP
-!TIMG      CALL SWTSTO(202)
+      CALL SWTSTO(202)
 
       DEALLOCATE(ITEMP)
 
@@ -1399,8 +1399,8 @@
 !MPI!                      distribute the result back to all processes
 !     MSGERR           Writes error message
 !     STRACE           Tracing routine for debugging
-!TIMG!     SWTSTA           Start timing for a section of code
-!TIMG!     SWTSTO           Stop timing for a section of code
+!     SWTSTA           Start timing for a section of code
+!     SWTSTO           Stop timing for a section of code
 !     TXPBLA           Removes leading and trailing blanks in string
 !
 !  9. Subroutines calling
@@ -1428,7 +1428,7 @@
 
       ALLOCATE(TEMP(ILEN))
 
-!TIMG      CALL SWTSTA(202)
+      CALL SWTSTA(202)
 !MPI      CALL MPI_ALLREDUCE ( ARR, TEMP, ILEN, SWREAL,
 !MPI     &                     ITYPRD, MPI_COMM_WORLD, IERR )
 !MPI      IF ( IERR.NE.MPI_SUCCESS ) THEN
@@ -1440,7 +1440,7 @@
 !MPI         RETURN
 !MPI      END IF
       ARR = TEMP
-!TIMG      CALL SWTSTO(202)
+      CALL SWTSTO(202)
 
       DEALLOCATE(TEMP)
 
@@ -2417,8 +2417,8 @@
 !     STRACE           Tracing routine for debugging
 !     SWRECVNB         Data is received from a neighbour
 !     SWSENDNB         Data is sent to a neighbour
-!TIMG!     SWTSTA           Start timing for a section of code
-!TIMG!     SWTSTO           Stop timing for a section of code
+!     SWTSTA           Start timing for a section of code
+!     SWTSTO           Stop timing for a section of code
 !
       LOGICAL STPNOW
 !
@@ -2457,7 +2457,7 @@
 !     --- if not parallel, return
       IF (.NOT.PARLL) RETURN
 
-!TIMG      CALL SWTSTA(203)
+      CALL SWTSTA(203)
 
       NNEIGH = IBLKAD(1)
 
@@ -2509,7 +2509,7 @@
 
       END DO
 
-!TIMG      CALL SWTSTO(203)
+      CALL SWTSTO(203)
 
       RETURN
       END

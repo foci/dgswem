@@ -77,13 +77,13 @@ subroutine SwanCompUnstruc ( ac2, ac1, compda, spcsig, spcdir, xytst, cross, it 
     use SIZES, only: SZ, MNPROC
     use MESSENGER
 !Casey 080827: Added this module.
-    use couple2adcirc, only: DG_JDP1,DG_JDP2,DG_JVX2,DG_JVY2,DG_JWLV2,GrabDiscontinuousInformation,MakeBoundariesReflective
+!ADC    use couple2adcirc, only: DG_JDP1,DG_JDP2,DG_JVX2,DG_JVY2,DG_JWLV2,GrabDiscontinuousInformation,MakeBoundariesReflective
 !Casey 100210: Allow SWAN to handle wave refraction as a nodal attribute.
 !Casey 121126: DEBUG.
-!   use NodalAttributes, only: FoundSwanWaveRefrac,LoadSwanWaveRefrac,SwanWaveRefrac
+!ADC!   use NodalAttributes, only: FoundSwanWaveRefrac,LoadSwanWaveRefrac,SwanWaveRefrac
 !Casey 110111: Create new data structure with discontinuous information for SWAN.
-!    use Couple2Swan, only: PASS2SWAN
-!    use M_GENARR, only: DEPTH
+!ADC!    use Couple2Swan, only: PASS2SWAN
+!ADC!    use M_GENARR, only: DEPTH
 !
     implicit none
 !
@@ -241,11 +241,11 @@ subroutine SwanCompUnstruc ( ac2, ac1, compda, spcsig, spcdir, xytst, cross, it 
     type(verttype), dimension(:), pointer :: vert      ! datastructure for vertices with their attributes
 !
 !Casey 110111: Create new data structure with discontinuous information for SWAN.
-!   real, dimension(nverts) :: DG_JDP1
-!   real, dimension(nverts) :: DG_JDP2
-!   real, dimension(nverts) :: DG_JVX2
-!   real, dimension(nverts) :: DG_JVY2
-!   real, dimension(nverts) :: DG_JWLV2
+!ADC!   real, dimension(nverts) :: DG_JDP1
+!ADC!   real, dimension(nverts) :: DG_JDP2
+!ADC!   real, dimension(nverts) :: DG_JVX2
+!ADC!   real, dimension(nverts) :: DG_JVY2
+!ADC!   real, dimension(nverts) :: DG_JWLV2
 !
 !   Structure
 !
@@ -282,7 +282,7 @@ subroutine SwanCompUnstruc ( ac2, ac1, compda, spcsig, spcdir, xytst, cross, it 
     !
     ! allocation of shared arrays
     !
-!TIMG    call SWTSTA(101)
+    call SWTSTA(101)
     allocate(islmin(nverts))
     allocate( nflim(nverts))
     allocate(nrscal(nverts))
@@ -336,9 +336,9 @@ subroutine SwanCompUnstruc ( ac2, ac1, compda, spcsig, spcdir, xytst, cross, it 
     !
     ! calculate ranges of spectral space for arrays related to 4 wave-wave interactions
     !
-!TIMG    call SWTSTA(135)
+    call SWTSTA(135)
     if ( IQUAD > 0 ) call FAC4WW ( xis, snlc1, dal1, dal2, dal3, spcsig, wwint, wwawg, wwswg )
-!TIMG    call SWTSTO(135)
+    call SWTSTO(135)
     !
     if ( IQUAD > 0 ) then
        allocate(  ue(MSC4MI:MSC4MA,MDC4MI:MDC4MA))
@@ -384,7 +384,7 @@ subroutine SwanCompUnstruc ( ac2, ac1, compda, spcsig, spcdir, xytst, cross, it 
     tmcurr = 0.
     !
     swtsda = 0.
-!TIMG    call SWTSTO(101)
+    call SWTSTO(101)
     !
     ! marks vertices active and non-active
     !
@@ -408,7 +408,7 @@ subroutine SwanCompUnstruc ( ac2, ac1, compda, spcsig, spcdir, xytst, cross, it 
        fguess = .false.
     endif
     !
-!TIMG    call SWTSTA(103)
+    call SWTSTA(103)
     iterloop: do iter = 1, ITERMX
        !
        ! some initializations
@@ -581,10 +581,10 @@ subroutine SwanCompUnstruc ( ac2, ac1, compda, spcsig, spcdir, xytst, cross, it 
             !
 !Casey 100210: Allow SWAN to handle wave refraction as a nodal attribute.
 !Casey 121126: DEBUG.
-!          IF(LoadSwanWaveRefrac.AND.FoundSwanWaveRefrac)THEN
-!            IREFR = NINT(SwanWaveRefrac(ivert))
-!          ENDIF
-           !
+!ADC!          IF(LoadSwanWaveRefrac.AND.FoundSwanWaveRefrac)THEN
+!ADC!            IREFR = NINT(SwanWaveRefrac(ivert))
+!ADC!          ENDIF
+!ADC           !
             if ( vert(ivert)%atti(VBC) == 0 .and. vert(ivert)%active ) then   ! this active vertex needs to be updated
                !
                ! determine whether the present vertex is a test point
@@ -645,47 +645,47 @@ subroutine SwanCompUnstruc ( ac2, ac1, compda, spcsig, spcdir, xytst, cross, it 
                   KCGRD = vs    ! to be used in some original SWAN routines
                   !
 !Casey 110422: Create new data structure with discontinuous information for SWAN.
-                 CALL GrabDiscontinuousInformation(icell)
+!ADC                 CALL GrabDiscontinuousInformation(icell)
 !Casey 110111: Create new data structure with discontinuous information for SWAN.
-!                 DG_JWLV2 = compda(:,JWLV2)
-!                 DG_JDP1  = compda(:,JDP1)
-!                 DG_JDP2  = compda(:,JDP2)
-!                 DG_JVX2  = compda(:,JVX2)
-!                 DG_JVY2  = compda(:,JVY2)
-!                 IF(ALLOCATED(PASS2SWAN))THEN
-!                    DO K=1,3
-!                       DO J=1,PASS2SWAN(vs(K))%NO_NBORS
-!                          IF(icell.EQ.PASS2SWAN(vs(K))%NBOR_EL(J))THEN
-!                             DG_JWLV2(vs(K)) = REAL( PASS2SWAN(vs(K))%ETA2(J) )
-!                             DG_JDP1(vs(K))  = DEPTH(vs(K)) + REAL( PASS2SWAN(vs(K))%ETA1(J) )
-!                             DG_JDP2(vs(K))  = DEPTH(vs(K)) + REAL( PASS2SWAN(vs(K))%ETA2(J) )
-!                             DG_JVX2(vs(K))  = REAL( PASS2SWAN(vs(K))%UU2(J) )
-!                             DG_JVY2(vs(K))  = REAL( PASS2SWAN(vs(K))%VV2(J) )
-!                          ENDIF
-!                       ENDDO
-!                    ENDDO
-!                 ENDIF
-!                 !
+!ADC!                 DG_JWLV2 = compda(:,JWLV2)
+!ADC!                 DG_JDP1  = compda(:,JDP1)
+!ADC!                 DG_JDP2  = compda(:,JDP2)
+!ADC!                 DG_JVX2  = compda(:,JVX2)
+!ADC!                 DG_JVY2  = compda(:,JVY2)
+!ADC!                 IF(ALLOCATED(PASS2SWAN))THEN
+!ADC!                    DO K=1,3
+!ADC!                       DO J=1,PASS2SWAN(vs(K))%NO_NBORS
+!ADC!                          IF(icell.EQ.PASS2SWAN(vs(K))%NBOR_EL(J))THEN
+!ADC!                             DG_JWLV2(vs(K)) = REAL( PASS2SWAN(vs(K))%ETA2(J) )
+!ADC!                             DG_JDP1(vs(K))  = DEPTH(vs(K)) + REAL( PASS2SWAN(vs(K))%ETA1(J) )
+!ADC!                             DG_JDP2(vs(K))  = DEPTH(vs(K)) + REAL( PASS2SWAN(vs(K))%ETA2(J) )
+!ADC!                             DG_JVX2(vs(K))  = REAL( PASS2SWAN(vs(K))%UU2(J) )
+!ADC!                             DG_JVY2(vs(K))  = REAL( PASS2SWAN(vs(K))%VV2(J) )
+!ADC!                          ENDIF
+!ADC!                       ENDDO
+!ADC!                    ENDDO
+!ADC!                 ENDIF
+!ADC!                 !
                   swpnr = 0                                              ! this trick assures to calculate Ursell number and
                   if ( all(mask=vert(ivert)%updated(:)==0) ) swpnr = 1   ! quadruplets only once in each vertex during an iteration
                   !
                   ! compute wavenumber and group velocity in points of stencil
                   !
-!TIMG                  call SWTSTA(110)
+                  call SWTSTA(110)
 !Casey 110111: Create new data structure with discontinuous information for SWAN.
 !Casey 110405: Debug: The discontinuous information was fine by itself in 110328h.
-!NADC                  call SwanDispParm ( kwave, cgo, compda(1,JDP2), spcsig )
-                  call SwanDispParm ( kwave, cgo, DG_JDP2, spcsig )
-!TIMG                  call SWTSTO(110)
+                  call SwanDispParm ( kwave, cgo, compda(1,JDP2), spcsig )
+!ADC                  call SwanDispParm ( kwave, cgo, DG_JDP2, spcsig )
+                  call SWTSTO(110)
                   !
                   ! compute wave transport velocities in points of stencil for all directions
                   !
-!TIMG                  call SWTSTA(111)
+                  call SWTSTA(111)
 !Casey 110111: Create new data structure with discontinuous information for SWAN.
 !Casey 110405: Debug: The discontinuous information was fine by itself in 110328i.
-!NADC                  call SwanPropvelX ( cax, cay, compda(1,JVX2), compda(1,JVY2), cgo, spcdir(1,2), spcdir(1,3) )
-                  call SwanPropvelX ( cax, cay, DG_JVX2, DG_JVY2, cgo, spcdir(1,2), spcdir(1,3) )
-!TIMG                  call SWTSTO(111)
+                  call SwanPropvelX ( cax, cay, compda(1,JVX2), compda(1,JVY2), cgo, spcdir(1,2), spcdir(1,3) )
+!ADC                  call SwanPropvelX ( cax, cay, DG_JVX2, DG_JVY2, cgo, spcdir(1,2), spcdir(1,3) )
+                  call SWTSTO(111)
                   !
                   ! compute local contravariant base vectors at present vertex
                   !
@@ -714,33 +714,33 @@ subroutine SwanCompUnstruc ( ac2, ac1, compda, spcsig, spcdir, xytst, cross, it 
                   !
                   ! compute spectral directions for the considered sweep in present vertex
                   !
-!TIMG                  call SWTSTA(112)
+                  call SWTSTA(112)
                   call SwanSweepSel ( idcmin, idcmax, anybin, iscmin, iscmax, &
                                       iddlow, iddtop, idtot , isslow, isstop, &
                                       istot , cax   , cay   , rdx   , rdy   , &
                                       spcsig)
-!TIMG                  call SWTSTO(112)
+                  call SWTSTO(112)
                   !
                   if ( idtot > 0 ) then
                      !
                      ! compute propagation velocities in spectral space for the considered sweep in present vertex
                      !
-!TIMG                     call SWTSTA(113)
+                     call SWTSTA(113)
 !Casey 110111: Create new data structure with discontinuous information for SWAN.
 !Casey 110405: Debug: The discontinuous information was problematic in 110328n.
-!NADC                     call SwanPropvelS ( cad           , cas           , compda(1,JVX2), compda(1,JVY2), &
-!NADC                                         compda(1,JDP1), compda(1,JDP2), cax           , cay           , &
-!NADC                                         kwave         , cgo           , spcsig        , idcmin        , &
-!NADC                                         idcmax        , spcdir(1,2)   , spcdir(1,3)   , spcdir(1,4)   , &
-!NADC                                         spcdir(1,5)   , spcdir(1,6)   , rdx           , rdy           , &
-!NADC                                         jc            )
-                     call SwanPropvelS ( cad           , cas           , DG_JVX2       , DG_JVY2       , &
-                                         DG_JDP1       , DG_JDP2       , cax           , cay           , &
+                     call SwanPropvelS ( cad           , cas           , compda(1,JVX2), compda(1,JVY2), &
+                                         compda(1,JDP1), compda(1,JDP2), cax           , cay           , &
                                          kwave         , cgo           , spcsig        , idcmin        , &
                                          idcmax        , spcdir(1,2)   , spcdir(1,3)   , spcdir(1,4)   , &
                                          spcdir(1,5)   , spcdir(1,6)   , rdx           , rdy           , &
                                          jc            )
-!TIMG                     call SWTSTO(113)
+!ADC                     call SwanPropvelS ( cad           , cas           , DG_JVX2       , DG_JVY2       , &
+!ADC                                         DG_JDP1       , DG_JDP2       , cax           , cay           , &
+!ADC                                         kwave         , cgo           , spcsig        , idcmin        , &
+!ADC                                         idcmax        , spcdir(1,2)   , spcdir(1,3)   , spcdir(1,4)   , &
+!ADC                                         spcdir(1,5)   , spcdir(1,6)   , rdx           , rdy           , &
+!ADC                                         jc            )
+                     call SWTSTO(113)
                      !
                      ! estimate action density in case of first iteration at cold start in stationary mode
                      ! (since it is zero in first stationary run)
@@ -759,18 +759,18 @@ subroutine SwanCompUnstruc ( ac2, ac1, compda, spcsig, spcdir, xytst, cross, it 
                      !
                      ! calculate various integral parameters
                      !
-!TIMG                     call SWTSTA(116)
+                     call SWTSTA(116)
 !Casey 110111: Create new data structure with discontinuous information for SWAN.
 !Casey 110405: Debug: The discontinuous information was problematic in 110328j.
-                     call SINTGRL (spcdir, kwave        , ac2  , compda(1,JDP2), qbloc , compda(1,JURSEL), &
-                                   rdx   , rdy          , dummy, etot          , abrbot, compda(1,JUBOT) , &
-                                   hs    , compda(1,JQB), hm   , kmespc        , smebrk, compda(1,JPBOT) , &
-                                   swpnr )
-!                    call SINTGRL (spcdir, kwave        , ac2  , DG_JDP2       , qbloc , compda(1,JURSEL), &
-!                                  rdx   , rdy          , dummy, etot          , abrbot, compda(1,JUBOT) , &
-!                                  hs    , compda(1,JQB), hm   , kmespc        , smebrk, compda(1,JPBOT) , &
-!                                  swpnr )
-!TIMG                     call SWTSTO(116)
+!ADC                     call SINTGRL (spcdir, kwave        , ac2  , compda(1,JDP2), qbloc , compda(1,JURSEL), &
+!ADC                                   rdx   , rdy          , dummy, etot          , abrbot, compda(1,JUBOT) , &
+!ADC                                   hs    , compda(1,JQB), hm   , kmespc        , smebrk, compda(1,JPBOT) , &
+!ADC                                   swpnr )
+!ADC!                    call SINTGRL (spcdir, kwave        , ac2  , DG_JDP2       , qbloc , compda(1,JURSEL), &
+!ADC!                                  rdx   , rdy          , dummy, etot          , abrbot, compda(1,JUBOT) , &
+!ADC!                                  hs    , compda(1,JQB), hm   , kmespc        , smebrk, compda(1,JPBOT) , &
+!ADC!                                  swpnr )
+                     call SWTSTO(116)
                      !
                      compda(ivert,JHS) = hs
  20                  continue
@@ -780,7 +780,7 @@ subroutine SwanCompUnstruc ( ac2, ac1, compda, spcsig, spcdir, xytst, cross, it 
                      obredf = 1.
                      reflso = 0.
                      !
-!TIMG                     call SWTSTA(136)
+                     call SWTSTA(136)
                      if ( NUMOBS > 0 ) then
                         !
                         ! determine obstacle for the link(s) in the computational stencil
@@ -814,26 +814,26 @@ subroutine SwanCompUnstruc ( ac2, ac1, compda, spcsig, spcdir, xytst, cross, it 
                            !
 !Casey 110111: Create new data structure with discontinuous information for SWAN.
 !Casey 110405: Debug: The discontinuous information was fine by itself in 110328k.
-!NADC                           call SWTRCF ( compda(1,JWLV2), compda(1,JHS), link, obredf, ac2, reflso, dummy , dummy  , &
-!NADC                                         dummy          , cax          , cay , rdx   , rdy, anybin, spcsig, spcdir )
-                           call SWTRCF ( DG_JWLV2       , compda(1,JHS), link, obredf, ac2, reflso, dummy , dummy  , &
+                           call SWTRCF ( compda(1,JWLV2), compda(1,JHS), link, obredf, ac2, reflso, dummy , dummy  , &
                                          dummy          , cax          , cay , rdx   , rdy, anybin, spcsig, spcdir )
+!ADC                           call SWTRCF ( DG_JWLV2       , compda(1,JHS), link, obredf, ac2, reflso, dummy , dummy  , &
+!ADC                                         dummy          , cax          , cay , rdx   , rdy, anybin, spcsig, spcdir )
                            !
                         endif
                         !
                      endif
-!TIMG                     call SWTSTO(136)
+                     call SWTSTO(136)
                      if (lpredt) goto 10
                      !
                      ! compute the transport part of the action balance equation
                      !
-!TIMG                     call SWTSTA(118)
+                     call SWTSTA(118)
                      call SwanTranspAc ( amat  , rhs   , leakcf, ac2   , ac1   , &
                                          cgo   , cax   , cay   , cad   , cas   , &
                                          anybin, rdx   , rdy   , spcsig, spcdir, &
                                          obredf, idcmin, idcmax, iscmin, iscmax, &
                                          iddlow, iddtop, isslow, isstop )
-!TIMG                     call SWTSTO(118)
+                     call SWTSTO(118)
                      !
                      ! compute the source part of the action balance equation
                      !
@@ -848,51 +848,30 @@ subroutine SwanCompUnstruc ( ac2, ac1, compda, spcsig, spcdir, xytst, cross, it 
                         ! wind friction velocity and the minimum and maximum counters for
                         ! active wind input
                         !
-!TIMG                        call SWTSTA(115)
+                        call SWTSTA(115)
 !Casey 110111: Create new data structure with discontinuous information for SWAN.
 !Casey 110405: Debug: The discontinuous information was fine by itself in 110328l.
-!NADC                        if ( IWIND > 0 ) call WINDP1 ( wind10, thetaw, idwmin        , idwmax        , &
-!NADC                                                       fpm   , ufric , compda(1,JWX2), compda(1,JWY2), &
-!NADC                                                       anywnd, spcdir, compda(1,JVX2), compda(1,JVY2), &
-!NADC                                                       spcsig )
                         if ( IWIND > 0 ) call WINDP1 ( wind10, thetaw, idwmin        , idwmax        , &
                                                        fpm   , ufric , compda(1,JWX2), compda(1,JWY2), &
-                                                       anywnd, spcdir, DG_JVX2       , DG_JVY2       , &
+                                                       anywnd, spcdir, compda(1,JVX2), compda(1,JVY2), &
+                                                       spcsig )
+!ADC                        if ( IWIND > 0 ) call WINDP1 ( wind10, thetaw, idwmin        , idwmax        , &
+!ADC                                                       fpm   , ufric , compda(1,JWX2), compda(1,JWY2), &
+!ADC                                                       anywnd, spcdir, DG_JVX2       , DG_JVY2       , &
 !Casey 100608: Use ADCIRC's new sector-based wind drag.
-                                                       spcsig, ivert )
-!TIMG                        call SWTSTO(115)
+!ADC                                                       spcsig, ivert )
+                        call SWTSTO(115)
                         !
                         ! compute the source terms
                         !
-!TIMG                        call SWTSTA(117)
+                        call SWTSTA(117)
 !Casey 110111: Create new data structure with discontinuous information for SWAN.
 !Casey 110405: Debug: The discontinuous information was fine by itself in 110328m.
-!NADC                        call SOURCE ( iter                , IXCGRD(1)           , IYCGRD(1)           , swpnr               , &
-!NADC                                      kwave               , spcsig              , spcdir(1,2)         , spcdir(1,3)         , &
-!NADC                                      ac2                 , compda(1,JDP2)      , amat(1,1,1)         , rhs                 , &
-!NADC                                      abrbot              , kmespc              , dummy               , compda(1,JUBOT)     , &
-!NADC                                      ufric               , compda(1,JVX2)      , compda(1,JVY2)      , idcmin              , &
-!NADC                                      idcmax              , iddlow              , iddtop              , idwmin              , &
-!NADC                                      idwmax              , isstop              ,                                             &
-!NADC                                      swtsda(1,1,1,JPWNDA), swtsda(1,1,1,JPWNDB), swtsda(1,1,1,JPWCAP), swtsda(1,1,1,JPBTFR), &
-!NADC                                      swtsda(1,1,1,JPWBRK), swtsda(1,1,1,JP4S)  , swtsda(1,1,1,JP4D)  ,                       &
-!NADC                                      swtsda(1,1,1,JPTRI) ,                                                                   &
-!NADC                                      hs                  , etot                , qbloc               , thetaw              , &
-!NADC                                      hm                  , fpm                 , wind10              , dummy               , &
-!NADC                                      groww               , alimw               , smebrk              , snlc1               , &
-!NADC                                      dal1                , dal2                , dal3                , ue                  , &
-!NADC                                      sa1                 , sa2                 , da1c                , da1p                , &
-!NADC                                      da1m                , da2c                , da2p                , da2m                , &
-!NADC                                      sfnl                , dsnl                , memnl4              , wwint               , &
-!NADC                                      wwawg               , wwswg               , cgo                 , compda(1,JUSTAR)    , &
-!NADC                                      compda(1,JZEL)      , spcdir              , anywnd              , disc0               , &
-!NADC                                      disc1               , xis                 , compda(1,JFRC2)     , it                  , &
-!NADC                                      compda(1,JURSEL)    , anybin              , reflso              )
                         call SOURCE ( iter                , IXCGRD(1)           , IYCGRD(1)           , swpnr               , &
                                       kwave               , spcsig              , spcdir(1,2)         , spcdir(1,3)         , &
-                                      ac2                 , DG_JDP2             , amat(1,1,1)         , rhs                 , &
+                                      ac2                 , compda(1,JDP2)      , amat(1,1,1)         , rhs                 , &
                                       abrbot              , kmespc              , dummy               , compda(1,JUBOT)     , &
-                                      ufric               , DG_JVX2             , DG_JVY2             , idcmin              , &
+                                      ufric               , compda(1,JVX2)      , compda(1,JVY2)      , idcmin              , &
                                       idcmax              , iddlow              , iddtop              , idwmin              , &
                                       idwmax              , isstop              ,                                             &
                                       swtsda(1,1,1,JPWNDA), swtsda(1,1,1,JPWNDB), swtsda(1,1,1,JPWCAP), swtsda(1,1,1,JPBTFR), &
@@ -909,7 +888,28 @@ subroutine SwanCompUnstruc ( ac2, ac1, compda, spcsig, spcdir, xytst, cross, it 
                                       compda(1,JZEL)      , spcdir              , anywnd              , disc0               , &
                                       disc1               , xis                 , compda(1,JFRC2)     , it                  , &
                                       compda(1,JURSEL)    , anybin              , reflso              )
-!TIMG                        call SWTSTO(117)
+!ADC                        call SOURCE ( iter                , IXCGRD(1)           , IYCGRD(1)           , swpnr               , &
+!ADC                                      kwave               , spcsig              , spcdir(1,2)         , spcdir(1,3)         , &
+!ADC                                      ac2                 , DG_JDP2             , amat(1,1,1)         , rhs                 , &
+!ADC                                      abrbot              , kmespc              , dummy               , compda(1,JUBOT)     , &
+!ADC                                      ufric               , DG_JVX2             , DG_JVY2             , idcmin              , &
+!ADC                                      idcmax              , iddlow              , iddtop              , idwmin              , &
+!ADC                                      idwmax              , isstop              ,                                             &
+!ADC                                      swtsda(1,1,1,JPWNDA), swtsda(1,1,1,JPWNDB), swtsda(1,1,1,JPWCAP), swtsda(1,1,1,JPBTFR), &
+!ADC                                      swtsda(1,1,1,JPWBRK), swtsda(1,1,1,JP4S)  , swtsda(1,1,1,JP4D)  ,                       &
+!ADC                                      swtsda(1,1,1,JPTRI) ,                                                                   &
+!ADC                                      hs                  , etot                , qbloc               , thetaw              , &
+!ADC                                      hm                  , fpm                 , wind10              , dummy               , &
+!ADC                                      groww               , alimw               , smebrk              , snlc1               , &
+!ADC                                      dal1                , dal2                , dal3                , ue                  , &
+!ADC                                      sa1                 , sa2                 , da1c                , da1p                , &
+!ADC                                      da1m                , da2c                , da2p                , da2m                , &
+!ADC                                      sfnl                , dsnl                , memnl4              , wwint               , &
+!ADC                                      wwawg               , wwswg               , cgo                 , compda(1,JUSTAR)    , &
+!ADC                                      compda(1,JZEL)      , spcdir              , anywnd              , disc0               , &
+!ADC                                      disc1               , xis                 , compda(1,JFRC2)     , it                  , &
+!ADC                                      compda(1,JURSEL)    , anybin              , reflso              )
+                        call SWTSTO(117)
                         !
                      endif
                      !
@@ -919,23 +919,23 @@ subroutine SwanCompUnstruc ( ac2, ac1, compda, spcsig, spcdir, xytst, cross, it 
                         !
                         ! preparatory steps before solving system of equations
                         !
-!TIMG                        call SWTSTA(119)
+                        call SWTSTA(119)
                         call SOLPRE(ac2        , ac2old     , rhs        , amat(1,1,4), &
                                     amat(1,1,1), amat(1,1,5), amat(1,1,2), amat(1,1,3), &
                                     idcmin     , idcmax     , anybin     , idtot      , &
                                     istot      , iddlow     , iddtop     , isstop     , &
                                     spcsig     )
-!TIMG                        call SWTSTO(119)
+                        call SWTSTO(119)
                         !
                         if ( .not.DYNDEP .and. ICUR == 0 ) then
                            !
                            ! propagation in theta space only
                            ! solve tridiagonal system of equations using Thomas' algorithm
                            !
-!TIMG                           call SWTSTA(120)
+                           call SWTSTA(120)
                            call SOLMAT ( idcmin     , idcmax     , ac2        , rhs, &
                                          amat(1,1,1), amat(1,1,5), amat(1,1,4)     )
-!TIMG                           call SWTSTO(120)
+                           call SWTSTO(120)
                            !
                         else
                            !
@@ -946,13 +946,13 @@ subroutine SwanCompUnstruc ( ac2, ac1, compda, spcsig, spcdir, xytst, cross, it 
                               ! implicit scheme in sigma space
                               ! solve pentadiagonal system of equations using SIP solver
                               !
-!TIMG                              call SWTSTA(120)
+                              call SWTSTA(120)
                               call SWSIP ( ac2        , amat(1,1,1)    , rhs            , amat(1,1,4), &
                                            amat(1,1,5), amat(1,1,2)    , amat(1,1,3)    , ac2old     , &
                                            PNUMS(12)  , nint(PNUMS(14)), nint(PNUMS(13)), inocnv     , &
                                            iddlow     , iddtop         , isstop         , idcmin     , &
                                            idcmax     )
-!TIMG                              call SWTSTO(120)
+                              call SWTSTO(120)
                               !
                            endif
                            !
@@ -960,22 +960,22 @@ subroutine SwanCompUnstruc ( ac2, ac1, compda, spcsig, spcdir, xytst, cross, it 
                         !
                         ! if negative action density occur rescale with a factor
                         !
-!TIMG                        call SWTSTA(121)
+                        call SWTSTA(121)
                         if ( BRESCL ) call RESCALE ( ac2, isstop, idcmin, idcmax, nrscal )
-!TIMG                        call SWTSTO(121)
+                        call SWTSTO(121)
                         !
                         ! limit the change of the spectrum
                         !
-!TIMG                        call SWTSTA(122)
+                        call SWTSTA(122)
                         if ( PNUMS(20) < 100. ) call PHILIM ( ac2, ac2old, cgo, kwave, spcsig, anybin, islmin, nflim, qbloc )
-!TIMG                        call SWTSTO(122)
+                        call SWTSTO(122)
                         !
                         ! reduce the computed energy density if the value is larger then the limit value
                         ! as computed in SOURCE in case of first or second generation mode
                         !
-!TIMG                        call SWTSTA(123)
+                        call SWTSTA(123)
                         if ( IWIND == 1 .or. IWIND == 2 ) call WINDP3 ( isstop, alimw, ac2, groww, idcmin, idcmax )
-!TIMG                        call SWTSTO(123)
+                        call SWTSTO(123)
                         !
                         ! store some infinity norms meant for convergence check
                         !
@@ -985,12 +985,12 @@ subroutine SwanCompUnstruc ( ac2, ac1, compda, spcsig, spcdir, xytst, cross, it 
                      !
                      ! store dissipation and leak in present vertex
                      !
-!TIMG                     call SWTSTA(124)
+                     call SWTSTA(124)
                      call ADDDIS ( compda(1,JDISS), compda(1,JLEAK), ac2   , anybin , &
                                    disc0          , disc1          , compda(1,JDSXB), &
                                    compda(1,JDSXS), compda(1,JDSXW),                  &
                                    leakcf         , spcsig         )
-!TIMG                     call SWTSTO(124)
+                     call SWTSTO(124)
                      !
                   endif
                   !
@@ -1004,17 +1004,17 @@ subroutine SwanCompUnstruc ( ac2, ac1, compda, spcsig, spcdir, xytst, cross, it 
                if ( nupdv == vert(ivert)%noc ) vert(ivert)%fullupdated = .true.
                !
 !Casey 080827: Add call to make reflective boundaries.
-               if ( .FALSE. ) then
-                  !
-                  if ( vert(ivert)%atti(VMARKER)==1 .and. &
-                       vert(ivert)%atti(VBC)==0 ) then
-                     !
-                     call MakeBoundariesReflective( ivert, ac2 )
-                     !
-                  endif
-                  !
-               endif
-               !
+!ADC               if ( .FALSE. ) then
+!ADC                  !
+!ADC                  if ( vert(ivert)%atti(VMARKER)==1 .and. &
+!ADC                       vert(ivert)%atti(VBC)==0 ) then
+!ADC                     !
+!ADC                     call MakeBoundariesReflective( ivert, ac2 )
+!ADC                     !
+!ADC                  endif
+!ADC                  !
+!ADC               endif
+!ADC               !
             endif
             !
           enddo vertloop
@@ -1024,7 +1024,7 @@ subroutine SwanCompUnstruc ( ac2, ac1, compda, spcsig, spcdir, xytst, cross, it 
        ! exchange action densities with neighbours in parallel run
        !
        if ( ACUPDA .and. MNPROC>1 ) then
-!TIMG!PUN          call SWTSTA(213)
+          call SWTSTA(213)
           do id = 1, MDC
              do is = 1, MSC
                 ac2loc(:) = real(ac2(id,is,:),SZ)
@@ -1032,12 +1032,12 @@ subroutine SwanCompUnstruc ( ac2, ac1, compda, spcsig, spcdir, xytst, cross, it 
                 ac2(id,is,:) = real(ac2loc(:),4)
              enddo
           enddo
-!TIMG!PUN          call SWTSTO(213)
+          call SWTSTO(213)
        endif
        !
        ! store the source terms assembled in test points per iteration in the files IFPAR, IFS1D and IFS2D
        !
-!TIMG       call SWTSTA(105)
+       call SWTSTA(105)
        if ( NPTST > 0 .and. NSTATM == 0 ) then
           if ( IFPAR > 0 ) write (IFPAR,151) iter
           if ( IFS1D > 0 ) write (IFS1D,151) iter
@@ -1047,7 +1047,7 @@ subroutine SwanCompUnstruc ( ac2, ac1, compda, spcsig, spcdir, xytst, cross, it 
                         ac2                 , spcsig              , compda(1,JDP2)      , xytst               , &
                         dummy               )
        endif
-!TIMG       call SWTSTO(105)
+       call SWTSTO(105)
        !
        ! carry out some checks for debug purposes
        !
@@ -1126,7 +1126,7 @@ subroutine SwanCompUnstruc ( ac2, ac1, compda, spcsig, spcdir, xytst, cross, it 
        !
        if ( PNUMS(21) <= 1. ) then
           !
-!TIMG          call SWTSTA(102)
+          call SWTSTA(102)
           if ( PNUMS(21) == 0. ) then
              !
              call SwanConvAccur ( accur, hscurr, tmcurr, compda(1,JDHS), compda(1,JDTM), xytst, spcsig, ac2 )
@@ -1145,7 +1145,7 @@ subroutine SwanCompUnstruc ( ac2, ac1, compda, spcsig, spcdir, xytst, cross, it 
              write (PRINTF,140) accur, PNUMS(4)
              if ( NSTATC == 0 .and. IAMMASTER ) write (SCREEN,140) accur, PNUMS(4)
           endif
-!TIMG          call SWTSTO(102)
+          call SWTSTO(102)
           !
           ! if accuracy has been reached then terminates iteration process
           !
@@ -1153,7 +1153,7 @@ subroutine SwanCompUnstruc ( ac2, ac1, compda, spcsig, spcdir, xytst, cross, it 
           !
        elseif ( PNUMS(21) == 2. ) then
           !
-!TIMG          call SWTSTA(102)
+          call SWTSTA(102)
           write (PRINTF,141)
           if ( NSTATC == 0 .and. IAMMASTER ) write (SCREEN,141)
           if ( iter == 1 ) then
@@ -1172,7 +1172,7 @@ subroutine SwanCompUnstruc ( ac2, ac1, compda, spcsig, spcdir, xytst, cross, it 
              endif
           endif
           acnrmo = acnrms(1)
-!TIMG          call SWTSTO(102)
+          call SWTSTO(102)
           !
           ! if accuracy has been reached then terminates iteration process
           !
@@ -1181,11 +1181,11 @@ subroutine SwanCompUnstruc ( ac2, ac1, compda, spcsig, spcdir, xytst, cross, it 
        endif
        !
     enddo iterloop
-!TIMG    call SWTSTO(103)
+    call SWTSTO(103)
     !
     ! store the source terms assembled in test points per time step in the files IFPAR, IFS1D and IFS2D
     !
-!TIMG    call SWTSTA(105)
+    call SWTSTA(105)
     if ( NPTST > 0 .and. NSTATM == 1 ) then
        if ( IFPAR > 0 ) write (IFPAR,152) CHTIME
        if ( IFS1D > 0 ) write (IFS1D,152) CHTIME
@@ -1195,11 +1195,11 @@ subroutine SwanCompUnstruc ( ac2, ac1, compda, spcsig, spcdir, xytst, cross, it 
                      ac2                 , spcsig              , compda(1,JDP2)      , xytst               , &
                      dummy               )
     endif
-!TIMG    call SWTSTO(105)
+    call SWTSTO(105)
     !
     ! deallocation of private arrays
     !
-!TIMG    call SWTSTA(101)
+    call SWTSTA(101)
     deallocate(  cad)
     deallocate(  cas)
     deallocate(  cax)
@@ -1254,7 +1254,7 @@ subroutine SwanCompUnstruc ( ac2, ac1, compda, spcsig, spcdir, xytst, cross, it 
     deallocate(swtsda)
     !
     deallocate(memnl4)
-!TIMG    call SWTSTO(101)
+    call SWTSTO(101)
     !
  101 format (// ' Settings of 2nd generation mode as first guess are used:')
  102 format (// ' User-defined settings of 3rd generation mode is re-used:')

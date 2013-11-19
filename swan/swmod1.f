@@ -2430,13 +2430,13 @@
 !     ---
 !
 !  6. Parameter variables
-!TIMG!
-!TIMG!     MXTIMR [  10] maximum number of simultaneous timings, dimension of
-!TIMG!                   work-arrays LISTTM, TIMERS
-!TIMG!     NSECTM [ 300] number of sections that may be defined for an application
-!TIMG!
-!TIMG      INTEGER NSECTM, MXTIMR
-!TIMG      PARAMETER (NSECTM=300, MXTIMR=10)
+!
+!     MXTIMR [  10] maximum number of simultaneous timings, dimension of
+!                   work-arrays LISTTM, TIMERS
+!     NSECTM [ 300] number of sections that may be defined for an application
+!
+      INTEGER NSECTM, MXTIMR
+      PARAMETER (NSECTM=300, MXTIMR=10)
 !
 !  7. Local variables
 !
@@ -2474,23 +2474,23 @@
 !
       INTEGER  IFACMX, IFACMY
       REAL     BEGBOU, TIMERB, TINTBO
-!TIMG!
-!TIMG!     *** contains the cpu and wall-clock times ***
-!TIMG!
-!TIMG! DCUMTM    [ 600] cumulative time; columns 1,2: cpu-time, wall-clock time
-!TIMG! LASTTM    [   1] last occupied position in LISTTM, 0 if all positions in
-!TIMG!                  LISTTM are free
-!TIMG! LISTTM    [  10] list of section numbers for all running/active timers
-!TIMG!                  in array TIMERS. A value of -1 signals that the
-!TIMG!                  corresponding timer is not running
-!TIMG! NCUMTM    [ 300] for each section of the application the number of timings
-!TIMG!                  that contributed to time in DCPUTM
-!TIMG! TIMERS    [ 600] start-time of active timers; columns 1,2: cpu-time,
-!TIMG!                  wall-clock time
-!TIMG!
-!TIMG      INTEGER, SAVE          :: NCUMTM(NSECTM), LISTTM(MXTIMR), LASTTM
-!TIMG      DOUBLE PRECISION, SAVE :: DCUMTM(NSECTM,2), TIMERS(MXTIMR,2)
-!TIMG!$OMP THREADPRIVATE(DCUMTM,TIMERS,NCUMTM,LISTTM,LASTTM)
+!
+!     *** contains the cpu and wall-clock times ***
+!
+! DCUMTM    [ 600] cumulative time; columns 1,2: cpu-time, wall-clock time
+! LASTTM    [   1] last occupied position in LISTTM, 0 if all positions in
+!                  LISTTM are free
+! LISTTM    [  10] list of section numbers for all running/active timers
+!                  in array TIMERS. A value of -1 signals that the
+!                  corresponding timer is not running
+! NCUMTM    [ 300] for each section of the application the number of timings
+!                  that contributed to time in DCPUTM
+! TIMERS    [ 600] start-time of active timers; columns 1,2: cpu-time,
+!                  wall-clock time
+!
+      INTEGER, SAVE          :: NCUMTM(NSECTM), LISTTM(MXTIMR), LASTTM
+      DOUBLE PRECISION, SAVE :: DCUMTM(NSECTM,2), TIMERS(MXTIMR,2)
+!$OMP THREADPRIVATE(DCUMTM,TIMERS,NCUMTM,LISTTM,LASTTM)
 !
 !  8. Subroutines and functions used
 !

@@ -5,12 +5,12 @@
 #SBATCH -o test.o%j       # Name of stdout output file (%j expands to jobId)   
 #SBATCH -e test.e%j       # Name of stdout output file (%j expands to jobId)                               
 #SBATCH -p development   # Queue name                                                         
-#SBATCH -n 256             #Total number of mpi tasks requested
+#SBATCH -n 64             #Total number of mpi tasks requested
 #SBATCH -t 4:00:00      # Run time (hh:mm:ss) - 1.5 hours                                                   
 #SBATCH --mail-user=michoski@ices.utexas.edu
 #SBATCH --mail-type=ALL 
 
-export MV2_ON_DEMAND_THRESHOLD=256
+export MV2_ON_DEMAND_THRESHOLD=64
 
 ibrun ./dgswem
 

@@ -4,7 +4,7 @@ SHELL:=/bin/sh
 
 ########################################################################
 #  Get Canonical Machine NAME from config.guess
-#1
+#
 NAME     := $(shell ./config.guess)
 LIST     := $(subst -, ,$(NAME))
 MACHINE  := $(word 1, $(LIST))
@@ -42,7 +42,7 @@ ifeq ($(BUILDTYPE),dgswem_serial)
 endif
 #Casey 121126: Add rules for the serial SWAN+ADCIRC.
 #                                      adcswan
-ifeq ($(BUILDTYPE),swemswan)
+ifeq ($(BUILDTYPE),adcswan)
   CF:= $(PPFC)
   O_DIR:=odir44/
   FFLAGS:= $(FFLAGS3) -DSWAN $(DA) $(IMODS) $(O_DIR)
@@ -60,7 +60,7 @@ ifeq ($(BUILDTYPE),dgswem)
 endif
 #Casey 121126: Add rules for the parallel SWAN+ADCIRC.
 #                                      padcswan
-ifeq ($(BUILDTYPE),dgswemswan)
+ifeq ($(BUILDTYPE),padcswan)
   CF:= $(PFC)
   O_DIR:=odir55/
   FFLAGS:= $(FFLAGS4) -DSWAN $(DP) $(IMODS)$(O_DIR)
@@ -171,12 +171,9 @@ $(O_DIR)%.o  : %.f90
 
 ########################## Executable Targets ##################################
 
-.PHONY: all metis adcprep adcpost dgswem_serial dgswem winds
+.PHONY: all metis adcprep adcpost dgswem_serial dgswem
 
-all :  metis adcprep adcpost dgswem_serial dgswem winds
- 
-winds : 
-	python ./get_winds.py 
+all :  metis adcprep adcpost dgswem_serial dgswem
 
 ifeq ($(MAKELEVEL),0)
    metis:
@@ -195,12 +192,12 @@ ifeq ($(MAKELEVEL),0)
    dgswem:
 	$(MAKE) BUILDTYPE=dgswem $@
 #Casey 121126: Added the following lines for coupling to unstructured SWAN.
-   swemswan:
+   adcswan:
 	@perl ../swan/switch.pl -unix -f95 -adcirc ../swan/*.ftn ../swan/*.ftn90
-	$(MAKE) BUILDTYPE=swemswan $@
-   dgswemswan:
+	$(MAKE) BUILDTYPE=adcswan $@
+   padcswan:
 	@perl ../swan/switch.pl -unix -f95 -pun -adcirc ../swan/*.ftn ../swan/*.ftn90
-	$(MAKE) BUILDTYPE=dgswemswan $@
+	$(MAKE) BUILDTYPE=padcswan $@
 else
    adcprep::  $(O_DIR)
    adcprep2:: $(O_DIR)
@@ -224,12 +221,12 @@ else
 	$(CF) $(FFLAGS) -o $@  $(O_DIR)*.o  $(MSGLIBS)
 
 #Casey 121126: Added the following lines for coupling to unstructured SWAN.
-   swemswan :: $(O_DIR)
-   swemswan :: $(MSG_MOBJ) $(SWAN_MOBJ) $(COUP_MOBJ) $(ADC_OBJ) $(SWAN_OBJ)
+   adcswan :: $(O_DIR)
+   adcswan :: $(MSG_MOBJ) $(SWAN_MOBJ) $(COUP_MOBJ) $(ADC_OBJ) $(SWAN_OBJ)
 	$(CF) $(FFLAGS) -o $@ $(O_DIR)*.o
 
-   dgswemswan :: $(O_DIR)
-   dgswemswan :: $(MSG_MOBJ) $(SWAN_MOBJ) $(COUP_MOBJ) $(MSG_OBJ) $(ADC_OBJ) $(SWAN_OBJ)
+   padcswan :: $(O_DIR)
+   padcswan :: $(MSG_MOBJ) $(SWAN_MOBJ) $(COUP_MOBJ) $(MSG_OBJ) $(ADC_OBJ) $(SWAN_OBJ)
 	$(CF) $(FFLAGS) -o $@ $(O_DIR)*.o $(MSGLIBS)
 endif
 
@@ -239,7 +236,7 @@ clean:
 	 rm -f odir*/*.o  odir*/*.mod 
 clobber:
 	rm -r -f odir*
-	rm -f  graphchk adcprep adcprep2 adcpost dgswem_serial dgswem swemswan dgswemswan \
+	rm -f  graphchk adcprep adcprep2 adcpost dgswem_serial dgswem adcswan padcswan \
                 ../metis/Lib/*.o  ../metis/libmetis.a ../metis/Programs/*.o
 help:
 	@echo "This makefile supports the following:"
@@ -250,8 +247,8 @@ help:
 	@echo "make dgswem_serial   - makes the serial dgswem executable"
 	@echo "make dgswem  - makes the dgswem executable"
 #Casey 121126: Add text for the SWAN+ADCIRC targets.
-	@echo "make swemswan  - makes the serial SWAN+ADCIRC executable"
-	@echo "make dgswemswan - makes the parallel SWAN+ADCIRC executable"
+	@echo "make adcswan  - makes the serial SWAN+ADCIRC executable"
+	@echo "make padcswan - makes the parallel SWAN+ADCIRC executable"
 
 
 ########################## Defining the DAG  ####################################

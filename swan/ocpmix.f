@@ -1388,7 +1388,7 @@
           OPEN (UNIT=IERRF, FILE=ERRFNM, FORM='FORMATTED')                40.13
         ENDIF
 !Casey 080919: Debug.
-        PRINT*, STRING
+!ADC        PRINT*, STRING
         WRITE (IERRF,14) ERRM, STRING
   14    FORMAT (A, ': ',A)
       ENDIF
@@ -1851,7 +1851,7 @@
                RETURN
             ENDIF
 !Casey 090617: See below.
- 9617       CONTINUE
+!ADC 9617       CONTINUE
 !           Assign free unit number
             IF (IFUN.EQ.0) THEN
                IFUN = FUNLO
@@ -1861,10 +1861,10 @@
             IUNIT = IFUN
 !Casey 090617: We have to be careful when we couple to ADCIRC, which uses
 !              specific, hard-wired unit numbers for its external files.
-            IF(IUNIT.EQ.13) GOTO 9617
-            IF(IUNIT.EQ.14) GOTO 9617
-            IF(IUNIT.EQ.15) GOTO 9617
-            IF(IUNIT.EQ.22) GOTO 9617
+!ADC            IF(IUNIT.EQ.13) GOTO 9617
+!ADC            IF(IUNIT.EQ.14) GOTO 9617
+!ADC            IF(IUNIT.EQ.15) GOTO 9617
+!ADC            IF(IUNIT.EQ.22) GOTO 9617
             IF (IUNIT .GT. FUNHI) THEN
                IF (IOSTAT.GT.-2) CALL MSGERR (3, 'All free units used')
                IOSTAT= IENUNF

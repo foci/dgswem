@@ -4,7 +4,7 @@
 F90_SER = ifort
 F90_OMP = ifort
 F90_MPI = mpif90
-FLAGS_OPT = -O2 -ipo -xW -mp1
+FLAGS_OPT = -O2 -ipo  -msse2 -mp1
 FLAGS_MSC = -W0 -assume byterecl -traceback
 FLAGS_F90 =
 FLAGS_SER =
@@ -16,6 +16,7 @@ INCS_MPI =
 LIBS_SER =
 LIBS_OMP =
 LIBS_MPI =
+O_DIR = ../work/odir5/
 OUT = -o 
 EXTO = o
 MAKE = make

@@ -114,8 +114,8 @@ subroutine SwanCheckGrid
     do i = 1, nverts
 !Casey 080905: Maybe SWAN is too smart for its own good?
       if ( vcount(i) > 0 .and. vcount(i) < 4 .and. vmark(i) == 0 ) then
-!NADC         badvertex = .true.
-         vmark(i) = 1
+         badvertex = .true.
+!ADC         vmark(i) = 1
        endif
        if ( vcount(i) > 10 ) badvertex = .true.
     enddo
@@ -154,7 +154,7 @@ subroutine SwanCheckGrid
        !
        if ( cosphi1 <= -0.8 .or. cosphi2 <= -0.8 .or. cosphi3 <= -0.8 ) then
 !Casey 100106: Maybe SWAN is too smart for its own good?
-!NADC          call msgerr (2, 'an angle in a triangle is too large ')
+          call msgerr (2, 'an angle in a triangle is too large ')
        endif
        !
     enddo

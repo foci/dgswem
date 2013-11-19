@@ -119,7 +119,7 @@ subroutine SwanTranspAc ( amat  , rhs   , leakcf, ac2   , ac1   , &
     !
     ! compute transport in x-y space
     !
-!TIMG    call SWTSTA(140)
+    call SWTSTA(140)
     call SwanTranspX ( amat   , rhs, ac2   , ac1   , cax   , cay   , &
                        rdx    , rdy, obredf, idcmin, idcmax, isslow, &
                        isstop )
@@ -127,11 +127,11 @@ subroutine SwanTranspAc ( amat  , rhs   , leakcf, ac2   , ac1   , &
     ! add GSE correction, if appropriate
     !
     if ( WAVAGE > 0. ) call SwanGSECorr ( rhs, ac2, cgo, spcdir, idcmin, idcmax, isslow, isstop )
-!TIMG    call SWTSTO(140)
+    call SWTSTO(140)
     !
     ! compute transport in theta space
     !
-!TIMG    call SWTSTA(142)
+    call SWTSTA(142)
     if ( IREFR /= 0 ) then
        !
        call STRSD ( DDIR       , idcmin     , idcmax     , cad    , &
@@ -139,11 +139,11 @@ subroutine SwanTranspAc ( amat  , rhs   , leakcf, ac2   , ac1   , &
                     ac2        , isstop     , anybin     , leakcf )
        !
     endif
-!TIMG    call SWTSTO(142)
+    call SWTSTO(142)
     !
     ! compute transport in sigma space
     !
-!TIMG    call SWTSTA(141)
+    call SWTSTA(141)
     if ( (DYNDEP .OR. ICUR /= 0) .and. ITFRE /= 0 ) then
        !
        ! only implicit scheme
@@ -162,6 +162,6 @@ subroutine SwanTranspAc ( amat  , rhs   , leakcf, ac2   , ac1   , &
        endif
        !
     endif
-!TIMG    call SWTSTO(141)
+    call SWTSTO(141)
     !
 end subroutine SwanTranspAc

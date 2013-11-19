@@ -311,9 +311,9 @@ subroutine SwanSweepSel ( idcmin, idcmax, anybin, iscmin, iscmax, &
        !
        if ( isslow /= 1 ) then
 !Casey 080912: Marcel says we don't need this error message.
-!NADC          call msgerr ( 4, 'inconsistency found in SwanSweepSel: isslow <> 1 ' )
+          call msgerr ( 4, 'inconsistency found in SwanSweepSel: isslow <> 1 ' )
 !Casey 090706: Also remove this return message.
-!NADC          return
+          return
        endif
        !
        isslow = 1

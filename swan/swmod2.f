@@ -1057,7 +1057,7 @@
 !MPI!/impi      END MODULE MPI
 !
 !Casey 100323: Address the situation where the compiler might need the mpif.h file.
-!/impi
-!/impi      MODULE MPI
-!/impi      INCLUDE 'mpif.h'
-!/impi      END MODULE MPI
+
+      MODULE MPI
+      INCLUDE 'mpif.h'
+      END MODULE MPI

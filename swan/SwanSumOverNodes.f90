@@ -76,12 +76,12 @@ subroutine SwanSumOverNodes ( rval )
     !
     if ( MNPROC==1 ) return
     !
-!TIMG    call SWTSTA(202)
+    call SWTSTA(202)
     sumval = 0.
     count  = 1
     call MPI_ALLREDUCE ( rval, sumval, count, MPI_REAL, MPI_SUM, MPI_COMM_WORLD, IERR )
     !
     rval = sumval
-!TIMG    call SWTSTO(202)
+    call SWTSTO(202)
     !
 end subroutine SwanSumOverNodes
