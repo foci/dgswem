@@ -1,0 +1,1154 @@
+C----------------------------------------------------------------------------
+C
+C                           MODULE DECOMP
+C
+C----------------------------------------------------------------------------
+C
+C                  For use with ADCPREP Version 2.0a (  7/07/05 )
+C
+C                     current for hp_DG_ADCIRC v8.1-mp   7/07/2005
+C----------------------------------------------------------------------------
+C
+      SUBROUTINE DECOMP()
+      USE pre_global 
+      IMPLICIT NONE
+C
+C---------------------------------------------------------------------------C
+C                     (  Serial Version 1.1  5/04/99  )                     C 
+C                                                                           C
+C  Decomposes the ADCIRC grid into NPROC subdomains.                        C
+C  The Decomposition Variables are defined in the include file adcprep.inc  C 
+C  This version is compatible with ADCIRC version 34.03                     C
+C                                                                           C
+C  12/14/98 vjp  Added interface to METIS 4.0                               C
+C   3/10/99 vjp  Rewritten to allow Weir-node pairs to both be ghost nodes  C
+C   4/05/99 vjp  Fixed bugs in metis interface routine                      C
+C  ??/??/05 sb   Accomodate hp_DG_ADCIRC                                    C
+C  02/26/06 sb   Speed up decomp process                                    C
+C                                                                           C
+C---------------------------------------------------------------------------C
+C
+      INTEGER N1, N2, N3, KMIN, VTMAX
+      INTEGER I,J,JD,JG,JP,K,L,ITEMP,ITEMP2,IPR,IPR1,ICNT
+Csb-DG1
+      INTEGER IPR2,IPR3,M1,M2,M3,A,B,IEDG,INEIGHELG,INEIGHEDG
+      INTEGER INEIELG,NELPI
+      INTEGER,ALLOCATABLE :: COMM_PE_FLAG(:)
+C--
+Csb--02/26/06
+      INTEGER NM1,NM2,NM3,IK,JJ
+C--
+      INTEGER ITOT,IEL,IELG,ILNODE,ILNODE2,IPROC,IPROC2
+      INTEGER IG1,IG2,IG3,IL1,IL2,IL3,PE1,PE2,PE3
+      INTEGER I1,DISC,BBN,IBP,NCOUNT
+      INTEGER INDEX,INDEX2
+      INTEGER,ALLOCATABLE :: ITVECT(:)
+      CHARACTER PE*6,GLOBAL*6
+C
+      VTMAX = 24*MNP
+      ALLOCATE ( ITVECT(VTMAX) )
+
+C   STEP 1:
+C-- Use Partition of nodes to compute the number of Resident Nodes
+C   to be assigned to each processor.
+C-- Then construct Local-to-Global and Global-to-Local Node maps
+C   for resident nodes: IMAP_NOD_LG(I,PE),  IMAP_NOD_GL(1:2,I) 
+
+      DO I=1, NPROC             ! Use METIS 4.0  Partition
+         NOD_RES_TOT(I) = 0
+      ENDDO
+      DO J=1, NNODG
+         NCOUNT = NOD_RES_TOT(PROC(J))+1
+         IMAP_NOD_GL(1,J) = PROC(J)
+         IMAP_NOD_GL(2,J) = NCOUNT
+         IMAP_NOD_LG(NCOUNT,PROC(J)) = J
+         NOD_RES_TOT(PROC(J)) = NCOUNT
+      ENDDO
+C     DO I = 1, NNODG
+C        print *, I, IMAP_NOD_GL(1,I)
+C     ENDDO
+
+C STEP 2:
+C  Construct Local-to-Global Element Map: IMAP_EL_LG(:,PE)
+C  Add an element to the map if it has an resident node
+ 
+      DO I = 1,NPROC
+         NELP(I) = 0
+         DO K = 1,NELG
+            N1 = NNEG(1,K)
+            N2 = NNEG(2,K)
+            N3 = NNEG(3,K)
+            PE1 = IMAP_NOD_GL(1,N1) ! Is any vertex a resident node?
+            PE2 = IMAP_NOD_GL(1,N2)
+            PE3 = IMAP_NOD_GL(1,N3)
+            IF ((PE1.EQ.I).OR.(PE2.EQ.I).OR.(PE3.EQ.I)) THEN
+              NELP(I) = NELP(I) + 1
+              IMAP_EL_LG(NELP(I),I) = K
+            ENDIF
+         ENDDO
+         IF (NELP(I).GT.MNEP) STOP 'NELP(I) > MNEP'
+      ENDDO
+
+C STEP 3:
+C--Using Local-to-Global Element map
+C  Construct Local-to-Global Node map:  IMAP_NOD_LG(I,PE)
+C  and reconstruct Global-to-Local map for resident nodes
+C
+      DO I = 1,NPROC
+         ITOT = 0
+         DO J = 1,NELP(I)
+            IEL = IMAP_EL_LG(J,I)
+            DO L=1, 3
+               ITOT = ITOT + 1
+               ITVECT(ITOT) = NNEG(L,IEL)
+            ENDDO
+         ENDDO
+         ITEMP = ITOT     
+         IF (ITOT.GT.VTMAX) stop 'step3 decomp'
+         CALL SORT(ITEMP,ITVECT) ! Sort and remove multiple occurrences
+         ITOT = 1
+         IMAP_NOD_LG(1,I) = ITVECT(1)
+         IF (IMAP_NOD_GL(1,ITVECT(1)).EQ.I) THEN
+           IMAP_NOD_GL(2,ITVECT(1))=1
+         ENDIF
+         DO J = 2, ITEMP
+           IF (ITVECT(J).NE.IMAP_NOD_LG(ITOT,I)) THEN
+             ITOT = ITOT + 1
+             IMAP_NOD_LG(ITOT,I) = ITVECT(J)
+             IF (IMAP_NOD_GL(1,ITVECT(J)).EQ.I) THEN
+               IMAP_NOD_GL(2,ITVECT(J))=ITOT
+             ENDIF
+           ENDIF
+         ENDDO
+         NNODP(I) = ITOT
+         IF (NNODP(I).GT.MNPP) STOP 'NNODP > MNPP'
+      ENDDO
+c     print *, "Number of Nodes Assigned to PEs"
+c     DO I=1, NPROC
+c        print *, I-1, NNODP(I)
+c        DO J=1, NNODP(I)
+c           print *, J,IMAP_NOD_LG(J,I)
+c        ENDDO
+c     ENDDO
+
+C STEP 4:
+C--If there are any global Weir-node pairs, construct
+C  Local-to-Global Weir Node maps: WEIRP_LG(:,PE), WEIRDP_LG(:,PE)
+C  Rule: if a global Weir node is assigned ( either as a resident or ghost node )
+C        then make it and its dual a local Weir-node pair
+
+      IF (NWEIR.GT.0) THEN
+        DO I=1, NPROC
+           ITOT = 0
+           DO J = 1,NNODP(I)
+              CALL SEARCH(WEIR,NWEIR,IMAP_NOD_LG(J,I),INDEX)
+              IF (INDEX.NE.0) THEN
+                ITOT = ITOT+1
+                ITVECT(ITOT) = INDEX
+              ENDIF
+              CALL SEARCH(WEIRD,NWEIR,IMAP_NOD_LG(J,I),INDEX2)
+              IF (INDEX2.NE.0) THEN
+                ITOT = ITOT+1
+                ITVECT(ITOT) = INDEX2
+              ENDIF
+           ENDDO
+           NWEIRP(I) = 0
+           ITEMP = ITOT
+           IF (ITOT.GT.VTMAX) stop 'step4 decomp'
+           IF (ITEMP.GT.1) THEN
+             CALL SORT(ITEMP,ITVECT)
+             ITOT=1
+             INDEX = ITVECT(1)
+             WEIRP_LG(ITOT,I)  = WEIR(INDEX)       
+             WEIRDP_LG(ITOT,I) = WEIRD(INDEX)
+             DO J = 2,ITEMP
+                IF (ITVECT(J).NE.INDEX) THEN
+                  INDEX = ITVECT(J)
+                  ITOT = ITOT+1
+                  WEIRP_LG(ITOT,I)  = WEIR(INDEX)
+                  WEIRDP_LG(ITOT,I) = WEIRD(INDEX)
+                ENDIF
+             ENDDO
+             NWEIRP(I) = ITOT
+           ENDIF
+c       DO J = 1, NWEIRP(I)
+c          print *, J, WEIRP_LG(J,I),WEIRDP_LG(J,I)
+c       ENDDO
+c       print *, "decomp: Number of WEIR node-pairs on PE",I-1,
+c    &           " = ",NWEIRP(I)
+        ENDDO
+      ELSE
+        DO I=1, NPROC
+           NWEIRP(I) = 0
+c          print *, "decomp: Number of WEIR node-pairs on PE",I-1,
+c    &              " = ",NWEIRP(I)
+        ENDDO
+      ENDIF 
+
+C STEP 5:
+C--If there are any global Weir-node pairs,
+C  Re-construct Local-to-Global Element Map: IMAP_EL_LG(:,PE)
+C  Rule:  Add an element if it has an resident node or 
+C         has the dual Weir node of a resident or ghost node
+ 
+      IF (NWEIR.GT.0) THEN
+        DO I = 1,NPROC
+           NELP(I) = 0
+c          print *, "PE = ",I-1
+           DO K = 1,NELG
+              N1 = NNEG(1,K)
+              N2 = NNEG(2,K)
+              N3 = NNEG(3,K)
+              PE1 = IMAP_NOD_GL(1,N1)   ! Is any vertex a resident node?
+              PE2 = IMAP_NOD_GL(1,N2)
+              PE3 = IMAP_NOD_GL(1,N3)   ! belong to a Weir-node pair ?
+              CALL SEARCH3(WEIRP_LG(1,I),NWEIRP(I),N1,N2,N3,INDEX)
+              CALL SEARCH3(WEIRDP_LG(1,I),NWEIRP(I),N1,N2,N3,INDEX2)
+              IF ((PE1.EQ.I).OR.(PE2.EQ.I).OR.(PE3.EQ.I)
+     &          .OR.(INDEX.NE.0).OR.(INDEX2.NE.0)) THEN
+c                print *, K, PE1,PE2,PE3,INDEX,INDEX2
+                NELP(I) = NELP(I) + 1
+                IMAP_EL_LG(NELP(I),I) = K
+              ENDIF
+           ENDDO
+         IF (NELP(I).GT.MNEP) STOP 'NELP(I) > MNEP'
+c       print *, "Number of elements on PE",I-1," = ",NELP(I)
+c       DO J = 1, NELP(I)
+c          print *, J, IMAP_EL_LG(J,I)
+c       ENDDO
+        ENDDO
+      ENDIF
+
+C STEP 5-DG-1:
+C--Alloc memory 1
+C
+      CALL ALLOC_DG1()
+
+C STEP 5-DG-2
+C--Count maximum of the number of the elements associated with a node
+      NNDEL(:) = 0
+      DO IK=1,MNE
+        NNDEL(NNEG(1,IK)) = NNDEL(NNEG(1,IK)) + 1
+        NNDEL(NNEG(2,IK)) = NNDEL(NNEG(2,IK)) + 1
+        NNDEL(NNEG(3,IK)) = NNDEL(NNEG(3,IK)) + 1
+      ENDDO
+      MNNDEL = 0
+      DO IK=1,MNP
+        IF(NNDEL(IK).GT.MNNDEL) MNNDEL = NNDEL(IK)
+      ENDDO
+
+C STEP 5-DG-3:
+C--Alloc memory 1B
+C
+      CALL ALLOC_DG1B()
+
+C STEP 5-DG-4:
+C--Make node-to-elements table
+      NNDEL(:) = 0
+
+      DO IK=1,MNE
+        NM1 = NNEG(1,IK)
+        NM2 = NNEG(2,IK)
+        NM3 = NNEG(3,IK)
+        
+        NNDEL(NM1) = NNDEL(NM1) + 1
+        NDEL(NM1,NNDEL(NM1)) = IK
+
+        NNDEL(NM2) = NNDEL(NM2) + 1
+        NDEL(NM2,NNDEL(NM2)) = IK
+
+        NNDEL(NM3) = NNDEL(NM3) + 1
+        NDEL(NM3,NNDEL(NM3)) = IK
+      ENDDO
+
+C STEP 5-DG-5:
+C--Make a index of the neighboring element of each edge
+C
+      IMAP_NEIGHEDG(:,:,:) = 0
+
+      DO I=1,NELG
+        DO 2001 A=1,3
+          IF(IMAP_NEIGHEDG(1,A,I).NE.0) GOTO 2001
+
+          N1 = NNEG(MOD(A+0,3)+1,I) ! Endnode 1 of edge A
+          N2 = NNEG(MOD(A+1,3)+1,I) ! Endnode 2 of edge A
+
+          DO JJ=1,NNDEL(N1)
+            J = NDEL(N1,JJ)
+            IF(I.NE.J) THEN
+              DO B=1,3
+                M1 = NNEG(MOD(B+0,3)+1,J) ! Endnode 1 of edge B
+                M2 = NNEG(MOD(B+1,3)+1,J) ! Endnode 2 of edge B
+
+                IF(N1.EQ.M2.AND.N2.EQ.M1) THEN
+                  IMAP_NEIGHEDG(1,A,I) = J
+                  IMAP_NEIGHEDG(2,A,I) = B
+
+                  IMAP_NEIGHEDG(1,B,J) = I
+                  IMAP_NEIGHEDG(2,B,J) = A
+
+                  GOTO 2001
+                ENDIF
+              ENDDO
+            ENDIF
+          ENDDO
+ 2001   CONTINUE
+      ENDDO
+
+C STEP 5-DG-6:
+C--If there are any elements shared by three different sub-domains,
+C  Re-construct Local-to-Global Element Map: IMAP_EL_LG(:,PE)
+C  Rule: Add non-local elements adjacent to the elements
+C        shared by three different sub-domains
+C        to the local element list
+C
+      DO I=1,NPROC
+        NELPI = NELP(I)
+        DO J=1,NELPI
+          IELG = IMAP_EL_LG(J,I)
+
+          N1 = NNEG(1,IELG)
+          N2 = NNEG(2,IELG)
+          N3 = NNEG(3,IELG)
+
+          PE1 = IMAP_NOD_GL(1,N1)
+          PE2 = IMAP_NOD_GL(1,N2)
+          PE3 = IMAP_NOD_GL(1,N3)
+
+C          IF(((PE1.NE.PE2).AND.(PE2.NE.PE3).AND.(PE3.NE.PE1)).AND.
+C     &     (PE1.EQ.I.OR.PE2.EQ.I.OR.PE3.EQ.I)) THEN
+          IF((PE1.NE.PE2).AND.(PE2.NE.PE3).AND.(PE3.NE.PE1)) THEN
+            IF(PE1.EQ.I) THEN
+              K = 1
+            ELSE IF(PE2.EQ.I) THEN
+              K = 2
+            ELSE IF(PE3.EQ.I) THEN
+              K = 3
+            ENDIF
+
+            IELG = IMAP_EL_LG(J,I)
+            INEIELG = IMAP_NEIGHEDG(1,K,IELG)
+
+!Cmm   Do NOT add the neighboring element if the current
+! element is on the global boundary.
+            if (ineielg /= 0) then
+
+!Cmm   Also do NOT add the neighboring element if it
+! is already a member of the current subdomain.
+!c                  if (I == 4 .or. i == 8) then
+!c                     write(*,*) "NELP(I) = ", NELP(I)
+!c                     write(*,*) "NELPI = ", NELPI
+!c                  endif
+               do L = 1,NELP(I)
+                  if (IMAP_EL_LG(L,I) == INEIELG) then
+!Cmm   As much as I cringe at using GO TO's,
+! I feel one is necessary here
+!     since we need to break out of a nested loop
+! and give up on element J.
+!if (i == 4 .or. i == 8) then
+!   write(*,*) "Found a match: L = ", L
+!   write(*,*) "INEIELG = ", INEIELG
+!endif
+                     go to 520
+                  end if
+               end do
+
+               IF(NELP(I).GE.MNEP) THEN
+                  STOP 'FATAL ERROR (STEP 5-DG-6 (2))'
+               ELSE
+                  NELP(I) = NELP(I) + 1
+                  IMAP_EL_LG(NELP(I),I) = INEIELG
+               ENDIF
+!c               endif
+            ENDIF
+         ENDIF
+ 520     continue
+      ENDDO
+      ENDDO
+C--
+
+C STEP 6:
+C--Using Local-to-Global Element map
+C  Construct Local-to-Global Node map:  IMAP_NOD_LG(I,PE)
+C  and reconstruct Global-to-Local map for resident nodes
+C
+      DO I = 1,NPROC
+         ITOT = 0
+         DO J = 1,NELP(I)
+            IEL = IMAP_EL_LG(J,I)
+            DO L=1, 3
+               ITOT = ITOT + 1
+               ITVECT(ITOT) = NNEG(L,IEL)
+            ENDDO
+         ENDDO
+         ITEMP = ITOT     
+         IF (ITOT.GT.VTMAX) stop 'step6 decomp'
+         CALL SORT(ITEMP,ITVECT) ! Sort and remove multiple occurrences
+         ITOT = 1
+         IMAP_NOD_LG(1,I) = ITVECT(1)
+         IF (IMAP_NOD_GL(1,ITVECT(1)).EQ.I) THEN
+           IMAP_NOD_GL(2,ITVECT(1))=1
+         ENDIF
+         DO J = 2, ITEMP
+           IF (ITVECT(J).NE.IMAP_NOD_LG(ITOT,I)) THEN
+             ITOT = ITOT + 1
+             IMAP_NOD_LG(ITOT,I) = ITVECT(J)
+             IF (IMAP_NOD_GL(1,ITVECT(J)).EQ.I) THEN
+               IMAP_NOD_GL(2,ITVECT(J))=ITOT
+             ENDIF
+           ENDIF
+         ENDDO
+         NNODP(I) = ITOT
+         IF (NNODP(I).GT.MNPP) STOP 'NNODP > MNPP'
+      ENDDO
+c     print *, "Number of Nodes Assigned to PEs"
+c     DO I=1, NPROC
+c        print *, I-1, NNODP(I)
+c        DO J=1, NNODP(I)
+c           print *, J,IMAP_NOD_LG(J,I)
+c        ENDDO
+c     ENDDO
+
+C STEP 7:
+C--Construct Local Element Connectivity Table for each PE: NNEP(3,I,PE)
+C
+      DO I = 1,NPROC
+         ITEMP = NNODP(I)
+         DO J = 1,NNODP(I)
+            ITVECT(J) = IMAP_NOD_LG(J,I)
+         ENDDO
+         DO J = 1,NELP(I)
+            IELG = IMAP_EL_LG(J,I)
+            DO L = 1,3
+               IG1 = NNEG(L,IELG)
+               CALL LOCATE(ITVECT,ITEMP,IG1,K)
+               IF (K.LE.0) THEN
+                 IF (IMAP_NOD_LG(K+1,I).EQ.IG1) THEN
+                   NNEP(L,J,I) = K+1
+                 ELSE
+                   STOP 'ERROR IN IMAP_NOD_LG'
+                 ENDIF
+               ELSEIF (K.GE.NNODP(I))THEN
+                 IF (IMAP_NOD_LG(K,I).EQ.IG1) THEN
+                   NNEP(L,J,I) = K
+                 ELSE
+                   STOP 'ERROR IN IMAP_NOD_LG'
+                 ENDIF
+               ELSE
+                 IF (IMAP_NOD_LG(K,I).EQ.IG1) THEN
+                   NNEP(L,J,I) = K
+                 ELSEIF (IMAP_NOD_LG(K+1,I).EQ.IG1) THEN
+                   NNEP(L,J,I) = K+1
+                 ELSE 
+                   STOP 'ERROR IN IMAP_NOD_LG'
+                 ENDIF
+               ENDIF
+           ENDDO
+         ENDDO
+      ENDDO
+
+C STEP 8:
+C--Compute the number of communicating PEs and their 
+C  list for each PE:  NUM_COMM_PE(PE) and COMM_PE_NUM(IPE,PE)
+C
+      DO I = 1,NPROC
+         NUM_COMM_PE(I) = 0
+         ITEMP = 0
+         DO J = 1,NNODP(I)
+            INDEX = IMAP_NOD_LG(J,I)
+            IPR = IMAP_NOD_GL(1,INDEX)
+            IF (IPR.NE.I)THEN
+              ITEMP = ITEMP + 1
+              ITVECT(ITEMP) = IPR
+            ENDIF
+         ENDDO
+         IF (ITEMP.EQ.0) THEN
+           NUM_COMM_PE(I) = 0
+         ELSE
+           IF (ITEMP.GT.VTMAX) stop 'step8 decomp'
+           CALL SORT(ITEMP,ITVECT)
+           COMM_PE_NUM(1,I) = ITVECT(1)
+           ITOT = 1
+           DO J = 1,ITEMP
+             IF (ITVECT(J).NE.COMM_PE_NUM(ITOT,I)) THEN
+               ITOT = ITOT + 1
+               COMM_PE_NUM(ITOT,I) = ITVECT(J)
+             ENDIF
+           ENDDO
+           NUM_COMM_PE(I) = ITOT
+           IF (NUM_COMM_PE(I).GT.MNPROC) STOP 'NUM_COMM_PE>MNPROC'
+         ENDIF
+      ENDDO
+
+C STEP 9:
+C--Construct a Global-to-Local node mapping: IMAP_NOD_GL2(*,J)
+C  This is not a function, but is rather a relation
+C  It works for both resident and ghost nodes
+
+      DO I = 1,NNODG
+         ITOTPROC(I) = 0
+      ENDDO
+      DO I = 1,NPROC
+         DO J = 1,NNODP(I)
+            INDEX = IMAP_NOD_LG(J,I)
+            ITOTPROC(INDEX) = ITOTPROC(INDEX) + 1
+            IF (ITOTPROC(INDEX).GT.MNPROC)THEN
+              WRITE(6,*)'Some nodes belong to more processors',
+     $                  ' than MNPROC'
+              STOP 
+            ENDIF
+            ITEMP = (ITOTPROC(INDEX)-1)*2 + 1
+            IMAP_NOD_GL2(ITEMP,INDEX) = I
+            IMAP_NOD_GL2(ITEMP+1,INDEX) = J
+         ENDDO
+      ENDDO
+c     print *, "Global Nodes assigned to more than one PE"
+c     do J=1, NNODG
+c        if (ITOTPROC(J).GT.1) print *, J, ITOTPROC(J)
+c     enddo
+
+Csb-DG2
+C STEP 9-DG-1:
+C--Compute NIEL_SEND(:) and NIEL_RECV(:) to prepare for ALLOC_DG2
+C
+      NIEL_SEND(:) = 0
+      NIEL_RECV(:) = 0
+
+      DO I=1,NPROC
+        DO J=1,NELP(I)
+          IELG = IMAP_EL_LG(J,I)
+
+          N1 = NNEG(1,IELG)
+          N2 = NNEG(2,IELG)
+          N3 = NNEG(3,IELG)
+
+          PE1 = IMAP_NOD_GL(1,N1)
+          PE2 = IMAP_NOD_GL(1,N2)
+          PE3 = IMAP_NOD_GL(1,N3)
+
+          ! Element J in sub-domain I should receive information from 
+          ! a neighboring sub-domain (i.e. element J is a ghost element),
+          ! if two or three nodes of the element belong to a sub-domain 
+          ! other than sub-domain I.
+          ! However, there is an exception.  If the elemental nodes belong
+          ! to three different sub-domains and one of the nodes belong to 
+          ! sub-domain I, this element is not a ghost element because
+          ! it is immersed in sub-domain I since an adjacent element has
+          ! been added at STEP 5-DG-3.
+
+          IF((PE1.EQ.I.AND.PE2.EQ.I).OR.
+     &       (PE2.EQ.I.AND.PE3.EQ.I).OR.
+     &       (PE3.EQ.I.AND.PE1.EQ.I)) THEN
+            ! A resident element; Do nothing
+          ELSE IF((PE1.NE.PE2.AND.PE2.NE.PE3.AND.PE3.NE.PE1).AND.
+     &            (PE1.EQ.I.OR.PE2.EQ.I.OR.PE3.EQ.I)) THEN
+            ! An element shared by three different sub-domains; Do nothing
+          ELSE IF(PE1.NE.PE2.AND.PE2.NE.PE3.AND.PE3.NE.PE1) THEN
+            ! An element added at STEP 5-DG-3
+
+            ! Ghost element J can receive information from any of the 
+            ! neighboring sub-domains if the elemental nodes belong
+            ! to three different sub-domains and none of the sub-domains
+            ! is sub-domain I.
+
+            NIEL_RECV(I) = NIEL_RECV(I) + 1
+            NIEL_SEND(PE1) = NIEL_SEND(PE1) + 1
+              
+          ELSE IF((PE1.NE.I.AND.PE2.NE.I).OR.
+     &            (PE2.NE.I.AND.PE3.NE.I).OR.
+     &            (PE3.NE.I.AND.PE1.NE.I)) THEN
+            ! An element which comes here should have one node which belongs 
+            ! to sub-domain I and two nodes which belong to one sub-domain
+            ! different from sub-domain I
+            
+            ! Ghost element J can receive information from a neighboring
+            ! sub-domain to which two of the elemental nodes belong to the
+            ! sub-domain.
+
+            NIEL_RECV(I) = NIEL_RECV(I) + 1
+
+            IF(PE1.EQ.PE2) THEN
+              NIEL_SEND(PE1) = NIEL_SEND(PE1) + 1
+            ELSE IF(PE2.EQ.PE3) THEN
+              NIEL_SEND(PE2) = NIEL_SEND(PE2) + 1
+            ELSE IF(PE3.EQ.PE1) THEN
+              NIEL_SEND(PE3) = NIEL_SEND(PE3) + 1
+            ELSE
+              STOP 'STEP 9-DG-1 You should not see this. (1)'
+            ENDIF
+          ELSE
+            STOP 'STEP 9-DG-1 You should not see this. (2)'
+          ENDIF
+        ENDDO
+      ENDDO
+
+C STEP 9-DG-2:
+C--Alloc memory 2
+C
+      CALL ALLOC_DG2()
+
+C STEP 9-DG-3:
+C--Decompose sub-domain interface edges
+C
+      ! Zero out again
+      NIEL_RECV(:) = 0
+      NIEL_SEND(:) = 0
+
+      DO I=1,NPROC
+        DO J=1,NELP(I)
+          IELG = IMAP_EL_LG(J,I)
+
+          N1 = NNEG(1,IELG)
+          N2 = NNEG(2,IELG)
+          N3 = NNEG(3,IELG)
+
+          PE1 = IMAP_NOD_GL(1,N1)
+          PE2 = IMAP_NOD_GL(1,N2)
+          PE3 = IMAP_NOD_GL(1,N3)
+
+          ! Element J in sub-domain I should receive information from 
+          ! a neighboring sub-domain (i.e. element J is a ghost element),
+          ! if two or three nodes of the element belong to a sub-domain 
+          ! other than sub-domain I.
+          ! However, there is an exception.  If the elemental nodes belong
+          ! to three different sub-domains and one of the nodes belong to 
+          ! sub-domain I, this element is not a ghost element because
+          ! it is immersed in sub-domain I since an adjacent element has
+          ! been added at STEP 5-DG-3.
+
+          IF((PE1.EQ.I.AND.PE2.EQ.I).OR.
+     &       (PE2.EQ.I.AND.PE3.EQ.I).OR.
+     &       (PE3.EQ.I.AND.PE1.EQ.I)) THEN
+            ! A resident element; Do nothing
+          ELSE IF((PE1.NE.PE2.AND.PE2.NE.PE3.AND.PE3.NE.PE1).AND.
+     &            (PE1.EQ.I.OR.PE2.EQ.I.OR.PE3.EQ.I)) THEN
+            ! An element shared by three different sub-domains; Do nothing
+          ELSE IF(PE1.NE.PE2.AND.PE2.NE.PE3.AND.PE3.NE.PE1) THEN
+            ! An element added at STEP 5-DG-3
+
+            ! Ghost element J can receive information from any of the 
+            ! neighboring sub-domains if the elemental nodes belong
+            ! to three different sub-domains and none of the sub-domains
+            ! is sub-domain I.
+
+            NIEL_RECV(I) = NIEL_RECV(I) + 1
+            IEL_RECV(1,NIEL_RECV(I),I) = PE1
+            IEL_RECV(2,NIEL_RECV(I),I) = J
+              
+            NIEL_SEND(PE1) = NIEL_SEND(PE1) + 1
+            IEL_SEND(1,NIEL_SEND(PE1),PE1) = I
+            IEL_SEND(2,NIEL_SEND(PE1),PE1) = IELG
+
+          ELSE IF((PE1.NE.I.AND.PE2.NE.I).OR.
+     &            (PE2.NE.I.AND.PE3.NE.I).OR.
+     &            (PE3.NE.I.AND.PE1.NE.I)) THEN
+            ! An element which comes here should have one node which belongs 
+            ! to sub-domain I and two nodes which belong to one sub-domain
+            ! different from sub-domain I
+            
+            ! Ghost element J can receive information from a neighboring
+            ! sub-domain to which two of the elemental nodes belong to the
+            ! sub-domain.
+
+            IF(PE1.EQ.PE2) THEN
+              K = PE1
+            ELSE IF(PE2.EQ.PE3) THEN
+              K = PE2
+            ELSE IF(PE3.EQ.PE1) THEN
+              K = PE3
+            ELSE
+              STOP 'STEP 9-DG-1 You should not see this. (1)'
+            ENDIF
+
+            NIEL_RECV(I) = NIEL_RECV(I) + 1
+            IEL_RECV(1,NIEL_RECV(I),I) = K
+            IEL_RECV(2,NIEL_RECV(I),I) = J
+
+            NIEL_SEND(K) = NIEL_SEND(K) + 1
+            IEL_SEND(1,NIEL_SEND(K),K) = I
+            IEL_SEND(2,NIEL_SEND(K),K) = IELG
+
+          ELSE
+            STOP 'STEP 9-DG-1 You should not see this. (2)'
+          ENDIF
+        ENDDO
+      ENDDO
+
+C STEP 9-DG-4:
+C--Replace the temporarily assigned global element IDs with local ones
+C
+      DO I=1,NPROC
+        DO J=1,NIEL_SEND(I)
+          IELG = IEL_SEND(2,J,I)
+
+          DO 5000 K=1,NELP(I)
+            IF(IMAP_EL_LG(K,I).EQ.IELG) THEN
+              IEL_SEND(2,J,I) = K
+              GOTO 5000
+            ENDIF
+ 5000     CONTINUE
+        ENDDO
+      ENDDO
+      
+C STEP DG-7:
+C--Compute NUM_COMM_PE_SEND and NUM_COMM_PE_RECV
+C
+      ALLOCATE( COMM_PE_FLAG(MNPROC) )
+
+      NUM_COMM_PE_RECV(:) = 0
+      NUM_COMM_PE_SEND(:) = 0
+
+      DO I=1,MNPROC
+        ! RECV
+        COMM_PE_FLAG(:) = 0
+
+        DO J=1,NIEL_RECV(I)
+          COMM_PE_FLAG(IEL_RECV(1,J,I)) = 1
+        ENDDO
+
+        DO J=1,MNPROC
+          IF(COMM_PE_FLAG(J).EQ.1) THEN
+            NUM_COMM_PE_RECV(I) = NUM_COMM_PE_RECV(I) + 1
+          ENDIF
+        ENDDO
+
+        ! SEND
+        COMM_PE_FLAG(:) = 0
+
+        DO J=1,NIEL_SEND(I)
+          COMM_PE_FLAG(IEL_SEND(1,J,I)) = 1
+        ENDDO
+
+        DO J=1,MNPROC
+          IF(COMM_PE_FLAG(J).EQ.1) THEN
+            NUM_COMM_PE_SEND(I) = NUM_COMM_PE_SEND(I) + 1
+          ENDIF
+        ENDDO
+
+      ENDDO
+
+      DEALLOCATE( COMM_PE_FLAG )
+C--
+
+C STEP 10:
+C--Print Summary of Decomposition
+C
+      print *, "Decomposition Data"
+      print *, "DOMAIN  RES_NODES  GHOST_NODES  TOT_NODES  ELEMENTS"
+      print *, "------  ---------  -----------  ---------  --------"
+      GLOBAL = "GLOBAL"
+      WRITE(*,90) GLOBAL,NNODG,NELG      
+      DO I=1, NPROC
+         PE(1:6) = 'PE0000'
+         CALL IWRITE(PE,3,6,I-1)
+         WRITE(6,92) PE, NOD_RES_TOT(I),NNODP(I)-NOD_RES_TOT(I),
+     &                   NNODP(I),NELP(I)
+      ENDDO
+ 90   FORMAT(1X,A6,25X,I9,2X,I9)
+ 92   FORMAT(1X,A6,1X,I9,2X,I9,4X,I9,2X,I9)
+C
+      RETURN
+      END
+
+
+      SUBROUTINE DOMSIZE()
+      USE pre_global 
+C
+C---------------------------------------------------------------------------C
+C                   (  Serial Version 1.0  12/20/99 vjp )                   C 
+C                                                                           C
+C  Takes dry run through the domain decomp to determine the max number of   C
+C  nodes and elements assigned to any subdomain to determine MNPP and MNEP. C 
+C                                                                           C
+C---------------------------------------------------------------------------C
+C
+      INTEGER N1,N2,N3,VTMAX
+      INTEGER I,J,K,L,ITEMP
+      INTEGER ITOT,IEL,IELG,ILNODE,ILNODE2,IPROC
+      INTEGER IG1,IG2,IG3,IL1,IL2,IL3,PE1,PE2,PE3
+      INTEGER INDEX,INDEX2
+      INTEGER RESNODE,NODES,NELEM,ONELEM,NLWEIR
+Csb-
+      INTEGER NEL_ADDED
+C--
+C
+      INTEGER,ALLOCATABLE :: ITVECT(:)
+      INTEGER,ALLOCATABLE :: NODE_LG(:)
+      INTEGER,ALLOCATABLE :: NODE_GL1(:)
+      INTEGER,ALLOCATABLE :: NODE_GL2(:)
+      INTEGER,ALLOCATABLE :: ELEM_LG(:)
+      INTEGER,ALLOCATABLE :: LWEIR_LG(:),LWEIRD_LG(:)
+C
+      VTMAX = 24*MNP
+      ALLOCATE ( ITVECT(VTMAX) )
+      ALLOCATE ( NODE_LG(MNP) )
+      ALLOCATE ( NODE_GL1(MNP) )
+      ALLOCATE ( NODE_GL2(MNP) )
+      ALLOCATE ( LWEIR_LG(MNP),LWEIRD_LG(MNP) )
+      ALLOCATE ( ELEM_LG(MNE) )
+C
+      MNPP = 0
+      MNEP = 0
+C
+      DO 1000 IPROC=1, NPROC
+C
+C   STEP 1:
+C-- Use Partition of nodes to compute the number of Resident Nodes
+C   to be assigned to each processor.
+C-- Then construct Local-to-Global and Global-to-Local Node maps
+C   for resident nodes
+C
+C
+      DO J=1, MNP   
+         NODE_GL1(J) = 0
+         NODE_GL2(J) = 0
+         LWEIR_LG(J) = 0
+         LWEIRD_LG(J) = 0
+      ENDDO
+C
+      DO J=1, MNE   
+         ELEM_LG(J) = 0
+      ENDDO
+C
+      RESNODE = 0
+      NODES   = 0
+      DO J=1, NNODG
+Csb-
+         NODE_GL1(J) = PROC(J)
+         IF (IPROC.EQ.PROC(J)) THEN
+           RESNODE = RESNODE+1
+Csb-
+C           NODE_GL1(J) = PROC(J)
+           NODE_GL2(J) = RESNODE
+           NODE_LG(RESNODE) = J
+         ENDIF
+      ENDDO
+C     DO I = 1, NNODG
+C        print *, I, NODE_GL1(I)
+C     ENDDO
+
+C STEP 2:
+C  Construct Local-to-Global Element Map
+C  Add an element to the map if it has an resident node
+ 
+      NELEM   = 0
+      DO K = 1,NELG
+         N1 = NNEG(1,K)
+         N2 = NNEG(2,K)
+         N3 = NNEG(3,K)
+         PE1 = NODE_GL1(N1) ! Is any vertex a resident node?
+         PE2 = NODE_GL1(N2)
+         PE3 = NODE_GL1(N3)
+         IF ((PE1.EQ.IPROC).OR.(PE2.EQ.IPROC).OR.(PE3.EQ.IPROC)) THEN
+           NELEM = NELEM+1
+           ELEM_LG(NELEM) = K
+         ENDIF
+      ENDDO
+
+C STEP 3:
+C--Using Local-to-Global Element map
+C  reconstruct Local-to-Global Node map
+C  and Global-to-Local map for resident nodes
+C
+      ITOT = 0
+      DO J = 1,NELEM  
+         IEL = ELEM_LG(J)
+         DO L=1, 3
+            ITOT = ITOT + 1
+            ITVECT(ITOT) = NNEG(L,IEL)
+         ENDDO
+      ENDDO
+      ITEMP = ITOT     
+      IF (ITOT.GT.VTMAX) stop 'step3 decomp'
+      CALL SORT(ITEMP,ITVECT) ! Sort and remove multiple occurrences
+      ITOT = 1
+      NODE_LG(1) = ITVECT(1)
+      IF (NODE_GL1(ITVECT(1)).EQ.IPROC) THEN
+        NODE_GL2(ITVECT(1))=1
+      ENDIF
+      DO J = 2, ITEMP
+         IF (ITVECT(J).NE.NODE_LG(ITOT)) THEN
+           ITOT = ITOT + 1
+           NODE_LG(ITOT) = ITVECT(J)
+           IF (NODE_GL1(ITVECT(J)).EQ.IPROC) THEN
+             NODE_GL2(ITVECT(J))=ITOT
+           ENDIF
+         ENDIF
+      ENDDO
+      NODES = ITOT
+
+
+C STEP 4:
+C--If there are any global Weir-node pairs, construct
+C  Local-to-Global Weir Node maps
+C  Rule: if a global Weir node is assigned ( as resident or ghost node )
+C        then make it and its dual a local Weir-node pair
+      IF (NWEIR.GT.0) THEN
+        ITOT = 0
+        DO J = 1,NODES    
+           CALL SEARCH(WEIR,NWEIR,NODE_LG(J),INDEX)
+           IF (INDEX.NE.0) THEN
+             ITOT = ITOT+1
+             ITVECT(ITOT) = INDEX
+           ENDIF
+           CALL SEARCH(WEIRD,NWEIR,NODE_LG(J),INDEX2)
+           IF (INDEX2.NE.0) THEN
+             ITOT = ITOT+1
+             ITVECT(ITOT) = INDEX2
+           ENDIF
+        ENDDO
+        NLWEIR  = 0
+        ITEMP = ITOT
+        IF (ITOT.GT.VTMAX) stop 'step4 decomp'
+        IF (ITEMP.GT.1) THEN
+          CALL SORT(ITEMP,ITVECT)
+          ITOT=1
+          INDEX = ITVECT(1)
+          LWEIR_LG(ITOT)  = WEIR(INDEX)       
+          LWEIRD_LG(ITOT) = WEIRD(INDEX)
+          DO J = 2,ITEMP
+             IF (ITVECT(J).NE.INDEX) THEN
+               INDEX = ITVECT(J)
+               ITOT = ITOT+1
+               LWEIR_LG(ITOT)  = WEIR(INDEX)
+               LWEIRD_LG(ITOT) = WEIRD(INDEX)
+             ENDIF
+          ENDDO
+          NLWEIR = ITOT
+        ENDIF
+      ELSE
+          NLWEIR = 0
+      ENDIF 
+c     print *, "domsize: Number of WEIR node-pairs on PE",IPROC-1,
+c    &         " = ",NLWEIR
+      IF (NLWEIR.GT.NWEIR) THEN
+        print *, "error in domsize: "
+        print *, "local number of weir-pairs exceeds total"
+        stop
+      ENDIF
+
+C STEP 5:
+C--If there are any global Weir-node pairs,
+C  Re-construct Local-to-Global Element Map: IMAP_EL_LG(:,PE)
+C  Rule:  Add an element if it has an resident node or 
+C         has the dual Weir node of a resident or ghost node
+
+      ONELEM = NELEM     ! Save NELEM for PEs with no WEIR-pairs 
+      NELEM  = 0
+      IF (NLWEIR.GT.0) THEN
+        DO K = 1,NELG
+           N1 = NNEG(1,K)
+           N2 = NNEG(2,K)
+           N3 = NNEG(3,K)
+           PE1 = NODE_GL1(N1)   ! Is any vertex a resident node?
+           PE2 = NODE_GL1(N2)
+           PE3 = NODE_GL1(N3)   ! belong to a Weir-node pair ?
+           CALL SEARCH3(LWEIR_LG(1),NLWEIR,N1,N2,N3,INDEX)
+           CALL SEARCH3(LWEIRD_LG(1),NLWEIR,N1,N2,N3,INDEX2)
+           IF ((PE1.EQ.IPROC).OR.(PE2.EQ.IPROC).OR.(PE3.EQ.IPROC)
+     &          .OR.(INDEX.NE.0).OR.(INDEX2.NE.0)) THEN
+             NELEM = NELEM + 1
+             ELEM_LG(NELEM) = K
+           ENDIF
+        ENDDO
+C
+      ENDIF
+      IF (NELEM.EQ.0) NELEM = ONELEM   ! if necessary restore old nelem
+ 
+Csb-DG2
+C STEP 5-DG-3:
+C--If there are any elements shared by three different sub-domains,
+C  Re-construct Local-to-Global Element Map: IMAP_EL_LG(:,PE)
+C  Rule: Add non-local elements adjacent to the elements
+C        shared by three different sub-domains
+C        to the local element list
+C
+      ONELEM = NELEM
+      NEL_ADDED = 0
+      DO J = 1,ONELEM
+        K = ELEM_LG(J)
+
+        N1 = NNEG(1,K)
+        N2 = NNEG(2,K)
+        N3 = NNEG(3,K)
+
+        PE1 = NODE_GL1(N1)
+        PE2 = NODE_GL1(N2)
+        PE3 = NODE_GL1(N3)
+
+        IF(K.EQ.10352.AND.IPROC.EQ.16) THEN
+           print *, 'B=',IPROC,NELEM,K,PE1,PE2,PE3
+        ENDIF
+        IF(((PE1.NE.PE2).AND.(PE2.NE.PE3).AND.(PE3.NE.PE1)).AND.
+     &     (PE1.EQ.IPROC.OR.PE2.EQ.IPROC.OR.PE3.EQ.IPROC)) THEN
+C        IF((PE1.NE.PE2).AND.(PE2.NE.PE3).AND.(PE3.NE.PE1)) THEN
+          IF(NELEM.GE.MNE) THEN
+            STOP 'FATAL ERROR (STEP 5-DG-3 DRY)'
+          ELSE
+            NELEM = NELEM + 1
+            ELEM_LG(NELEM) = K
+            NEL_ADDED = NEL_ADDED + 1
+          ENDIF
+        ENDIF
+      ENDDO
+C--
+
+C STEP 6:
+C--Using Local-to-Global Element map, reconstruct Local-to-Global Node map
+C
+      ITOT = 0
+      DO J = 1,NELEM   
+         IEL = ELEM_LG(J)
+         DO L=1, 3
+            ITOT = ITOT + 1
+            ITVECT(ITOT) = NNEG(L,IEL)
+         ENDDO
+      ENDDO
+      ITEMP = ITOT     
+      IF (ITOT.GT.VTMAX) stop 'step6 decomp'
+      CALL SORT(ITEMP,ITVECT) ! Sort and remove multiple occurrences
+      ITOT = 1
+      NODE_LG(1) = ITVECT(1)
+      DO J = 2, ITEMP
+         IF (ITVECT(J).NE.NODE_LG(ITOT)) THEN
+           ITOT = ITOT + 1
+           NODE_LG(ITOT) = ITVECT(J)
+         ENDIF
+      ENDDO
+
+Csb
+C STEP 6-DG
+C--Increase ITOT to take into acount NEL_ADDED
+C
+      ITOT = ITOT + NEL_ADDED*3
+C--
+
+
+C
+      NODES = ITOT
+      IF (NODES.GT.MNPP) MNPP = NODES
+c     print *, "Number of nodes on PE",IPROC-1," = ",NODES  
+      IF (NELEM.GT.MNEP) MNEP = NELEM
+c     print *, "Number of elements on PE",IPROC-1," = ",NELEM  
+
+1000  CONTINUE
+C
+      DEALLOCATE ( ITVECT,NODE_LG,NODE_GL1,NODE_GL2,ELEM_LG, 
+     &             LWEIR_LG,LWEIRD_LG )
+C
+      print *, " Setting MNPP = ",MNPP
+      print *, " Setting MNEP = ",MNEP
+C
+      RETURN
+      END
+
+
+
+
+
+
+      SUBROUTINE SORT(N,RA)
+      IMPLICIT NONE
+      INTEGER N, L, IR, RRA, I, J
+      INTEGER RA(N)
+C 
+C---------------------------------------------------------------------------        
+C  Sorts array RA of length N into ascending order using Heapsort algorithm.
+C  N is input; RA is replaced on its output by its sorted rearrangement.
+C  Ref: Numerical Recipes
+C--------------------------------------------------------------------------- 
+C
+      L = N/2 + 1
+      IR = N
+10    CONTINUE
+      IF (L.GT.1)THEN
+        L=L-1
+        RRA = RA(L)
+      ELSE
+        RRA=RA(IR)
+        RA(IR)=RA(1)
+        IR=IR-1
+        IF (IR.EQ.1) THEN
+          RA(1)=RRA
+          RETURN
+        ENDIF
+      ENDIF
+      I=L
+      J=L+L
+20    IF (J.LE.IR) THEN
+        IF (J.LT.IR) THEN
+          IF(RA(J).LT.RA(J+1)) J=J+1
+        ENDIF
+        IF (RRA.LT.RA(J)) THEN
+          RA(I)=RA(J)
+          I=J
+          J=J+J
+        ELSE
+          J=IR+1
+        ENDIF
+        GO TO 20
+      ENDIF
+      RA(I)=RRA
+      GO TO 10
+      END
+
+      SUBROUTINE LOCATE(XX,N,X,J)
+      IMPLICIT NONE
+      INTEGER JM,JL,JU,J,N,X,XX(N)
+C
+C--Given an array XX of length N, and given a value X, returns a value J
+C--such that X is between XX(J) and XX(J+1). XX must be monotonic, either
+C--increasing or decreasing. J=0 or J=N is returned to indicate that X is out 
+C--of range.
+C--
+C--NUMERICAL RECIPES - The Art of Scientific Computing [FORTRAN Version]
+
+C--Initialize lower and upper limits
+         JL = 0
+         JU = N+1
+C
+C--If we are not done yet, compute a mid-point, and replace either the lower 
+C--limit or the upper limit, as appropriate.
+C
+10       IF(JU-JL.GT.1)THEN
+            JM = (JU+JL)/2
+            IF((XX(N).GT.XX(1)).EQV.(X.GT.XX(JM)))THEN
+              JL = JM
+            ELSE
+              JU = JM
+            ENDIF
+C--Repeat until the test condition 10 is satisfied.
+         GO TO 10
+         ENDIF
+C--Then set the output and return.
+         J = JL
+         RETURN
+         END
+
+      SUBROUTINE SEARCH3(MAP,LEN,N1,N2,N3,INDEX)
+      INTEGER MAP(*),LEN,N1,N2,N3,INDEX,IP
+cvjp  rewritten 5/3/99
+      INDEX = 0
+      DO I=1,LEN
+         IP = MAP(I)
+         IF (IP.EQ.N1.OR.IP.EQ.N2.OR.IP.EQ.N3) THEN
+           INDEX = I
+           GOTO 99
+         ENDIF
+      ENDDO
+ 99   RETURN
+      END
+
+      SUBROUTINE SEARCH(MAP,N,TARGET,INDEX)
+      INTEGER MAP(*),N,TARGET,INDEX,I
+C
+      INDEX = 0
+      IF (N.EQ.0) GOTO 99
+      DO I=1,N
+         IF (MAP(I).EQ.TARGET) THEN
+            INDEX = I
+            GOTO 99
+         ENDIF
+      ENDDO
+99    RETURN
+      END

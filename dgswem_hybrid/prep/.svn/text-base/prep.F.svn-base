@@ -1,0 +1,2790 @@
+C----------------------------------------------------------------------------
+C
+C                           MODULE PREP
+C
+C----------------------------------------------------------------------------
+C
+C                  For use with ADCPREP Version 1.8 (  5/18/04 )
+C
+C                     current for ADCIRC v44.17   5/03/2004
+C
+C    Modifications by S.Bunya for parallel DG runs  AUG 2005
+C    Modifications by S.Bunya for fort.hb           SEP 2005
+C----------------------------------------------------------------------------
+
+C
+C Version 1.1 5/04/99 vjp
+cjjw fixes 053100
+C Revisions by rl 10/12/01, MEB 3/03, rl 3/03, rl 5/21/03, rl 5/18/04, vp 11/27/03 (by rl)
+C
+      SUBROUTINE PREP12()
+      USE PRE_GLOBAL 
+C
+C---------------------------------------------------------------------------C
+C  This routine writes a Local StartDry file "fort.12" file for each        C
+C  subdomain using the domain decomposition of the ADCIRC grid created by   C
+C  the routine  DECOMP.                                                     C
+C                                                                           C
+C  The Decomposition Variables are defined in the include file adcprep.inc  C 
+C                                                                           C
+C---------------------------------------------------------------------------C
+C
+cjjw - added 1 line
+cjjw      IMPLICIT NONE
+      INTEGER I,JKI,IPROC,NE2,NP2
+      CHARACTER LOCFN*14,FNAME*60,AGRID2*24
+      REAL(8)  DUM1,DUM2,SDCODE
+      INTEGER,ALLOCATABLE :: LOC(:)
+      REAL(8),ALLOCATABLE :: STARTDRY(:)
+      LOGICAL FOUND
+C
+C--Open global StartDry file.
+C
+  31  WRITE(*,*) 'Enter the name of the ADCIRC UNIT 12 file:'
+      READ(*,60) FNAME
+      INQUIRE(FILE=FNAME,EXIST=FOUND)
+      IF(FOUND) GOTO 32
+      WRITE(*,1010) FNAME
+      GOTO 31
+  32  WRITE(*,1011) FNAME
+      OPEN(12,FILE=FNAME)
+C
+C--Allocate local arrays
+C
+      ALLOCATE ( LOC(MNPROC) )
+      ALLOCATE ( STARTDRY(MNP) )
+C
+C--Assign Logical Unit Numbers to the Local files.
+C
+      DO IPROC=1, NPROC
+         LOC(IPROC) = 105+ (IPROC-1)
+      ENDDO
+C
+C--Open each of the Local StartDry files.
+C
+      DO IPROC = 1,NPROC
+         LOCFN(1:14) = 'PE0000/fort.12'
+         CALL IWRITE(LOCFN,3,6,IPROC-1)
+         OPEN (LOC(IPROC),FILE=LOCFN)
+      ENDDO
+C
+C--------------------------------------------------------------------------
+C--Write a Local StartDry File ( fort.12 ) for each PE
+C--------------------------------------------------------------------------
+C
+      READ(12,'(A24)') AGRID2
+      READ(12,*) NE2,NP2
+      IF ((NE2.NE.NELG).OR.(NP2.NE.NNODG)) THEN
+        print *, "Fatal Error:  either NE2 or NP2 do not match NE or NP"
+        stop 
+      ENDIF
+
+      DO IPROC = 1,NPROC
+         WRITE(LOC(IPROC),'(A24)') AGRID2
+         WRITE(LOC(IPROC),*) NELP(IPROC),NNODP(IPROC)
+      ENDDO
+C
+      DO I=1, NNODG
+         READ(12,*) JKI, DUM1, DUM2, STARTDRY(I) 
+         IF (JKI.NE.I) THEN
+           print *, "Warning -- NonFatal Error:"
+           print *, "Node numberbering in unit 12 is not sequential"
+         ENDIF
+      ENDDO
+C
+      DO IPROC = 1,NPROC
+         DO I=1, NNODP(IPROC)
+            DUM1 = X(IMAP_NOD_LG(I,IPROC))
+            DUM2 = Y(IMAP_NOD_LG(I,IPROC))
+            SDCODE = STARTDRY(IMAP_NOD_LG(I,IPROC))
+            WRITE(LOC(IPROC),*) I,DUM1,DUM2,SDCODE
+         ENDDO
+      ENDDO      
+C
+C--Close the global StartDry file and all local StartDry files
+C
+      CLOSE(12)
+C
+      DO IPROC = 1,NPROC
+         CLOSE(LOC(IPROC))
+      ENDDO      
+C
+  40  FORMAT(A40)
+  60  FORMAT(A60)
+1010  FORMAT(' File ',A60,/,' WAS NOT FOUND!  Try again',/)
+1011  FORMAT(' File ',A60,/,' WAS FOUND!  Opening & Processing file',/)
+C
+      RETURN
+      END
+      
+C---------------------------------------------------------------------------
+C                S U B R O U T I N E   P R E P 1 3
+C---------------------------------------------------------------------------
+C
+C     jgf46.00 This subroutine will break up the full domain nodal
+C     attributes file into subdomains.
+C
+C---------------------------------------------------------------------------
+      SUBROUTINE PREP13()
+C---------------------------------------------------------------------------
+      USE PRE_GLOBAL
+      use memory_usage
+      IMPLICIT NONE
+      integer :: nbytes = 0
+      INTEGER i              ! node loop counter
+      INTEGER k              ! attribute loop counter
+      INTEGER l              ! line loop counter
+      INTEGER m              ! attribute default value counter
+      INTEGER iproc          ! subdomain loop counter
+      INTEGER sdu(nproc)     ! subdomain unit numbers for unit 11 files
+      INTEGER NumOfNodes     ! must match the no. of nodes in grid (unit 14)
+      INTEGER NAttr          ! number of nodal attributes in the file
+      INTEGER NumNotDefault  ! number of nodes specified in the file
+      CHARACTER(len=80) header       ! header comments in unit 13 files
+      CHARACTER(len=80) AttrName     ! label for attribute
+      CHARACTER(len=80) Units        ! label describing physical units
+      REAL(SZ) :: Default(12)        ! default value of attribute
+      INTEGER NoOfVals               ! at each node for an attribute
+      CHARACTER(len=80) Skipped      ! data we want to skip over
+      INTEGER Mode           !=0 to count, =1 to write
+      LOGICAL success        ! .true. if all files opened successfully
+      INTEGER, ALLOCATABLE :: SDNumND(:,:)  ! subdomain # of nodes not default
+
+C     Open subdomain fort.13 files.
+      CALL OpenPrepFiles(13, 'nodal attributes              ',
+     &     nproc, sdu, success)
+C
+      IF (.not.success) THEN
+         WRITE(*,*) 'WARNING: Unit 13 files not preprocessed.'
+         RETURN ! note early return
+      ENDIF
+C
+C     Read header information from full domain unit 13 file
+      READ(13,'(A80)') header
+      READ(13,*) NumOfNodes     ! number of nodes according to unit 13
+      READ(13,*) NAttr          ! number of attributes in the unit 13 file
+C
+C     Check to make sure that the number of nodes in the nodal
+C     attributes file is the same as in the grid file (unit 14).
+      IF (NumOfNodes.NE.NNODG) THEN
+         WRITE(6,9900)
+ 9900    FORMAT(////,1X,'!!!!!!!!!!  FATAL ERROR  !!!!!!!!!',
+     &        //,1X,'The number of nodes in the grid file (unit 14) and'
+     &        /,1X,'the nodal attributes file (unit 13) must match.',
+     &        //,1X,'!!!!!! EXECUTION WILL NOW BE TERMINATED !!!!!!',//)
+         STOP                   ! We're toast.
+      ENDIF
+C
+C     Transcribe header information into subdomain unit 13 files
+      DO iproc=1, nproc
+         WRITE(sdu(iproc),'(A80)') header
+         WRITE(sdu(iproc),*) NNODP(iproc) !substitute no. of nodes in subdomain
+         WRITE(sdu(iproc),*) NAttr
+      ENDDO
+C
+C     Transcribe attribute names from full domain file to subdomains.
+      DO k=1, NAttr
+         READ(13,'(A80)') AttrName
+         READ(13,'(A80)') Units
+         READ(13,*) NoOfVals
+         READ(13,*) (Default(m),m=1,NoOfVals)
+         DO iproc=1, nproc
+            WRITE(sdu(IPROC),'(A80)') TRIM(ADJUSTL(AttrName))
+            WRITE(sdu(IPROC),'(A80)') Units
+            WRITE(sdu(IPROC),*) NoOfVals
+            WRITE(sdu(IPROC),'(12(1x,e16.9))') (Default(m),m=1,NoOfVals)
+         END DO
+      END DO
+C
+C     Allocate and initialize the matrix for the number of Non Default
+C     nodes in each SubDomain for each nodal attribute
+      ALLOCATE(SDNumND(nproc,NAttr))
+      nbytes = 8*nproc*nattr
+      call memory_alloc(nbytes)
+      DO iproc=1,nproc
+         DO k=1, NAttr
+            SDNumND(iproc,k)=0
+         END DO
+      END DO
+C     We need to figure out how many nodes go into each subdomain
+C     for each attribute.
+      Mode=0                  ! read and count, don't write
+      CALL ProcessNodalAttr(NAttr, Mode, sdu, SDNumND)
+C
+C     Now rewind and advance to the beginning of the data again
+      REWIND(13)
+      DO l=1, 3
+         READ(13,*) skipped    ! skip header, NumOfNodes, NAttr
+      END DO
+      DO k=1, NAttr
+         DO l=1, 4
+            READ(13,*) skipped ! skip AttrName,Units,NoOfVals,Default
+         END DO
+      END DO
+C
+C     Now read each of the nodal attributes and transcribe them to the
+C     appropriate subdomain.
+      Mode=1  ! write data to subdomain files
+      CALL ProcessNodalAttr(NAttr, Mode, sdu, SDNumND)
+C
+      DEALLOCATE(SDNumND)
+      nbytes = 8*nproc*nattr
+      call memory_dealloc(nbytes)
+
+      if (allocated(NodalAttributes)) then
+         DEALLOCATE(NodalAttributes)
+         nbytes = 4*nwp
+         call memory_dealloc(nbytes)
+      endif
+C
+C     Close full domain and all subdomain unit 13 files.
+      CLOSE (13)
+      DO IPROC=1, NPROC
+         CLOSE (SDU(IPROC))
+      ENDDO
+C
+      call memory_status()
+      RETURN
+C---------------------------------------------------------------------------
+      END SUBROUTINE PREP13
+C---------------------------------------------------------------------------
+
+C     ----------------------------------------------------------------
+C        S U B R O U T I N E   P R O C E S S   N O D A L   A T T R
+C     ----------------------------------------------------------------
+C
+C     jgf46.00 Subroutine to support PREP13. This subroutine is called
+C     twice; once to determine the number of nodes with non-default
+C     values going into each subdomain, then a second time to actually
+C     place the data in the subdomain files.
+C
+C     This is necessary because the attributes in the subdomain files
+C     must each have the number of non-default values at the top, and
+C     this information cannot be known until we have processed the
+C     entire fulldomain file.
+C
+C     An alternative would be to use temporary files, but that approach
+C     would require many open files for large grids processed on many
+C     CPUs, and some platforms are limited to a small number of
+C     simultaneously open files.
+C
+C     ----------------------------------------------------------------
+      SUBROUTINE ProcessNodalAttr(NAttr, Mode, sdu, SDNumND)
+      USE PRE_GLOBAL
+      IMPLICIT NONE
+C
+      INTEGER,intent(in) :: NAttr  ! number of attributes in the file
+      INTEGER,intent(in) :: Mode   !=0 to count and return, =1 to write
+      INTEGER,intent(in), dimension(nproc) :: sdu !i/o unit number array
+      INTEGER,intent(inout),dimension(nproc,NAttr) :: SDNumND
+      INTEGER NumNotDefault      ! number of nodes specified in the file
+      INTEGER NumCol             ! number of values per node for an attr
+      INTEGER NodeNum            ! full domain node number
+      INTEGER SDNode             ! subdomain node number
+      INTEGER i                  ! node loop counter
+      INTEGER j                  ! column loop counter
+      INTEGER k                  ! attribute loop counter
+      INTEGER m                  ! mapping loop counter
+      INTEGER iproc              ! subdomain loop counter
+      INTEGER iproc2             ! mapped subdomain
+      CHARACTER(len=80) AttrName ! label for attribute
+      REAL(SZ), ALLOCATABLE :: AttrData(:)  ! attribute data
+C
+      DO k=1, NAttr
+         READ(13,'(A80)') AttrName
+         IF (Mode.eq.1) THEN
+            DO iproc=1,nproc
+               WRITE(sdu(iproc),'(A80)') TRIM(ADJUSTL(AttrName))
+            END DO
+         ENDIF
+         SELECT CASE (TRIM(ADJUSTL(AttrName)))
+         CASE("primitive_weighting_in_continuity_equation")
+            NumCol=1
+         CASE("surface_submergence_state")
+            NumCol=1
+         CASE("quadratic_friction_coefficient_at_sea_floor")
+            NumCol=1
+         CASE("mannings_n_at_sea_floor")
+            NumCol=1
+         CASE("chezy_friction_coefficient_at_sea_floor")
+            NumCol=1
+         CASE("sea_surface_height_above_geoid")
+            NumCol=1
+         CASE("surface_directional_effective_roughness_length")
+            NumCol=12
+         CASE("surface_canopy_coefficient")
+            NumCol=1
+         CASE("bridge_pilings_friction_parameters")
+            NumCol=4
+         CASE
+     &   ("average_horizontal_eddy_viscosity_in_sea_water_wrt_depth")
+            NumCol=1
+         CASE
+     &   ("average_horizontal_eddy_diffusivity_in_sea_water_wrt_depth")
+            NumCol=1
+         CASE DEFAULT
+            NumCol=1
+            IF (Mode.eq.0) THEN
+               WRITE(6,1001)    ! Nodal Attributes file
+               WRITE(6,1021) AttrName ! contains invalid name
+            ELSE
+               WRITE(6,1031) AttrName ! Process 1st column only
+            ENDIF
+         END SELECT
+         ALLOCATE(AttrData(NumCol))
+         READ(13,*) NumNotDefault
+         IF (Mode.eq.1) THEN
+            DO iproc=1,nproc
+               WRITE(sdu(iproc),*) SDNumND(iproc,k)
+            END DO
+         ENDIF
+         DO i=1, NumNotDefault
+            READ(13,*) NodeNum, (AttrData(j),j=1,NumCol)
+            DO m=1, ITOTPROC(NodeNum)
+               iproc2 = IMAP_NOD_GL2(2*(m-1)+1,NodeNum)
+               DO iproc=1, NPROC
+                  IF (iproc.EQ.iproc2) THEN ! f.d. node maps to this s.d.
+                    IF (Mode.eq.0) THEN
+                      SDNumND(iproc,k)=SDNumND(iproc,k)+1
+                    ENDIF
+                    IF (Mode.eq.1) THEN
+                      SDNode = IMAP_NOD_GL2(2*(m-1)+2,NodeNum)
+                      WRITE(sdu(iproc),1100) SDNode,
+     &                  (AttrData(j),j=1,NumCol)
+                    ENDIF
+                  ENDIF
+               END DO
+            END DO
+         END DO
+         DEALLOCATE(AttrData)
+         IF (Mode.eq.1) THEN
+            WRITE(6,'(A25,A80)') '     Finished processing ', AttrName
+         ENDIF
+      END DO
+C
+ 1001 FORMAT('ERROR: The Nodal Attributes File (unit 13)')
+ 1021 FORMAT('contains invalid name: ',A80)
+ 1031 FORMAT('WARNING: Processed only one column of unrecognized ',A80)
+ 1100 FORMAT(I10,32000(2X,E16.8))
+C
+      RETURN
+C     ----------------------------------------------------------------
+      END SUBROUTINE ProcessNodalAttr
+C     ----------------------------------------------------------------
+
+
+
+      SUBROUTINE PREP14_AND_HB()
+      USE PRE_GLOBAL 
+C
+C---------------------------------------------------------------------------C
+C                     (  Serial Version  2/28/98  )                         C 
+C  This routine writes a Local Grid file "fort.14" file for each subdomain  C
+C  using the domain decomposition of the ADCIRC grid created by the routine C
+C  DECOMP.                                                                  C
+C                                                                           C
+C  The Decomposition Variables are defined in the include file adcprep.inc  C 
+C  This version is compatible with ADCIRC version 34.03                     C
+C                                                                           C
+C---------------------------------------------------------------------------C
+C
+cjjw - added 1 line
+cjjw      IMPLICIT NONE
+      INTEGER I,I1,J,K,L,ETYPE,ITEMP,ITEMP2,ILNODE,ILNODE2,ILNODE3
+      INTEGER JD,JG,JP,IPROC,IPROC2,IPROC3,DISC,BBN,IBP
+      INTEGER INDEX,INDEX2,ITOT,ITYPE,NUMS(10)
+      CHARACTER LOCFN*14,PE*6
+      CHARACTER*80 OUTMSG
+C
+      ETYPE = 3   ! The only Element-Type supported by ADCIRC is 3.
+C
+C--------------------------------------------------------------------------
+C--MAIN LOOP:   Write a Local Grid File ( fort.14 ) for each PE
+C--------------------------------------------------------------------------
+C
+      DO 1000 IPROC = 1,NPROC
+C
+         LOCFN(1:14) = 'PE0000/fort.14'
+         CALL IWRITE(LOCFN,3,6,IPROC-1)
+         OPEN (14,FILE=LOCFN)
+C
+C--------------------------------------------------------------------------
+C--OPEN BOUNDARY NODES PROCESSING BEGINS HERE
+C--------------------------------------------------------------------------
+C
+C--Partition the open boundary nodes between various processors
+C
+         NETAP(IPROC) = 0
+         DO K=1, NOPE
+            NVDLLP(K) = 0
+            DO J=1, NETA
+               OBNODE_LG(J,IPROC) = 0
+               NBDVP(K,J) = 0
+            ENDDO
+         ENDDO
+C
+         ITOT = 0
+         DO K = 1,NOPE
+            DO I = 1,NVDLL(K)
+               ITOT = ITOT + 1
+               INDEX = NBDV(K,I)
+               DO J = 1,ITOTPROC(INDEX)
+                  ITEMP = (J-1)*2+1
+                  IPROC2 = IMAP_NOD_GL2(ITEMP,INDEX)
+                  ILNODE = IMAP_NOD_GL2(ITEMP+1,INDEX)
+                  IF (IPROC.EQ.IPROC2) THEN
+                    NETAP(IPROC) = NETAP(IPROC)+1
+                    NVDLLP(K) = NVDLLP(K) + 1
+                    NBDVP(K,NVDLLP(K)) = ILNODE
+                    OBNODE_LG(NETAP(IPROC),IPROC)=ITOT
+                  ENDIF
+               ENDDO
+            ENDDO
+         ENDDO
+C
+         NOPEP(IPROC) = 0
+         DO K = 1,NOPE
+            IF (NVDLLP(K).NE.0) THEN
+              NOPEP(IPROC) = NOPEP(IPROC) + 1
+            ENDIF
+         ENDDO
+C
+C
+C--------------------------------------------------------------------------
+C--LAND BOUNDARY NODES PROCESSING BEGINS HERE
+C--------------------------------------------------------------------------
+C
+C--Partition Land Boundary Segments between PEs
+C
+         NVELP(IPROC) = 0
+         DO K = 1,NBOU
+            NVELLP(K) = 0
+            IBTYPEP(K,IPROC) = IBTYPE(K)
+         ENDDO
+C
+         DO K = 1,NBOU
+C
+C--Weir Land Boundary Node-Pair Case
+Cmod vjp 3/8/99
+C  mod to allow that each of Weir-node pair might be ghosts nodes
+C
+         IF ((IBTYPE(K).EQ.4).OR.(IBTYPE(K).EQ.24)) THEN
+           DO I = 1,NVELL(K)
+              INDEX = NBVV(K,I)
+              INDEX2 = IBCONNR(K,I)
+              DO J = 1,ITOTPROC(INDEX)
+                 ITEMP = (J-1)*2 + 1
+                 IPROC2  =  IMAP_NOD_GL2(ITEMP,INDEX)
+                 ILNODE2 =  IMAP_NOD_GL2(ITEMP+1,INDEX)
+                 IF (IPROC.EQ.IPROC2) THEN
+                   DO JD = 1, ITOTPROC(INDEX2)
+                      ITEMP2 = (JD-1)*2 + 1
+                      IPROC3  = IMAP_NOD_GL2(ITEMP2,INDEX2)
+                      ILNODE3 = IMAP_NOD_GL2(ITEMP2+1,INDEX2)
+                      IF (IPROC.EQ.IPROC3) THEN 
+                        NVELP(IPROC) = NVELP(IPROC) + 1
+                        NVELLP(K) = NVELLP(K) + 1
+                        LBINDEX_LG(K,NVELLP(K)) = I
+                        NBVVP(K,NVELLP(K))   = ILNODE2
+                        IBCONNRP(K,NVELLP(K)) = ILNODE3
+                      ENDIF
+                   ENDDO
+                 ENDIF
+              ENDDO
+           ENDDO
+C
+C--All Other Land Boundary Node types
+C
+         ELSE
+C
+           DO I = 1,NVELL(K)
+              INDEX = NBVV(K,I)
+              DO J = 1,ITOTPROC(INDEX)
+                 ITEMP = (J-1)*2 + 1
+                 IPROC2 =  IMAP_NOD_GL2(ITEMP,INDEX)
+                 ILNODE =  IMAP_NOD_GL2(ITEMP+1,INDEX)
+                 IF (IPROC.EQ.IPROC2) THEN 
+                   NVELP(IPROC) = NVELP(IPROC) + 1
+                   NVELLP(K) = NVELLP(K) + 1
+                   LBINDEX_LG(K,NVELLP(K)) = I
+                   NBVVP(K,NVELLP(K)) = ILNODE
+                 ENDIF
+              ENDDO
+           ENDDO
+C
+         ENDIF
+C
+         ENDDO
+C
+Cmod 05/18/2004 rl -- I don't think this next part is the correct
+c  way to handle islands.  Rather, if an island is split by a domain, it 
+c  should remain an island.  This will ensure that the boundary is 
+c  closed.  The only error would occur in ghost node space, which is
+c  not a problem since the answers are not used there anyway.
+
+Cmod 12/18/98 vjp --this section re-written
+C--If a PE has only part of a closed internal land boundary
+C  modify its local IBTYPE to be an external land boundary segment
+C  of the same type by decrementing its IBTYPE.
+C  and remove a closing loop node if present
+
+C
+c        DO K=1, NBOU
+c          IF (NVELLP(K).LT.NVELL(K)) THEN
+c            IF (  (IBTYPEP(K,IPROC).EQ.1)
+c    &         .OR.(IBTYPEP(K,IPROC).EQ.11)
+c    &         .OR.(IBTYPEP(K,IPROC).EQ.21)) THEN
+c decrement ibtype
+c              IBTYPEP(K,IPROC) = IBTYPEP(K,IPROC)-1
+C remove loop closing node
+c              IF (NVELLP(K).GT.1.AND.
+c    &           NBVVP(K,NVELLP(K)).EQ.NBVVP(K,1)) THEN
+c                NVELLP(K) = NVELLP(K)-1
+c              ENDIF
+c            ENDIF
+c          ENDIF
+c        ENDDO
+
+C If a segment contains only one node, remove the segment from the list     
+C (NOTE: rl 5/18/04 I don't see how this could possibly happen, including 
+C  ghost nodes)
+
+         DO K=1, NBOU
+           IF (NVELLP(K).EQ.1) NVELLP(K) = 0
+         ENDDO
+
+C    
+C--Count the number of land boundary segments on PE IPROC.
+C         
+         NBOUP(IPROC) = 0
+         DO K = 1,NBOU
+            IF (NVELLP(K).NE.0) THEN
+              NBOUP(IPROC) = NBOUP(IPROC) + 1
+            ENDIF
+         ENDDO
+C
+C--Count to check correctness of NVELP
+C
+         DISC=0  ! LB Nodes with non-zero normal discharge
+         BBN=0   ! Mainland Barrier Boundary Nodes
+         IBP=0   ! Internal Barrier Boundary Pairs
+         ITEMP = 0
+C
+         DO 400 K=1,NBOU
+            IF (NVELLP(K).EQ.0) GOTO 400
+            ITYPE = IBTYPEP(K,IPROC)
+            IF ((ITYPE.EQ.2).OR.(ITYPE.EQ.12).OR.(ITYPE.EQ.22)) THEN
+              DISC = DISC + NVELLP(K)
+            ENDIF
+            IF ((ITYPE.EQ.3).OR.(ITYPE.EQ.13).OR.(ITYPE.EQ.23)) THEN
+              BBN = BBN + NVELLP(K)
+            ENDIF
+            IF ((ITYPE.EQ.4).OR.(ITYPE.EQ.24)) THEN
+              IBP = IBP + NVELLP(K)
+            ENDIF
+            IF ((ITYPE.NE.2).AND.(ITYPE.NE.12).AND.(ITYPE.NE.22).AND.
+     &          (ITYPE.NE.3).AND.(ITYPE.NE.13).AND.(ITYPE.NE.23).AND.
+     &          (ITYPE.NE.4).AND.(ITYPE.NE.24)) THEN
+              ITEMP = ITEMP + NVELLP(K)
+            ENDIF
+            I1 = 0
+            DO I=1,NVELLP(K)
+               IF ((ITYPE.EQ.1).OR.(ITYPE.EQ.11).OR.
+     &             (ITYPE.EQ.21)) THEN
+                 IF ((I.EQ.NVELLP(K)).AND.(NBVVP(K,I).NE.I1)) THEN
+                   ITEMP = ITEMP + 1
+                 ENDIF
+               ENDIF
+               IF (I.EQ.1) I1 = NBVVP(K,I)
+            ENDDO
+ 400     CONTINUE
+C
+c        print *, IPROC-1,ITEMP,DISC,BBN,2*IBP
+         ITEMP  = ITEMP + DISC + BBN + 2*IBP
+         IF (ITEMP.NE.NVELP(IPROC)) THEN
+c          print *, "changed value from ",NVELP(IPROC)," to ",ITEMP
+           NVELP(IPROC) = ITEMP
+         ENDIF
+         IF (NVELP(IPROC)+1.GT.MNVEL) THEN
+           print *, "NVEL exceeds parameter value MNVEL on PE",IPROC
+           print *, "local NVEL value = ",ITEMP
+           stop
+         ENDIF
+C
+C--Construct a LBCODE for each Land Boundary Node of this PE
+C
+         JP=0
+         DO K = 1,NBOU
+            DO I=1, NVELLP(K)
+               JP = JP+1
+               LBCODEP(JP,IPROC) = IBTYPEP(K,IPROC)
+            ENDDO
+         ENDDO
+C
+C--Determine whether there are any normal flow boundaries local to PE
+C
+         NFLUXFP(IPROC) = 0
+         DO K=1, NBOU
+            IF (NVELLP(K).GT.0) THEN
+              IF ((IBTYPE(K).EQ.2).OR.(IBTYPE(K).EQ.12)
+     &            .OR.(IBTYPE(K).EQ.22)) THEN
+                NFLUXFP(IPROC) = 1
+              ENDIF
+            ENDIF
+         ENDDO
+C
+C--------------------------------------------------------------------------
+C--BEGIN WRITING LOCAL GRID ( fort.14 ) FILE HERE        
+C--------------------------------------------------------------------------
+C
+C--Write Mesh Data
+C
+          WRITE(14,80) AGRID
+C
+          NUMS(1) = NELP(IPROC)
+          NUMS(2) = NNODP(IPROC)
+C          CALL INSERT(SIZEMSG,OUTMSG,NUMS,2)
+C          WRITE(14,80) OUTMSG
+          WRITE(14,43) NELP(IPROC),NNODP(IPROC) !jgf45.06
+C
+          DO J = 1,NNODP(IPROC)
+             INDEX = IMAP_NOD_LG(J,IPROC)
+             WRITE(14,44) J,X(INDEX),Y(INDEX),DP(INDEX)
+          ENDDO
+c
+          DO J = 1,NELP(IPROC)
+             WRITE(14,45) J,ETYPE,NNEP(1,J,IPROC),NNEP(2,J,IPROC),
+     &                           NNEP(3,J,IPROC)
+          ENDDO
+  43      FORMAT(2I8)
+  44      FORMAT(I8,3(E24.12))
+  45      FORMAT(5I8)
+C
+C--Write Open Boundary Data
+C
+          CALL NEWINDEX(NOPEMSG,OUTMSG,NOPEP(IPROC))
+          WRITE(14,80) OUTMSG
+C
+          CALL NEWINDEX(NETAMSG,OUTMSG,NETAP(IPROC))
+          WRITE(14,80) OUTMSG
+C
+          ITOT = 0
+          DO K = 1,NOPE
+             IF (NVDLLP(K).GT.0)THEN
+                ITOT = ITOT + 1
+                CALL NEWINDEX(NVDLLMSG(K),OUTMSG,NVDLLP(K))
+                WRITE(14,80) OUTMSG
+                DO I = 1,NVDLLP(K)
+                   WRITE(14,*) NBDVP(K,I)
+                ENDDO
+             ENDIF
+          ENDDO
+C
+C--Write Land Boundary Data
+C
+          CALL NEWINDEX(NBOUMSG,OUTMSG,NBOUP(IPROC))
+          WRITE(14,80) OUTMSG
+C
+          CALL NEWINDEX(NVELMSG,OUTMSG,NVELP(IPROC))
+          WRITE(14,80) OUTMSG
+C
+          DO K = 1,NBOU
+             IF(NVELLP(K).GT.0)THEN
+                ITYPE = IBTYPEP(K,IPROC)
+                NUMS(1) = NVELLP(K)
+                NUMS(2) = ITYPE
+                CALL INSERT(NVELLMSG(K),OUTMSG,NUMS,2)
+                WRITE(14,80) OUTMSG
+C
+                IF ((ITYPE.NE.3).AND.(ITYPE.NE.13).AND.
+     &             (ITYPE.NE.23).AND.(ITYPE.NE.4).AND.
+     &             (ITYPE.NE.24)) THEN
+                  DO I = 1,NVELLP(K)
+                     WRITE(14,'(I8)') NBVVP(K,I)
+                  ENDDO
+                ELSEIF ((ITYPE.EQ.3).OR.(ITYPE.EQ.13).OR.
+     &                  (ITYPE.EQ.23)) THEN 
+                  DO I = 1,NVELLP(K)
+                     INDEX = LBINDEX_LG(K,I)
+                     WRITE(14,81) NBVVP(K,I),BAR1(K,INDEX),BAR2(K,INDEX)
+                  ENDDO
+C
+                ELSEIF ((ITYPE.EQ.4).OR.(ITYPE.EQ.24)) THEN
+                  DO I = 1,NVELLP(K)
+                     INDEX = LBINDEX_LG(K,I)
+                     WRITE(14,82) NBVVP(K,I),IBCONNRP(K,I),
+     &                        BAR1(K,INDEX),BAR2(K,INDEX),BAR3(K,INDEX)
+                  ENDDO
+                ENDIF
+             ENDIF
+          ENDDO
+C
+          CLOSE(14)
+
+Csb
+C-Hard Bottom file (fort.hb)
+C
+          IF(HBFLAG.EQ.1) THEN
+C
+            LOCFN(1:14) = 'PE0000/fort.hb'
+            CALL IWRITE(LOCFN,3,6,IPROC-1)
+            OPEN (26,FILE=LOCFN)
+C
+            WRITE(26,80) AGRID
+C
+            NUMS(1) = NELP(IPROC)
+            NUMS(2) = NNODP(IPROC)
+            CALL INSERT(SIZEMSG,OUTMSG,NUMS,2)
+            WRITE(26,80) OUTMSG
+C
+            DO J = 1,NNODP(IPROC)
+              INDEX = IMAP_NOD_LG(J,IPROC)
+              WRITE(26,44) J,X(INDEX),Y(INDEX),DP_HB(INDEX)
+            ENDDO
+C
+            CLOSE(26)
+          ENDIF
+C--
+
+1000  CONTINUE
+C
+C--Print Summary of Boundary Node Decomposition
+C
+      print *, " "
+      print *, "Boundary Node Decomposition Data"
+      print *, "DOMAIN      NOPE    NETA    NBOU  NVEL    NWEIR"
+      WRITE(*,90)  "GLOBAL",NOPE, NETA, NBOU, NVEL, NWEIR
+      DO IPROC=1, NPROC
+         PE(1:6) = 'PE0000'
+         CALL IWRITE(PE,3,6,IPROC-1)
+         WRITE(*,90)  PE,NOPEP(IPROC),NETAP(IPROC),
+     &                NBOUP(IPROC),NVELP(IPROC),NWEIRP(IPROC)
+      ENDDO
+C
+  80  FORMAT(A80)
+  81  FORMAT(I8,E13.6,2X,E13.6)
+  82  FORMAT(I8,2X,I8,2X,E13.6,2X,E13.6,2X,E13.6)
+  90  FORMAT(1X,A6,5I8)
+C
+      RETURN
+      END
+
+
+      SUBROUTINE PREP15()
+      USE PRE_GLOBAL
+      use memory_usage
+C
+C---------------------------------------------------------------------------C
+C                     (  Serial Version  2/28/98  )                         C
+C  This routine writes a Local Input file "fort.15" file for each subdomain C
+C  using the domain decomposition of the ADCIRC grid created by the routine C
+C  DECOMP.                                                                  C
+C                                                                           C
+C  The Decomposition Variables are defined in the include file adcprep.inc  C
+C  This version is compatible with ADCIRC version 34.03                     C
+C                                                                           C
+C           Modifications by RL on 10/9/01 to accomodate NWS = -2           C
+C---------------------------------------------------------------------------C
+C
+      IMPLICIT NONE
+      integer :: nbytes = 0
+      INTEGER I,J,K,L,JG,JP,KK
+      INTEGER INDEX,ITOT,ILNODE,IPROC,IPROC2,ITYPE,NUMS(10)
+      CHARACTER LOCFN*14,PE*6
+      CHARACTER*80 OUTMSG
+C
+C--Write a Local Input file ( fort.15 ) for each PE
+C
+      ! max number of stations in any subdomain
+      NSTAE_MAX = 0; NSTAV_MAX = 0; NSTAM_MAX = 0; NSTAC_MAX = 0
+C
+      DO 1000 IPROC = 1,NPROC
+C
+         LOCFN(1:14) = 'PE0000/fort.15'
+         CALL IWRITE(LOCFN,3,6,IPROC-1)
+         OPEN (15,FILE=LOCFN)
+C
+         WRITE(15,80) RUNDES
+         WRITE(15,80) RUNID
+         WRITE(15,80) OVERMSG
+         WRITE(15,80) ABOUTMSG
+         WRITE(15,80) SCREENMSG
+         WRITE(15,80) HOTMSG
+         WRITE(15,80) ICSMSG
+         WRITE(15,80) IMMSG
+         IF (CBaroclinic) THEN  !jgf46.28
+            WRITE(15,80) IDENMSG
+         ENDIF
+         WRITE(15,80) IBFMSG
+         WRITE(15,80) IFAMSG
+         WRITE(15,80) ICAMSG
+         WRITE(15,80) ICATMSG
+         WRITE(15,80) NWPMSG
+         IF (NWP.gt.0) THEN !jgf46.00 write nodal attributes
+            DO I=1, NWP
+               WRITE(15,80) NodalAttributes(I)
+            ENDDO
+         ENDIF
+         WRITE(15,80) NCORMSG
+         WRITE(15,80) NTIPMSG
+C     jgfdebug46.02 Added check for NWS=45 to write NWS=5
+         IF (NWS.EQ.45) THEN
+            WRITE(15,'(A1)') "5"
+         ELSE
+            WRITE(15,80) NWSMSG
+         ENDIF
+         WRITE(15,80) RAMPMSG
+         WRITE(15,80) GMSG
+         WRITE(15,80) TAU0MSG
+         WRITE(15,80) DTMSG
+         WRITE(15,80) STATMSG
+         WRITE(15,80) REFTMSG
+
+         IF((NWS.EQ.0).AND.(NRS.GE.1)) WRITE(15,80) RSTIMMSG  ! sb46.28sb03
+         IF((NWS.EQ.1).AND.(NRS.GE.1)) WRITE(15,80) RSTIMMSG  ! sb46.28sb03
+C     jgfdebug46.02 Added check for NWS=45.
+C     jgf46.02 Added NWS=8.
+C     jgf46.16 Merged:
+C     cf & cm added NWS=9: asymmetric hurricane wind model
+C     sb46.28sb01 added NWS=12: OWI format
+         IF ((ABS(NWS).EQ.2).OR.(ABS(NWS).EQ.4).OR.(ABS(NWS).EQ.45).OR.
+     &        (ABS(NWS).EQ.5).OR.(ABS(NWS).EQ.6).OR.(ABS(NWS).EQ.8).
+     &        OR.(ABS(NWS).EQ.9.OR.(ABS(NWS).EQ.12)))THEN
+            WRITE(15,80) WSMSG1
+         ENDIF
+         IF (NWS.EQ.3) THEN
+            WRITE(15,80) WSMSG1
+            WRITE(15,80) WSMSG2
+         ENDIF
+
+         WRITE(15,80) RNDAYMSG
+         WRITE(15,80) DRAMPMSG
+         WRITE(15,80) COEFMSG
+         WRITE(15,80) H0MSG
+         WRITE(15,80) SLMSG
+         WRITE(15,80) TAUMSG
+         WRITE(15,80) ESLMSG
+         WRITE(15,80) CORIMSG
+         WRITE(15,80) NTIFMSG
+         DO I=1,NTIF
+            WRITE(15,80)  TIPOTAG(I)
+            WRITE(15,80)  TPKMSG(I)
+         ENDDO
+
+         WRITE(15,80) NBFRMSG
+         DO I=1,NBFR
+            WRITE(15,80) BOUNTAG(I)
+            WRITE(15,80) AMIGMSG(I)
+         ENDDO
+         DO I=1,NBFR
+            WRITE(15,80) ALPHA1(I)
+            DO J=1,NETAP(IPROC)
+               WRITE(15,80) EMOMSG(I,OBNODE_LG(J,IPROC))
+            ENDDO
+         ENDDO
+
+         WRITE(15,80) ANGMSG
+C
+C--If there were any normal flow boundaries local to PE, process them
+C
+         IF (NFLUXFP(IPROC).EQ.1) THEN
+C
+            NFLBNP = 0
+            DO I=1, NFLBN
+               INDEX = FLBN(I)
+               DO J=1, ITOTPROC(INDEX)
+                  IPROC2 = IMAP_NOD_GL2(2*(J-1)+1,INDEX)
+                  IF (IPROC.EQ.IPROC2) THEN
+                     NFLBNP = NFLBNP + 1
+                     FLBNXP(NFLBNP) = FLBNX(I)
+                  ENDIF
+               ENDDO
+            ENDDO
+C
+            WRITE(15,80) NFFRMSG
+            IF (NFFR.NE.0) THEN
+               DO I=1,NFFR
+                  WRITE(15,80) FBOUNTAG(I)
+                  WRITE(15,80) FREQMSG(I)
+               ENDDO
+               DO I=1,NFFR
+                  WRITE(15,80) ALPHA2(I)
+                  DO J=1,NFLBNP
+                     WRITE(15,80) QNMSG(I,FLBNXP(J))
+cdebug               print *, "PE=",IPROC," FLUXNODE=",FLBNXP(J)
+                  ENDDO
+               ENDDO
+            ENDIF
+C
+         ENDIF
+C
+C--Write Local Elevation Station Info:
+C--Create Local-to-Global element "ownership" of an elevation station
+C
+C     WRITE(15,80) STAEMSG !jgf45.07 we may have changed NOUTE in adcprep
+         WRITE(15,*) NOUTE,TOUTSE,TOUTFE,NSPOOLE
+C
+         NSTAEP(IPROC) = 0
+         DO K = 1,NSTAE
+            DO J=1,NELP(IPROC)
+               INDEX = abs(IMAP_EL_LG(J,IPROC))
+               IF (INDEX.EQ.NNSEG(K)) THEN
+                  NSTAEP(IPROC) = NSTAEP(IPROC) + 1
+                  KK = K
+                  if (STAE_SHARE(K) > -1) KK = -K
+                  IMAP_STAE_LG(NSTAEP(IPROC),IPROC) = KK
+                  STAE_SHARE(K) = IPROC
+               ENDIF
+            ENDDO
+         ENDDO
+         NSTAE_MAX = MAX(NSTAEP(IPROC),NSTAE_MAX)
+C
+         CALL INSERT(NSTAEMSG,OUTMSG,NSTAEP(IPROC),1)
+         WRITE(15,80) OUTMSG
+C
+         DO K=1,NSTAEP(IPROC)
+            INDEX = abs(IMAP_STAE_LG(K,IPROC))
+            WRITE(15,80) STAELOC(INDEX)
+         ENDDO
+C
+C--Write Local Velocity Station Info:
+C--Create Local-to-Global element "ownership" of an velocity station
+C
+         WRITE(15,*) NOUTV,TOUTSV,TOUTFV,NSPOOLV
+C
+         NSTAVP(IPROC) = 0
+         DO K = 1,NSTAV
+            DO J=1,NELP(IPROC)
+               INDEX = abs(IMAP_EL_LG(J,IPROC))
+               IF (INDEX.EQ.NNSVG(K)) THEN
+                  NSTAVP(IPROC) = NSTAVP(IPROC) + 1
+                  KK = K
+                  if (STAV_SHARE(K) > -1) KK = -K
+                  IMAP_STAV_LG(NSTAVP(IPROC),IPROC) = KK
+                  STAV_SHARE(K) = IPROC
+               ENDIF
+            ENDDO
+         ENDDO
+         NSTAV_MAX = MAX(NSTAVP(IPROC),NSTAV_MAX)
+C
+         CALL INSERT(NSTAVMSG,OUTMSG,NSTAVP(IPROC),1)
+         WRITE(15,80) OUTMSG
+C
+         DO K=1,NSTAVP(IPROC)
+            INDEX = abs(IMAP_STAV_LG(K,IPROC))
+            WRITE(15,80) STAVLOC(INDEX)
+         ENDDO
+C
+C--If IM=10 Write Concentration Station Info:
+C--Create Local-to-Global element "ownership" of an concentration station
+C
+         NSTACP(IPROC) = 0
+         IF (C2D_PTrans.or.C3D_PTrans) THEN !jgf46.28
+C
+C     WRITE(15,80) STACMSG   !jgf45.07 we may have changed NOUTC in adcprep
+            WRITE(15,*) NOUTC,TOUTSC,TOUTFC,NSPOOLC
+C
+            DO K = 1,NSTAC
+               DO J=1,NELP(IPROC)
+                  INDEX = abs(IMAP_EL_LG(J,IPROC))
+                  IF (INDEX.EQ.NNSCG(K)) THEN
+                     NSTACP(IPROC) = NSTACP(IPROC) + 1
+                     KK = K
+                     if (STAC_SHARE(K) > -1) KK = -K
+                     IMAP_STAC_LG(NSTACP(IPROC),IPROC) = KK
+                     STAC_SHARE(K) = IPROC
+                  ENDIF
+               ENDDO
+            ENDDO
+            NSTAC_MAX = MAX(NSTACP(IPROC),NSTAC_MAX)
+C
+            CALL INSERT(NSTACMSG,OUTMSG,NSTACP(IPROC),1)
+            WRITE(15,80) OUTMSG
+C
+            DO K=1,NSTACP(IPROC)
+               INDEX = abs(IMAP_STAC_LG(K,IPROC))
+               WRITE(15,80) STACLOC(INDEX)
+            ENDDO
+C
+         ENDIF
+C
+C--Write Local Meterological Station Info:
+C--Create Local-to-Global element "ownership" of an elevation station
+C
+         NSTAMP(IPROC) = 0
+         IF (NWS.NE.0) THEN
+            WRITE(15,*) NOUTM,TOUTSM,TOUTFM,NSPOOLM
+            DO K = 1,NSTAM
+               DO J=1,NELP(IPROC)
+                  INDEX = abs(IMAP_EL_LG(J,IPROC))
+                  IF (INDEX.EQ.NNSMG(K)) THEN
+                     NSTAMP(IPROC) = NSTAMP(IPROC) + 1
+                     KK = K
+                     if (STAM_SHARE(K) > -1) KK = -K
+                     IMAP_STAM_LG(NSTAMP(IPROC),IPROC) = KK
+                     STAM_SHARE(K) = IPROC
+                  ENDIF
+               ENDDO
+            ENDDO
+            NSTAM_MAX = MAX(NSTAMP(IPROC),NSTAM_MAX)
+C
+            CALL INSERT(NSTAMMSG,OUTMSG,NSTAMP(IPROC),1)
+            WRITE(15,80) OUTMSG
+C
+            DO K=1,NSTAMP(IPROC)
+               INDEX = abs(IMAP_STAM_LG(K,IPROC))
+               WRITE(15,80) STAMLOC(INDEX)
+            ENDDO
+         ENDIF
+
+C
+C--Write Local Elevation Data Output Info
+C
+C     WRITE(15,80) OUTGEMSG !jgf45.07 we may have changed NOUTGE in adcprep
+      WRITE(15,*) NOUTGE,TOUTSGE,TOUTFGE,NSPOOLGE
+C
+C--Write Local Velocity Data Output Info
+C
+C     WRITE(15,80) OUTGVMSG !jgf45.07 we may have changed NOUTGV in adcprep
+      WRITE(15,*) NOUTGV,TOUTSGV,TOUTFGV,NSPOOLGV
+C
+C     jgf45.07 write subdomain concentration data output info if necessary
+C
+      IF (IM.EQ.10) WRITE(15,*) NOUTGC,TOUTSGC,TOUTFGC,NSPOOLGC
+C
+C--Write Local Wind Velocity Data Output Info ( added 4/16/98 vjp )
+C
+C     jgf45.07 we may have changed NOUTGW in adcprep
+C     IF (NWS.NE.0) WRITE(15,80) OUTGWMSG
+      IF (NWS.NE.0) WRITE(15,*) NOUTGW,TOUTSGW,TOUTFGW,NSPOOLGW
+C
+C--Write Harmonic Analysis Data
+C
+         WRITE(15,80) HARFRMSG
+         DO I=1,NHARFR
+            WRITE(15,80) HAFNAM(I)
+            WRITE(15,80) HAFREMSG(I)
+c           WRITE(15,*) HAFREQ(I),HAFF(I),HAFACE(I)
+         ENDDO
+C
+         WRITE(15,80) HARPARMSG
+         WRITE(15,80) OUTHARMSG
+C
+C--Write Hot Start Info
+C
+         WRITE(15,80) HSTARMSG
+C
+C--Write Solver Info
+C
+         WRITE(15,80) SOLVMSG
+C
+C--Write 3DVS Info
+C
+         IF(C3DVS) THEN
+            CALL PREP15_3DVS(IPROC)
+c        ELSEIF(C3DDSS) THEN
+c           CALL PREP15_3DDSS(IPROC)
+         ENDIF
+C
+         CLOSE(15)
+C
+ 1000 CONTINUE
+C     jgf45.12 Release memory that may have been allocated for vertical
+C     grid specification.
+      IF(C3DVS.and.(IGC.EQ.0)) THEN
+         DEALLOCATE ( Sigma )
+         nbytes = 8*nfen
+         call memory_dealloc(nbytes)
+      ENDIF
+      IF(C3DVS.and.(IEVC.EQ.0)) THEN
+         DEALLOCATE ( EVTot )
+         nbytes = 8*nfen
+         call memory_dealloc(nbytes)
+      ENDIF
+
+C
+C--Print Summary of Stations
+C
+      print *, " "
+      print *, "Station Data"
+      print *, "DOMAIN      NSTAE   NSTAV    NSTAC    NSTAM"
+      WRITE(*,92)  "GLOBAL",NSTAE,NSTAV,NSTAC,NSTAM
+      DO IPROC=1, NPROC
+         PE(1:6) = 'PE0000'
+         CALL IWRITE(PE,3,6,IPROC-1)
+         WRITE(*,92)  PE,NSTAEP(IPROC),NSTAVP(IPROC),
+     .        NSTACP(IPROC),NSTAMP(IPROC)
+      ENDDO
+C
+      RETURN
+ 80   FORMAT(A80)
+ 92   FORMAT(1X,A6,4I8)
+      END
+
+
+      SUBROUTINE PREP15_3DVS(IPROC)
+      USE PRE_GLOBAL
+      INTEGER,ALLOCATABLE :: ISLOC(:)
+      INTEGER :: N,NSLOC
+C
+C---------------------------------------------------------------------------C
+C                     (  Serial Version  6/24/02  )                         C 
+C  This routine writes the 3DVS info in the Local Input file "fort.15" file C
+C  for each subdomain using the domain decomposition of the ADCIRC grid     C
+C  created by the routine DECOMP.                                           C
+C                                                                           C
+C  The Decomposition Variables are defined in the include file adcprep.inc  C 
+C  This version is compatible with ADCIRC version 41.11a                    C
+C                                                                           C
+C---------------------------------------------------------------------------C
+C
+      WRITE(15,80) IDIAGMSG
+      WRITE(15,80) IDENMSG
+      WRITE(15,80) SLIPMSG
+      WRITE(15,80) Z0MSG
+      WRITE(15,80) ALPMSG
+      WRITE(15,80) FEMSG
+      WRITE(15,80) EVCMSG
+      IF(IEVC.EQ.50) WRITE(15,80) THETAMSG
+      IF(I3DSD.GT.0) THEN
+        ALLOCATE(ISLOC(NHN3DSD))
+        NSLOC=0
+        DO N=1,NHN3DSD
+          IF(IMAP_NOD_GL(1,ISDHOUT(N)).EQ.IPROC) THEN
+            NSLOC=NSLOC+1
+            ISLOC(NSLOC)=IMAP_NOD_GL(2,ISDHOUT(N))
+            IMAP_3DSD_LG(NSLOC,IPROC)=ISDHOUT(N)
+          ENDIF
+        ENDDO
+        N3DSDP(IPROC)=NSLOC
+        WRITE(15,81) I3DSD, TO3DSSD, TO3DFSD, NSPO3DSD, NSLOC,
+     &         '   ! I3DSD, TO3DSSD, TO3DFSD, NSPO3DGD, NHN3DSD'
+        WRITE(15,82) (ISLOC(N),N=1,NSLOC)
+        DEALLOCATE(ISLOC)
+      ELSE
+        WRITE(15,80) DSDMSG
+      ENDIF
+      IF(I3DSV.GT.0) THEN
+        ALLOCATE(ISLOC(NHN3DSV))
+        NSLOC=0
+        DO N=1,NHN3DSV
+          IF(IMAP_NOD_GL(1,ISVHOUT(N)).EQ.IPROC) THEN
+            NSLOC=NSLOC+1
+            ISLOC(NSLOC)=IMAP_NOD_GL(2,ISVHOUT(N))
+            IMAP_3DSV_LG(NSLOC,IPROC)=ISVHOUT(N)
+          ENDIF
+        ENDDO
+        N3DSVP(IPROC)=NSLOC
+        WRITE(15,81) I3DSV, TO3DSSV, TO3DFSV, NSPO3DSV, NSLOC,
+     &         '   ! I3DSV, TO3DSSV, TO3DFSV, NSPO3DGV, NHN3DSV'
+        WRITE(15,82) (ISLOC(N),N=1,NSLOC)
+        DEALLOCATE(ISLOC)
+      ELSE
+        WRITE(15,80) DSVMSG
+      ENDIF
+      IF(I3DST.GT.0) THEN
+        ALLOCATE(ISLOC(NHN3DST))
+        NSLOC=0
+        DO N=1,NHN3DST
+          IF(IMAP_NOD_GL(1,ISTHOUT(N)).EQ.IPROC) THEN
+            NSLOC=NSLOC+1
+            ISLOC(NSLOC)=IMAP_NOD_GL(2,ISTHOUT(N))
+            IMAP_3DST_LG(NSLOC,IPROC)=ISTHOUT(N)
+          ENDIF
+        ENDDO
+        N3DSTP(IPROC)=NSLOC
+        WRITE(15,81) I3DST, TO3DSST, TO3DFST, NSPO3DST, NSLOC,
+     &         '   ! I3DST, TO3DSST, TO3DFST, NSPO3DGT, NHN3DST'
+        WRITE(15,82) (ISLOC(N),N=1,NSLOC)
+        DEALLOCATE(ISLOC)
+      ELSE
+        WRITE(15,80) DSTMSG
+      ENDIF
+      WRITE(15,80) DGDMSG
+      WRITE(15,80) DGVMSG
+      WRITE(15,80) DGTMSG
+C
+      RETURN
+  80  FORMAT(A80)
+  81  FORMAT(I8,2E15.8,2I8,A32)
+  82  FORMAT(500I8)
+      END
+
+
+      SUBROUTINE PREP18()   
+      USE PRE_GLOBAL 
+C
+C---------------------------------------------------------------------------C
+C                     (  Serial Version  2/28/98  )                         C 
+C  This Routine writes a message-passing file "fort.18" for each subdomain  C
+C  of the domain decomposition created by DECOMP.                           C
+C                                                                           C
+C  The Decomposition Variables are defined in the include file adcprep.inc  C 
+C  This version is compatible with ADCIRC version 34.03                     C
+C                                                                           C
+C---------------------------------------------------------------------------C
+C
+cjjw - added 1 line
+cjjw      IMPLICIT NONE
+      INTEGER N1, N2, N3, KMIN
+      INTEGER I,J,K,L,ITEMP,IPR,IPR1
+      INTEGER INDEX,ITOT,IEL,IELG,ILNODE,IPROC,ITYPE
+      INTEGER,ALLOCATABLE :: RES_NODE(:)
+      CHARACTER LOCFN*14,PE*6
+C
+C  Allocate local arrays
+C
+      ALLOCATE ( RES_NODE(MNPP) )
+C
+C--Write Message-Passing File for each PE
+C
+      DO 1000 I = 1,NPROC
+C
+         LOCFN(1:14) = 'PE0000/fort.18'
+         CALL IWRITE(LOCFN,3,6,I-1)
+         OPEN (18,FILE=LOCFN)
+C
+C--Write the Resident Node List
+C
+         WRITE(18,3010) (I-1),NOD_RES_TOT(I)
+         ITOT = 0
+         DO J = 1,NNODP(I)
+            INDEX = IMAP_NOD_LG(J,I)
+            IPR = IMAP_NOD_GL(1,INDEX)
+            IF (IPR.EQ.I)THEN
+              ITOT = ITOT + 1
+              RES_NODE(ITOT) = J
+c uncomment next line and comment preceding line for debugging
+c             RES_NODE(ITOT) = INDEX
+            ENDIF
+         ENDDO
+         IF (ITOT.NE.NOD_RES_TOT(I)) STOP 'ERROR IN # OF RES. NODES'
+         WRITE(18,1130) (RES_NODE(J),J=1,ITOT)
+C
+C--Write the Number of Communicating PEs
+C
+         WRITE(18,3020) NUM_COMM_PE(I)
+C
+C--Write the Receive List
+C
+         DO J = 1,NUM_COMM_PE(I)
+            IPR = COMM_PE_NUM(J,I)
+            IRECV_TOT(J,I) = 0
+            DO K = 1,NNODP(I)
+               INDEX = IMAP_NOD_LG(K,I)
+               IF (IMAP_NOD_GL(1,INDEX).EQ.IPR) THEN
+                 IRECV_TOT(J,I) = IRECV_TOT(J,I) + 1
+                 IRECV(IRECV_TOT(J,I)) = K
+c uncomment next line and comment preceding line for debugging
+c                IRECV(IRECV_TOT(J,I)) = INDEX
+                ENDIF
+            ENDDO
+            WRITE(18,3030) (IPR-1), IRECV_TOT(J,I)
+            WRITE(18,1130) (IRECV(K),K=1,IRECV_TOT(J,I))
+         ENDDO
+C              
+C--write the send list
+C
+         DO J = 1,NUM_COMM_PE(I)
+            IPR = COMM_PE_NUM(J,I)
+            ISEND_TOT(J,I) = 0
+            DO K = 1,NNODP(IPR)
+               INDEX = IMAP_NOD_LG(K,IPR)
+               IF (IMAP_NOD_GL(1,INDEX).EQ.I) THEN
+                 ISEND_TOT(J,I) = ISEND_TOT(J,I) + 1
+                 ISEND(ISEND_TOT(J,I)) = IMAP_NOD_GL(2,INDEX)
+c uncomment next line and comment preceding line for debugging
+c                ISEND(ISEND_TOT(J,I)) = INDEX
+               ENDIF
+            ENDDO
+            WRITE(18,3040)  IPR-1, ISEND_TOT(J,I)
+            WRITE(18,1130) (ISEND(K),K=1,ISEND_TOT(J,I))
+         ENDDO
+
+         CLOSE(18)
+C
+1000  CONTINUE
+C
+C--Compute the surface to volume ratio (in %)
+C
+      DO I = 1,NPROC
+         ITOT = 0
+         DO J = 1,NUM_COMM_PE(I)
+            ITOT = ITOT + IRECV_TOT(J,I)
+         ENDDO
+         PROC_SV(I) = (ITOT/REAL(NOD_RES_TOT(I)))*100.0
+c        WRITE(6,*) I-1,PROC_SV(I)
+      ENDDO
+C
+      print *, " "
+      print *, "Communication Data"
+      print *, "DOMAIN  COMM_PE  %(SURF/VOL)"
+      print *, "------  -------  -----------"
+      DO I=1, NPROC
+         PE(1:6) = 'PE0000'
+         CALL IWRITE(PE,3,6,I-1)
+         WRITE(6,92) PE, NUM_COMM_PE(I),PROC_SV(I)
+      ENDDO
+C
+  92  FORMAT(1X,A6,2X,I7,2X,F8.2)
+1130  FORMAT(8X,9I8)
+3010  FORMAT('RES NODE',2I8)    
+3020  FORMAT('COMM PE ',2I8)    
+3030  FORMAT('RECV PE ',2I8)    
+3040  FORMAT('SEND PE ',2I8) 
+C
+      RETURN
+      END
+
+
+Csb-DG1
+      SUBROUTINE PREPDG18()   
+      USE PRE_GLOBAL
+C
+C---------------------------------------------------------------------------C
+C                     (  Serial Version  8/30/05  )                         C 
+C  This Routine writes a message-passing file "DG.18" for each subdomain    C
+C  of the domain decomposition created by DECOMP.                           C
+C                                                                           C
+C  This version is compatible with hp_DG_ADCIRC v10_sb3                     C
+C  (S. Bunya)                                                               C
+C                                                                           C
+C---------------------------------------------------------------------------C
+C
+cjjw - added 1 line
+      IMPLICIT NONE
+      INTEGER N1,N2,N3,PE1,PE2,PE3
+      INTEGER I,J,K,L,ITEMP,IPR,IPR1
+      INTEGER INDEX,ITOT,IEL,IELG,ILNODE,IPROC,ITYPE
+      INTEGER NEL,MNEL,NRES_ELEM,IRES
+      INTEGER,ALLOCATABLE :: COMM_EL(:),RES_ELEM(:)
+      CHARACTER LOCFN*14,PE*6
+C
+C  Allocate local arrays
+C
+      ALLOCATE ( RES_ELEM(MNEP) )
+
+C
+C--Set the array size to be the maximum number of communicating elements
+C
+      MNEL = 0
+      DO I = 1,NPROC
+        IF(NIEL_RECV(I).GT.MNEL) MNEL = NIEL_RECV(I)
+        IF(NIEL_SEND(I).GT.MNEL) MNEL = NIEL_SEND(I)
+      ENDDO
+      ALLOCATE( COMM_EL(MNEL) )
+      
+C
+C--Write Message-Passing File for each PE
+C
+      DO 1000 I = 1,NPROC
+C
+        LOCFN(1:14) = 'PE0000/DG.18'
+        CALL IWRITE(LOCFN,3,6,I-1)
+        OPEN (181,FILE=LOCFN)
+C
+C--Write the Resident Node List
+C
+        NRES_ELEM = 0
+        DO J = 1,NELP(I)
+          IELG = IMAP_EL_LG(J,I)
+
+          N1 = NNEG(1,IELG)
+          N2 = NNEG(2,IELG)
+          N3 = NNEG(3,IELG)
+
+          PE1 = IMAP_NOD_GL(1,N1)
+          PE2 = IMAP_NOD_GL(1,N2)
+          PE3 = IMAP_NOD_GL(1,N3)
+
+          IF(PE1.NE.I.AND.PE2.NE.I.AND.PE3.NE.I) THEN
+            ! DO NOTHING
+          ELSE IF(PE1.EQ.I.AND.PE2.EQ.I.AND.PE3.EQ.I) THEN
+            NRES_ELEM = NRES_ELEM + 1
+          ELSE IF(PE1.EQ.I.AND.PE2.NE.I.AND.PE3.NE.I.AND.PE2.NE.PE3)THEN
+            NRES_ELEM = NRES_ELEM + 1
+          ELSE IF(PE2.EQ.I.AND.PE3.NE.I.AND.PE1.NE.I.AND.PE3.NE.PE1)THEN
+            NRES_ELEM = NRES_ELEM + 1
+          ELSE IF(PE3.EQ.I.AND.PE1.NE.I.AND.PE2.NE.I.AND.PE1.NE.PE2)THEN
+            NRES_ELEM = NRES_ELEM + 1
+          ENDIF
+        ENDDO
+
+        WRITE(181,3015) (I-1),NRES_ELEM
+
+        ITOT = 0
+        DO J = 1,NELP(I)
+          IELG = IMAP_EL_LG(J,I)
+
+          N1 = NNEG(1,IELG)
+          N2 = NNEG(2,IELG)
+          N3 = NNEG(3,IELG)
+
+          PE1 = IMAP_NOD_GL(1,N1)
+          PE2 = IMAP_NOD_GL(1,N2)
+          PE3 = IMAP_NOD_GL(1,N3)
+
+          IRES = 0
+
+          IF(PE1.NE.I.AND.PE2.NE.I.AND.PE3.NE.I) THEN
+            ! DO NOTHING
+          ELSE IF(PE1.EQ.I.AND.PE2.EQ.I.AND.PE3.EQ.I) THEN
+            IRES = 1
+          ELSE IF(PE1.EQ.I.AND.PE2.NE.I.AND.PE3.NE.I.AND.PE2.NE.PE3)THEN
+            IRES = 1
+          ELSE IF(PE2.EQ.I.AND.PE3.NE.I.AND.PE1.NE.I.AND.PE3.NE.PE1)THEN
+            IRES = 1
+          ELSE IF(PE3.EQ.I.AND.PE1.NE.I.AND.PE2.NE.I.AND.PE1.NE.PE2)THEN
+            IRES = 1
+          ENDIF
+
+          IF(IRES.EQ.1)THEN
+            ITOT = ITOT + 1
+            RES_ELEM(ITOT) = J
+          ENDIF
+        ENDDO
+        WRITE(181,1130) (RES_ELEM(J),J=1,ITOT)
+C
+C--Write the Number of Communicating PEs and the maximum number of send/receive elements
+C
+C         IF(NIEL_RECV(I).GT.NIEL_SEND(I)) THEN
+C           MNEL = NIEL_RECV(I)
+C         ELSE 
+C          MNEL = NIEL_SEND(I)
+C         ENDIF
+
+        WRITE(181,3020) NUM_COMM_PE_RECV(I),NUM_COMM_PE_SEND(I)
+C
+C--Write the Receive List
+C
+        DO J = 1,NPROC
+          NEL = 0
+          DO K = 1,NIEL_RECV(I)
+            IF(IEL_RECV(1,K,I).EQ.J) THEN
+              NEL = NEL + 1
+              COMM_EL(NEL) = IEL_RECV(2,K,I)
+            ENDIF
+          ENDDO
+          IF(NEL.GT.0) THEN
+            WRITE(181,3030) (J-1), NEL
+            WRITE(181,1130) (COMM_EL(K),K=1,NEL)
+          ENDIF
+        ENDDO
+C     
+C--   write the send list
+C     
+        DO J = 1,NPROC
+          NEL = 0
+          DO K = 1,NIEL_SEND(I)
+            IF(IEL_SEND(1,K,I).EQ.J) THEN
+              NEL = NEL + 1
+              COMM_EL(NEL) = IEL_SEND(2,K,I)
+            ENDIF
+          ENDDO
+          IF(NEL.GT.0) THEN
+            WRITE(181,3040) (J-1), NEL
+            WRITE(181,1130) (COMM_EL(K),K=1,NEL)
+          ENDIF
+        ENDDO
+
+        CLOSE(181)
+C     
+ 1000 CONTINUE
+
+      DEALLOCATE( COMM_EL )
+
+C
+C--Compute the share edge to all edge ratio (in %)
+C
+      print *, " "
+      print *, "Communication Data (DG)"
+      print *, "DOMAIN  COMM_PE  %(SHARD_EL/ALL)"
+      print *, "------  -------  ---------------"
+      DO I=1, NPROC
+         PE(1:6) = 'PE0000'
+         CALL IWRITE(PE,3,6,I-1)
+         WRITE(6,92) PE, NUM_COMM_PE(I),
+     &               (NIEL_RECV(I)+NIEL_SEND(I))/REAL(NELP(I))*100.0
+      ENDDO
+C
+  92  FORMAT(1X,A6,2X,I7,2X,F9.2)
+1130  FORMAT(8X,9I8)
+3010  FORMAT('LPE ID  ',I8)    
+3015  FORMAT('RES ELEM',2I8)    
+3020  FORMAT('COMM PE ',3I8)
+3030  FORMAT('RECV PE ',2I8)    
+3040  FORMAT('SEND PE ',2I8) 
+C
+      RETURN
+      END
+C--
+
+
+      SUBROUTINE PREP19()
+      USE PRE_GLOBAL 
+C
+C---------------------------------------------------------------------------C
+C                     (  Serial Version  2/28/98  )                         C 
+C  This routine writes a Local "Aperiodic Elevation Boundary Condtions"     C
+C  file "fort.19" file for each subdomain using the domain decomposition of C
+C  the ADCIRC grid created by the routine DECOMP.                           C
+C                                                                           C
+C  The Decomposition Variables are defined in the include file adcprep.inc  C
+C  This version is compatible with ADCIRC version 34.03                     C
+C                                                                           C
+C---------------------------------------------------------------------------C
+C
+cjjw - added 1 line
+cjjw      IMPLICIT NONE
+      INTEGER I,J,IPROC
+      INTEGER LOC(MNPROC)
+      CHARACTER*40  ETIMINC,ESBINP
+      CHARACTER*40,ALLOCATABLE :: ESBIN(:)
+      CHARACTER LOCFN*14,FNAME*60
+      LOGICAL FOUND
+C
+C--For each PE write a Local Aperiodic Elevation Boundary Conditions File 
+C
+C--Enter, Locate, Open, and Read the ADCIRC UNIT 19 
+C  Global Aperiodic Elevation Boundary Conditions file
+C
+  31  WRITE(*,*) 'Enter the name of the ADCIRC UNIT 19 file:'
+      READ(*,60) FNAME
+      INQUIRE(FILE=FNAME,EXIST=FOUND)
+      IF(FOUND) GOTO 32
+      WRITE(*,1010) FNAME
+      GOTO 31
+  32  WRITE(*,1011) FNAME
+      OPEN(11,FILE=FNAME)
+C
+C--Allocate local arrays
+C
+      ALLOCATE ( ESBIN(MNETA) )
+C
+C--Assign Logical Unit Numbers to the Local files.
+C
+      DO IPROC=1, NPROC
+         LOC(IPROC) = 105 + (IPROC-1)
+      ENDDO
+C
+C--Open each of the Local files.
+C
+      DO IPROC = 1,NPROC
+         LOCFN(1:14) = 'PE0000/fort.19'
+         CALL IWRITE(LOCFN,3,6,IPROC-1)
+         OPEN (LOC(IPROC),FILE=LOCFN)
+      ENDDO
+C
+      READ(11,40) ETIMINC
+      DO IPROC = 1,NPROC
+         WRITE(LOC(IPROC),40)  ETIMINC
+      ENDDO
+C
+C--While ( NOT EOF ) Read NETA BCs from Global File
+C
+1000  CONTINUE
+      DO I=1, NETA
+         READ(11,40,END=9999)  ESBIN(I)
+      ENDDO
+C
+      DO IPROC= 1,NPROC
+         DO I=1, NETAP(IPROC)
+            ESBINP = ESBIN(OBNODE_LG(I,IPROC))
+            WRITE(LOC(IPROC),40) ESBINP
+         ENDDO
+      ENDDO
+C
+      GO TO 1000
+C
+C--Close Global file and all the Local Files     
+C
+9999  CLOSE (11)
+      DO IPROC=1, NPROC
+         CLOSE (LOC(IPROC))
+      ENDDO
+C
+  40  FORMAT(A40)
+  60  FORMAT(A60)
+1010  FORMAT(' File ',A60,/,' WAS NOT FOUND!  Try again',/)
+1011  FORMAT(' File ',A60,/,' WAS FOUND!  Opening & Processing file',/)
+C
+      RETURN
+      END
+
+
+      SUBROUTINE PREP21()
+      USE PRE_GLOBAL 
+C
+C---------------------------------------------------------------------------C
+C                     (  Serial Version  2/28/98  )                         C 
+C  This routine writes a Local "Nodal Bottom Friction Values" file          C
+C  file "fort.21" file for each subdomain using the domain decomposition of C
+C  the ADCIRC grid created by the routine DECOMP.                           C
+C                                                                           C
+C  The Decomposition Variables are defined in the include file adcprep.inc  C
+C  This version is compatible with ADCIRC version 34.03                     C
+C                                                                           C
+C---------------------------------------------------------------------------C
+C
+cjjw - added 1 line
+cjjw      IMPLICIT NONE
+      LOGICAL FOUND
+      INTEGER I,J,IPROC
+      CHARACTER LOCFN*14,FNAME*60,AFRIC*80
+      CHARACTER*80 FRICP,OUTMSG
+      INTEGER,ALLOCATABLE :: LOC(:)
+      CHARACTER*80,ALLOCATABLE :: FRIC(:)
+C
+C--Allocate local arrays
+C
+      ALLOCATE ( FRIC(MNP) )
+      ALLOCATE ( LOC(MNPROC) )
+C
+C--For each PE write a Local Nodal Bottom Friction Values File 
+C
+C
+C--Enter, Locate, Open, and Read the ADCIRC UNIT 21 
+C  Global Nodal Bottom Friction Values File                
+C
+  31  WRITE(*,*) 'Enter the name of the ADCIRC UNIT 21 file:'
+      READ(*,60) FNAME
+      INQUIRE(FILE=FNAME,EXIST=FOUND)
+      IF(FOUND) GOTO 32
+      WRITE(*,1010) FNAME
+      GOTO 31
+  32  WRITE(*,1011) FNAME
+      OPEN(11,FILE=FNAME)
+C
+C--Assign Logical Unit Numbers to the Local files.
+C
+      DO IPROC=1, NPROC
+         LOC(IPROC) = 105 + (IPROC-1)
+      ENDDO
+C
+C--Open each of the Local files.
+C
+      DO IPROC = 1,NPROC
+         LOCFN(1:14) = 'PE0000/fort.21'
+         CALL IWRITE(LOCFN,3,6,IPROC-1)
+         OPEN (LOC(IPROC),FILE=LOCFN)
+      ENDDO
+C
+      READ(11,80) AFRIC
+      DO IPROC = 1,NPROC
+         WRITE(LOC(IPROC),80)  AFRIC
+      ENDDO
+C
+      DO I=1, NNODG
+         READ(11,80)  FRIC(I)
+         READ(FRIC(I),*) J
+         IF (J.NE.I) THEN
+           print *, "nodal friction numbering is out of sequence"
+           print *, "check your unit21 input file carefully"
+           stop
+         ENDIF
+      ENDDO
+C
+      DO IPROC= 1,NPROC
+         DO I=1, NNODP(IPROC)
+           FRICP = FRIC(IMAP_NOD_LG(I,IPROC))
+           CALL NEWINDEX(FRICP,OUTMSG,I)
+           WRITE(LOC(IPROC),80) OUTMSG   
+         ENDDO
+      ENDDO
+C
+C--Close Global file and all the Local Files     
+C
+9999  CLOSE (11)
+      DO IPROC=1, NPROC
+         CLOSE (LOC(IPROC))
+      ENDDO
+C
+  20  FORMAT(A20)
+  60  FORMAT(A60)
+  80  FORMAT(A80)
+1010  FORMAT(' File ',A60,/,' WAS NOT FOUND!  Try again',/)
+1011  FORMAT(' File ',A60,/,' WAS FOUND!  Opening & Processing file',/)
+C
+      RETURN
+      END
+
+
+      SUBROUTINE PREP22()
+      USE PRE_GLOBAL 
+C
+C---------------------------------------------------------------------------C
+C                     (  Serial Version  2/28/98  )                         C 
+C  This routine reads a global external meteorology file when NWS=1,+-2,3,  C
+C  +-4,+-5,+-6.  In each case it wites a local meteorology file of the same C
+C  format for each subdomain using the domain decomposition of the ADCIRC   C
+C  grid created by the routine DECOMP.                                      C
+C                                                                           C
+C  The Decomposition Variables are defined in the include file adcprep.inc  C 
+C  This version is compatible with ADCIRC version 43.03                     C
+C                                                                           C
+C---------------------------------------------------------------------------C
+C
+cjjw - added 1 line
+      IMPLICIT NONE
+      LOGICAL FOUND,DONE
+      INTEGER I,J,IPROC,IPROC2,ILNODE,INDEX,NHG,LINDEX
+      CHARACTER*80 PBLJAGF
+      CHARACTER FNAME*60,LOCFN*14,CMD1*63,CMD2*7,CMD*70,INLINE*80
+      INTEGER,ALLOCATABLE  :: LOC(:),NG(:)
+      REAL(SZ),ALLOCATABLE :: WVNXG(:),WVNYG(:),PRG(:)
+      REAL(SZ),ALLOCATABLE :: WVNXL(:),WVNYL(:),PRL(:)
+      REAL(SZ) U,V,PR
+C
+C--Open Global Wind Stress File ( UNIT 22 )
+C
+  31  WRITE(*,*) 'Enter the name of the Global Wind Stress file:'
+      READ(*,60) FNAME
+      INQUIRE(FILE=FNAME,EXIST=FOUND)
+      IF(FOUND) GOTO 32
+      WRITE(*,1010) FNAME
+      GOTO 31
+  32  WRITE(*,1011) FNAME
+      OPEN(22,FILE=FNAME)
+C
+C Allocate local work arrays
+C
+      ALLOCATE ( LOC(MNPROC),NG(MNWP) )
+      ALLOCATE ( WVNXG(MNWP),WVNYG(MNWP),PRG(MNWP) )
+      ALLOCATE ( WVNXL(MNWP),WVNYL(MNWP),PRL(MNWP) )
+C
+C--Open All Local Wind Stress Files 
+C
+      DO IPROC = 1,NPROC
+         LOC(IPROC) = 105 + (IPROC-1)
+         LOCFN(1:14) = 'PE0000/fort.22'
+         CALL IWRITE(LOCFN,3,6,IPROC-1)
+         OPEN (LOC(IPROC),FILE=LOCFN)
+      ENDDO
+C
+C--Branch to Appropriate Code
+C
+      IF ((NWS.EQ.1).OR.(ABS(NWS).EQ.2).OR.(ABS(NWS).EQ.5)) THEN
+        GOTO 1000
+        ELSEIF ((NWS.EQ.3).OR.(ABS(NWS).EQ.6)) THEN
+        GO TO 2000
+        ELSEIF (ABS(NWS).EQ.4) THEN
+        GO TO 3000
+        ELSE
+        print *, "NWS=",NWS, " has incorect value in PREP22"
+        RETURN
+        ENDIF
+C
+C--------------------------------------------------------------------------
+C--MAIN LOOP FOR NWS = 1, +-2,+-5
+C   (1)  Read a record from Global Wind Stress File
+C   (2)  Use Decomp arrarys to Localize record to a subdomain
+C   (3)  Write Local Wind Stress record in same format 
+C--------------------------------------------------------------------------
+C
+1000  CONTINUE
+C
+      READ(22,*,END=9999)  (NG(I),WVNXG(I),WVNYG(I),PRG(I),I=1,NNODG)
+C
+      DO IPROC = 1,NPROC
+         DO I=1, NNODP(IPROC)
+            INDEX = IMAP_NOD_LG(I,IPROC)
+            WVNXL(I) = WVNXG(INDEX)
+            WVNYL(I) = WVNYG(INDEX)
+            PRL(I) = PRG(INDEX)
+         ENDDO
+         DO I=1, NNODP(IPROC)
+            WRITE(LOC(IPROC),1100)  I,WVNXL(I),WVNYL(I),PRL(I)
+         ENDDO
+      ENDDO
+      GO TO 1000
+C
+C--------------------------------------------------------------------------
+C--CASE NWS=3 ( Naval Fleet Numeric Format ) or NWS=+-6 (generic)
+C   (1) Make a copy for each PE using the UNIX Sytem cp command
+C       Note: ISHELL is a wrapper defined in the file mach_dep.f
+C--------------------------------------------------------------------------
+C
+2000  CONTINUE
+C
+Cvjp--Close the Global and all Local files before the file copies
+C
+      CLOSE(22)
+      DO IPROC=1, NPROC
+         CLOSE (LOC(IPROC))
+      ENDDO
+C
+      DO IPROC = 1,NPROC
+         CMD1(1:63) = 'cp '//FNAME          
+         CMD2(1:7) = ' PE0000'
+         CALL IWRITE(CMD2,4,7,IPROC-1)
+         CMD(1:70) = CMD1//CMD2
+         CALL ISHELL(CMD)
+      ENDDO
+      GO TO 99  
+C
+C--------------------------------------------------------------------------
+C--MAIN LOOP FOR NWS = +- 4  ( PBL Format )
+C   (1)  Read a record from Global Wind Stress File
+C   (2)  Use Decomp arrarys to Localize record to a subdomain
+C   (3)  Write out in PBL Format on subdomain
+C--------------------------------------------------------------------------
+C
+3000  CONTINUE
+C
+C--Read a wind field record from the global input file
+C
+  170 READ(22,'(A80)',END=9999) PBLJAGF
+      IF(PBLJAGF(2:2).EQ.'#') THEN
+        DO IPROC = 1,NPROC
+          WRITE(LOC(IPROC),1101)
+          WRITE(LOC(IPROC),1100) 1,0.0,0.0,0.0            !victor didn't like this line 27/11/03
+          ENDDO
+        ELSE
+! vjp 27/11/03 
+! rewrote this section to handle ghost-nodes 
+        READ(PBLJAGF,'(I8,3E13.5)',END=9999) NHG,U,V,PR
+        DO J=1, ITOTPROC(NHG)
+           IPROC  = IMAP_NOD_GL2(2*(J-1)+1,NHG)
+           LINDEX = IMAP_NOD_GL2(2*(J-1)+2,NHG)
+           WRITE(LOC(IPROC),1100) LINDEX,U,V,PR
+        ENDDO
+        ENDIF
+
+      GOTO 170
+C
+C--Close Global file and all the Local Files     
+C
+9999  CLOSE (22)
+      DO IPROC=1, NPROC
+         CLOSE (LOC(IPROC))
+      ENDDO
+
+  60  FORMAT(A60)
+1010  FORMAT(' File ',A60,/,' WAS NOT FOUND!  Try again',/)
+1011  FORMAT(' File ',A60,/,' WAS FOUND!  Opening & Processing file',/)
+1100  FORMAT(I8,3E13.5)
+1101  FORMAT(' #')
+
+  99  RETURN
+      END
+
+
+      SUBROUTINE PREP23()
+      USE PRE_GLOBAL
+C
+C---------------------------------------------------------------------------C
+C                           (  add MEB 03/04/03  )                          C
+C  This routine writes a Local Input file "fort.23" file for each subdomain C
+C  using the domain decomposition of the ADCIRC grid created by the routine C
+C  DECOMP.                                                                  C
+C                                                                           C
+C  The Decomposition Variables are defined in the include file adcprep.inc  C
+C  This version is compatible with ADCIRC version 34.03                     C
+C                                                                           C
+C---------------------------------------------------------------------------C
+C
+      IMPLICIT NONE
+      LOGICAL FOUND,DONE
+      INTEGER IPROC, NHG, J, LINDEX
+      CHARACTER FNAME*60,LOCFN*14
+      CHARACTER*80 PBLJAGF
+      INTEGER,ALLOCATABLE  :: LOC(:)
+      REAL(SZ)                U,V
+C
+C--Open Global Wave Stress File ( UNIT 23 )
+C 
+  31  WRITE(*,*) 'Enter the name of the Global Wave Stress file:'
+      READ(*,60) FNAME
+      INQUIRE(FILE=FNAME,EXIST=FOUND)
+      IF(FOUND) GOTO 32
+      WRITE(*,1010) FNAME                                                    
+      GOTO 31                                                               
+  32  WRITE(*,1011) FNAME                                                   
+      OPEN(23,FILE=FNAME)                                                  
+C                                                                      
+C Allocate local work arrays                                        
+C                                                              
+      ALLOCATE ( LOC(MNPROC) )                       
+C                                                      
+C--Open All Local Wave Stress Files                     
+C                                     
+      DO IPROC = 1,NPROC                        
+         LOC(IPROC) = 105 + (IPROC-1)          
+         LOCFN(1:14) = 'PE0000/fort.23'     
+         CALL IWRITE(LOCFN,3,6,IPROC-1)     
+         OPEN (LOC(IPROC),FILE=LOCFN)         
+      ENDDO                               
+C--------------------------------------------------------------------------
+C--MAIN LOOP
+C   (1)  Read a record from Global Wave Stress File
+C   (2)  Use Decomp arrays to Localize record to a subdomain
+C   (3)  Write Local Wave Stress record in standard PBL format
+C--------------------------------------------------------------------------
+C 
+C--Read a wave field record from the global input file                         
+C--and write out to respective local fort.23 file.                                    
+C
+  170 READ(23,'(A80)',END=9999) PBLJAGF
+      IF(PBLJAGF(2:2).EQ.'#') THEN
+        DO IPROC = 1,NPROC
+          WRITE(LOC(IPROC),1101)
+          WRITE(LOC(IPROC),1100) 1,0.0,0.0   !victor didn't like this line 27/11/03
+          ENDDO
+      ELSE
+! vjp 27/11/03 
+! rewrote this section to handle ghost-nodes 
+! and changed if test from "and" to "or"
+        READ(PBLJAGF,'(I8,2E13.5)',END=9999) NHG,U,V
+        IF ((U.NE.0.).OR.(V.NE.0.)) THEN
+          DO J=1, ITOTPROC(NHG)
+             IPROC  = IMAP_NOD_GL2(2*(J-1)+1,NHG)
+             LINDEX = IMAP_NOD_GL2(2*(J-1)+2,NHG)
+             WRITE(LOC(IPROC),1100) LINDEX,U,V
+          ENDDO
+        ENDIF
+      ENDIF
+
+      GOTO 170
+
+9999  CLOSE(23)
+      DO IPROC=1,NPROC
+        CLOSE(LOC(IPROC))
+      ENDDO
+
+  60  FORMAT(A60)
+1010  FORMAT(' File ',A60,/,' WAS NOT FOUND!  Try again',/)
+1011  FORMAT(' File ',A60,/,' WAS FOUND!  Opening & Processing file',/)
+1100  FORMAT(I8,2E13.5)
+1101  FORMAT (' #')
+
+  99  RETURN
+      END
+
+
+      SUBROUTINE PREP67_68()
+      USE PRE_GLOBAL 
+C
+C---------------------------------------------------------------------------C
+C                     written 10/11/01 by RL                                C
+C             started mods for harmonic analysis and 3D RL 5/22/03          C
+C                                                                           C  
+C  This routine reads the global hot start file (either fort.67 or fort.68) C
+C  and writes local hot start files of the same format.                     C
+C                                                                           C
+C---------------------------------------------------------------------------C
+C
+      IMPLICIT NONE
+      LOGICAL FOUND
+C     LOGICAL CHARMV
+      INTEGER I,J,IPROC,LOCHSF,INDEX,IHOTSTP
+      INTEGER IMHSF,ITHSF
+      INTEGER IESTP,NSCOUE,IVSTP,NSCOUV,ICSTP,NSCOUC,IPSTP,IWSTP,NSCOUM,
+     &        IGEP,NSCOUGE,IGVP,NSCOUGV,IGCP,NSCOUGC,IGPP,IGWP,NSCOUGW
+      CHARACTER FNAME*60,LOCFN*14
+      CHARACTER*16 FNAME1
+      CHARACTER*8 FNAM8(2)
+      EQUIVALENCE (FNAM8(1),FNAME1)
+
+      INTEGER,ALLOCATABLE  :: LOC(:),NODECODE(:)
+      REAL(SZ),ALLOCATABLE :: ETA1(:),ETA2(:),UU2(:),VV2(:),CH1(:)
+      REAL(8) TIMEHSF
+
+      INTEGER INZ,INF,IMM,INP,INSTAE,INSTAV,IISTAE,IISTAV,IIGLOE,IIGLOV,
+     &                                       IICALL,INFREQ,ITUD,NTSTEPS
+      INTEGER IHARIND,ITHAS,ITHAF,ITMV,IHABEG,ICHA
+      CHARACTER*10,ALLOCATABLE     ::  INAMEFR(:)
+      REAL(8)  TIMEUD
+      REAL(SZ),ALLOCATABLE ::  HA(:,:)
+      REAL(SZ),ALLOCATABLE ::  ELAV(:),ELVA(:),XVELAV(:),XVELVA(:),
+     &                                         YVELAV(:),YVELVA(:)
+      REAL(SZ),ALLOCATABLE ::  IFREQ(:),IFF(:),IFACE(:)    
+      REAL(SZ),ALLOCATABLE ::  GLOELV(:,:)
+      REAL(SZ),ALLOCATABLE ::  GLOULV(:,:),GLOVLV(:,:)
+      REAL(SZ),ALLOCATABLE ::  STAELV(:,:)
+      REAL(SZ),ALLOCATABLE ::  STAULV(:,:),STAVLV(:,:)
+
+      ALLOCATE ( HA(2*MNHARF,2*MNHARF) )
+      ALLOCATE ( GLOELV(2*MNHARF,MNP) )
+      ALLOCATE ( GLOULV(2*MNHARF,MNP),GLOVLV(2*MNHARF,MNP) )
+      ALLOCATE ( STAELV(2*MNHARF,MNSTAE) )
+      ALLOCATE ( STAULV(2*MNHARF,MNSTAV),STAVLV(2*MNHARF,MNSTAV) )
+      ALLOCATE ( ELAV(MNP),ELVA(MNP) )
+      ALLOCATE ( XVELAV(MNP),XVELVA(MNP),YVELAV(MNP),YVELVA(MNP) )
+      ALLOCATE ( IFREQ(MNHARF),IFF(MNHARF),IFACE(MNHARF) )
+      ALLOCATE ( INAMEFR(MNHARF) )
+
+C
+C Allocate local work arrays
+C
+      ALLOCATE ( LOC(MNPROC) )
+      ALLOCATE ( ETA1(MNP),ETA2(MNP),UU2(MNP),
+     &                               VV2(MNP),NODECODE(MNP),CH1(MNP) )
+
+C
+C--Open Appropriate Hot Start File based on the value of IHOT from the fort.15 file 
+C
+      IF(IHOT.EQ.67) FNAME='fort.67'
+      IF(IHOT.EQ.68) FNAME='fort.68'
+
+      INQUIRE(FILE=FNAME,EXIST=FOUND)
+      IF (FOUND) THEN
+        WRITE(*,1011) FNAME
+        OPEN(IHOT,FILE=FNAME,ACCESS='DIRECT',RECL=8)
+        ELSE
+        WRITE(*,1010) FNAME
+        STOP
+        ENDIF
+        
+1010  FORMAT(' File ',A60,/,' WAS NOT FOUND!  ADCPrep Terminated!!!',/)
+1011  FORMAT(' File ',A60,/,' WAS FOUND!  Opening & Processing file',/)
+
+C
+C--Open All Local Hot Start files 
+C
+      DO IPROC = 1,NPROC
+        LOC(IPROC) = 105 + (IPROC-1)
+        IF(IHOT.EQ.67) LOCFN(1:14) = 'PE0000/fort.67'
+        IF(IHOT.EQ.68) LOCFN(1:14) = 'PE0000/fort.68'         
+        CALL IWRITE(LOCFN,3,6,IPROC-1)
+        OPEN (LOC(IPROC),FILE=LOCFN,ACCESS='DIRECT',RECL=8)
+        ENDDO
+C
+C--Read in info from global hot start files
+
+      IHOTSTP=1
+      READ(IHOT,REC=IHOTSTP) IMHSF
+      IHOTSTP=2
+      READ(IHOT,REC=IHOTSTP) TIMEHSF
+      IHOTSTP=3
+      READ(IHOT,REC=IHOTSTP) ITHSF
+      DO I=1,MNP
+        READ(IHOT,REC=IHOTSTP+1) ETA1(I)
+        READ(IHOT,REC=IHOTSTP+2) ETA2(I)
+        READ(IHOT,REC=IHOTSTP+3) UU2(I)
+        READ(IHOT,REC=IHOTSTP+4) VV2(I)
+        IHOTSTP = IHOTSTP + 4
+        IF(IM.EQ.10) THEN
+          READ(IHOT,REC=IHOTSTP+1) CH1(I)
+          IHOTSTP=IHOTSTP+1
+          ENDIF
+        READ(IHOT,REC=IHOTSTP+1) NODECODE(I)
+        IHOTSTP=IHOTSTP+1
+        END DO
+
+      READ(IHOT,REC=IHOTSTP+1) IESTP
+      READ(IHOT,REC=IHOTSTP+2) NSCOUE
+      IHOTSTP=IHOTSTP+2
+      READ(IHOT,REC=IHOTSTP+1) IVSTP
+      READ(IHOT,REC=IHOTSTP+2) NSCOUV
+      IHOTSTP=IHOTSTP+2
+      READ(IHOT,REC=IHOTSTP+1) ICSTP
+      READ(IHOT,REC=IHOTSTP+2) NSCOUC
+      IHOTSTP=IHOTSTP+2
+      READ(IHOT,REC=IHOTSTP+1) IPSTP
+      READ(IHOT,REC=IHOTSTP+2) IWSTP
+      READ(IHOT,REC=IHOTSTP+2) NSCOUM
+      IHOTSTP=IHOTSTP+3
+      READ(IHOT,REC=IHOTSTP+1) IGEP
+      READ(IHOT,REC=IHOTSTP+2) NSCOUGE
+      IHOTSTP=IHOTSTP+2
+      READ(IHOT,REC=IHOTSTP+1) IGVP
+      READ(IHOT,REC=IHOTSTP+2) NSCOUGV
+      IHOTSTP=IHOTSTP+2
+      READ(IHOT,REC=IHOTSTP+1) IGCP
+      READ(IHOT,REC=IHOTSTP+2) NSCOUGC
+      IHOTSTP=IHOTSTP+2
+      READ(IHOT,REC=IHOTSTP+1) IGPP
+      READ(IHOT,REC=IHOTSTP+2) IGWP
+      READ(IHOT,REC=IHOTSTP+3) NSCOUGW
+      IHOTSTP=IHOTSTP+3
+
+C.....DETERMINE HARMONIC ANALYSIS PARAMETERS
+
+      IHARIND=NHARFR*(NHASE+NHASV+NHAGE+NHAGV)
+      IF(IHARIND.GT.0) IHARIND=1
+
+C.....IF HARMONIC ANALYSIS IS INCLUDED IN THE RUN, PROCESS HOT START INFORMATION FOR
+C.....IN PROGRESS HARMONIC ANALYSIS      
+
+      IF(IHARIND.EQ.1) THEN
+        ITHAS=INT((THAS-STATIM)*(86400.D0/DT) + 0.5d0)
+        ITHAF=INT((THAF-STATIM)*(86400.D0/DT) + 0.5d0)
+        ITMV = ITHAF - (ITHAF-ITHAS)*FMV
+        IHABEG=ITHAS+NHAINC
+
+C.......IF HARMONIC ANALYSIS HAS ALREADY BEGUN, READ IN HOT START
+C........HARMONIC ANALYSIS, MEAN AND SQUARE INFO
+
+        IF(ITHSF.GT.ITHAS) THEN
+          IHOTSTP=IHOTSTP+1
+          READ(IHOT,REC=IHOTSTP) ICHA
+          ENDIF
+
+        IF(ITHSF.GE.IHABEG) THEN
+          READ(IHOT,REC=IHOTSTP+1) INZ
+          READ(IHOT,REC=IHOTSTP+2) INF
+          READ(IHOT,REC=IHOTSTP+3) IMM
+          READ(IHOT,REC=IHOTSTP+4) INP
+          READ(IHOT,REC=IHOTSTP+5) INSTAE
+          READ(IHOT,REC=IHOTSTP+6) INSTAV
+          READ(IHOT,REC=IHOTSTP+7) IISTAE
+          READ(IHOT,REC=IHOTSTP+8) IISTAV
+          READ(IHOT,REC=IHOTSTP+9) IIGLOE
+          READ(IHOT,REC=IHOTSTP+10) IIGLOV
+          READ(IHOT,REC=IHOTSTP+11) IICALL
+          READ(IHOT,REC=IHOTSTP+12) INFREQ
+          IHOTSTP = IHOTSTP+12
+
+          DO I=1,INFREQ+INF
+            READ(IHOT,REC=IHOTSTP+1) FNAM8(1)
+            READ(IHOT,REC=IHOTSTP+2) FNAM8(2)
+            IHOTSTP = IHOTSTP + 2
+            INAMEFR(I) = FNAME1
+            READ(IHOT,REC=IHOTSTP+1) IFREQ(I)
+            READ(IHOT,REC=IHOTSTP+2) IFF(I)
+            READ(IHOT,REC=IHOTSTP+3) IFACE(I)
+            IHOTSTP = IHOTSTP + 3
+            ENDDO
+
+          READ(IHOT,REC=IHOTSTP+1) TIMEUD
+          READ(IHOT,REC=IHOTSTP+2) ITUD
+          IHOTSTP = IHOTSTP + 2
+
+          DO I=1,IMM
+            DO J=1,IMM
+              IHOTSTP = IHOTSTP + 1
+              READ(IHOT,REC=IHOTSTP) HA(I,J)
+              ENDDO
+            ENDDO
+
+          IF(NHASE.EQ.1) THEN
+            DO J=1,INSTAE
+              DO I=1,IMM
+                IHOTSTP=IHOTSTP+1
+                READ(IHOT,REC=IHOTSTP) STAELV(I,J)
+                ENDDO
+              ENDDO
+            ENDIF
+
+          IF(NHASV.EQ.1) THEN
+            DO J=1,INSTAV
+              DO I=1,IMM
+                READ(IHOT,REC=IHOTSTP+1) STAULV(I,J)
+                READ(IHOT,REC=IHOTSTP+2) STAVLV(I,J)
+                IHOTSTP = IHOTSTP + 2
+                ENDDO
+              ENDDO
+            ENDIF
+
+          IF(NHAGE.EQ.1) THEN
+            DO J=1,INP
+              DO I=1,IMM
+                IHOTSTP=IHOTSTP+1
+                READ(IHOT,REC=IHOTSTP) GLOELV(I,J)
+                ENDDO
+              ENDDO
+            ENDIF
+
+          IF(NHAGV.EQ.1) THEN
+            DO J=1,INP
+              DO I=1,IMM
+                READ(IHOT,REC=IHOTSTP+1) GLOULV(I,J)
+                READ(IHOT,REC=IHOTSTP+2) GLOVLV(I,J)
+                IHOTSTP = IHOTSTP + 2
+                ENDDO
+              ENDDO
+            ENDIF
+
+          ENDIF
+
+        IF((FMV.GT.0.).AND.(INFREQ.GT.0).AND.(IM.EQ.0)) THEN   !include means and variances
+          IF(ITHSF.GT.ITMV) THEN
+            IHOTSTP=IHOTSTP+1
+            READ(IHOT,REC=IHOTSTP) NTSTEPS
+            IF(NHAGE.EQ.1) THEN
+              DO I=1,INP
+                READ(IHOT,REC=IHOTSTP+1) ELAV(I)
+                READ(IHOT,REC=IHOTSTP+2) ELVA(I)
+                IHOTSTP=IHOTSTP+2
+                ENDDO
+              ENDIF
+            IF(NHAGV.EQ.1) THEN
+              DO I=1,INP
+                READ(IHOT,REC=IHOTSTP+1) XVELAV(I)
+                READ(IHOT,REC=IHOTSTP+2) YVELAV(I)
+                READ(IHOT,REC=IHOTSTP+3) XVELVA(I)
+                READ(IHOT,REC=IHOTSTP+4) YVELVA(I)
+                IHOTSTP=IHOTSTP+4
+                ENDDO
+              ENDIF
+            ENDIF
+          ENDIF
+ 
+        ENDIF
+
+
+C     STILL NEED TO READ IN 3D HOTSTART STUFF HERE
+
+C
+C--Write out info to local hot start files
+C
+      DO IPROC = 1,NPROC
+        LOCHSF=LOC(IPROC)
+        IHOTSTP=1
+        WRITE(LOCHSF,REC=IHOTSTP) IMHSF
+        IHOTSTP=2
+        WRITE(LOCHSF,REC=IHOTSTP) TIMEHSF
+        IHOTSTP=3
+        WRITE(LOCHSF,REC=IHOTSTP) ITHSF
+        DO I=1, NNODP(IPROC)
+          INDEX = IMAP_NOD_LG(I,IPROC)
+          WRITE(LOCHSF,REC=IHOTSTP+1) ETA1(INDEX)
+          WRITE(LOCHSF,REC=IHOTSTP+2) ETA2(INDEX)
+          WRITE(LOCHSF,REC=IHOTSTP+3) UU2(INDEX)
+          WRITE(LOCHSF,REC=IHOTSTP+4) VV2(INDEX)
+          IHOTSTP = IHOTSTP + 4
+          IF(IM.EQ.10) THEN
+            WRITE(LOCHSF,REC=IHOTSTP+1) CH1(INDEX)
+            IHOTSTP=IHOTSTP+1
+            ENDIF
+          WRITE(LOCHSF,REC=IHOTSTP+1) NODECODE(INDEX)
+          IHOTSTP=IHOTSTP+1
+          END DO
+        WRITE(LOCHSF,REC=IHOTSTP+1) IESTP
+        WRITE(LOCHSF,REC=IHOTSTP+2) NSCOUE
+        IHOTSTP=IHOTSTP+2
+        WRITE(LOCHSF,REC=IHOTSTP+1) IVSTP
+        WRITE(LOCHSF,REC=IHOTSTP+2) NSCOUV
+        IHOTSTP=IHOTSTP+2
+        WRITE(LOCHSF,REC=IHOTSTP+1) ICSTP
+        WRITE(LOCHSF,REC=IHOTSTP+2) NSCOUC
+        IHOTSTP=IHOTSTP+2
+        WRITE(LOCHSF,REC=IHOTSTP+1) IPSTP
+        WRITE(LOCHSF,REC=IHOTSTP+2) IWSTP
+        WRITE(LOCHSF,REC=IHOTSTP+2) NSCOUM
+        IHOTSTP=IHOTSTP+3
+        WRITE(LOCHSF,REC=IHOTSTP+1) IGEP
+        WRITE(LOCHSF,REC=IHOTSTP+2) NSCOUGE
+        IHOTSTP=IHOTSTP+2
+        WRITE(LOCHSF,REC=IHOTSTP+1) IGVP
+        WRITE(LOCHSF,REC=IHOTSTP+2) NSCOUGV
+        IHOTSTP=IHOTSTP+2
+        WRITE(LOCHSF,REC=IHOTSTP+1) IGCP
+        WRITE(LOCHSF,REC=IHOTSTP+2) NSCOUGC
+        IHOTSTP=IHOTSTP+2
+        WRITE(LOCHSF,REC=IHOTSTP+1) IGPP
+        WRITE(LOCHSF,REC=IHOTSTP+2) IGWP
+        WRITE(LOCHSF,REC=IHOTSTP+3) NSCOUGW
+        IHOTSTP=IHOTSTP+3
+ 
+C....IF APPROPRIATE, WRITE OUT HOT START INFORMATION FOR IN PROGRESS HARMONIC ANALYSIS
+
+c       IF((IHARIND.EQ.1).AND.(ITHSF.GT.ITHAS)) THEN
+c         WRITE(LOCHSF,REC=IHOTSTP+1) ICHA
+c         IHOTSTP = IHOTSTP + 1
+c         CALL HAHOUT(NP,NSTAE,NSTAV,NHASE,NHASV,NHAGE,NHAGV,
+c    &                LOCHSF,IHOTSTP)
+c
+c         IF(NHASE.EQ.1) CALL HAHOUTES(NSTAE,LOCHSF,IHOTSTP)
+c         IF(NHASV.EQ.1) CALL HAHOUTVS(NSTAV,LOCHSF,IHOTSTP)
+c         IF(NHAGE.EQ.1) CALL HAHOUTEG(MNP,LOCHSF,IHOTSTP)
+c         IF(NHAGV.EQ.1) CALL HAHOUTVG(MNP,LOCHSF,IHOTSTP)
+c         ENDIF
+c
+c       if(CHARMV) then
+c         IF((IHARIND.EQ.1).AND.(ITHSF.GT.ITMV)) THEN
+c           IHOTSTP=IHOTSTP+1
+c           WRITE(LOCHSF,REC=IHOTSTP) NTSTEPS
+c           IF(NHAGE.EQ.1) THEN
+c             DO I=1, NNODP(IPROC)
+c               INDEX = IMAP_NOD_LG(I,IPROC)
+c               DO I=1,MNP
+c                 WRITE(LOCHSF,REC=IHOTSTP+1) ELAV(INDEX)
+c                 WRITE(LOCHSF,REC=IHOTSTP+2) ELVA(INDEX)
+c                 IHOTSTP=IHOTSTP+2
+c                 END DO
+c             ENDIF
+c           IF(NHAGV.EQ.1) THEN
+c             DO I=1,NNODP(IPROC)
+c               WRITE(LOCHSF,REC=IHOTSTP+1) XVELAV(INDEX)
+c               WRITE(LOCHSF,REC=IHOTSTP+2) YVELAV(INDEX)
+c               WRITE(LOCHSF,REC=IHOTSTP+3) XVELVA(INDEX)
+c               WRITE(LOCHSF,REC=IHOTSTP+4) YVELVA(INDEX)
+c               IHOTSTP=IHOTSTP+4
+c               END DO
+c             ENDIF
+c           ENDIF
+c         ENDIF               
+
+
+C   STILL NEED TO WRITE OUT 3D HOTSTART STUFF HERE
+
+
+        ENDDO
+
+C
+C--Close Global file and all the Local Files     
+C
+      CLOSE (IHOT)
+      DO IPROC=1, NPROC
+        CLOSE (LOC(IPROC))
+        ENDDO
+C
+      RETURN
+      END
+
+
+      SUBROUTINE PREP80()
+      USE PRE_GLOBAL 
+C
+C---------------------------------------------------------------------------C
+C                     (  Serial Version  2/28/98  )                         C 
+C  This routine writes the domain decomposition information into a file,    C
+C  "fort.80".  This file is used by the ADCIRC post-processor ADCPOST.      C
+C  This version is compatible with ADCIRC version 34.03                     C
+C                                                                           C
+C---------------------------------------------------------------------------C
+C
+cjjw - added 1 line
+cjjw      IMPLICIT NONE
+      INTEGER I,K
+C
+      OPEN(UNIT=80,FILE='fort.80')              ! output for ADCPOST
+C
+C--Write out the domain decomposition information into a file
+C  which will later be used in post-processing the results
+C
+      WRITE(80,80) RUNDES
+      WRITE(80,80) RUNID
+      WRITE(80,80) AGRID
+      WRITE(80,'(2I8,16x,A)') NELG,NNODG,'! Total # elements & nodes'
+      WRITE(80,'(I8,24x,A)') NPROC,'! Number of processors'
+      WRITE(80,'(I8,24x,A)')  MNPP,'! Max nodes on any processor'
+Csb
+      WRITE(80,*)  MNEP                     ! Max elements on any PE 
+Csb--
+      WRITE(80,'(I8,24x,A)') NSTAE,'! NSTAE'
+      WRITE(80,'(I8,24x,A)') NSTAV,'! NSTAV'
+      WRITE(80,'(I8,24x,A)') MNHARF,'! MNHARF'
+      WRITE(80,'(2I8,16x,A)') MNWLAT,MNWLON,'! NWLON, NWLAT'
+
+C
+      DO I = 1,NPROC
+         WRITE(80,'(3I8,A33)') I-1, NNODP(I), NOD_RES_TOT(I), 
+     &             '  ! PE, NNODP(PE), NOD_RES_TOT(PE)'
+         WRITE(80,1130) (IMAP_NOD_LG(K,I),K=1,NNODP(I))
+      ENDDO
+C
+Csb
+C-- Map local element to global
+C 
+      DO I = 1,NPROC
+         WRITE(80,'(2I8,A16)') I-1, NELP(I),
+     &             '  ! PE, NELP(PE)'
+         WRITE(80,1130) (IMAP_EL_LG(K,I),K=1,NELP(I))
+      ENDDO
+C--
+C
+      WRITE(80,*) "GLOBAL   PE     LOCAL   ( Global-to-Local Nodes )"
+      DO I = 1,NNODG
+         WRITE(80,1140) I, IMAP_NOD_GL(1,I)-1, IMAP_NOD_GL(2,I)
+      ENDDO
+C
+      WRITE(80,'(I8,2E15.8,I8,A32)') NOUTE,TOUTSE,TOUTFE,NSPOOLE, 
+     &    '   ! NOUTE,TOUTSE,TOUTFE,NSPOOLE'
+C
+      DO I = 1,NPROC
+         WRITE(80,*) I,NSTAEP(I)
+         DO K = 1,NSTAEP(I)
+            WRITE(80,*) IMAP_STAE_LG(K,I)
+         ENDDO
+      ENDDO
+C
+      WRITE(80,'(I8,2E15.8,I8,A32)') NOUTV,TOUTSV,TOUTFV,NSPOOLV,
+     &    '   ! NOUTV,TOUTSV,TOUTFV,NSPOOLV'
+C
+      DO I = 1,NPROC
+         WRITE(80,*) I,NSTAVP(I)
+         DO K = 1,NSTAVP(I)
+            WRITE(80,*) IMAP_STAV_LG(K,I)
+         ENDDO
+      ENDDO
+C
+      WRITE(80,'(I8,2E15.8,I8,A32)') NOUTGE, TOUTSGE,TOUTFGE,NSPOOLGE,
+     &    '   ! NOUTGE, TOUTSGE, TOUTFGE, NSPOOLGE'
+C
+      WRITE(80,'(I8,2E15.8,I8,A32)') NOUTGV, TOUTSGV,TOUTFGV,NSPOOLGV,
+     &    '   ! NOUTGV, TOUTSGV, TOUTFGV, NSPOOLGV'
+C
+      WRITE(80,'(I8,2E15.8,I8,A32)') NOUTGC, TOUTSGC,TOUTFGC,NSPOOLGC,
+     &    '   ! NOUTGC, TOUTSGC, TOUTFGC, NSPOOLGC'
+C
+      WRITE(80,'(I8,2E15.8,I8,A32)') NOUTGW, TOUTSGW,TOUTFGW,NSPOOLGW,
+     &    '   ! NOUTGW, TOUTSGW, TOUTFGW, NSPOOLGW'
+C
+      WRITE(80,'(4I4,A32)') NHASE,NHASV,NHAGE,NHAGV,
+     &    '   ! NHASE, NHASV, NHAGE, NHAGV'
+C
+C--Start 3D data
+      WRITE(80,81) I3DSD, TO3DSSD, TO3DFSD, NSPO3DSD, NHN3DSD,
+     &       '   ! I3DSD, TO3DSSD, TO3DFSD, NSPO3DSD, NHN3DSD'
+      IF(I3DSD.GT.0) THEN
+        DO I = 1,NPROC
+           WRITE(80,*) I,N3DSDP(I)
+           DO K = 1,N3DSDP(I)
+              WRITE(80,*) IMAP_3DSD_LG(K,I)
+           ENDDO
+        ENDDO
+      ENDIF
+      WRITE(80,81) I3DSV, TO3DSSV, TO3DFSV, NSPO3DSV, NHN3DSV,
+     &       '   ! I3DSV, TO3DSSV, TO3DFSV, NSPO3DSV, NHN3DSV'
+      IF(I3DSV.GT.0) THEN
+        DO I = 1,NPROC
+           WRITE(80,*) I,N3DSVP(I)
+           DO K = 1,N3DSVP(I)
+              WRITE(80,*) IMAP_3DSV_LG(K,I)
+           ENDDO
+        ENDDO
+      ENDIF
+      WRITE(80,81) I3DST, TO3DSST, TO3DFST, NSPO3DST, NHN3DST,
+     &       '   ! I3DST, TO3DSST, TO3DFST, NSPO3DST, NHN3DST'
+      IF(I3DST.GT.0) THEN
+        DO I = 1,NPROC
+           WRITE(80,*) I,N3DSTP(I)
+           DO K = 1,N3DSTP(I)
+              WRITE(80,*) IMAP_3DST_LG(K,I)
+           ENDDO
+        ENDDO
+      ENDIF
+      WRITE(80,82) I3DGD, TO3DSGD, TO3DFGD, NSPO3DGD,
+     &       '   ! I3DGD, TO3DSGD, TO3DFGD, NSPO3DGD'
+      WRITE(80,82) I3DGV, TO3DSGV, TO3DFGV, NSPO3DGV,
+     &       '   ! I3DGV, TO3DSGV, TO3DFGV, NSPO3DGV'
+      WRITE(80,82) I3DGT, TO3DSGT, TO3DFGT, NSPO3DGT,
+     &       '   ! I3DGT, TO3DSGT, TO3DFGT, NSPO3DGT'
+C--End 3D data
+C
+C
+      WRITE(80,*) NBYTE
+C
+      CLOSE(80)
+C
+  80  FORMAT(A80)
+  81  FORMAT(I8,2E15.8,2I8,A32)
+  82  FORMAT(I8,2E15.8,I8,A32)
+1130  FORMAT(8X,9I8)
+1140  FORMAT(8X,3I8)
+C
+      RETURN
+      END
+
+
+Csb--
+      SUBROUTINE PREP_DG()
+      USE PRE_GLOBAL
+C
+C---------------------------------------------------------------------------C
+C                     (  Serial Version  8/4/05  )                          C 
+C  This routine writes a "fort.dg" file for each subdomain.                 C
+C---------------------------------------------------------------------------C
+C
+      IMPLICIT NONE
+      LOGICAL FOUND
+      INTEGER IPROC
+      CHARACTER LOCFN*14
+      CHARACTER*80 LINE
+      
+      INQUIRE(FILE='fort.dg',EXIST=FOUND)
+      IF(FOUND) GOTO 10
+      WRITE(*,*) 'FILE fort.dg WAS NOT FOUND.  NOT COPIED.'
+      RETURN
+
+ 10   OPEN(151,FILE='fort.dg')
+
+      DO IPROC = 1,NPROC
+
+        REWIND(151)
+
+        LOCFN(1:14) = 'PE0000/fort.dg'
+        CALL IWRITE(LOCFN,3,6,IPROC-1)
+        OPEN (1151,FILE=LOCFN)
+
+        DO WHILE (.TRUE.) 
+
+          READ(UNIT=151,FMT=110,END=20) LINE
+ 110      FORMAT(A80)
+
+          WRITE(1151,120) LINE
+ 120      FORMAT(A80)
+
+        ENDDO
+
+ 20     CLOSE(1151)
+
+      ENDDO
+
+      CLOSE(151)
+
+      END SUBROUTINE
+
+
+
+
+c***********************************************************************
+c   Subroutine to write out to the hotstart file (UNITS 67 and 68)     *
+c   header information and the LHS matrix for the harmonic analysis    *
+c                                                                      *
+c                        R.L.  11/8/95                                 *
+c***********************************************************************
+c
+c     SUBROUTINE HAHOUT(NP,NSTAE,NSTAV,ISTAE,ISTAV,IGLOE,IGLOV,
+c    &  IOUNIT,IHOTSTP)
+c     implicit none
+c     INTEGER NP,NSTAE,NSTAV,ISTAE,AE,ISTAV
+c     INTEGER IGLOE,IGLOV,IOUNIT,IHOTSTP,I,J
+c     CHARACTER*16 FNAME
+c     CHARACTER*8 FNAM8(2)
+c     EQUIVALENCE (FNAM8(1),FNAME)c
+c
+c
+c***** Write Out various parameter values
+c
+c     WRITE(IOUNIT,REC=IHOTSTP+1) NZ
+c     WRITE(IOUNIT,REC=IHOTSTP+2) NF
+c     WRITE(IOUNIT,REC=IHOTSTP+3) MM
+c     WRITE(IOUNIT,REC=IHOTSTP+4) NP
+c     WRITE(IOUNIT,REC=IHOTSTP+5) NSTAE
+c     WRITE(IOUNIT,REC=IHOTSTP+6) NSTAV
+c     WRITE(IOUNIT,REC=IHOTSTP+7) ISTAE
+c     WRITE(IOUNIT,REC=IHOTSTP+8) ISTAV
+c     WRITE(IOUNIT,REC=IHOTSTP+9) IGLOE
+c     WRITE(IOUNIT,REC=IHOTSTP+10) IGLOV
+c     WRITE(IOUNIT,REC=IHOTSTP+11) ICALL
+c     WRITE(IOUNIT,REC=IHOTSTP+12) NFREQ
+c     IHOTSTP = IHOTSTP+12
+c
+c     do i=1,nfreq+nf
+c        FNAME=NAMEFR(I)
+c        WRITE(IOUNIT,REC=IHOTSTP+1) FNAM8(1)
+c        WRITE(IOUNIT,REC=IHOTSTP+2) FNAM8(2)
+c        IHOTSTP=IHOTSTP+2
+c        WRITE(IOUNIT,REC=IHOTSTP+1) hafreq(i)
+c        WRITE(IOUNIT,REC=IHOTSTP+2) HAFF(i)
+c        WRITE(IOUNIT,REC=IHOTSTP+3) HAFACE(i)
+c        IHOTSTP=IHOTSTP+3
+c     end do
+c
+c
+c***** Write Out time of most recent H.A. update
+c
+c     WRITE(IOUNIT,REC=IHOTSTP+1) TIMEUD
+c     WRITE(IOUNIT,REC=IHOTSTP+2) ITUD
+c     IHOTSTP=IHOTSTP+2
+c
+c***** Write Out LHS Matrix
+c
+c     do i=1,mm
+c        do j=1,mm
+c           IHOTSTP = IHOTSTP + 1
+c           WRITE(IOUNIT,REC=IHOTSTP) HA(I,J)
+c        END DO
+c     END DO
+c
+c     return
+c     end subroutine
+c
+c***********************************************************************
+c   Subroutine to write global elevation harmonic analysis RHS load    *
+c   vector to a hot start file (UNITS 67 and 68)                       *
+c                                                                      *
+c                        R.L.  11/8/95                                 *
+c***********************************************************************
+c
+c     SUBROUTINE HAHOUTEG(NP,IOUNIT,IHOTSTP)
+c     implicit none
+c     INTEGER IOUNIT
+c     INTEGER NP,IHOTSTP,N,I 
+c
+c***** Write Out Global Elevation RHS load vector
+c
+c     do n=1,np
+c        do i=1,mm
+c           IHOTSTP=IHOTSTP+1
+c           WRITE(IOUNIT,REC=IHOTSTP) GLOELV(I,N)
+c        end do
+c     end do
+c     
+c     return
+c     end subroutine
+
+c***********************************************************************
+c   Subroutine to write elevation station harmonic analysis RHS load   *
+c   vector to a hot start file (UNITS 67 and 68)                       *
+c                                                                      *
+c                        R.L.  11/8/95                                 *
+c***********************************************************************
+c
+c     SUBROUTINE HAHOUTES(NSTAE,IOUNIT,IHOTSTP)
+c     implicit none
+c     INTEGER NSTAE,IOUNIT,IHOTSTP,N,I
+c
+c***** Write Out Station Elevation RHS load vector
+c
+c     do n=1,NSTAE
+c        do i=1,mm
+c           IHOTSTP=IHOTSTP+1
+c           WRITE(IOUNIT,REC=IHOTSTP) STAELV(I,N)
+c        end do
+c     end do
+c
+c     return
+c     end subroutine
+c
+c***********************************************************************
+c   Subroutine to write global velocity harmonic analysis RHS load     *
+c   vector to a hot start file (UNITS 67 and 68)                       *
+c                                                                      *
+c                        R.L.  11/8/95                                 *
+c***********************************************************************
+c
+c     SUBROUTINE HAHOUTVG(NP,IOUNIT,IHOTSTP)
+c     implicit none
+c     INTEGER NP,IOUNIT,IHOTSTP,N,I
+c
+c***** Write Out Global Velocity RHS load vector
+c
+c     do n=1,np
+c        do i=1,mm
+c           IHOTSTP=IHOTSTP+1
+c           WRITE(IOUNIT,REC=IHOTSTP) GLOULV(I,N)
+c           IHOTSTP=IHOTSTP+1
+c           WRITE(IOUNIT,REC=IHOTSTP) GLOVLV(I,N)
+c        end do
+c     end do
+c     
+c     return
+c     end subroutine
+c
+c***********************************************************************
+c   Subroutine to write velocity station harmonic analysis RHS load    *
+c   vector to a hot start file (UNITS 67 and 68)                       *
+c                                                                      *
+c                        R.L.  11/8/95                                 *
+c***********************************************************************
+c
+c     SUBROUTINE HAHOUTVS(NSTAV,IOUNIT,IHOTSTP)
+c     implicit none
+c     INTEGER NSTAV,IOUNIT,IHOTSTP,N,I
+c
+c***** Write Out Station Velocity LHS load vector
+c
+c     do N=1,NSTAV
+c        do i=1,mm
+c           IHOTSTP=IHOTSTP+1
+c           WRITE(IOUNIT,REC=IHOTSTP) STAULV(I,N)
+c           IHOTSTP=IHOTSTP+1
+c           WRITE(IOUNIT,REC=IHOTSTP) STAVLV(I,N)
+c        end do
+c     end do
+c
+c     return
+c     end subroutine
+
+
+C.....ek added this from version 46
+C---------------------------------------------------------------------------
+C           S U B R O U T I N E   O P E N  P R E P  F I L E S
+C---------------------------------------------------------------------------
+C
+C     jgf45.12 This subroutine will open the full domain file and each
+C     of the subdomain files. It assumes that all unit numbers are
+C     between 10 and 99.
+C
+C---------------------------------------------------------------------------
+      SUBROUTINE OpenPrepFiles(UnitNumber, Description,
+     &     NumSD, SDU, Success)
+C---------------------------------------------------------------------------
+      USE PRE_GLOBAL
+      IMPLICIT NONE
+      INTEGER, intent(in) :: UnitNumber     ! i/o unit number to open
+      CHARACTER(len=30), intent(in) :: Description ! description of file
+      INTEGER, intent(in) :: NumSD          ! number of subdomains
+      INTEGER, intent(out), dimension(NumSD):: SDU ! Subdomain unit numbers
+      LOGICAL, intent(out):: Success     ! .true. if files opened w/o errors
+      LOGICAL Found               !.true. if the full domain file exists
+      CHARACTER(len=80) FileName   ! name of full domain file
+      CHARACTER(len=7) DefaultName! default name of full domain file
+      INTEGER ErrorIO             ! zero if file opened successfully
+      INTEGER iproc               ! subdomain index
+      CHARACTER*14 sdFileName     ! subdomain file name
+      CHARACTER(len=4) skipstring ! indicates user wants to skip this file
+
+      Found = .false.
+      Success = .false.
+      ErrorIO = 1
+      skipstring = 'skip'
+
+      DefaultName(1:5) = 'fort.'
+      WRITE(DefaultName(6:7),2) UnitNumber
+C
+C     Determine the name of the file; if found, open it
+ 31   IF (USE_DEFAULT) THEN
+         FileName = DefaultName
+      ELSE
+         WRITE(*,850) ! type skip to bypass
+         WRITE(*,900) Description
+         WRITE(*,910) UnitNumber
+         READ(*,'(A)') FileName
+         FileName = trim(FILENAME)
+      ENDIF
+C
+C     Determine if full domain file exists
+      INQUIRE(FILE=FileName,EXIST=FOUND)
+C
+C     If it does exist, open it
+      IF ( FOUND ) THEN
+         WRITE(*,1011) FileName !found
+         OPEN(UNIT=UnitNumber, FILE=FileName, IOSTAT=ErrorIO)
+         Success = .true.
+         IF ( ErrorIO .GT. 0 ) THEN
+            WRITE(*,*) "ERROR: Full domain file exists but"
+            WRITE(*,*) "cannot be opened."
+            Success = .false.
+         ENDIF
+      ELSE
+C     Give the user a chance to opt out of prepping this file.
+         IF (FileName .eq. skipstring) RETURN ! note the early RETURN
+         WRITE(*,1010) FileName !not found
+         GOTO 31
+      ENDIF
+C
+      If (.not.Success) RETURN ! failed to open full domain file
+C
+C     Open each of the subdomain files
+      DO iproc = 1, NumSD
+         sdu(iproc) = 105 + (iproc-1)
+         sdFileName(1:7) = 'PE0000/'
+         sdFileName(8:14) = DefaultName
+         CALL IWRITE(sdFileName, 3, 6, iproc-1)
+         OPEN (UNIT=SDU(iproc), FILE=sdFileName, IOSTAT=ErrorIO)
+         Success = .true.
+         IF ( ErrorIO .GT. 0 ) THEN
+            WRITE(*,*) "ERROR: Subdomain file cannot be opened."
+            Success = .false.
+            RETURN ! failed to open at least one subdomain file
+         ENDIF
+      ENDDO
+
+ 2    FORMAT(I2)
+ 30   FORMAT(A30)
+ 850  FORMAT(/,'Type ''skip'' to bypass preprocessing or')
+ 900  FORMAT('Enter the name of the ',A30)
+ 910  FORMAT('file (unit ',I3,'): ')
+ 1010 FORMAT('File ',A7,/,' WAS NOT FOUND! Try again or type "skip"',/)
+ 1011 FORMAT('File ',A7,/,' WAS FOUND!  Opening & Processing file.',/)
+      RETURN
+C---------------------------------------------------------------------------
+      END SUBROUTINE OpenPrepFiles
+
+
+

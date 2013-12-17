@@ -1,0 +1,268 @@
+SHELL:=/bin/sh
+#
+#  Makefile to Build PADCIRC and its pre/post-processor 
+#  University of Texas's parallel version of the Hydrodynamics
+#  Modeling program ADCIRC by J.J. Westerink and R.A. Luettich
+#  vjp 3/29/2001
+#  updated JJW 3/17/2003
+#  updated for 3D JGF spring 2003
+
+########################################################################
+#  Get Canonical Machine NAME from config.guess
+#
+NAME     := $(shell ./config.guess)
+LIST     := $(subst -, ,$(NAME))
+MACHINE  := $(word 1, $(LIST))
+VENDOR   := $(word 2, $(LIST))
+OS       := $(subst  $(MACHINE)-$(VENDOR)-,,$(strip $(NAME)))
+
+include cmplrflags.mk
+
+######################## Target Specific Rules ###################################
+
+#                                      adcprep   
+ifeq ($(BUILDTYPE),adcprep)
+  CF:= $(PPFC)
+  O_DIR:=odir1/
+  FFLAGS:= $(FFLAGS1) $(DPRE) $(IMODS)$(O_DIR) 
+  VPATH :=  ../prep 
+  PMSG_OBJ:=
+endif
+#                                      adcpost  
+ifeq ($(BUILDTYPE),adcpost)
+  CF:= $(PPFC)
+  O_DIR:=odir3/
+  FFLAGS:= $(FFLAGS1) $(DPRE) $(IMODS)$(O_DIR) 
+  VPATH :=  ../prep
+endif
+#                                      adcirc   
+ifeq ($(BUILDTYPE),adcirc)
+  CF:= $(PPFC)
+  O_DIR:=odir4/
+  FFLAGS:= $(FFLAGS3) $(DA) $(IMODS)$(O_DIR)
+  VPATH:=  ../src 
+  MSG_MOBJ:=
+endif
+#                                      padcirc   
+ifeq ($(BUILDTYPE),padcirc)
+  CF:= $(PFC)
+  O_DIR:=odir5/
+  FFLAGS:= $(FFLAGS4) $(DP) $(IMODS)$(O_DIR)
+  VPATH :=  ../src 
+  MSG_MOBJ:= $(O_DIR)messenger_elem.o
+  MSG_OBJ:= 
+endif
+
+$(O_DIR):
+	mkdir -p $@
+
+######################### Module Source, Object, & Mod Files ######################
+
+PREP_MSRC  =  presizes.F 
+PGLO_MSRC  =  pre_global.F  
+POST_MSRC  =  post_global.F
+ADC_MSRC   =  sizes.F diff45_41.F global.F dg.F sed.F global_3dvs.F nodalattr.F 
+HARM_MSRC  =  harm.F  
+WIND_MSRC  =  wind.F  
+
+PREP_MOBJ:= $(patsubst %.F, $(O_DIR)%.o, $(PREP_MSRC) )
+PGLO_MOBJ:= $(patsubst %.F, $(O_DIR)%.o, $(PGLO_MSRC) )
+POST_MOBJ:= $(patsubst %.F, $(O_DIR)%.o, $(POST_MSRC) )
+ADC_MOBJ := $(patsubst %.F, $(O_DIR)%.o, $(ADC_MSRC)  )
+HARM_MOBJ := $(patsubst %.F, $(O_DIR)%.o, $(HARM_MSRC)  )
+WIND_MOBJ := $(patsubst %.F, $(O_DIR)%.o, $(WIND_MSRC)  )
+
+############################# Source & Object Files ##############################
+
+METIS1_SRC =  metis.F
+METIS2_SRC =  metis2.F
+PREP_SRC   =  adcprep.F  decomp.F   read_global.F   prep.F   interp.F  machdep.F
+POST_SRC   =  adcpost.F    post.F  compare.F  diffmerge.F
+ADC_SRC    =  adcirc.F owiwind.F read_input.F cstart.F hstart.F radiation_edge_hydro.F \
+	modified_wave_friction.F ibarrier_edge_hydro.F ebarrier_edge_hydro.F  \
+	calc_normal.F create_edge_data.F detector.F \
+	DG_timestep.F DG_hydro_timestep.F DG_sed_timestep.F \
+	edge_int_hydro.F edge_int_sed.F flow_edge_hydro.F \
+	flow_edge_sed.F internal_edge_hydro.F internal_edge_sed.F land_edge_hydro.F \
+	land_edge_sed.F lund_formula.F ocean_edge_hydro.F ocean_edge_sed.F \
+	orthobasis_area.F orthobasis_edge.F prep_DG.F prep_sed.F quad_pts_area.F \
+	quad_pts_edge.F radiation_edge_hydro.F read_input.F rhs_dg_hydro.F \
+	rhs_dg_sed.F numerical_flux.F tidal_potential.F write_results.F \
+	slopelimiter.F prep_slopelim.F ocean_edge_hydro_post.F ocean_flow_edge_hydro.F \
+	wetdry.F LDG_hydro.F met_forcing.F sta_basis.F
+
+METIS1_OBJ:= $(patsubst %.F, $(O_DIR)%.o, $(METIS1_SRC) )
+METIS2_OBJ:= $(patsubst %.F, $(O_DIR)%.o, $(METIS2_SRC) )
+PREP_OBJ:= $(patsubst %.F, $(O_DIR)%.o, $(PREP_SRC) )
+POST_OBJ:= $(patsubst %.F, $(O_DIR)%.o, $(POST_SRC) )
+ADC_OBJ:= $(patsubst %.F, $(O_DIR)%.o, $(ADC_SRC) )
+
+######################## compilation rules #####################################
+
+$(O_DIR)%.o  : %.F
+#  @echo depend $<
+#  @echo target $@
+	$(CF) -c $(FFLAGS) -o $@  $<
+	if [ "`echo *.mod`" != '*.mod' ]; then mv *.mod $(O_DIR); fi
+
+########################## Executable Targets ##################################
+
+.PHONY: all metis adcprep adcpost adcirc padcirc
+
+all :  metis adcprep adcpost adcirc padcirc
+
+ifeq ($(MAKELEVEL),0)
+   metis:
+	$(MAKE) -C ../metis/Lib/ CC="$(CC)"  CFLAGS="$(CFLAGS)"
+   graphchk:
+	$(MAKE) -C ../metis/Programs/ CC="$(CC)"  CFLAGS="$(CFLAGS)" 
+	mv ../metis/graphchk ../work
+   adcprep:
+	$(MAKE) BUILDTYPE=adcprep  $@            
+   adcprep2:
+	$(MAKE) BUILDTYPE=adcprep2 $@ 
+   adcpost:
+	$(MAKE) BUILDTYPE=adcpost $@            
+   adcirc:
+	$(MAKE) BUILDTYPE=adcirc  $@
+   padcirc:
+	$(MAKE) BUILDTYPE=padcirc $@ 
+else
+   adcprep::  $(O_DIR)
+   adcprep2:: $(O_DIR)
+   adcpost::  $(O_DIR)
+   adcirc::   $(O_DIR)
+   padcirc::  $(O_DIR)
+
+   adcprep ::  $(METIS1_OBJ) $(PREP_OBJ) 
+	$(CF) $(FFLAGS) -o $@  $(O_DIR)*.o  $(LIBS) $(LDFLAGS)
+
+   adcprep2 :: $(PMSG_OBJ) $(METIS2_OBJ) $(PREP_OBJ) 
+	$(CF) $(FFLAGS) -o $@  $(O_DIR)*.o  $(LIBS) $(MSGLIBS) $(LDFLAGS)
+
+   adcpost ::  $(POST_OBJ) 
+	$(CF) $(FFLAGS) -o $@  $(O_DIR)*.o
+
+   adcirc ::  $(ADC_OBJ) 
+	$(CF) $(FFLAGS) -o $@  $(O_DIR)*.o
+
+   padcirc ::  $(MSG_MOBJ) $(MSG_OBJ) $(ADC_OBJ) 
+	$(CF) $(FFLAGS) -o $@  $(O_DIR)*.o  $(MSGLIBS)
+endif
+
+########################## Misc Commands ####################################
+
+clean:
+	 rm -f odir*/*.o  odir*/*.mod 
+clobber:
+	rm -r -f odir*
+	rm -f  graphchk adcprep adcprep2 adcpost adcirc  padcirc \
+                ../metis/Lib/*.o  ../metis/libmetis.a ../metis/Programs/*.o
+help:
+	@echo "This makefile supports the following:"
+	@echo "make all      - makes all six targets"
+	@echo "make adcprep  - makes the adcprep  executable"
+	@echo "make adcprep2 - makes the adcprep2  executable"
+	@echo "make adcpost  - makes the adcpost  executable"
+	@echo "make adcirc   - makes the serial adcirc executable"
+	@echo "make padcirc  - makes the parallel adcirc executable"
+
+########################## Defining the DAG  ####################################
+
+#  adcprep & adcprep2 modules
+
+$(O_DIR)presize.o     :  presize.F
+$(O_DIR)pre_global.o  :  pre_global.F  $(PREP_MOBJ)
+
+#  adcprep & adcprep2 
+
+$(O_DIR)adcprep.o     :  adcprep.F  $(PGLO_MOBJ) $(PMSG_OBJ)
+$(O_DIR)decomp.o      :  decomp.F   $(PGLO_MOBJ)
+$(O_DIR)read_global.o :  read_global.F  $(PGLO_MOBJ)
+$(O_DIR)prep.o        :  prep.F   $(PGLO_MOBJ)
+$(O_DIR)interp.o      :  interp.F  
+$(O_DIR)machdep.o     :  machdep.F
+$(O_DIR)metis.o       :  metis.F $(PGLO_MOBJ)
+$(O_DIR)metis2.o      :  metis2.F $(PGLO_MOBJ)
+$(O_DIR)picomsg.o     :  picomsg.F
+
+#  adpost modules
+
+$(O_DIR)post_global.o :  post_global.F 
+
+#  adpost                
+
+$(O_DIR)adcpost.o     :  adcpost.F $(POST_MOBJ)
+$(O_DIR)post.o        :  post.F  $(POST_MOBJ)
+$(O_DIR)compare.o     :  compare.F  
+$(O_DIR)diffmerge.o   :  diffmerge.F
+
+#  adcirc & padcirc modules
+
+$(O_DIR)sizes.o       			:  sizes.F
+$(O_DIR)global.o      			:  global.F  $(O_DIR)sizes.o
+$(O_DIR)messenger.o   			:  messenger.F  $(ADC_MOBJ)
+$(O_DIR)messenger_elem.o		:  messenger_elem.F  $(ADC_MOBJ)
+$(O_DIR)harm.o        			:  harm.F
+$(O_DIR)wind.o        			:  wind.F
+$(O_DIR)itpackv.o     			:  itpackv.F   $(ADC_MOBJ)
+$(O_DIR)dg.o          			:  dg.F sizes.F global.F
+$(O_DIR)sed.o         			:  sed.F sizes.F global.F
+$(O_DIR)diff45_41.o   			:  diff45_41.F
+$(O_DIR)nodalattr.o   			:  nodalattr.F
+
+#  adcirc & padcirc
+
+$(O_DIR)owiwind.o   			:  owiwind.F $(ADC_MOBJ)
+$(O_DIR)read_input.o  			:  read_input.F $(ADC_MOBJ) $(HARM_MOBJ) $(WIND_MOBJ)
+$(O_DIR)cstart.o      			:  cstart.F $(ADC_MOBJ)  $(HARM_MOBJ)  $(WIND_MOBJ)
+$(O_DIR)hstart.o      			:  hstart.F $(ADC_MOBJ)  $(HARM_MOBJ)  $(WIND_MOBJ)
+$(O_DIR)adcirc.o      			:  adcirc.F $(ADC_MOBJ)  $(HARM_MOBJ) $(WIND_MOBJ) 
+$(O_DIR)calc_normal.o         	:  calc_normal.F $(ADC_MOBJ)
+$(O_DIR)create_edge_data.o    	:  create_edge_data.F $(ADC_MOBJ)
+$(O_DIR)detector.o	      	:  detector.F $(ADC_MOBJ)
+$(O_DIR)DG_timestep.o         	:  DG_timestep.F $(ADC_MOBJ)
+$(O_DIR)DG_hydro_timestep.o   	:  DG_hydro_timestep.F $(ADC_MOBJ)
+$(O_DIR)DG_sed_timestep.o     	:  DG_sed_timestep.F $(ADC_MOBJ)
+$(O_DIR)edge_int_hydro.o      	:  edge_int_hydro.F $(ADC_MOBJ)
+$(O_DIR)edge_int_sed.o        	:  edge_int_sed.F $(ADC_MOBJ)
+$(O_DIR)flow_edge_hydro.o     	:  flow_edge_hydro.F $(ADC_MOBJ)
+$(O_DIR)flow_edge_sed.o       	:  flow_edge_sed.F $(ADC_MOBJ)
+$(O_DIR)internal_edge_hydro.o 	:  internal_edge_hydro.F $(ADC_MOBJ)
+$(O_DIR)internal_edge_sed.o   	:  internal_edge_sed.F $(ADC_MOBJ)
+$(O_DIR)land_edge_hydro.o     	:  land_edge_hydro.F $(ADC_MOBJ)
+$(O_DIR)land_edge_sed.o       	:  land_edge_sed.F $(ADC_MOBJ)
+$(O_DIR)lund_formula.o        	:  lund_formula.F $(ADC_MOBJ)
+$(O_DIR)ocean_edge_hydro.o    	:  ocean_edge_hydro.F $(ADC_MOBJ)
+$(O_DIR)ocean_edge_sed.o      	:  ocean_edge_sed.F $(ADC_MOBJ)
+$(O_DIR)orthobasis_area.o     	:  orthobasis_area.F $(ADC_MOBJ)
+$(O_DIR)orthobasis_edge.o     	:  orthobasis_edge.F $(ADC_MOBJ)
+$(O_DIR)prep_DG.o             	:  prep_DG.F $(ADC_MOBJ)
+$(O_DIR)prep_sed.o            	:  prep_sed.F $(ADC_MOBJ)
+$(O_DIR)quad_pts_area.o       	:  quad_pts_area.F $(ADC_MOBJ)
+$(O_DIR)quad_pts_edge.o       	:  quad_pts_edge.F $(ADC_MOBJ)
+$(O_DIR)read_input.o          	:  read_input.F $(ADC_MOBJ)
+$(O_DIR)rhs_dg_hydro.o        	:  rhs_dg_hydro.F $(ADC_MOBJ)
+$(O_DIR)rhs_dg_sed.o          	:  rhs_dg_sed.F $(ADC_MOBJ)
+$(O_DIR)numerical_flux.o      	:  numerical_flux.F $(ADC_MOBJ)
+$(O_DIR)radiation_edge_hydro.o	:  radiation_edge_hydro.F $(ADC_MOBJ)
+$(O_DIR)tidal_potential.o     	:  tidal_potential.F $(ADC_MOBJ)
+$(O_DIR)ibarrier_edge_hydro.o 	:  ibarrier_edge_hydro.F $(ADC_MOBJ)
+$(O_DIR)ebarrier_edge_hydro.o       :  ebarrier_edge_hydro.F $(ADC_MOBJ)
+$(O_DIR)modified_wave_friction.o    :  modified_wave_friction.F $(ADC_MOBJ)
+$(O_DIR)write_results.o             :  write_results.F $(ADC_MOBJ)
+$(O_DIR)pdg_debug.o                 :  pdg_debug.F  $(ADC_MOBJ) $(MSG_MOBJ)
+$(O_DIR)ghost_internal_edge_hydro.o :  ghost_internal_edge_hydro.F  $(ADC_MOBJ) $(MSG_MOBJ)
+$(O_DIR)ghost_internal_edge_sed.o   :  ghost_internal_edge_sed.F  $(ADC_MOBJ) $(MSG_MOBJ)
+$(O_DIR)slopelimiter.o              :  slopelimiter.F  $(ADC_MOBJ)
+$(O_DIR)prep_slopelim.o             :  prep_slopelim.F  $(ADC_MOBJ)
+$(O_DIR)ocean_edge_hydro_post.o     :  ocean_edge_hydro_post.F $(ADC_MOBJ)
+$(O_DIR)ocean_flow_edge_hydro.o     :  ocean_flow_edge_hydro.F $(ADC_MOBJ)
+$(O_DIR)wetdry.o                    :  wetdry.F  $(ADC_MOBJ)
+$(O_DIR)LDG_hydro.o                 :  LDG_hydro.F  $(ADC_MOBJ)
+$(O_DIR)met_forcing.o               :  met_forcing.F  $(ADC_MOBJ)
+$(O_DIR)sta_basis.o                 :  sta_basis.F  $(ADC_MOBJ)
+
+# graphchk
+
+$(O_DIR)io.o		:  ../metis/Lib

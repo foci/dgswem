@@ -1,0 +1,16 @@
+#!/bin/bash                                                                                                       
+
+#SBATCH -J dgswem      # Job name                                                                          
+#SBATCH -A Oil # seDawson
+#SBATCH -o Katrina.o%j       # Name of stdout output file (%j expands to jobId)   
+#SBATCH -e Katrina.e%j       # Name of stdout output file (%j expands to jobId)                               
+#SBATCH -p normal   # Queue name                                                         
+#SBATCH -n 512             #Total number of mpi tasks requested
+#SBATCH -t 10:00:00      # Run time (hh:mm:ss) - 1.5 hours                                                   
+#SBATCH --mail-user=michoski@ices.utexas.edu
+#SBATCH --mail-type=ALL 
+
+export MV2_ON_DEMAND_THRESHOLD=512
+
+ibrun ./dgswem
+

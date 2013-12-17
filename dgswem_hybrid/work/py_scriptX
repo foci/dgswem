@@ -1,0 +1,17 @@
+#!/usr/bin/env python
+from sympy import *
+from sympy.parsing.sympy_parser import parse_expr
+a,b,c,d,z,y = symbols(r'ZE_ROE QX_ROE QY_ROE bed_ROE z y')
+f = open("sedlaw.X",'r')
+g = f.readline()
+f.close()
+h1 = diff(g,a)
+h2 = diff(g,b)
+h3 = diff(g,c)
+h4 = diff(g,d)
+fd = open("db_partials_X","w")
+fd.write("%s\n" % str(h1))
+fd.write("%s\n" % str(h2))
+fd.write("%s\n" % str(h3))
+fd.write("%s\n" % str(h4))
+fd.close()
