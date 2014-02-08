@@ -13,21 +13,42 @@ C***********************************************************************
 C.....Use appropriate modules
       
       USE SIZES, ONLY : SZ,layers
-      USE GLOBAL, ONLY : SEDFLAG
+      USE GLOBAL, ONLY : SEDFLAG, TIME_A, TIMEH, NE, NWS, NTIP
+      USE DG
 
 #ifdef CMPI
-      USE MESSENGER_ELEM
+      USE MESSENGER_NEW
 #endif
 
       IMPLICIT NONE
 
 C.....Declare local variables
 
-      INTEGER IT
+      INTEGER i,j,k,kk,IT,lvl !cjt
       
 C.....Hydrodynamics
 
-      CALL DG_HYDRO_TIMESTEP(IT)
+C.....Hydrodynamics
+      tn_a(:) = time_a
+      tn_h(:) = timeh
+      
+C.....Set the next time level on the domain with the largest dt
+      tnkp1_a(Ndom) = tn_a(Ndom) + DtDom(Ndom)
+      tnkp1_h(Ndom) = tn_h(Ndom) + DtDom(Ndom)
+
+C.....Obtain the meteorological forcing
+      IF (NWS.NE.0) CALL MET_FORCING(IT)
+
+C.....Compute tidal potential terms
+      IF (NTIP .NE. 0) CALL TIDAL_POTENTIAL()
+
+      IF (Ndom>1) CALL FIRST_LOOP(IT,Ndom-1)
+
+      CALL DG_HYDRO_TIMESTEP(IT,NDOM)
+
+C.....Get Ready for next ts  CJT *********************************************
+
+      time_a = time_a + DtDom(Ndom)      
 
 C.....Write out results
 
@@ -43,7 +64,7 @@ C.....Write out results
 #endif
 #endif
 
-      CALL SCRUTINIZE_SOLUTION()
+      CALL SCRUTINIZE_SOLUTION(IT)
 
       RETURN
       END SUBROUTINE
@@ -66,12 +87,14 @@ C.....Use appropriate modules
       
 #ifdef CMPI
       USE SIZES, ONLY : SZ,MYPROC,layers
-      USE MESSENGER_ELEM, ONLY: MESSAGE_FINI, ErrorElevSum
+!      USE MESSENGER_ELEM, ONLY: MESSAGE_FINI, ErrorElevSum
+      USE MESSENGER_NEW, ONLY: MESSAGE_FINI
+      USE MESSENGER_NODE_NEW
 #else
       USE SIZES, ONLY : SZ,layers
 #endif
       USE GLOBAL, ONLY : NE,NM,DP,X,Y,SLAM,SFEA,DEG2RAD,tracer_flag,chem_flag,pdg_el
-      USE DG, ONLY : DOF,ZE,QX,QY,iota,iota2,dynP,bed,ncheck,dp_node
+      USE DG, ONLY : DOF,ZE,QX,QY,iota,iota2,dynP,bed,ncheck,dp_node,TsGroup
 
       IMPLICIT NONE
       
@@ -156,7 +179,7 @@ C.....Detect NaN
 #endif
                PRINT *, '  ZE(',K,',',J,',1) IS ',ZE(K,J,1)
                PRINT *, ' x,  y ',SLAM(NM(J,1))/DEG2RAD,
-     $              SFEA(NM(J,1))/DEG2RAD
+     $              SFEA(NM(J,1))/DEG2RAD,dp(NM(j,1)),TsGroup(J)
                Detected = .TRUE.
                ErrorElevExceeded = 1
             ENDIF
@@ -167,7 +190,7 @@ C.....Detect NaN
                PRINT *, ''
                PRINT *, '  QX(',K,',',J,',1) IS ',QX(K,J,1)
                PRINT *, ' x,  y ',SLAM(NM(J,1))/DEG2RAD,
-     $              SFEA(NM(J,1))/DEG2RAD
+     $              SFEA(NM(J,1))/DEG2RAD,TsGroup(J)
                Detected = .TRUE.
                ErrorElevExceeded = 1
             ENDIF
@@ -178,7 +201,7 @@ C.....Detect NaN
                PRINT *, ''
                PRINT *, '  QY(',K,',',J,',1) IS ',QY(K,J,1)
                PRINT *, ' x,  y ',SLAM(NM(J,1))/DEG2RAD,
-     $              SFEA(NM(J,1))/DEG2RAD
+     $              SFEA(NM(J,1))/DEG2RAD,TsGroup(J)
                Detected = .TRUE.
                ErrorElevExceeded = 1
             ENDIF

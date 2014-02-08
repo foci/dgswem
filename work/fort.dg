@@ -7,13 +7,15 @@
 1,0.5,2            ! k,ks,L for pflag=2 tolerance:log((k*p)**(-L*2))-ks  
 1                  ! FLUXTYPE 
 2,2                ! RK_STAGE,RK_ORDER
+1,2,8,0.175,0,1.0  ! LTS_FLAG, Mbar, MaxNdom, dt_min0, dtcheck, cflfac
+0		   ! LTSmodflag
 1                  ! DG_TO_CG (ignore)
 0                  ! MODAL_IC
-0,86400            ! DGHOT,DGHOTSPOOL
+0,0            ! DGHOT,DGHOTSPOOL
 5 1                ! SLOPEFLAG(only 1,4-10 work; 5 is best/fast!),weight(default 1!)
 0,0.0001000,0.00001,1 ! SEDFLAG, porosity, SEVDM, and # of layers
 1                  ! Reaction rate when chemistry is on in (litres/(mol*days))
-23556             ! Number of total elements in mesh
+2828             ! Number of total elements in mesh
 0,-1.0,0.0,2.5e-6,0 !artdif,kappa, s0, uniform_dif, tune_by_hand
 (ZE_ROE+bed_ROE)**-1 *QX_ROE
 (ZE_ROE+bed_ROE)**-1 *QY_ROE 

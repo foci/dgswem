@@ -16,7 +16,7 @@ C
 C     01-10-2011 - cem - adapted for p_enrichment and multicomponent  
 C     
 C***********************************************************************
-      SUBROUTINE OCEAN_EDGE_HYDRO(IT)
+      SUBROUTINE OCEAN_EDGE_HYDRO(IT,lvl)
 
 C.....Use appropriate modules
 
@@ -32,7 +32,7 @@ c
 
 C.....Declare local variables
       
-      INTEGER L, LED, GED, i,k,jj,II,ll,IT,w
+      INTEGER L, LED, GED, i,k,jj,II,ll,IT,w,lvl
       Real(SZ) DEN2,U_AVG,V_AVG,VEL_NORMAL,q_RoeX, q_RoeY, q_Roe
       REAL(SZ) TX, TY, HUU, HUV, GH2,FH_NL_IN,F1_NL,FX1_IN,FY1_IN
       REAL(SZ) LZ_XX_IN, LZ_XY_IN, LZ_YX_IN, LZ_YY_IN,W_IN,FX3_IN
@@ -58,6 +58,9 @@ C.....Retrieve the elements which share the edge
             pa = 1
          endif
 #endif
+
+!CND
+        if (tsgroup(el_in).ne.lvl) go to 1000
          
 C.....If the element is dry then skip the edge calculation
 

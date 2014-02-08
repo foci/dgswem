@@ -23,7 +23,7 @@ C     06-02-2012 - cem - adapted for sediment
 C     
 C***********************************************************************
 
-      SUBROUTINE LAND_EDGE_HYDRO(IT)
+      SUBROUTINE LAND_EDGE_HYDRO(IT,lvl)
 
 C.....Use appropriate modules
 
@@ -35,7 +35,7 @@ C.....Use appropriate modules
 
 C.....Declare local variables
 
-      INTEGER L, LED, GED, i,k,jj,II,ll,IT,mm
+      INTEGER L, LED, GED, i,k,jj,II,ll,IT,mm,lvl
       Real(SZ) DEN2,U_AVG,V_AVG,VEL_NORMAL,q_RoeX, q_RoeY, q_Roe
       REAL(SZ) TX, TY, DEN,ell_1,ell_2,ell_3,HZ_X_IN,HZ_Y_IN
       REAL(SZ) LZ_XX_IN, LZ_XY_IN, LZ_YX_IN, LZ_YY_IN,W_IN
@@ -60,6 +60,9 @@ C.....Retrieve the elements which share the edge
             pa = 1
          endif
 #endif
+
+C.....If edge element is not assign this ts level, skip CJT
+        IF (TsGroup(EL_IN) /= lvl) GOTO 1000
          
 C.....If the element is dry then skip the edge calculation
 

@@ -78,7 +78,7 @@ C
       INTEGER N1,N2,NO_NBORS,NBOR,DG_TO_CG,SEDFLAG_W, OPEN_INDEX
       INTEGER NSCREEN_INC
       
-      INTEGER ScreenUnit
+      INTEGER ScreenUnit, COMM
       
       REAL(SZ) AREA_SUM, CEN_SUM, NLEQ, LEQ, NLEQG, reaction_rate
       Character*100 sed_equationX,sed_equationY

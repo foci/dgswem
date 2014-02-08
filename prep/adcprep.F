@@ -206,6 +206,159 @@ C
           print *, 'Hard Bottom file read successfully'
         ENDIF
 
+cnd LTS
+      write(*,*) 'read LTS flag, Mbar, Ndom from fort.dg'
+      open(25,file='fort.dg')
+      read(25,*)
+      read(25,*) !padapt, pflag
+      read(25,*)
+      read(25,*) !pl,ph, px
+      READ(25,*) !slimit
+      READ(25,*) !plimit
+      READ(25,*) !pflag2con1,pflag2con2,lebesgueP 
+      READ(25,*) !FLUXTYPE
+      READ(25,*) !RK_STAGE, RK_ORDER
+      read(25,*) Lts_Flag, Mbar, Ndom, dt_min0, dtcheck, cflfac!, Z0
+      write(*,*) Lts_flag, Mbar, Ndom, dt_min0, dtcheck, cflfac !,Z0
+      read(25,*) LTSmodflag
+      if (LTSmodflag.eq.1) then
+         read(25,*) nmodtimes
+         do k=1,nmodtimes
+            read(25,*)
+         enddo
+      endif
+      read(25,*) !DG_TO_CG
+      read(25,*) modal_ic
+      write(*,*) modal_ic
+      read(25,*) !DGHOT, DGHOTSPOOL
+      read(25,*) SLOPEFLAG
+      write(*,*) slopeflag
+      READ(25,*) !SEDFLAG,porosity,SEVDM,layers
+      READ(25,*) !reaction_rate
+      READ(25,*) !MNES
+      READ(25,'(a)') !sed_equationX
+      READ(25,'(a)') !sed_equationY
+      close(25)
+      MaxNdom=Ndom
+      call alloc_multi_rate()
+      if (modal_ic.eq.0.or.lts_flag.eq.0) then
+         CALL cfl_prep(MNE,MNP,ics,X,Y,dp,NNEG,SLAM0,SFEA0,DtLoc,H0,slopeflag)
+         dt_max = MAXVAL(Dtloc);
+         dt_min = MINVAL(Dtloc);
+         dt_min=max(dt_min,dt_min0)
+         Mint = dt_max/dt_min;
+         WRITE(*,*) "Before Scale ---------------------------------------"
+         WRITE(*,*) "Largest stable time-step over grid from CFL: ",dt_max
+         WRITE(*,*) "Smallest stable time-step over grid from CFL: ",dt_min
+         WRITE(*,*) "Largest to smallest ratio: ",Mint
+         dt_max = MAXVAL(Dtloc)
+         dt_min = MINVAL(Dtloc)
+         dt_min= min(dt_min,dt)
+         dt_min=max(dt_min,dt_min0)
+         Mint = dt_max/dt_min;
+         WRITE(*,*) "After Scale ---------------------------------------"
+         WRITE(*,*) "Largest stable time-step over grid from CFL: ",dt_max
+         WRITE(*,*) "Smallest stable time-step over grid from CFL: ",dt_min
+         WRITE(*,*) "Largest to smallest ratio: ",Mint,Mbar
+           
+!     CND
+         if (lts_flag /= 1) Mint=1
+!     
+         if (Mint==1) then
+            Ndom=1
+            DtDom(1)=dt_min
+            Msteps(1)=1
+         else
+            Ndom=MaxNdom
+            do i=1,Ndom-1
+               Msteps(i)=Mbar
+            enddo
+            Msteps(Ndom)=1
+            write(*,*) (Msteps(i),i=1,Ndom)
+            if (Msteps(1)<2) then
+               Ndom=1
+               Dtdom(1)=dt_min
+            else
+               DtDom(1) = dt_min
+               do i=2,Ndom
+                  DtDom(i)=Msteps(i-1)*dtdom(i-1)
+               enddo
+            endif
+         endif
+         write(*,*)'dtdom ',(dtdom(i),i=1,Ndom)
+!!!!
+         TsGroup(:)=1
+         if (nDom > 1) then
+            DO i=1,MNE
+               DO j=2,nDom
+                  IF ( (DtLoc(i)>=DtDom(j-1)) .and. (DtLoc(i)<DtDom(j)) ) THEN
+                     DtLoc(i) = DtDom(j-1)
+                     TsGroup(i) = j-1
+                  Endif
+               enddo
+               if (Dtloc(i) >= DtDom(Ndom)) then
+                  dtloc(i)=dtdom(Ndom)
+                  TsGroup(i)=Ndom
+               endif
+            ENDDO
+         else
+            DO i=1,MNE
+               DtLoc(i) = DtDom(1)
+               TsGroup(i) = 1
+            enddo
+         endif
+      else
+         if (dtcheck.ne.-1) then
+            open(299,file='GlobalHot_start.299')
+            read(299,*) Ndom,(dtdom(i),i=1,Ndom)
+            do i=1,mne
+               read(299,*) TsGroup(i)
+            enddo
+            do i=1,Ndom-1
+               Msteps(i)=Mbar
+            enddo
+            Msteps(Ndom)=1
+            close(299)
+         else
+            TsGroup(:)=1
+            open(299,file='GlobalHot_start.299')
+            read(299,*) Ndom,(dtdom(i),i=1,Ndom)
+            Ndom=1
+            Msteps(1)=1
+            close(299)
+         endif
+         open(300,file='GlobalHot_start.214')
+         read(300,*) iths,dt_max
+         do i=1,mne
+            do j=1,dof
+               read(300,*) HB(j,i),WDFLG(j,i)
+            enddo
+         enddo
+         close(300)
+         open(301,file='GlobalHot_start.263')
+         read(301,*) pze
+         do i=1,mne
+            do j=1,dof
+               read(301,*) ZE(j,i)
+            enddo
+         enddo
+         close(301)
+         open(301,file='GlobalHot_start.264')
+         read(301,*) pqx,pqy
+         do i=1,mne
+            do j=1,dof
+               read(301,*) QX(J,I),QY(J,I)
+            enddo
+         enddo
+         close(301)
+      endif
+cnd
+      do j=1,Ndom
+         i=Ndom-j
+         metiswght(j)=Msteps(j)**i
+      enddo
+      print *,'done with local time stepping'
+
 C
 C-- Partiton Nodes with METIS 4.0 Graph Partition Library
 C
@@ -289,6 +442,25 @@ C
         print *, "Writing Local UNIT 14 (Grid) File and"
         print *, "fort.hb (Hard Bottom) File for each PE"
         CALL PREP14_AND_HB()
+
+      TsGroupNode(:,:)=0
+      Nelem_loc(:) = 0
+c
+      Do i=1,MNE
+         do j=1,3
+            TsGroupNode(nneg(j,i),TsGroup(i))=TsGroup(i)
+         enddo
+         do j=1,Ndom
+            if (TsGroup(i).eq.j) then
+               Nelem_loc(j)=Nelem_loc(j)+1
+            endif
+         enddo
+      enddo
+      do j=1,Ndom
+         write(*,*) 'Number of elements in TS group ',j,' is ',
+     $        Nelem_loc(j),metiswght(j)
+      enddo
+
 C
 C-- Write a Local Input file ( fort.15 ) for each PE
 C

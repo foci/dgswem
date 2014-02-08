@@ -21,7 +21,7 @@ C.....Use appropriate modules
      &     InitNAModule, ReadNodalAttr, InitNodalAttr, ESLM, ESLC,
      &     TAU0VAR, STARTDRY, FRIC, EVM, EVC
 #ifdef CMPI
-      USE MESSENGER_ELEM
+      USE MESSENGER_NEW
 #endif
 #ifdef SWAN
 Casey 101118: Enable hot-start file generation by SWAN.
@@ -118,6 +118,18 @@ C.....Read in the fort.dg file
       READ(25,*) pflag2con1,pflag2con2,lebesgueP 
       READ(25,*) FLUXTYPE
       READ(25,*) RK_STAGE, RK_ORDER
+      READ(25,*) Lts_Flag, Mbar, MaxNdom, dt_min0, dtcheck, cflfac ! CJT
+      READ(25,*) LTSmodflag
+C.....LTS
+      if (LTSmodflag.eq.1) then
+         READ(25,*) nmodtimes
+         do k=1,nmodtimes
+            READ(25,*) tmod1(k),tmod2(k),TsGroupmod(k)
+            tmod1(k)=tmod1(k)*86400.
+            tmod2(k)=tmod2(k)*86400.
+         enddo
+      endif
+
       READ(25,*) DG_TO_CG
       READ(25,*) MODAL_IC
       READ(25,*) DGHOT, DGHOTSPOOL
@@ -1134,12 +1146,6 @@ C.....Read and process RNDAY - simulation duration i days
  10   FORMAT(5X,'TOTAL LENGTH OF NUMERICAL SIMULATION =',F12.4,
      &     5X,'DAYS',/)
 
-C.....Compute total number of time steps NT
-
-      NT = INT(RNDAY*(86400.D0/DTDP) + 0.5D0)
-      WRITE(16,1920) NT
- 1920 FORMAT(5X,'NUMBER OF TIME STEPS  =',I8,/)
-
 C.....Read and process effective length of hyperbolic tangent ramp
 
 C...  
@@ -1426,6 +1432,146 @@ C     READ(11,*) JKI,DASIGT(JKI),DATEMP(JKI),DASAL(JKI)
 C     ENDDO
 C     CLOSE(11)
 C     ENDIF
+
+! CJT ***************** CALCULATE LOCAL CFL TIME-STEPS *************************
+
+#ifdef CMPI
+      CALL ALLOC_MULTI_RATE(); 
+      OPEN(366,FILE=DIRNAME//'/'//'EL.TS')
+      READ(366,*) Ndom,(Msteps(j),j=1,Ndom),(DtDom(j),j=1,Ndom)
+      do j=1,ne
+         read(366,*) i,TsGroup(j)
+      enddo
+      Nelem(:)=0
+      ElemNum(:,:)=0
+      do i=1,Ndom
+         do j=1,ne
+            if (TsGroup(j).eq.i) then
+               Nelem(i)=Nelem(i)+1
+               ElemNum(i,Nelem(i))=j
+            endif
+         enddo
+      enddo
+      if (Lts_flag==0) then
+         do i=1,Ndom
+            dtDom(i)=max(dtDom(1),dt_min0)
+            dtDom(i)=min(dtDom(i),dtdp)
+            Msteps(i)=1
+         enddo
+      endif
+#else
+      CALL ALLOC_MULTI_RATE(); 
+      CALL cfl_init(NE,NP,ics,X,Y,dp,NM,SLAM0,SFEA0,DtLoc,slopeflag,myproc)
+      write(*,*) 'back from computing cfl '
+      dt_max = MAXVAL(Dtloc)
+      dt_min = MINVAL(Dtloc)
+      dt_min = max(dt_min,dt_min0)
+      Mint = dt_max/dt_min;
+      WRITE(*,*) "Before Scale ---------------------------------------"
+      WRITE(*,*) "Largest stable time-step over grid from CFL: ",dt_max
+      WRITE(*,*) "Smallest stable time-step over grid from CFL: ",dt_min
+      WRITE(*,*) "Largest to smallest ratio: ",Mint
+
+
+      ! Scale Local time-steps to user input
+      !IF (dtmax > DTDP) THEN
+      DO i=1,NE
+!        DtLoc(i) = min((DtLoc(i)/dt_max)*DT,dtloc(i))
+        DtLoc(i) = min(DTDP,dtloc(i))
+        WRITE(69,*) DtLoc(i)
+      ENDDO
+      dt_max = MAXVAL(Dtloc);
+      dt_min = MINVAL(Dtloc);
+      dt_min = max(dt_min,dt_min0)
+      Mint = dt_max/dt_min;
+      WRITE(*,*) "After Scale ---------------------------------------"
+      WRITE(*,*) "Largest stable time-step over grid from CFL: ",dt_max
+      WRITE(*,*) "Smallest stable time-step over grid from CFL: ",dt_min
+      WRITE(*,*) "Largest to smallest ratio: ",Mint,Mbar
+
+!  CND
+      if (lts_flag /= 1) then
+         Mint=1
+      endif
+!  
+      if (Mint==1) then
+         Ndom=1
+         DtDom(1)=dt_min
+         Msteps(1)=1
+      else
+         Ndom=MaxNdom
+         do i=1,Ndom-1
+            Msteps(i)=Mint**(1./(Ndom-1))
+            Msteps(i)=min(Msteps(i),Mbar)
+         enddo
+         Msteps(Ndom)=1
+         write(*,*) (Msteps(i),i=1,Ndom)
+         if (Msteps(1)<2) then
+            Ndom=1
+            Dtdom(1)=dt_min
+         else
+            DtDom(1) = dt_min
+            do i=2,Ndom
+               DtDom(i)=Msteps(i-1)*dtdom(i-1)
+            enddo
+         endif
+      endif
+!!!!
+      Nelem(:) = 0
+      TsGroup(:)=1
+      if (nDom > 1) then
+         DO i=1,NE
+            DO j=2,nDom
+               IF ( (DtLoc(i)>=DtDom(j-1)) .and. (DtLoc(i)<DtDom(j)) ) THEN
+                  DtLoc(i) = DtDom(j-1)
+                  TsGroup(i) = j-1
+                  Nelem(j-1) = Nelem(j-1) + 1
+                  ElemNum(j-1,Nelem(j-1)) = i
+               Endif
+            enddo
+            if (Dtloc(i) >= DtDom(Ndom)) then
+               dtloc(i)=dtdom(Ndom)
+               TsGroup(i)=Ndom
+               Nelem(Ndom) = Nelem(Ndom) + 1
+               ElemNum(Ndom,Nelem(Ndom)) = i
+            endif
+         ENDDO
+      else
+         DO i=1,NE
+            DtLoc(i) = DtDom(1)
+            TsGroup(i) = 1
+            Nelem(1) = Nelem(1) + 1
+            ElemNum(1,Nelem(1)) = i
+         enddo
+      endif
+#endif        
+
+      OPEN(69,FILE=DIRNAME//'/'//'elementTSGroups.out')
+      DO i=1,NE
+        WRITE(69,'(2i10,f20.10)')
+     $        i,TsGroup(i),DtDom(TsGroup(i))
+      ENDDO
+
+      WRITE(69,*) "Number of Domains: ",Ndom,(Nelem(i),i=1,Ndom)
+      CLOSE(69)
+
+      IF (SUM(Nelem) .ne. NE) THEN
+	WRITE(*,*) "ERROR: Local time-step binning error (Adcirc.f)"
+	WRITE(*,*) "Total Number of Elements Binned: ",SUM(Nelem),"  NE: ",NE
+	STOP
+      ENDIF
+ 
+ 
+!      ENDIF
+!  Reset DTDP to maximum time step
+      DTDP=DtDom(Ndom)
+      DT=DTDP
+
+C.....Compute total number of time steps NT
+
+      NT = INT(RNDAY*(86400.D0/DTDP) + 0.5D0)
+      WRITE(16,1920) NT
+1920  FORMAT(5X,'NUMBER OF TIME STEPS  =',I8,/)
 
 C.....Process startdry info from unit 12 (if NOLIFA = 3 -> NSTARTDRY = 1
 C.....STARTDRY now set in nodal attributes

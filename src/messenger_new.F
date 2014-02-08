@@ -1,0 +1,605 @@
+C******************************************************************************
+C PADCIRC VERSION 45.01 09/30/2004                                            *
+C  last changes in this file VERSION 12.sb01                                  *
+C  S.Bunya changed this file a bit. 07/13/2005                                *
+C  S.Bunya changed this file a bit. 01/04/2007                                *
+C                                                                             *
+C     01-10-2011 - cem - adapted for p_enrichment and multicomponent          *
+C****************************************************************************** 
+C 
+      MODULE MESSENGER_NEW
+C
+      USE SIZES
+c$$$      USE GLOBAL!, ONLY: C3D
+      USE DG, ONLY: DOF,Ndom, tsgroup
+c$$$      USE DIFF45_41,ONLY : MNODES
+
+
+#ifdef HAVE_MPI_MOD
+      use mpi  
+      IMPLICIT NONE
+#else
+      IMPLICIT NONE
+#endif
+C
+C--------------------------------------------------------------------------
+C  This module supplies the MPI Message-Passing Interface for PADCIRC.
+C
+C  Uses asynchronous and persistent communication with buffer packing
+C  as performance enhancements for "cluster" architectures.
+C
+C  vjp  8/29/1999
+C--------------------------------------------------------------------------
+C
+C
+
+C
+C  Message-Passing Array space
+C
+Csb-PDG1
+      PUBLIC
+
+      INTEGER, SAVE :: MPI_COMM_ADCIRC
+      INTEGER, SAVE ::  COMM_COMP     
+      INTEGER, SAVE ::  GROUP_WORLD, GROUP_COMP
+
+      INTEGER,SAVE,PRIVATE :: REALTYPE, DBLETYPE, COMM   
+      INTEGER,SAVE,PRIVATE ::  NEIGHPROC_R, NEIGHPROC_S, RDIM, IERR,
+     $     lvl
+      INTEGER,SAVE,PRIVATE ::  TAG = 101
+      LOGICAL,SAVE,ALLOCATABLE :: RESELEM(:)
+C
+      INTEGER, PRIVATE, ALLOCATABLE ::IPROC_R(:),IPROC_S(:),NELEMLOC(:),
+     &    NELEMSEND(:,:), NELEMRECV(:,:),ISENDLOC(:,:), IBELONGTO(:),
+     $     NELEMSENDMAX(:), NELEMRECVMAX(:),
+     &    IRECVLOC(:,:), ISENDBUF(:,:), IRECVBUF(:,:),
+     $     ISENDLOCLVL(:,:,:),IRECVLOCLVL(:,:,:)
+C
+      INTEGER, PRIVATE, ALLOCATABLE :: REQ_I1(:), REQ_I2(:)
+      INTEGER, PRIVATE, ALLOCATABLE :: STAT_I1(:,:), STAT_I2(:,:)
+      INTEGER, PRIVATE, ALLOCATABLE :: REQ_R1(:), REQ_R2(:), REQ_R3(:),
+     &                                 REQ_LZ(:) 
+      INTEGER, PRIVATE, ALLOCATABLE :: STAT_R1(:,:), STAT_R2(:,:), 
+     &                                 STAT_R3(:,:), STAT_LZ(:,:)
+      INTEGER, PRIVATE, ALLOCATABLE :: REQ_R3D(:), STAT_R3D(:,:)
+      INTEGER, PRIVATE, ALLOCATABLE :: REQ_C3D(:), STAT_C3D(:,:)
+      INTEGER, PRIVATE, ALLOCATABLE :: INDEX(:)
+      REAL(SZ), PRIVATE,ALLOCATABLE :: SENDBUF(:,:), RECVBUF(:,:)
+C--
+C
+
+C---------------------end of data declarations--------------------------------C
+
+
+      CONTAINS
+
+
+      SUBROUTINE MSG_TYPES_ELEM()
+      IMPLICIT NONE
+#ifndef HAVE_MPI_MOD
+      include 'mpif.h'
+#endif
+c
+#ifdef  REAL4
+      REALTYPE = MPI_REAL
+      DBLETYPE = MPI_DOUBLE_PRECISION
+#else
+      REALTYPE = MPI_DOUBLE_PRECISION
+      DBLETYPE = MPI_DOUBLE_PRECISION
+#endif
+c
+      RETURN
+      END  SUBROUTINE
+
+
+      SUBROUTINE MESSAGE_INIT ()
+C--------------------------------------------------------------------------
+C  Routine performs following steps:
+C   (1)  initialize MPI, 
+C   (2)  get number of processors,
+C   (3)  get MPI rank of processor 
+C  vjp  8/06/1999
+C--------------------------------------------------------------------------
+      IMPLICIT NONE
+#ifndef HAVE_MPI_MOD
+      include 'mpif.h'
+#endif
+CND
+      Integer I
+      INTEGER, ALLOCATABLE :: RANKS(:)
+
+      CALL MPI_INIT(IERR)                               ! Initialize MPI
+      CALL MPI_COMM_SIZE (MPI_COMM_WORLD,MNPROC,IERR)   ! Get number of procs
+      CALL MPI_COMM_RANK (MPI_COMM_WORLD,MYPROC,IERR)   ! Get MPI rank
+CND
+      ALLOCATE(RANKS(MNPROC+1))
+      DO I=1,MNPROC
+         RANKS(I)=I-1
+      ENDDO
+      CALL MPI_COMM_GROUP(MPI_COMM_WORLD,GROUP_WORLD,IERR)
+      CALL MPI_GROUP_INCL(GROUP_WORLD,MNPROC,RANKS,GROUP_COMP,IERR)
+      CALL MPI_COMM_CREATE(MPI_COMM_WORLD,GROUP_COMP,COMM_COMP,IERR)
+      DEALLOCATE(RANKS)
+      COMM = COMM_COMP
+      RETURN
+      END SUBROUTINE
+
+c$$$      IMPLICIT NONE
+c$$$#ifndef HAVE_MPI_MOD
+c$$$      include 'mpif.h'
+c$$$#endif
+c$$$      CALL MPI_INIT(IERR)                               ! Initialize MPI
+c$$$      CALL MPI_COMM_SIZE (MPI_COMM_WORLD,MNPROC,IERR)   ! Get number of procs
+c$$$      CALL MPI_COMM_RANK (MPI_COMM_WORLD,MYPROC,IERR)   ! Get MPI rank
+c$$$      RETURN
+c$$$      END SUBROUTINE
+
+ 
+      SUBROUTINE MESSAGE_FINI ()
+C--------------------------------------------------------------------------
+C  Shutdown MPI library.
+C--------------------------------------------------------------------------
+      IMPLICIT NONE
+#ifndef HAVE_MPI_MOD
+      include 'mpif.h'
+#endif
+      INTEGER IERR,I
+C
+      CALL MPI_FINALIZE(IERR)
+      IF (MYPROC.EQ.0)  
+     &  print *, "MPI terminated with Status = ",IERR      
+      RETURN
+      END SUBROUTINE
+
+ 
+      SUBROUTINE MESSAGE_ABORT ()
+C--------------------------------------------------------------------------
+C  Shutdown MPI library.
+C--------------------------------------------------------------------------
+      IMPLICIT NONE
+#ifndef HAVE_MPI_MOD
+      include 'mpif.h'
+#endif
+      INTEGER IERR,I
+C
+      CALL MPI_ABORT(MPI_COMM_WORLD,IERR)
+      IF (MYPROC.EQ.0)  
+     &  print *, "MPI Aborted with Status = ",IERR      
+      RETURN
+      END SUBROUTINE
+
+
+
+      SUBROUTINE MSG_TABLE_ELEM () 
+C
+C--------------------------------------------------------------------------
+C  Routine preforms following steps:
+C
+C   (1) Read Message-Passing Information from file "DG.18"
+C   (2) Determine resident nodes: RESNODE(I) is true  if I is resident node
+C   (3) Determine ghost nodes:    RESNODE(I) is false if I is ghost node    
+C   (4) Determine number of neighbor subdomains
+C   (5) MPI rank of each neighbor and number of ghosts nodes to receive
+C   (6) Read Message-Passing Receive List
+C   (7) MPI rank of each neighbor and number of ghosts nodes to send
+C   (8) Read Message-Passing Send List
+C
+C  vjp  8/06/1999
+C--------------------------------------------------------------------------
+C
+      IMPLICIT NONE
+#ifndef HAVE_MPI_MOD
+      include 'mpif.h'
+#endif
+      INTEGER :: IDPROC,NLOCAL,I,J,JJ,NEIGH,KK
+C
+      OPEN(18,FILE=DIRNAME(1:LNAME)//'/'//'DG.18')
+C
+      READ(18,3015) IDPROC,NLOCAL
+c      write(19+myproc,*) idproc, nlocal,mne
+C
+      ALLOCATE ( NELEMLOC(NLOCAL) )
+C
+      READ(18,1130) (NELEMLOC(I), I=1,NLOCAL)
+C
+      ALLOCATE ( IBELONGTO(MNE),RESELEM(MNE) )
+C
+      DO I=1,MNE
+         IBELONGTO(I) = 0
+      ENDDO
+      DO I=1,NLOCAL
+         IBELONGTO(NELEMLOC(I)) = IDPROC + 1
+      ENDDO
+      DO I=1, MNE
+         IF (IBELONGTO(I)-1.EQ.MYPROC) THEN
+           RESELEM(I) = .TRUE.
+         ELSE 
+           RESELEM(I) = .FALSE.
+         ENDIF
+      ENDDO
+C
+      READ(18,3015) NEIGHPROC_R,NEIGHPROC_S
+C
+      RDIM = NEIGHPROC_R + NEIGHPROC_S
+      ALLOCATE( INDEX(RDIM) )
+C
+      ALLOCATE( IPROC_R(NEIGHPROC_R),NELEMRECVMAX(NEIGHPROC_R),
+     $     NELEMRECV(NEIGHPROC_R,Ndom) )
+      ALLOCATE( IRECVLOC(MNE,NEIGHPROC_R) )
+      ALLOCATE( IRECVLOCLVL(MNE,NEIGHPROC_R,Ndom) )
+C
+      DO JJ=1,NEIGHPROC_R
+         J = MOD(JJ-1+MYPROC,NEIGHPROC_R)+1
+         READ(18,3015) IPROC_R(J),NELEMRECVMAX(J)
+         READ(18,1130) (IRECVLOC(I,J), I=1,NELEMRECVMAX(J))
+         do lvl=1,Ndom
+            read(18,1130) KK,NELEMRECV(J,lvl)
+            if (NELEMRECV(J,lvl).ne.0) then
+              READ(18,1130) (IRECVLOCLVL(I,J,lvl), I=1,NELEMRECV(J,lvl))
+            endif
+         enddo
+      ENDDO
+C
+      ALLOCATE( IPROC_S(NEIGHPROC_S),NELEMSENDMAX(NEIGHPROC_S),
+     $     NELEMSEND(NEIGHPROC_S,Ndom) )
+      ALLOCATE( ISENDLOC(MNE,NEIGHPROC_S) )
+      ALLOCATE( ISENDLOCLVL(MNE,NEIGHPROC_S,Ndom) )
+C
+      DO JJ=1,NEIGHPROC_S
+         J = MOD(JJ-1+MYPROC,NEIGHPROC_S)+1
+         READ(18,3015) IPROC_S(J),NELEMSENDMAX(J)
+         READ(18,1130) (ISENDLOC(I,J), I=1,NELEMSENDMAX(J))
+         do lvl=1,Ndom
+            READ(18,1130) KK,NELEMSEND(J,lvl)
+            if (NELEMSEND(J,lvl).ne.0) then
+               READ(18,1130) (ISENDLOCLVL(I,J,lvl), I=1,NELEMSEND(J,lvl))
+            endif
+         enddo
+      ENDDO
+C
+      CLOSE(18)
+      RETURN
+C
+1130  FORMAT(11X,9I8)
+ 3011 FORMAT(8X,3I8)
+3015  FORMAT(8X,2I8)    
+      END SUBROUTINE
+
+
+      SUBROUTINE MESSAGE_START_ELEM ()
+C
+C--------------------------------------------------------------------------
+C  Routine preforms following steps:
+C   (1)  allocate message-passing space
+C   (2)  setup MPI data structures for "persistent" message-passing.
+C
+C  vjp  8/06/1999
+C--------------------------------------------------------------------------
+C
+      IMPLICIT NONE
+#ifndef HAVE_MPI_MOD
+      include 'mpif.h'
+#endif
+      INTEGER :: J,NCOMMELEM_S,NCOMMELEM_R
+C
+      NCOMMELEM_R = 0
+      NCOMMELEM_S = 0
+      DO J=1,NEIGHPROC_R
+        NCOMMELEM_R = NCOMMELEM_R + NELEMRECVMAX(J)
+      ENDDO
+      DO J=1,NEIGHPROC_S
+        NCOMMELEM_S = NCOMMELEM_S + NELEMSENDMAX(J)
+      ENDDO
+C
+      ALLOCATE ( ISENDBUF(NCOMMELEM_S*2,NEIGHPROC_S) )
+      ALLOCATE ( IRECVBUF(NCOMMELEM_R*2,NEIGHPROC_R) )
+C
+C      IF (C3D) THEN
+C         ALLOCATE ( SENDBUF(2*MNP*MNODES,NEIGHPROC) )
+C         ALLOCATE ( RECVBUF(2*MNP*MNODES,NEIGHPROC) )
+C        STOP 'NOT UPDATED'
+C      ELSE
+         ALLOCATE ( SENDBUF(NCOMMELEM_S*DOF*4,NEIGHPROC_S) )
+         ALLOCATE ( RECVBUF(NCOMMELEM_R*DOF*4,NEIGHPROC_R) )
+C      ENDIF
+C
+      ALLOCATE ( REQ_I1(RDIM),REQ_I2(RDIM) )
+      ALLOCATE ( REQ_R1(RDIM),REQ_R2(RDIM),REQ_R3(RDIM),REQ_LZ(RDIM) )
+C
+      ALLOCATE ( STAT_I1(MPI_STATUS_SIZE,RDIM),       
+     &           STAT_I2(MPI_STATUS_SIZE,RDIM) )
+
+      ALLOCATE ( STAT_R1(MPI_STATUS_SIZE,RDIM),       
+     &           STAT_R2(MPI_STATUS_SIZE,RDIM),
+     &           STAT_R3(MPI_STATUS_SIZE,RDIM),
+     &           STAT_LZ(MPI_STATUS_SIZE,RDIM) )
+C
+C
+             !  Setup persistent structures for integer arrays
+C
+      DO J=1,NEIGHPROC_R
+         CALL MPI_RECV_INIT ( IRECVBUF(1,J), NELEMRECVMAX(J), 
+     &     MPI_INTEGER,IPROC_R(J), TAG, MPI_COMM_WORLD,
+     &     REQ_I1(J),IERR)
+      ENDDO
+      DO J=1,NEIGHPROC_S
+         CALL MPI_SEND_INIT ( ISENDBUF(1,J), NELEMSENDMAX(J), 
+     &    MPI_INTEGER,IPROC_S(J), TAG, MPI_COMM_WORLD,
+     &    REQ_I1(J+NEIGHPROC_R),IERR )
+      ENDDO
+C
+C
+C
+      DO J=1,NEIGHPROC_R
+         CALL MPI_RECV_INIT ( RECVBUF(1,J), DOF*NELEMRECVMAX(J), 
+     &     REALTYPE,IPROC_R(J), TAG, MPI_COMM_WORLD,
+     &     REQ_R1(J),IERR)
+      ENDDO
+      DO J=1,NEIGHPROC_S
+         CALL MPI_SEND_INIT ( SENDBUF(1,J), DOF*NELEMSENDMAX(J), 
+     &     REALTYPE,IPROC_S(J), TAG, MPI_COMM_WORLD,
+     &     REQ_R1(J+NEIGHPROC_R),IERR)
+      ENDDO
+C
+C
+      RETURN
+      END SUBROUTINE
+
+
+      SUBROUTINE UPDATER_ELEM_MOD( VEC1, irk,lvl )
+C
+C--------------------------------------------------------------------------
+C  update 1, 2, or 3 Real Arrays's Ghost Cells using asynchronous
+C  and persistent message-passing.
+C
+C  vjp  8/06/1999
+C--------------------------------------------------------------------------
+C 
+      IMPLICIT NONE
+#ifndef HAVE_MPI_MOD
+      include 'mpif.h'
+#endif
+C
+      INTEGER,  INTENT(IN) ::  lvl, irk
+      REAL(SZ), INTENT(INOUT) ::  VEC1(:,:,:)
+      INTEGER :: N,I,J,JJ,K,NCOUNT,NFINI,TOT,IERR
+c
+      DO J=1,NEIGHPROC_S
+         NCOUNT = 0
+         DO I=1,NELEMSEND(J,lvl)
+            DO K=1,DOF
+              NCOUNT = NCOUNT+1
+              SENDBUF(NCOUNT,J)=VEC1(k,ISENDLOCLVL(I,J,lvl),irk)
+            ENDDO
+         ENDDO
+         if (nelemsend(j,lvl).ne.0) then
+c            write(*,*) myproc,'sending message to ',iproc_s(j)
+            call mpi_send(sendbuf(1,j),ncount,realtype,iproc_s(j),tag,
+     $           MPI_COMM_WORLD,ierr)
+         endif
+      ENDDO
+c
+      DO J=1,NEIGHPROC_R
+         if (nelemrecv(j,lvl).ne.0) then
+c            write(*,*) myproc,'receiving message from ',iproc_r(j)
+            call mpi_recv(recvbuf(1,j),dof*nelemrecv(j,lvl),realtype,
+     $           iproc_r(j),tag,mpi_comm_world,stat_r1(1,j),ierr)
+            NCOUNT = 0
+            DO I=1,NELEMRECV(J,lvl)
+               DO K=1,DOF
+                  NCOUNT = NCOUNT+1
+                  VEC1(k,IRECVLOCLVL(I,J,lvl),irk) = RECVBUF(NCOUNT,J)
+               ENDDO
+            ENDDO
+         ENDIF
+      ENDDO
+c
+c 999  continue
+      RETURN
+      END SUBROUTINE
+c
+      subroutine update_msgpass_elem
+
+      IMPLICIT NONE
+      INTEGER :: lvl, jj,j,kk,k
+c
+c      write(888+myproc,*) 'updating message passing tables'
+      do jj=1,neighproc_r
+         j=mod(jj-1+myproc,neighproc_r)+1
+         do lvl=1,Ndom
+            nelemrecv(j,lvl)=0
+            do kk=1,nelemrecvmax(j)
+               k=irecvloc(kk,j)
+               if (tsgroup(k).eq.lvl) then
+                  nelemrecv(j,lvl)=nelemrecv(j,lvl)+1
+                  irecvloclvl(nelemrecv(j,lvl),j,lvl)=k
+               endif
+            enddo
+c            write(888+myproc,*) 'recv ',j,lvl,nelemrecv(j,lvl),
+c     $           (irecvloclvl(kk,j,lvl),kk=1,nelemrecv(j,lvl))
+         enddo
+      enddo
+      do jj=1,neighproc_s
+         j=mod(jj-1+myproc,neighproc_s)+1
+         do lvl=1,Ndom
+            nelemsend(j,lvl)=0
+            do kk=1,nelemsendmax(j)
+               k=isendloc(kk,j)
+               if (tsgroup(k).eq.lvl) then
+                  nelemsend(j,lvl)=nelemsend(j,lvl)+1
+                  isendloclvl(nelemsend(j,lvl),j,lvl)=k
+               endif
+            enddo
+c            write(888+myproc,*) 'send ',j,lvl,nelemsend(j,lvl),
+c     $           (isendloclvl(kk,j,lvl),kk=1,nelemsend(j,lvl))
+         enddo
+      enddo
+c
+c      write(77+myproc,*) neighproc_r,
+c     $     ((nelemrecv(k,j),j=1,Ndom),k=1,neighproc_r)
+      return
+      end subroutine
+
+      SUBROUTINE UPDATEI_ELEM( IVEC1, IVEC2, NMSG )
+C
+C--------------------------------------------------------------------------
+C  Update 1 or 2 Integer Arrays's Ghost Cells using asynchronous
+C  and persistent message-passing.
+C
+C  vjp  8/06/1999
+C--------------------------------------------------------------------------
+C 
+      IMPLICIT NONE
+#ifndef HAVE_MPI_MOD
+      include 'mpif.h'
+#endif
+C
+      INTEGER,   INTENT(IN) :: NMSG
+      INTEGER,   INTENT(INOUT) :: IVEC1(*),IVEC2(*)
+      INTEGER :: N,I,J,NCOUNT,NFINI,TOT
+C
+                             !..Pack 1 or 2 Messages
+      DO J=1,NEIGHPROC_S
+         NCOUNT = 0
+         DO I=1,NELEMSENDMAX(J)
+            NCOUNT = NCOUNT+1
+            ISENDBUF(NCOUNT,J)=IVEC1(ISENDLOC(I,J))
+         ENDDO
+         IF (NMSG.GT.1) THEN
+           DO I=1,NELEMSENDMAX(J)
+              NCOUNT = NCOUNT+1
+              ISENDBUF(NCOUNT,J)=IVEC2(ISENDLOC(I,J))
+           ENDDO
+         ENDIF
+      ENDDO
+C                     
+                          ! Send/receive messages to/from all neighbors
+      IF (NMSG.EQ.1) THEN
+        CALL MPI_STARTALL ( RDIM, REQ_I1, IERR )
+      ELSE
+        CALL MPI_STARTALL ( RDIM, REQ_I2, IERR )
+      ENDIF
+C
+                          !..Unpack Received messages as they arrive  
+
+      IF (NMSG.EQ.1) THEN   
+        TOT = 0
+        DO WHILE (TOT.LT.RDIM)
+           DO N=1, RDIM
+              INDEX(N) = 0
+           ENDDO
+           CALL MPI_WAITSOME( RDIM,REQ_I1,NFINI,INDEX,STAT_I1,IERR )
+           TOT = TOT + NFINI
+           DO N=1, NFINI
+              IF (INDEX(N).GT.0.AND.INDEX(N).LE.RDIM)  THEN
+                IF (INDEX(N).LE.NEIGHPROC_R) THEN
+                  J = INDEX(N)
+                  NCOUNT = 0
+                  DO I=1,NELEMRECVMAX(J)
+                     NCOUNT = NCOUNT+1
+                     IVEC1(IRECVLOC(I,J)) = IRECVBUF(NCOUNT,J)
+                  ENDDO
+                ENDIF
+              ENDIF
+           ENDDO
+        ENDDO
+      ELSE
+        TOT = 0
+        DO WHILE (TOT.LT.RDIM)
+           DO N=1, RDIM
+              INDEX(N) = 0
+           ENDDO
+           CALL MPI_WAITSOME( RDIM,REQ_I2,NFINI,INDEX,STAT_I2,IERR )
+           TOT = TOT + NFINI
+           DO N=1, NFINI
+              IF (INDEX(N).GT.0.AND.INDEX(N).LE.RDIM)  THEN
+                IF (INDEX(N).LE.NEIGHPROC_R) THEN
+                  J = INDEX(N)
+                  NCOUNT = 0
+                  DO I=1,NELEMRECVMAX(J)
+                     NCOUNT = NCOUNT+1
+                     IVEC1(IRECVLOC(I,J)) = IRECVBUF(NCOUNT,J)
+                  ENDDO
+                  DO I=1,NELEMRECVMAX(J)
+                     NCOUNT = NCOUNT+1
+                     IVEC2(IRECVLOC(I,J)) = IRECVBUF(NCOUNT,J)
+                  ENDDO
+                ENDIF
+              ENDIF
+           ENDDO
+        ENDDO
+      ENDIF
+C 
+ 999  continue
+      RETURN
+      END SUBROUTINE
+
+      SUBROUTINE para_sum( sum_this )
+      IMPLICIT NONE
+#ifndef HAVE_MPI_MOD
+      include 'mpif.h'
+#endif
+
+
+      Real(SZ), INTENT(INOUT) ::sum_this
+      Real(SZ) sum_of_this 
+      Integer kount       
+
+      sum_of_this = 0.D0
+
+      kount=1
+
+      call MPI_ALLREDUCE( sum_this, sum_of_this, kount,
+     &     REALTYPE, MPI_SUM, COMM, ierr)
+
+      sum_this = sum_of_this 
+
+      END SUBROUTINE para_sum
+
+      SUBROUTINE para_max( max_this )
+      IMPLICIT NONE
+#ifndef HAVE_MPI_MOD
+      include 'mpif.h'
+#endif
+
+      Real(SZ), INTENT(INOUT) :: max_this
+      Real(SZ) max_of_this     
+      Integer kount            
+
+      max_of_this = -100.D0
+
+      kount=1
+
+      call MPI_ALLREDUCE( max_this, max_of_this, kount,
+     &     REALTYPE, MPI_MAX, COMM, ierr)
+
+      max_this = max_of_this
+
+      END SUBROUTINE para_max
+
+      SUBROUTINE para_min( min_this )
+      
+      IMPLICIT NONE
+
+#ifndef HAVE_MPI_MOD
+      include 'mpif.h'
+#endif
+
+
+      Real(SZ), INTENT(INOUT) :: min_this
+      Real(SZ) min_of_this    
+      Integer kount           
+
+      min_of_this = 100.D0
+
+      kount=1
+
+      call MPI_ALLREDUCE( min_this, min_of_this, kount,
+     &     REALTYPE, MPI_MIN, COMM, ierr)
+
+      min_this = min_of_this
+
+      END SUBROUTINE para_min
+
+      END MODULE MESSENGER_NEW
+       

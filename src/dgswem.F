@@ -27,7 +27,8 @@ Casey 101118: We need the following information to couple to unstructured SWAN.
      &                       PADCSWAN_RUN
 #endif
 #ifdef CMPI
-      USE MESSENGER_ELEM
+      USE MESSENGER_NEW
+      USE MESSENGER_NODE_NEW
 C--   
       IMPLICIT NONE
       
@@ -192,12 +193,12 @@ c     write(200+myproc,*) 'back from prep_dg'
       open(778, file = tecfile_max)
       write(777,*) 'TITLE = "dgswem output"'
       write(777,*) 
-     $     'VARIABLES = "x", "y", "b", "ze", "H", "u", "v", "|v|","|w|","p","iota","iota2","sum","diff"'
+     $     'VARIABLES = "x", "y", "b", "ze", "H", "u", "v", "|v|","|w|","p","iota","iota2","sum","diff","TsGroup"'
       write(777,*) 'ZONE ZONETYPE=FETRIANGLE ',
      $     'NODES=', np, 
      $     ' ELEMENTS=', ne, 
         !$     ' DATAPACKING=POINT ','SOLUTIONTIME=',time_a
-     $     ' DATAPACKING=BLOCK ',' VARLOCATION=([3,4,5,6,7,8,10,11,12,13,14]=CELLCENTERED) ',
+     $     ' DATAPACKING=BLOCK ',' VARLOCATION=([3,4,5,6,7,8,10,11,12,13,14,15]=CELLCENTERED) ',
      $     'SOLUTIONTIME=',time_a 
 c$$$      do i=1,np
 c$$$      write(777,7777) x(i), y(i),  
@@ -249,6 +250,9 @@ c$$$      enddo
       do i=1,ne 
          write(777,7777)  abs(tracer(i)-tracer2(i))    
       enddo
+      do i=1,ne
+         write(777,7777) real(TsGroup(i))
+      enddo
  7777 format(9f20.8,i10)
       do i=1,ne
          write(777,"(3i12)") nm(i,1), nm(i,2), nm(i,3)
@@ -279,12 +283,31 @@ C     sb...Write initial conditions
 !     endif
 #endif
 C.....Begin time stepping
-      DO 200 ITIME_A = ITHS+1,NT
-c$$$         if (mod(itime_a,1000).eq.1) then
-c$$$            if (myproc.eq.0) write(*,*) 'timestep ',itime_a
-c$$$c     write(200+myproc,*) 'timestep ',itime_a,myproc
-c$$$         endif
+
+c     TIME_A = STATIM*86400.d0
+      timeh  = (STATIM - REFTIM)*86400.D0
+      itime_a = iths+1
+
+      LZ(:,:,:,:) = 0.d0
+      
+      TSGROUPFLAG(:) = .FALSE.
+      IF (LTS_FLAG .ne. 0 .AND. NDOM>1) THEN
+         OPEN(987,FILE = DIRNAME//'/'//'dtmods.out')
+         RAMPDG = 1.D0
+         IF ((NRAMP .EQ. 1).AND.(TIME_A .LE. DRAMP*86400.d0)) THEN
+            RAMPDG = TANH((2.D0*TIME_A/86400.D0)/DRAMP)
+         ENDIF
+         IF (NWS .NE. 0) CALL MET_FORCING(itime_a)
+         CALL RESET_LTS()
+      ENDIF
+
+      DO WHILE (TIME_A .LT. RNDAY*86400.D0)
+
+         CALLRESETFLAG = 0
+
          CALL DG_TIMESTEP(ITIME_A)
+         ITIME_A = ITIME_A + 1
+
 #ifdef SWAN
 Casey 090302: If it is time, then call the following subroutine
 C             to then call the SWAN time-stepping subroutine.
@@ -300,6 +323,38 @@ Casey 121126: DEBUG.
 !           ENDIF
          ENDIF
 #endif
+
+#ifdef CMPI
+         call errorelevsum(callresetflag)
+         if (callresetflag.gt.1) callresetflag=1
+#endif
+
+C.....Write State as Hot Start for Local Timestepping Reset
+         IF((DTCHECK .GT. 0) .AND. (NDOM > 1) .AND.
+     $        (MOD(ITIME_A,DTCHECK)) .EQ. 0) THEN
+            CALLRESETFLAG = 2
+         ENDIF
+
+         IF (CALLRESETFLAG .NE. 0) THEN
+            IF (MYPROC .EQ. 0) WRITE(*,*) 'calling reset',time_a/86400.
+            CALL RESET_LTS()
+            IF (CALLRESETFLAG .EQ. 2) TSGROUPFLAG(:) = .FALSE.
+         ENDIF
+      ENDDO
+
+      IF(LTS_FLAG .NE. 0 .AND. NDOM > 1) THEN
+         if(myproc.eq.0) WRITE(*,*) 'calling reset'
+         CALL RESET_LTS()
+         CLOSE(987)
+      ENDIF
+
+      OPEN(69,FILE = DIRNAME//'/'//'Hot_start.299')
+      WRITE(69,*) Ndom,(Dtdom(i),i=1,Ndom)
+      DO i=1,ne
+         WRITE(69,*) TsGroup(i)
+      ENDDO
+      CLOSE(69)
+
  200  CONTINUE
 
  1112 FORMAT(/,1X,79('_'))

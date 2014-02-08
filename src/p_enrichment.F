@@ -13,7 +13,7 @@ c.....use appropriate modules
       use dg
 
 #ifdef CMPI
-      USE MESSENGER_ELEM
+      USE MESSENGER_NEW
 #endif
 
       implicit none

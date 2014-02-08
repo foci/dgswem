@@ -21,7 +21,8 @@ C.....Use appropriate modules
       use sizes, only:  myproc,layers
 
 #ifdef CMPI
-      USE MESSENGER_ELEM 
+      USE MESSENGER_NEW
+      USE MESSENGER_NODE_NEW
 #endif
       
 C.....Declare local variables
@@ -543,7 +544,7 @@ C.....time step falls within the specified window
      $     ' ELEMENTS=', ne, 
      $     ' DATAPACKING=BLOCK ',
      $     'SOLUTIONTIME=',time_a,
-     $     'VARLOCATION=([3,4,5,6,7,8,10,11,12,13,14]=CELLCENTERED)'
+     $     'VARLOCATION=([3,4,5,6,7,8,10,11,12,13,14,15]=CELLCENTERED)'
                      do i=1,np
                         write(777,7777)  x(i)
                      enddo
@@ -585,6 +586,9 @@ C.....time step falls within the specified window
                      enddo
                      do i=1,ne 
                         write(777,7777)  abs(tracer(i)-tracer2(i))    
+                     enddo
+                     do i=1,ne
+                        write(777,7777) real(TsGroup(i))
                      enddo
 
  7777                format(9f20.8,i10)

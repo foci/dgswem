@@ -396,6 +396,8 @@ cjjw      IMPLICIT NONE
       INTEGER I,I1,J,K,L,ETYPE,ITEMP,ITEMP2,ILNODE,ILNODE2,ILNODE3
       INTEGER JD,JG,JP,IPROC,IPROC2,IPROC3,DISC,BBN,IBP
       INTEGER INDEX,INDEX2,ITOT,ITYPE,NUMS(10)
+cnd
+      INTEGER TSGROUP1,TSGROUP2,EL1,EL2,JJ,J1,J2
       CHARACTER LOCFN*14,PE*6
       CHARACTER*80 OUTMSG
 C
@@ -462,6 +464,12 @@ C
          NVELP(IPROC) = 0
          DO K = 1,NBOU
             NVELLP(K) = 0
+cnd
+            if (ibtype(k).eq.52) then
+               write(*,*) 'changing ibtype=52 to ibtype=30',iproc
+               ibtype(k)=30
+            endif
+c
             IBTYPEP(K,IPROC) = IBTYPE(K)
          ENDDO
 C
@@ -700,6 +708,7 @@ C
           CALL NEWINDEX(NVELMSG,OUTMSG,NVELP(IPROC))
           WRITE(14,80) OUTMSG
 C
+          nweir_edge=0
           DO K = 1,NBOU
              IF(NVELLP(K).GT.0)THEN
                 ITYPE = IBTYPEP(K,IPROC)
@@ -735,11 +744,81 @@ C
                      WRITE(14,82) NBVVP(K,I),IBCONNRP(K,I),
      &                        BAR1(K,INDEX),BAR2(K,INDEX),BAR3(K,INDEX)
                   ENDDO
-                ENDIF
-             ENDIF
-          ENDDO
-C
-          CLOSE(14)
+cnd local time stepping fix
+                  EL1=0
+                  EL2=0
+                  TSGROUP1=0
+                  TSGROUP2=0
+                  DO I=1,NVELLP(K)-1
+                     DO J=1,NELP(IPROC)
+                        DO JJ=1,3
+                           IF (NBVVP(K,I).EQ.NNEP(JJ,J,IPROC)) THEN
+                              DO JJJ=1,3
+                                 IF (NBVVP(K,I+1).EQ.NNEP(JJJ,J,IPROC)) THEN
+                                    TSGROUP1=TSGROUP(IMAP_EL_LG(J,IPROC))
+                                    EL1=IMAP_EL_LG(J,IPROC)
+                                    J1=J
+                                    GO TO 4494
+                                 ENDIF
+                              ENDDO
+                           ENDIF
+                        ENDDO
+                     ENDDO
+ 4494                continue
+                     IF (TSGROUP1.EQ.0) THEN
+                        WRITE(*,*) 'ERROR IN PREP14 ',IPROC,
+     $                       NBVVP(K,I)
+c                        STOP
+                     ENDIF
+                     DO J=1,NELP(IPROC)
+                        DO JJ=1,3
+                           IF (IBCONNRP(K,I).EQ.NNEP(JJ,J,IPROC)) THEN
+                              DO JJJ=1,3
+                                 IF (IBCONNRP(K,I+1).EQ.NNEP(JJJ,J,IPROC)) THEN
+                                    TSGROUP2=MIN(TSGROUP1,
+     $                                   TSGROUP(IMAP_EL_LG(J,IPROC)))
+                                    EL2=IMAP_EL_LG(J,IPROC)
+                                    J2=J
+                                    GO TO 3579
+                                 ENDIF
+                              ENDDO
+                           ENDIF
+                        ENDDO
+                     ENDDO
+ 3579             CONTINUE
+                  IF (TSGROUP2.eq.0) THEN
+                     WRITE(*,*) 'ERROR IN PREP14 WITH WEIR NODES',
+     $                    iproc,el1,el2
+c                     STOP
+                  ENDIF
+c                  TSGROUP(EL1)=TSGROUP2
+c                  TSGROUP(EL2)=TSGROUP2
+                  TSGROUP(EL1)=1
+                  TSGROUP(EL2)=1
+                  nweir_edge=nweir_edge+1
+                  weir_left_elem(nweir_edge)=el1
+                  weir_right_elem(nweir_edge)=el2
+               ENDDO
+!END FIX                      
+            ENDIF
+         ENDIF
+      ENDDO
+c
+c     this fix might be necessary if an element has more than one weir edge
+      do l=1,2
+         do i=1,nweir_edge
+            if (tsgroup(weir_left_elem(i)).ne.tsgroup(weir_right_elem(i))) then
+c     tsgroup(weir_left_elem(i))=min(tsgroup(weir_left_elem(i)),
+c     $           tsgroup(weir_right_elem(i)))
+c     tsgroup(weir_right_elem(i))=min(tsgroup(weir_left_elem(i)),
+c     $           tsgroup(weir_right_elem(i)))
+               tsgroup(weir_left_elem(i))=1
+               tsgroup(weir_right_elem(i))=1
+            endif
+         enddo
+      enddo
+C     
+      CLOSE(14)
 
 Csb
 C-Hard Bottom file (fort.hb)
@@ -1246,8 +1325,8 @@ C---------------------------------------------------------------------------C
 C
 cjjw - added 1 line
 cjjw      IMPLICIT NONE
-      INTEGER N1, N2, N3, KMIN
-      INTEGER I,J,K,L,ITEMP,IPR,IPR1
+      INTEGER N1, N2, N3, KMIN, lvl
+      INTEGER I,J,K,L,ITEMP,IPR,IPR1, kk
       INTEGER INDEX,ITOT,IEL,IELG,ILNODE,IPROC,ITYPE
       INTEGER,ALLOCATABLE :: RES_NODE(:)
       CHARACTER LOCFN*14,PE*6
@@ -1320,6 +1399,22 @@ c                IRECV(IRECV_TOT(J,I)) = INDEX
             ENDDO
             WRITE(18,3030) (IPR-1), IRECV_TOT(J,I)
             WRITE(18,1130) (IRECV(K),K=1,IRECV_TOT(J,I))
+c
+            do lvl=1,Ndom
+               nnoderecv(j,lvl)=0
+               do k=1,irecv_tot(j,i)
+                  index=imap_nod_lg(irecv(k),i)
+                  if (tsgroupnode(index,lvl).eq.lvl) then
+                     nnoderecv(j,lvl)=nnoderecv(j,lvl)+1
+                     noderecvlvl(nnoderecv(j,lvl),lvl)=irecv(k)
+                  endif
+               enddo
+               write(18,3031) lvl,nnoderecv(j,lvl)
+               if (nnoderecv(j,lvl).ne.0) then
+                  write(18,1130) (noderecvlvl(k,lvl),k=1,
+     $                    nnoderecv(j,lvl))
+               endif
+            enddo
          ENDDO
 C              
 C--write the send list
@@ -1338,6 +1433,22 @@ c                ISEND(ISEND_TOT(J,I)) = INDEX
             ENDDO
             WRITE(18,3040)  IPR-1, ISEND_TOT(J,I)
             WRITE(18,1130) (ISEND(K),K=1,ISEND_TOT(J,I))
+c
+            do lvl=1,Ndom
+               nnodesend(j,lvl)=0
+               do k=1,isend_tot(j,i)
+                  index=imap_nod_lg(isend(k),i)
+                  if (tsgroupnode(index,lvl).eq.lvl) then
+                     nnodesend(j,lvl)=nnodesend(j,lvl)+1
+                     nodesendlvl(nnodesend(j,lvl),lvl)=isend(k)
+                  endif
+               enddo
+               write(18,3041) lvl,nnodesend(j,lvl)
+               if (nnodesend(j,lvl).ne.0) then
+                  write(18,1130) (nodesendlvl(k,lvl),k=1,
+     $                    nnodesend(j,lvl))
+               endif
+            enddo
          ENDDO
 
          CLOSE(18)
@@ -1369,8 +1480,10 @@ C
 1130  FORMAT(8X,9I8)
 3010  FORMAT('RES NODE',2I8)    
 3020  FORMAT('COMM PE ',2I8)    
-3030  FORMAT('RECV PE ',2I8)    
-3040  FORMAT('SEND PE ',2I8) 
+3030  FORMAT('RECV PE ',2I8)
+3031  FORMAT('REPE LVL',2I8)      
+3040  FORMAT('SEND PE ',2I8)
+3041  FORMAT('SEPE LVL',2I8) 
 C
       RETURN
       END
@@ -1393,11 +1506,12 @@ C
 cjjw - added 1 line
       IMPLICIT NONE
       INTEGER N1,N2,N3,PE1,PE2,PE3
-      INTEGER I,J,K,L,ITEMP,IPR,IPR1
+      INTEGER I,J,K,L,ITEMP,IPR,IPR1, lvl
       INTEGER INDEX,ITOT,IEL,IELG,ILNODE,IPROC,ITYPE
       INTEGER NEL,MNEL,NRES_ELEM,IRES
       INTEGER,ALLOCATABLE :: COMM_EL(:),RES_ELEM(:)
       CHARACTER LOCFN*14,PE*6
+      CHARACTER LOCFN2*14,LOCFN3*20,LOCFN4*20,LOCFN5*20
 C
 C  Allocate local arrays
 C
@@ -1416,11 +1530,27 @@ C
 C
 C--Write Message-Passing File for each PE
 C
+      Nelem_loc_proc(:,:)=0
+      MaxNelem_loc_proc(:)=0
       DO 1000 I = 1,NPROC
 C
         LOCFN(1:14) = 'PE0000/DG.18'
+        LOCFN2(1:14) = 'PE0000/EL.TS'
         CALL IWRITE(LOCFN,3,6,I-1)
+        CALL IWRITE(LOCFN2,3,6,I-1)
         OPEN (181,FILE=LOCFN)
+        OPEN (191,FILE=LOCFN2)
+        if (modal_ic.eq.2) then
+           LOCFN3(1:20) = 'PE0000/Hot_start.214'
+           LOCFN4(1:20) = 'PE0000/Hot_start.263'
+           LOCFN5(1:20) = 'PE0000/Hot_start.264'
+           CALL IWRITE(LOCFN3,3,6,I-1)
+           CALL IWRITE(LOCFN4,3,6,I-1)
+           CALL IWRITE(LOCFN5,3,6,I-1)
+           OPEN (401,FILE=LOCFN3)
+           OPEN (402,FILE=LOCFN4)
+           OPEN (403,FILE=LOCFN5)
+        endif
 C
 C--Write the Resident Node List
 C
@@ -1483,6 +1613,30 @@ C
           ENDIF
         ENDDO
         WRITE(181,1130) (RES_ELEM(J),J=1,ITOT)
+clts
+        write(191,*) Ndom,(Msteps(j),j=1,Ndom),(DtDom(j),j=1,Ndom)
+        if (modal_ic.eq.2) then
+           write(401,*) iths,dt_max
+           write(402,*) pze
+           write(403,*) pqx,pqy
+        endif
+        do j=1,Nelp(i)
+           WRITE(191,*) j,TsGroup(IMAP_EL_LG(J,I)),imap_el_lg(j,i)
+           Nelem_loc_proc(i,TsGroup(IMAP_EL_LG(J,I)))=
+     $          Nelem_loc_proc(i,TsGroup(IMAP_EL_LG(J,I)))+1
+           if (modal_ic.eq.2) then
+              do k=1,dof
+                 write(401,*) HB(k,IMAP_EL_LG(J,I)),WDFLG(k,IMAP_EL_LG(J,I))
+                 write(402,*) ZE(k,IMAP_EL_LG(J,I))
+                 write(403,*) QX(k,IMAP_EL_LG(J,I)),QY(k,IMAP_EL_LG(J,I))
+              enddo
+           endif
+        enddo
+        do j=1,Ndom
+           MaxNelem_loc_proc(j)=max(MaxNelem_loc_proc(j),
+     $          Nelem_loc_proc(i,j))
+        enddo
+
 C
 C--Write the Number of Communicating PEs and the maximum number of send/receive elements
 C
@@ -1507,6 +1661,21 @@ C
           IF(NEL.GT.0) THEN
             WRITE(181,3030) (J-1), NEL
             WRITE(181,1130) (COMM_EL(K),K=1,NEL)
+clts
+            do lvl=1,NDom
+               nelemrecv(j,lvl)=0
+               do k=1,NEL
+                  ielg=imap_el_lg(comm_el(k),i)
+                  if (tsgroup(ielg).eq.lvl) then
+                     nelemrecv(j,lvl)=nelemrecv(j,lvl)+1
+                     elemrecv(nelemrecv(j,lvl),lvl)=comm_el(k)
+                  endif
+               enddo
+               write(181,3050) lvl,nelemrecv(j,lvl)
+               if (nelemrecv(j,lvl).ne.0) then
+                 write(181,1130) (elemrecv(k,lvl),k=1,nelemrecv(j,lvl))
+              endif
+            enddo
           ENDIF
         ENDDO
 C     
@@ -1523,12 +1692,49 @@ C
           IF(NEL.GT.0) THEN
             WRITE(181,3040) (J-1), NEL
             WRITE(181,1130) (COMM_EL(K),K=1,NEL)
+clts
+            do lvl=1,NDom
+               nelemsend(j,lvl)=0
+               do k=1,NEL
+                  ielg=imap_el_lg(comm_el(k),i)
+                  if (tsgroup(ielg).eq.lvl) then
+                     nelemsend(j,lvl)=nelemsend(j,lvl)+1
+                     elemsend(nelemsend(j,lvl),lvl)=comm_el(k)
+                  endif
+               enddo
+               write(181,3060) lvl,nelemsend(j,lvl)
+               if (nelemsend(j,lvl).ne.0) 
+     $            write(181,1130) (elemsend(k,lvl),k=1,nelemsend(j,lvl))
+            enddo
           ENDIF
         ENDDO
 
         CLOSE(181)
+        CLOSE(191)
+        if (modal_ic.eq.2) then
+           close(401)
+           close(402)
+           close(403)
+        endif
 C     
  1000 CONTINUE
+clts
+      write(*,*)
+      NumNonZero(:)=0
+      do i=1,MNPROC
+         do j=1,Ndom
+            write(*,*) 'Processor ',i,' lvl ',j,'nelem ',
+     $           Nelem_loc_proc(i,j)
+            if (Nelem_loc_proc(i,j).ne.0) then
+               NumNonZero(j)=NumNonZero(j)+1
+            endif
+         enddo
+      enddo
+      write(*,*)
+      write(*,*) 'Maximum number of elements in each TS group'
+      write(*,*) (MaxNelem_loc_proc(j),j=1,Ndom)
+      write(*,*) 'Total number of processors containing elements'
+      write(*,*) (NumNonZero(j),j=1,Ndom)
 
       DEALLOCATE( COMM_EL )
 
@@ -1552,7 +1758,9 @@ C
 3015  FORMAT('RES ELEM',2I8)    
 3020  FORMAT('COMM PE ',3I8)
 3030  FORMAT('RECV PE ',2I8)    
-3040  FORMAT('SEND PE ',2I8) 
+3040  FORMAT('SEND PE ',2I8)
+3050  FORMAT('RECV PE LVL',2I8)
+3060  FORMAT('SEND PE LVL',2I8)  
 C
       RETURN
       END

@@ -18,7 +18,7 @@ C                        transport sediment across weirs
 C     
 C***********************************************************************
 
-      SUBROUTINE IBARRIER_EDGE_HYDRO(IT)
+      SUBROUTINE IBARRIER_EDGE_HYDRO(IT,lvl)
       
 C.....Use appropriate modules
 
@@ -31,7 +31,7 @@ C.....Use appropriate modules
 C.....Declare local variables
 
       INTEGER GEDB, GEDF, LEDB, LEDF, ELB, ELF, GPB, GPF, L, WEIR_FLOW
-      INTEGER IT, NB1, NB2, NF1, NF2,i,k,ll
+      INTEGER IT, NB1, NB2, NF1, NF2,i,k,ll, lvl
       REAL(SZ) ZEB, QXB, QYB, HBB, ZEF, QXF, QYF, HBF
       REAL(SZ) SFACB,SFACF
       Real(SZ) iotaB, iota2B, iotaF, iota2F, dynPB, dynPF
@@ -83,6 +83,8 @@ C.......Obtain the elements of the back and front sides
          
          NF1 = NEDNO(1,GEDF)
          NF2 = NEDNO(2,GEDF)
+
+         IF(TSGROUP(ELB).NE.LVL) GOTO 1000
          IF((WDFLG(ELB).EQ.0).AND.(WDFLG(ELF).EQ.0)) GOTO 1000
 
          test_el = test_el+1

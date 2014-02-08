@@ -172,6 +172,21 @@ C.....Declare allocatable real arrays
       REAL(SZ), ALLOCATABLE :: PHI_STAE(:,:), PHI_STAV(:,:)
       Real(SZ), Allocatable :: bed_IN(:),bed_EX(:),bed_HAT(:)
 
+! CJT - Multi-rate time-stepping
+      INTEGER(4) Mint, Ndom, Lts_Flag, Mbar, MaxNdom, dtcheck,LTSmodflag,
+     $     nmodtimes,TsGroupmod(20)
+      REAL(SZ) tmod1(20),tmod2(20)
+      REAL(SZ) dt_max, dt_min,dt_min0,cflfac,slammin,slammax,sfeamin,sfeamax
+      INTEGER(4), ALLOCATABLE :: Msteps(:), Nelem(:), TsGroup(:), ElemNum(:,:)
+      INTEGER(4), ALLOCATABLE :: TsGroupNode(:,:), TsGroupSave(:)
+      REAL(SZ), ALLOCATABLE :: DtLoc(:), DtDom(:), tnkp1_a(:), tnkp1_h(:)
+      REAL(SZ), ALLOCATABLE :: tn_a(:), tn_h(:)
+      REAL(SZ), ALLOCATABLE :: CENTROID_X(:), CENTROID_Y(:)
+      REAL(SZ), ALLOCATABLE :: UFLUX(:), UFLUXOLD(:)
+      INTEGER(4),  ALLOCATABLE :: TsGroupNodetemp(:)
+      LOGICAL, ALLOCATABLE:: TSGROUPFLAG(:)
+      INTEGER  CALLRESETFLAG
+
 C.....These (below) are defined in prep_slopelim.F
 
       Integer :: lim_count,lim_count_roll
@@ -224,6 +239,20 @@ C.....These (below) are defined in slopelimiter.F
 C**********************END OF DATA DECLARATIONS ***********************
 
       CONTAINS
+
+C.....Multi-rate (CJT)
+      SUBROUTINE ALLOC_MULTI_RATE()
+      ALLOCATE ( Msteps(MaxNdom), DtLoc(MNE), DtDom(MaxNdom) )
+      ALLOCATE ( TsGroup(MNE), ElemNum(MaxNdom,MNE), Nelem(MaxNdom) )
+      ALLOCATE (TsGroupNode(MNP,MaxNdom), TsGroupSave(MNE))
+      ALLOCATE ( tnkp1_a(MaxNdom), tnkp1_h(MaxNdom), tn_a(MaxNdom), 
+     $     tn_h(MaxNdom) )
+      ALLOCATE ( CENTROID_X(MNE), CENTROID_Y(MNE) ) 
+      ALLOCATE ( UFLUX(MNE), TsGroupNodetemp(MNP), UFLUXOLD(MNE) ) 
+      ALLOCATE (TSGROUPFLAG(MNE))
+      uflux(:)=0
+      RETURN
+      END SUBROUTINE
       
 C.....Set edge array sizes
 

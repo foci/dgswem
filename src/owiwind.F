@@ -8,7 +8,7 @@ C******************************************************************************
       USE SIZES,ONLY : SZ,MYPROC
       USE GLOBAL,ONLY : NSCREEN, ScreenUnit
 #ifdef CMPI
-      USE MESSENGER_ELEM, ONLY : MESSAGE_FINI
+      USE MESSENGER_NEW, ONLY : MESSAGE_FINI
 #endif         
       IMPLICIT NONE
 

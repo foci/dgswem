@@ -138,11 +138,21 @@ C
         ENDDO
         NEDGETOT = NEDGETOT/2
         print *, "edge count = ",nedgetot
+cnd
+        maxwght(:)=1
+        do iel=1,mne
+           do j=1,3
+              inode=nneg(j,iel)
+              maxwght(inode)=max(maxwght(inode),
+     $             metiswght(tsgroup(iel)))
+           enddo
+        enddo
+
 C
 C  COMPUTE WEIGHTS OF THE GRAPH'S VERTICES
 C
         DO INODE = 1,MNP   
-         VWGTS(INODE) = NEDGES(INODE)
+         VWGTS(INODE) = NEDGES(INODE)*maxwght(inode)
         ENDDO
 C
 C--COMPUTE ADJACENCY LIST OF GRAPH AND ITS EDGE WEIGHTS

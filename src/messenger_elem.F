@@ -129,21 +129,6 @@ c$$$      CALL MPI_COMM_RANK (MPI_COMM_WORLD,MYPROC,IERR)   ! Get MPI rank
 c$$$      RETURN
 c$$$      END SUBROUTINE
 
-      SUBROUTINE ErrorElevSum( ErrorElevExceeded )
-#ifndef HAVE_MPI_MOD
-      include 'mpif.h'
-#endif
-      INTEGER ErrorElevExceeded !=1 if this subdomain has exceeded warning elev
-      INTEGER SumErrorElevExceeded !sum total of all flags from all subdomains
-      INTEGER kount             ! to avoid compiler bug on certain platforms
-      
-      SumErrorElevExceeded = 0
-      kount=1
-      call MPI_ALLREDUCE( ErrorElevExceeded, SumErrorElevExceeded, kount,
-     &     MPI_INTEGER, MPI_SUM, MPI_COMM_world, ierr)
-      ErrorElevExceeded = SumErrorElevExceeded
-      END SUBROUTINE ErrorElevSum
-
  
       SUBROUTINE MESSAGE_FINI ()
 C--------------------------------------------------------------------------

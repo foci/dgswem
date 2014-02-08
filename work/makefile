@@ -55,7 +55,7 @@ ifeq ($(BUILDTYPE),dgswem)
   O_DIR:=odir5/
   FFLAGS:= $(FFLAGS4) $(DP) $(IMODS)$(O_DIR)
   VPATH :=  ../src 
-  MSG_MOBJ:= $(O_DIR)messenger_elem.o $(O_DIR)messenger.o
+  MSG_MOBJ:= $(O_DIR)messenger_new.o $(O_DIR)messenger_node_new.o
   MSG_OBJ:= 
 endif
 #Casey 121126: Add rules for the parallel SWAN+ADCIRC.
@@ -98,7 +98,7 @@ COUP_MOBJ := $(patsubst %.F, $(O_DIR)%.o, $(COUP_MSRC)  )
 
 METIS1_SRC =  metis.F
 METIS2_SRC =  metis2.F
-PREP_SRC   =  adcprep.F  decomp.F   read_global.F   prep.F   interp.F  machdep.F
+PREP_SRC   =  adcprep.F  cfl_prep.F decomp.F   read_global.F   prep.F   interp.F  machdep.F
 POST_SRC   =  adcpost.F    post.F  compare.F  diffmerge.F
 ADC_SRC    =  dgswem.F owiwind.F read_input.F cstart.F hstart.F radiation_edge_hydro.F \
 	ibarrier_edge_hydro.F ebarrier_edge_hydro.F  \
@@ -111,7 +111,8 @@ ADC_SRC    =  dgswem.F owiwind.F read_input.F cstart.F hstart.F radiation_edge_h
 	quad_pts_edge.F radiation_edge_hydro.F read_input.F rhs_dg_hydro.F \
 	numerical_flux.F tidal_potential.F write_results.F \
 	slopelimiter.F prep_slopelim.F ocean_edge_hydro_post.F ocean_flow_edge_hydro.F \
-	wetdry.F LDG_hydro.F met_forcing.F sta_basis.F modal2nodal.F write_output.F
+	wetdry.F LDG_hydro.F met_forcing.F sta_basis.F modal2nodal.F write_output.F \
+	cfl.F cfl_init.F first_loop.F second_loop.F reset_lts.F\
 #Casey 121126: Added modal2nodal.F and write_output.F to the previous line.
 
 METIS1_OBJ:= $(patsubst %.F, $(O_DIR)%.o, $(METIS1_SRC) )
@@ -267,6 +268,7 @@ $(O_DIR)adcprep.o     :  adcprep.F  $(PGLO_MOBJ) $(PMSG_OBJ)
 $(O_DIR)decomp.o      :  decomp.F   $(PGLO_MOBJ)
 $(O_DIR)read_global.o :  read_global.F  $(PGLO_MOBJ)
 $(O_DIR)prep.o        :  prep.F   $(PGLO_MOBJ)
+$(O_DIR)cfl_prep.o    :  cfl_prep.F   $(PGLO_MOBJ)
 $(O_DIR)interp.o      :  interp.F  
 $(O_DIR)machdep.o     :  machdep.F
 $(O_DIR)metis.o       :  metis.F $(PGLO_MOBJ)
@@ -290,8 +292,8 @@ $(O_DIR)sizes.o       			:  sizes.F
 $(O_DIR)fparser.o	                :  fparser.F90 $(O_DIR)sizes.o
 $(O_DIR)fparser2.o	                :  fparser2.F90 $(O_DIR)sizes.o
 $(O_DIR)global.o      			:  global.F  $(O_DIR)sizes.o
-$(O_DIR)messenger.o   			:  messenger.F  $(ADC_MOBJ)
-$(O_DIR)messenger_elem.o		:  messenger_elem.F  $(ADC_MOBJ)
+$(O_DIR)messenger_new.o   		:  messenger_new.F  $(ADC_MOBJ)
+$(O_DIR)messenger_node_new.o		:  messenger_node_new.F  $(ADC_MOBJ)
 $(O_DIR)harm.o        			:  harm.F
 $(O_DIR)wind.o        			:  wind.F
 $(O_DIR)itpackv.o     			:  itpackv.F   $(ADC_MOBJ)
@@ -304,6 +306,11 @@ $(O_DIR)couple2swan.o                   :  couple2swan.F $(ADC_MOBJ)
 
 #  adcirc & padcirc
 
+$(O_DIR)first_loop.o			:  first_loop.F $(ADC_MOBJ)
+$(O_DIR)second_loop.o                   :  second_loop.F $(ADC_MOBJ)
+$(O_DIR)cfl.o                           :  cfl.F $(ADC_MOBJ) 
+$(O_DIR)cfl_init.o                      :  cfl_init.F $(ADC_MOBJ) 
+$(O_DIR)reset_lts.o                     :  reset_lts.F $(ADC_MOBJ)
 $(O_DIR)owiwind.o   			:  owiwind.F $(ADC_MOBJ)
 $(O_DIR)read_input.o  			:  read_input.F $(ADC_MOBJ) $(HARM_MOBJ) $(WIND_MOBJ)
 $(O_DIR)cstart.o      			:  cstart.F $(ADC_MOBJ)  $(HARM_MOBJ)  $(WIND_MOBJ)

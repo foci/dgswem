@@ -11,11 +11,13 @@ C     -- cem, 2011
 C
 C***********************************************************************
 
-      SUBROUTINE SLOPELIMITER()
+      SUBROUTINE SLOPELIMITER(lvl)
 
       USE DG, ONLY : SLOPEFLAG
       
       IMPLICIT NONE
+
+      integer lvl
 
 #ifdef SLOPEALL
       IF (SLOPEFLAG.EQ.1) THEN
@@ -27,7 +29,7 @@ C***********************************************************************
       ELSE IF (SLOPEFLAG.EQ.4) THEN
         CALL SLOPELIMITER4()
       ELSE IF (SLOPEFLAG.EQ.5) THEN
-        CALL SLOPELIMITER5()
+        CALL SLOPELIMITER5(lvl)
       ELSE IF (SLOPEFLAG.EQ.6) THEN
         CALL SLOPELIMITER6()
       ELSE IF (SLOPEFLAG.EQ.7) THEN
@@ -42,11 +44,11 @@ C***********************************************************************
 #endif
 
 #ifdef SLOPE5 
-        CALL SLOPELIMITER5()
+        CALL SLOPELIMITER5(lvl)
 #endif
 
 #ifdef STBLZR
-        CALL SLOPELIMITER5()
+        CALL SLOPELIMITER5(lvl)
 #endif
     
 
@@ -2345,8 +2347,8 @@ C.....Use appropriate modules
       USE DG
 
 #ifdef CMPI
-      USE MESSENGER
-      USE MESSENGER_ELEM
+c      USE MESSENGER
+c      USE MESSENGER_ELEM
 #endif
 
       IMPLICIT NONE
@@ -2466,33 +2468,33 @@ C.....Find values at vertices of base elements and neighbors
 
 #ifdef CMPI
 
-      CALL UPDATER_ELEM_MOD2(ZEtaylor,QXtaylor,QYtaylor,1,3)
+c      CALL UPDATER_ELEM_MOD2(ZEtaylor,QXtaylor,QYtaylor,1,3)
 
 #ifdef TRACE
-      CALL UPDATER_ELEM_MOD2(iotataylor,QXtaylor,QYtaylor,1,2 )
+c      CALL UPDATER_ELEM_MOD2(iotataylor,QXtaylor,QYtaylor,1,2 )
 #endif
 
 #ifdef CHEM
-      CALL UPDATER_ELEM_MOD2(iotataylor,iota2taylor,QYtaylor,1,2 )
+c      CALL UPDATER_ELEM_MOD2(iotataylor,iota2taylor,QYtaylor,1,2 )
 #endif
 
-      CALL UPDATERV(ZEmin)
-      CALL UPDATERV(ZEmax)
-      CALL UPDATERV(QXmin)
-      CALL UPDATERV(QXmax)
-      CALL UPDATERV(QYmin)
-      CALL UPDATERV(QYmax)
+c      CALL UPDATERV(ZEmin)
+c      CALL UPDATERV(ZEmax)
+c      CALL UPDATERV(QXmin)
+c      CALL UPDATERV(QXmax)
+c      CALL UPDATERV(QYmin)
+c      CALL UPDATERV(QYmax)
 
 #ifdef TRACE
-      CALL UPDATERV(iotamax)
-      CALL UPDATERV(iotamin)
+c      CALL UPDATERV(iotamax)
+c      CALL UPDATERV(iotamin)
 #endif
 
 #ifdef CHEM
-      CALL UPDATERV(iotamax)
-      CALL UPDATERV(iotamin)
-      CALL UPDATERV(iota2max)
-      CALL UPDATERV(iota2min)
+c      CALL UPDATERV(iotamax)
+c      CALL UPDATERV(iotamin)
+c      CALL UPDATERV(iota2max)
+c      CALL UPDATERV(iota2min)
 #endif
 
 #endif
@@ -2542,23 +2544,23 @@ C.....Find max and min values over polynomial coefficients
 #ifdef CMPI
 
 
-      CALL UPDATERV(ZEmin)
-      CALL UPDATERV(ZEmax)
-      CALL UPDATERV(QXmin)
-      CALL UPDATERV(QXmax)
-      CALL UPDATERV(QYmin)
-      CALL UPDATERV(QYmax)
+c      CALL UPDATERV(ZEmin)
+c      CALL UPDATERV(ZEmax)
+c      CALL UPDATERV(QXmin)
+c      CALL UPDATERV(QXmax)
+c      CALL UPDATERV(QYmin)
+c      CALL UPDATERV(QYmax)
 
 #ifdef TRACE
-      CALL UPDATERV(iotamax)
-      CALL UPDATERV(iotamin)
+c      CALL UPDATERV(iotamax)
+c      CALL UPDATERV(iotamin)
 #endif
 
 #ifdef CHEM
-      CALL UPDATERV(iotamax)
-      CALL UPDATERV(iotamin)
-      CALL UPDATERV(iota2max)
-      CALL UPDATERV(iota2min)
+c      CALL UPDATERV(iotamax)
+c      CALL UPDATERV(iotamin)
+c      CALL UPDATERV(iota2max)
+c      CALL UPDATERV(iota2min)
 #endif
 
 #endif
@@ -3241,7 +3243,7 @@ C
 C     
 C***********************************************************************
 
-      SUBROUTINE SLOPELIMITER5()
+      SUBROUTINE SLOPELIMITER5(lvl)
 
 C.....Use appropriate modules
 
@@ -3250,14 +3252,14 @@ C.....Use appropriate modules
       USE DG
 
 #ifdef CMPI
-      USE MESSENGER
+      USE MESSENGER_NODE_NEW
 #endif
 
       IMPLICIT NONE
 
 C.....Declare local variables
 
-      INTEGER L, LL, INC1,INC2,INC3,KDP,NN,IVAR,I,J,kk,k,varnum,bb,varnum_prev
+      INTEGER L, LL, INC1,INC2,INC3,KDP,NN,IVAR,I,J,kk,k,varnum,bb,varnum_prev,lvl
       REAL(SZ) ZEC(3),ZEVERTEX(3),DIF(3),SUMLOC,SUMDIF,SIGNDIF,
      $     DIV,REDFAC,REDMAX,tmp1,tmp2,tmp3,bound
       Real(SZ) ZEMIN1(3),ZEMAX1(3),QXMIN1(3),QXMAX1(3)
@@ -3316,24 +3318,45 @@ C     SHARING A NODE
 
 c     IF(WDFLG(NBOR_EL).EQ.0) CYCLE ! DON'T COUNT DRY ELEMENTS  sb 02/26/07
 
-            ZE_DG(J) = ZE(1,NBOR_EL,IRK+1)
-            QX_DG(J) = QX(1,NBOR_EL,IRK+1)
-            QY_DG(J) = QY(1,NBOR_EL,IRK+1)
+            IF (TSGROUP(NBOR_EL) .EQ. lvl) THEN
+               ZE_DG(J) = ZE(1,NBOR_EL,IRK+1)
+               QX_DG(J) = QX(1,NBOR_EL,IRK+1)
+               QY_DG(J) = QY(1,NBOR_EL,IRK+1)
+            ELSE
+               ZE_DG(J) = ZE(1,NBOR_EL,1)
+               QX_DG(J) = QX(1,NBOR_EL,1)
+               QY_DG(J) = QY(1,NBOR_EL,1)
+            ENDIF 
 
 #ifdef TRACE
-            iota_DG(J) = iota(1,NBOR_EL,IRK+1)
+            IF (TSGROUP(NBOR_EL) .EQ. lvl) THEN
+               iota_DG(J) = iota(1,NBOR_EL,IRK+1)
+            ELSE
+               iota_DG(J) = iota(1,NBOR_EL,1)
+            ENDIF
 #endif
 
 #ifdef CHEM
+         IF (TSGROUP(NBOR_EL) .EQ. lvl) THEN
             iota_DG(J) = iota(1,NBOR_EL,IRK+1)
             iota2_DG(J) = iota2(1,NBOR_EL,IRK+1)
+         ELSE
+            iota_DG(J) = iota(1,NBOR_EL,1)
+            iota2_DG(J) = iota2(1,NBOR_EL,1)
+         ENDIF
 #endif
 
 
 #ifdef SED_LAY
+         IF (TSGROUP(NBOR_EL) .EQ. lvl) THEN
             do l=1,layers
                bed_DG(J,l) = bed(1,NBOR_EL,IRK+1,l)
             enddo
+         ELSE
+            do l=1,layers
+               bed_DG(J,l) = bed(1,NBOR_EL,1,l)
+            enddo
+         ENDIF
 #endif
 
 C     
@@ -3400,23 +3423,39 @@ C
       ENDDO
 #ifdef CMPI
 
-      CALL UPDATER(ZE_MIN1,ZE_MAX1,QX_MIN1,3)
-      CALL UPDATER(QX_MAX1,QY_MIN1,QY_MAX1,3)
+c      CALL UPDATER(ZE_MIN1,ZE_MAX1,QX_MIN1,3)
+       call updater_node_mod(ZE_MIN1,lvl)
+       call updater_node_mod(ZE_MAX1,lvl)
+       call updater_node_mod(QX_MIN1,lvl)
+
+c      CALL UPDATER(QX_MAX1,QY_MIN1,QY_MAX1,3)
+       call updater_node_mod(QX_MAX1,lvl)
+       call updater_node_mod(QY_MIN1,lvl)
+       call updater_node_mod(QY_MAX1,lvl)
 
 #ifdef TRACE
-      CALL UPDATER(iota_MAX1,iota_MIN1,QY_MAX1,2)
+c      CALL UPDATER(iota_MAX1,iota_MIN1,QY_MAX1,2)
+       call updater_node_mod(iota_MIN1,lvl)
+       call updater_node_mod(iota_MAX1,lvl)
 #endif
 
 #ifdef CHEM
-      CALL UPDATER(iota_MAX1,iota_MIN1,QY_MAX1,2)
-      CALL UPDATER(iota2_MAX1,iota2_MIN1,QY_MAX1,2)
+c      CALL UPDATER(iota_MAX1,iota_MIN1,QY_MAX1,2)
+       call updater_node_mod(iota_MAX1,lvl)
+       call updater_node_mod(iota_MIN1,lvl)
+
+c      CALL UPDATER(iota2_MAX1,iota2_MIN1,QY_MAX1,2)
+       call updater_node_mod(iota2_MAX1,lvl)
+       call updater_node_mod(iota2_MIN1,lvl)
 #endif
 
 #ifdef SED_LAY
          do l = 1,layers
             arraymax => bed_max1(:,l)
             arraymin => bed_min1(:,l)
-            CALL UPDATER(arraymax,arraymin,QY_MAX1,2 )
+c            CALL UPDATER(arraymax,arraymin,QY_MAX1,2 )
+            call updater_node_mod(arraymin,lvl)
+            call updater_node_mod(arraymax,lvl)
          enddo
 #endif
 
@@ -3427,7 +3466,8 @@ C
 
       bb = 1
 
-      DO I=1,NE 
+      DO J=1,Nelem(lvl)
+         I = ElemNum(lvl,J) 
          !IF(WDFLG(I).EQ.0) CYCLE ! DON'T COUNT DRY ELEMENTS  sb 02/26/07
          N1=NM(I,1)
          N2=NM(I,2)
@@ -3784,7 +3824,7 @@ C
 C     
 C***********************************************************************
 
-      SUBROUTINE SLOPELIMITER5()
+      SUBROUTINE SLOPELIMITER5(lvl)
 
 C.....Use appropriate modules
 
@@ -3793,7 +3833,7 @@ C.....Use appropriate modules
       USE DG
 
 #ifdef CMPI
-      USE MESSENGER
+      USE MESSENGER_NODE_NEW
 #endif
 
       IMPLICIT NONE
@@ -3859,24 +3899,45 @@ C     SHARING A NODE
 
 c     IF(WDFLG(NBOR_EL).EQ.0) CYCLE ! DON'T COUNT DRY ELEMENTS  sb 02/26/07
 
-            ZE_DG(J) = ZE(1,NBOR_EL,IRK+1)
-            QX_DG(J) = QX(1,NBOR_EL,IRK+1)
-            QY_DG(J) = QY(1,NBOR_EL,IRK+1)
+            IF (TSGROUP(NBOR_EL) .EQ. lvl) THEN
+               ZE_DG(J) = ZE(1,NBOR_EL,IRK+1)
+               QX_DG(J) = QX(1,NBOR_EL,IRK+1)
+               QY_DG(J) = QY(1,NBOR_EL,IRK+1)
+            ELSE
+               ZE_DG(J) = ZE(1,NBOR_EL,1)
+               QX_DG(J) = QX(1,NBOR_EL,1)
+               QY_DG(J) = QY(1,NBOR_EL,1)
+            ENDIF
 
 #ifdef TRACE
-            iota_DG(J) = iota(1,NBOR_EL,IRK+1)
+            IF (TSGROUP(NBOR_EL) .EQ. lvl) THEN
+               iota_DG(J) = iota(1,NBOR_EL,IRK+1)
+            ELSE
+               iota_DG(J) = iota(1,NBOR_EL,1)
+            ENDIF
 #endif
 
 #ifdef CHEM
+         IF (TSGROUP(NBOR_EL) .EQ. lvl) THEN
             iota_DG(J) = iota(1,NBOR_EL,IRK+1)
             iota2_DG(J) = iota2(1,NBOR_EL,IRK+1)
+         ELSE
+            iota_DG(J) = iota(1,NBOR_EL,1)
+            iota2_DG(J) = iota2(1,NBOR_EL,1)
+         ENDIF
 #endif
 
 
 #ifdef SED_LAY
+         IF (TSGROUP(NBOR_EL) .EQ. lvl) THEN
             do l=1,layers
                bed_DG(J,l) = bed(1,NBOR_EL,IRK+1,l)
             enddo
+         ELSE
+            do l=1,layers
+               bed_DG(J,l) = bed(1,NBOR_EL,1,l)
+            enddo
+         ENDIF
 #endif
 
 C     
@@ -3943,23 +4004,37 @@ C
       ENDDO
 #ifdef CMPI
 
-      CALL UPDATER(ZE_MIN1,ZE_MAX1,QX_MIN1,3)
-      CALL UPDATER(QX_MAX1,QY_MIN1,QY_MAX1,3)
+c      CALL UPDATER(ZE_MIN1,ZE_MAX1,QX_MIN1,3)
+       call updater_node_mod(ZE_MIN1,lvl)
+       call updater_node_mod(ZE_MAX1,lvl)
+       call updater_node_mod(QX_MIN1,lvl)
+c      CALL UPDATER(QX_MAX1,QY_MIN1,QY_MAX1,3)
+       call updater_node_mod(QX_MAX1,lvl)
+       call updater_node_mod(QY_MIN1,lvl)
+       call updater_node_mod(QY_MAX1,lvl)
 
 #ifdef TRACE
-      CALL UPDATER(iota_MAX1,iota_MIN1,QY_MAX1,2)
+c      CALL UPDATER(iota_MAX1,iota_MIN1,QY_MAX1,2)
+       call updater_node_mod(iota_MIN1,lvl)
+       call updater_node_mod(iota_MAX1,lvl)
 #endif
 
 #ifdef CHEM
-      CALL UPDATER(iota_MAX1,iota_MIN1,QY_MAX1,2)
-      CALL UPDATER(iota2_MAX1,iota2_MIN1,QY_MAX1,2)
+c      CALL UPDATER(iota_MAX1,iota_MIN1,QY_MAX1,2)
+       call updater_node_mod(iota_MAX1,lvl)
+       call updater_node_mod(iota_MIN1,lvl)
+c      CALL UPDATER(iota2_MAX1,iota2_MIN1,QY_MAX1,2)
+       call updater_node_mod(iota2_MAX1,lvl)
+       call updater_node_mod(iota2_MIN1,lvl)
 #endif
 
 #ifdef SED_LAY
          do l = 1,layers
             arraymax => bed_max1(:,l)
             arraymin => bed_min1(:,l)
-            CALL UPDATER(arraymax,arraymin,QY_MAX1,2 )
+c            CALL UPDATER(arraymax,arraymin,QY_MAX1,2 )
+            call updater_node_mod(arraymin,lvl)
+            call updater_node_mod(arraymax,lvl)
          enddo
 #endif
 
@@ -3970,7 +4045,9 @@ C
 
       bb = 1
 
-      DO I=1,NE 
+      DO J=1,Nelem(lvl)
+         I = ElemNum(lvl,J)
+
          !IF(WDFLG(I).EQ.0) CYCLE ! DON'T COUNT DRY ELEMENTS  sb 02/26/07
          N1=NM(I,1)
          N2=NM(I,2)
@@ -4328,7 +4405,7 @@ C
 C     
 C***********************************************************************
 
-      SUBROUTINE SLOPELIMITER5()
+      SUBROUTINE SLOPELIMITER5(lvl)
 
 C.....Use appropriate modules
 
@@ -4337,14 +4414,14 @@ C.....Use appropriate modules
       USE DG
 
 #ifdef CMPI
-      USE MESSENGER
+      USE MESSENGER_NODE_NEW
 #endif
 
       IMPLICIT NONE
 
 C.....Declare local variables
 
-      INTEGER L, LL, INC1,INC2,INC3,KDP,NN,IVAR,I,J,kk,k,varnum,bb,varnum_prev
+      INTEGER L, LL, INC1,INC2,INC3,KDP,NN,IVAR,I,J,kk,k,varnum,bb,varnum_prev,lvl
       REAL(SZ) ZEC(3),ZEVERTEX(3),DIF(3),SUMLOC,SUMDIF,SIGNDIF,
      $     DIV,REDFAC,REDMAX,tmp1,tmp2,tmp3,bound
       Real(SZ) ZEMIN1(3),ZEMAX1(3),QXMIN1(3),QXMAX1(3)
@@ -4403,24 +4480,45 @@ C     SHARING A NODE
 
 c     IF(WDFLG(NBOR_EL).EQ.0) CYCLE ! DON'T COUNT DRY ELEMENTS  sb 02/26/07
 
-            ZE_DG(J) = ZE(1,NBOR_EL,IRK+1)
-            QX_DG(J) = QX(1,NBOR_EL,IRK+1)
-            QY_DG(J) = QY(1,NBOR_EL,IRK+1)
+            IF (TSGROUP(NBOR_EL) .EQ. lvl) THEN
+               ZE_DG(J) = ZE(1,NBOR_EL,IRK+1)
+               QX_DG(J) = QX(1,NBOR_EL,IRK+1)
+               QY_DG(J) = QY(1,NBOR_EL,IRK+1)
+            ELSE
+               ZE_DG(J) = ZE(1,NBOR_EL,1)
+               QX_DG(J) = QX(1,NBOR_EL,1)
+               QY_DG(J) = QY(1,NBOR_EL,1)
+            ENDIF
 
 #ifdef TRACE
-            iota_DG(J) = iota(1,NBOR_EL,IRK+1)
+            IF (TSGROUP(NBOR_EL) .EQ. lvl) THEN
+               iota_DG(J) = iota(1,NBOR_EL,IRK+1)
+            ELSE
+               iota_DG(J) = iota(1,NBOR_EL,1)
+            ENDIF
 #endif
 
 #ifdef CHEM
+         IF (TSGROUP(NBOR_EL) .EQ. lvl) THEN
             iota_DG(J) = iota(1,NBOR_EL,IRK+1)
             iota2_DG(J) = iota2(1,NBOR_EL,IRK+1)
+         ELSE
+            iota_DG(J) = iota(1,NBOR_EL,1)
+            iota2_DG(J) = iota2(1,NBOR_EL,1)
+         ENDIF
 #endif
 
 
 #ifdef SED_LAY
+         IF (TSGROUP(NBOR_EL) .EQ. lvl) THEN
             do l=1,layers
                bed_DG(J,l) = bed(1,NBOR_EL,IRK+1,l)
             enddo
+         ELSE
+            do l=1,layers
+               bed_DG(J,l) = bed(1,NBOR_EL,1,l)
+            enddo
+         ENDIF
 #endif
 
 C     
@@ -4487,23 +4585,38 @@ C
       ENDDO
 #ifdef CMPI
 
-      CALL UPDATER(ZE_MIN1,ZE_MAX1,QX_MIN1,3)
-      CALL UPDATER(QX_MAX1,QY_MIN1,QY_MAX1,3)
+C      CALL UPDATER(ZE_MIN1,ZE_MAX1,QX_MIN1,3)
+       call updater_node_mod(ZE_MIN1,lvl)
+       call updater_node_mod(ZE_MAX1,lvl)
+       call updater_node_mod(QX_MIN1,lvl)
+
+c      CALL UPDATER(QX_MAX1,QY_MIN1,QY_MAX1,3)
+       call updater_node_mod(QX_MAX1,lvl)
+       call updater_node_mod(QY_MIN1,lvl)
+       call updater_node_mod(QY_MAX1,lvl)
 
 #ifdef TRACE
-      CALL UPDATER(iota_MAX1,iota_MIN1,QY_MAX1,2)
+c      CALL UPDATER(iota_MAX1,iota_MIN1,QY_MAX1,2)
+       call updater_node_mod(iota_MIN1,lvl)
+       call updater_node_mod(iota_MAX1,lvl)
 #endif
 
 #ifdef CHEM
-      CALL UPDATER(iota_MAX1,iota_MIN1,QY_MAX1,2)
-      CALL UPDATER(iota2_MAX1,iota2_MIN1,QY_MAX1,2)
+c      CALL UPDATER(iota_MAX1,iota_MIN1,QY_MAX1,2)
+       call updater_node_mod(iota_MAX1,lvl)
+       call updater_node_mod(iota_MIN1,lvl)
+c      CALL UPDATER(iota2_MAX1,iota2_MIN1,QY_MAX1,2)
+       call updater_node_mod(iota2_MAX1,lvl)
+       call updater_node_mod(iota2_MIN1,lvl)
 #endif
 
 #ifdef SED_LAY
          do l = 1,layers
             arraymax => bed_max1(:,l)
             arraymin => bed_min1(:,l)
-            CALL UPDATER(arraymax,arraymin,QY_MAX1,2 )
+c            CALL UPDATER(arraymax,arraymin,QY_MAX1,2 )
+            call updater_node_mod(arraymin,lvl)
+            call updater_node_mod(arraymax,lvl)
          enddo
 #endif
 
@@ -4514,7 +4627,8 @@ C
 
       bb = 1
 
-      DO I=1,NE 
+      DO J=1,Nelem(lvl)
+         I = ElemNum(lvl,J)
 
                                 !if (dofs(i).eq.3) then
 
@@ -4882,7 +4996,7 @@ C.....Use appropriate modules
       USE DG
 
 #ifdef CMPI
-      USE MESSENGER_ELEM
+c      USE MESSENGER_ELEM
 #endif
 
       IMPLICIT NONE
@@ -5012,14 +5126,14 @@ C.....Find values at vertices of base elements and neighbors
 
 #ifdef CMPI
 
-      CALL UPDATER_ELEM_MOD2(ZEtaylor,QXtaylor,QYtaylor,1,3)
+c      CALL UPDATER_ELEM_MOD2(ZEtaylor,QXtaylor,QYtaylor,1,3)
 
 #ifdef TRACE
-      CALL UPDATER_ELEM_MOD2(iotataylor,QXtaylor,QYtaylor,1,2 )  
+c      CALL UPDATER_ELEM_MOD2(iotataylor,QXtaylor,QYtaylor,1,2 )  
 #endif
 
 #ifdef CHEM
-      CALL UPDATER_ELEM_MOD2(iotataylor,iota2taylor,QYtaylor,1,2 )  
+c      CALL UPDATER_ELEM_MOD2(iotataylor,iota2taylor,QYtaylor,1,2 )  
 #endif
 
 #endif
@@ -5687,8 +5801,8 @@ C.....Use appropriate modules
       USE DG
 
 #ifdef CMPI
-      USE MESSENGER
-      USE MESSENGER_ELEM
+C      USE MESSENGER
+C      USE MESSENGER_ELEM
 #endif
 
       IMPLICIT NONE
@@ -5809,33 +5923,33 @@ C.....Find values at vertices of base elements and neighbors
 
 #ifdef CMPI
 
-      CALL UPDATER_ELEM_MOD2(ZEtaylor,QXtaylor,QYtaylor,1,3)
+c      CALL UPDATER_ELEM_MOD2(ZEtaylor,QXtaylor,QYtaylor,1,3)
 
 #ifdef TRACE
-      CALL UPDATER_ELEM_MOD2(iotataylor,QXtaylor,QYtaylor,1,2 )  
+c      CALL UPDATER_ELEM_MOD2(iotataylor,QXtaylor,QYtaylor,1,2 )  
 #endif
 
 #ifdef CHEM
-      CALL UPDATER_ELEM_MOD2(iotataylor,iota2taylor,QYtaylor,1,2 )  
+c      CALL UPDATER_ELEM_MOD2(iotataylor,iota2taylor,QYtaylor,1,2 )  
 #endif
 
-      CALL UPDATERV(ZEmin)
-      CALL UPDATERV(ZEmax)
-      CALL UPDATERV(QXmin)
-      CALL UPDATERV(QXmax)
-      CALL UPDATERV(QYmin)
-      CALL UPDATERV(QYmax)
+c      CALL UPDATERV(ZEmin)
+c      CALL UPDATERV(ZEmax)
+c      CALL UPDATERV(QXmin)
+c      CALL UPDATERV(QXmax)
+c      CALL UPDATERV(QYmin)
+c      CALL UPDATERV(QYmax)
 
 #ifdef TRACE
-         CALL UPDATERV(iotamax)
-         CALL UPDATERV(iotamin)
+c         CALL UPDATERV(iotamax)
+c         CALL UPDATERV(iotamin)
 #endif
 
 #ifdef CHEM
-         CALL UPDATERV(iotamax)
-         CALL UPDATERV(iotamin)
-         CALL UPDATERV(iota2max)
-         CALL UPDATERV(iota2min)
+c         CALL UPDATERV(iotamax)
+c         CALL UPDATERV(iotamin)
+c         CALL UPDATERV(iota2max)
+c         CALL UPDATERV(iota2min)
 #endif
 
 #endif
@@ -5884,23 +5998,23 @@ C.....Find max and min values over polynomial coefficients
 
 #ifdef CMPI
 
-      CALL UPDATERV(ZEmin)
-      CALL UPDATERV(ZEmax)
-      CALL UPDATERV(QXmin)
-      CALL UPDATERV(QXmax)
-      CALL UPDATERV(QYmin)
-      CALL UPDATERV(QYmax)
+c      CALL UPDATERV(ZEmin)
+c      CALL UPDATERV(ZEmax)
+c      CALL UPDATERV(QXmin)
+c      CALL UPDATERV(QXmax)
+c      CALL UPDATERV(QYmin)
+c      CALL UPDATERV(QYmax)
 
 #ifdef TRACE
-      CALL UPDATERV(iotamax)
-      CALL UPDATERV(iotamin)
+c      CALL UPDATERV(iotamax)
+c      CALL UPDATERV(iotamin)
 #endif
 
 #ifdef CHEM
-      CALL UPDATERV(iotamax)
-      CALL UPDATERV(iotamin)
-      CALL UPDATERV(iota2max)
-      CALL UPDATERV(iota2min)
+c      CALL UPDATERV(iotamax)
+c      CALL UPDATERV(iotamin)
+c      CALL UPDATERV(iota2max)
+c      CALL UPDATERV(iota2min)
 #endif
 
 #endif
@@ -6709,7 +6823,7 @@ C.....Use appropriate modules
       USE DG
 
 #ifdef CMPI
-      USE MESSENGER_ELEM
+c      USE MESSENGER_ELEM
 #endif
 
       IMPLICIT NONE
@@ -6839,14 +6953,14 @@ C.....Find values at vertices of base elements and neighbors
 
 #ifdef CMPI
 
-      CALL UPDATER_ELEM_MOD2(ZEtaylor,QXtaylor,QYtaylor,1,3)
+c      CALL UPDATER_ELEM_MOD2(ZEtaylor,QXtaylor,QYtaylor,1,3)
 
 #ifdef TRACE
-      CALL UPDATER_ELEM_MOD2(iotataylor,QXtaylor,QYtaylor,1,2 )  
+c      CALL UPDATER_ELEM_MOD2(iotataylor,QXtaylor,QYtaylor,1,2 )  
 #endif
 
 #ifdef CHEM
-      CALL UPDATER_ELEM_MOD2(iotataylor,iota2taylor,QYtaylor,1,2 )  
+c      CALL UPDATER_ELEM_MOD2(iotataylor,iota2taylor,QYtaylor,1,2 )  
 #endif
 
 #endif
@@ -7544,8 +7658,8 @@ C.....Use appropriate modules
       USE DG
 
 #ifdef CMPI
-      USE MESSENGER_ELEM
-      USE MESSENGER
+c      USE MESSENGER_ELEM
+c      USE MESSENGER
 #endif
 
       IMPLICIT NONE
@@ -7690,15 +7804,15 @@ C.....Generate linear recostructions at vertices
 
 #ifdef CMPI
 
-      CALL UPDATER_ELEM_MOD2(ZEtaylor,QXtaylor,QYtaylor,1,3)
+c      CALL UPDATER_ELEM_MOD2(ZEtaylor,QXtaylor,QYtaylor,1,3)
 
 
 #ifdef TRACE
-      CALL UPDATER_ELEM_MOD2(iotataylor,QXtaylor,QYtaylor,1,2 )  
+c      CALL UPDATER_ELEM_MOD2(iotataylor,QXtaylor,QYtaylor,1,2 )  
 #endif
 
 #ifdef CHEM
-      CALL UPDATER_ELEM_MOD2(iotataylor,iota2taylor,QYtaylor,1,2 )  
+c      CALL UPDATER_ELEM_MOD2(iotataylor,iota2taylor,QYtaylor,1,2 )  
 #endif
 
 #endif
@@ -7855,15 +7969,15 @@ C.....Generate linear recostructions at vertices
 
 #ifdef CMPI
 
-      CALL UPDATER_ELEM_MOD2(ZE_cand,QX_cand,QY_cand,1,3)
+c      CALL UPDATER_ELEM_MOD2(ZE_cand,QX_cand,QY_cand,1,3)
 
 
 #ifdef TRACE
-      CALL UPDATER_ELEM_MOD2(iota_cand,iota_cand,QY_cand,1,2 )
+c      CALL UPDATER_ELEM_MOD2(iota_cand,iota_cand,QY_cand,1,2 )
 #endif
 
 #ifdef CHEM
-      CALL UPDATER_ELEM_MOD2(iota_cand,iota2_cand,QY_cand,1,2 )
+c      CALL UPDATER_ELEM_MOD2(iota_cand,iota2_cand,QY_cand,1,2 )
 #endif
 
 #endif
@@ -8216,14 +8330,14 @@ c$$$  #endif
 
 #ifdef CMPI
 
-      CALL UPDATER_ELEM_MOD2(ZE_minmod,QX_minmod,QY_minmod,1,3)
+c      CALL UPDATER_ELEM_MOD2(ZE_minmod,QX_minmod,QY_minmod,1,3)
 
 #ifdef TRACE
-      CALL UPDATER_ELEM_MOD2(iota_minmod,iota_minmod,QY_minmod,1,2 )
+c      CALL UPDATER_ELEM_MOD2(iota_minmod,iota_minmod,QY_minmod,1,2 )
 #endif
 
 #ifdef CHEM
-      CALL UPDATER_ELEM_MOD2(iota_minmod,iota2_minmod,QY_minmod,1,2 )
+c      CALL UPDATER_ELEM_MOD2(iota_minmod,iota2_minmod,QY_minmod,1,2 )
 #endif
 
 #endif
@@ -8285,7 +8399,7 @@ C.....Transform back to the Dubiner basis (multiply by NmatrixInv),
 
 C.....Set limit values
       
-      CALL SLOPELIMITER5()
+      CALL SLOPELIMITER5(lvl)
 
       do k=1,ne
 
@@ -8342,8 +8456,8 @@ C.....Use appropriate modules
       use dg
 
 #ifdef CMPI
-      USE MESSENGER_ELEM
-      USE MESSENGER
+C      USE MESSENGER_ELEM
+C      USE MESSENGER
 #endif
 
       IMPLICIT NONE
@@ -8445,14 +8559,14 @@ c.....convert initial values to the taylor basis (multiply by nmatrix) on base e
 
 #ifdef CMPI
 
-      CALL UPDATER_ELEM_MOD2(ZEtaylor,QXtaylor,QYtaylor,1,3)
+C      CALL UPDATER_ELEM_MOD2(ZEtaylor,QXtaylor,QYtaylor,1,3)
 
 #ifdef TRACE
-      CALL UPDATER_ELEM_MOD2(iotataylor,iotataylor,QYtaylor,1,2 )
+C      CALL UPDATER_ELEM_MOD2(iotataylor,iotataylor,QYtaylor,1,2 )
 #endif
 
 #ifdef CHEM
-      CALL UPDATER_ELEM_MOD2(iotataylor,iota2taylor,QYtaylor,1,2 )
+C      CALL UPDATER_ELEM_MOD2(iotataylor,iota2taylor,QYtaylor,1,2 )
 #endif
 
 #endif
@@ -8643,14 +8757,14 @@ c.....convert initial values to the taylor basis (multiply by nmatrix) on base e
 
 #ifdef CMPI
 
-      CALL UPDATER_ELEM_MOD2(ZEtaylor,QXtaylor,QYtaylor,1,3)
+C      CALL UPDATER_ELEM_MOD2(ZEtaylor,QXtaylor,QYtaylor,1,3)
 
 #ifdef TRACE
-      CALL UPDATER_ELEM_MOD2(iotataylor,iotataylor,QYtaylor,1,2 )
+C      CALL UPDATER_ELEM_MOD2(iotataylor,iotataylor,QYtaylor,1,2 )
 #endif
 
 #ifdef CHEM
-      CALL UPDATER_ELEM_MOD2(iotataylor,iota2taylor,QYtaylor,1,2 )
+C      CALL UPDATER_ELEM_MOD2(iotataylor,iota2taylor,QYtaylor,1,2 )
 #endif
 
 #endif
@@ -8763,7 +8877,7 @@ C.....Use appropriate modules
       USE DG
 
 #ifdef CMPI
-      USE MESSENGER
+      USE MESSENGER_NEW
 #endif
 
       IMPLICIT NONE
@@ -8893,16 +9007,23 @@ C
       ENDDO
 #ifdef CMPI
 
-      CALL UPDATER(ZE_MIN1,ZE_MAX1,QX_MIN1,3)
-      CALL UPDATER(QX_MAX1,QY_MIN1,QY_MAX1,3)
+      CALL UPDATER_NODE_MOD(ZE_MIN1,lvl)
+      CALL UPDATER_NODE_MOD(ZE_MAX1,lvl)
+      CALL UPDATER_NODE_MOD(QX_MIN1,lvl)
+      CALL UPDATER_NODE_MOD(QX_MAX1,lvl)
+      CALL UPDATER_NODE_MOD(QY_MIN1,lvl)
+      CALL UPDATER_NODE_MOD(QY_MAX1,lvl)
 
 #ifdef TRACE
-      CALL UPDATER(iota_MAX1,iota_MIN1,QY_MAX1,2)
+      CALL UPDATER_NODE_MOD(iota_MAX1,lvl)
+      CALL UPDATER_NODE_MOD(iota_MIN1,lvl)
 #endif
 
 #ifdef CHEM
-      CALL UPDATER(iota_MAX1,iota_MIN1,QY_MAX1,2)
-      CALL UPDATER(iota2_MAX1,iota2_MIN1,QY_MAX1,2)
+      CALL UPDATER_NODE_MOD(iota_MAX1,lvl)
+      CALL UPDATER_NODE_MOD(iota_MIN1,lvl)
+      CALL UPDATER_NODE_MOD(iota2_MAX1,lvl)
+      CALL UPDATER_NODE_MOD(iota2_MIN1,lvl)
 #endif
 
 #endif

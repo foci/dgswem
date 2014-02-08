@@ -21,7 +21,7 @@ C.....Use appropriate modules
       USE NodalAttributes, ONLY : EVM
 
 #ifdef CMPI
-      USE MESSENGER_ELEM,ONLY : UPDATELZ_ELEM,UPDATEMZ_ELEM
+C      USE MESSENGER_ELEM,ONLY : UPDATELZ_ELEM,UPDATEMZ_ELEM
 #endif
 
       IMPLICIT NONE
@@ -197,22 +197,22 @@ C.....Loop over interior elements
       enddo
 C********************************************
 
-#ifdef CMPI
-#ifdef WAVE_DIF
-      CALL UPDATELZ_ELEM(HZ)
-#endif
-      CALL UPDATELZ_ELEM(LZ)
-#ifdef TRACE
-      CALL UPDATELZ_ELEM(TZ)
-#endif
-#ifdef SED_LAY
-      do ll=1,layers
-         tmp_mz(:,:,1,:) = MZ(:,:,ll,:) 
-         CALL UPDATEMZ_ELEM(tmp_mz)
-         MZ(:,:,ll,:) = tmp_mz(:,:,1,:)
-      enddo
-#endif
-#endif
+c$$$#ifdef CMPI
+c$$$#ifdef WAVE_DIF
+c$$$      CALL UPDATELZ_ELEM(HZ)
+c$$$#endif
+c$$$      CALL UPDATELZ_ELEM(LZ)
+c$$$#ifdef TRACE
+c$$$      CALL UPDATELZ_ELEM(TZ)
+c$$$#endif
+c$$$#ifdef SED_LAY
+c$$$      do ll=1,layers
+c$$$         tmp_mz(:,:,1,:) = MZ(:,:,ll,:) 
+c$$$         CALL UPDATEMZ_ELEM(tmp_mz)
+c$$$         MZ(:,:,ll,:) = tmp_mz(:,:,1,:)
+c$$$      enddo
+c$$$#endif
+c$$$#endif
 
       RETURN
       END SUBROUTINE

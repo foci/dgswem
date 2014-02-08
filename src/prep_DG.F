@@ -30,8 +30,8 @@ C.....Use appropriate modules
       USE NodalAttributes, ONLY : STARTDRY, FRIC, GeoidOffset,
      $     LoadGeoidOffset,LoadManningsN,ManningsN
 #ifdef CMPI
-      USE MESSENGER_ELEM
-      USE MESSENGER
+      USE MESSENGER_NEW
+      USE MESSENGER_NODE_NEW
 #endif
 
       IMPLICIT NONE

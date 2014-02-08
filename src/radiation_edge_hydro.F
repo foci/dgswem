@@ -17,7 +17,7 @@ C     If you need to use it, you might fix it first -- cem
 C     
 C***********************************************************************
 
-      SUBROUTINE RADIATION_EDGE_HYDRO(IT)
+      SUBROUTINE RADIATION_EDGE_HYDRO(IT,lvl)
 
 C.....Use appropriate modules
 
@@ -28,7 +28,7 @@ C.....Use appropriate modules
 
 C.....Declare local variables
 
-      INTEGER L, LED, GED,i,k,ll,IT
+      INTEGER L, LED, GED,i,k,ll,IT,lvl
       REAL(SZ) TX, TY, W_IN, DEN
       REAL(SZ) LZ_XX_IN, LZ_XY_IN, LZ_YX_IN, LZ_YY_IN
       Real(sz) HZ_X_IN,HZ_Y_IN,TZ_X_IN,TZ_Y_IN
@@ -53,6 +53,9 @@ C.....Retrieve the elements which share the edge
             pa = 1
          endif
 #endif
+
+C.....If edge element is not assign this ts level, skip CJT
+        IF (TsGroup(EL_IN) /= lvl) GOTO 1000 
          
 C.....If the element is dry then skip the edge calculation
 

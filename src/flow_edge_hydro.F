@@ -17,7 +17,7 @@ C     01-10-2011 - cem - adapted for p_enrichment and multicomponent
 C     
 C***********************************************************************
 
-      SUBROUTINE FLOW_EDGE_HYDRO(IT)
+      SUBROUTINE FLOW_EDGE_HYDRO(IT,lvl)
 
 C.....Use appropriate modules
 
@@ -31,7 +31,7 @@ C.....Use appropriate modules
 
 C.....Declare local variables
 
-      INTEGER L, LED, GED, i,k,jj,II,ll,IT,w
+      INTEGER L, LED, GED, i,k,jj,II,ll,IT,w,lvl
       Real(SZ) DEN2,U_AVG,V_AVG,VEL_NORMAL,q_RoeX, q_RoeY, q_Roe
       REAL(SZ) TX, TY,HZ_X_IN,HZ_Y_IN,TZ_X_IN,TZ_Y_IN
       REAL(SZ) LZ_XX_IN, LZ_XY_IN, LZ_YX_IN, LZ_YY_IN,W_IN
@@ -58,6 +58,9 @@ C.....Organize the dofs for the p_adaptivity
             pa = 1
          endif
 #endif
+
+C.....If edge element is not assign this ts level, skip CJT
+        IF (TsGroup(EL_IN) /= lvl) GOTO 1000
 
 C.....If the element is dry then skip the edge calculation
 

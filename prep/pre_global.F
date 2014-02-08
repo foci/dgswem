@@ -14,13 +14,14 @@ C----------------------------------------------------------------------------
       IMPLICIT NONE
 C
 C  PARM14 section
-      INTEGER  NELG,NNODG,NOPE,NETA,NBOU,NVEL
+      INTEGER  NELG,NNODG,NOPE,NETA,NBOU,NVEL, nweir_edge
       INTEGER,ALLOCATABLE ::  NNEG(:,:)
       INTEGER,ALLOCATABLE ::  NVDLL(:),NBDV(:,:)
       INTEGER,ALLOCATABLE ::  NVELL(:),NBVV(:,:)
       INTEGER,ALLOCATABLE ::  IBTYPE(:)
       INTEGER,ALLOCATABLE ::  IBCONNR(:,:),LBCODE(:)
       INTEGER,ALLOCATABLE ::  WEIR(:),WEIRD(:)
+      INTEGER,ALLOCATABLE :: WEIR_LEFT_ELEM(:),WEIR_RIGHT_ELEM(:)
 
 C   METIS interface section
       INTEGER,ALLOCATABLE ::  PROC(:)
@@ -244,6 +245,23 @@ C
       INTEGER,ALLOCATABLE  ::  IMAP_3DSD_LG(:,:)
       INTEGER,ALLOCATABLE  ::  IMAP_3DSV_LG(:,:)
       INTEGER,ALLOCATABLE  ::  IMAP_3DST_LG(:,:)
+! CJT - Multi-rate time-stepping
+      INTEGER(4) modal_ic,iths
+      INTEGER(4) Mint, Ndom, Lts_Flag, Mbar, MaxNdom, slopeflag, dtcheck,
+     $     pze,pqx,pqy,dof
+      REAL(SZ) dt_max, dt_min, dt_min0,cflfac, Z0
+      integer(4) LTSmodflag,nmodtimes
+      INTEGER(4), ALLOCATABLE :: Msteps(:), Nelem_loc(:), TsGroup(:)
+     $     , ElemNum(:,:),nelemrecv(:,:),elemrecv(:,:),
+     $     nelemsend(:,:),elemsend(:,:),metiswght(:),maxwght(:),
+     $     Nelem_loc_proc(:,:),MaxNelem_loc_proc(:),NumNonzero(:),
+     $     TsGroupNode(:,:),nnoderecv(:,:),noderecvlvl(:,:),
+     $     nnodesend(:,:),nodesendlvl(:,:),WDFLG(:,:)
+      REAL(SZ), ALLOCATABLE :: DtLoc(:), DtDom(:), tnkp1_a(:)
+     $     , tnkp1_h(:)
+      REAL(SZ), ALLOCATABLE :: tn_a(:), tn_h(:)
+      REAL(SZ), ALLOCATABLE :: CENTROID_X(:), CENTROID_Y(:),
+     $     ZE(:,:),QX(:,:),QY(:,:),HB(:,:)
 
 C-------------------end of data declarations------------------------C
 
@@ -264,6 +282,7 @@ C--
       ALLOCATE ( NVELL(MNBOU),NBVV(MNBOU,0:MNVEL),IBTYPE(MNBOU) )
       ALLOCATE ( IBCONNR(MNBOU,MNVEL),LBCODE(MNVEL) )
       ALLOCATE ( WEIR(MNVEL),WEIRD(MNVEL) )
+      ALLOCATE ( WEIR_LEFT_ELEM(MNVEL),WEIR_RIGHT_ELEM(MNVEL))
       ALLOCATE ( BAR1(MNBOU,MNVEL),BAR2(MNBOU,MNVEL),BAR3(MNBOU,MNVEL) )
       ALLOCATE ( FLBN(MNVEL),FLBNX(MNVEL),FLBNXP(MNVEL) )
       ALLOCATE ( NVDLLMSG(MNOPE),NVELLMSG(MNBOU+1) )
@@ -389,7 +408,24 @@ Csb-DG1
 
       RETURN
       END SUBROUTINE
-C--
+
+C.....Multi-rate (CJT)
+      SUBROUTINE ALLOC_MULTI_RATE()
+      ALLOCATE ( Msteps(MaxNdom), DtLoc(MNE), DtDom(MaxNdom),
+     $     metiswght(MaxNdom),maxwght(MNP) )
+      ALLOCATE ( TsGroup(MNE), ElemNum(MaxNdom,MNE),Nelem_loc(MaxNdom),
+     $     nelemrecv(MNPROC,MaxNdom),elemrecv(MNE,MaxNdom),
+     $     nelemsend(MNPROC,MaxNdom),elemsend(MNE,MaxNdom),
+     $  Nelem_loc_proc(MNPROC,MaxNdom),MaxNelem_loc_Proc(MaxNdom),
+     $     NumNonZero(Ndom),TsGroupNode(MNP,MaxNdom),
+     $     nnoderecv(MNPROC,MaxNdom),noderecvlvl(MNP,MaxNdom),
+     $     nnodesend(MNPROC,MaxNdom),nodesendlvl(MNP,MaxNdom))
+      ALLOCATE ( tnkp1_a(MaxNdom), tnkp1_h(MaxNdom), tn_a(MaxNdom), 
+     $     tn_h(MaxNdom) )
+      ALLOCATE ( CENTROID_X(MNE), CENTROID_Y(MNE), ZE(6,MNE),
+     $     QX(6,MNE),QY(6,MNE), WDFLG(6,MNE),HB(6,MNE)) 
+      RETURN
+      END SUBROUTINE
 
 C
 C

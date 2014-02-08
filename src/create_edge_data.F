@@ -36,7 +36,7 @@ C.....Use appropriate modules
       USE DG     
       use sizes, only:  myproc
 #ifdef CMPI
-      USE MESSENGER_ELEM
+      USE MESSENGER_NEW
 #endif
       IMPLICIT NONE
       
