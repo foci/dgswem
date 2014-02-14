@@ -218,8 +218,8 @@ cnd LTS
       READ(25,*) !pflag2con1,pflag2con2,lebesgueP 
       READ(25,*) !FLUXTYPE
       READ(25,*) !RK_STAGE, RK_ORDER
-      read(25,*) Lts_Flag, Mbar, Ndom, dt_min0, dtcheck, cflfac!, Z0
-      write(*,*) Lts_flag, Mbar, Ndom, dt_min0, dtcheck, cflfac !,Z0
+      read(25,*) Lts_Flag, Mbar, Ndom, dt_min0, dtcheck, cflfac, Z0
+      write(*,*) Lts_flag, Mbar, Ndom, dt_min0, dtcheck, cflfac, Z0
       read(25,*) LTSmodflag
       if (LTSmodflag.eq.1) then
          read(25,*) nmodtimes
