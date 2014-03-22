@@ -14,7 +14,7 @@
       REAL(8)      :: CEDGE_X(3),CEDGE_Y(3),DX(3),DY(3),DH(3),Stab(3)
       REAL(8)      :: HBEL(3),EDGELEN(3)
 
-
+      OPEN(unit = 700,file = 'fort.700')
       dt_local(:)=1d6; 
       if (ics.eq.2) then
          SLAM0=SLAM0*DEG2RAD
@@ -25,18 +25,19 @@
          enddo
       endif
 
+      write(*,*) 'Z0: ',Z0 
+
       DO I=1,ne
 
       	! Average Bathymetry
         do j=1,3
 c           HBEL(j)=max(abs(HB(EC(j,i))),H0)
-           HBEL(j)=max(abs(HB(EC(j,i))),2.)
+           HBEL(j)=HB(EC(j,i))
         enddo
       	Hb_Average = (1.D0/3.D0)*(HBEL(1)+HBEL(2)+HBEL(3))
-c  account for initial water height
-     $       +Z0
+     
 	!Hb_Average = 1.d0/G;
-      	C = Sqrt(G*Hb_Average)
+      	C = Sqrt(G*abs(Hb_Average+Z0))
 
       	! EDGE 1 - Node 1 <--> Node 2
       	IF(X(EC(1,I))<X(EC(2,I))) THEN
@@ -96,11 +97,19 @@ c  account for initial water height
                    Stab(J)=cflfac*(1.D0/Sqrt(2.D0))*DH(J)/C
                 endif
 
-      		IF (Stab(J)<dt_local(I)) dt_local(i)=Stab(J)
-
-      	ENDDO
-c        write(700,*) i,dt_local(i)
+      		IF (Stab(J)<dt_local(I)) dt_local(i)=stab(J)
+             ENDDO
+        IF (HB_Average <0.D0) dt_local(i) = 0.0000001D0
+        write(700,*) i,dt_local(i)      
       ENDDO
+      CLOSE(700)
+C      OPEN(UNIT = 701, FILE = 'fort.701')
+C      STAB_MIN = minval(abs(dt_local))
+C      DO i = 1,ne
+C         IF (DT_LOCAL(i) < 0.D0) DT_LOCAL(i) = STAB_MIN
+C         write(701,*) i,dt_local(i)
+C      ENDDO
+C      CLOSE(701)
 c
       if (ics.eq.2) then
          do i=1,no

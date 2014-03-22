@@ -176,7 +176,7 @@ C.....Declare allocatable real arrays
       INTEGER(4) Mint, Ndom, Lts_Flag, Mbar, MaxNdom, dtcheck,LTSmodflag,
      $     nmodtimes,TsGroupmod(20)
       REAL(SZ) tmod1(20),tmod2(20)
-      REAL(SZ) dt_max, dt_min,dt_min0,cflfac,slammin,slammax,sfeamin,sfeamax
+      REAL(SZ) dt_max, dt_min,dt_min0,cflfac, Z0,slammin,slammax,sfeamin,sfeamax
       INTEGER(4), ALLOCATABLE :: Msteps(:), Nelem(:), TsGroup(:), ElemNum(:,:)
       INTEGER(4), ALLOCATABLE :: TsGroupNode(:,:), TsGroupSave(:)
       REAL(SZ), ALLOCATABLE :: DtLoc(:), DtDom(:), tnkp1_a(:), tnkp1_h(:)

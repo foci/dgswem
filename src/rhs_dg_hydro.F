@@ -49,7 +49,10 @@ C.....Declare local variables
       DO 1000 L = 1, Nelem(lvl)
 c     nd
 
+         
          elem = ElemNum(lvl,L)
+
+         if(elem .EQ. 0) GOTO 1000
 
          advectqx(elem)=0.0
          advectqx(elem)=0.0

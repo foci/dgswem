@@ -204,6 +204,21 @@ C.....Allocate additional variables for wave friction
       REAL(SZ),ALLOCATABLE ::   WKSP(:),RPARM(:)
       REAL(SZ),ALLOCATABLE ::   ABD(:,:),ZX(:)
       REAL(SZ),ALLOCATABLE ::   GRAVX(:),GRAVY(:)
+CND ADDED FOR SLOPELIMITER 5
+      REAL(SZ),ALLOCATABLE ::   ZE_MIN1(:),ZE_MAX1(:)
+      REAL(SZ),ALLOCATABLE ::   QX_MIN1(:),QX_MAX1(:)
+      REAL(SZ),ALLOCATABLE ::   QY_MIN1(:),QY_MAX1(:)
+#ifdef TRACE
+      Real(SZ), Allocatable :: iota_MIN1(:),iota_MAX1(:)
+#endif
+#ifdef CHEM
+      Real(SZ), Allocatable :: iota_MIN1(:),iota_MAX1(:)
+      Real(SZ), Allocatable :: iota2_MIN1(:),iota2_MAX1(:)
+#endif
+#ifdef SED_LAY
+      Real(SZ), Allocatable, target :: bed_min1(:,:), bed_max1(:,:)
+#endif
+      LOGICAL,ALLOCATABLE ::    VISIT_FLAG(:)
 
       INTEGER,ALLOCATABLE ::    ME2GW(:)
       INTEGER,ALLOCATABLE ::    NBV(:),LBCODEI(:)
@@ -450,6 +465,22 @@ C      ALLOCATE ( TAU0VAR(MNP))
       ALLOCATE ( CSI(MNP),SII(MNP))
       ALLOCATE ( NODECODE(MNP))
       ALLOCATE (GRAVX(MNP),GRAVY(MNP))
+CND ADDED FOR SLOPELIMITER 5
+      ALLOCATE (ZE_MIN1(MNP),ZE_MAX1(MNP))
+      ALLOCATE (QX_MIN1(MNP),QX_MAX1(MNP))
+      ALLOCATE (QY_MIN1(MNP),QY_MAX1(MNP))
+      ALLOCATE (VISIT_FLAG(MNP))
+#ifdef TRACE
+      Allocate ( iota_MIN1(MNP),iota_MAX1(MNP) )
+#endif
+#ifdef CHEM
+      Allocate ( iota_MIN1(MNP),iota_MAX1(MNP) )
+      Allocate ( iota2_MIN1(MNP),iota2_MAX1(MNP) )
+#endif
+#ifdef SED_LAY
+      Allocate ( bed_MIN1(MNP,layers),bed_MAX1(MNP,layers) )
+#endif
+
       ALLOCATE ( NIBCNT(MNP) )    !  added 7/31/2000 to fix wetdry bug
 Csb-added by sb 10/11/2005
       ALLOCATE( NNDEL(MNP) )

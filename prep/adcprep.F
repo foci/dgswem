@@ -291,7 +291,7 @@ cnd LTS
          if (nDom > 1) then
             DO i=1,MNE
                DO j=2,nDom
-                  IF ( (DtLoc(i)>=DtDom(j-1)) .and. (DtLoc(i)<DtDom(j)) ) THEN
+                  IF ( (DtLoc(i)>DtDom(j-1)) .and. (DtLoc(i)<DtDom(j)) ) THEN
                      DtLoc(i) = DtDom(j-1)
                      TsGroup(i) = j-1
                   Endif

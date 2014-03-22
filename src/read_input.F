@@ -1,4 +1,4 @@
-C***********************************************************************
+***********************************************************************
 C     
 C     SUBROUTINE READ_INPUT()
 C     
@@ -118,7 +118,7 @@ C.....Read in the fort.dg file
       READ(25,*) pflag2con1,pflag2con2,lebesgueP 
       READ(25,*) FLUXTYPE
       READ(25,*) RK_STAGE, RK_ORDER
-      READ(25,*) Lts_Flag, Mbar, MaxNdom, dt_min0, dtcheck, cflfac ! CJT
+      READ(25,*) Lts_Flag, Mbar, MaxNdom, dt_min0, dtcheck, cflfac,z0 ! CJT
       READ(25,*) LTSmodflag
 C.....LTS
       if (LTSmodflag.eq.1) then
@@ -1516,6 +1516,7 @@ C     ENDIF
             enddo
          endif
       endif
+      write(*,*)'dtdom ',(dtdom(i),i=1,Ndom)
 !!!!
       Nelem(:) = 0
       TsGroup(:)=1
@@ -1535,14 +1536,29 @@ C     ENDIF
                Nelem(Ndom) = Nelem(Ndom) + 1
                ElemNum(Ndom,Nelem(Ndom)) = i
             endif
+            if (Dtloc(i) < DtDom(1)) then
+               Dtloc(i) = dtdom(1)
+               Tsgroup(i) = 1
+               Nelem(1) = Nelem(1) + 1
+               ElemNum(1,Nelem(1)) = i
+            endif
          ENDDO
+
+      IF (SUM(Nelem) .ne. NE) THEN
+	WRITE(*,*) "ERROR: Local time-step binning error (Adcirc.f)"
+	WRITE(*,*) "Total Number of Elements Binned: ",SUM(Nelem),"  NE: ",NE
+	STOP
+      ENDIF
+
       else
          DO i=1,NE
             DtLoc(i) = DtDom(1)
             TsGroup(i) = 1
-            Nelem(1) = Nelem(1) + 1
-            ElemNum(1,Nelem(1)) = i
          enddo
+!         Nelem(1) = NE
+!         Ndom = 1
+!         Mint = 1
+!         LTS_flag = 0
       endif
 #endif        
 
@@ -1555,11 +1571,8 @@ C     ENDIF
       WRITE(69,*) "Number of Domains: ",Ndom,(Nelem(i),i=1,Ndom)
       CLOSE(69)
 
-      IF (SUM(Nelem) .ne. NE) THEN
-	WRITE(*,*) "ERROR: Local time-step binning error (Adcirc.f)"
-	WRITE(*,*) "Total Number of Elements Binned: ",SUM(Nelem),"  NE: ",NE
-	STOP
-      ENDIF
+
+
  
  
 !      ENDIF

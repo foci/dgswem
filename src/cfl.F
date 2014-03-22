@@ -1,7 +1,7 @@
       SUBROUTINE cfl(ne,no,ics,X,Y,Hb,EC,SLAM0,SFEA0,dt_local,slopeflag
      $     ,myproc)
       USE GLOBAL, ONLY:  H0
-      USE DG, ONLY: CENTROID_X, CENTROID_Y, UFLUX, ZE,cflfac
+      USE DG, ONLY: CENTROID_X, CENTROID_Y, UFLUX, ZE,cflfac, Z0
       IMPLICIT NONE
 
       REAL(8), PARAMETER :: G=9.80665D0,PI=3.141592653589793D0,DEG2RAD=PI/180.D0
@@ -23,14 +23,13 @@
       	! Average Bathymetry
         do j=1,3
 c           HBEL(j)=max(abs(HB(EC(i,j))),H0)
-           HBEL(j)=max(abs(HB(EC(i,j))),2.0)
+           HBEL(j)=HB(EC(i,j))
 c        write(*,*) i,j,hbel(j)
         enddo
       	Hb_Average = (1.D0/3.D0)*(HBEL(1)+HBEL(2)+HBEL(3))
-     $       +max(ZE(1,I,1),0.0)
 c      	IF (Hb_Average<1D-6) Hb_Average=1D-6
 	!Hb_Average = 1.d0/G;
-      	C = abs(uflux(i))+Sqrt(G*Hb_Average)
+      	C = abs(uflux(i))+Sqrt(G*Hb_Average+Z0)
 c      	C = Sqrt(G*Hb_Average)
 		!WRITE(99,*) I,C
 c        if (myproc.eq.141.and.i.eq.14176) write(987+myproc,*) C
@@ -87,12 +86,16 @@ c        if (myproc.eq.141.and.i.eq.14176) write(987+myproc,*) C
                    Stab(J)=cflfac*(1.D0/Sqrt(2.D0))*DH(J)/C
                 endif
 
+ 
+
       		!Stab(J)=(0.5882D0)*(1.D0/Sqrt(2.D0))*DH(J)/C
 
       		IF (Stab(J)<dt_local(I)) dt_local(i)=Stab(J)
 
       	ENDDO
-
+               IF (HB_Average <0.D0) THEN
+                 dt_local(i) = 0.0000001D0
+              ENDIF
       ENDDO
 
 

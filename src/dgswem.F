@@ -193,12 +193,12 @@ c     write(200+myproc,*) 'back from prep_dg'
       open(778, file = tecfile_max)
       write(777,*) 'TITLE = "dgswem output"'
       write(777,*) 
-     $     'VARIABLES = "x", "y", "b", "ze", "H", "u", "v", "|v|","|w|","p","iota","iota2","sum","diff","TsGroup"'
+     $     'VARIABLES = "x", "y", "b", "ze", "H", "u", "v", "|v|","|w|","p","iota","iota2","sum","diff","TsGroup","WDFLG"'
       write(777,*) 'ZONE ZONETYPE=FETRIANGLE ',
      $     'NODES=', np, 
      $     ' ELEMENTS=', ne, 
         !$     ' DATAPACKING=POINT ','SOLUTIONTIME=',time_a
-     $     ' DATAPACKING=BLOCK ',' VARLOCATION=([3,4,5,6,7,8,10,11,12,13,14,15]=CELLCENTERED) ',
+     $     ' DATAPACKING=BLOCK ',' VARLOCATION=([3,4,5,6,7,8,10,11,12,13,14,15,16]=CELLCENTERED) ',
      $     'SOLUTIONTIME=',time_a 
 c$$$      do i=1,np
 c$$$      write(777,7777) x(i), y(i),  
@@ -250,8 +250,11 @@ c$$$      enddo
       do i=1,ne 
          write(777,7777)  abs(tracer(i)-tracer2(i))    
       enddo
+      do i = 1,ne
+         write(777,7777) DBLE(TsGroup(i))
+      enddo
       do i=1,ne
-         write(777,7777) real(TsGroup(i))
+         write(777,7777) WDFLG(i)
       enddo
  7777 format(9f20.8,i10)
       do i=1,ne
@@ -297,7 +300,7 @@ c     TIME_A = STATIM*86400.d0
          IF ((NRAMP .EQ. 1).AND.(TIME_A .LE. DRAMP*86400.d0)) THEN
             RAMPDG = TANH((2.D0*TIME_A/86400.D0)/DRAMP)
          ENDIF
-         IF (NWS .NE. 0) CALL MET_FORCING(itime_a)
+         IF (NWS .NE. 0) CALL MET_FORCING(itime_a,NDOM)
          CALL RESET_LTS()
       ENDIF
 

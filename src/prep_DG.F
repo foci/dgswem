@@ -140,9 +140,9 @@ C.....Initilization for parallel DG run
 
       CALL MSG_TYPES_ELEM()     ! Determine Word Sizes for Message-Passing
       CALL MSG_TABLE_ELEM()     ! Read Message-Passing Tables
+      CALL MSG_TYPES()
 
       IF (SLOPEFLAG.ge.4) THEN
-         CALL MSG_TYPES()
          CALL MSG_TABLE()
       ENDIF
 

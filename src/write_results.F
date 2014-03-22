@@ -544,7 +544,7 @@ C.....time step falls within the specified window
      $     ' ELEMENTS=', ne, 
      $     ' DATAPACKING=BLOCK ',
      $     'SOLUTIONTIME=',time_a,
-     $     'VARLOCATION=([3,4,5,6,7,8,10,11,12,13,14,15]=CELLCENTERED)'
+     $     'VARLOCATION=([3,4,5,6,7,8,10,11,12,13,14,15,16]=CELLCENTERED)'
                      do i=1,np
                         write(777,7777)  x(i)
                      enddo
@@ -587,8 +587,11 @@ C.....time step falls within the specified window
                      do i=1,ne 
                         write(777,7777)  abs(tracer(i)-tracer2(i))    
                      enddo
+                     do i = 1,ne
+                        write(777,7777) real(Tsgroup(i))
+                     enddo
                      do i=1,ne
-                        write(777,7777) real(TsGroup(i))
+                        write(777,7777) real(WDFLG(i))
                      enddo
 
  7777                format(9f20.8,i10)

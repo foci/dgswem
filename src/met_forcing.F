@@ -7,7 +7,7 @@ C     code
 C
 C***********************************************************************
 
-      SUBROUTINE MET_FORCING(IT)
+      SUBROUTINE MET_FORCING(IT,lvl)
       
       USE GLOBAL
       USE DG
@@ -27,7 +27,7 @@ Casey 101118: We need these values from other places.
       IMPLICIT NONE
       
       REAL(SZ) WindDragLimit
-      INTEGER II, IT
+      INTEGER II, IT, lvl
 
 C.....Set the wind drag limit
 
@@ -741,7 +741,7 @@ C-----------------------------------------------------------------------
       
 C.......Determine if the met file time increment is exceeded
       
-        IF(TIME_A.GT.WTIME2) THEN
+        IF(TIME_A.GT.WTIME2 .AND. lvl .EQ. NDOM) THEN
           WTIME1=WTIME2
           WTIME2=WTIME2+WTIMINC
           

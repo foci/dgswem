@@ -94,7 +94,7 @@ C.......Compute the DG time and DG ramp
          
 C.......Obtain the meteorological forcing
 
-C         IF (NWS.NE.0) CALL MET_FORCING(IT)
+        IF (NWS.NE.0) CALL MET_FORCING(IT,lvl)
         
         IF(NRS.GE.1) THEN
           IF(TIME_A.GT.RSTIME2) THEN
@@ -183,6 +183,8 @@ C.......SSP Runge-Kutta Time Scheme
             BRK = BTVD(IRK,I)*DTl
             DO J = 1,Nelem(lvl)
                elem = ElemNum(lvl,j)
+
+               IF( elem /= 0) THEN
                DO K = 1,DOFS(elem)
 
 #ifdef SED_LAY
@@ -232,6 +234,7 @@ C.......Compute the dynamic pressure if flagged
 
 
                ENDDO
+               ENDIF
             ENDDO
          ENDDO
 
@@ -262,7 +265,7 @@ C.......Compute the dynamic pressure if flagged
          
 C.......Obtain the meteorological forcing
 
-         IF (NWS.NE.0) CALL MET_FORCING(IT)
+         IF (NWS.NE.0) CALL MET_FORCING(IT,lvl)
          
 C.......Compute tidal potential terms
 
@@ -472,7 +475,7 @@ C.......Apply the slopelimiter if appropriate
 C.......Apply the wet-dry algorithm if appropriate
 
 #ifdef WETDR
-         CALL WETDRY(lvl)
+         CALL WETDRY()
 #endif
 
 c$$$C.......Apply the slopelimiter again if auxiliary variable is being used
@@ -491,7 +494,6 @@ C.......For parallel run update for dofs if slope limiter and/or wetting and
 C.......drying is being used
 
 #ifdef CMPI
-         if (SLOPEFLAG.NE.0.OR.NOLIFA.GE.2) THEN
             CALL UPDATER_ELEM_MOD(ZE,IRK+1,lvl)
             CALL UPDATER_ELEM_MOD(QX,IRK+1,lvl)
             CALL UPDATER_ELEM_MOD(QY,IRK+1,lvl)
@@ -518,7 +520,6 @@ C.......drying is being used
                CALL UPDATER_ELEM_MOD(arrayfix,IRK+1,lvl )
             enddo
 #endif
-         endif
 #endif
 
 C.......p_enrich soln and update

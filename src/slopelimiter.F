@@ -3231,6 +3231,7 @@ C.....Set limit values
 
 #endif
 
+
 #ifdef SLOPE5
 
 C***********************************************************************
@@ -3259,167 +3260,166 @@ C.....Use appropriate modules
 
 C.....Declare local variables
 
-      INTEGER L, LL, INC1,INC2,INC3,KDP,NN,IVAR,I,J,kk,k,varnum,bb,varnum_prev,lvl
+      INTEGER L, LL, INC1,INC2,INC3,KDP,NN,IVAR,I,J,JJ,kk,k,varnum,bb,varnum_prev,lvl
       REAL(SZ) ZEC(3),ZEVERTEX(3),DIF(3),SUMLOC,SUMDIF,SIGNDIF,
      $     DIV,REDFAC,REDMAX,tmp1,tmp2,tmp3,bound
       Real(SZ) ZEMIN1(3),ZEMAX1(3),QXMIN1(3),QXMAX1(3)
       Real(SZ) QYMIN1(3),QYMAX1(3)
       Real(SZ) iotaMIN1(3),iotaMAX1(3)
       Real(SZ) iota2MIN1(3),iota2MAX1(3)
-      Real(SZ), Allocatable :: ZE_MIN1(:),ZE_MAX1(:),QX_MIN1(:),QX_MAX1(:)
-      Real(SZ), Allocatable :: QY_MIN1(:),QY_MAX1(:)
-      Real(SZ), Allocatable :: iota_MIN1(:),iota_MAX1(:)
-      Real(SZ), Allocatable :: iota2_MIN1(:),iota2_MAX1(:)
-      Real(SZ), Allocatable, target :: bed_min1(:,:), bed_max1(:,:)
       Real(SZ), pointer:: arraymin(:),arraymax(:)
 
-      Allocate ( ZE_MIN1(NP),ZE_MAX1(NP),QX_MIN1(NP) )
-      Allocate ( QY_MIN1(NP),QY_MAX1(NP),QX_MAX1(NP) )
-      Allocate ( iota_MIN1(NP),iota_MAX1(NP) )
-      Allocate ( iota2_MIN1(NP),iota2_MAX1(NP) )
-      Allocate ( bed_MIN1(NP,layers),bed_MAX1(NP,layers) )
 
 C     FIND THE MAXIMUM AND MINIMUM OF EACH VARIABLE OVER ALL ELEMENTS 
 C     SHARING A NODE
 
       bound = 0.0D0
-
-      DO I = 1,NP
-         ZE_MIN1(I)=99999.
-         ZE_MAX1(I)=-99999.
-         QX_MIN1(I)=99999.
-         QX_MAX1(I)=-99999.
-         QY_MIN1(I)=99999.
-         QY_MAX1(I)=-99999.
+      DO N1=1,NP
+         VISIT_FLAG(N1)=.FALSE.
+      ENDDO
+      
+      DO J=1,Nelem(lvl)
+         I=ElemNum(lvl,J)
+         DO KK=1,3
+            N1=NM(I,KK)
+C   IF THIS NODE HAS ALREADY BEEN DONE SKIP IT
+            IF (VISIT_FLAG(N1).EQ..TRUE.) GO TO 1590
+            VISIT_FLAG(N1)=.TRUE.
+ 
+            ZE_MIN1(N1)=99999.
+            ZE_MAX1(N1)=-99999.
+            QX_MIN1(N1)=99999.
+            QX_MAX1(N1)=-99999.
+            QY_MIN1(N1)=99999.
+            QY_MAX1(N1)=-99999.
 
 #ifdef TRACE
-         iota_MIN1(I)=99999.
-         iota_MAX1(I)=-99999.
+         iota_MIN1(N1)=99999.
+         iota_MAX1(N1)=-99999.
 #endif
 
 #ifdef CHEM
-         iota_MIN1(I)=99999.
-         iota_MAX1(I)=-99999.
-         iota2_MIN1(I)=99999.
-         iota2_MAX1(I)=-99999.
+         iota_MIN1(N1)=99999.
+         iota_MAX1(N1)=-99999.
+         iota2_MIN1(N1)=99999.
+         iota2_MAX1(N1)=-99999.
 #endif
 
 #ifdef SED_LAY
          do l=1,layers
-            bed_MIN1(I,l) = 99999.
-            bed_MAX1(I,l) =-99999.
+            bed_MIN1(N1,l) = 99999.
+            bed_MAX1(N1,l) =-99999.
          enddo
 #endif
 
-         NO_NBORS = EL_COUNT(I)
+         NO_NBORS = EL_COUNT(N1)
 
-         DO J = 1,NO_NBORS
-            NBOR_EL = ELETAB(I,1+J)
+         DO JJ = 1,NO_NBORS
+            NBOR_EL = ELETAB(N1,1+JJ)
 
 c     IF(WDFLG(NBOR_EL).EQ.0) CYCLE ! DON'T COUNT DRY ELEMENTS  sb 02/26/07
 
             IF (TSGROUP(NBOR_EL) .EQ. lvl) THEN
-               ZE_DG(J) = ZE(1,NBOR_EL,IRK+1)
-               QX_DG(J) = QX(1,NBOR_EL,IRK+1)
-               QY_DG(J) = QY(1,NBOR_EL,IRK+1)
+               ZE_DG(JJ) = ZE(1,NBOR_EL,IRK+1)
+               QX_DG(JJ) = QX(1,NBOR_EL,IRK+1)
+               QY_DG(JJ) = QY(1,NBOR_EL,IRK+1)
+#ifdef TRACE
+               iota_DG(JJ) = iota(1,NBOR_EL,IRK+1)
+#endif
+#ifdef CHEM
+            iota_DG(JJ) = iota(1,NBOR_EL,IRK+1)
+            iota2_DG(JJ) = iota2(1,NBOR_EL,IRK+1)
+#endif
+#ifdef SED_LAY
+            do l=1,layers
+               bed_DG(JJ,l) = bed(1,NBOR_EL,IRK+1,l)
+            enddo
+#endif
             ELSE
-               ZE_DG(J) = ZE(1,NBOR_EL,1)
-               QX_DG(J) = QX(1,NBOR_EL,1)
-               QY_DG(J) = QY(1,NBOR_EL,1)
+               ZE_DG(JJ) = ZE(1,NBOR_EL,1)
+               QX_DG(JJ) = QX(1,NBOR_EL,1)
+               QY_DG(JJ) = QY(1,NBOR_EL,1)
+#ifdef TRACE
+               iota_DG(JJ) = iota(1,NBOR_EL,1)
+#endif
+#ifdef CHEM
+            iota_DG(JJ) = iota(1,NBOR_EL,1)
+            iota2_DG(JJ) = iota2(1,NBOR_EL,1)
+#endif            
+#ifdef SED_LAY
+            do l=1,layers
+               bed_DG(JJ,l) = bed(1,NBOR_EL,1,l)
+            enddo
+#endif   
             ENDIF 
 
-#ifdef TRACE
-            IF (TSGROUP(NBOR_EL) .EQ. lvl) THEN
-               iota_DG(J) = iota(1,NBOR_EL,IRK+1)
-            ELSE
-               iota_DG(J) = iota(1,NBOR_EL,1)
-            ENDIF
-#endif
 
-#ifdef CHEM
-         IF (TSGROUP(NBOR_EL) .EQ. lvl) THEN
-            iota_DG(J) = iota(1,NBOR_EL,IRK+1)
-            iota2_DG(J) = iota2(1,NBOR_EL,IRK+1)
-         ELSE
-            iota_DG(J) = iota(1,NBOR_EL,1)
-            iota2_DG(J) = iota2(1,NBOR_EL,1)
-         ENDIF
-#endif
-
-
-#ifdef SED_LAY
-         IF (TSGROUP(NBOR_EL) .EQ. lvl) THEN
-            do l=1,layers
-               bed_DG(J,l) = bed(1,NBOR_EL,IRK+1,l)
-            enddo
-         ELSE
-            do l=1,layers
-               bed_DG(J,l) = bed(1,NBOR_EL,1,l)
-            enddo
-         ENDIF
-#endif
 
 C     
-            IF (ZE_DG(J).LT.ZE_MIN1(I))THEN
-               ZE_MIN1(I)=ZE_DG(J)
+            IF (ZE_DG(JJ).LT.ZE_MIN1(N1))THEN
+               ZE_MIN1(N1)=ZE_DG(JJ)
             ENDIF
-            IF (ZE_DG(J).GT.ZE_MAX1(I)) THEN
-               ZE_MAX1(I)=ZE_DG(J)
+            IF (ZE_DG(JJ).GT.ZE_MAX1(N1)) THEN
+               ZE_MAX1(N1)=ZE_DG(JJ)
             ENDIF
-            IF (QX_DG(J).LT.QX_MIN1(I))THEN
-               QX_MIN1(I)=QX_DG(J)
+            IF (QX_DG(JJ).LT.QX_MIN1(N1))THEN
+               QX_MIN1(N1)=QX_DG(JJ)
             ENDIF
-            IF (QX_DG(J).GT.QX_MAX1(I)) THEN
-               QX_MAX1(I)=QX_DG(J)
+            IF (QX_DG(JJ).GT.QX_MAX1(N1)) THEN
+               QX_MAX1(N1)=QX_DG(JJ)
             ENDIF
-            IF (QY_DG(J).LT.QY_MIN1(I))THEN
-               QY_MIN1(I)=QY_DG(J)
+            IF (QY_DG(JJ).LT.QY_MIN1(N1))THEN
+               QY_MIN1(N1)=QY_DG(JJ)
             ENDIF
-            IF (QY_DG(J).GT.QY_MAX1(I)) THEN
-               QY_MAX1(I)=QY_DG(J)
+            IF (QY_DG(JJ).GT.QY_MAX1(N1)) THEN
+               QY_MAX1(N1)=QY_DG(JJ)
             ENDIF
 
 #ifdef TRACE
-            IF (iota_DG(J).LT.iota_MIN1(I))THEN
-               iota_MIN1(I)=iota_DG(J)
+            IF (iota_DG(JJ).LT.iota_MIN1(N1))THEN
+               iota_MIN1(N1)=iota_DG(JJ)
             ENDIF
 
-            IF (iota_DG(J).GT.iota_MAX1(I)) THEN
-               iota_MAX1(I)=iota_DG(J)
+            IF (iota_DG(JJ).GT.iota_MAX1(N1)) THEN
+               iota_MAX1(N1)=iota_DG(JJ)
             ENDIF
 #endif
 
 #ifdef CHEM
-            IF (iota_DG(J).LT.iota_MIN1(I))THEN
-               iota_MIN1(I)=iota_DG(J)
+            IF (iota_DG(JJ).LT.iota_MIN1(N1))THEN
+               iota_MIN1(N1)=iota_DG(JJ)
             ENDIF
 
-            IF (iota_DG(J).GT.iota_MAX1(I)) THEN
-               iota_MAX1(I)=iota_DG(J)
+            IF (iota_DG(JJ).GT.iota_MAX1(N1)) THEN
+               iota_MAX1(N1)=iota_DG(JJ)
             ENDIF
 
-            IF (iota2_DG(J).LT.iota2_MIN1(I))THEN
-               iota2_MIN1(I)=iota2_DG(J)
+            IF (iota2_DG(JJ).LT.iota2_MIN1(N1))THEN
+               iota2_MIN1(N1)=iota2_DG(JJ)
             ENDIF
 
-            IF (iota2_DG(J).GT.iota2_MAX1(I)) THEN
-               iota2_MAX1(I)=iota2_DG(J)
+            IF (iota2_DG(JJ).GT.iota2_MAX1(N1)) THEN
+               iota2_MAX1(N1)=iota2_DG(JJ)
             ENDIF
 #endif
 
 #ifdef SED_LAY
             do l=1,layers
-               IF (bed_DG(J,l).LT.bed_MIN1(I,l))THEN
-                  bed_MIN1(I,l)=bed_DG(J,l)
+               IF (bed_DG(JJ,l).LT.bed_MIN1(N1,l))THEN
+                  bed_MIN1(N1,l)=bed_DG(JJ,l)
                ENDIF
                
-               IF (bed_DG(J,l).GT.bed_MAX1(I,l)) THEN
-                  bed_MAX1(I,l)=bed_DG(J,l)
+               IF (bed_DG(JJ,l).GT.bed_MAX1(N1,l)) THEN
+                  bed_MAX1(N1,l)=bed_DG(JJ,l)
                ENDIF
             enddo
 #endif
-
+C END JJ LOOP
          ENDDO
+ 1590     CONTINUE
+C END KK LOOP
+         ENDDO
+C END J LOOP
       ENDDO
 #ifdef CMPI
 
@@ -3811,6 +3811,8 @@ c$$$               endif
       END SUBROUTINE 
 
 #endif
+
+
 
 #ifdef STBLZR
 
