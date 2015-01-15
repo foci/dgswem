@@ -26,34 +26,42 @@
 
 !C.....Declare integer variables
 
-      INTEGER DGFLAG,DGHOT,DGHOTSPOOL,DOF,dofh,dofl,dofx
-      INTEGER EL,MNES,artdif,tune_by_hand
+      INTEGER, TARGET :: DGFLAG,DGHOT,DGHOTSPOOL
+      INTEGER DOF,dofh,dofl,dofx
+      INTEGER EL
+      INTEGER, TARGET :: MNES,artdif,tune_by_hand
       INTEGER IRK
       INTEGER J1, J2, J3,negp_fixed,nagp_fixed
       INTEGER NAGP(8),NCHECK(8), NEGP(8), NEDGES, NRK !42 hardwires for ph=7
       INTEGER NIEDS, NLEDS, NEEDS, NFEDS, NREDS, NEBEDS, NIBEDS
       INTEGER NIBSEG, NEBSEG
-      INTEGER MNED, MNLED, MNSED, MNRAED, MNRIED, MODAL_IC
+      INTEGER MNED, MNLED, MNSED, MNRAED, MNRIED
+      INTEGER, TARGET :: MODAL_IC
       INTEGER P_READ
-      INTEGER SLOPEFLAG
-      INTEGER FLUXTYPE, test_el
-      INTEGER RK_STAGE, RK_ORDER
-      Integer padapt,pflag,pl,ph,px,lebesgueP,pa, gflag
+      INTEGER, TARGET :: SLOPEFLAG
+      INTEGER test_el
+      INTEGER, TARGET :: FLUXTYPE
+      INTEGER, TARGET :: RK_STAGE, RK_ORDER
+      Integer, TARGET :: padapt,pflag,pl,ph,px,lebesgueP, gflag
+      INTEGER pa
       logical init_parser,stblzr
 !c     
       integer iwrite
 
 !C.....Declare real variables
 
-      REAL(SZ) C13, C16, diorism, porosity, SEVDM
-      REAL(SZ) DOT, DHB_X, DHB_Y, DPHIDX, DPHIDY,uniform_dif
-      Real(SZ) slimit,plimit,pflag2con1,pflag2con2
+      REAL(SZ) C13, C16
+      REAL(SZ), TARGET :: diorism, porosity, SEVDM
+      REAL(SZ) DOT, DHB_X, DHB_Y, DPHIDX, DPHIDY
+      Real(SZ), TARGET :: slimit,plimit,pflag2con1,pflag2con2
       REAL(SZ) EFA_GP, EMO_GP,slimit1,slimit2,slimit3
       REAL(SZ) EL_ANG,slimit4, bg_dif,trc_dif,slimit5
-      REAL(SZ) FG_L,slope_weight,l2er_global,temperg
+      REAL(SZ) FG_L,l2er_global,temperg
+      REAL(SZ), TARGET :: slope_weight
       REAL(SZ) HB_IN, HB_EX, H_TRI
       REAL(SZ) MAG1, MAG2
-      REAL(SZ) NX, NY, kappa, s0
+      REAL(SZ) NX, NY 
+      REAL(SZ), TARGET :: kappa,s0,uniform_dif
       REAL(SZ) SFAC_IN,SFAC_EX
       REAL(SZ) RAMPDG
       REAL(SZ) S1, S2, SAV, SOURCE_X, SOURCE_Y

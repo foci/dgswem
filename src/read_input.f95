@@ -16,7 +16,11 @@
       USE HARM
       USE WIND
       USE DG
-      USE NodalAttributes, ONLY :     NoLiBF, NWP, Tau0, HBreak, FTheta, FGamma, Tau, CF,     InitNAModule, ReadNodalAttr, InitNodalAttr, ESLM, ESLC,     TAU0VAR, STARTDRY, FRIC, EVM, EVC
+      USE NodalAttributes, ONLY :&
+          NoLiBF, NWP, Tau0, HBreak, FTheta, FGamma, Tau, CF,&
+          InitNAModule, ReadNodalAttr, InitNodalAttr, ESLM, ESLC,&
+          TAU0VAR, STARTDRY, FRIC, EVM, EVC
+      USE fort_dg, ONLY: read_keyword_fort_dg,read_fixed_fort_dg
 #ifdef CMPI
       USE MESSENGER_ELEM
 #endif
@@ -30,7 +34,7 @@
 !.....Declare local variables
 
       INTEGER NIBP, IBN1, IK, NDISC, NBBN, NVEL2, II, i,j,jj,k
-      CHARACTER(256) LINE
+      CHARACTER(256) LINE,LINE2
       
 !     sb-PDG1 added
 #ifdef CMPI
@@ -89,7 +93,7 @@
       OPEN(14,FILE=DIRNAME//'/'//'fort.14')
       OPEN(15,FILE=DIRNAME//'/'//'fort.15')
       OPEN(17,FILE=DIRNAME//'/'//'fort.17')
-      OPEN(25,FILE=DIRNAME//'/'//'fort.dg')
+      OPEN(25,FILE=DIRNAME//'/'//'fort.dg')            
 
 !.....Open statement for unit 16 output file
       
@@ -102,69 +106,6 @@
  9973 FORMAT(/,1X,'!!!!!! EXECUTION WILL NOW BE TERMINATED !!!!!!',//)
  9974 FORMAT(/,1X,'!!!!!! EXECUTION WILL CONTINUE !!!!!!!!',//)
 
-!.....Read in the fort.dg file
-
-      READ(25,*) DGSWE
-      READ(25,*) padapt,pflag
-      READ(25,*) gflag,diorism
-      READ(25,*) pl,ph,px
-      READ(25,*) slimit
-      READ(25,*) plimit
-      READ(25,*) pflag2con1,pflag2con2,lebesgueP 
-      READ(25,*) FLUXTYPE
-      READ(25,*) RK_STAGE, RK_ORDER
-      READ(25,*) DG_TO_CG
-      READ(25,*) MODAL_IC
-      READ(25,*) DGHOT, DGHOTSPOOL
-      READ(25,"(A256)") LINE
-      READ(LINE,*) SLOPEFLAG
-      IF(SLOPEFLAG.EQ.2) THEN
-         READ(LINE,*) SLOPEFLAG, SL2_M, SL2_NYU
-      ENDIF
-      IF(SLOPEFLAG.EQ.3) THEN
-         READ(LINE,*) SLOPEFLAG, SL2_M, SL2_NYU, SL3_MD
-      ENDIF
-      IF(SLOPEFLAG.EQ.4) THEN
-         READ(LINE,*) SLOPEFLAG,slope_weight
-         vertexslope = .True.
-      ENDIF
-      IF(SLOPEFLAG.EQ.5) THEN
-         READ(LINE,*) SLOPEFLAG
-         vertexslope = .True.
-      ENDIF
-      IF(SLOPEFLAG.EQ.6) THEN
-         READ(LINE,*) SLOPEFLAG,slope_weight
-         vertexslope = .True.
-      ENDIF
-      IF(SLOPEFLAG.EQ.7) THEN
-         READ(LINE,*) SLOPEFLAG,slope_weight
-         vertexslope = .True.
-      ENDIF
-      IF(SLOPEFLAG.EQ.8) THEN
-         READ(LINE,*) SLOPEFLAG,slope_weight
-         vertexslope = .True.
-      ENDIF
-      IF(SLOPEFLAG.EQ.9) THEN
-         READ(LINE,*) SLOPEFLAG,slope_weight
-         vertexslope = .True.
-      ENDIF
-      IF(SLOPEFLAG.EQ.10) THEN
-         READ(LINE,*) SLOPEFLAG,slope_weight
-         vertexslope = .True.
-      ENDIF
-      READ(25,*) SEDFLAG,porosity,SEVDM,layers
-      READ(25,*) reaction_rate
-      READ(25,*) MNES
-      READ(25,*) artdif,kappa,s0,uniform_dif,tune_by_hand
-      READ(25,'(a)') sed_equationX
-      READ(25,'(a)') sed_equationY
-
-      RHOWAT0 = 1000.D0
-      IF(FLUXTYPE.NE.1.AND.FLUXTYPE.NE.2.AND.FLUXTYPE.NE.3.AND.FLUXTYPE.NE.4) THEN
-         PRINT *, 'SPECIFIED FLUXTYPE (=', FLUXTYPE,') IS NOT ALLOWED.'
-         PRINT *, 'EXECUTION WILL BE TERMINATED.'
-         STOP 'SPECIFIED FLUXTYPE IS NOT ALLOWED.'
-      ENDIF
 
 !.....Print out header for output including version number and copyright
 
@@ -218,6 +159,25 @@
       WRITE(16,*) '      - CODE WILL USE JCG ITERATIVE GWCE SOLVER'
       WRITE(16,1112)
 
+!.....Input from unit 15 and output to unit 16 rundescription and run ID
+      
+      
+!.....Read in the fort.dg file
+
+      !srb - check fort.dg format (for backwards compatibility)
+      READ(25,*) LINE
+      CLOSE(25)
+      LINE2 = ADJUSTL(LINE)
+      
+      IF (LINE2(1:1) .EQ. "1") THEN
+        CALL read_fixed_fort_dg()   ! first line of old fort.dg is a 1 for the dgswe option
+      ELSE
+        CALL read_keyword_fort_dg() ! otherwise assume keyword format
+      ENDIF     
+      
+      RHOWAT0 = 1000.D0
+                  
+      
 !.....Input from unit 15 and output to unit 16 rundescription and run ID
 
       READ(15,'(A32)') RUNDES

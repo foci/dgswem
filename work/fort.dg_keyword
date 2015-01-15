@@ -37,8 +37,8 @@ weight = 1
 ! sediment options
 sedflag = 0
 porosity = 0.0001
-sevdm = 0.00001  
-layers = 1            ! number of layers
+sevdm = 0.00001
+layers = 1
 sed_equationX = (ZE_ROE+bed_ROE)**-1 *QX_ROE
 sed_equationY = (ZE_ROE+bed_ROE)**-1 *QY_ROE
 
