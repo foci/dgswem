@@ -77,7 +77,8 @@ $(O_DIR):
 PREP_MSRC  =  presizes.F 
 PGLO_MSRC  =  pre_global.F  
 POST_MSRC  =  post_global.F
-ADC_MSRC   =  sizes.F diff45_41.F global.F dg.F global_3dvs.F nodalattr.F fparser.F90 fparser2.F90
+ADC_MSRC   =  sizes.F diff45_41.F global.F dg.F global_3dvs.F nodalattr.F fparser.F90 fparser2.F90 \
+              read_fort_dg.F90              
 HARM_MSRC  =  harm.F  
 WIND_MSRC  =  wind.F  
 #Casey 121126: Add file for coupling to unstructured SWAN.
@@ -316,6 +317,8 @@ $(O_DIR)nodalattr.o   			:  nodalattr.F
 #Casey 121126: Added the next line.
 $(O_DIR)globalio.o                      :  globalio.F $(ADC_MOBJ)
 $(O_DIR)couple2swan.o                   :  couple2swan.F $(ADC_MOBJ)
+
+$(ODIR)read_fort_dg.o                   :  read_fort_dg.F90 $(O_DIR)sizes.o $(O_DIR)dg.o $(O_DIR)global.o
 
 #  adcirc & padcirc
 

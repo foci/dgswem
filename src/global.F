@@ -73,15 +73,18 @@ C.....Sediment Transport stuff added (Ethan Kubatko 8-1-2003)
 C
 C.....Declare variables used in sediment transport section
 C
-      INTEGER SEDFLAG, MAXEL, ELEM_ED, NBOR_ED, NBOR_EL,ITDG
+      INTEGER, TARGET :: SEDFLAG
+      INTEGER MAXEL, ELEM_ED, NBOR_ED, NBOR_EL,ITDG
       Integer tracer_flag, chem_flag
-      INTEGER N1,N2,NO_NBORS,NBOR,DG_TO_CG,SEDFLAG_W, OPEN_INDEX
+      INTEGER N1,N2,NO_NBORS,NBOR,SEDFLAG_W, OPEN_INDEX
+      INTEGER, TARGET :: DG_TO_CG
       INTEGER NSCREEN_INC
       
       INTEGER ScreenUnit
       
-      REAL(SZ) AREA_SUM, CEN_SUM, NLEQ, LEQ, NLEQG, reaction_rate
-      Character*100 sed_equationX,sed_equationY
+      REAL(SZ) AREA_SUM, CEN_SUM, NLEQ, LEQ, NLEQG
+      REAL(SZ), TARGET :: reaction_rate
+      Character*100, TARGET :: sed_equationX,sed_equationY
       
       REAL(SZ) FluxSettlingTime
       INTEGER  FluxSettlingIT
@@ -107,7 +110,7 @@ C--
       
 C.....Declare variables for DG SW
 
-      INTEGER DGSWE
+      INTEGER, TARGET :: DGSWE
       INTEGER EL_IN, EL_EX, SD_IN, SD_EX, EDGE(3)
       INTEGER SIDE(2),TESTPROBLEM
       REAL(SZ) FX_IN,FY_IN,GX_IN,GY_IN,HX_IN,HY_IN     
