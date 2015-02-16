@@ -100,7 +100,7 @@ METIS1_SRC =  metis.F
 METIS2_SRC =  metis2.F
 PREP_SRC   =  adcprep.F  decomp.F   read_global.F   prep.F   interp.F  machdep.F
 POST_SRC   =  adcpost.F    post.F  compare.F  diffmerge.F
-ADC_SRC    =  dgswem.F owiwind.F read_input.F cstart.F hstart.F radiation_edge_hydro.F \
+ADC_SRC    =  dgswem.F simplepoisson.f90 owiwind.F read_input.F cstart.F hstart.F radiation_edge_hydro.F \
 	ibarrier_edge_hydro.F ebarrier_edge_hydro.F  \
 	calc_normal.F create_edge_data.F detector.F \
 	DG_timestep.F DG_hydro_timestep.F \
@@ -119,6 +119,7 @@ METIS2_OBJ:= $(patsubst %.F, $(O_DIR)%.o, $(METIS2_SRC) )
 PREP_OBJ:= $(patsubst %.F, $(O_DIR)%.o, $(PREP_SRC) )
 POST_OBJ:= $(patsubst %.F, $(O_DIR)%.o, $(POST_SRC) )
 ADC_OBJ:= $(patsubst %.F, $(O_DIR)%.o, $(ADC_SRC) )
+ADC_OBJ:= $(patsubst %.f90, $(O_DIR)%.o, $(ADC_OBJ) )
 
 #################### SWAN Source & Object Files #########################
 #Casey 121126: Added this section for coupling to unstructured SWAN.
@@ -148,25 +149,39 @@ ocpids.f ocpcre.f ocpmix.f
 SWAN_OBJ:= $(patsubst %.f,   $(O_DIR)%.o, $(SWAN_SRC) )
 SWAN_OBJ:= $(patsubst %.f90, $(O_DIR)%.o, $(SWAN_OBJ) )
 
+
+#######################sparskit variables #####################################
+# Location of SPARSKIT
+MATHDIR = /home/ios-admin/WASUPP/MATHLibs
+LibSPARSKIT = $(MATHDIR)/SPARSKIT2/Libs/libskit.a
+LibWSPARSKIT = $(MATHDIR)/AddSPARSKIT/Libs/libwrpsparskit.a
+LibBLAS = /usr/lib/libblas/libblas.a
+
+# Location of module files of SPARSKIT f90-wrapper 
+MWSPARSKIT = $(MATHDIR)/AddSPARSKIT/Libs
+
+MODDIR = -I$(MWSPARSKIT)
+
+
 ######################## compilation rules #####################################
 
 $(O_DIR)%.o  : %.F
 #  @echo depend $<
 #  @echo target $@
-	$(CF) -c $(FFLAGS) -o $@  $<
+	$(CF) -c $(FFLAGS)  $(MODDIR) -o $@  $<
 	if [ "`echo *.mod`" != '*.mod' ]; then mv *.mod $(O_DIR); fi
 
 #Casey 121126: Changed the f90 files to F90 extension to avoid conflict with SWAN.
 $(O_DIR)%.o  : %.F90
-	$(CF) -c $(FFLAGS) -o $@  $<
+	$(CF) -c $(FFLAGS)  $(MODDIR)  -o $@  $<
 	if [ "`echo *.mod`" != '*.mod' ]; then mv *.mod $(O_DIR); fi
 
 #Casey 121126: Added the following rules for the unstructured SWAN.
 $(O_DIR)%.o  : %.f
-	$(CF) -c $(FLAGS_OPT) $(FLAGS_MSC) $(FLAGS_SER) -module $(O_DIR) -o $@  $<
+	$(CF) -c $(FLAGS_OPT) $(FLAGS_MSC) $(FLAGS_SER) -module $(O_DIR)  $(MODDIR) -o $@  $<
 	if [ "`echo *.mod`" != '*.mod' ]; then mv *.mod $(O_DIR); fi
 $(O_DIR)%.o  : %.f90
-	$(CF) -c $(FLAGS_OPT) $(FLAGS_MSC) $(FLAGS_SER) -module $(O_DIR) -o $@  $<
+	$(CF) -c $(FLAGS_OPT) $(FLAGS_MSC) $(FLAGS_SER) -module $(O_DIR) $(MODDIR) -o $@  $<
 	if [ "`echo *.mod`" != '*.mod' ]; then mv *.mod $(O_DIR); fi
 
 ########################## Executable Targets ##################################
@@ -218,7 +233,7 @@ else
 	$(CF) $(FFLAGS) -o $@  $(O_DIR)*.o
 
    dgswem_serial ::  $(ADC_OBJ) 
-	$(CF) $(FFLAGS) -o $@  $(O_DIR)*.o
+	$(CF) $(FFLAGS) -o $@ $(MODDIR) $(O_DIR)*.o  $(LibWSPARSKIT)  $(LibSPARSKIT) $(LibBLAS) 
 
    dgswem ::  $(MSG_MOBJ) $(MSG_OBJ) $(ADC_OBJ) 
 	$(CF) $(FFLAGS) -o $@  $(O_DIR)*.o  $(MSGLIBS)
@@ -304,6 +319,7 @@ $(O_DIR)couple2swan.o                   :  couple2swan.F $(ADC_MOBJ)
 
 #  adcirc & padcirc
 
+$(O_DIR)simplepoisson.f90               :  simplepoisson.f90
 $(O_DIR)owiwind.o   			:  owiwind.F $(ADC_MOBJ)
 $(O_DIR)read_input.o  			:  read_input.F $(ADC_MOBJ) $(HARM_MOBJ) $(WIND_MOBJ)
 $(O_DIR)cstart.o      			:  cstart.F $(ADC_MOBJ)  $(HARM_MOBJ)  $(WIND_MOBJ)

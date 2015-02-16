@@ -38,6 +38,8 @@ C     sb-PDG1
 c     nd
       character*80 tecfile,tecfile_max
 
+
+
       CALL MESSAGE_INIT()       ! Init MPI and get MPI-rank of this cpu
 
                                 ! <ezpp-begin>
@@ -55,10 +57,19 @@ c     nd
       INTEGER TESTFLAG,OUTITER,i,ModetoNode
       character*80 tecfile, tecfile_max
 
+      write(*,*) 'calling FDhemholz'
+      CALL FDHELMHOLTZ
+      write(*,*) 'called FDhemholz'
+
+
+
       CALL MAKE_DIRNAME()       ! Establish Working Directory Name
       CALL READ_INPUT()         ! Establish sizes by reading fort.14 and fort.15
 #endif         
 
+      write(*,*) 'calling FDhemholz'
+      CALL FDHELMHOLTZ
+      write(*,*) 'called FDhemholz'
       
       
 C...  

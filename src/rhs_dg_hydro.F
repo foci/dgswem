@@ -306,7 +306,7 @@ c     TAU  = TAU*UMAG_C*FH_NL_C
                IF (IFHYBF.EQ.1) TAU = TAU*
      &              (1.D0  + (HBREAK*FH_NL_C)**FTHETA)**(FGAMMA/FTHETA)
 c     &            (1.D0  + (HBREAK*FH_NL)**FTHETA)**(FGAMMA/FTHETA)
-C     It is numerically probable that the bottom friction is large enoght
+C     It is numerically probable that the bottom friction is large enough
 C     to reverse the direction of currents backward due to a too small column
 C     height even though it does not happen in reality. To avoid this, the MIN
 C     function bellow is added. It is expected that this MIN function upper-limits
