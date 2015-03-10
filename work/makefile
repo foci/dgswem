@@ -83,6 +83,9 @@ HARM_MSRC  =  harm.F
 WIND_MSRC  =  wind.F  
 #Casey 121126: Add file for coupling to unstructured SWAN.
 COUP_MSRC  =  couple2swan.F
+#jessica   Add pressure poisson 
+PP_MSRC    = pressure_module.F
+
 
 PREP_MOBJ:= $(patsubst %.F, $(O_DIR)%.o, $(PREP_MSRC) )
 PGLO_MOBJ:= $(patsubst %.F, $(O_DIR)%.o, $(PGLO_MSRC) )
@@ -93,7 +96,8 @@ HARM_MOBJ := $(patsubst %.F, $(O_DIR)%.o, $(HARM_MSRC)  )
 WIND_MOBJ := $(patsubst %.F, $(O_DIR)%.o, $(WIND_MSRC)  )
 #Casey 121126: Add rules for coupling to unstructured SWAN.
 COUP_MOBJ := $(patsubst %.F, $(O_DIR)%.o, $(COUP_MSRC)  )
-
+#jessica Add pressure poisson 
+PP_MOBJ := $(patsubst %.F, $(O_DIR)%.o, $(PP_MSRC)  )
 
 ############################# Source & Object Files ##############################
 
@@ -101,7 +105,7 @@ METIS1_SRC =  metis.F
 METIS2_SRC =  metis2.F
 PREP_SRC   =  adcprep.F  decomp.F   read_global.F   prep.F   interp.F  machdep.F
 POST_SRC   =  adcpost.F    post.F  compare.F  diffmerge.F
-ADC_SRC    =  dgswem.F simplepoisson.f90 owiwind.F read_input.F cstart.F hstart.F radiation_edge_hydro.F \
+ADC_SRC    =  dgswem.F owiwind.F read_input.F cstart.F hstart.F radiation_edge_hydro.F \
 	ibarrier_edge_hydro.F ebarrier_edge_hydro.F  \
 	calc_normal.F create_edge_data.F detector.F \
 	DG_timestep.F DG_hydro_timestep.F \
@@ -112,7 +116,9 @@ ADC_SRC    =  dgswem.F simplepoisson.f90 owiwind.F read_input.F cstart.F hstart.
 	quad_pts_edge.F radiation_edge_hydro.F read_input.F rhs_dg_hydro.F \
 	numerical_flux.F tidal_potential.F write_results.F \
 	slopelimiter.F prep_slopelim.F ocean_edge_hydro_post.F ocean_flow_edge_hydro.F \
-	wetdry.F LDG_hydro.F met_forcing.F sta_basis.F modal2nodal.F write_output.F
+	wetdry.F LDG_hydro.F met_forcing.F sta_basis.F modal2nodal.F write_output.F pressure_WASUPP.F
+#Casey 121126: Added modal2nodal.F and write_output.F to the previous line.
+#jessica added to pressure poisson file pressure_WASUPP.F to previous line 
 #Casey 121126: Added modal2nodal.F and write_output.F to the previous line.
 
 METIS1_OBJ:= $(patsubst %.F, $(O_DIR)%.o, $(METIS1_SRC) )
@@ -121,6 +127,7 @@ PREP_OBJ:= $(patsubst %.F, $(O_DIR)%.o, $(PREP_SRC) )
 POST_OBJ:= $(patsubst %.F, $(O_DIR)%.o, $(POST_SRC) )
 ADC_OBJ:= $(patsubst %.F, $(O_DIR)%.o, $(ADC_SRC) )
 ADC_OBJ:= $(patsubst %.f90, $(O_DIR)%.o, $(ADC_OBJ) )
+
 
 #################### SWAN Source & Object Files #########################
 #Casey 121126: Added this section for coupling to unstructured SWAN.
@@ -233,10 +240,10 @@ else
    adcpost ::  $(POST_OBJ) 
 	$(CF) $(FFLAGS) -o $@  $(O_DIR)*.o
 
-   dgswem_serial ::  $(ADC_OBJ) 
+   dgswem_serial ::  $(PP_MOBJ) $(ADC_OBJ)
 	$(CF) $(FFLAGS) -o $@ $(MODDIR) $(O_DIR)*.o  $(LibWSPARSKIT)  $(LibSPARSKIT) $(LibBLAS) 
 
-   dgswem ::  $(MSG_MOBJ) $(MSG_OBJ) $(ADC_OBJ) 
+   dgswem ::  $(MSG_MOBJ) $(MSG_OBJ) $(ADC_OBJ)  $(PP_MOBJ) 
 	$(CF) $(FFLAGS) -o $@  $(O_DIR)*.o  $(MSGLIBS)
 
 #Casey 121126: Added the following lines for coupling to unstructured SWAN.
@@ -319,15 +326,17 @@ $(O_DIR)globalio.o                      :  globalio.F $(ADC_MOBJ)
 $(O_DIR)couple2swan.o                   :  couple2swan.F $(ADC_MOBJ)
 
 $(ODIR)read_fort_dg.o                   :  read_fort_dg.F90 $(O_DIR)sizes.o $(O_DIR)dg.o $(O_DIR)global.o
+#jessica added pressure poisson module 
+$(O_DIR)pressure_module.o               :  pressure_module.F $(ADC_MOBJ)
+
 
 #  adcirc & padcirc
 
-$(O_DIR)simplepoisson.f90               :  simplepoisson.f90
 $(O_DIR)owiwind.o   			:  owiwind.F $(ADC_MOBJ)
 $(O_DIR)read_input.o  			:  read_input.F $(ADC_MOBJ) $(HARM_MOBJ) $(WIND_MOBJ)
 $(O_DIR)cstart.o      			:  cstart.F $(ADC_MOBJ)  $(HARM_MOBJ)  $(WIND_MOBJ)
 $(O_DIR)hstart.o      			:  hstart.F $(ADC_MOBJ)  $(HARM_MOBJ)  $(WIND_MOBJ)
-$(O_DIR)dgswem.o      			:  dgswem.F $(ADC_MOBJ)  $(HARM_MOBJ) $(WIND_MOBJ) 
+$(O_DIR)dgswem.o      			:  dgswem.F $(ADC_MOBJ)  $(HARM_MOBJ) $(WIND_MOBJ) $(PP_MOBJ) 
 $(O_DIR)calc_normal.o         	:  calc_normal.F $(ADC_MOBJ)
 $(O_DIR)create_edge_data.o    	:  create_edge_data.F $(ADC_MOBJ)
 $(O_DIR)detector.o	      	:  detector.F $(ADC_MOBJ)
@@ -365,6 +374,8 @@ $(O_DIR)sta_basis.o                 :  sta_basis.F  $(ADC_MOBJ)
 $(O_DIR)modal2nodal.o               :  modal2nodal.F  $(ADC_MOBJ)
 $(O_DIR)write_output.o              :  write_output.F
 #Casey 121126: Added the previous lines for modal2nodal.F and write_output.F.
+#jessica added next line for pressure poisson 
+$(O_DIR)pressure_WASUPP.o           :  pressure_WASUPP.F $(ADC_MOBJ)  $(PP_MOBJ)
 
 debug:
 	@echo $(ADC_MSRC) 

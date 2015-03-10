@@ -26,8 +26,14 @@ Casey 101118: We need the following information to couple to unstructured SWAN.
      &                       PADCSWAN_INIT,
      &                       PADCSWAN_RUN
 #endif
+
+!JDM Pressure Poisson 
+      USE pressure_module  !, ONLY: read_and_initialize_PPvalues
+
 #ifdef CMPI
       USE MESSENGER_ELEM
+
+
 C--   
       IMPLICIT NONE
       
@@ -57,9 +63,6 @@ c     nd
       INTEGER TESTFLAG,OUTITER,i,ModetoNode
       character*80 tecfile, tecfile_max
 
-      write(*,*) 'calling FDhemholz'
-      CALL FDHELMHOLTZ
-      write(*,*) 'called FDhemholz'
 
 
 
@@ -67,9 +70,6 @@ c     nd
       CALL READ_INPUT()         ! Establish sizes by reading fort.14 and fort.15
 #endif         
 
-      write(*,*) 'calling FDhemholz'
-      CALL FDHELMHOLTZ
-      write(*,*) 'called FDhemholz'
       
       
 C...  
@@ -185,6 +185,11 @@ c     write(200+myproc,*) 'back from prep_dg'
 
       CALL PREP_DG()
       CALL WRITE_RESULTS(0,.FALSE.)
+
+!JDM Pressure Poisson 
+      CALL read_and_initialize_PPvalues
+
+
 
                                !cnd...for tecplot output
 !Casey 120813: Begin the OUT_TEC conditional.
