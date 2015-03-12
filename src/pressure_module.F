@@ -103,7 +103,7 @@
 
       END SUBROUTINE  read_and_initialize_PPvalues 
 
-      SUBROUTINE  from_DG_to_Pressure 
+      SUBROUTINE  from_DG_to_Pressure(jjRK) 
 
       !Need to obtain u,v,eta,depth and wet/dry at each node.  then need to pass to (i,j) type format 
 
@@ -118,6 +118,7 @@
 
 C.....Declare local variables
 
+      INTEGER, INTENT(In) :: jjRK 
       INTEGER I, NO_NBORS, J,K,N1,KK, NBOR_EL, inode 
       REAL(SZ) AREA_SUM, AREA, DEPTH, FH_NL
       REAL(SZ), ALLOCATABLE :: TOTALDEPTH(:)
@@ -145,15 +146,15 @@ C.....Declare local variables
           DO K = 1,3
             N1 = NM(NBOR_EL,K)
             IF (N1.EQ.I) THEN
-              ZE_DG(J) = ZE(1,NBOR_EL,1)
-              QX_DG(J) = QX(1,NBOR_EL,1)
-              QY_DG(J) = QY(1,NBOR_EL,1)
-              HB_DG(J) = HB(1,NBOR_EL,1)
+              ZE_DG(J) = ZE(1,NBOR_EL,jjRK)
+              QX_DG(J) = QX(1,NBOR_EL,jjRK)
+              QY_DG(J) = QY(1,NBOR_EL,jjRK)
+              HB_DG(J) = HB(1,NBOR_EL,jjRK)
               DO KK = 2,DOFH
-                ZE_DG(J) = ZE_DG(J) + PHI_CORNER(KK,K,ph)*ZE(KK,NBOR_EL,1)
-                QX_DG(J) = QX_DG(J) + PHI_CORNER(KK,K,ph)*QX(KK,NBOR_EL,1)
-                QY_DG(J) = QY_DG(J) + PHI_CORNER(KK,K,ph)*QY(KK,NBOR_EL,1)
-                HB_DG(J) = HB_DG(J) + PHI_CORNER(KK,K,ph)*HB(KK,NBOR_EL,1)
+                ZE_DG(J) = ZE_DG(J) + PHI_CORNER(KK,K,ph)*ZE(KK,NBOR_EL,jjRK)
+                QX_DG(J) = QX_DG(J) + PHI_CORNER(KK,K,ph)*QX(KK,NBOR_EL,jjRK)
+                QY_DG(J) = QY_DG(J) + PHI_CORNER(KK,K,ph)*QY(KK,NBOR_EL,jjRK)
+                HB_DG(J) = HB_DG(J) + PHI_CORNER(KK,K,ph)*HB(KK,NBOR_EL,jjRK)
               ENDDO
               AREA = 0.5*AREAS(NBOR_EL)
               AREA_SUM = AREA_SUM + AREA

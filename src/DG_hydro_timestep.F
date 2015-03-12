@@ -95,6 +95,10 @@ C.......Compute the DG time and DG ramp
             ENDIF
          ENDIF
          RAMP = RAMPDG
+
+!.......Calculate Pressure Poisson - JDM 
+        CALL from_DG_to_Pressure(IRK)
+
          
 C.......Obtain the meteorological forcing
 
@@ -676,7 +680,6 @@ C......Filter chemistry transported terms if flagged
       ENDDO
 
 
-       CALL from_DG_to_Pressure
 
       RETURN
       END SUBROUTINE
