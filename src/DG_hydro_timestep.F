@@ -27,6 +27,8 @@ C.....Use appropriate modules
       USE GLOBAL
       USE DG
 
+      USE pressure_module, ONLY: from_DG_to_Pressure
+
 #ifdef CMPI
       USE MESSENGER_ELEM 
 #endif
@@ -672,6 +674,9 @@ C......Filter chemistry transported terms if flagged
             ENDDO
          ENDDO
       ENDDO
+
+
+       CALL from_DG_to_Pressure
 
       RETURN
       END SUBROUTINE

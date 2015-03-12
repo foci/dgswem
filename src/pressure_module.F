@@ -15,7 +15,7 @@
 
       USE SIZES,    ONLY: SZ
 
-      INTEGER LengthX, LengthY 
+!      INTEGER LengthX, LengthY 
       INTEGER NumCols, NumRows 
 
 
@@ -49,10 +49,10 @@
 
       !read in what is LengthInX, LengthInY 
       !read in what is NumCols, NumRows
-!      NumCols = 
-!      NumRows = 
-!      DX = 
-!      DY = 
+      NumCols = 11 
+      NumRows = 6
+      DX = 1 
+      DY = 1
   
       !read in what are the different boundary types: 
          !only 1 (reflective) boundary type for now. 
@@ -90,11 +90,8 @@
       Depxy_pp=0.d0
       p1_pp=0.d0;p1x_pp=0.d0;p1y_pp=0.d0
       pd_pp=0.d0;pb_pp=0.d0
-      p1ol=0.d0;p1oldest=0.d0 
+      p1old=0.d0;p1oldest=0.d0 
  
-            
-
-
  
       inode = 1
       DO i = 1, NumRows
