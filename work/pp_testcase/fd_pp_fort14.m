@@ -10,7 +10,7 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 NumRows = 6; %num of nodes in y direction                                  
-NumCols = 11; %number of nodes in x direction
+NumCols = 101; %number of nodes in x direction
 
 LengthY = 5; 
 LengthX = 10; 
