@@ -184,6 +184,12 @@ c     write(200+myproc,*) 'call prep_dg'
 c     write(200+myproc,*) 'back from prep_dg'
 
       CALL PREP_DG()
+      
+      ! ASD ASD ASD ASD 
+      CALL PP_DG_TO_CG
+      
+      ! ASD ASD ASD ASD
+      
       CALL WRITE_RESULTS(0,.FALSE.)
 
 !JDM Pressure Poisson 

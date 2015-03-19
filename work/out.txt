@@ -1,0 +1,124 @@
+
+ _______________________________________________________________________________
+
+
+                   dgswem.11.13 
+
+     A disconintuous Galerkin shallow water equation model
+          for coastal seas and estuarine research
+
+
+       -  Based off of the ADCIRC model created by
+
+          R.A. Luettich, Jr., University of North Carolina
+          J.J. Westerink, University of Notre Dame
+
+       -  The ADCIRC source code has been copyrighted by
+          R.A. Luettich, Jr. & J.J. Westerink, 1994-2001
+          No part of the adcirc base code may be reproduced
+          or redistributed without the written permission of
+          the above authors.
+
+
+     The DG version of the code was written largely ab initio,
+     though some data structures from the CG version were used.
+
+       Developed by:
+          Ethan J. Kubatko, The Ohio State University (EJK)
+          Clint N. Dawson, UT ICES (cnd)
+          Shintaro Bunya, The University of Tokyo (sb)
+          Craig Michoski, UT ICES (cem)
+          Christopher Mirabito, MIT
+          Damrongsak Wirasaet, University of Notre Dame
+          Casey Dietrich, North Carolina State University
+
+
+
+ _______________________________________________________________________________
+ 
+READING FIXED FORMAT FORT.DG...
+ 
+dgswe           =        1
+padapt          =        0
+pflag           =        1
+gflag           =        0
+dis_tol         =        0.00000000E+00
+pl              =        1
+ph              =        1
+px              =        1
+slimit          =        0.50000000E-04
+plimit          =        0.10000000E+02
+k               =        0.10000000E+01
+ks              =        0.50000000E+00
+L               =        2
+fluxtype        =        2
+rk_stage        =        3
+rk_order        =        3
+modal_ic        =        0
+dghot           =        0
+dghotspool      =    86400
+slopeflag       =        5
+weight          =        0.10000000E+01
+sedflag         =        0
+porosity        =        0.10000000E-03
+sevdm           =        0.10000000E-04
+layers          =        1
+rxn_rate        =        0.10000000E+01
+nelem           =    23556
+artdif          =        0
+kappa           =       -0.10000000E+01
+s0              =        0.00000000E+00
+uniform_dif     =        0.25000000E-05
+tune_by_hand    =        0
+sed_equationX   = (ZE_ROE+bed_ROE)**-1 *QX_ROE                                                                        
+sed_equationY   = (ZE_ROE+bed_ROE)**-1 *QY_ROE                                                                        
+  
+
+ THE NEIGHBOR TABLE IS BEING COMPUTED 
+
+ THE NEIGHBOR TABLE IS COMPLETED 
+     THE MINIMUM NUMBER OF NEIGHBORS FOR ANY NODE =   3
+     1+THE MAXIMUM NUMBER OF NEIGHBORS FOR ANY NODE =   7
+     THE PARAMETER MNEI CAN BE SET AS SMALL AS   7
+
+ CREATING EDGE DATA...
+ 
+ CREATING EDGE PAIRS...
+ DONE
+ 
+   
+ TOTAL NO. OF EDGES =         1605
+   
+ NO. OF INTERNAL (NON-BOUNDARY) EDGES =         1395
+ NO. OF NO-NORMAL FLOW EDGES =          205
+ NO. OF NON-ZERO NORMAL FLOW EDGES =            5
+ NO. OF ELEVATION SPECIFIED EDGES =            0
+ NO. OF EXTERNAL BARRIER EDGES =            0
+ NO. OF INTERNAL BARRIER EDGES =            0
+ NO. OF RADIATION EDGES =            0
+ -----------------------------------------------------
+ NO. OF MISSING EDGES =            0
+ 
+ CREATING EDGE DATA DONE
+ 
+ PREP FOR WET/DRY BEGINS...
+ DONE
+ 
+ Slope limiting prep begins, "kshanti"
+ Finished
+ __________________________________________________________________________
+ 
+ TIME STEP =       0     ITERATIONS =    0
+  ELMAX =  0.0000E+00 AT NODE      1  SPEEDMAX =  0.0000E+00 AT NODE      0
+ __________________________________________________________________________
+
+ _______________________________________________________________________________
+
+
+ LIMITED RUNTIME INFORMATION SECTION 
+
+
+ MCG Matrix:
+              0.3333333333333334              0.1666666666666664              0.1666666666666664
+              0.1666666666666664              0.3333333333333331              0.1666666666666663
+              0.1666666666666664              0.1666666666666663              0.3333333333333331
