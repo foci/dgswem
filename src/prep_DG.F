@@ -34,7 +34,7 @@ C.....Use appropriate modules
       USE MESSENGER
 #endif
 
-      IMPLICIT NONE
+      IMPLICIT NONE           
       
 C.....Declare local variables
 

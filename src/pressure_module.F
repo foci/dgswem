@@ -10,10 +10,17 @@
 !      Jessica Meixner and Aaron Donahue  Feb 2015 
 !
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!
+! ASD - Added projection of DG solution to CG solution
+!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
       MODULE pressure_module
 
       USE SIZES,    ONLY: SZ
+      USE global,   ONLY: NP
+      use dg,       ONLY: nagp
+      USE AddSPARSKIT
 
 !      INTEGER LengthX, LengthY 
       INTEGER NumCols, NumRows 
@@ -34,10 +41,183 @@
 
       REAL(SZ)              :: DX,DY
       REAL(SZ), ALLOCATABLE :: pd_pp(:,:),pb_pp(:,:)
-      REAL(SZ), ALLOCATABLE :: p1old(:),p1oldest(:)  
+      REAL(SZ), ALLOCATABLE :: p1old(:),p1oldest(:) 
+      
+      INTEGER,ALLOCATABLE   :: csrloc(:,:,:)
+      TYPE (spmat)          :: pp_dg_cg_mat
+      TYPE (spmat), pointer :: pp_dg_cg_ilumat
+      
+      REAL(SZ),allocatable  :: phinodal(:,:)
+      
+      INTEGER               :: totalnz
+      
+            
      
       CONTAINS 
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+      SUBROUTINE PP_DG_TO_CG
+      ! This subroutine calculate the CG Global Mass matrix to be used in the
+      ! projection of any DG solution onto a CG framework.
+      USE global, ONLY: MNP,NM,NE,neimin,neimax,neitab,nneigh
+      USE sizes,  ONLY: SZ
+      USE dg,     ONLY: XAGP,YAGP,WAGP,NAGP
+      USE AddSPARSKIT
+      
+      IMPLICIT NONE            
+      INTEGER               :: i,j,l,k,pt,pad,a(3)
+      INTEGER	            :: ifil,initmem
+      REAL(SZ)              :: DropTol
+      REAL(SZ),ALLOCATABLE  :: rhs(:),MCG(:,:)
+      
+      REAL(SZ),ALLOCATABLE  :: matv(:,:)
+      
+      
+      
+      ! Determine the value of the linear nodal basis functions at the quadrature points.
+      pad = 1      
+      allocate(rhs(np),MCG(3,3))
+      allocate(phinodal(3,NAGP(pad))) 
+            
+      do pt = 1,NAGP(pad)
+        phinodal(1,pt) = -1.d0/2.d0*(xagp(pt,pad)+yagp(pt,pad))
+        phinodal(2,pt) =  1.d0/2.d0*(1.d0+xagp(pt,pad))
+        phinodal(3,pt) =  1.d0/2.d0*(1.d0+yagp(pt,pad))
+      end do
+      
+      ! Determine the elemental Mass Matrix
+      MCG(:,:) = 0.d0
+      do j = 1,3
+        do i = 1,3
+          do pt = 1,NAGP(pad)
+            MCG(i,j) = MCG(i,j) + phinodal(i,pt)*phinodal(j,pt)*wagp(pt,pad)
+          end do
+        end do  
+      end do  
+      
+      print*, 'MCG Matrix:'
+      open(unit=11,file='MCGlocal.txt',status='replace')
+      do i = 1,3
+        write(*,'(3F32.16)') mcg(i,:)
+        write(11,'(3F32.16)') mcg(i,:)
+      end do
+      
+      ! Construct the global CG Mass matrix
+      allocate(matv(mnp,neimax))
+      matv(:,:) = 0.d0 ! start all values at 0
+      
+      ! Determine the csr starting point for each node "row" in domain
+      pp_dg_cg_mat.str = 'csr'  ;
+      pp_dg_cg_mat.ndim = mnp ; !c number of rows
+      allocate(pp_dg_cg_mat.idv2(mnp+1)) ; !c row index (row_prt)
+      pp_dg_cg_mat.idv2(:) = 0
+      pp_dg_cg_mat.idv2(1) = 1
+      totalnz = nneigh(1);
+      do i = 2,mnp
+        pp_dg_cg_mat.idv2(i) =  pp_dg_cg_mat.idv2(i-1)+nneigh(i-1)
+        totalnz = totalnz + nneigh(i-1)
+      end do
+      pp_dg_cg_mat.idv2(mnp+1) = totalnz+1
+      
+!       allocate(pp_dg_cg_mat.idv1(totalnz)) ; !c column index (col_ind)      
+      allocate(pp_dg_cg_mat.idv1(totalnz+2)) ; !c column index (col_ind)
+      pp_dg_cg_mat.idv1(:) = 0
+      allocate(csrloc(ne,3,3)) ! Determine the connectivity of each node with respects to CSR format
+      do l = 1,ne
+        ! Node numbers associated eith element
+        a(1) = NM(l,1)
+        a(2) = NM(l,2)
+        a(3) = NM(l,3)
+        ! Connectivity associated with node a(j)
+        do j = 1,3
+        do i = 1,3
+          do k = 1,neimax ! cycle through all connected nodes
+            if (neitab(a(j),k).eq.a(i)) then
+              csrloc(l,j,i) = k+pp_dg_cg_mat.idv2(a(j))-1 ! designate the csr column format location for this connection
+              pp_dg_cg_mat.idv1(csrloc(l,j,i)) = a(i)
+              ! Note that when building the CSR matrix
+              !  l: Designates the current element
+              !  j: Designates the row
+              !  i: Designates the csr row
+              goto 900
+            end if           
+          end do
+          print*, 'Error establishing connectivity table for CSR format'
+          print*, 'Error encountered for element', l
+          call exit          
+900       continue
+        end do
+        end do
+      end do
+      
+      open(unit=10,file='csrloc_test.txt',status='replace')
+      open(unit=20,file='nneigh_elem.txt',status='replace')
+      open(unit=30,file='elem_table.txt',status='replace')
+      do l = 1,ne
+        write(30,'(3i)') NM(l,1:3)
+        do i = 1,3
+          do j = 1,3
+          write(10,'(4i)') l, i, j, csrloc(l,j,i)
+          end do
+        end do        
+      end do
+      do i = 1,mnp
+        write(20,'(3i)') i, nneigh(i), pp_dg_cg_mat.idv2(i)
+      end do
+      close(10)
+      close(20)
+      close(30)
+      close(11)
+      
+      
+      ! Build global mass matrix in CSR format using csrloc and csrnode
+      
+      ! Allocate memory for the global CG mass matrix to be used by Sparsekit      
+!       allocate(pp_dg_cg_mat.val(totalnz)) ;  !c estimate nnz for second order matrix
+      allocate(pp_dg_cg_mat.val(totalnz+2)) ;  !c estimate nnz for second order matrix
+      pp_dg_cg_mat.val(:) = 0.d0
+      do l = 1,ne
+        a(1) = NM(l,1)
+        a(2) = NM(l,2)
+        a(3) = NM(l,3)
+        do j = 1,3
+          do i = 1,3
+            pp_dg_cg_mat.val(csrloc(l,j,i)) = pp_dg_cg_mat.val(csrloc(l,j,i)) + MCG(j,i)            
+          end do
+        end do
+      end do
+      
+      
+      open( unit = 10, file = 'val.crs' ) ; 
+      open( unit = 20, file = 'col.crs' ) ; 
+      open( unit = 30, file = 'ptr.crs' ) ; 
+      DO I = 1, ubound(pp_dg_cg_mat.val,1) 
+	    WRITE(10,'(f32.16)') pp_dg_cg_mat.val(i) ;
+	    WRITE(20,*) pp_dg_cg_mat.idv1(i) ; 
+      END DO
+      close(10) ;
+      close(20) ;
+      
+      DO I = 1, mnp + 1
+	    WRITE(30,*) pp_dg_cg_mat.idv2(i) ; 
+      END DO
+      close(30)
 
+      !! .Precondition Matrix  
+      DropTol = 0.00001D0 ; 
+      ifil = 21 ; !c ifil -- 3*bandwidth
+      initmem = 20 ; 
+      pp_dg_cg_ilumat => WrpILUT( pp_dg_cg_mat, DROPTOL, IFILOP = IFIL, INITMEMOP = initmem ) ;
+      
+      deallocate(rhs,MCG)
+      deallocate(matv)
+      
+      
+      END SUBROUTINE PP_DG_TO_CG
+
+            
+      !==================================================================================!      
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
       SUBROUTINE  read_and_initialize_PPvalues 
 
       USE global,   ONLY: DP 
@@ -49,10 +229,10 @@
 
       !read in what is LengthInX, LengthInY 
       !read in what is NumCols, NumRows
-      NumCols = 11 
+      NumCols = 101 
       NumRows = 6
-      DX = 1 
-      DY = 1
+      DX = .1d0 
+      DY = 1d0
   
       !read in what are the different boundary types: 
          !only 1 (reflective) boundary type for now. 
@@ -102,7 +282,7 @@
       END DO !j 
 
       END SUBROUTINE  read_and_initialize_PPvalues 
-
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
       SUBROUTINE  from_DG_to_Pressure(jjRK) 
 
       !Need to obtain u,v,eta,depth and wet/dry at each node.  then need to pass to (i,j) type format 
@@ -110,19 +290,25 @@
       USE GLOBAL, ONLY: MNP, EL_COUNT, ELETAB, NM,
      &                  ZE_DG, QX_DG, QY_DG, HB_DG, 
      &                  AREAS, ETA2, UU2, VV2, 
-     &                  NLEQ, LEQ 
+     &                  NLEQ, LEQ, ne
       USE DG,     ONLY: WDFLG, ZE, QX, QY, HB, DOFH, 
-     &                  PHI_CORNER, ph   
+     &                  PHI_CORNER, ph, wagp, nagp, phi_area    
 
       IMPLICIT NONE 
 
 C.....Declare local variables
 
-      INTEGER, INTENT(In) :: jjRK 
+      INTEGER, INTENT(In) :: jjRK
       INTEGER I, NO_NBORS, J,K,N1,KK, NBOR_EL, inode 
       REAL(SZ) AREA_SUM, AREA, DEPTH, FH_NL
       REAL(SZ), ALLOCATABLE :: TOTALDEPTH(:)
       INTEGER, ALLOCATABLE :: WDFLG_VERT(:) 
+      
+      REAL(SZ),ALLOCATABLE :: dgcgeta(:),dgcgetax(:),dgcgloc(:)
+      REAL(SZ)	           :: ze_in,INFOR(4)
+      INTEGER	           :: INFOI(4)
+      INTEGER              :: pad, l
+      
 
       ALLOCATE(TOTALDEPTH(MNP))
       ALLOCATE(WDFLG_VERT(MNP))
@@ -188,6 +374,7 @@ C.....Declare local variables
 
       !now that we have ETA2,UU2,VV2,TOTALDEPTH, and WDFLG_VERT 
       !need to go from a node numbering to a (i,j) vertex numbering PP FD can use.  
+      open(unit=10,file='dgfd_ver1.txt',status='replace',action='write')
       inode = 1 
       DO i = 1, NumRows 
         DO j = 1, NumCols 
@@ -196,15 +383,59 @@ C.....Declare local variables
            u_pp(i,j) = UU2(inode) 
            v_pp(i,j) = VV2(inode) 
            wetdry_pp(i,j) = WDFLG_VERT(inode)
-           inode = inode + 1 
+           inode = inode + 1
+           write(10,'(2i,f)') i, j, eta_pp(i,j)
         END DO !i 
-      END DO !j 
+      END DO !j                   
+      close(10)
 
-
-      CALL pressure_WASUPP 
+            
+!       CALL PP_DG_TO_CG
+      
+      !!!!! ASD ASD ASD !!!!
+      pad = 1
+      ! Build DG right hand side
+      allocate(dgcgeta(mnp),dgcgetax(mnp),dgcgloc(3))
+      dgcgeta(:) = 0.d0
+      dgcgetax(:) = 0.d0
+      do l = 1,ne
+        dgcgloc(:) = 0.d0
+        ! determine ze at each quad point        
+        do i = 1,nagp(pad)
+          ze_in = ze(1,l,jjrk)
+          do kk = 2,dofh
+            ze_in = ze_in + ze(kk,l,jjrk)*phi_area(kk,i,pad)
+          end do
+          do kk = 1,3
+            dgcgeta(NM(l,kk)) = dgcgeta(NM(l,kk)) + wagp(i,pad)*phinodal(kk,i)*ze_in
+          end do
+        end do
+      end do
+      
+      ETA2 = WrpSPBCCGSTAB0( dgcgeta, ETA2*0.d0, pp_dg_cg_mat, pp_dg_cg_ilumat, 1.d-12, mnp/4, INFOR, INFOI ) ;
+!       print*, 'infoi'
+!       do i = 1,4
+!         print*, INFOI(i)
+!       end do
+!       print*, 'Iter = ',infoi(2)
+            
+      open(unit=20,file='dgfd_ver2.txt',status='replace',action='write')
+      inode = 1 
+      DO i = 1, NumRows 
+        DO j = 1, NumCols 
+           eta_pp(i,j) = ETA2(inode) 
+           inode = inode + 1
+           write(20,'(2i,f)') i, j, eta_pp(i,j)
+        END DO !i 
+      END DO !j                   
+      close(20)
+      
+      CALL pressure_WASUPP      
+      deallocate(dgcgeta,dgcgloc)
+!       call exit
       
       END SUBROUTINE from_DG_to_Pressure      
-
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
       END MODULE
 

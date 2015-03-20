@@ -160,10 +160,17 @@ SWAN_OBJ:= $(patsubst %.f90, $(O_DIR)%.o, $(SWAN_OBJ) )
 
 #######################sparskit variables #####################################
 # Location of SPARSKIT
-MATHDIR = /home/ios-admin/WASUPP/MATHLibs
+## Jessica's Computer
+#MATHDIR = /home/ios-admin/WASUPP/MATHLibs
+#LibSPARSKIT = $(MATHDIR)/SPARSKIT2/Libs/libskit.a
+#LibWSPARSKIT = $(MATHDIR)/AddSPARSKIT/Libs/libwrpsparskit.a
+#LibBLAS = /usr/lib/libblas/libblas.a
+
+## Aaron's Computer
+MATHDIR = /home/diaplo/Documents/MATHLibs
 LibSPARSKIT = $(MATHDIR)/SPARSKIT2/Libs/libskit.a
 LibWSPARSKIT = $(MATHDIR)/AddSPARSKIT/Libs/libwrpsparskit.a
-LibBLAS = /usr/lib/libblas/libblas.a
+LibBLAS = $(MATHDIR)/BLAS/blas_LINUX.a
 
 # Location of module files of SPARSKIT f90-wrapper 
 MWSPARSKIT = $(MATHDIR)/AddSPARSKIT/Libs

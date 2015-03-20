@@ -6,7 +6,6 @@
 !    Calculates dynamic pressure 
 !
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! 
-
       
       
       SUBROUTINE pressure_WASUPP
@@ -19,8 +18,7 @@
      &                            Etaxx_pp,Etayy_pp,Depx_pp,Depy_pp,Depxx_pp,Depyy_pp,Depxy_pp,
      &                            p1_pp,p1x_pp,p1y_pp,p1old,p1oldest, 
      &                            totaldepth_pp, wetdry_pp,
-     &                            DX,DY,pd_pp,pb_pp, !!! ASD Need to add these
-     &                            totalnz
+     &                            DX,DY,pd_pp,pb_pp !!! ASD Need to add these
       
       IMPLICIT NONE
       
@@ -33,10 +31,10 @@
       TYPE (spmat):: fdmat
       TYPE (spmat), pointer:: ilumat
        
-             
       
+        
       !.Allocate local variables
-            
+      
        NX = NumRows 
        NY = NumCols 
        Nghost = 0
@@ -73,10 +71,7 @@
         CALL GETRHS()
       
       !.Construct the left hand side Matrix for solving P1
-        CALL FDDISCRETE()   
-        
-!         CAll testilut(totalnz,fdmat)
-!         call exit
+        CALL FDDISCRETE()
       
       !.Precondition Matrix  
         DropTol = 0.0001D0 ; 
@@ -88,7 +83,7 @@
       !   p1sol = 0.0D0
         RESID = 1.d-4 ; 
         ITMAX = NT/4 ;
-        p1sol = WrpSPBCCGSTAB0( rhs, p1sol, fdmat, ilumat, RESID, ITMAX, INFOR, INFOI ) ;
+        p1sol = WrpSPBCCGSTAB0( rhs, p1sol, fdmat, ilumat,RESID, ITMAX, INFOR, INFOI ) ;
         p1oldest = p1old
         p1old = p1sol
         
@@ -387,20 +382,20 @@
           
           fdmat.idv2(id+1) = ind_beg ;
           
-          open( unit = 10, file = 'valpp.crs' ) ; 
-          open( unit = 20, file = 'colpp.crs' ) ; 
-          open( unit = 30, file = 'ptrpp.crs' ) ; 
-          DO I = 1, ubound(fdmat.val,1) 
-             WRITE(10,*) fdmat.val(i) ;
-             WRITE(20,*) fdmat.idv1(i) ; 
-          END DO
-          close(10) ;
-          close(20) ;
-        
-          DO I = 1, id + 1
-             WRITE(30,*) fdmat.idv2(i) ; 
-          END DO
-          close(30)
+      !     open( unit = 10, file = 'val.crs' ) ; 
+      !     open( unit = 20, file = 'col.crs' ) ; 
+      !     open( unit = 30, file = 'ptr.crs' ) ; 
+      !     DO I = 1, ubound(fdmat.val,1) 
+      !        WRITE(10,*) fdmat.val(i) ;
+      !        WRITE(20,*) fdmat.idv1(i) ; 
+      !     END DO
+      !     close(10) ;
+      !     close(20) ;
+      !   
+      !     DO I = 1, id + 1
+      !        WRITE(30,*) fdmat.idv2(i) ; 
+      !     END DO
+      !     close(30)
           
           RETURN ;
         END SUBROUTINE FDDISCRETE
@@ -658,61 +653,5 @@
           
           RETURN 
         END SUBROUTINE DERIVATIVE_XY
-!       !==================================================================================!
-!       !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-!       SUBROUTINE TESTILUT(nnz,fdmat)
-!       
-!       USE AddSparskit
-!       
-!       USE sizes, ONLY: SZ
-!       USE global, ONLY: mnp
-!       
-!       IMPLICIT NONE
-!       TYPE (spmat),intent(in) :: fdmat
-!       TYPE (spmat):: fdmat1
-!       TYPE (spmat), pointer:: ilumat1
-!       
-! !       REAL(SZ) :: DropTol
-! !       INTEGER :: ifil,initmem
-!       INTEGER :: i
-!       INTEGER,INTENT(in) :: nnz
-!       
-!       
-!       fdmat1.str = 'csr'  ;
-!       fdmat1.ndim = mnp ; !c number of rows
-!         
-!       allocate(fdmat1.val(7*mnp)) ;
-!       allocate(fdmat1.idv1(7*mnp)) ;
-!       allocate(fdmat1.idv2(mnp+1)) ;
-!       
-!       open( unit = 10, file = 'valnew.crs' , action='READ') ; 
-!       open( unit = 20, file = 'colnew.crs' , action='READ') ; 
-!       open( unit = 30, file = 'ptr.crs' , action='READ') ;
-!       do i = 1,nnz
-!         read(10,*) fdmat1.val(i)
-!         read(20,'(i)') fdmat1.idv1(i)
-!       end do
-! 
-!       do i = 1,mnp+1
-!         read(30,'(i)') fdmat1.idv2(i)
-!       end do
-!       close(10)
-!       close(20)
-!       close(30)
-!       
-!       do i = 1,10
-! !         write(*,*) fdmat.val(i), fdmat1.val(i)
-! !         write(*,*) fdmat.idv1(i), fdmat1.idv1(i)
-! !         write(*,*) fdmat.idv2(i), fdmat1.idv2(i)
-!           write(*,*) fdmat1.idv2(mnp+2-i)
-!       end do
-!       
-!       !.Precondition Matrix  
-!       DropTol = 0.00001D0 ; 
-!       ifil = 20 ; !c ifil -- 3*bandwidth
-!       initmem = 20 ; 
-!       ilumat1 => WrpILUT( fdmat1, DROPTOL, IFILOP = IFIL, INITMEMOP = initmem ) ;
-!       print*, 'goodbye'
-!       
-!       END SUBROUTINE TESTILUT
+      !==================================================================================!
       END SUBROUTINE pressure_WASUPP

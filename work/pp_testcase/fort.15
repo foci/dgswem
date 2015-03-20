@@ -20,8 +20,8 @@ Mesh 1                                 ! 20 CHARACTER ALPANUMERIC RUN IDENTIFICA
  0.01                                  ! DT - TIME STEP (IN SECONDS)
  0.0                                   ! STATIM - STARTING TIME
  0.0                                   ! REFTIME - STARTING REFERENCE TIME (IN DAYS)
- 1.0                                   ! RNDAY - TOTAL LENGTH OF SIMULATION (IN DAYS)
- 0.5                                   ! DRAMP - TIME CONSTANT FOR RAMP FUNCTION
+ 0.1                                   ! RNDAY - TOTAL LENGTH OF SIMULATION (IN DAYS)
+ 0.05                                  ! DRAMP - TIME CONSTANT FOR RAMP FUNCTION
  0.35 0.30 0.35                        ! TIME WEIGHTING FACTORS FOR THE GWCE EQUATION
  0.0                                   ! H0 - MIMINMUM CUTOFF DEPTH
  -76.67  34.69                         ! SLAM0, SFEA0 - LONG. AND LAT. WHERE CPP IS CENTERED
@@ -33,14 +33,14 @@ Mesh 1                                 ! 20 CHARACTER ALPANUMERIC RUN IDENTIFICA
 100.0                                  ! ANGINN : INNER ANGLE THRESHOLD
 1                                      ! NFFR
  M2                                    ! BOUNTAG - ALPHA NUMERIC DESCRIPTOR
- 0.000140518902509   1.000  0.000      ! FREQUENCY, NODAL FACTOR, EQUILIBRIUM ARGUMENT (DEG)
+ 1.2566   1.000  0.000      ! FREQUENCY, NODAL FACTOR, EQUILIBRIUM ARGUMENT (DEG) 0.000140518902509
    M2                 ! ALPHANUMERIC DESCRIPTION OF OPEN BOUNDARY FORCING DATA SET WHICH FOLLOWS 
-      0.1          0
-      0.1          0
-      0.1          0
-      0.1          0
-      0.1          0
-      0.1          0
+      0.01          0
+      0.01          0
+      0.01          0
+      0.01          0
+      0.01          0
+      0.01          0
 1 0.0 28.0 864           ! NOUTE,TOUTSE,TOUTFE,NSPOOLE:ELEV STATION OUTPUT INFO (UNIT  61)
 0                          ! TOTAL NUMBER OF ELEVATION RECORDING STATIONS
 1 0.0 28.0 864           ! NOUTE,TOUTSE,TOUTFE,NSPOOLE:VEL STATION OUTPUT INFO (UNIT  62)
