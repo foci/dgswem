@@ -1,0 +1,600 @@
+
+ _______________________________________________________________________________
+
+ _______________________________________________________________________________
+
+
+                   dgswem.11.13 
+
+     A disconintuous Galerkin shallow water equation model
+          for coastal seas and estuarine research
+
+
+       -  Based off of the ADCIRC model created by
+
+          R.A. Luettich, Jr., University of North Carolina
+          J.J. Westerink, University of Notre Dame
+
+       -  The ADCIRC source code has been copyrighted by
+          R.A. Luettich, Jr. & J.J. Westerink, 1994-2001
+          No part of the adcirc base code may be reproduced
+          or redistributed without the written permission of
+          the above authors.
+
+
+     The DG version of the code was written largely ab initio,
+     though some data structures from the CG version were used.
+
+       Developed by:
+          Ethan J. Kubatko, The Ohio State University (EJK)
+          Clint N. Dawson, UT ICES (cnd)
+          Shintaro Bunya, The University of Tokyo (sb)
+          Craig Michoski, UT ICES (cem)
+          Christopher Mirabito, MIT
+          Damrongsak Wirasaet, University of Notre Dame
+          Casey Dietrich, North Carolina State University
+
+
+
+ _______________________________________________________________________________
+
+
+ THE SOURCE CODE HAS BEEN CONFIGURED BY THE PREPROCESSOR AS FOLLOWS:
+
+       - 2D DEPTH INTEGRATED MODEL OPTION
+       - CODE SETUP TO RUN WITH 8 byte REALS
+       - CODE OPTIMIZED FOR A SCALAR COMPUTER
+       - NONVECTORIZABLE PARTS OF CODE OPTIMIZED FOR MEMORY
+       - CODE WILL USE JCG ITERATIVE GWCE SOLVER
+
+ _______________________________________________________________________________
+
+
+ RUN DESCRIPTION : Idealized Inlet                 
+
+ RUN IDENTIFICATION : Mesh 1                  
+
+ _______________________________________________________________________________
+
+
+ GENERAL RUN INFORMATION
+
+     NFOVER =  1
+         IF NON-FATAL ERRORS ARE DETECTED, THEY WILL BE CORRECTED AND EXECUTION CONTINUED
+     NABOUT =  1
+         ABREVIATED OUTPUT WILL BE PROVIDED TO UNIT 16
+         UNIT 14, 21, 22 INPUT DATA WILL NOT BE ECHO PRINTED
+
+     NSCREEN =  1
+         SCREEN OUTPUT WILL BE PROVIDED TO UNIT 6
+
+
+     dgswem will be cold started
+
+     ICS =  1
+         Governing equations are in Cartesian coordinates
+
+     NOLIBF =   1
+         THE MODEL WILL USE STANDARD QUADRATIC BOTTOM FRICTION
+
+     NOLIFA =   1
+         THE MODEL WILL USE FINITE AMPLITUDE TERMS BUT NO WETTING AND DRYING
+
+     NOLICA =   1
+         THE MODEL WILL USE SPATIAL DERIVATIVE COMPONENTS OF THE ADVECTIVE TERMS
+
+     NOLICAT =   1
+         THE MODEL WILL USE TIME DERIVATIVE COMPONENTS 
+         OF THE ADVECTIVE TERMS IN THE GWCE
+
+     NWP =  0
+         A Nodal Attributes File (unit 13)
+         will not be used.
+
+     NCOR =  0
+         A CONSTANT VALUE OF THE CORIOLIS PARAMETER WILL BE 
+         USED THROUGHOUT THE DOMAIN
+
+     NTIP =  0
+         TIDAL POTENTIAL FORCING IS NOT USED IN THE COMPUTATION
+
+     NWS =  0
+         WIND STRESS OR SURFACE PRESSURE ARE NOT USED TO FORCETHE COMPUTATION
+
+     NRS =  0
+         WAVE RADIATION STRESS IS NOT USED TO FORCE THE COMPUTATION
+
+     NRAMP =  1
+         A HYPERBOLIC TANGENT RAMP IS APPLIED TO THE FORCING FUNCTIONS
+
+
+
+     GRAVITATIONAL CONSTANT G =   9.81000
+
+
+     WEIGHTING COEFFICIENT FOR THE GENERALIZED WAVE CONTINUITY EQUATION :
+     TAU0 = 0.40000000E-01  1/sec
+
+
+ _______________________________________________________________________________
+
+
+ TIME INTEGRATION INFORMATION
+
+
+     TIME STEP =    1.000000     SECONDS
+
+     STARTING TIME FOR SIMULATION =       0.000000 DAYS
+
+     Harmonic REFERENCE TIME =       0.000000 DAYS
+
+     TOTAL LENGTH OF NUMERICAL SIMULATION =      1.0000     DAYS
+
+     NUMBER OF TIME STEPS  =   86400
+
+
+
+     TIME WEIGHTING FACTORS IN THE WAVE EQUATION :
+
+         AT TIME LEVEL K+1 :  0.35000
+         AT TIME LEVEL K   :  0.30000
+         AT TIME LEVEL K-1 :  0.35000
+
+
+
+     THE BATHYMETRIC DEPTH AT ALL NODES WILL BE INCREASED TO H0=       0.0000 IF NECESSARY
+
+
+ _______________________________________________________________________________
+
+
+ GRID INFORMATION
+
+
+
+     GRID IDENTIFICATION : Idealized Inlet, Linear 
+
+     TOTAL NUMBER OF NODES =   632
+
+     TOTAL NUMBER OF ELEMENTS =  1114
+
+
+     NODAL COORDINATES AND BATHYMETRY INFORMATION IS AVAILABLE IN THE
+      UNIT 14 INPUT FILE
+
+     THE GLOBAL CONNECTIVITY TABLE INFORMATION IS AVAILABLE IN THE
+      UNIT 14 INPUT FILE
+
+ _______________________________________________________________________________
+
+
+ BOTTOM FRICTION INFORMATION
+
+
+     NONLINEAR FRICTION COEFFICIENT CF =  0.00300000
+
+     EVM, EDDY VISCOSITY COEFFICIENT = 0.00000000E+00
+
+
+
+ _______________________________________________________________________________
+
+
+ CORIOLIS INFORMATION 
+
+
+     CONSTANT CORIOLIS COEFFICIENT = 0.00000000E+00     1/SEC
+
+
+ _______________________________________________________________________________
+
+
+ TIDAL POTENTIAL FORCING INFORMATION 
+
+
+
+ TIDAL POTENTIAL IS FORCED FOR     0 CONSTITUENT(S) 
+
+ _______________________________________________________________________________
+
+
+ ELEVATION SPECIFIED BOUNDARY FORCING INFORMATION 
+
+
+
+     NUMBER OF PERIODIC, ELEVATION SPECIFIED CONSTITUENTS =    0
+
+
+
+     TOTAL NUMBER OF ELEVATION BOUNDARY FORCING SEGMENTS  =     0
+
+     TOTAL NUMBER OF ELEVATION SPECIFIED BOUNDARY NODES =     0
+
+ _______________________________________________________________________________
+
+
+     ANGINN =   100.00 DEGREES
+     ALL FLOW BOUNDARY NODES WITH NORMAL FLOW AS AN ESSENTIAL B.C. AND 
+         INNER ANGLES LESS THAN ANGINN WILL HAVE BOTH NORMAL 
+         AND TANGENTIAL VELOCITY COMPONENTS ZEROED
+
+
+ _______________________________________________________________________________
+
+
+ FLOW BOUNDARY INFORMATION 
+
+
+
+     THE TOTAL NUMBER OF FLOW BOUNDARY SEGMENTS =     2
+
+     THE TOTAL NUMBER OF FLOW BOUNDARY NODES =   150
+
+
+
+     TOTAL NUMBER OF NODES FOR FLOW BOUNDARY SEGMENT   1  =    129
+     THIS SEGMENT IS AN EXTERNAL BOUNDARY WITH:
+       NO NORMAL FLOW AS AN ESSENTIAL B.C.
+       AND NO TANGENTIAL SLIP
+
+    JGW    JME    ME2GW   NODE #  BNDRY CODE   INNER ANGLE       COS             SIN         0.667*BNDRY LEN
+
+      1      1      1        1     10         ********    0.00000000E+00  -0.10000000E+01    0.50000000E+02
+      2      2      2        2     10           180.00    0.00000000E+00  -0.10000000E+01    0.10000000E+03
+      3      3      3        3     10           180.00    0.00000000E+00  -0.10000000E+01    0.10000000E+03
+      4      4      4        4     10           180.00    0.00000000E+00  -0.10000000E+01    0.10000000E+03
+      5      5      5        5     10           180.00    0.00000000E+00  -0.10000000E+01    0.10000000E+03
+      6      6      6        6     10           180.00    0.00000000E+00  -0.10000000E+01    0.10000000E+03
+      7      7      7        7     10           180.00    0.00000000E+00  -0.10000000E+01    0.10000000E+03
+      8      8      8        8     10           180.00    0.00000000E+00  -0.10000000E+01    0.10000000E+03
+      9      9      9        9     10           180.00    0.00000000E+00  -0.10000000E+01    0.10000000E+03
+     10     10     10       10     10           180.00    0.00000000E+00  -0.10000000E+01    0.10000000E+03
+     11     11     11       11     10           180.00    0.00000000E+00  -0.10000000E+01    0.10000000E+03
+     12     12     12       12     10           180.00    0.00000000E+00  -0.10000000E+01    0.10000000E+03
+     13     13     13       13     10           180.00    0.00000000E+00  -0.10000000E+01    0.10000000E+03
+     14     14     14       14     10           180.00    0.00000000E+00  -0.10000000E+01    0.10000000E+03
+     15     15     15       15     10           180.00    0.00000000E+00  -0.10000000E+01    0.10000000E+03
+     16     16     16       16     10           180.00    0.00000000E+00  -0.10000000E+01    0.10000000E+03
+     17     17     17       17     10           180.00    0.00000000E+00  -0.10000000E+01    0.10000000E+03
+     18     18     18       18     10            90.00    0.70710678E+00  -0.70710678E+00    0.10000000E+03
+     19     19     19       19     10           180.00    0.10000000E+01   0.00000000E+00    0.10000000E+03
+     20     20     20       20     10           180.00    0.10000000E+01   0.00000000E+00    0.10000000E+03
+     21     21     21       21     10           180.00    0.10000000E+01   0.00000000E+00    0.10000000E+03
+     22     22     22       22     10           180.00    0.10000000E+01   0.00000000E+00    0.10000000E+03
+     23     23     23       23     10           180.00    0.10000000E+01   0.00000000E+00    0.10000000E+03
+     24     24     24       24     10           180.00    0.10000000E+01   0.00000000E+00    0.10000000E+03
+     25     25     25       25     10           180.00    0.10000000E+01   0.00000000E+00    0.10000000E+03
+     26     26     26       26     10           180.00    0.10000000E+01   0.00000000E+00    0.66666667E+02
+     27     27     27       27     10            90.00    0.80000000E+00   0.60000000E+00    0.50000000E+02
+     28     28     28       28     10           180.00    0.00000000E+00   0.10000000E+01    0.10000000E+03
+     29     29     29       29     10           270.00    0.31622777E+00   0.94868330E+00    0.33333333E+02
+     30     30     30       30     10           270.00    0.31622777E+00  -0.94868330E+00    0.10000000E+03
+     31     31     31       31     10           180.00    0.00000000E+00  -0.10000000E+01    0.10000000E+03
+     32     32     32       32     10           180.00    0.00000000E+00  -0.10000000E+01    0.10000000E+03
+     33     33     33       33     10           180.00    0.00000000E+00  -0.10000000E+01    0.10000000E+03
+     34     34     34       34     10           180.00    0.00000000E+00  -0.10000000E+01    0.10000000E+03
+     35     35     35       35     10           270.00   -0.70710678E+00  -0.70710678E+00    0.10000000E+03
+     36     36     36       36     10           180.00   -0.10000000E+01   0.00000000E+00    0.10000000E+03
+     37     37     37       37     10           180.00   -0.10000000E+01   0.00000000E+00    0.10000000E+03
+     38     38     38       38     10           180.00   -0.10000000E+01   0.00000000E+00    0.10000000E+03
+     39     39     39       39     10           180.00   -0.10000000E+01   0.00000000E+00    0.10000000E+03
+     40     40     40       40     10           180.00   -0.10000000E+01   0.00000000E+00    0.10000000E+03
+     41     41     41       41     10           180.00   -0.10000000E+01   0.00000000E+00    0.10000000E+03
+     42     42     42       42     10           180.00   -0.10000000E+01   0.00000000E+00    0.10000000E+03
+     43     43     43       43     10           180.00   -0.10000000E+01   0.00000000E+00    0.10000000E+03
+     44     44     44       44     10            90.00   -0.89442719E+00  -0.44721360E+00    0.50000000E+02
+     45     45     45       45     10           180.00    0.00000000E+00  -0.10000000E+01    0.10000000E+03
+     46     46     46       46     10           180.00    0.00000000E+00  -0.10000000E+01    0.10000000E+03
+     47     47     47       47     10           180.00    0.00000000E+00  -0.10000000E+01    0.10000000E+03
+     48     48     48       48     10           180.00    0.00000000E+00  -0.10000000E+01    0.10000000E+03
+     49     49     49       49     10           180.00    0.00000000E+00  -0.10000000E+01    0.10000000E+03
+     50     50     50       50     10           180.00    0.00000000E+00  -0.10000000E+01    0.10000000E+03
+     51     51     51       51     10           180.00    0.00000000E+00  -0.10000000E+01    0.10000000E+03
+     52     52     52       52     10           180.00    0.00000000E+00  -0.10000000E+01    0.10000000E+03
+     53     53     53       53     10           180.00    0.00000000E+00  -0.10000000E+01    0.10000000E+03
+     54     54     54       54     10           180.00    0.00000000E+00  -0.10000000E+01    0.50000000E+02
+     55     55     55       55     10            90.00    0.89442719E+00  -0.44721360E+00    0.10000000E+03
+     56     56     56       56     10           180.00    0.10000000E+01   0.00000000E+00    0.10000000E+03
+     57     57     57       57     10           180.00    0.10000000E+01   0.00000000E+00    0.10000000E+03
+     58     58     58       58     10           180.00    0.10000000E+01   0.00000000E+00    0.10000000E+03
+     59     59     59       59     10           180.00    0.10000000E+01   0.00000000E+00    0.10000000E+03
+     60     60     60       60     10           180.00    0.10000000E+01   0.00000000E+00    0.10000000E+03
+     61     61     61       61     10           180.00    0.10000000E+01   0.00000000E+00    0.10000000E+03
+     62     62     62       62     10           180.00    0.10000000E+01   0.00000000E+00    0.10000000E+03
+     63     63     63       63     10           180.00    0.10000000E+01   0.00000000E+00    0.10000000E+03
+     64     64     64       64     10           180.00    0.10000000E+01   0.00000000E+00    0.10000000E+03
+     65     65     65       65     10           180.00    0.10000000E+01   0.00000000E+00    0.10000000E+03
+     66     66     66       66     10           180.00    0.10000000E+01   0.00000000E+00    0.10000000E+03
+     67     67     67       67     10           180.00    0.10000000E+01   0.00000000E+00    0.10000000E+03
+     68     68     68       68     10           180.00    0.10000000E+01   0.00000000E+00    0.10000000E+03
+     69     69     69       69     10           180.00    0.10000000E+01   0.00000000E+00    0.10000000E+03
+     70     70     70       70     10           180.00    0.10000000E+01   0.00000000E+00    0.10000000E+03
+     71     71     71       71     10           180.00    0.10000000E+01   0.00000000E+00    0.10000000E+03
+     72     72     72       72     10           180.00    0.10000000E+01   0.00000000E+00    0.10000000E+03
+     73     73     73       73     10           180.00    0.10000000E+01   0.00000000E+00    0.10000000E+03
+     74     74     74       74     10           180.00    0.10000000E+01   0.00000000E+00    0.10000000E+03
+     75     75     75       75     10            90.00    0.89442719E+00   0.44721360E+00    0.50000000E+02
+     76     76     76       76     10           180.00    0.00000000E+00   0.10000000E+01    0.10000000E+03
+     77     77     77       77     10           180.00    0.00000000E+00   0.10000000E+01    0.10000000E+03
+     78     78     78       78     10           180.00    0.00000000E+00   0.10000000E+01    0.10000000E+03
+     79     79     79       79     10           180.00    0.00000000E+00   0.10000000E+01    0.10000000E+03
+     80     80     80       80     10           180.00    0.00000000E+00   0.10000000E+01    0.10000000E+03
+     81     81     81       81     10           180.00    0.00000000E+00   0.10000000E+01    0.10000000E+03
+     82     82     82       82     10           180.00    0.00000000E+00   0.10000000E+01    0.10000000E+03
+     83     83     83       83     10           180.00    0.00000000E+00   0.10000000E+01    0.10000000E+03
+     84     84     84       84     10           180.00    0.00000000E+00   0.10000000E+01    0.10000000E+03
+     85     85     85       85     10           180.00    0.00000000E+00   0.10000000E+01    0.50000000E+02
+     86     86     86       86     10            90.00   -0.89442719E+00   0.44721360E+00    0.10000000E+03
+     87     87     87       87     10           180.00   -0.10000000E+01   0.00000000E+00    0.10000000E+03
+     88     88     88       88     10           180.00   -0.10000000E+01   0.00000000E+00    0.10000000E+03
+     89     89     89       89     10           180.00   -0.10000000E+01   0.00000000E+00    0.10000000E+03
+     90     90     90       90     10           180.00   -0.10000000E+01   0.00000000E+00    0.10000000E+03
+     91     91     91       91     10           180.00   -0.10000000E+01   0.00000000E+00    0.10000000E+03
+     92     92     92       92     10           180.00   -0.10000000E+01   0.00000000E+00    0.10000000E+03
+     93     93     93       93     10           180.00   -0.10000000E+01   0.00000000E+00    0.10000000E+03
+     94     94     94       94     10           180.00   -0.10000000E+01   0.00000000E+00    0.10000000E+03
+     95     95     95       95     10           270.00   -0.70710678E+00   0.70710678E+00    0.10000000E+03
+     96     96     96       96     10           180.00    0.00000000E+00   0.10000000E+01    0.10000000E+03
+     97     97     97       97     10           180.00    0.00000000E+00   0.10000000E+01    0.10000000E+03
+     98     98     98       98     10           180.00    0.00000000E+00   0.10000000E+01    0.10000000E+03
+     99     99     99       99     10           180.00    0.00000000E+00   0.10000000E+01    0.10000000E+03
+    100    100    100      100     10           270.00    0.31622777E+00   0.94868330E+00    0.33333333E+02
+    101    101    101      101     10           270.00    0.31622777E+00  -0.94868330E+00    0.10000000E+03
+    102    102    102      102     10           180.00    0.00000000E+00  -0.10000000E+01    0.50000000E+02
+    103    103    103      103     10            90.00    0.80000000E+00  -0.60000000E+00    0.66666667E+02
+    104    104    104      104     10           180.00    0.10000000E+01   0.00000000E+00    0.10000000E+03
+    105    105    105      105     10           180.00    0.10000000E+01   0.00000000E+00    0.10000000E+03
+    106    106    106      106     10           180.00    0.10000000E+01   0.00000000E+00    0.10000000E+03
+    107    107    107      107     10           180.00    0.10000000E+01   0.00000000E+00    0.10000000E+03
+    108    108    108      108     10           180.00    0.10000000E+01   0.00000000E+00    0.10000000E+03
+    109    109    109      109     10           180.00    0.10000000E+01   0.00000000E+00    0.10000000E+03
+    110    110    110      110     10           180.00    0.10000000E+01   0.00000000E+00    0.10000000E+03
+    111    111    111      111     10           180.00    0.10000000E+01   0.00000000E+00    0.10000000E+03
+    112    112    112      112     10            90.00    0.70710678E+00   0.70710678E+00    0.10000000E+03
+    113    113    113      113     10           180.00    0.00000000E+00   0.10000000E+01    0.10000000E+03
+    114    114    114      114     10           180.00    0.00000000E+00   0.10000000E+01    0.10000000E+03
+    115    115    115      115     10           180.00    0.00000000E+00   0.10000000E+01    0.10000000E+03
+    116    116    116      116     10           180.00    0.00000000E+00   0.10000000E+01    0.10000000E+03
+    117    117    117      117     10           180.00    0.00000000E+00   0.10000000E+01    0.10000000E+03
+    118    118    118      118     10           180.00    0.00000000E+00   0.10000000E+01    0.10000000E+03
+    119    119    119      119     10           180.00    0.00000000E+00   0.10000000E+01    0.10000000E+03
+    120    120    120      120     10           180.00    0.00000000E+00   0.10000000E+01    0.10000000E+03
+    121    121    121      121     10           180.00    0.00000000E+00   0.10000000E+01    0.10000000E+03
+    122    122    122      122     10           180.00    0.00000000E+00   0.10000000E+01    0.10000000E+03
+    123    123    123      123     10           180.00    0.00000000E+00   0.10000000E+01    0.10000000E+03
+    124    124    124      124     10           180.00    0.00000000E+00   0.10000000E+01    0.10000000E+03
+    125    125    125      125     10           180.00    0.00000000E+00   0.10000000E+01    0.10000000E+03
+    126    126    126      126     10           180.00    0.00000000E+00   0.10000000E+01    0.10000000E+03
+    127    127    127      127     10           180.00    0.00000000E+00   0.10000000E+01    0.10000000E+03
+    128    128    128      128     10           180.00    0.00000000E+00   0.10000000E+01    0.50000000E+02
+    129    129    129      129     10         ********    0.00000000E+00   0.10000000E+01    0.00000000E+00
+
+
+
+     TOTAL NUMBER OF NODES FOR FLOW BOUNDARY SEGMENT   2  =     21
+     THIS SEGMENT IS AN EXTERNAL BOUNDARY WITH:
+       SPECIFIED NORMAL FLOW AS AN ESSENTIAL B.C.
+       AND NO TANGENTIAL SLIP
+
+    JGW    JME    ME2GW   NODE #  BNDRY CODE   INNER ANGLE       COS             SIN         0.667*BNDRY LEN
+
+    130    129    130      129     12         ********   -0.10000000E+01   0.00000000E+00    0.10000000E+03
+    131    130    131      239     12           180.00   -0.10000000E+01   0.00000000E+00    0.10000000E+03
+    132    131    132      334     12           180.00   -0.10000000E+01   0.00000000E+00    0.10000000E+03
+    133    132    133      413     12           180.00   -0.10000000E+01   0.00000000E+00    0.10000000E+03
+    134    133    134      482     12           180.00   -0.10000000E+01   0.00000000E+00    0.10000000E+03
+    135    134    135      533     12           180.00   -0.10000000E+01   0.00000000E+00    0.10000000E+03
+    136    135    136      564     12           180.00   -0.10000000E+01   0.00000000E+00    0.10000000E+03
+    137    136    137      589     12           180.00   -0.10000000E+01   0.00000000E+00    0.10000000E+03
+    138    137    138      610     12           180.00   -0.10000000E+01   0.00000000E+00    0.10000000E+03
+    139    138    139      625     12           180.00   -0.10000000E+01   0.00000000E+00    0.10000000E+03
+    140    139    140      627     12           180.00   -0.10000000E+01   0.00000000E+00    0.10000000E+03
+    141    140    141      611     12           180.00   -0.10000000E+01   0.00000000E+00    0.10000000E+03
+    142    141    142      591     12           180.00   -0.10000000E+01   0.00000000E+00    0.10000000E+03
+    143    142    143      565     12           180.00   -0.10000000E+01   0.00000000E+00    0.10000000E+03
+    144    143    144      535     12           180.00   -0.10000000E+01   0.00000000E+00    0.10000000E+03
+    145    144    145      483     12           180.00   -0.10000000E+01   0.00000000E+00    0.10000000E+03
+    146    145    146      415     12           180.00   -0.10000000E+01   0.00000000E+00    0.10000000E+03
+    147    146    147      335     12           180.00   -0.10000000E+01   0.00000000E+00    0.10000000E+03
+    148    147    148      241     12           180.00   -0.10000000E+01   0.00000000E+00    0.10000000E+03
+    149    148    149      130     12           180.00   -0.10000000E+01   0.00000000E+00    0.10000000E+03
+    150    148    149        1     12         ********   -0.10000000E+01   0.00000000E+00    0.00000000E+00
+
+ _______________________________________________________________________________
+
+
+ NORMAL FLOW BOUNDARY FORCING INFORMATION 
+
+
+
+     NUMBER OF PERIODIC NORMAL FLOW CONSTITUENTS =    1
+
+       CONSTITUENT #    FREQUENCY    NODAL FACTOR   EQU.ARG (DEG)  CONSTITUENT
+
+             1        0.000140518903   1.0000000       0.000           M2  
+
+
+
+
+     PERIODIC NORMAL FLOW CONSTITUENT NUMBER   1 DESIGNATED :  M2  
+         VERIFICATION OF CONSTITUENT :    M2     
+
+              NODE           AMPL.         PHASE(DEG)
+
+               129           0.75000           0.000
+               239           0.75000           0.000
+               334           0.75000           0.000
+               413           0.75000           0.000
+               482           0.75000           0.000
+               533           0.75000           0.000
+               564           0.75000           0.000
+               589           0.75000           0.000
+               610           0.75000           0.000
+               625           0.75000           0.000
+               627           0.75000           0.000
+               611           0.75000           0.000
+               591           0.75000           0.000
+               565           0.75000           0.000
+               535           0.75000           0.000
+               483           0.75000           0.000
+               415           0.75000           0.000
+               335           0.75000           0.000
+               241           0.75000           0.000
+               130           0.75000           0.000
+                 1           0.75000           0.000
+
+ _______________________________________________________________________________
+
+
+ OUTPUT INFORMATION WILL BE PROVIDED AS FOLLOWS :
+
+
+
+ ELEVATION RECORDING STATION OUTPUT : 
+
+     NOUTE =  1
+
+     DATA RECORDS WILL START AFTER TOUTSE =   0.000 DAY(S) RELATIVE
+         TO THE STARTING TIME OR        0 TIME STEPS INTO THE SIMULATION
+
+     DATA RECORDS WILL STOP AFTER TOUTFE =  28.000 DAY(S) RELATIVE
+         TO THE STARTING TIME OR    86400 TIME STEPS INTO THE SIMULATION
+
+     INFORMATION WILL BE SPOOLED TO UNIT 61 EVERY NSPOOLE =     864 TIME STEPS
+
+     UNIT 61 FORMAT WILL BE ASCII
+
+
+
+     NUMBER OF INPUT ELEVATION RECORDING STATIONS =     0
+
+
+
+
+ VELOCITY RECORDING STATION OUTPUT : 
+
+     NOUTV =  1
+
+     DATA RECORDS WILL START AFTER TOUTSV =   0.000 DAY(S) RELATIVE
+         TO THE STARTING TIME OR        0 TIME STEPS INTO THE SIMULATION
+
+     DATA RECORDS WILL STOP AFTER TOUTFV =  28.000 DAY(S) RELATIVE
+         TO THE STARTING TIME OR    86400 TIME STEPS INTO THE SIMULATION
+
+     INFORMATION WILL BE SPOOLED TO UNIT 62 EVERY  NSPOOLV =     864 TIME STEPS
+
+     UNIT 62 FORMAT WILL BE ASCII
+
+
+
+
+     NUMBER OF INPUT VELOCITY RECORDING STATIONS =     0
+
+
+
+
+ GLOBAL NODAL ELEVATION INFORMATION OUTPUT: 
+
+     NOUTGE =  1
+
+     DATA RECORDS WILL START AFTER TOUTSGE =   0.000 DAY(S) RELATIVE
+         TO THE STARTING TIME OR        0 TIME STEPS INTO THE SIMULATION
+
+     DATA RECORDS WILL STOP AFTER TOUTFGE = 730.000 DAY(S) RELATIVE
+         TO THE STARTING TIME OR    86400 TIME STEPS INTO THE SIMULATION
+
+     INFORMATION WILL BE SPOOLED TO UNIT 63 EVERY NSPOOLGE =     864 TIME STEPS
+
+     UNIT 63 FORMAT WILL BE ASCII
+
+
+
+
+ GLOBAL NODAL VELOCITY INFORMATION OUTPUT : 
+
+     NOUTGV =  1
+
+     DATA RECORDS WILL START AFTER TOUTSGV =   0.000 DAY(S) RELATIVE
+         TO THE STARTING TIME OR        0 TIME STEPS INTO THE SIMULATION
+
+     DATA RECORDS WILL STOP AFTER TOUTFGV = 730.000 DAY(S) RELATIVE
+         TO THE STARTING TIME OR    86400 TIME STEPS INTO THE SIMULATION
+
+     INFORMATION WILL BE SPOOLED TO UNIT 64 EVERY NSPOOLGV =     864 TIME STEPS
+
+     UNIT 64 FORMAT WILL BE ASCII
+
+
+
+
+ HARMONIC ANALYSIS INFORMATION OUTPUT : 
+
+     HARMONIC ANALYSIS PERFORMED FOR    0 CONSTITUENTS
+
+
+
+
+     NO HARMONIC ANALYSIS WILL BE DONE
+
+
+
+
+ HOT START OUTPUT INFORMATION OUTPUT : 
+
+
+
+     NO HOT START OUTPUT WILL BE GENERATED
+
+
+ SOLVER INFORMATION OUTPUT : 
+
+ THE NEIGHBOR TABLE IS BEING COMPUTED 
+
+ THE NEIGHBOR TABLE IS COMPLETED 
+     THE MINIMUM NUMBER OF NEIGHBORS FOR ANY NODE =   3
+     1+THE MAXIMUM NUMBER OF NEIGHBORS FOR ANY NODE =   8
+     THE PARAMETER MNEI CAN BE SET AS SMALL AS   8
+
+ *****************************************************
+ *   Based on information extracted from the ADCIRC  *
+ *   UNIT 14 and 15 (grid and horiz run info) files  *
+ *   the following paramter values will be set:      *
+ *                                                   *
+ *       MNPROC =     1                              *
+ *       MNE =     1114      MNP  =      632         *
+ *       MNEI =      11                              *
+ *       MNOPE =      1      MNETA =      1          *
+ *       MNBOU =      2      MNVEL =    300          *
+ *       MNTIF =      1      MNBFR =      1          *
+ *       MNSTAE =     1      MNSTAV =     1          *
+ *       MNSTAC =     1      MNSTAM =     1          *
+ *       MNWLAT =     0      MNWLON =     0          *
+ *       MNHARF =     1      MNFFR =      1          *
+ *                                                   *
+ *   Also, NO wind forcing will be used,             *
+ *   means and variance calculation will NOT be made,*
+ *   the GWCE matrix will be left in consistent form *
+ *   the model will be set up for a 2DDI run,        *
+ *   and an iterative solver will be used            *
+ *****************************************************
+
+   
+ TOTAL NO. OF EDGES =         1745
+   
+ NO. OF INTERNAL (NON-BOUNDARY) EDGES =         1597
+ NO. OF NO-NORMAL FLOW EDGES =          128
+ NO. OF NON-ZERO NORMAL FLOW EDGES =           20
+ NO. OF ELEVATION SPECIFIED EDGES =            0
+ NO. OF EXTERNAL BARRIER EDGES =            0
+ NO. OF INTERNAL BARRIER EDGES =            0
+ NO. OF RADIATION EDGES =            0
+ -----------------------------------------------------
+ NO. OF MISSING EDGES =            0
+ 
+
+ _______________________________________________________________________________
+
+
+ LIMITED RUNTIME INFORMATION SECTION 
+
+
