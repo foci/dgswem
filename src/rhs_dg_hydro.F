@@ -9,6 +9,7 @@ C     Written by Ethan Kubatko (06-11-2004)
 C     
 C-----------------------------------------------------------------------
 C     
+C     Mar xx, 2015, asd, modified to include pressure poisson (test)
 C     Feb 23, 2007, sb, Modified for better performance
 C     Jan 02, 2007, sb, Modified for LDG
 C     Aug xx, 2005, sb, Modified for wetting/drying
@@ -25,6 +26,9 @@ C.....Use appropriate modules
      &     FGAMMA,LoadManningsN,ManningsN,CF
 
       USE sizes, ONLY: myproc,layers
+!!!!!!!!!!!!!!!!! ASD !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+      USE pressure_module, ONLY: pp_pd,phinodal
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
       IMPLICIT NONE
       
@@ -43,6 +47,9 @@ C.....Declare local variables
 
       Real(SZ),allocatable :: XBCbt(:),YBCbt(:)
 
+      !!!!!!!!!!!!!!!!! ASD !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+      REAL(SZ) pe_in
+      
       Allocate ( XBCbt(MNE),YBCbt(MNE) )
 
       DTDPH = 1.D0/DTDP
@@ -169,6 +176,13 @@ C.......Compute ZE, QX, QY, and HB at each area Gauss quadrature point
             
             SFACQUAD = SFAC_ELEM(I,L,pa)
             
+!!!!!!!!!!!!!!!!! ASD !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+            pe_in = 0.d0
+            do k = 1,3
+              pe_in = pe_in + phinodal(k,i)*pp_pd
+            end do
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+            
             DO K = 2,DOFS(L)
                
                ZE_IN = ZE_IN + ZE(K,L,IRK)*PHI_AREA(K,I,pa)
@@ -274,6 +288,12 @@ C.........Compute y momentum fluxes
 
             advectqy(l)=advectqy(l)+hx_in+hy_in
 
+!!!!!!!!!!!!!!!!! ASD !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!          Include pressure terms in momentum flux
+           GX_IN = GX_IN+pe_in
+           HY_IN = HY_IN+pe_in
+           
+            
 C.........Compute the friction factor
             if (LoadManningsN) then
 c     MN_IN=MANN(1,L)
