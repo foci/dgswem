@@ -18,7 +18,7 @@
       MODULE pressure_module
 
       USE SIZES,    ONLY: SZ
-      USE global,   ONLY: NP
+      USE global,   ONLY: NP,mnp
       use dg,       ONLY: nagp
       USE AddSPARSKIT
 
@@ -51,6 +51,8 @@
       
       INTEGER               :: totalnz
       
+      REAL(SZ),allocatable  :: pp_p1(:),pp_p2(:),pp_pd(:),pp_pb(:)
+      
             
      
       CONTAINS 
@@ -58,7 +60,7 @@
       SUBROUTINE PP_DG_TO_CG
       ! This subroutine calculate the CG Global Mass matrix to be used in the
       ! projection of any DG solution onto a CG framework.
-      USE global, ONLY: MNP,NM,NE,neimin,neimax,neitab,nneigh
+      USE global, ONLY: MNP,NM,NE,neimin,neimax,neitab,nneigh,areas
       USE sizes,  ONLY: SZ
       USE dg,     ONLY: XAGP,YAGP,WAGP,NAGP
       USE AddSPARSKIT
@@ -77,6 +79,9 @@
       pad = 1      
       allocate(rhs(np),MCG(3,3))
       allocate(phinodal(3,NAGP(pad))) 
+      
+      allocate(pp_p1(mnp),pp_p2(mnp))
+      allocate(pp_pd(mnp),pp_pb(mnp))
             
       do pt = 1,NAGP(pad)
         phinodal(1,pt) = -1.d0/2.d0*(xagp(pt,pad)+yagp(pt,pad))
@@ -176,16 +181,15 @@
       allocate(pp_dg_cg_mat.val(totalnz+2)) ;  !c estimate nnz for second order matrix
       pp_dg_cg_mat.val(:) = 0.d0
       do l = 1,ne
-        a(1) = NM(l,1)
-        a(2) = NM(l,2)
-        a(3) = NM(l,3)
+!         a(1) = NM(l,1)
+!         a(2) = NM(l,2)
+!         a(3) = NM(l,3)
         do j = 1,3
           do i = 1,3
-            pp_dg_cg_mat.val(csrloc(l,j,i)) = pp_dg_cg_mat.val(csrloc(l,j,i)) + MCG(j,i)            
+            pp_dg_cg_mat.val(csrloc(l,j,i)) = pp_dg_cg_mat.val(csrloc(l,j,i)) + AREAS(l)/4.d0*MCG(j,i)            
           end do
         end do
       end do
-      
       
       open( unit = 10, file = 'val.crs' ) ; 
       open( unit = 20, file = 'col.crs' ) ; 
@@ -290,7 +294,7 @@
       USE GLOBAL, ONLY: MNP, EL_COUNT, ELETAB, NM,
      &                  ZE_DG, QX_DG, QY_DG, HB_DG, 
      &                  AREAS, ETA2, UU2, VV2, 
-     &                  NLEQ, LEQ, ne
+     &                  NLEQ, LEQ, ne, x, y, dp
       USE DG,     ONLY: WDFLG, ZE, QX, QY, HB, DOFH, 
      &                  PHI_CORNER, ph, wagp, nagp, phi_area    
 
@@ -304,8 +308,8 @@ C.....Declare local variables
       REAL(SZ), ALLOCATABLE :: TOTALDEPTH(:)
       INTEGER, ALLOCATABLE :: WDFLG_VERT(:) 
       
-      REAL(SZ),ALLOCATABLE :: dgcgeta(:),dgcgetax(:),dgcgloc(:)
-      REAL(SZ)	           :: ze_in,INFOR(4)
+      REAL(SZ),ALLOCATABLE :: dgcgeta(:),dgcgu(:),dgcgv(:),dgcgloc(:)
+      REAL(SZ)	           :: ze_in,ue_in,ve_in,INFOR(4)
       INTEGER	           :: INFOI(4)
       INTEGER              :: pad, l
       
@@ -395,31 +399,57 @@ C.....Declare local variables
       !!!!! ASD ASD ASD !!!!
       pad = 1
       ! Build DG right hand side
-      allocate(dgcgeta(mnp),dgcgetax(mnp),dgcgloc(3))
+      allocate(dgcgeta(mnp),dgcgu(mnp),dgcgv(mnp),dgcgloc(3))
       dgcgeta(:) = 0.d0
-      dgcgetax(:) = 0.d0
+      dgcgu(:) = 0.d0
+      dgcgv(:) = 0.d0
       do l = 1,ne
         dgcgloc(:) = 0.d0
         ! determine ze at each quad point        
         do i = 1,nagp(pad)
           ze_in = ze(1,l,jjrk)
+          ue_in = qx(1,l,jjrk)
+          ve_in = qy(1,l,jjrk)
           do kk = 2,dofh
             ze_in = ze_in + ze(kk,l,jjrk)*phi_area(kk,i,pad)
+            ue_in = ue_in + qx(kk,l,jjrk)*phi_area(kk,i,pad)
+            ve_in = ve_in + qy(kk,l,jjrk)*phi_area(kk,i,pad)
           end do
+          
           do kk = 1,3
-            dgcgeta(NM(l,kk)) = dgcgeta(NM(l,kk)) + wagp(i,pad)*phinodal(kk,i)*ze_in
+            dgcgeta(NM(l,kk)) = dgcgeta(NM(l,kk)) + wagp(i,pad)*phinodal(kk,i)*ze_in*areas(l)/4.d0
+            dgcgu(NM(l,kk))   = dgcgu(NM(l,kk))   + wagp(i,pad)*phinodal(kk,i)*ue_in*areas(l)/4.d0
+            dgcgv(NM(l,kk))   = dgcgv(NM(l,kk))   + wagp(i,pad)*phinodal(kk,i)*ve_in*areas(l)/4.d0
           end do
         end do
       end do
       
-      ETA2 = WrpSPBCCGSTAB0( dgcgeta, ETA2*0.d0, pp_dg_cg_mat, pp_dg_cg_ilumat, 1.d-12, mnp/4, INFOR, INFOI ) ;
+      ETA2 = WrpSPBCCGSTAB0( dgcgeta, ETA2, pp_dg_cg_mat, pp_dg_cg_ilumat, 1.d-12, mnp/4, INFOR, INFOI ) ;
+      UU2 = WrpSPBCCGSTAB0( dgcgu, UU2, pp_dg_cg_mat, pp_dg_cg_ilumat, 1.d-12, mnp/4, INFOR, INFOI ) ;
+      VV2 = WrpSPBCCGSTAB0( dgcgv, VV2, pp_dg_cg_mat, pp_dg_cg_ilumat, 1.d-12, mnp/4, INFOR, INFOI ) ;
 !       print*, 'infoi'
 !       do i = 1,4
 !         print*, INFOI(i)
 !       end do
 !       print*, 'Iter = ',infoi(2)
+
+      CALL pressure_WASUPP_CG
             
       open(unit=20,file='dgfd_ver2.txt',status='replace',action='write')
+      open(unit=30,file='dgcgsoln.txt',status='replace',action='write')
+      do l = 1,ne
+        write(30,'(4i,30f32.16)') l, nm(l,1), nm(l,2), nm(l,3), 
+     &                 x(nm(l,1)), x(nm(l,2)), x(nm(l,3)),
+     &                 y(nm(l,1)), y(nm(l,2)), y(nm(l,3)),
+     &                 eta2(nm(l,1)), eta2(nm(l,2)), eta2(nm(l,3)),
+     &                 uu2(nm(l,1)), uu2(nm(l,2)), uu2(nm(l,3)),
+     &                 vv2(nm(l,1)), vv2(nm(l,2)), vv2(nm(l,3)),
+     &                 dp(nm(l,1)), dp(nm(l,2)), dp(nm(l,3)),
+     &                 pp_p1(nm(l,1)), pp_p1(nm(l,2)), pp_p1(nm(l,3)),
+     &                 pp_p2(nm(l,1)), pp_p2(nm(l,2)), pp_p2(nm(l,3)),
+     &                 pp_pd(nm(l,1)), pp_pd(nm(l,2)), pp_pd(nm(l,3)),
+     &                 pp_pb(nm(l,1)), pp_pb(nm(l,2)), pp_pb(nm(l,3))
+      end do
       inode = 1 
       DO i = 1, NumRows 
         DO j = 1, NumCols 
@@ -429,8 +459,10 @@ C.....Declare local variables
         END DO !i 
       END DO !j                   
       close(20)
+      close(30)
       
-      CALL pressure_WASUPP      
+!       CALL pressure_WASUPP
+      
       deallocate(dgcgeta,dgcgloc)
 !       call exit
       
