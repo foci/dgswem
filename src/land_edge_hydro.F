@@ -30,6 +30,9 @@ C.....Use appropriate modules
       USE GLOBAL
       USE DG
       Use SIZES, only: layers
+!!!!!!!!!!!!!!!!! ASD !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+      USE pressure_module, ONLY: pp_pd,pp_pb,phinodal,pd_in,pb_in,pd_ex,phinodaledge
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!      
 
       IMPLICIT NONE
 
@@ -80,6 +83,13 @@ C.....Set the components for the tangential vector to the edge
 C.....Compute ZE, QX, QY, and HB at each Gauss point
 
          DO I = 1,NEGP(pa)
+         
+            ! ASD
+            pd_in = 0.d0           
+            do k = 1,3
+              pd_in = pd_in + phinodaledge(k,i,led)*pp_pd(nm(el_in,k))            
+            end do
+            pd_ex = pd_in
             
             ZE_IN = ZE(1,EL_IN,IRK)
             QX_IN = QX(1,EL_IN,IRK)

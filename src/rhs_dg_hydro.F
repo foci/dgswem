@@ -27,7 +27,7 @@ C.....Use appropriate modules
 
       USE sizes, ONLY: myproc,layers
 !!!!!!!!!!!!!!!!! ASD !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-      USE pressure_module, ONLY: pp_pd,phinodal
+      USE pressure_module, ONLY: pp_pd,pp_pb,phinodal,pd_in,pb_in
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
       IMPLICIT NONE
@@ -47,8 +47,6 @@ C.....Declare local variables
 
       Real(SZ),allocatable :: XBCbt(:),YBCbt(:)
 
-      !!!!!!!!!!!!!!!!! ASD !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-      REAL(SZ) pe_in
       
       Allocate ( XBCbt(MNE),YBCbt(MNE) )
 
@@ -177,9 +175,11 @@ C.......Compute ZE, QX, QY, and HB at each area Gauss quadrature point
             SFACQUAD = SFAC_ELEM(I,L,pa)
             
 !!!!!!!!!!!!!!!!! ASD !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-            pe_in = 0.d0
+            pd_in = 0.d0
+            pb_in = 0.d0
             do k = 1,3
-              pe_in = pe_in + phinodal(k,i)*pp_pd
+              pd_in = pd_in + phinodal(k,i)*pp_pd(nm(l,k))
+              pb_in = pb_in + phinodal(k,i)*pp_pb(nm(l,k))
             end do
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
             
@@ -290,8 +290,8 @@ C.........Compute y momentum fluxes
 
 !!!!!!!!!!!!!!!!! ASD !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !          Include pressure terms in momentum flux
-           GX_IN = GX_IN+pe_in
-           HY_IN = HY_IN+pe_in
+           GX_IN = GX_IN+pd_in
+           HY_IN = HY_IN+pd_in
            
             
 C.........Compute the friction factor
@@ -350,6 +350,10 @@ C.........1.) Friction term
 C.........2.) Bathymetric slope term
 
      &           + FG_NL*DHB_X*SFACQUAD
+     
+C.........2.1) Bathymetric slope term (pressure) ASD
+
+     &           + pb_in*DHB_X*SFACQUAD     
 
 C.........3.) Coriolis force
 
@@ -364,9 +368,13 @@ C.........1.) Friction term
      &           - TAU*QY_IN
 
 C.........2) Bathymetric slope term
-
       
      &           + FG_NL*DHB_Y
+     
+C.........2.1) Bathymetric slope term (pressure) ASD
+
+      
+     &           + pb_in*DHB_Y     
      
 C.........3.) Coriolis force
 

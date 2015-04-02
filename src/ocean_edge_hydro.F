@@ -27,6 +27,10 @@ c
       USE NodalAttributes, ONLY: GeoidOffset, LoadGeoidOffset
       use fparser
       use fparser2
+      
+!!!!!!!!!!!!!!!!! ASD !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+      USE pressure_module, ONLY: pp_pd,pp_pb,phinodal,pd_in,pb_in,pd_ex,phinodaledge
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!           
 
       IMPLICIT NONE
 
@@ -82,6 +86,13 @@ C.....Compute ZE, QX, QY, and HB at each edge Gauss quadrature point
             ZE_IN = ZE(1,EL_IN,IRK)
             QX_IN = QX(1,EL_IN,IRK)
             QY_IN = QY(1,EL_IN,IRK)
+            
+            ! ASD
+            pd_in = 0.d0           
+            do k = 1,3
+              pd_in = pd_in + phinodaledge(k,i,led)*pp_pd(nm(el_in,k))            
+            end do
+            pd_ex = pd_in
 
             ZE_EX = 0.D0
             QX_EX = 0.D0

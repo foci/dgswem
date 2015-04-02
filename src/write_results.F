@@ -627,7 +627,7 @@ C.....Write DG.63 results
                      
                      DO J = 1,NE
                         DO K = 1,DOFS(J)
-                           WRITE(631,*) J, ZE(K,J,1)
+                           WRITE(631,*) J, ZE(K,J,1), HB(K,J,1)
                         ENDDO
                      ENDDO
                      

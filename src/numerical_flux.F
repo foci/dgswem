@@ -891,6 +891,9 @@ C.....Use appropriate modules
       USE GLOBAL
       USE DG
       use sizes, only: layers
+!!!!!!!!!!!!!!!!! ASD !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+      USE pressure_module, ONLY: pd_in,pd_ex
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!      
 
       IMPLICIT NONE
 
@@ -951,7 +954,12 @@ C.....Compute y momentum fluxes at interior state
 
       FX3_IN = HUV*SFAC_IN
       FY3_IN = HVV + GH2
-
+      
+!!!!!!!!!!!!!!!!! ASD !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!          Include pressure terms in momentum flux
+      FX2_IN = FX2_IN + pd_in*SFAC_IN
+      FY3_IN = FY3_IN + pd_in
+      
 C.....Compute the total height of the water column
 
       HT_EX = ZE_EX*NLEQ + HB_EX
@@ -985,6 +993,10 @@ C.....Compute y momentum fluxes at exterior state
 
       FX3_EX = HUV*SFAC_EX
       FY3_EX = HVV + GH2
+!!!!!!!!!!!!!!!!! ASD !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!          Include pressure terms in momentum flux
+      FX2_EX = FX2_EX + pd_ex*SFAC_EX
+      FY3_EX = FY3_EX + pd_ex
 
 C.....Compute the average flux function
 

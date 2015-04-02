@@ -29,6 +29,9 @@ C.....Use appropriate modules
       USE DG
       USE NodalAttributes, ONLY :  ESLM
       use sizes, only:  sz, myproc, layers
+!!!!!!!!!!!!!!!!! ASD !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+      USE pressure_module, ONLY: pp_pd,pp_pb,phinodal,pd_in,pb_in,pd_ex,phinodaledge
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
       IMPLICIT NONE
 
@@ -196,10 +199,19 @@ C.....Set the components for the tangential vector to the edge
 
 C.....Compute ZE, QX, QY, and HB at each edge Gauss quadrature point
 
-         DO I = 1,NEGP(pa)
+         DO I = 1,NEGP(pa)                    
 
             GP_IN = I
             GP_EX = NEGP(pa) - I + 1
+            
+            !!! ASD
+            pd_in = 0.d0
+            pd_ex = 0.d0
+            do k = 1,3
+              pd_in = pd_in + phinodaledge(k,GP_IN,led_in)*pp_pd(nm(el_in,k))
+              pd_ex = pd_ex + phinodaledge(k,GP_EX,led_ex)*pp_pd(nm(el_ex,k))
+            end do
+            
 
             ZE_IN = ZE(1,EL_IN,IRK)
             QX_IN = QX(1,EL_IN,IRK)

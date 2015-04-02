@@ -24,6 +24,8 @@
 
 !      INTEGER LengthX, LengthY 
       INTEGER NumCols, NumRows 
+      
+      INTEGER IWASUPP
 
 
       !Variables that will be passed from DG-SWEM to Pressure Poisson 
@@ -41,17 +43,21 @@
 
       REAL(SZ)              :: DX,DY
       REAL(SZ), ALLOCATABLE :: pd_pp(:,:),pb_pp(:,:)
-      REAL(SZ), ALLOCATABLE :: p1old(:),p1oldest(:) 
+      REAL(SZ), ALLOCATABLE :: p1old(:),p1oldest(:)
       
+      
+      ! ASD
       INTEGER,ALLOCATABLE   :: csrloc(:,:,:)
       TYPE (spmat)          :: pp_dg_cg_mat
       TYPE (spmat), pointer :: pp_dg_cg_ilumat
       
-      REAL(SZ),allocatable  :: phinodal(:,:)
+      REAL(SZ),allocatable  :: phinodal(:,:),phinodaledge(:,:,:)
       
       INTEGER               :: totalnz
       
       REAL(SZ),allocatable  :: pp_p1(:),pp_p2(:),pp_pd(:),pp_pb(:)
+      
+      REAL(SZ)              :: pd_in,pb_in,pd_ex
       
             
      
@@ -62,17 +68,29 @@
       ! projection of any DG solution onto a CG framework.
       USE global, ONLY: MNP,NM,NE,neimin,neimax,neitab,nneigh,areas
       USE sizes,  ONLY: SZ
-      USE dg,     ONLY: XAGP,YAGP,WAGP,NAGP
+      USE dg,     ONLY: XAGP,YAGP,WAGP,NAGP,NEGP,XEGP
       USE AddSPARSKIT
       
       IMPLICIT NONE            
       INTEGER               :: i,j,l,k,pt,pad,a(3)
       INTEGER	            :: ifil,initmem
-      REAL(SZ)              :: DropTol
+      INTEGER		    :: ed
+      REAL(SZ)              :: DropTol,xpt,ypt
       REAL(SZ),ALLOCATABLE  :: rhs(:),MCG(:,:)
       
       REAL(SZ),ALLOCATABLE  :: matv(:,:)
       
+      
+      ! Load WASUPP.15 to control pressure
+      open(unit=10,file='WASUPP.15',action='read')
+      read(10,'(i)') IWASUPP
+      close(10)
+      
+      if (IWASUPP.EQ.0) then
+        print*, 'No pressure-Poisson solver used'
+      else
+        print*, 'pressure-Poisson'
+      end if
       
       
       ! Determine the value of the linear nodal basis functions at the quadrature points.
@@ -89,6 +107,29 @@
         phinodal(3,pt) =  1.d0/2.d0*(1.d0+yagp(pt,pad))
       end do
       
+      allocate(phinodaledge(3,NEGP(pad),3))
+      do pt = 1,NEGP(pad)        
+        xpt = -XEGP(pt,pad)
+        ypt =  XEGP(pt,pad)
+        ed  = 1
+        phinodaledge(1,pt,ed) = -1.d0/2.d0*(xpt+ypt)
+        phinodaledge(2,pt,ed) =  1.d0/2.d0*(1.d0+xpt)
+        phinodaledge(3,pt,ed) =  1.d0/2.d0*(1.d0+ypt)
+        xpt = -1.d0
+        ypt = -XEGP(pt,pad)
+        ed  = 2
+        phinodaledge(1,pt,ed) = -1.d0/2.d0*(xpt+ypt)
+        phinodaledge(2,pt,ed) =  1.d0/2.d0*(1.d0+xpt)
+        phinodaledge(3,pt,ed) =  1.d0/2.d0*(1.d0+ypt)
+        xpt =  XEGP(pt,pad)
+        ypt = -1.d0
+        ed  = 3
+        phinodaledge(1,pt,ed) = -1.d0/2.d0*(xpt+ypt)
+        phinodaledge(2,pt,ed) =  1.d0/2.d0*(1.d0+xpt)
+        phinodaledge(3,pt,ed) =  1.d0/2.d0*(1.d0+ypt)
+      end do
+      
+      
       ! Determine the elemental Mass Matrix
       MCG(:,:) = 0.d0
       do j = 1,3
@@ -99,16 +140,18 @@
         end do  
       end do  
       
-      print*, 'MCG Matrix:'
-      open(unit=11,file='MCGlocal.txt',status='replace')
-      do i = 1,3
-        write(*,'(3F32.16)') mcg(i,:)
-        write(11,'(3F32.16)') mcg(i,:)
-      end do
+!       print*, 'MCG Matrix:'
+!       open(unit=11,file='MCGlocal.txt',status='replace')
+!       do i = 1,3
+!         write(*,'(3F32.16)') mcg(i,:)
+!         write(11,'(3F32.16)') mcg(i,:)
+!       end do
       
       ! Construct the global CG Mass matrix
-      allocate(matv(mnp,neimax))
-      matv(:,:) = 0.d0 ! start all values at 0
+      
+      ! Two Things:
+      ! 1) Create a set of vectors for constructing the CG LHS matrices.
+      ! 2) Create the "GLOBAL" mass matrix
       
       ! Determine the csr starting point for each node "row" in domain
       pp_dg_cg_mat.str = 'csr'  ;
@@ -117,11 +160,18 @@
       pp_dg_cg_mat.idv2(:) = 0
       pp_dg_cg_mat.idv2(1) = 1
       totalnz = nneigh(1);
+      open(unit=12,file='ppdgcgmat_idv2.txt',status='replace')
       do i = 2,mnp
         pp_dg_cg_mat.idv2(i) =  pp_dg_cg_mat.idv2(i-1)+nneigh(i-1)
         totalnz = totalnz + nneigh(i-1)
+        write(12,'(3i)') i-1, nneigh(i-1), pp_dg_cg_mat.idv2(i-1)
       end do
-      pp_dg_cg_mat.idv2(mnp+1) = totalnz+1
+      pp_dg_cg_mat.idv2(mnp+1) = totalnz+nneigh(mnp)
+      totalnz = totalnz + nneigh(mnp)
+      write(12,'(3i)') mnp, nneigh(mnp), pp_dg_cg_mat.idv2(mnp)
+      close(12)
+      
+      print*, totalnz, pp_dg_cg_mat.idv2(mnp+1)
       
 !       allocate(pp_dg_cg_mat.idv1(totalnz)) ; !c column index (col_ind)      
       allocate(pp_dg_cg_mat.idv1(totalnz+2)) ; !c column index (col_ind)
@@ -213,7 +263,7 @@
       pp_dg_cg_ilumat => WrpILUT( pp_dg_cg_mat, DROPTOL, IFILOP = IFIL, INITMEMOP = initmem ) ;
       
       deallocate(rhs,MCG)
-      deallocate(matv)
+!       deallocate(matv)
       
       
       END SUBROUTINE PP_DG_TO_CG
@@ -241,49 +291,49 @@
       !read in what are the different boundary types: 
          !only 1 (reflective) boundary type for now. 
 
-      ALLOCATE(totaldepth_pp(NumRows,NumCols)) 
-      ALLOCATE(eta_pp(NumRows,NumCols))
-      ALLOCATE(u_pp(NumRows,NumCols))
-      ALLOCATE(v_pp(NumRows,NumCols))
-      ALLOCATE(depth_pp(NumRows,NumCols))
-      ALLOCATE(wetdry_pp(NumRows,NumCols))
-      ALLOCATE(Etax_pp(NumRows,NumCols),Etay_pp(NumRows,NumCols))
-      ALLOCATE(Etaxx_pp(NumRows,NumCols),Etayy_pp(NumRows,NumCols))
-      ALLOCATE(Ux_pp(NumRows,NumCols),Uy_pp(NumRows,NumCols))
-      ALLOCATE(Vx_pp(NumRows,NumCols),Vy_pp(NumRows,NumCols))      
-      ALLOCATE(Depx_pp(NumRows,NumCols),Depy_pp(NumRows,NumCols))
-      ALLOCATE(Depxx_pp(NumRows,NumCols),Depyy_pp(NumRows,NumCols))
-      ALLOCATE(Depxy_pp(NumRows,NumCols))   
-      ALLOCATE(p1_pp(NumRows,NumCols),p1x_pp(NumRows,NumCols),p1y_pp(NumRows,NumCols))
-      ALLOCATE(pd_pp(NumRows,NumCols),pb_pp(NumRows,NumCols))
-      ALLOCATE(p1old(NumRows*NumCols),p1oldest(NumRows*NumCols))  
+!       ALLOCATE(totaldepth_pp(NumRows,NumCols)) 
+!       ALLOCATE(eta_pp(NumRows,NumCols))
+!       ALLOCATE(u_pp(NumRows,NumCols))
+!       ALLOCATE(v_pp(NumRows,NumCols))
+!       ALLOCATE(depth_pp(NumRows,NumCols))
+!       ALLOCATE(wetdry_pp(NumRows,NumCols))
+!       ALLOCATE(Etax_pp(NumRows,NumCols),Etay_pp(NumRows,NumCols))
+!       ALLOCATE(Etaxx_pp(NumRows,NumCols),Etayy_pp(NumRows,NumCols))
+!       ALLOCATE(Ux_pp(NumRows,NumCols),Uy_pp(NumRows,NumCols))
+!       ALLOCATE(Vx_pp(NumRows,NumCols),Vy_pp(NumRows,NumCols))      
+!       ALLOCATE(Depx_pp(NumRows,NumCols),Depy_pp(NumRows,NumCols))
+!       ALLOCATE(Depxx_pp(NumRows,NumCols),Depyy_pp(NumRows,NumCols))
+!       ALLOCATE(Depxy_pp(NumRows,NumCols))   
+!       ALLOCATE(p1_pp(NumRows,NumCols),p1x_pp(NumRows,NumCols),p1y_pp(NumRows,NumCols))
+!       ALLOCATE(pd_pp(NumRows,NumCols),pb_pp(NumRows,NumCols))
+!       ALLOCATE(p1old(NumRows*NumCols),p1oldest(NumRows*NumCols))  
 
  
       !Inititalize values:     
-      totaldepth_pp = 0.d0 
-      eta_pp = 0.d0 
-      u_pp = 0.d0 
-      v_pp = 0.d0 
-      wetdry_pp = 1
-      Etax_pp=0.d0; Etay_pp=0.d0 
-      Etaxx_pp=0.d0; Etayy_pp=0.d0
-      Ux_pp=0.d0;Uy_pp=0.d0
-      Vx_pp=0.d0;Vy_pp=0.d0 
-      Depx_pp=0.d0;Depy_pp=0.d0
-      Depxx_pp=0.d0; Depyy_pp=0.d0
-      Depxy_pp=0.d0
-      p1_pp=0.d0;p1x_pp=0.d0;p1y_pp=0.d0
-      pd_pp=0.d0;pb_pp=0.d0
-      p1old=0.d0;p1oldest=0.d0 
+!       totaldepth_pp = 0.d0 
+!       eta_pp = 0.d0 
+!       u_pp = 0.d0 
+!       v_pp = 0.d0 
+!       wetdry_pp = 1
+!       Etax_pp=0.d0; Etay_pp=0.d0 
+!       Etaxx_pp=0.d0; Etayy_pp=0.d0
+!       Ux_pp=0.d0;Uy_pp=0.d0
+!       Vx_pp=0.d0;Vy_pp=0.d0 
+!       Depx_pp=0.d0;Depy_pp=0.d0
+!       Depxx_pp=0.d0; Depyy_pp=0.d0
+!       Depxy_pp=0.d0
+!       p1_pp=0.d0;p1x_pp=0.d0;p1y_pp=0.d0
+!       pd_pp=0.d0;pb_pp=0.d0
+!       p1old=0.d0;p1oldest=0.d0 
  
  
-      inode = 1
-      DO i = 1, NumRows
-        DO j = 1, NumCols
-           depth_pp(i,j) = DP(inode)
-           inode = inode + 1
-        END DO !i 
-      END DO !j 
+!       inode = 1
+!       DO i = 1, NumRows
+!         DO j = 1, NumCols
+!            depth_pp(i,j) = DP(inode)
+!            inode = inode + 1
+!         END DO !i 
+!       END DO !j 
 
       END SUBROUTINE  read_and_initialize_PPvalues 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -314,84 +364,84 @@ C.....Declare local variables
       INTEGER              :: pad, l
       
 
-      ALLOCATE(TOTALDEPTH(MNP))
-      ALLOCATE(WDFLG_VERT(MNP))
-      WDFLG_VERT = 1 !Start as all being wet, will set to dry if any element connected to vertex is dry 
+!       ALLOCATE(TOTALDEPTH(MNP))
+!       ALLOCATE(WDFLG_VERT(MNP))
+!       WDFLG_VERT = 1 !Start as all being wet, will set to dry if any element connected to vertex is dry 
 
       !Obtain u,v,eta, depth and wet/dry flag at each node 
 
-      DO I = 1,MNP
-
-        NO_NBORS = EL_COUNT(I)
-
-        AREA_SUM = 0
-        DO 333 J = 1,NO_NBORS
-          NBOR_EL = ELETAB(I,1+J)
-
-          IF(WDFLG(NBOR_EL).EQ.0) THEN 
-            WDFLG_VERT(I) = 0 !if any neighboring elem is dry, consider vertex dry 
-            CYCLE ! DON'T COUNT DRY ELEMENTS  sb 02/26/07
-          END IF 
-
-          DO K = 1,3
-            N1 = NM(NBOR_EL,K)
-            IF (N1.EQ.I) THEN
-              ZE_DG(J) = ZE(1,NBOR_EL,jjRK)
-              QX_DG(J) = QX(1,NBOR_EL,jjRK)
-              QY_DG(J) = QY(1,NBOR_EL,jjRK)
-              HB_DG(J) = HB(1,NBOR_EL,jjRK)
-              DO KK = 2,DOFH
-                ZE_DG(J) = ZE_DG(J) + PHI_CORNER(KK,K,ph)*ZE(KK,NBOR_EL,jjRK)
-                QX_DG(J) = QX_DG(J) + PHI_CORNER(KK,K,ph)*QX(KK,NBOR_EL,jjRK)
-                QY_DG(J) = QY_DG(J) + PHI_CORNER(KK,K,ph)*QY(KK,NBOR_EL,jjRK)
-                HB_DG(J) = HB_DG(J) + PHI_CORNER(KK,K,ph)*HB(KK,NBOR_EL,jjRK)
-              ENDDO
-              AREA = 0.5*AREAS(NBOR_EL)
-              AREA_SUM = AREA_SUM + AREA
-              GOTO 333
-            ENDIF
-          ENDDO
- 333    CONTINUE
-
+!       DO I = 1,MNP
+! 
+!         NO_NBORS = EL_COUNT(I)
+! 
+!         AREA_SUM = 0
+!         DO 333 J = 1,NO_NBORS
+!           NBOR_EL = ELETAB(I,1+J)
+! 
+!           IF(WDFLG(NBOR_EL).EQ.0) THEN 
+!             WDFLG_VERT(I) = 0 !if any neighboring elem is dry, consider vertex dry 
+!             CYCLE ! DON'T COUNT DRY ELEMENTS  sb 02/26/07
+!           END IF 
+! 
+!           DO K = 1,3
+!             N1 = NM(NBOR_EL,K)
+!             IF (N1.EQ.I) THEN
+!               ZE_DG(J) = ZE(1,NBOR_EL,jjRK)
+!               QX_DG(J) = QX(1,NBOR_EL,jjRK)
+!               QY_DG(J) = QY(1,NBOR_EL,jjRK)
+!               HB_DG(J) = HB(1,NBOR_EL,jjRK)
+!               DO KK = 2,DOFH
+!                 ZE_DG(J) = ZE_DG(J) + PHI_CORNER(KK,K,ph)*ZE(KK,NBOR_EL,jjRK)
+!                 QX_DG(J) = QX_DG(J) + PHI_CORNER(KK,K,ph)*QX(KK,NBOR_EL,jjRK)
+!                 QY_DG(J) = QY_DG(J) + PHI_CORNER(KK,K,ph)*QY(KK,NBOR_EL,jjRK)
+!                 HB_DG(J) = HB_DG(J) + PHI_CORNER(KK,K,ph)*HB(KK,NBOR_EL,jjRK)
+!               ENDDO
+!               AREA = 0.5*AREAS(NBOR_EL)
+!               AREA_SUM = AREA_SUM + AREA
+!               GOTO 333
+!             ENDIF
+!           ENDDO
+!  333    CONTINUE
+! 
         ETA2(I) = 0.D0
         UU2(I)  = 0.D0
         VV2(I)  = 0.D0
-        TOTALDEPTH(I) = 0.d0 
-
-
-        DO J = 1,NO_NBORS
-          NBOR_EL = ELETAB(I,1+J)
-
-          IF(WDFLG(NBOR_EL).EQ.0) CYCLE ! DON'T COUNT DRY ELEMENTS  sb 02/26/07
-
-          AREA = 0.5*AREAS(NBOR_EL)/AREA_SUM
-          DEPTH = ZE_DG(J) + HB_DG(J)
-          FH_NL = 1.D0/(NLEQ*DEPTH + LEQ)
-          ETA2(I) = ETA2(I) + AREA*ZE_DG(J)
-          UU2(I)  = UU2(I)  + AREA*QX_DG(J)*FH_NL
-          VV2(I)  = VV2(I)  + AREA*QY_DG(J)*FH_NL
-          TOTALDEPTH(I) = TOTALDEPTH(I) + AREA*DEPTH  
-        ENDDO
-      ENDDO
+!         TOTALDEPTH(I) = 0.d0 
+! 
+! 
+! !         DO J = 1,NO_NBORS
+! !           NBOR_EL = ELETAB(I,1+J)
+! ! 
+! !           IF(WDFLG(NBOR_EL).EQ.0) CYCLE ! DON'T COUNT DRY ELEMENTS  sb 02/26/07
+! ! 
+! !           AREA = 0.5*AREAS(NBOR_EL)/AREA_SUM
+! !           DEPTH = ZE_DG(J) + HB_DG(J)
+! !           FH_NL = 1.D0/(NLEQ*DEPTH + LEQ)
+! !           ETA2(I) = ETA2(I) + AREA*ZE_DG(J)
+! !           UU2(I)  = UU2(I)  + AREA*QX_DG(J)*FH_NL
+! !           VV2(I)  = VV2(I)  + AREA*QY_DG(J)*FH_NL
+! !           TOTALDEPTH(I) = TOTALDEPTH(I) + AREA*DEPTH  
+! !         ENDDO
+!       ENDDO
 
 
 
       !now that we have ETA2,UU2,VV2,TOTALDEPTH, and WDFLG_VERT 
       !need to go from a node numbering to a (i,j) vertex numbering PP FD can use.  
-      open(unit=10,file='dgfd_ver1.txt',status='replace',action='write')
-      inode = 1 
-      DO i = 1, NumRows 
-        DO j = 1, NumCols 
-           totaldepth_pp(i,j) = TOTALDEPTH(inode) 
-           eta_pp(i,j) = ETA2(inode) 
-           u_pp(i,j) = UU2(inode) 
-           v_pp(i,j) = VV2(inode) 
-           wetdry_pp(i,j) = WDFLG_VERT(inode)
-           inode = inode + 1
-           write(10,'(2i,f)') i, j, eta_pp(i,j)
-        END DO !i 
-      END DO !j                   
-      close(10)
+!       open(unit=10,file='dgfd_ver1.txt',status='replace',action='write')
+!       inode = 1 
+!       DO i = 1, NumRows 
+!         DO j = 1, NumCols 
+!            totaldepth_pp(i,j) = TOTALDEPTH(inode) 
+!            eta_pp(i,j) = ETA2(inode) 
+!            u_pp(i,j) = UU2(inode) 
+!            v_pp(i,j) = VV2(inode) 
+!            wetdry_pp(i,j) = WDFLG_VERT(inode)
+!            inode = inode + 1
+!            write(10,'(2i,f)') i, j, eta_pp(i,j)
+!         END DO !i 
+!       END DO !j                   
+!       close(10)
 
             
 !       CALL PP_DG_TO_CG
@@ -425,17 +475,23 @@ C.....Declare local variables
       end do
       
       ETA2 = WrpSPBCCGSTAB0( dgcgeta, ETA2, pp_dg_cg_mat, pp_dg_cg_ilumat, 1.d-12, mnp/4, INFOR, INFOI ) ;
-      UU2 = WrpSPBCCGSTAB0( dgcgu, UU2, pp_dg_cg_mat, pp_dg_cg_ilumat, 1.d-12, mnp/4, INFOR, INFOI ) ;
+      UU2 = WrpSPBCCGSTAB0( dgcgu, uu2, pp_dg_cg_mat, pp_dg_cg_ilumat, 1.d-12, mnp/4, INFOR, INFOI ) ;
       VV2 = WrpSPBCCGSTAB0( dgcgv, VV2, pp_dg_cg_mat, pp_dg_cg_ilumat, 1.d-12, mnp/4, INFOR, INFOI ) ;
 !       print*, 'infoi'
 !       do i = 1,4
 !         print*, INFOI(i)
 !       end do
 !       print*, 'Iter = ',infoi(2)
-
+      
+!       open(unit=20,file='utest.txt',status='replace',action='write')
+!       do l = 1,ne
+!         write(20,'(3f32.16)') uu2(nm(l,1)), uu2(nm(l,2)), uu2(nm(l,3))
+!       end do
+!       close(20)
+      
       CALL pressure_WASUPP_CG
             
-      open(unit=20,file='dgfd_ver2.txt',status='replace',action='write')
+!       open(unit=20,file='dgfd_ver2.txt',status='replace',action='write')
       open(unit=30,file='dgcgsoln.txt',status='replace',action='write')
       do l = 1,ne
         write(30,'(4i,30f32.16)') l, nm(l,1), nm(l,2), nm(l,3), 
@@ -450,20 +506,20 @@ C.....Declare local variables
      &                 pp_pd(nm(l,1)), pp_pd(nm(l,2)), pp_pd(nm(l,3)),
      &                 pp_pb(nm(l,1)), pp_pb(nm(l,2)), pp_pb(nm(l,3))
       end do
-      inode = 1 
-      DO i = 1, NumRows 
-        DO j = 1, NumCols 
-           eta_pp(i,j) = ETA2(inode) 
-           inode = inode + 1
-           write(20,'(2i,f)') i, j, eta_pp(i,j)
-        END DO !i 
-      END DO !j                   
-      close(20)
+!       inode = 1 
+!       DO i = 1, NumRows 
+!         DO j = 1, NumCols 
+!            eta_pp(i,j) = ETA2(inode) 
+!            inode = inode + 1
+!            write(20,'(2i,f)') i, j, eta_pp(i,j)
+!         END DO !i 
+!       END DO !j                   
+!       close(20)
       close(30)
       
 !       CALL pressure_WASUPP
       
-      deallocate(dgcgeta,dgcgloc)
+      deallocate(dgcgeta,dgcgu,dgcgv,dgcgloc)
 !       call exit
       
       END SUBROUTINE from_DG_to_Pressure      

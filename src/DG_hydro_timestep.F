@@ -27,7 +27,7 @@ C.....Use appropriate modules
       USE GLOBAL
       USE DG
 
-      USE pressure_module, ONLY: from_DG_to_Pressure
+      USE pressure_module, ONLY: from_DG_to_Pressure,IWASUPP
 
 #ifdef CMPI
       USE MESSENGER_ELEM 
@@ -42,7 +42,6 @@ Casey 101118: Add variables for coupling to SWAN.
       IMPLICIT NONE
       
 C.....Declare local variables
-
 
       INTEGER IT,L,GED,NBOREL,NNBORS,NDRYNBORS,Istop,k,j,kk,i,mm
       INTEGER Detected,flagger,store
@@ -96,9 +95,10 @@ C.......Compute the DG time and DG ramp
          ENDIF
          RAMP = RAMPDG
 
-!.......Calculate Pressure Poisson - JDM 
-        CALL from_DG_to_Pressure(IRK)
-
+!.......Calculate Pressure Poisson - JDM
+        IF (IWASUPP.gt.0) THEN
+          CALL from_DG_to_Pressure(IRK)
+        END IF
          
 C.......Obtain the meteorological forcing
 

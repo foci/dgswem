@@ -147,7 +147,6 @@ C.....Detect NaN
       
       DO J = 1,NE
          DO K = 1,DOF
-
             Detected = .FALSE.
             IF(ZE(K,J,1).NE.ZE(K,J,1)) THEN
                PRINT *, ''

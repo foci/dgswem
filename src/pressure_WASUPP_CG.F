@@ -1,6 +1,6 @@
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !
-!    SUBROUTINE pressure_WASSUP_CG 
+!    SUBROUTINE pressure_WASUPP_CG 
 !    Aaron Donahue and Jessica Meixner 
 !    March 2015
 !    Calculates dynamic pressure 
@@ -22,7 +22,8 @@
      &                            DX,DY,pd_pp,pb_pp, !!! ASD Need to add these
      &                            totalnz, pp_dg_cg_mat, pp_dg_cg_ilumat,
      &                            phinodal,csrloc,
-     &                            pp_p1,pp_p2,pp_pd,pp_pb
+     &                            pp_p1,pp_p2,pp_pd,pp_pb,
+     &                            IWASUPP
       USE DG,      ONLY: wagp,nagp
       
       IMPLICIT NONE
@@ -60,6 +61,11 @@
       pp_p2(:) = 0.d0
       pp_pd(:) = 0.d0
       pp_pb(:) = 0.d0
+      
+      if (IWASUPP.eq.0) then
+        goto 100
+        
+      else
       
       pad = 1
 !       open( unit = 60, file = 'p1coeff.crs' ) ; 
@@ -117,27 +123,67 @@
             vx = vx + vv2(nm(l,j))*phix(j)
             vy = vy + vv2(nm(l,j))*phiy(j)
             
+!             print*, l,pt,j,ui
+!             if (isnan(ui)) then
+!               print*, phinodal(j,pt), uu2(nm(l,j))
+!               call exit
+!             end if
+            
           end do          
           
           do i = 1,3
             do j = 1,3
               p1xcf(i,j) = p1xcf(i,j) + arealoc/2.d0*wagp(pt,pad)*(
-     &                        (1.d0/2.d0*hi**2*phix(i))
+     &                        (1.d0/2.d0*hi**2*phix(i))                       ! Linear Flat
+     &                       +(1.d0/4.d0*hi*hx*phinodal(i,pt))                ! Linear Vary
+     &                       +(1.d0/6.d0*(3*zi**2*phix(i)+4*hi*zx*phinodal(i,pt) ! Nonlin Flat
+     &                          +zi*(6*hi*phix(i)+4*zx*phinodal(i,pt))))
+     &                       +(1.d0/4.d0*zi*hx*phinodal(i,pt))                ! Nonlin Vary
      &                                                           )*phix(j)
               p1ycf(i,j) = p1ycf(i,j) + arealoc/2.d0*wagp(pt,pad)*(
-     &                        (1.d0/2.d0*hi**2*phiy(i))
+     &                        (1.d0/2.d0*hi**2*phiy(i))                       ! Linear Flat
+     &                       +(1.d0/4.d0*hi*hy*phinodal(i,pt))                ! Linear Vary
+     &                       +(1.d0/6.d0*(3*zi**2*phiy(i)+4*hi*zy*phinodal(i,pt) ! Nonlin Flat
+     &                          +zi*(6*hi*phiy(i)+4*zy*phinodal(i,pt))))      
+     &                       +(1.d0/4.d0*zi*hy*phinodal(i,pt))                ! Nonlin Vary
      &                                                           )*phiy(j)
               p1cf(i,j)  = p1cf(i,j)  + arealoc/2.d0*wagp(pt,pad)*(
-     &                        (5.d0/4.d0*phinodal(i,pt))
+     &                        (5.d0/4.d0*phinodal(i,pt))                      ! Linear Flat
+     &                       +(-1.d0/4.d0*((hx**2+hy**2)*phinodal(i,pt)+2*hi  ! Linear Vary
+     &                          *(hy*phiy(i)+hx*phix(i))))
+     &                       +(1.d0/3.d0*((hi+zi)*(zx*phix(i)+zy*phiy(i))     ! Nonlin Flat
+     &                          +3.d0*phinodal(i,pt)*(zx**2+zy**2)))
+     &                       +(-1.d0/2.d0*(zi*(hx*phix(i)+hy*phiy(i))         ! Nonlin Vary
+     &                          +phinodal(i,pt)*(hy*zy+hx*zx)))
      &                                                           )*phinodal(j,pt)     
             end do
             
             
             prhs(i) = prhs(i) - arealoc/2.d0*wagp(pt,pad)*(
-     &                   1.d0/12.d0*g*(-15.d0*zi*phinodal(i,pt)+4.d0*hi**2*(
-     &                   zx*phix(i)+zy*phiy(i)))
+     &                   (1.d0/12.d0*g*(-15.d0*zi*phinodal(i,pt)+4.d0*hi**2   ! Linear Flat
+     &                      *(zx*phix(i)+zy*phiy(i))))
+     &                  +(1.d0/12.d0*g*(3.d0*zi*(phinodal(i,pt)*(hy**2+hx**2) ! Linear Vary
+     &                      +2.d0*hi*(hy*phiy(i)+hx*phix(i)))
+     &                      +2.d0*hi*phinodal(i,pt)*(hy*zy+hx*zx)))
+     &                  +(1.d0/6.d0*(10.d0*zi**2*phinodal(i,pt)               ! Nonlin Flat
+     &                      *(vy**2+ux*vy*ux**2+uy*vx)+hi*phinodal(i,pt)
+     &                      *(15.d0*ui*vi*hxy+2.d0*(3.d0*g*(zy**2+zx**2)
+     &                      +5.d0*hi*(vy**2+vy*ux+ux**2+uy*vx)))
+     &                      +zi*(15.d0*ui*vi*hxy*phinodal(i,pt)
+     &                      +2.d0*hi*g*(zx*phix(i)+zy*phiy(i))
+     &                      +10.d0*phinodal(i,pt)*(vy**2+vy*ux+ux**2+uy*vx)))) 
+     &                  +(-1.d0/12.d0*(6.d0*g*zi**2*(hy*phiy(i)+hx*phix(i))  ! Nonlin Vary
+     &                      +15.d0*vi**2*hy*((zi+hi)*phiy(i)+(zy+hy)*phinodal(i,pt))
+     &                      +30.d0*(zi+hi)*vi*vy*hy+15*ui*hx*(
+     &                       ui*(hi*phix(i)+phinodal(i,pt)*(hx+zx))+2.d0*hi*ux*phinodal(i,pt))
+     &                      +zi*(15.d0*ui**2*hx*phix(i)-8.d0*g*phinodal(i,pt)*(hy*zy+hx*zx)
+     &                      +30.d0*ui*phinodal(i,pt)*hx*ux)))
      &                                                     )
+     
+!           write(*,'(7f16.8)') prhs(i), ui, vi, ux ,vx, uy, vy
           end do          
+          
+          
           
           ! Now construct LHS and RHS CG matrices through Gauss integration
           do j = 1,3
@@ -249,7 +295,7 @@
           do j = 1,3
             prhs(j) = prhs(j) - arealoc/2.d0*wagp(pt,pad)*3.d0/4.d0*(
      &                  (1.d0+hx**2+hy**2)*(g*zi-pi)
-     &                 +(hi+zi*0.d0)*(hx*px+hy*py)    ! ASD
+     &                 +(hi+zi)*(hx*px+hy*py)    ! ASD
      &                                                              )*phinodal(j,pt)/4.d0  ! ASD I have no idea why /4!!!!!
             pdrhs(j) = pdrhs(j) + arealoc/2.d0*wagp(pt,pad)/2.d0*(zi+hi)*(
      &                               pi-g*zi )*phinodal(j,pt)/4.d0
@@ -301,6 +347,17 @@
       
       pp_pd = WrpSPBCCGSTAB0( cgpd, pp_pd, pp_dg_cg_mat, pp_dg_cg_ilumat, 1.d-8, mnp/4, INFOR, INFOI )
       pp_pb = WrpSPBCCGSTAB0( cgpb, pp_pb, pp_dg_cg_mat, pp_dg_cg_ilumat, 1.d-8, mnp/4, INFOR, INFOI )
+
+      end if
+      
+100   continue
+      
+      CALL EmptySpmat(pp_p1_cg_mat)
+      CALL EmptySpmat(pp_p1_cg_ilumat)
+      deallocate(pp_p1_cg_ilumat)
+      
+      
+      
       
 !       call exit
 ! 
