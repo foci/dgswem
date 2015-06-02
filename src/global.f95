@@ -1,30 +1,30 @@
-C**************************************************************************
-C  mod history
-C  v41.06mxxx  - date - programmer - describe change 
-C                    - mark change in code with  cinitials-mxxx
-C  v41.10      - 07/25/01 - rl - from 41.09 - bug fix in GWCE lateral viscosity term
-C  v41.09      - 06/30/01 - jw - from 41.08 - made minor mods as per vp version 41.05
-C  v41.06      - 04/02/01 - rl - changed MNWP to MNP in wind forcing 
-C                                ALLOCATION statements
-C  v41.02      - 09/04 - rl
-C  v40.02m004b - 05/17 - vjp - corrected dimensioning problem cvjpm004b
-C  v40.02m001  - 12/21 - jjw - add cross barrier pipes cjjwm001
-C-----------------------------------------------------------------------
-C
-C     v9_sb2.2.1 - 08/16/05 - sb - Hard bottom implementation
-C     v10_sb5    - 10/11/05 - sb - Table that associates nodes to elements (NODEELEM)
-C                - 10/27/05 - sb - H0L and H0H are added
-C
-C**************************************************************************
-C 
+!**************************************************************************
+!  mod history
+!  v41.06mxxx  - date - programmer - describe change 
+!                    - mark change in code with  cinitials-mxxx
+!  v41.10      - 07/25/01 - rl - from 41.09 - bug fix in GWCE lateral viscosity term
+!  v41.09      - 06/30/01 - jw - from 41.08 - made minor mods as per vp version 41.05
+!  v41.06      - 04/02/01 - rl - changed MNWP to MNP in wind forcing 
+!                                ALLOCATION statements
+!  v41.02      - 09/04 - rl
+!  v40.02m004b - 05/17 - vjp - corrected dimensioning problem cvjpm004b
+!  v40.02m001  - 12/21 - jjw - add cross barrier pipes cjjwm001
+!-----------------------------------------------------------------------
+!
+!     v9_sb2.2.1 - 08/16/05 - sb - Hard bottom implementation
+!     v10_sb5    - 10/11/05 - sb - Table that associates nodes to elements (NODEELEM)
+!                - 10/27/05 - sb - H0L and H0H are added
+!
+!**************************************************************************
+! 
       MODULE GLOBAL
       USE SIZES
-C...
-C...SET GLOBAL PARAMETER CONSTANTS
-C...
+!...
+!...SET GLOBAL PARAMETER CONSTANTS
+!...
 
 #ifdef SWAN
-Casey 121128: Added variables for the output of global files from SWAN.
+!asey 121128: Added variables for the output of global files from SWAN.
       INTEGER,ALLOCATABLE,TARGET :: NODES_LG(:)
       INTEGER,PARAMETER :: BUFSIZE_MAX = 131072
       INTEGER :: float_type
@@ -60,19 +60,19 @@ Casey 121128: Added variables for the output of global files from SWAN.
 
       Logical vertexslope
 
-C.....PI and degrees to radians conversions
+!.....PI and degrees to radians conversions
       REAL(8), PARAMETER  ::  PI=3.141592653589793D0
       REAL(8), PARAMETER  ::  DEG2RAD = PI/180.D0
       REAL(8), PARAMETER  ::  RAD2DEG = 180.D0/PI
 
-C.....parameters used in barrier overflow 
+!.....parameters used in barrier overflow 
       REAL(SZ), PARAMETER ::  BARMIN=0.01D0
       REAL(SZ) DEPAVG,DEPMAX,DEPMIN
-C
-C.....Sediment Transport stuff added (Ethan Kubatko 8-1-2003)
-C
-C.....Declare variables used in sediment transport section
-C
+!
+!.....Sediment Transport stuff added (Ethan Kubatko 8-1-2003)
+!
+!.....Declare variables used in sediment transport section
+!
       INTEGER SEDFLAG, MAXEL, ELEM_ED, NBOR_ED, NBOR_EL,ITDG
       Integer tracer_flag, chem_flag
       INTEGER N1,N2,NO_NBORS,NBOR,DG_TO_CG,SEDFLAG_W, OPEN_INDEX
@@ -85,7 +85,7 @@ C
       
       REAL(SZ) FluxSettlingTime
       INTEGER  FluxSettlingIT
-C     jgf46.08 Fine grained ramp functions (jgf46.21 split flux b.c.s)
+!     jgf46.08 Fine grained ramp functions (jgf46.21 split flux b.c.s)
       REAL(SZ) RampExtFlux,DRampExtFlux ! Ramp for external flux b.c.s
       REAL(SZ) RampIntFlux,DRampIntFlux ! Ramp for internal flux b.c.s
       REAL(SZ) RampElev,DRampElev    ! Ramp for elevation boundary conditions.
@@ -93,19 +93,19 @@ C     jgf46.08 Fine grained ramp functions (jgf46.21 split flux b.c.s)
       REAL(SZ) RampMete,DRampMete    ! Ramp for wind and atmospheric pressure
       REAL(SZ) RampWRad,DRampWRad    ! Ramp for wave radiation stress
 
-C.....Create allocatable arrays
+!.....Create allocatable arrays
 
       REAL(SZ),ALLOCATABLE :: ANGTAB(:,:),CENTAB(:,:),ELETAB(:,:)
       REAL(SZ),ALLOCATABLE :: DG_ANG(:),DP_DG(:)
       INTEGER, ALLOCATABLE :: EL_COUNT(:)
       INTEGER, ALLOCATABLE :: NNOEL(:,:)
 
-Csb...Table that maps nodes to elements
+!sb...Table that maps nodes to elements
       INTEGER, ALLOCATABLE :: NNDEL(:)
       INTEGER, ALLOCATABLE :: NDEL(:,:)
-C--
+!--
       
-C.....Declare variables for DG SW
+!.....Declare variables for DG SW
 
       INTEGER DGSWE
       INTEGER EL_IN, EL_EX, SD_IN, SD_EX, EDGE(3)
@@ -129,9 +129,9 @@ C.....Declare variables for DG SW
       REAL(SZ),ALLOCATABLE :: ZE_DG(:),QX_DG(:),QY_DG(:),HB_DG(:)
       REAL(SZ),Allocatable :: iota2_DG(:),iota_DG(:),iotaa_DG(:)
       REAL(SZ),Allocatable :: bed_DG(:,:), bed_N_int(:), bed_N_ext(:)
-C...
-C...DECLARE ALL ARRAYS
-C...
+!...
+!...DECLARE ALL ARRAYS
+!...
 #ifdef CMPI
       INTEGER, ALLOCATABLE ::   IDUMY(:)
       REAL(SZ),ALLOCATABLE ::   DUMY1(:),DUMY2(:)
@@ -155,7 +155,7 @@ C...
       REAL(SZ),ALLOCATABLE ::   QNAM(:,:),QNPH(:,:)
       REAL(SZ),ALLOCATABLE ::   QNIN1(:),QNIN2(:)
       REAL(SZ),ALLOCATABLE ::   CSI(:),SII(:)
-C      REAL(SZ),ALLOCATABLE ::   TAU0VAR(:)
+!      REAL(SZ),ALLOCATABLE ::   TAU0VAR(:)
       REAL(SZ),ALLOCATABLE ::   ET00(:),BT00(:)
       REAL(SZ),ALLOCATABLE ::   STAIE1(:),STAIE2(:),STAIE3(:)
       REAL(8),ALLOCATABLE ::    XEV(:),YEV(:),SLEV(:),SFEV(:)
@@ -174,10 +174,10 @@ C      REAL(SZ),ALLOCATABLE ::   TAU0VAR(:)
       REAL(SZ),ALLOCATABLE ::   WVNX2(:),WVNY2(:),PRN2(:)
       REAL(SZ),ALLOCATABLE ::   RSNX1(:),RSNY1(:),RSNX2(:),RSNY2(:)
 #ifdef SWAN
-Casey 101118: Added the following arrays for output of radiation stress gradients.
+!Casey 101118: Added the following arrays for output of radiation stress gradients.
       REAL(SZ),ALLOCATABLE,TARGET :: RSNXOUT(:), RSNYOUT(:)
 #endif
-C.....Allocate additional variables for wave friction
+!.....Allocate additional variables for wave friction
       REAL(SZ),ALLOCATABLE ::   WAVE_T1(:),WAVE_H1(:),WAVE_A1(:),WAVE_D1(:)
       REAL(SZ),ALLOCATABLE ::   WAVE_T2(:),WAVE_H2(:),WAVE_A2(:),WAVE_D2(:)
       REAL(SZ),ALLOCATABLE ::   WAVE_T(:), WAVE_H(:), WAVE_A(:), WAVE_D(:)
@@ -230,7 +230,7 @@ C.....Allocate additional variables for wave friction
       INTEGER,ALLOCATABLE ::    ONE_OR_TWO(:)
       INTEGER,ALLOCATABLE ::    EDFLG(:,:)
 
-C.....for internal barrier boundaries with flowthrough pipes
+!.....for internal barrier boundaries with flowthrough pipes
       REAL(SZ),ALLOCATABLE ::   BARLANHTR(:),BARLANCFSPR(:)
       REAL(SZ),ALLOCATABLE ::   BARINHTR(:),BARINCFSBR(:),BARINCFSPR(:)
       REAL(SZ),ALLOCATABLE ::   PIPEHTR(:),PIPECOEFR(:),PIPEDIAMR(:)
@@ -245,29 +245,29 @@ C.....for internal barrier boundaries with flowthrough pipes
       REAL(SZ),ALLOCATABLE ::   ELEXLEN(:,:)
       INTEGER, ALLOCATABLE ::   IBCONN(:),IBCONNR(:),NTRAN1(:),NTRAN2(:)
 
-C.....for bridge pilings
+!.....for bridge pilings
       REAL(SZ)                  POAN,Fr,FRICBP
       INTEGER                   NBPNODES
       REAL(SZ),ALLOCATABLE ::   BK(:),BALPHA(:),BDELX(:)
       INTEGER, ALLOCATABLE ::   NBNNUM(:)
 
-C...
-C...DECLARE COMMON BLOCKS
-C...
+!...
+!...DECLARE COMMON BLOCKS
+!...
       INTEGER NTSTEPS,ITMV
       REAL(SZ) DT,FMV
       REAL(8) TIMEBEG
       COMMON /MEANSQ/ TIMEBEG,DT,FMV,NTSTEPS,ITMV
-C
+!
       INTEGER NHARFR
       COMMON /LSQFREQS/ NHARFR
-C
+!
       INTEGER NP,NOLICA,NOLIFA,NSCREEN,IHOT,ICS
       COMMON /EXTMODE5/ NP,NOLICA,NOLIFA,NSCREEN,IHOT,ICS
 
-C...
-C...DECLARE REAL(8) AND CHAR VARIABLES, EQUIVALENCES
-C...
+!...
+!...DECLARE REAL(8) AND CHAR VARIABLES, EQUIVALENCES
+!...
       REAL(8) STATIM,REFTIM,TIME_A,DTDP,TIMEH,vdtdp,cfl_max
       REAL(8) AVGXY,DIF1R,DIF2R,DIF3R
       REAL(8) AEMIN,AE,AA,A1,A2,A3,X1,X2,X3,X4,Y1,Y2,Y3,Y4
@@ -293,12 +293,11 @@ C...
       CHARACTER*8  RDES8(4),RID8(3),AID8(3)
       CHARACTER*10 ALPHA
       CHARACTER*5,ALLOCATABLE :: TIPOTAG(:),BOUNTAG(:),FBOUNTAG(:)
-      EQUIVALENCE (RDES4(1),RDES8(1),RUNDES), (RID4(1),RID8(1),RUNID),
-     &            (AID4(1),AID8(1),AGRID)
+      EQUIVALENCE (RDES4(1),RDES8(1),RUNDES), (RID4(1),RID8(1),RUNID),(AID4(1),AID8(1),AGRID)
 
-C...
-C...EXPLICITLY DECLARE ADDITIONAL VARIABLES
-C...
+!...
+!...EXPLICITLY DECLARE ADDITIONAL VARIABLES
+!...
       INTEGER  FRW,NODEDRYMIN,NODEWETMIN,IBTYPE,ICK
       INTEGER  IDR,IM,IPRBI,JGW,JKI,JME
       INTEGER  JNMM,KMIN,N3,NABOUT
@@ -315,7 +314,7 @@ C...
       INTEGER  IFNLCAT, IFNLCT, IFNLFA
       INTEGER  IFWIND, IGCP, IGEP, IGPP, IGVP, IGWP, IHABEG
 #ifdef SWAN
-Casey 101118: Added a variable for output of radiation stress gradients.
+!asey 101118: Added a variable for output of radiation stress gradients.
       INTEGER  IGRadS
 #endif
       INTEGER  IHARIND, IHOTSTP, IHSFIL, IJ, ILUMP, IMHS, IPSTP
@@ -343,7 +342,7 @@ Casey 101118: Added a variable for output of radiation stress gradients.
       INTEGER  NTRSPC, NTRSPM, NUMITR, NW, NWET, NWSEGWI, NWSGGWI
       INTEGER  NCCHANGE
       INTEGER  IRAMPING
-C
+
       REAL(SZ) ADVECX, ADVECY, AGIRD, AH, AO12, AO6, ARG
       REAL(SZ) ARG1, ARG2, ARGJ, ARGJ1, ARGJ2, ARGSALT, ARGT
       REAL(SZ) ARGTP, AUV21, AUV22, BARAVGWT
@@ -384,10 +383,10 @@ C
       REAL(SZ) TT0L, TT0R, U11, U1N1, U1N2, U1N3, U22
       REAL(SZ) U33, UEA, UHPP, UHPP3, UN1, UPEA, UPP
       REAL(SZ) UPPDT, UPPDTDDX1, UPPDTDDX2, UPPDTDDX3, UV1, V11, V1N1
-C.....Add additional variable declarations for wave friction (EK)
+!.....Add additional variable declarations for wave friction (EK)
       REAL(SZ) UVW1, UVW2, COSA1, SINA1, WD1, WD, WDXX, WDYY,WDXY,CHYBR
       REAL(SZ) VCOEFXX, VCOEFYY, VCOEFXY, VCOEFYX, VCOEF2
-C.....End (EK)
+!.....End (EK)
       REAL(SZ) V1N2, V1N3, V22, V33, VCOEF3N1
       REAL(SZ) VCOEF3N2, VCOEF3N3, VCOEF3X, VCOEF3Y, VEA, VEL, VELABS
       REAL(SZ) VELMAX, VELNORM, VELTAN, VHPP, VHPP3, VPEA, VPP
@@ -411,15 +410,15 @@ C.....End (EK)
       
 
 
-C-------------------end of data declarations----------------------------------C
+!-------------------end of data declarations----------------------------------C
 
 
       CONTAINS
 
       SUBROUTINE ALLOC_MAIN1()
-C
-C     Allocate space for Arrays dimensioned by MNE and MNP
-C
+!
+!     Allocate space for Arrays dimensioned by MNE and MNP
+!
       ALLOCATE ( SLAM(MNP),SFEA(MNP),X(MNP),Y(MNP))
       ALLOCATE ( DP(MNP),DP0(MNP),DPe(MNE),SFAC(MNP))!,STARTDRY(MNP))
       ALLOCATE ( NM(MNE,3))
@@ -429,13 +428,13 @@ C
       ALLOCATE ( NELED(3,MNE))
       ALLOCATE ( ETAS(MNP))
       ALLOCATE ( QW(MNP))
-C.....ek now allocated in nodal attributes
-C      ALLOCATE ( FRIC(MNP),EVM(MNP))
+!.....ek now allocated in nodal attributes
+!      ALLOCATE ( FRIC(MNP),EVM(MNP))
       ALLOCATE ( UU1(MNP),VV1(MNP))
       ALLOCATE ( NNODECODE(MNP),NODEREP(MNP))
       ALLOCATE ( NNEIGH(MNP),MJU(MNP),NODELE(MNP))
       ALLOCATE ( NIBNODECODE(MNP),NNEIGH_ELEM(MNP))
-C      ALLOCATE ( TAU0VAR(MNP))
+!      ALLOCATE ( TAU0VAR(MNP))
       ALLOCATE ( CH1(MNP),QB(MNP),QA(MNP),SOURSIN(MNP))!,EVC(MNP))
       ALLOCATE ( TKXX(MNP),TKYY(MNP),TKXY(MNP))
       ALLOCATE ( AREAS(MNE),SFACDUB(3,MNE),RTEMP2(MNE))
@@ -451,11 +450,11 @@ C      ALLOCATE ( TAU0VAR(MNP))
       ALLOCATE ( NODECODE(MNP))
       ALLOCATE (GRAVX(MNP),GRAVY(MNP))
       ALLOCATE ( NIBCNT(MNP) )    !  added 7/31/2000 to fix wetdry bug
-Csb-added by sb 10/11/2005
+!sb-added by sb 10/11/2005
       ALLOCATE( NNDEL(MNP) )
       ALLOCATE( EDFLG(3,MNE) )
 
-C--
+!--
 
 #ifdef CMPI
       ALLOCATE ( IDUMY(1), DUMY1(1), DUMY2(1) )
@@ -475,15 +474,14 @@ C--
       IF ( C3D) THEN
        ALLOCATE( DUU1(MNP),DUV1(MNP),DVV1(MNP),BSX1(MNP),BSY1(MNP))
        endif
-C
       RETURN
       END SUBROUTINE
 
 
       SUBROUTINE ALLOC_MAIN2()
-C
-C     Allocate space for Arrays dimensioned by MNOPE and MNETA
-C
+!
+!     Allocate space for Arrays dimensioned by MNOPE and MNETA
+!
       ALLOCATE ( ESBIN1(MNETA),ESBIN2(MNETA))
       ALLOCATE ( NBDV(MNOPE,MNETA))
       ALLOCATE ( NVDLL(MNOPE),NBD(MNETA))
@@ -495,10 +493,10 @@ C
       END SUBROUTINE
 
 
-C
-C     Allocate space for nonperiodic zero and nonzero normal flow boundary arrays
-C     including barriers
-C
+!
+!     Allocate space for nonperiodic zero and nonzero normal flow boundary arrays
+!     including barriers
+!
       SUBROUTINE ALLOC_MAIN3()
       ALLOCATE ( QN0(MNVEL),QN1(MNVEL),QN2(MNVEL))
       ALLOCATE ( NBV(MNVEL),LBCODEI(MNVEL))
@@ -526,9 +524,9 @@ C
       END SUBROUTINE
 
 
-C
-C     Allocate space for tidal potential terms 
-C
+!
+!     Allocate space for tidal potential terms 
+!
       SUBROUTINE ALLOC_MAIN4a()
       ALLOCATE ( TPK(MNTIF),AMIGT(MNTIF),FFT(MNTIF) )
       ALLOCATE ( FACET(MNTIF),PERT(MNTIF),ETRF(MNTIF) )
@@ -542,18 +540,18 @@ C
       END SUBROUTINE
 
 
-C
-C     Allocate space for Earth load/self-attraction tide 
-C
+!
+!     Allocate space for Earth load/self-attraction tide 
+!
       SUBROUTINE ALLOC_MAIN4b()
       ALLOCATE ( SALTAMP(MNTIF,MNP),SALTPHA(MNTIF,MNP) )
       RETURN
       END SUBROUTINE
 
 
-C
-C     Allocate space for Arrays dimensioned by MNBFR      
-C
+!
+!     Allocate space for Arrays dimensioned by MNBFR      
+!
       SUBROUTINE ALLOC_MAIN5()
       ALLOCATE ( AMIG(MNBFR),PER(MNBFR))
       ALLOCATE ( FF(MNBFR),FACE(MNBFR))
@@ -564,9 +562,9 @@ C
 
 
 
-C
-C     Allocate space for periodic normal flow boundary conditions
-C
+!
+!     Allocate space for periodic normal flow boundary conditions
+!
       SUBROUTINE ALLOC_MAIN6()
       ALLOCATE ( QNAM(MNFFR,MNVEL),QNPH(MNFFR,MNVEL))
       ALLOCATE ( FBOUNTAG(MNFFR))
@@ -576,9 +574,9 @@ C
       END SUBROUTINE
 
 
-C
-C     Allocate space for arrays used for station elevation output
-C
+!
+!     Allocate space for arrays used for station elevation output
+!
       SUBROUTINE ALLOC_MAIN7()
       ALLOCATE ( NNE(MNSTAE),ET00(MNSTAE),BT00(MNSTAE))
       ALLOCATE ( STAIE1(MNSTAE),STAIE2(MNSTAE),STAIE3(MNSTAE))
@@ -587,9 +585,9 @@ C
       END SUBROUTINE
 
 
-C
-C     Allocate space for arrays used for station velocity output
-C
+!
+!     Allocate space for arrays used for station velocity output
+!
       SUBROUTINE ALLOC_MAIN8()
       ALLOCATE ( XEV(MNSTAV),YEV(MNSTAV),SLEV(MNSTAV),SFEV(MNSTAV))
       ALLOCATE ( NNV(MNSTAV))
@@ -600,9 +598,9 @@ C
       END SUBROUTINE
 
 
-C
-C     Allocate space for arrays used for station concentration output
-C
+!
+!     Allocate space for arrays used for station concentration output
+!
       SUBROUTINE ALLOC_MAIN9()
       ALLOCATE ( XEC(MNSTAC),YEC(MNSTAC),SLEC(MNSTAC),SFEC(MNSTAC))
       ALLOCATE ( NNC(MNSTAC))
@@ -613,9 +611,9 @@ C
       END SUBROUTINE
 
 
-C
-C     Allocate space for arrays used for station meteorological output
-C
+!
+!     Allocate space for arrays used for station meteorological output
+!
       SUBROUTINE ALLOC_MAIN10()
       ALLOCATE ( XEM(MNSTAM),YEM(MNSTAM),SLEM(MNSTAM),SFEM(MNSTAM))
       ALLOCATE ( NNM(MNSTAM))
@@ -626,18 +624,18 @@ C
       END SUBROUTINE
 
 
-C
-C     Allocate space for Arrays dimensioned by MNEI   
-C
+!
+!     Allocate space for Arrays dimensioned by MNEI   
+!
       SUBROUTINE ALLOC_MAIN11()
 
-C  Arrays used by JCG iterative solver
+!  Arrays used by JCG iterative solver
 
       ALLOCATE( OBCCOEF(MNETA,MNEI-1),COEF(MNP,MNEI))
       ALLOCATE( IWKSP(3*MNP),WKSP(4*MNP+400) )
       ALLOCATE( IPARM(12),RPARM(12) )
 
-C  Neighbor Table
+!  Neighbor Table
 
       ALLOCATE ( NEITAB(MNP,MNEI),NEIGH_ELEM(MNP,MNEI))
 
@@ -645,9 +643,9 @@ C  Neighbor Table
       END SUBROUTINE
 
 
-C
-C     Allocate space for wind forcing   
-C
+!
+!     Allocate space for wind forcing   
+!
       SUBROUTINE ALLOC_MAIN12()
       ALLOCATE ( WSX1(MNP),WSY1(MNP),PR1(MNP) )
       ALLOCATE ( WSX2(MNP),WSY2(MNP),PR2(MNP) )
@@ -656,32 +654,32 @@ C
       ALLOCATE ( RSNX1(MNP),RSNY1(MNP),RSNX2(MNP),RSNY2(MNP) )
       ALLOCATE ( WVNXOUT(MNP),WVNYOUT(MNP) )
 #ifdef SWAN
-Casey 101118: Added the next line for output of radiation stress gradients.
+!asey 101118: Added the next line for output of radiation stress gradients.
       ALLOCATE ( RSNXOUT(MNP),RSNYOUT(MNP) )
 #endif
       RETURN
       END SUBROUTINE
 
 
-C
-C     Allocate space for bridge piling friction arrays   
-C
+!
+!     Allocate space for bridge piling friction arrays   
+!
       SUBROUTINE ALLOC_MAIN13()
       ALLOCATE ( NBNNUM(MNP),BK(MNP),BALPHA(MNP),BDELX(MNP) )
       RETURN
       END SUBROUTINE
-C
-C     Allocate space for harmonic analysis means and variance calculations, this is in 
-C     global data because the variables are used in main source, outside of HA analysis
-C     subroutines.  This should probably be changed.
-C
+!
+!     Allocate space for harmonic analysis means and variance calculations, this is in 
+!     global data because the variables are used in main source, outside of HA analysis
+!     subroutines.  This should probably be changed.
+!
       SUBROUTINE ALLOC_MAIN14()
       ALLOCATE ( XVELAV(MNP),YVELAV(MNP),XVELVA(MNP),YVELVA(MNP) )
       ALLOCATE ( ELAV(MNP),ELVA(MNP) )
       RETURN
       END SUBROUTINE
       
-C.....Allocate for wave friction
+!.....Allocate for wave friction
 
       SUBROUTINE ALLOC_MAIN15()
       ALLOCATE ( WAVE_T1(MNP),WAVE_H1(MNP),WAVE_A1(MNP),WAVE_D1(MNP) )
@@ -690,13 +688,13 @@ C.....Allocate for wave friction
       ALLOCATE ( WB(MNP) )
       END SUBROUTINE
 
-C.....Allocate arrays used for node to element table
-C
+!.....Allocate arrays used for node to element table
+!
       SUBROUTINE ALLOC_NNOEL1(MNP)
       ALLOCATE ( EL_COUNT(MNP) )
       RETURN
       END SUBROUTINE
-C
+!
       SUBROUTINE ALLOC_NNOEL2(MNP,MAXEL)
       ALLOCATE ( DP_DG(MAXEL),DG_ANG(MAXEL) )
       ALLOCATE ( NNOEL(MNP,MAXEL),CENTAB(MNP,MAXEL+1) )
@@ -707,12 +705,12 @@ C
       RETURN
       END SUBROUTINE
 
-Csb
-C     Allocate space for Arrays dimensioned by MNNDEL
-C
+!sb
+!     Allocate space for Arrays dimensioned by MNNDEL
+!
       SUBROUTINE ALLOC_MAIN16()
 
-C.....Node-to-elements table      
+!.....Node-to-elements table      
       ALLOCATE( NDEL(MNP,MNNDEL) )
 
       RETURN
