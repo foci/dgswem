@@ -1,30 +1,30 @@
-C***********************************************************************
-C     
-C     MODULE DG
-C     
-C     This module declares all the necessary variables for DG
-C     
-C     Written by Ethan Kubatko (3-10-05)
-C     
-C-----------------------------------------------------------------------
-C     
-C     Modification history after v9_sb1
-C     
-C     v9_sb1     - 08/05    - sb - Parallel runs
-C     v9_sb2     - 08/05    - sb - Wetting and drying
-C     v9_sb2.2.1 - 08/16/05 - sb - Hard bottom implementation
-C     v10_sb5      - Oct 03 - sb - Consolidate Ethan's slope limiter
-C     Moving to versioning repo now
-C     
-C***********************************************************************
+!!$C***********************************************************************
+!!$C     
+!!$C     MODULE DG
+!!$C     
+!!$C     This module declares all the necessary variables for DG
+!!$C     
+!!$C     Written by Ethan Kubatko (3-10-05)
+!!$C     
+!!$C-----------------------------------------------------------------------
+!!$C     
+!!$C     Modification history after v9_sb1
+!!$C     
+!!$C     v9_sb1     - 08/05    - sb - Parallel runs
+!!$C     v9_sb2     - 08/05    - sb - Wetting and drying
+!!$C     v9_sb2.2.1 - 08/16/05 - sb - Hard bottom implementation
+!!$C     v10_sb5      - Oct 03 - sb - Consolidate Ethan's slope limiter
+!!$C     Moving to versioning repo now
+!!$C     
+!!$C***********************************************************************
 
       MODULE DG
       
-C.....Use appropriate modules
+!C.....Use appropriate modules
 
       USE SIZES
 
-C.....Declare integer variables
+!C.....Declare integer variables
 
       INTEGER DGFLAG,DGHOT,DGHOTSPOOL,DOF,dofh,dofl,dofx
       INTEGER EL,MNES,artdif,tune_by_hand
@@ -40,10 +40,10 @@ C.....Declare integer variables
       INTEGER RK_STAGE, RK_ORDER
       Integer padapt,pflag,pl,ph,px,lebesgueP,pa, gflag
       logical init_parser,stblzr
-c     
+!c     
       integer iwrite
 
-C.....Declare real variables
+!C.....Declare real variables
 
       REAL(SZ) C13, C16, diorism, porosity, SEVDM
       REAL(SZ) DOT, DHB_X, DHB_Y, DPHIDX, DPHIDY,uniform_dif
@@ -68,7 +68,7 @@ C.....Declare real variables
       Real(SZ) subphi_IN,subphi_EX
       Real(SZ) iota_EX, iota_IN,iota2_EX, iota2_IN
 
-C     sb...Wetting and drying
+!C     sb...Wetting and drying
       INTEGER, ALLOCATABLE :: WDFLG(:) ! = 1 if wet, =0 if dry
       INTEGER, ALLOCATABLE :: WDFLG_TMP(:)
       INTEGER, ALLOCATABLE :: DOFW(:)
@@ -78,22 +78,21 @@ C     sb...Wetting and drying
                                 ! LEDGE_NVEC(1,1:3,1:NELEM) = whether a node is on the land boundary
                                 ! LEDGE_NVEC(2,1:3,1:NELEM) = x component of the normal vector
                                 ! LEDGE_NVEC(3,1:3,1:NELEM) = y component of the normal vector
-
 !Declare some stuff for function parsing for bed load
 
-      CHARACTER (LEN=*), DIMENSION(4),  PARAMETER :: varx  = (/ 'ZE_ROE', 
-     & 'QX_ROE','QY_ROE','bed_ROE' /)
-      CHARACTER (LEN=*), DIMENSION(4),  PARAMETER :: vary  = (/ 'ZE_ROE', 
-     & 'QX_ROE','QY_ROE','bed_ROE' /)
+! commenting these declarations out because they won't compile
+
+!      CHARACTER (LEN=*), DIMENSION(4),  PARAMETER :: varx  = (/ 'ZE_ROE', 'QX_ROE','QY_ROE','bed_ROE' /)
+!      CHARACTER (LEN=*), DIMENSION(4),  PARAMETER :: vary  = (/ 'ZE_ROE', 'QX_ROE','QY_ROE','bed_ROE' /)
       CHARACTER (LEN=200) funcx(4), funcy(4)
       Real(sz)  valx(4), valy(4)
 
-C.....Declare real variable arrays
+!C.....Declare real variable arrays
 
       REAL(SZ) DRPSI(3), DSPSI(3)
       REAL(SZ) VEC1(2), VEC2(2)
       
-C.....Declare allocatable integer arrays
+!C.....Declare allocatable integer arrays
 
       INTEGER, ALLOCATABLE :: DOFS(:), PCOUNT(:), PDG(:)
       INTEGER, ALLOCATABLE :: NCOUNT(:)
@@ -107,7 +106,7 @@ C.....Declare allocatable integer arrays
       INTEGER, ALLOCATABLE :: MARK(:)
 
 
-C.....Declare allocatable real arrays
+!C.....Declare allocatable real arrays
       
       REAL(SZ), ALLOCATABLE :: ATVD(:,:), BTVD(:,:), CTVD(:,:)
       REAL(SZ), ALLOCATABLE :: DTVD(:), MAX_BOA_DT(:),e1(:),balance(:)
@@ -172,7 +171,7 @@ C.....Declare allocatable real arrays
       REAL(SZ), ALLOCATABLE :: PHI_STAE(:,:), PHI_STAV(:,:)
       Real(SZ), Allocatable :: bed_IN(:),bed_EX(:),bed_HAT(:)
 
-C.....These (below) are defined in prep_slopelim.F
+!....These (below) are defined in prep_slopelim.F
 
       Integer :: lim_count,lim_count_roll
       Integer,Allocatable :: fact(:),focal_neigh(:,:),focal_up(:),bi(:),bj(:)
@@ -190,7 +189,7 @@ C.....These (below) are defined in prep_slopelim.F
       Real(SZ),Allocatable :: Nmatrix(:,:,:,:),NmatrixInv(:,:,:,:)
       Real(SZ),Allocatable :: deltx(:),delty(:),pmatrix(:,:,:)
 
-C.....These (below) are defined in slopelimiter.F 
+!....These (below) are defined in slopelimiter.F 
 
 
       Real(SZ),Allocatable :: ZEmin(:,:),ZEmax(:,:),QXmin(:,:)
@@ -221,11 +220,11 @@ C.....These (below) are defined in slopelimiter.F
 #endif
 
     
-C**********************END OF DATA DECLARATIONS ***********************
+!C**********************END OF DATA DECLARATIONS ***********************
 
       CONTAINS
       
-C.....Set edge array sizes
+!....Set edge array sizes
 
       SUBROUTINE ALLOC_EDGES0()
       ALLOCATE ( IBHT(3*MNE), EBHT(3*MNE) )
@@ -246,7 +245,7 @@ C.....Set edge array sizes
       RETURN
       END SUBROUTINE
       
-C.....Set DG SWE array sizes
+!....Set DG SWE array sizes
 
       SUBROUTINE ALLOC_DG1(MNBFR)
       ALLOCATE ( EFA_DG(MNBFR,NEEDS+2,2), EMO_DG(MNBFR,NEEDS+2,2) )
@@ -266,7 +265,7 @@ C.....Set DG SWE array sizes
       END SUBROUTINE
 
       SUBROUTINE ALLOC_DG4()
-Csb-20070228 NRK+1-->NRK+2 --- XX(:,:,NRK+2) will be used by slope limiter
+!Csb-20070228 NRK+1-->NRK+2 --- XX(:,:,NRK+2) will be used by slope limiter
       ALLOCATE ( HB(DOFH,MNE,NRK+2),e1(layers+5),balance(layers+5) )
       ALLOCATE ( MANN(DOFH,MNE) ) !,arrayfix(DOFH,MNE,NRK+2) )
       ALLOCATE ( QY(DOFH,MNE,NRK+2), QX(DOFH,MNE,NRK+2) )
@@ -275,22 +274,21 @@ Csb-20070228 NRK+1-->NRK+2 --- XX(:,:,NRK+2) will be used by slope limiter
       Allocate ( dynP(DOFH,MNE,NRK+2) ) 
       Allocate ( iotaa(DOFH,MNE,NRK+2),iotaa2(DOFH,MNE,NRK+2) )
       Allocate ( iotaa3(DOFH,MNE,NRK+2) )
-Csb-20060711 For wet/dry
+!Csb-20060711 For wet/dry
       ALLOCATE ( ZE_MAX(MNE),ZE_MIN(MNE),DPE_MIN(MNE) )
       Allocate ( iota_MAX(MNE),iota_MIN(MNE),iota2_MAX(MNE),iota2_MIN(MNE) )
       Allocate ( dynP_MAX(MNE),dynP_MIN(MNE) )
       ALLOCATE ( WATER_DEPTH(MNE,3), WATER_DEPTH_OLD(MNE,3))
-      ALLOCATE ( ADVECTQX(MNE), ADVECTQY(MNE),
-     $     SOURCEQX(MNE),SOURCEQY(MNE))
+      ALLOCATE ( ADVECTQX(MNE), ADVECTQY(MNE),SOURCEQX(MNE),SOURCEQY(MNE))
       ALLOCATE ( MARK(MNE))
-cem-2012 for sediment
+!cem-2012 for sediment
       Allocate ( bed_IN(layers),bed_EX(layers),bed_HAT(layers) )
 
-C--
-Csb-20070101
+!C--
+!Csb-20070101
       ALLOCATE ( LZ(DOFH,2,2,MNE),MZ(DOFH,2,layers,MNE) )
       Allocate ( HZ(DOFH,2,2,MNE),TZ(DOFH,2,2,MNE) )
-C--
+!C--
       ALLOCATE ( RHS_QX(DOFH,MNE,NRK), RHS_QY(DOFH,MNE,NRK) )
       ALLOCATE ( RHS_ZE(DOFH,MNE,NRK), RHS_bed(DOFH,MNE,NRK,layers) )
       Allocate ( RHS_iota(DOFH,MNE,NRK),RHS_iota2(DOFH,MNE,NRK) )
@@ -305,7 +303,7 @@ C--
       RETURN
       END SUBROUTINE
 
-C.....Set RK time scheme parameters array sizes
+!....Set RK time scheme parameters array sizes
 
       SUBROUTINE ALLOC_RK()
       ALLOCATE( ATVD(NRK,NRK), BTVD(NRK,NRK), CTVD(NRK,NRK)  )
@@ -316,7 +314,7 @@ C.....Set RK time scheme parameters array sizes
       RETURN
       END SUBROUTINE ALLOC_RK
 
-C.....Set sizes for arrays used in orthobasis
+!....Set sizes for arrays used in orthobasis
 
       SUBROUTINE ALLOC_JACOBI()
       ALLOCATE ( JACOBI(ph+1,2*ph+3,2,NAGP(ph)+1) )
@@ -326,7 +324,7 @@ C.....Set sizes for arrays used in orthobasis
       RETURN
       END SUBROUTINE
       
-C.....Set sizes for arrays for area integrals
+!....Set sizes for arrays for area integrals
       
       SUBROUTINE ALLOC_AREA_GAUSS()
       ALLOCATE ( XAGP(NAGP(ph),ph),YAGP(NAGP(ph),ph),WAGP(NAGP(ph),ph) ) 
@@ -343,7 +341,7 @@ C.....Set sizes for arrays for area integrals
       RETURN
       END SUBROUTINE
       
-C.....Set sizes for arrays for edge integrals
+!....Set sizes for arrays for edge integrals
 
       SUBROUTINE ALLOC_EDGE_GAUSS()
       ALLOCATE ( XEGP(NEGP(ph),ph), WEGP(NEGP(ph),ph) )
@@ -354,15 +352,15 @@ C.....Set sizes for arrays for edge integrals
       RETURN
       END SUBROUTINE
 
-C.....Set sizes for the arrays for the slope limiter
-C.....slopelim arrays
+!....Set sizes for the arrays for the slope limiter
+!....slopelim arrays
 
       SUBROUTINE ALLOC_SLOPELIM()
       ALLOCATE ( XBC(MNE), YBC(MNE) )
       ALLOCATE ( EL_NBORS(4,MNE) )
       ALLOCATE ( SL3(3,MNE) )
 
-C.....These are defined in prep_slopelim.F
+!....These are defined in prep_slopelim.F
 
       Allocate ( fact(0:ph) ,focal_neigh(MNE,3*MNEI),focal_up(MNE),bi(dofh),bj(dofh) )
 
@@ -380,7 +378,7 @@ C.....These are defined in prep_slopelim.F
       Allocate ( Nmatrix(MNE,dofh,dofh,dofh),NmatrixInv(MNE,dofh,dofh,dofh) )
       Allocate ( deltx(MNE),delty(MNE),var2sigmav(MNE,3,dofh))
 
-C.....These (below) are defined in slopelimiter.F (slopelimiter4)
+!....These (below) are defined in slopelimiter.F (slopelimiter4)
       
       Allocate ( ZEmin(MNP,dofh),ZEmax(MNP,dofh),QXmin(MNP,dofh) )
       Allocate ( QXmax(MNP,dofh),QYmin(MNP,dofh),QYmax(MNP,dofh) )
@@ -389,7 +387,7 @@ C.....These (below) are defined in slopelimiter.F (slopelimiter4)
 
 #ifdef SLOPEALL
       Allocate ( ZEtaylor(MNE,dofh,1),QXtaylor(MNE,dofh,1) )
-      Allocate ( iotataylor(MNE,dofh,1),iota2taylor(MNE,dofh,1) 
+      Allocate ( iotataylor(MNE,dofh,1),iota2taylor(MNE,dofh,1)  )
       Allocate ( ZEtaylorvert(MNE,dofh,3),QXtaylorvert(MNE,dofh,3) )
       Allocate ( QYtaylorvert(MNE,dofh,3),iotataylorvert(MNE,dofh,3) )
       Allocate ( iota2taylorvert(MNE,dofh,3), QYtaylor(MNE,dofh,1) )
@@ -412,7 +410,7 @@ C.....These (below) are defined in slopelimiter.F (slopelimiter4)
       RETURN
       END SUBROUTINE
 
-Csb...Set sizes for arrays for wetting and drying
+!sb...Set sizes for arrays for wetting and drying
       SUBROUTINE ALLOC_DG_WETDRY()
       ALLOCATE ( WDFLG(MNE), DOFW(MNE) )
       ALLOCATE ( EL_UPDATED(MNE) )
