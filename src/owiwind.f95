@@ -1,7 +1,7 @@
-C******************************************************************************
-C  MODULE OWIWIND
-C    Written by s.b. 08/17/2006
-C****************************************************************************** 
+!******************************************************************************
+!  MODULE OWIWIND
+!    Written by s.b. 08/17/2006
+!****************************************************************************** 
 
       MODULE OWIWIND
 
@@ -49,15 +49,15 @@ C******************************************************************************
 
       PUBLIC
 
-C---------------------end of data declarations--------------------------
+!---------------------end of data declarations--------------------------
 
       CONTAINS
 
-C***********************************************************************
-C
-C     SUBROUTINE NWS12INIT
-C
-C***********************************************************************
+!***********************************************************************
+!
+!     SUBROUTINE NWS12INIT
+!
+!***********************************************************************
 
       SUBROUTINE NWS12INIT( WVNX, WVNY, PRN, NP, RHOWAT0, G )
 
@@ -71,17 +71,16 @@ C***********************************************************************
       allocate(swpointsB(NP,2),wB(NP,4))
       allocate(swpointsR(NP,2),wR(NP,4))
       
-C.....Read meta info
+!.....Read meta info
 
-      OPEN(22,FILE=TRIM(GBLINPUTDIR)//'/'//'fort.22',STATUS='OLD',
-     &                                                    ACTION='READ')
+      OPEN(22,FILE=TRIM(GBLINPUTDIR)//'/'//'fort.22',STATUS='OLD',                                                    ACTION='READ')
 
-C.....Read the number of sets of .pre and .win files from unit 22
-C       If numSets = 1 then ADCIRC requires UNIT 221 and 222.
-C       If numSets = 2 then ADCIRC requires UNIT 223 and 224 in addition
-C                      to 221 and 222.
-C       UNIT 221 and 223 are atmospheric pressure fields
-C       UNIT 222 and 224 are wind velocity fields.
+!.....Read the number of sets of .pre and .win files from unit 22
+!       If numSets = 1 then ADCIRC requires UNIT 221 and 222.
+!       If numSets = 2 then ADCIRC requires UNIT 223 and 224 in addition
+!                      to 221 and 222.
+!       UNIT 221 and 223 are atmospheric pressure fields
+!       UNIT 222 and 224 are wind velocity fields.
 
       read(22,*,err=99999) numSets
 
@@ -94,37 +93,37 @@ C       UNIT 222 and 224 are wind velocity fields.
         stop
       endif
 
-C.....Read number of blank snaps to be inserted before OWI winds start
+!.....Read number of blank snaps to be inserted before OWI winds start
 
       read(22,*,err=99999) numBlankSnaps
 
-C.....If numBlankSnaps < 0, ABS(numBlankSnaps) snaps in OWI wind files
-C.....(UNIT 221, 222, 223 and 224) will be skipped.
+!.....If numBlankSnaps < 0, ABS(numBlankSnaps) snaps in OWI wind files
+!.....(UNIT 221, 222, 223 and 224) will be skipped.
 
       if (numBlankSnaps.LT.0) then
         numSkipSnaps = ABS(numBlankSnaps)
         numBlankSnaps = 0
       endif
 
-C.....Read a wind velocity multiplier
+!.....Read a wind velocity multiplier
 
       read(22,*,err=99999) windMultiplier
 
       close(22)
 
-C.....Read basin pre file header ---------------------------------------
+!.....Read basin pre file header ---------------------------------------
 
       OPEN(221,FILE=TRIM(GBLINPUTDIR)//'/'//'fort.221', STATUS='OLD')
 
-C.....Read begining/ending dates of pre file
+!.....Read begining/ending dates of pre file
 
       read(221,10,err=99999) title,date1p,title,date2p
 
-C.....Read basin win file header ---------------------------------------
+!.....Read basin win file header ---------------------------------------
 
       OPEN(222,FILE=TRIM(GBLINPUTDIR)//'/'//'fort.222',STATUS='OLD')
 
-C.....Read begining/ending dates of win file
+!.....Read begining/ending dates of win file
 
       read(222,10,err=99999) title,date1w,title,date2w
 
@@ -144,23 +143,23 @@ C.....Read begining/ending dates of win file
       date1B = date1p
       date2B = date2p
 
-C.....Check if region scale data exist
+!.....Check if region scale data exist
 
       IF (numSets.eq.1) GOTO 100
 
-C.....Read region pre file header --------------------------------------
+!.....Read region pre file header --------------------------------------
 
       OPEN(223,FILE=TRIM(GBLINPUTDIR)//'/'//'fort.223',STATUS='OLD')
 
-C.....Read begining/ending dates of pre file
+!.....Read begining/ending dates of pre file
 
       read(223,10,err=99999) title,date1p,title,date2p
 
-C.....Read region win file header --------------------------------------
+!.....Read region win file header --------------------------------------
 
       OPEN(224,FILE=TRIM(GBLINPUTDIR)//'/'//'fort.224',STATUS='OLD')
 
-C.....Read begining/ending dates of win file
+!.....Read begining/ending dates of win file
 
       read(224,10,err=99999) title,date1w,title,date2w
 
@@ -182,7 +181,7 @@ C.....Read begining/ending dates of win file
 
  100  CONTINUE
 
-C.....Initialize flags -------------------------------------------------
+!.....Initialize flags -------------------------------------------------
 
       isnapB   = 0
       isnapR   = 0
@@ -190,7 +189,7 @@ C.....Initialize flags -------------------------------------------------
       updateR  = 1
       cntSnaps = 0
 
-C.....Skip snaps if necessary ------------------------------------------
+!.....Skip snaps if necessary ------------------------------------------
 
       do i = 1,numSkipSnaps
         CALL NWS12GET( WVNX, WVNY, PRN, NP, RHOWAT0, G )
@@ -202,10 +201,7 @@ C.....Skip snaps if necessary ------------------------------------------
  1001 FORMAT(1X,   'HEADER INFO IN UNIT 222 AND UNIT 221 DO NOT MATCH')
  1002 FORMAT(1X,   'HEADER INFO IN UNIT 224 AND UNIT 223 DO NOT MATCH')
  1003 FORMAT(1X,   'EXECUTION WILL BE TERMINATED')
- 1004 FORMAT(//,1X,'NUMBER OF SETS WAS SPECIFIED'//
-     &             'INCORRECTLY IN UNIT 22.'/
-     &             'IT MUST BE ETEHR OF 1 or 2'/
-     &             'EXECUTION WILL BE TERMINATED.'//)
+ 1004 FORMAT(//,1X,'NUMBER OF SETS WAS SPECIFIED'//             'INCORRECTLY IN UNIT 22.'/             'IT MUST BE ETEHR OF 1 or 2'/             'EXECUTION WILL BE TERMINATED.'//)
 
 99999 CONTINUE
 
@@ -216,11 +212,11 @@ C.....Skip snaps if necessary ------------------------------------------
 
       END SUBROUTINE
 
-C***********************************************************************
-C
-C   SOBROUTINE NWS12GET
-C
-C***********************************************************************
+!***********************************************************************
+!
+!   SOBROUTINE NWS12GET
+!
+!***********************************************************************
 
       SUBROUTINE NWS12GET(WVNX,WVNY,PRN,NP,RHOWAT0,G)
       USE SIZES,ONLY : MYPROC,MNPROC
@@ -260,17 +256,13 @@ C***********************************************************************
       isnapB = isnapB+1
 
       ! Read grid specifications/date in pressure file
-      read (221,11,end=10000,err=99999) 
-     &      iLatp,iLongp,dxp,dyp,swlatp,swlongp,iCYMDHp,iMinp
+      read (221,11,end=10000,err=99999)       iLatp,iLongp,dxp,dyp,swlatp,swlongp,iCYMDHp,iMinp
 
       ! Read grid specifications/date in wind file
-      read (222,11,end=10000,err=99999) 
-     &      iLatw,iLongw,dxw,dyw,swlatw,swlongw,iCYMDHw,iMinw
+      read (222,11,end=10000,err=99999)       iLatw,iLongw,dxw,dyw,swlatw,swlongw,iCYMDHw,iMinw
 
       ! Check consistency
-      if(iLatp.ne.iLatw.or.iLongp.ne.iLongw.or.dxp.ne.dxw.or. 
-     &     dyp.ne.dyw.or.swlatp.ne.swlatw.or.swlongp.ne.swlongw.or. 
-     &     iCYMDHp.ne.iCYMDHw.or.iMinp.ne.iMinw) then
+      if(iLatp.ne.iLatw.or.iLongp.ne.iLongw.or.dxp.ne.dxw.or.      dyp.ne.dyw.or.swlatp.ne.swlatw.or.swlongp.ne.swlongw.or.      iCYMDHp.ne.iCYMDHw.or.iMinp.ne.iMinw) then
         if (myproc == 0) then
           write(screenunit,12)
           write(screenunit,13)
@@ -285,9 +277,7 @@ C***********************************************************************
 
       ! Check if header info has changed from the previous snapshot
       if(isnapB.gt.1) then
-        if(iLatp.ne.iLatB.or.iLongp.ne.iLongB.or.dxp.ne.dxB.or.
-     &       dyp.ne.dyB.or.swlatp.ne.swlatB.or.
-     &       swlongp.ne.swlongB) then
+        if(iLatp.ne.iLatB.or.iLongp.ne.iLongB.or.dxp.ne.dxB.or.       dyp.ne.dyB.or.swlatp.ne.swlatB.or.       swlongp.ne.swlongB) then
           updateB = 1
         else
           updateB = 0
@@ -303,11 +293,11 @@ C***********************************************************************
       endif
       
       ! Read pressure
-c      write(*,*) 'reading pressure ',myproc
+!      write(*,*) 'reading pressure ',myproc
       read(221,22,end=9999,err=99999) ((pB(i,j),i=1,iLongB),j=1,iLatB)
 
       ! Read u/v components of the wind
-c      write(*,*) 'reading wind components ',myproc
+!      write(*,*) 'reading wind components ',myproc
       read(222,22,end=9999,err=99999) ((uB(i,j),i=1,iLongB),j=1,iLatB)
       read(222,22,end=9999,err=99999) ((vB(i,j),i=1,iLongB),j=1,iLatB)
 
@@ -326,16 +316,12 @@ c      write(*,*) 'reading wind components ',myproc
       isnapR = isnapR+1
 
       ! Read grid specifications/date in pressure file
-      read (223,11,end=10000,err=99999) 
-     &     iLatp,iLongp,dxp,dyp,swlatp,swlongp,iCYMDHp,iMinp
+      read (223,11,end=10000,err=99999)      iLatp,iLongp,dxp,dyp,swlatp,swlongp,iCYMDHp,iMinp
 
       ! Read grid specifications/date in wind file
-      read (224,11,end=10000,err=99999) 
-     &        iLatw,iLongw,dxw,dyw,swlatw,swlongw,iCYMDHw,iMinw
+      read (224,11,end=10000,err=99999)         iLatw,iLongw,dxw,dyw,swlatw,swlongw,iCYMDHw,iMinw
 
-      if(iLatp.ne.iLatw.or.iLongp.ne.iLongw.or.dxp.ne.dxw.or.
-     &     dyp.ne.dyw.or.swlatp.ne.swlatw.or.swlongp.ne.swlongw.or.
-     &     iCYMDHp.ne.iCYMDHw.or.iMinp.ne.iMinw) then
+      if(iLatp.ne.iLatw.or.iLongp.ne.iLongw.or.dxp.ne.dxw.or.     dyp.ne.dyw.or.swlatp.ne.swlatw.or.swlongp.ne.swlongw.or.     iCYMDHp.ne.iCYMDHw.or.iMinp.ne.iMinw) then
         if (myproc == 0) then
           write(screenunit,12)
           write(screenunit,13)
@@ -350,9 +336,7 @@ c      write(*,*) 'reading wind components ',myproc
 
       ! Check if header info has changed from the previous snapshot
       if(isnapR.gt.1) then
-        if(iLatp.ne.iLatR.or.iLongp.ne.iLongR.or.dxp.ne.dxR.or. 
-     &       dyp.ne.dyR.or.swlatp.ne.swlatR.or.
-     &       swlongp.ne.swlongR) then
+        if(iLatp.ne.iLatR.or.iLongp.ne.iLongR.or.dxp.ne.dxR.or.        dyp.ne.dyR.or.swlatp.ne.swlatR.or.       swlongp.ne.swlongR) then
           updateR = 1
         else
           updateR = 0
@@ -399,9 +383,9 @@ c      write(*,*) 'reading wind components ',myproc
 ! Interpolate onto ADCIRC grid and write to file -------------------------
       
       rampfrac = isnapB-1
-c      if (rampfrac<36) then
-c        ramp = tanh(18d0*rampfrac/36d0)
-c      end if
+!      if (rampfrac<36) then
+!        ramp = tanh(18d0*rampfrac/36d0)
+!      end if
       ramp = 1.0
 
       IF(NSCREEN.GE.1) THEN
@@ -433,12 +417,9 @@ c      end if
           w3=wB(i,3)
           w4=wB(i,4)
           
-          uu=w1*uB(xi,yi)+w2*uB(xi+1,yi)+w3*
-     &         uB(xi+1,yi+1)+w4*uB(xi,yi+1)
-          vv=w1*vB(xi,yi)+w2*vB(xi+1,yi)+w3*
-     &         vB(xi+1,yi+1)+w4*vB(xi,yi+1)
-          PP=w1*pB(xi,yi)+w2*pB(xi+1,yi)+w3*
-     &         pB(xi+1,yi+1)+w4*pB(xi,yi+1)
+          uu=w1*uB(xi,yi)+w2*uB(xi+1,yi)+w3*         uB(xi+1,yi+1)+w4*uB(xi,yi+1)
+          vv=w1*vB(xi,yi)+w2*vB(xi+1,yi)+w3*         vB(xi+1,yi+1)+w4*vB(xi,yi+1)
+          PP=w1*pB(xi,yi)+w2*pB(xi+1,yi)+w3*         pB(xi+1,yi+1)+w4*pB(xi,yi+1)
           
         endif
         
@@ -454,12 +435,9 @@ c      end if
           w3=wR(i,3)
           w4=wR(i,4)
           
-          uu=w1*uR(xi,yi)+w2*uR(xi+1,yi)+
-     &         w3*uR(xi+1,yi+1)+w4*uR(xi,yi+1)
-          vv=w1*vR(xi,yi)+w2*vR(xi+1,yi)+
-     &         w3*vR(xi+1,yi+1)+w4*vR(xi,yi+1)
-          PP=w1*pR(xi,yi)+w2*pR(xi+1,yi)+
-     &         w3*pR(xi+1,yi+1)+w4*pR(xi,yi+1)
+          uu=w1*uR(xi,yi)+w2*uR(xi+1,yi)+         w3*uR(xi+1,yi+1)+w4*uR(xi,yi+1)
+          vv=w1*vR(xi,yi)+w2*vR(xi+1,yi)+         w3*vR(xi+1,yi+1)+w4*vR(xi,yi+1)
+          PP=w1*pR(xi,yi)+w2*pR(xi+1,yi)+         w3*pR(xi+1,yi+1)+w4*pR(xi,yi+1)
           
         endif
         
@@ -537,8 +515,7 @@ c      end if
       RETURN
 
 
- 11   format(t6,i4,t16,i4,t23,f6.0,t32,f6.0,
-     &     t44,f8.0,t58,f8.0,t69,i10,i2)
+ 11   format(t6,i4,t16,i4,t23,f6.0,t32,f6.0,     t44,f8.0,t58,f8.0,t69,i10,i2)
  12   format(1X,'SNAPSHOT HEADER IN WIN AND PRE FILES DO NOT MATCH')
  13   format(1X,'EXECUTION WILL BE TERMINATED')
  14   format(/,1X,'PROCESSING BASIN-SCALE WIND DATA',i12,' ',i2)
@@ -556,13 +533,13 @@ c      end if
 
       END SUBROUTINE
 
-C***********************************************************************
-C   SOBROUTINE NWS12INTERP_BASIN
-C
-C   This generates and saves interpolation coefficients for mapping
-C   from a basin-scale OWI to a ADCIRC grid.
-C
-C***********************************************************************
+!***********************************************************************
+!   SOBROUTINE NWS12INTERP_BASIN
+!
+!   This generates and saves interpolation coefficients for mapping
+!   from a basin-scale OWI to a ADCIRC grid.
+!
+!***********************************************************************
 
       SUBROUTINE NWS12INTERP_BASIN(NP)
       USE GLOBAL,ONLY : SLAM,SFEA,RAD2DEG
@@ -606,11 +583,9 @@ C***********************************************************************
         adcLat  = RAD2DEG*SFEA(i)
         adcLong = RAD2DEG*SLAM(i)
 
-        if (adcLong>=longB(1).and.adcLong<longB(iLongB) .and. 
-     &       adcLat>=latB(1).and.adcLat<latB(iLatB)) then
+        if (adcLong>=longB(1).and.adcLong<longB(iLongB) .and.        adcLat>=latB(1).and.adcLat<latB(iLatB)) then
           do j=1,iLongB-1
-            if (adcLong>=longB(j) .and.  
-     &           adcLong<longB(j+1)) then
+            if (adcLong>=longB(j) .and.             adcLong<longB(j+1)) then
               xi=j
               goto 200
             endif
@@ -618,8 +593,7 @@ C***********************************************************************
  200      continue
             
           do k=1,iLatB-1
-            if (adcLat>=latB(k) .and. 
-     &           adcLat<latB(k+1)) then
+            if (adcLat>=latB(k) .and.            adcLat<latB(k+1)) then
               yi=k
               goto 300
             endif
@@ -649,13 +623,13 @@ C***********************************************************************
       END SUBROUTINE
 
 
-C***********************************************************************
-C   SOBROUTINE NWS12INTERP_REGION
-C
-C   This generates and saves interpolation coefficients for mapping
-C   from a region-scale OWI to a ADCIRC grid.
-C
-C***********************************************************************
+!***********************************************************************
+!   SOBROUTINE NWS12INTERP_REGION
+!
+!   This generates and saves interpolation coefficients for mapping
+!   from a region-scale OWI to a ADCIRC grid.
+!
+!***********************************************************************
 
       SUBROUTINE NWS12INTERP_REGION(NP)
       USE GLOBAL,ONLY : SLAM,SFEA,RAD2DEG
@@ -698,8 +672,7 @@ C***********************************************************************
         adcLat  = RAD2DEG*SFEA(i)
         adcLong = RAD2DEG*SLAM(i)
 
-        if (adcLong>=longR(1).and.adcLong<longR(iLongR) .and. 
-     &       adcLat>=latR(1).and.adcLat<latR(iLatR)) then
+        if (adcLong>=longR(1).and.adcLong<longR(iLongR) .and.        adcLat>=latR(1).and.adcLat<latR(iLatR)) then
           do j=1,iLongR-1
             if (adcLong>=longR(j).and.adcLong<longR(j+1)) then
               xi=j

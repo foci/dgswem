@@ -1,41 +1,41 @@
-C******************************************************************************
-C     DGSWEM RELEASE VERSION 1 11/2013   
-C     
-C******************************************************************************
+!******************************************************************************
+!     DGSWEM RELEASE VERSION 1 11/2013   
+!     
+!******************************************************************************
 
       PROGRAM DGSWEM
-C     
-C     sb-disabled for Linux&Intel compiler
+!     
+!     sb-disabled for Linux&Intel compiler
 #ifdef VF
       USE DFPORT
 #endif
       USE GLOBAL
       USE HARM
       USE DG
-      USE NodalAttributes, ONLY :
-     &     NoLiBF, NWP, Tau0, HBreak, FTheta, FGamma, Tau, CF, IFNLBF,
-     &     InitNAModule, ReadNodalAttr, InitNodalAttr, ESLM, ESLC,
-     &     IFLINBF, IFHYBF
+      USE NodalAttributes, ONLY :&
+          NoLiBF, NWP, Tau0, HBreak, FTheta, FGamma, Tau, CF, IFNLBF,&
+          InitNAModule, ReadNodalAttr, InitNodalAttr, ESLM, ESLC,&
+          IFLINBF, IFHYBF
 #ifdef SWAN
-Casey 110422: Create a new data structure with discontinuous information.
-Casey 121126: DEBUG.
+!asey 110422: Create a new data structure with discontinuous information.
+!asey 121126: DEBUG.
 !     USE Couple2Adcirc, ONLY: PASS2SWAN
-Casey 101118: We need the following information to couple to unstructured SWAN.
-      USE Couple2Swan, ONLY: CouplingInterval,
-     &                       PADCSWAN_FINAL,
-     &                       PADCSWAN_INIT,
-     &                       PADCSWAN_RUN
+!asey 101118: We need the following information to couple to unstructured SWAN.
+      USE Couple2Swan, ONLY: CouplingInterval,&
+                            PADCSWAN_FINAL,&
+                            PADCSWAN_INIT,&
+                            PADCSWAN_RUN
 #endif
 #ifdef CMPI
       USE MESSENGER_ELEM
-C--   
+!--   
       IMPLICIT NONE
       
       INTEGER TESTFLAG,OUTITER,istop,i,ModetoNode
-C     sb-PDG1
+!     sb-PDG1
       REAL(4) CPU_TIME,CPU_SEC(2)
       REAL(4) TARRAY(2)
-c     nd
+!     nd
       character*80 tecfile,tecfile_max
 
       CALL MESSAGE_INIT()       ! Init MPI and get MPI-rank of this cpu
@@ -61,10 +61,10 @@ c     nd
 
       
       
-C...  
-C...  ******************* START PROGRAM SETUP SECTION ****************************
-C...  
-C     
+!...  
+!...  ******************* START PROGRAM SETUP SECTION ****************************
+!...  
+!     
       IF (IHOT.EQ.0) THEN
          CALL COLDSTART()
       ELSE
@@ -72,10 +72,10 @@ C
       ENDIF
 
 
-C...  
-C...  DETERMINE THE NUMBER OF ACTIVE ELEMENTS (MJU) and total number of 
-C...  elements (NODELE) ATTACHED TO EACH NODE
-C...  
+!...  
+!...  DETERMINE THE NUMBER OF ACTIVE ELEMENTS (MJU) and total number of 
+!...  elements (NODELE) ATTACHED TO EACH NODE
+!...  
       DO I=1,NP
          MJU(I)=0
          NODELE(I)=0
@@ -100,11 +100,11 @@ C...
       END DO
       
       
-C...  
-C...  ************* SET FLAGS AND COEFFICIENTS USED IN TIME STEPPING ***********
-C...  
+!...  
+!...  ************* SET FLAGS AND COEFFICIENTS USED IN TIME STEPPING ***********
+!...  
 
-C...  NONLINEAR FLAGS
+!...  NONLINEAR FLAGS
 
       IF(NOLIBF.EQ.0) THEN
          IFNLBF=0
@@ -150,12 +150,12 @@ C...  NONLINEAR FLAGS
       IFWIND=1
       IF(IM.EQ.1) IFWIND=0
  
-C...  CONSTANT COEFFICIENTS
-cjj   w - version m10
-cjj   w      TT0L=((1.0+0.5*DT*TAU0)/DT)/DT
+!...  CONSTANT COEFFICIENTS
+!jj   w - version m10
+!jj   w      TT0L=((1.0+0.5*DT*TAU0)/DT)/DT
       GA00=G*A00
-cjj   w - version m10
-cjj   w      TT0R=((0.5*TAU0*DT-1.0)/DT)/DT
+!jj   w - version m10
+!jj   w      TT0R=((0.5*TAU0*DT-1.0)/DT)/DT
       GC00=G*C00
       TADVODT=IFNLCAT/DT
       GB00A00=G*(B00+A00)
@@ -167,10 +167,10 @@ cjj   w      TT0R=((0.5*TAU0*DT-1.0)/DT)/DT
       SADVDTO3=IFNLCT*DT/3.D0
 
       
-C*************************DG SWEM*******************************
+!*************************DG SWEM*******************************
 
-c     write(200+myproc,*) 'call prep_dg'
-c     write(200+myproc,*) 'back from prep_dg'
+!     write(200+myproc,*) 'call prep_dg'
+!     write(200+myproc,*) 'back from prep_dg'
 
       CALL PREP_DG()
       CALL WRITE_RESULTS(0,.FALSE.)
@@ -212,12 +212,12 @@ c     write(200+myproc,*) 'back from prep_dg'
      $        ' DATAPACKING=BLOCK ',' VARLOCATION=([3,4,5,6,7,8,10,11,12,13,14]=CELLCENTERED) ',
      $        'SOLUTIONTIME=',time_a 
 
-c$$$  write(777,7777) x(i), y(i),  
-c$$$  $        dp(i), eta2(i), eta2(i)+dp(i),uu2(i),vv2(i),
-c$$$  $        sqrt(uu2(i)**2+vv2(i)**2),sqrt(wsx2(i)**2+wsy2(i)**2),
-c$$$  $        myproc,tracer(i),tracer2(i),abs(tracer(i)+tracer2(i)),
-c$$$  $        abs(tracer(i)-tracer2(i))
-c$$$  enddo
+!$$$  write(777,7777) x(i), y(i),  
+!$$$  $        dp(i), eta2(i), eta2(i)+dp(i),uu2(i),vv2(i),
+!$$$  $        sqrt(uu2(i)**2+vv2(i)**2),sqrt(wsx2(i)**2+wsy2(i)**2),
+!$$$  $        myproc,tracer(i),tracer2(i),abs(tracer(i)+tracer2(i)),
+!$$$  $        abs(tracer(i)-tracer2(i))
+!$$$  enddo
 
          do i=1,np
             write(777,7777)  x(i)
@@ -293,19 +293,19 @@ c$$$  enddo
 #endif
 
 #ifdef SWAN
-Casey 101118: Allow SWAN to initialize stuff before the start
-C             of the time step loop.  This subroutine is inside
-C             the 'couple2swan.F' src file.
+!asey 101118: Allow SWAN to initialize stuff before the start
+!             of the time step loop.  This subroutine is inside
+!             the 'couple2swan.F' src file.
       CALL PADCSWAN_INIT
 #endif
 
-C.....Write heading to unit 16
+!.....Write heading to unit 16
       WRITE(16,1112)
       WRITE(16,17931)
       IF (NSCREEN.EQ.1.AND.MYPROC.EQ.0) WRITE(6,1112)
       IF (NSCREEN.EQ.1.AND.MYPROC.EQ.0) WRITE(6,17931)
 
-C     sb...Write initial conditions
+!     sb...Write initial conditions
       CALL WRITE_DG_IC()
 #ifdef CMPI
 !     istop=1
@@ -314,19 +314,19 @@ C     sb...Write initial conditions
 !     stop
 !     endif
 #endif
-C.....Begin time stepping
+!.....Begin time stepping
       DO 200 ITIME_A = ITHS+1,NT
-c$$$         if (mod(itime_a,1000).eq.1) then
-c$$$            if (myproc.eq.0) write(*,*) 'timestep ',itime_a
-c$$$c     write(200+myproc,*) 'timestep ',itime_a,myproc
-c$$$         endif
+!$$$         if (mod(itime_a,1000).eq.1) then
+!$$$            if (myproc.eq.0) write(*,*) 'timestep ',itime_a
+!$$$c     write(200+myproc,*) 'timestep ',itime_a,myproc
+!$$$         endif
          CALL DG_TIMESTEP(ITIME_A)
 #ifdef SWAN
-Casey 090302: If it is time, then call the following subroutine
-C             to then call the SWAN time-stepping subroutine.
+!asey 090302: If it is time, then call the following subroutine
+!             to then call the SWAN time-stepping subroutine.
          IF(MOD(ITIME_A,CouplingInterval).EQ.0)THEN
            CALL PADCSWAN_RUN(ITIME_A)
-Casey 121126: DEBUG.
+!asey 121126: DEBUG.
 !          IF(ALLOCATED(PASS2SWAN))THEN
 !             DO I=1,NP
 !                DO J=1,PASS2SWAN(I)%NO_NBORS
@@ -342,18 +342,18 @@ Casey 121126: DEBUG.
 17931 FORMAT(//,1X,'LIMITED RUNTIME INFORMATION SECTION ',//)
       
 
-C...  
-C...  ****************** TIME STEPPING LOOP ENDS HERE ********************
-C...  
-C...  
-C...  IF IHARIND=1 SOLVE THE HARMONIC ANALYSIS PROBLEM AND WRITE OUTPUT
-C...  
+!...  
+!...  ****************** TIME STEPPING LOOP ENDS HERE ********************
+!...  
+!...  
+!...  IF IHARIND=1 SOLVE THE HARMONIC ANALYSIS PROBLEM AND WRITE OUTPUT
+!...  
       IF ((IHARIND.EQ.1).AND.(ITIME_A.GT.ITHAS)) THEN
 
-C...  LINES COMPUTE MEANS AND VARIANCES
-C...  FOR CHECKING THE HARMONIC ANALYSIS RESULTS.
-C...  ACCUMULATE VARIANCE AND MEAN OF RECORD AT NODES.
-C     
+!...  LINES COMPUTE MEANS AND VARIANCES
+!...  FOR CHECKING THE HARMONIC ANALYSIS RESULTS.
+!...  ACCUMULATE VARIANCE AND MEAN OF RECORD AT NODES.
+!     
          if (CHARMV) then
             IF (FMV.NE.0.) THEN
                DO I=1,NP
@@ -369,82 +369,80 @@ C
                WRITE(55,*) NP
             ENDIF
          endif                  !  charmv
-C...  
-C......Fill out and decompose the LHS harmonic analaysis matrix
-C...  
+!...  
+!......Fill out and decompose the LHS harmonic analaysis matrix
+!...  
          CALL FULSOL(0)
-C...  
-C......Solve the harmonic analysis problem and write the output
-C...  
+!...  
+!......Solve the harmonic analysis problem and write the output
+!...  
          IF(NHAGE.EQ.1) CALL LSQSOLEG(NP,DIRNAME,LNAME,ELAV,ELVA)
-C     
-         IF(NHAGV.EQ.1) CALL LSQSOLVG(NP,DIRNAME,LNAME,
-     &        XVELAV,YVELAV,XVELVA,YVELVA)
-C     
+!     
+         IF(NHAGV.EQ.1) CALL LSQSOLVG(NP,DIRNAME,LNAME,XVELAV,YVELAV,XVELVA,YVELVA)
+!     
          IF(NHASE.EQ.1) CALL LSQSOLES(NSTAE,DIRNAME,LNAME)
-C     
+!     
          IF(NHASV.EQ.1) CALL LSQSOLVS(NSTAV,DIRNAME,LNAME)
-C     
+!     
       ENDIF
       
 #ifdef SWAN
-Casey 101118: Let SWAN clean up stuff.
+!asey 101118: Let SWAN clean up stuff.
       CALL PADCSWAN_FINAL
 #endif
 
 #ifdef CMPI
       CALL MESSAGE_FINI()
 #endif
-C     
-C     
+!     
+!     
 #ifdef VF
-C     CALL ETIME(TARRAY)
-C     CPU_TIME = TARRAY(1) + TARRAY(2)
-C     PRINT*,'CPU_TIME = ',CPU_TIME
+!     CALL ETIME(TARRAY)
+!     CPU_TIME = TARRAY(1) + TARRAY(2)
+!     PRINT*,'CPU_TIME = ',CPU_TIME
 #endif
 
-      CALL ETIME(TARRAY)
-      CPU_TIME = TARRAY(1) + TARRAY(2)
+      CALL ETIME(TARRAY,CPU_TIME)
+!      CPU_TIME = TARRAY(1) + TARRAY(2)
       PRINT*,'CPU_TIME = ',CPU_TIME
       STOP
       END
 
-C******************************************************************************
-C     *
-C     Subroutine to generate a neighbor table from a connectivity table.     *
-c     *
-c     NOTE:the node itself is listed as neighbor #1                          *
-c     NOTE:all other neighbors are sorted and placed in cw order from east   *
-c     *
-c     R.L.       4/26/95                                    *
-C******************************************************************************
-C     *
-C     -  PARAMETERS WHICH MUST BE SET TO CONTROL THE DIMENSIONING OF ARRAYS   *
-C     ARE AS FOLLOWS:                                                   *
-C     *
-C     MNP = MAXIMUM NUMBER OF NODAL POINTS                               *
-C     MNE = MAXIMUM NUMBER OF ELEMENTS                                   *
-C     MNEI= 1+MAXIMUM NUMBER OF NODES CONNECTED TO ANY ONE NODE IN THE   *
-C     FINITE ELEMENT GRID                                       *
-C     *
-C******************************************************************************
-C     *
-C     VARIABLE DEFINITIONS:                                                 *
-C     NE - NUMBER OF ELEMENTS                                               *
-C     NP - NUMBER OF NODES                                                  *
-C     NM(MNE,3) - NODE NUMBERS ASSOCIATED WITH EACH ELEMENT                 *
-C     NNEIGH(MNP) NUMBER OF NEIGHBORS FOR EACH NODE                         *
-C     NNEIGH_ELEM(MNP) NUMBER OF NEIGHBORS BY ELEMENT                       *
-C     NEIGH(MNP,NEIMAX) 2D ARRAY OF NEIGHBORS FOR EACH NODE                 *
-C     NEIMIN - 1+MINIMUM NUMBER OF NEIGHBORS FOR ANY NODE                   *
-C     NEIMAX - 1+MAXIMUM NUMBER OF NEIGHBORS FOR ANY NODE                   *
-C     *
-C******************************************************************************
-C     
-      SUBROUTINE NEIGHB(NE,NP,NM,NNEIGH,NEIGH,NEIMIN,NEIMAX,
-     &     X,Y,NSCREEN,NNEIGH_ELEM,NEIGH_ELEM)
+!******************************************************************************
+!     *
+!     Subroutine to generate a neighbor table from a connectivity table.     *
+!     *
+!     NOTE:the node itself is listed as neighbor #1                          *
+!     NOTE:all other neighbors are sorted and placed in cw order from east   *
+!     *
+!     R.L.       4/26/95                                    *
+!******************************************************************************
+!     *
+!     -  PARAMETERS WHICH MUST BE SET TO CONTROL THE DIMENSIONING OF ARRAYS   *
+!     ARE AS FOLLOWS:                                                   *
+!     *
+!     MNP = MAXIMUM NUMBER OF NODAL POINTS                               *
+!     MNE = MAXIMUM NUMBER OF ELEMENTS                                   *
+!     MNEI= 1+MAXIMUM NUMBER OF NODES CONNECTED TO ANY ONE NODE IN THE   *
+!     FINITE ELEMENT GRID                                       *
+!     *
+!******************************************************************************
+!     *
+!     VARIABLE DEFINITIONS:                                                 *
+!     NE - NUMBER OF ELEMENTS                                               *
+!     NP - NUMBER OF NODES                                                  *
+!     NM(MNE,3) - NODE NUMBERS ASSOCIATED WITH EACH ELEMENT                 *
+!     NNEIGH(MNP) NUMBER OF NEIGHBORS FOR EACH NODE                         *
+!     NNEIGH_ELEM(MNP) NUMBER OF NEIGHBORS BY ELEMENT                       *
+!     NEIGH(MNP,NEIMAX) 2D ARRAY OF NEIGHBORS FOR EACH NODE                 *
+!     NEIMIN - 1+MINIMUM NUMBER OF NEIGHBORS FOR ANY NODE                   *
+!     NEIMAX - 1+MAXIMUM NUMBER OF NEIGHBORS FOR ANY NODE                   *
+!     *
+!******************************************************************************
+!     
+      SUBROUTINE NEIGHB(NE,NP,NM,NNEIGH,NEIGH,NEIMIN,NEIMAX,X,Y,NSCREEN,NNEIGH_ELEM,NEIGH_ELEM)
       USE SIZES
-C     
+!     
       INTEGER NP,NE,NEIMIN,NEIMAX,NSCREEN,N,NN,EN1,EN2,EN3,I,J
       INTEGER :: NEIGH(MNP,MNEI),NNEIGH(MNP),NNEIGH_ELEM(MNP)
       INTEGER NM(MNE,3),NEIGH_ELEM(MNP,MNEI)
@@ -452,12 +450,12 @@ C
       REAL(8) ANGLELOW,ANGLEMORE,RAD2DEG
       REAL(8), ALLOCATABLE :: ANGLE(:)
       INTEGER,ALLOCATABLE :: NEITEM(:)
-C     
+!     
       ALLOCATE ( ANGLE(MNEI) )
       ALLOCATE ( NEITEM(MNP) )
-C     
+!     
       RAD2DEG=45.0d0/ATAN(1.0d0)
-C     
+!     
       DO N=1,NP
          NNEIGH(N) = 0
 	 NNEIGH_ELEM(N) = 0
@@ -466,7 +464,7 @@ C
 	    NEIGH_ELEM(N,NN) = 0
          ENDDO
       ENDDO
-C     
+!     
       DO 10 N=1,NE
          EN1 = NM(N,1)
          EN2 = NM(N,2)
@@ -499,9 +497,9 @@ C
                   NEIGH(EN2,NNEIGH(EN2))=EN3
                   NEIGH(EN3,NNEIGH(EN3))=EN2
  10            CONTINUE
-C     
-C     INSERT NODE ITSELF IN PLACE #1 and SORT other NEIGHBORS by increasing cw angle from East
-C     
+!     
+!     INSERT NODE ITSELF IN PLACE #1 and SORT other NEIGHBORS by increasing cw angle from East
+!     
                DO I=1,NP
                   DO J=1,NNEIGH(I)
                      NEITEM(J)=NEIGH(I,J)
@@ -522,8 +520,8 @@ C
                   DO JJ=1,NNEIGH(I)
                      ANGLELOW=400.d0
                      DO J=1,NNEIGH(I)
-                        IF((ANGLE(J).LT.ANGLELOW).AND.(ANGLE(J).GT.ANGLEMORE))
-     &                       THEN
+                        IF((ANGLE(J).LT.ANGLELOW).AND.(ANGLE(J).GT.ANGLEMORE))&
+                            THEN
                            ANGLELOW=ANGLE(J)
                            JLOW=J
                         ENDIF
@@ -535,48 +533,42 @@ C
                   NNEIGH(I)=NNEIGH(I)+1
                ENDDO
 
-C     
-C     DETERMINE THE MAXIMUM AND MINIMUM NUMBER OF NEIGHBORS
-C     
+!     
+!     DETERMINE THE MAXIMUM AND MINIMUM NUMBER OF NEIGHBORS
+!     
                NEIMAX = 0
                NEIMIN = 1000
                DO 60 N=1,NP
                   IF(NNEIGH(N).LT.NEIMIN) NEIMIN=NNEIGH(N)
                   IF(NNEIGH(N).GT.NEIMAX) NEIMAX=NNEIGH(N)
  60            CONTINUE
-C     
+!     
                RETURN
 
-C     TERMINATE PROGRAM IF MAXIMUM NUMBER OF NEIGHBORS SET TOO SMALL
+!     TERMINATE PROGRAM IF MAXIMUM NUMBER OF NEIGHBORS SET TOO SMALL
 
  999           CONTINUE
                IF(NSCREEN.EQ.1.AND.MYPROC.EQ.0) WRITE(6,99311)
                WRITE(16,99311)
-99311          FORMAT(////,1X,'!!!!!!!!!!  WARNING - FATAL ERROR !!!!!!!!!',
-     &              //,1X,'THE DIMENSIONING PARAMETER MNEI IS TOO SMALL'
-     &              /,1X,'USER MUST RE-DIMENSION PROGRAM',
-     &              //,1X,'!!!!!! EXECUTION WILL NOW BE TERMINATED !!!!!!',//)
+99311          FORMAT(////,1X,'!!!!!!!!!!  WARNING - FATAL ERROR !!!!!!!!!',              //,1X,'THE DIMENSIONING PARAMETER MNEI IS TOO SMALL'              /,1X,'USER MUST RE-DIMENSION PROGRAM',              //,1X,'!!!!!! EXECUTION WILL NOW BE TERMINATED !!!!!!',//)
                STOP
 
  998           CONTINUE
                IF(NSCREEN.EQ.1.AND.MYPROC.EQ.0) WRITE(6,99312) I,NEITEM(J)
                WRITE(16,99312) I,NEITEM(J)
-99312          FORMAT(////,1X,'!!!!!!!!!!  WARNING - FATAL ERROR !!!!!!!!!',
-     &              //,1X,'NODES ',I7,' AND ',I7,
-     &         ' HAVE THE SAME COORDINATES'
-     &              //,1X,'!!!!!! EXECUTION WILL NOW BE TERMINATED !!!!!!',//)
+99312          FORMAT(////,1X,'!!!!!!!!!!  WARNING - FATAL ERROR !!!!!!!!!',              //,1X,'NODES ',I7,' AND ',I7,         ' HAVE THE SAME COORDINATES'              //,1X,'!!!!!! EXECUTION WILL NOW BE TERMINATED !!!!!!',//)
 
                STOP
                END         
       
 
 
-C******************************************************************************
-C                                                                             *
-C    Transform from lon,lat (lamda,phi) coordinates into CPP coordinates.     *
-C    Lon,Lat must be in radians.                                              *
-C                                                                             *
-C******************************************************************************
+!******************************************************************************
+!                                                                             *
+!    Transform from lon,lat (lamda,phi) coordinates into CPP coordinates.     *
+!    Lon,Lat must be in radians.                                              *
+!                                                                             *
+!******************************************************************************
 
       SUBROUTINE CPP(X,Y,RLAMBDA,PHI,RLAMBDA0,PHI0)
       REAL*8 X,Y,RLAMBDA,PHI,RLAMBDA0,PHI0,R
@@ -587,12 +579,12 @@ C******************************************************************************
       END
 
 
-C******************************************************************************
-C                                                                             *
-C    Transform from CPP coordinates to lon,lat (lamda,phi) coordinates        *
-C    Lon,Lat is in radians.                                                   *
-C                                                                             *
-C******************************************************************************
+!******************************************************************************
+!                                                                             *
+!    Transform from CPP coordinates to lon,lat (lamda,phi) coordinates        *
+!    Lon,Lat is in radians.                                                   *
+!                                                                             *
+!******************************************************************************
 
       SUBROUTINE INVCP(XXCP,YYCP,RLAMBDA,PHI,RLAMBDA0,PHI0)
       REAL*8 XXCP,YYCP,RLAMBDA,PHI,RLAMBDA0,PHI0,R

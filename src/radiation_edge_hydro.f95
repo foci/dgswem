@@ -1,32 +1,32 @@
-C***********************************************************************
-C     
-C     SUBROUTINE RADIATION_EDGE_HYDRO( )
-C     
-C     This subroutine does the following:
-C     
-C     1.  Calculates the values of the necessary variables at the edge
-C     gauss points for RADIATION edges
-C     2.  Calls the appropriate subroutine to compute the flux at
-C     these points.
-C     3.  Compute the boundary integrals.
-C     
-C     Written by Ethan Kubatko (06-11-2004)
-C     01-10-2011 - cem - adapted for p_enrichment and multicomponent
-C     You know, this file is not really up to date.  
-C     If you need to use it, you might fix it first -- cem
-C     
-C***********************************************************************
+!***********************************************************************
+!     
+!     SUBROUTINE RADIATION_EDGE_HYDRO( )
+!     
+!     This subroutine does the following:
+!     
+!     1.  Calculates the values of the necessary variables at the edge
+!     gauss points for RADIATION edges
+!     2.  Calls the appropriate subroutine to compute the flux at
+!     these points.
+!     3.  Compute the boundary integrals.
+!     
+!     Written by Ethan Kubatko (06-11-2004)
+!     01-10-2011 - cem - adapted for p_enrichment and multicomponent
+!     You know, this file is not really up to date.  
+!     If you need to use it, you might fix it first -- cem
+!     
+!***********************************************************************
 
       SUBROUTINE RADIATION_EDGE_HYDRO(IT)
 
-C.....Use appropriate modules
+!.....Use appropriate modules
 
       USE GLOBAL
       USE DG
       USE sizes, ONLY: myproc,layers
       IMPLICIT NONE
 
-C.....Declare local variables
+!.....Declare local variables
 
       INTEGER L, LED, GED,i,k,ll,IT
       REAL(SZ) TX, TY, W_IN, DEN
@@ -37,12 +37,12 @@ C.....Declare local variables
       test_el = 0
       DO 1000 L = 1,NREDS
          
-C.....Retrieve the global and local edge number
+!.....Retrieve the global and local edge number
 
          GED = NREDN(L)
          LED = NEDSD(1,GED)
 
-C.....Retrieve the elements which share the edge
+!.....Retrieve the elements which share the edge
 
          EL_IN = NEDEL(1,GED)
 
@@ -54,21 +54,21 @@ C.....Retrieve the elements which share the edge
          endif
 #endif
          
-C.....If the element is dry then skip the edge calculation
+!.....If the element is dry then skip the edge calculation
 
          IF (WDFLG(EL_IN).EQ.0) GOTO 1000
          test_el = test_el+1
 
-C.....Retrieve the components of the normal vector to the edge
+!.....Retrieve the components of the normal vector to the edge
          
          NX = COSNX(GED)
          NY = SINNX(GED)
-C.....Set the components for the tangential vector to the edge
+!.....Set the components for the tangential vector to the edge
          
          TX = -NY
          TY =  NX
 
-C.....Compute ZE, QX, QY, and HB at each Gauss point
+!.....Compute ZE, QX, QY, and HB at each Gauss point
 
          DO I = 1,NEGP(pa)
 
@@ -117,7 +117,7 @@ C.....Compute ZE, QX, QY, and HB at each Gauss point
             HB_IN = HB(1,EL_IN,irk)
 #endif
 
-C.....Compute the solution at the interior state
+!.....Compute the solution at the interior state
 
             DO K = 2,DOFS(EL_IN)
                
@@ -164,18 +164,18 @@ C.....Compute the solution at the interior state
 
             ENDDO
 
-C.....Compute the velocity in the normal and tangental direction
+!.....Compute the velocity in the normal and tangental direction
             
             Q_N_INT = QX_IN*NX + QY_IN*NY
             Q_T_INT = QX_IN*TX + QY_IN*TY
 
-C.....Reflect the velocity in the normal direction
+!.....Reflect the velocity in the normal direction
 
-c     Q_N_EXT = -Q_N_INT
+!     Q_N_EXT = -Q_N_INT
             Q_N_EXT = -Q_N_INT+2*SQRT(G/(HB_IN+ZE_IN))*ZE_IN
             Q_T_EXT =  Q_T_INT
             
-C.....Compute the x and y components of the external state flow
+!.....Compute the x and y components of the external state flow
 
             DEN = 1.D0/(NX*TY - NY*TX)
             QX_EX = ( TY*Q_N_EXT - NY*Q_T_EXT)*DEN
@@ -205,16 +205,16 @@ C.....Compute the x and y components of the external state flow
             dynP_EX = dynP_IN
 #endif
 
-C.....Compute the flux
+!.....Compute the flux
 
             CALL NUMERICAL_FLUX(IT,test_el)
             
-C.....Compute the edge integral
+!.....Compute the edge integral
 
             
             DO K = 1,DOFS(EL_IN)
-               W_IN = 2.0*M_INV(K,pa)/AREAS(EL_IN)*XLEN(GED)*
-     &              PHI_EDGE(K,I,LED,pa)*WEGP(I,pa)
+               W_IN = 2.0*M_INV(K,pa)/AREAS(EL_IN)*XLEN(GED)*&
+                   PHI_EDGE(K,I,LED,pa)*WEGP(I,pa)
                RHS_ZE(K,EL_IN,IRK) = RHS_ZE(K,EL_IN,IRK) - W_IN*F_HAT
                RHS_QX(K,EL_IN,IRK) = RHS_QX(K,EL_IN,IRK) - W_IN*G_HAT
                RHS_QY(K,EL_IN,IRK) = RHS_QY(K,EL_IN,IRK) - W_IN*H_HAT
@@ -239,7 +239,7 @@ C.....Compute the edge integral
 #endif
 
                
-c     !CALL EDGE_INT_HYDRO(EL_IN, LED, GED, I, F_HAT, G_HAT, H_HAT,k)
+!     !CALL EDGE_INT_HYDRO(EL_IN, LED, GED, I, F_HAT, G_HAT, H_HAT,k)
 
             ENDDO
 

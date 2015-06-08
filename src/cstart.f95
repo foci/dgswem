@@ -1,23 +1,23 @@
-C**************************************************************************
-C  mod history
-C  v41.06mxxx - date - programmer - describe change 
-C                    - mark change in code with  cinitials-mxxx
-C
-C  v41.11 - 09/14/01 - rl - from 41.09 - modified for NWS=-2
-C  v41.09 - 06/30/01 - jw - from 41.08 - made minor mods as per vp version 41.05 
-C  v41.08 - 06/22/01 - rl - from 41.07 - added 41.05m009 changes to HABSMIN
-C                                        and ETA2
-C  v41.07 - 04/09/01 - rl - from 41.06 - initialized PRN1(), PRN2() for NRS<>0
-C**************************************************************************
-C
+!**************************************************************************
+!  mod history
+!  v41.06mxxx - date - programmer - describe change 
+!                    - mark change in code with  cinitials-mxxx
+!
+!  v41.11 - 09/14/01 - rl - from 41.09 - modified for NWS=-2
+!  v41.09 - 06/30/01 - jw - from 41.08 - made minor mods as per vp version 41.05 
+!  v41.08 - 06/22/01 - rl - from 41.07 - added 41.05m009 changes to HABSMIN
+!                                        and ETA2
+!  v41.07 - 04/09/01 - rl - from 41.06 - initialized PRN1(), PRN2() for NRS<>0
+!**************************************************************************
+!
         SUBROUTINE COLDSTART()
-C
-C**************************************************************************
-C
-C  COLD START PROGRAM SETUP ROUTINE 
-C
-C**************************************************************************
-C
+!
+!**************************************************************************
+!
+!  COLD START PROGRAM SETUP ROUTINE 
+!
+!**************************************************************************
+!
       USE SIZES
       USE GLOBAL
       USE HARM
@@ -27,14 +27,14 @@ C
       IMPLICIT NONE
 
       INTEGER i,j
-C
+!
       ITHS = 0
 
-C...
-C....SET AT REST INITIAL CONDITION OVER WHOLE DOMAIN
-C....IF BOTTOM IS ABOVE THE GEIOD -> DRY NODE
-C....IF BOTTOM IS INITIALLY BELOW THE GEIOD AND STARTDRY=-88888 -> DRY NODE
-C...
+!...
+!....SET AT REST INITIAL CONDITION OVER WHOLE DOMAIN
+!....IF BOTTOM IS ABOVE THE GEIOD -> DRY NODE
+!....IF BOTTOM IS INITIALLY BELOW THE GEIOD AND STARTDRY=-88888 -> DRY NODE
+!...
         HABSMIN=0.8d0*H0
         DO I=1,NP
           UU1(I) =0.D0
@@ -49,11 +49,11 @@ C...
             IF(HTOT.LE.H0) THEN
               NNODECODE(I)=0
               ETA2(I)=H0-DP(I)
-C              ELSE
-C              IF(STARTDRY(I).EQ.-88888) THEN
-C                NNODECODE(I)=0
-C                ETA2(I)=H0-DP(I)
-C                ENDIF
+!              ELSE
+!              IF(STARTDRY(I).EQ.-88888) THEN
+!                NNODECODE(I)=0
+!                ETA2(I)=H0-DP(I)
+!                ENDIF
             ENDIF
           ENDIF
           ETA1(I)=ETA2(I)
@@ -61,18 +61,18 @@ C                ENDIF
           CH1(I)=0.d0
           END DO
 
-C...
-C....INITIALIZE THE ELEVATION SPECIFIED BOUNDARY CONDITION IF IT REQUIRES THE USE
-C....OF THE UNIT 19 FILE.
-C...
+!...
+!....INITIALIZE THE ELEVATION SPECIFIED BOUNDARY CONDITION IF IT REQUIRES THE USE
+!....OF THE UNIT 19 FILE.
+!...
 
         IF((NOPE.GT.0).AND.(NBFR.EQ.0)) THEN
           IF(NSCREEN.EQ.1.AND.MYPROC.EQ.0) WRITE(6,1112)
           WRITE(16,1112)
           IF(NSCREEN.EQ.1.AND.MYPROC.EQ.0) WRITE(6,1977)
           WRITE(16,1977)
- 1977     FORMAT(/,1X,'ELEVATION SPECIFIED INFORMATION READ FROM UNIT ',
-     &           '19',/)
+ 1977     FORMAT(/,1X,'ELEVATION SPECIFIED INFORMATION READ FROM UNIT ',&
+           '19',/)
           OPEN(19,FILE=DIRNAME//'/'//'fort.19')
           READ(19,*) ETIMINC
           DO J=1,NETA
@@ -85,7 +85,7 @@ C...
           ETIME2 = ETIME1 + ETIMINC
         ENDIF
 
-C....INITIALIZE THE NORMAL FLOW BOUNDARY CONDITION
+!....INITIALIZE THE NORMAL FLOW BOUNDARY CONDITION
 
         DO I=1,NVEL
           QN2(I)=0.D0
@@ -103,25 +103,25 @@ C....INITIALIZE THE NORMAL FLOW BOUNDARY CONDITION
           READ(20,*) FTIMINC
           DO J=1,NVEL
             QNIN1(J)=0.D0
-            IF((LBCODEI(J).EQ.2).OR.(LBCODEI(J).EQ.12)
-     &                          .OR.(LBCODEI(J).EQ.22))
-     &                                          READ(20,*) QNIN1(J)
+            IF((LBCODEI(J).EQ.2).OR.(LBCODEI(J).EQ.12)&
+                          .OR.(LBCODEI(J).EQ.22))&
+                                          READ(20,*) QNIN1(J)
             END DO
           DO J=1,NVEL
             QNIN2(J)=0.D0
-            IF((LBCODEI(J).EQ.2).OR.(LBCODEI(J).EQ.12)
-     &                          .OR.(LBCODEI(J).EQ.22))
-     &                                          READ(20,*) QNIN2(J)
+            IF((LBCODEI(J).EQ.2).OR.(LBCODEI(J).EQ.12)&
+                          .OR.(LBCODEI(J).EQ.22))&
+                                          READ(20,*) QNIN2(J)
             END DO
           QTIME1 = STATIM*86400.D0
           QTIME2 = QTIME1 + FTIMINC
           ENDIF
 
-C...INPUT METEOROLOGICAL INFORMATION FROM UNIT 22 OR UNIT 200 SERIES
-C....IF FLEET NUMERIC WIND DATA IS USED, FIND BEGINNING TIME IN FILE,
-C....NOTE: CAN'T DEAL WITH WIND THAT STARTS AFTER WREFTIM!!!!!!!!!!!!
-C....READ IN AND INTERPOLATE IN SPACE ONTO THE ADCIRC GRID THE
-C....TIME LEVEL 1 AND LEVEL 2 WIND FIELDS
+!...INPUT METEOROLOGICAL INFORMATION FROM UNIT 22 OR UNIT 200 SERIES
+!....IF FLEET NUMERIC WIND DATA IS USED, FIND BEGINNING TIME IN FILE,
+!....NOTE: CAN'T DEAL WITH WIND THAT STARTS AFTER WREFTIM!!!!!!!!!!!!
+!....READ IN AND INTERPOLATE IN SPACE ONTO THE ADCIRC GRID THE
+!....TIME LEVEL 1 AND LEVEL 2 WIND FIELDS
 
         IF(NWS.NE.0) THEN
           DO I=1,NP
@@ -154,9 +154,9 @@ C....TIME LEVEL 1 AND LEVEL 2 WIND FIELDS
 
         IF(NWS.EQ.3) THEN
           OPEN(22,FILE=DIRNAME//'/'//'fort.22')
- 2222     CALL NWS3GET( X, Y, SLAM, SFEA, WVNX2, WVNY2, IWTIME, IWYR,
-     &                  WTIMED, NP, NWLON, NWLAT, WLATMAX, WLONMIN,
-     &                  WLATINC, WLONINC, ICS, NSCREEN, ScreenUnit )
+ 2222     CALL NWS3GET( X, Y, SLAM, SFEA, WVNX2, WVNY2, IWTIME, IWYR,&
+                  WTIMED, NP, NWLON, NWLAT, WLATMAX, WLONMIN,&
+                  WLATINC, WLONINC, ICS, NSCREEN, ScreenUnit )
           IF(IWYR.NE.IREFYR) THEN
             IWTIMEP=IWTIME
             DO I=1,NP
@@ -173,11 +173,11 @@ C....TIME LEVEL 1 AND LEVEL 2 WIND FIELDS
               END DO
             GOTO 2222
             ENDIF
-          IF(NSCREEN.EQ.1.AND.MYPROC.EQ.0) 
-     &         WRITE(6,*)'FOUND WIND DATA AT TIME= ',IWTIMEP
+          IF(NSCREEN.EQ.1.AND.MYPROC.EQ.0) &
+         WRITE(6,*)'FOUND WIND DATA AT TIME= ',IWTIMEP
           WRITE(16,*) 'FOUND WIND DATA AT TIME= ',IWTIMEP
-          IF(NSCREEN.EQ.1.AND.MYPROC.EQ.0) 
-     &         WRITE(6,*)'FOUND WIND DATA AT TIME= ',IWTIME
+          IF(NSCREEN.EQ.1.AND.MYPROC.EQ.0) &
+         WRITE(6,*)'FOUND WIND DATA AT TIME= ',IWTIME
           WRITE(16,*) 'FOUND WIND DATA AT TIME= ',IWTIME
           WTIME2=WTIMED-WREFTIM                  !CAST INTO MODEL TIME REFRENCE
           WTIME1=WTIME2-WTIMINC
@@ -201,10 +201,10 @@ C....TIME LEVEL 1 AND LEVEL 2 WIND FIELDS
 
         IF(NWS.EQ.6) THEN
           OPEN(22,FILE=DIRNAME//'/'//'fort.22')
-          CALL NWS6GET(X,Y,SLAM,SFEA,WVNX1,WVNY1,PRN1,NP,NWLON,NWLAT,
-     &                 WLATMAX,WLONMIN,WLATINC,WLONINC,ICS,RHOWAT0,G)
-          CALL NWS6GET(X,Y,SLAM,SFEA,WVNX2,WVNY2,PRN2,NP,NWLON,NWLAT,
-     &                 WLATMAX,WLONMIN,WLATINC,WLONINC,ICS,RHOWAT0,G)
+          CALL NWS6GET(X,Y,SLAM,SFEA,WVNX1,WVNY1,PRN1,NP,NWLON,NWLAT,&
+                 WLATMAX,WLONMIN,WLATINC,WLONINC,ICS,RHOWAT0,G)
+          CALL NWS6GET(X,Y,SLAM,SFEA,WVNX2,WVNY2,PRN2,NP,NWLON,NWLAT,&
+                 WLATMAX,WLONMIN,WLATINC,WLONINC,ICS,RHOWAT0,G)
           WTIME1 = STATIM*86400.D0
           WTIME2 = WTIME1 + WTIMINC
           ENDIF
@@ -213,11 +213,11 @@ C....TIME LEVEL 1 AND LEVEL 2 WIND FIELDS
           WTIME1=STATIM*86400.D0
           WTIME2=WTIME1+WTIMINC
           NWSGGWI=-1
-          CALL NWS10GET(NWSGGWI,SLAM,SFEA,WVNX1,WVNY1,PRN1,NP,RHOWAT0,G,
-     &                  NWLON,NWLAT,WTIMINC) !JUST COMPUTE INTERPOLATING FACTORS
+          CALL NWS10GET(NWSGGWI,SLAM,SFEA,WVNX1,WVNY1,PRN1,NP,RHOWAT0,G,&
+                  NWLON,NWLAT,WTIMINC) !JUST COMPUTE INTERPOLATING FACTORS
           NWSGGWI=1
-          CALL NWS10GET(NWSGGWI,SLAM,SFEA,WVNX2,WVNY2,PRN2,NP,RHOWAT0,G,
-     &                  NWLON,NWLAT,WTIMINC) !NOW INTERPOLATE 1st WIND FIELD
+          CALL NWS10GET(NWSGGWI,SLAM,SFEA,WVNX2,WVNY2,PRN2,NP,RHOWAT0,G,&
+                  NWLON,NWLAT,WTIMINC) !NOW INTERPOLATE 1st WIND FIELD
           ENDIF
 
         IF(NWS.EQ.11) THEN
@@ -227,20 +227,20 @@ C....TIME LEVEL 1 AND LEVEL 2 WIND FIELDS
           IDSETFLG=0
           IF(NSCREEN.EQ.1.AND.MYPROC.EQ.0) WRITE(6,1197)
           WRITE(16,1197)
- 1197     FORMAT(/,1X,'THE E29 MET GRID INTERPOLATING FACTORS ARE ',
-     &                'BEING COMPUTED ')
-          CALL NWS11GET(NWSEGWI,IDSETFLG,SLAM,SFEA,WVNX1,WVNY1,PRN1,NP,
-     &                  RHOWAT0,G)  !JUST COMPUTE INTERPOLATING FACTORS
+ 1197     FORMAT(/,1X,'THE E29 MET GRID INTERPOLATING FACTORS ARE ',&
+                'BEING COMPUTED ')
+          CALL NWS11GET(NWSEGWI,IDSETFLG,SLAM,SFEA,WVNX1,WVNY1,PRN1,NP,&
+                  RHOWAT0,G)  !JUST COMPUTE INTERPOLATING FACTORS
           IF(NSCREEN.EQ.1.AND.MYPROC.EQ.0) WRITE(6,1198)
           WRITE(16,1198)
  1198     FORMAT(1X,'FINISHED COMPUTING E29 INTERPOLATING FACTORS',/)
           NWSEGWI=1
           IDSETFLG=1
-          CALL NWS11GET(NWSEGWI,IDSETFLG,SLAM,SFEA,WVNX2,WVNY2,PRN2,NP,
-     &                  RHOWAT0,G) !NOW INTERPOLATE 1st WIND FIELD
+          CALL NWS11GET(NWSEGWI,IDSETFLG,SLAM,SFEA,WVNX2,WVNY2,PRN2,NP,&
+                  RHOWAT0,G) !NOW INTERPOLATE 1st WIND FIELD
         ENDIF
         
-Cek added nws = 12 for owi winds
+!ek added nws = 12 for owi winds
         
         IF(ABS(NWS).EQ.12) THEN
           CALL NWS12INIT( WVNX1, WVNY1, PRN1, NP, RHOWAT0, G )
@@ -250,8 +250,8 @@ Cek added nws = 12 for owi winds
           WTIME2 = WTIME1 + WTIMINC
         ENDIF
 
-C...INPUT RADIATION STRESS INFORMATION FROM UNIT 23
-C....READ IN THE TIME LEVEL 1 AND LEVEL 2 FIELDS
+!...INPUT RADIATION STRESS INFORMATION FROM UNIT 23
+!....READ IN THE TIME LEVEL 1 AND LEVEL 2 FIELDS
 
         IF(NRS.EQ.1) THEN
           IF(NWS.EQ.0) THEN
@@ -272,14 +272,14 @@ C....READ IN THE TIME LEVEL 1 AND LEVEL 2 FIELDS
             CALL RSGET(RSNX2,RSNY2,NP)
           ENDIF
           IF (FRW.EQ.1) THEN
-C            CALL RSGET_MORE(RSNX1,RSNY1,WAVE_H1,WAVE_T1,WAVE_A1,
-C     &                                                  WAVE_D1,NP)
-C            CALL RSGET_MORE(RSNX2,RSNY2,WAVE_H2,WAVE_T2,WAVE_A2,
-C     &                                                  WAVE_D2,NP)
+!            CALL RSGET_MORE(RSNX1,RSNY1,WAVE_H1,WAVE_T1,WAVE_A1,
+!     &                                                  WAVE_D1,NP)
+!            CALL RSGET_MORE(RSNX2,RSNY2,WAVE_H2,WAVE_T2,WAVE_A2,
+!     &                                                  WAVE_D2,NP)
             
           ENDIF
 #ifdef SWAN   
-Casey 101118: Added this call to initialize the radiation stress gradients.
+!asey 101118: Added this call to initialize the radiation stress gradients.
          IF(NRS.EQ.3) THEN
            IF(.NOT.ALLOCATED(RSNX1)) ALLOCATE(RSNX1(1:NP))
            IF(.NOT.ALLOCATED(RSNX2)) ALLOCATE(RSNX2(1:NP))
@@ -301,20 +301,20 @@ Casey 101118: Added this call to initialize the radiation stress gradients.
           ENDIF
 
 
-C...
-C...LINES TO USE TIDAL POTENTIAL FORCING
-C...
+!...
+!...LINES TO USE TIDAL POTENTIAL FORCING
+!...
        if (CTIP) then
           DO I=1,NP
              TIP2(I)=0.0
           END DO
        endif
 
-CWET...
-CWET...THE FOLLOWING LINES ARE FOR WETTING AND DRYING
-CWET...Dry any landlocked nodes by checking that they are connected to at
-CWET...least 1 functioning element.
-CWET...
+!WET...
+!WET...THE FOLLOWING LINES ARE FOR WETTING AND DRYING
+!WET...Dry any landlocked nodes by checking that they are connected to at
+!WET...least 1 functioning element.
+!WET...
         IF(NOLIFA.EQ.2) THEN
           DO I=1,NP
             MJU(I)=0
@@ -339,29 +339,29 @@ CWET...
               ENDIF
           ENDDO
         ENDIF
-C...
-C......INITIALIZE 3D SOLUTION
-C...
+!...
+!......INITIALIZE 3D SOLUTION
+!...
 
-C...LINES TO RUN THE CODE IN 3D VS MODE.
+!...LINES TO RUN THE CODE IN 3D VS MODE.
 
       if (C3DVS) then
-c       CALL VSSTUP(DT,STATIM,NBYTE,RUNDES,RUNID,AGRID,NT)
+!       CALL VSSTUP(DT,STATIM,NBYTE,RUNDES,RUNID,AGRID,NT)
       endif
 
-C...LINES TO RUN THE CODE IN 3D DSS MODE
+!...LINES TO RUN THE CODE IN 3D DSS MODE
 
       if (C3DDSS) then
-c       CALL DSSSTUP(DT,STATIM,NBYTE,RUNDES,RUNID,AGRID,NT)
+!       CALL DSSSTUP(DT,STATIM,NBYTE,RUNDES,RUNID,AGRID,NT)
       endif
 
 
-C...
-C....INITILIZE ELEVATION STATION SPOOL COUNTER
-C....OPEN ELEVATION STATION OUTPUT FILE
-C....WRITE OUT HEADER INFORMATION INCLUDING NTRSPE (NO. OF DATA PTS. AT EACH
-C....ELEVATION STATION), NSTAE, DT*NSPOOLE, NSPOOLE, IRTYPE
-C...
+!...
+!....INITILIZE ELEVATION STATION SPOOL COUNTER
+!....OPEN ELEVATION STATION OUTPUT FILE
+!....WRITE OUT HEADER INFORMATION INCLUDING NTRSPE (NO. OF DATA PTS. AT EACH
+!....ELEVATION STATION), NSTAE, DT*NSPOOLE, NSPOOLE, IRTYPE
+!...
         NSCOUE=0
         IESTP=0
 
@@ -376,8 +376,8 @@ C...
           ENDIF
 
         IF(ABS(NOUTE).EQ.2) THEN
-          OPEN(61,FILE=DIRNAME//'/'//'fort.61',
-     &          ACCESS='DIRECT',RECL=NBYTE)
+          OPEN(61,FILE=DIRNAME//'/'//'fort.61',&
+          ACCESS='DIRECT',RECL=NBYTE)
           IF(NBYTE.EQ.4) THEN
             DO I=1,8
               WRITE(61,REC=IESTP+I) RDES4(I)
@@ -413,16 +413,16 @@ C...
           WRITE(61,REC=IESTP+5) 1
           IESTP=IESTP+5
           CLOSE(61)                    ! DO THIS TO FLUSH THE WRITE BUFFER
-          OPEN(61,FILE=DIRNAME//'/'//'fort.61',
-     &         ACCESS='DIRECT',RECL=NBYTE)
+          OPEN(61,FILE=DIRNAME//'/'//'fort.61',&
+         ACCESS='DIRECT',RECL=NBYTE)
           ENDIF
 
-C...
-C....INITILIZE VELOCITY STATION SPOOL COUNTER
-C....OPEN VELOCITY STATION OUTPUT FILE
-C....WRITE OUT HEADER INFORMATION INCLUDING NTRSPV (NO. OF DATA PTS. AT EACH
-C....VELOCITY STATION), NSTAV, DT*NSPOOLV, NSPOOLV, IRTYPE
-C...
+!...
+!....INITILIZE VELOCITY STATION SPOOL COUNTER
+!....OPEN VELOCITY STATION OUTPUT FILE
+!....WRITE OUT HEADER INFORMATION INCLUDING NTRSPV (NO. OF DATA PTS. AT EACH
+!....VELOCITY STATION), NSTAV, DT*NSPOOLV, NSPOOLV, IRTYPE
+!...
         NSCOUV=0
         IVSTP=0
 
@@ -434,8 +434,8 @@ C...
           ENDIF
 
         IF(ABS(NOUTV).EQ.2) THEN
-          OPEN(62,FILE=DIRNAME//'/'//'fort.62',
-     &          ACCESS='DIRECT',RECL=NBYTE)
+          OPEN(62,FILE=DIRNAME//'/'//'fort.62',&
+          ACCESS='DIRECT',RECL=NBYTE)
           IF(NBYTE.EQ.4) THEN
             DO I=1,8
               WRITE(62,REC=IVSTP+I) RDES4(I)
@@ -471,16 +471,16 @@ C...
           WRITE(62,REC=IVSTP+5) 2
           IVSTP=IVSTP+5
           CLOSE(62)                    ! DO THIS TO FLUSH THE WRITE BUFFER
-          OPEN(62,FILE=DIRNAME//'/'//'fort.62',
-     &         ACCESS='DIRECT',RECL=NBYTE)
+          OPEN(62,FILE=DIRNAME//'/'//'fort.62',&
+         ACCESS='DIRECT',RECL=NBYTE)
           ENDIF
 
-C...
-C....INITILIZE CONCENTRATION STATION SPOOL COUNTER
-C....OPEN ELEVATION STATION OUTPUT FILE
-C....WRITE OUT HEADER INFORMATION INCLUDING NTRSPC (NO. OF DATA PTS. AT EACH
-C....CONCENTRATION STATION), NSTAC, DT*NSPOOLC, NSPOOLC, IRTYPE
-C...
+!...
+!....INITILIZE CONCENTRATION STATION SPOOL COUNTER
+!....OPEN ELEVATION STATION OUTPUT FILE
+!....WRITE OUT HEADER INFORMATION INCLUDING NTRSPC (NO. OF DATA PTS. AT EACH
+!....CONCENTRATION STATION), NSTAC, DT*NSPOOLC, NSPOOLC, IRTYPE
+!...
         NSCOUC=0
         ICSTP=0
 
@@ -492,8 +492,8 @@ C...
           ENDIF
 
         IF(ABS(NOUTC).EQ.2) THEN
-          OPEN(81,FILE=DIRNAME//'/'//'fort.81',
-     &          ACCESS='DIRECT',RECL=NBYTE)
+          OPEN(81,FILE=DIRNAME//'/'//'fort.81',&
+          ACCESS='DIRECT',RECL=NBYTE)
           IF(NBYTE.EQ.4) THEN
             DO I=1,8
               WRITE(81,REC=ICSTP+I) RDES4(I)
@@ -529,17 +529,17 @@ C...
           WRITE(81,REC=ICSTP+5) 1
           ICSTP=ICSTP+5
           CLOSE(81)                    ! DO THIS TO FLUSH THE WRITE BUFFER
-          OPEN(81,FILE=DIRNAME//'/'//'fort.81',
-     &         ACCESS='DIRECT',RECL=NBYTE)
+          OPEN(81,FILE=DIRNAME//'/'//'fort.81',&
+         ACCESS='DIRECT',RECL=NBYTE)
           ENDIF
 
 
-C...
-C....INITILIZE BATHYMETRY STATION SPOOL COUNTER
-C....OPEN ELEVATION STATION OUTPUT FILE
-C....WRITE OUT HEADER INFORMATION INCLUDING NTRSPE (NO. OF DATA PTS. AT EACH
-C....ELEVATION STATION), NSTAE, DT*NSPOOLE, NSPOOLE, IRTYPE
-C...
+!...
+!....INITILIZE BATHYMETRY STATION SPOOL COUNTER
+!....OPEN ELEVATION STATION OUTPUT FILE
+!....WRITE OUT HEADER INFORMATION INCLUDING NTRSPE (NO. OF DATA PTS. AT EACH
+!....ELEVATION STATION), NSTAE, DT*NSPOOLE, NSPOOLE, IRTYPE
+!...
         NSCOUE=0
         IESTP=0
 
@@ -551,8 +551,8 @@ C...
           ENDIF
 
         IF(ABS(NOUTE).EQ.2) THEN
-          OPEN(82,FILE=DIRNAME//'/'//'fort.82',
-     &          ACCESS='DIRECT',RECL=NBYTE)
+          OPEN(82,FILE=DIRNAME//'/'//'fort.82',&
+          ACCESS='DIRECT',RECL=NBYTE)
           IF(NBYTE.EQ.4) THEN
             DO I=1,8
               WRITE(82,REC=IESTP+I) RDES4(I)
@@ -588,17 +588,17 @@ C...
           WRITE(82,REC=IESTP+5) 1
           IESTP=IESTP+5
           CLOSE(82)                    ! DO THIS TO FLUSH THE WRITE BUFFER
-          OPEN(82,FILE=DIRNAME//'/'//'fort.82',
-     &         ACCESS='DIRECT',RECL=NBYTE)
+          OPEN(82,FILE=DIRNAME//'/'//'fort.82',&
+         ACCESS='DIRECT',RECL=NBYTE)
           ENDIF
 
 
-C...
-C....INITILIZE METEOROLOGICAL STATION SPOOL COUNTERS
-C....OPEN METEOROLOGICAL STATION OUTPUT FILES
-C....WRITE OUT HEADER INFORMATION INCLUDING NTRSPM (NO. OF DATA PTS. AT EACH
-C....METEOROLOGICAL STATION), NSTAM, DT*NSPOOLM, NSPOOLM, IRTYPE
-C...
+!...
+!....INITILIZE METEOROLOGICAL STATION SPOOL COUNTERS
+!....OPEN METEOROLOGICAL STATION OUTPUT FILES
+!....WRITE OUT HEADER INFORMATION INCLUDING NTRSPM (NO. OF DATA PTS. AT EACH
+!....METEOROLOGICAL STATION), NSTAM, DT*NSPOOLM, NSPOOLM, IRTYPE
+!...
         NSCOUM=0
         IPSTP=0
         IWSTP=0
@@ -615,10 +615,10 @@ C...
           ENDIF
 
         IF(ABS(NOUTM).EQ.2) THEN
-          OPEN(71,FILE=DIRNAME//'/'//'fort.71',
-     &          ACCESS='DIRECT',RECL=NBYTE)
-          OPEN(72,FILE=DIRNAME//'/'//'fort.72',
-     &          ACCESS='DIRECT',RECL=NBYTE)
+          OPEN(71,FILE=DIRNAME//'/'//'fort.71',&
+          ACCESS='DIRECT',RECL=NBYTE)
+          OPEN(72,FILE=DIRNAME//'/'//'fort.72',&
+          ACCESS='DIRECT',RECL=NBYTE)
           IF(NBYTE.EQ.4) THEN
             DO I=1,8
               WRITE(71,REC=IPSTP+I) RDES4(I)
@@ -673,19 +673,19 @@ C...
           IWSTP=IWSTP+5
           CLOSE(71)                    ! DO THIS TO FLUSH THE WRITE BUFFER
           CLOSE(72)                    ! DO THIS TO FLUSH THE WRITE BUFFER
-          OPEN(71,FILE=DIRNAME//'/'//'fort.71',
-     &         ACCESS='DIRECT',RECL=NBYTE)
-          OPEN(72,FILE=DIRNAME//'/'//'fort.72',
-     &         ACCESS='DIRECT',RECL=NBYTE)
+          OPEN(71,FILE=DIRNAME//'/'//'fort.71',&
+         ACCESS='DIRECT',RECL=NBYTE)
+          OPEN(72,FILE=DIRNAME//'/'//'fort.72',&
+         ACCESS='DIRECT',RECL=NBYTE)
           ENDIF
 
-C...
-C....INITILIZE GLOBAL ELEVATION SPOOL COUNTER
-C....OPEN GLOBAL ELEVATION OUTPUT FILE
-C....WRITE OUT HEADER INFORMATION INCLUDING NDSETSE
-C....(NO. OF GLOBAL ELEVATION DATA SETS TO BE SPOOLED),
-C....NP, DT*NSPOOLGE, NSPOOLGE, IRTYPE
-C...
+!...
+!....INITILIZE GLOBAL ELEVATION SPOOL COUNTER
+!....OPEN GLOBAL ELEVATION OUTPUT FILE
+!....WRITE OUT HEADER INFORMATION INCLUDING NDSETSE
+!....(NO. OF GLOBAL ELEVATION DATA SETS TO BE SPOOLED),
+!....NP, DT*NSPOOLGE, NSPOOLGE, IRTYPE
+!...
         NSCOUGE=0
         IGEP=0
 
@@ -718,8 +718,8 @@ C...
           ENDIF
 
         IF(ABS(NOUTGE).EQ.2) THEN
-          OPEN(63,FILE=DIRNAME//'/'//'fort.63',
-     &          ACCESS='DIRECT',RECL=NBYTE)
+          OPEN(63,FILE=DIRNAME//'/'//'fort.63',&
+          ACCESS='DIRECT',RECL=NBYTE)
           IF(NBYTE.EQ.4) THEN
             DO I=1,8
               WRITE(63,REC=IGEP+I) RDES4(I)
@@ -755,17 +755,17 @@ C...
           WRITE(63,REC=IGEP+5) 1
           IGEP=IGEP+5
           CLOSE(63)                    ! DO THIS TO FLUSH THE WRITE BUFFER
-          OPEN(63,FILE=DIRNAME//'/'//'fort.63',
-     &         ACCESS='DIRECT',RECL=NBYTE)
+          OPEN(63,FILE=DIRNAME//'/'//'fort.63',&
+         ACCESS='DIRECT',RECL=NBYTE)
           ENDIF
 
-C...
-C....INITILIZE GLOBAL VELOCITY SPOOL COUNTER
-C....OPEN GLOBAL VELOCITY OUTPUT FILE
-C....WRITE OUT HEADER INFORMATION INCLUDING NDSETSV
-C....(NO. OF GLOBAL VELOCITY DATA SETS TO BE SPOOLED),
-C....NP, DT*NSPOOLGV, NSPOOLGV, IRTYPE
-C...
+!...
+!....INITILIZE GLOBAL VELOCITY SPOOL COUNTER
+!....OPEN GLOBAL VELOCITY OUTPUT FILE
+!....WRITE OUT HEADER INFORMATION INCLUDING NDSETSV
+!....(NO. OF GLOBAL VELOCITY DATA SETS TO BE SPOOLED),
+!....NP, DT*NSPOOLGV, NSPOOLGV, IRTYPE
+!...
         NSCOUGV=0
         IGVP=0
 
@@ -777,8 +777,8 @@ C...
           ENDIF
 
         IF(ABS(NOUTGV).EQ.2) THEN
-          OPEN(64,FILE=DIRNAME//'/'//'fort.64',
-     &          ACCESS='DIRECT',RECL=NBYTE)
+          OPEN(64,FILE=DIRNAME//'/'//'fort.64',&
+          ACCESS='DIRECT',RECL=NBYTE)
           IF(NBYTE.EQ.4) THEN
             DO I=1,8
               WRITE(64,REC=IGVP+I) RDES4(I)
@@ -814,17 +814,17 @@ C...
           WRITE(64,REC=IGVP+5) 2
           IGVP=IGVP+5
           CLOSE(64)                    ! DO THIS TO FLUSH THE WRITE BUFFER
-          OPEN(64,FILE=DIRNAME//'/'//'fort.64',
-     &         ACCESS='DIRECT',RECL=NBYTE)
+          OPEN(64,FILE=DIRNAME//'/'//'fort.64',&
+         ACCESS='DIRECT',RECL=NBYTE)
           ENDIF
 
-C...
-C....INITILIZE GLOBAL WIND and pressure SPOOL COUNTER
-C....OPEN GLOBAL WIND and pressure OUTPUT FILEs
-C....WRITE OUT HEADER INFORMATION INCLUDING NDSETSW
-C....(NO. OF GLOBAL WIND DATA SETS TO BE SPOOLED),
-C....NP, DT*NSPOOLGW, NSPOOLGW, IRTYPE
-C...
+!...
+!....INITILIZE GLOBAL WIND and pressure SPOOL COUNTER
+!....OPEN GLOBAL WIND and pressure OUTPUT FILEs
+!....WRITE OUT HEADER INFORMATION INCLUDING NDSETSW
+!....(NO. OF GLOBAL WIND DATA SETS TO BE SPOOLED),
+!....NP, DT*NSPOOLGW, NSPOOLGW, IRTYPE
+!...
         NSCOUGW=0
         IGWP=0
         igpp=0
@@ -841,10 +841,10 @@ C...
           ENDIF
 
         IF(ABS(NOUTGW).EQ.2) THEN
-          open(73,file=dirname//'/'//'fort.73',
-     &          access='direct',recl=nbyte)
-          OPEN(74,FILE=DIRNAME//'/'//'fort.74',
-     &          ACCESS='DIRECT',RECL=NBYTE)
+          open(73,file=dirname//'/'//'fort.73',&
+          access='direct',recl=nbyte)
+          OPEN(74,FILE=DIRNAME//'/'//'fort.74',&
+          ACCESS='DIRECT',RECL=NBYTE)
           IF(NBYTE.EQ.4) THEN
             DO I=1,8
               write(73,rec=igpp+i) rdes4(i)
@@ -892,8 +892,8 @@ C...
           write(73,rec=igpp+5) 2
           igpp=igpp+5
           close(73)                    ! DO THIS TO FLUSH THE WRITE BUFFER
-          open(73,file=dirname//'/'//'fort.73',
-     &         access='direct',recl=nbyte)
+          open(73,file=dirname//'/'//'fort.73',&
+         access='direct',recl=nbyte)
           WRITE(74,REC=IGWP+1) NDSETSW
           WRITE(74,REC=IGWP+2) NP
           WRITE(74,REC=IGWP+3) DT*NSPOOLGW
@@ -901,11 +901,11 @@ C...
           WRITE(74,REC=IGWP+5) 2
           IGWP=IGWP+5
           CLOSE(74)                    ! DO THIS TO FLUSH THE WRITE BUFFER
-          OPEN(74,FILE=DIRNAME//'/'//'fort.74',
-     &         ACCESS='DIRECT',RECL=NBYTE)
+          OPEN(74,FILE=DIRNAME//'/'//'fort.74',&
+         ACCESS='DIRECT',RECL=NBYTE)
           ENDIF
 #ifdef SWAN
-Casey 101118: Added the output of radiation stress gradients.
+!asey 101118: Added the output of radiation stress gradients.
        IGRadS=0
        IF(ABS(NOUTGW).EQ.1) THEN
           OPEN(164,FILE=DIRNAME//'/'//'rads.64')
@@ -914,8 +914,8 @@ Casey 101118: Added the output of radiation stress gradients.
           IGRadS=2
           ENDIF
        IF(ABS(NOUTGW).EQ.2) THEN
-          OPEN(164,FILE=TRIM(LOCALDIR)//'/'//'rads.64',
-     &           ACCESS='DIRECT',RECL=NByte)
+          OPEN(164,FILE=TRIM(LOCALDIR)//'/'//'rads.64',&
+           ACCESS='DIRECT',RECL=NByte)
           IF(NBYTE.EQ.4) THEN
              DO I=1,8
                 WRITE(164,REC=IGRadS+I) RDES4(I)
@@ -954,13 +954,13 @@ Casey 101118: Added the output of radiation stress gradients.
           ENDIF
 #endif
 
-C...
-C....INITILIZE GLOBAL CONCENTRATION SPOOL COUNTER
-C....OPEN GLOBAL CONCENTRATION OUTPUT FILE
-C....WRITE OUT HEADER INFORMATION INCLUDING NDSETSC
-C....(NO. OF GLOBAL CONCENTRATION DATA SETS TO BE SPOOLED),
-C....NP, DT*NSPOOLGC, NSPOOLGC, IRTYPE
-C...
+!...
+!....INITILIZE GLOBAL CONCENTRATION SPOOL COUNTER
+!....OPEN GLOBAL CONCENTRATION OUTPUT FILE
+!....WRITE OUT HEADER INFORMATION INCLUDING NDSETSC
+!....(NO. OF GLOBAL CONCENTRATION DATA SETS TO BE SPOOLED),
+!....NP, DT*NSPOOLGC, NSPOOLGC, IRTYPE
+!...
         NSCOUGC=0
         IGCP=0
 
@@ -972,8 +972,8 @@ C...
           ENDIF
 
         IF(ABS(NOUTGC).EQ.2) THEN
-          OPEN(83,FILE=DIRNAME//'/'//'fort.83',
-     &          ACCESS='DIRECT',RECL=NBYTE)
+          OPEN(83,FILE=DIRNAME//'/'//'fort.83',&
+          ACCESS='DIRECT',RECL=NBYTE)
           IF(NBYTE.EQ.4) THEN
             DO I=1,8
               WRITE(83,REC=IGCP+I) RDES4(I)
@@ -1009,13 +1009,13 @@ C...
           WRITE(83,REC=IGCP+5) 1
           IGCP=IGCP+5
           CLOSE(83)                    ! DO THIS TO FLUSH THE WRITE BUFFER
-          OPEN(83,FILE=DIRNAME//'/'//'fort.83',
-     &         ACCESS='DIRECT',RECL=NBYTE)
+          OPEN(83,FILE=DIRNAME//'/'//'fort.83',&
+         ACCESS='DIRECT',RECL=NBYTE)
           ENDIF
 
-C...
-C....INITIALIZE HARMONIC ANALYSIS MATRICES, MEAN AND SQUARE VECTORS
-C...
+!...
+!....INITIALIZE HARMONIC ANALYSIS MATRICES, MEAN AND SQUARE VECTORS
+!...
         IF (IHARIND.EQ.1) THEN
            ICHA=0
            CALL HACOLDS(HAFREQ)
@@ -1034,17 +1034,17 @@ C...
              ENDDO
            ENDIF !  charmv
         ENDIF
-C
+!
  1112 FORMAT(/,1X,79('_'))
  9883 FORMAT(' !!! NODE ',I6,' DRIED (LANDLOCKING)')
 
-C.....Added sediment transport output files (Ethan Kubatko, 8-1-2003)
+!.....Added sediment transport output files (Ethan Kubatko, 8-1-2003)
 
-C.....INITILIZE GLOBAL BATHYMETRY SPOOL COUNTER
-C.....OPEN GLOBAL BATHYMETRY OUTPUT FILE
-C.....WRITE OUT HEADER INFORMATION INCLUDING NDSETSE
-C.....(NO. OF GLOBAL ELEVATION DATA SETS TO BE SPOOLED),
-C.....NP, DT*NSPOOLGE, NSPOOLGE, IRTYPE
+!.....INITILIZE GLOBAL BATHYMETRY SPOOL COUNTER
+!.....OPEN GLOBAL BATHYMETRY OUTPUT FILE
+!.....WRITE OUT HEADER INFORMATION INCLUDING NDSETSE
+!.....(NO. OF GLOBAL ELEVATION DATA SETS TO BE SPOOLED),
+!.....NP, DT*NSPOOLGE, NSPOOLGE, IRTYPE
 
         IF (SEDFLAG.GE.1) THEN
         
@@ -1062,10 +1062,10 @@ C.....NP, DT*NSPOOLGE, NSPOOLGE, IRTYPE
           ENDIF
 
           IF (ABS(NOUTGE).EQ.2) THEN
-            OPEN(84,FILE=DIRNAME//'/'//'fort.84',
-     &          ACCESS='DIRECT',RECL=NBYTE)
-            OPEN(85,FILE=DIRNAME//'/'//'fort.85',
-     &          ACCESS='DIRECT',RECL=NBYTE)
+            OPEN(84,FILE=DIRNAME//'/'//'fort.84',&
+          ACCESS='DIRECT',RECL=NBYTE)
+            OPEN(85,FILE=DIRNAME//'/'//'fort.85',&
+          ACCESS='DIRECT',RECL=NBYTE)
             IF(NBYTE.EQ.4) THEN
               DO I=1,8
                 WRITE(84,REC=IGEP+I) RDES4(I)
@@ -1113,17 +1113,17 @@ C.....NP, DT*NSPOOLGE, NSPOOLGE, IRTYPE
             IGEP=IGEP+5
             CLOSE(84)                    ! DO THIS TO FLUSH THE WRITE BUFFER
             CLOSE(85)                    ! DO THIS TO FLUSH THE WRITE BUFFER
-            OPEN(84,FILE=DIRNAME//'/'//'fort.84',
-     &         ACCESS='DIRECT',RECL=NBYTE)
-            OPEN(85,FILE=DIRNAME//'/'//'fort.85',
-     &         ACCESS='DIRECT',RECL=NBYTE)
+            OPEN(84,FILE=DIRNAME//'/'//'fort.84',&
+         ACCESS='DIRECT',RECL=NBYTE)
+            OPEN(85,FILE=DIRNAME//'/'//'fort.85',&
+         ACCESS='DIRECT',RECL=NBYTE)
           ENDIF
-C...
-C.....INITILIZE BATHYMETRY STATION SPOOL COUNTER
-C.....OPEN ELEVATION STATION OUTPUT FILE
-C.....WRITE OUT HEADER INFORMATION INCLUDING NTRSPE (NO. OF DATA PTS. AT EACH
-C.....ELEVATION STATION), NSTAE, DT*NSPOOLE, NSPOOLE, IRTYPE
-C...
+!...
+!.....INITILIZE BATHYMETRY STATION SPOOL COUNTER
+!.....OPEN ELEVATION STATION OUTPUT FILE
+!.....WRITE OUT HEADER INFORMATION INCLUDING NTRSPE (NO. OF DATA PTS. AT EACH
+!.....ELEVATION STATION), NSTAE, DT*NSPOOLE, NSPOOLE, IRTYPE
+!...
           NSCOUE=0
           IESTP=0
 
@@ -1135,8 +1135,8 @@ C...
           ENDIF
 
           IF (ABS(NOUTE).EQ.2) THEN
-            OPEN(82,FILE=DIRNAME//'/'//'fort.82',
-     &          ACCESS='DIRECT',RECL=NBYTE)
+            OPEN(82,FILE=DIRNAME//'/'//'fort.82',&
+          ACCESS='DIRECT',RECL=NBYTE)
             IF(NBYTE.EQ.4) THEN
               DO I=1,8
                 WRITE(82,REC=IESTP+I) RDES4(I)
@@ -1172,16 +1172,16 @@ C...
             WRITE(82,REC=IESTP+5) 1
             IESTP=IESTP+5
             CLOSE(82)                    ! DO THIS TO FLUSH THE WRITE BUFFER
-            OPEN(82,FILE=DIRNAME//'/'//'fort.82',
-     &         ACCESS='DIRECT',RECL=NBYTE)
+            OPEN(82,FILE=DIRNAME//'/'//'fort.82',&
+         ACCESS='DIRECT',RECL=NBYTE)
           ENDIF
 
-C.....INITILIZE GLOBAL BED LOAD SEDIMENT FLUX SPOOL COUNTER
-C.....OPEN GLOBAL SEDIMENT FLUX OUTPUT FILE
-C.....WRITE OUT HEADER INFORMATION INCLUDING NDSETSV
-C.....(NO. OF GLOBAL VELOCITY DATA SETS TO BE SPOOLED),
-C.....NP, DT*NSPOOLGV, NSPOOLGV, IRTYPE
-C...
+!.....INITILIZE GLOBAL BED LOAD SEDIMENT FLUX SPOOL COUNTER
+!.....OPEN GLOBAL SEDIMENT FLUX OUTPUT FILE
+!.....WRITE OUT HEADER INFORMATION INCLUDING NDSETSV
+!.....(NO. OF GLOBAL VELOCITY DATA SETS TO BE SPOOLED),
+!.....NP, DT*NSPOOLGV, NSPOOLGV, IRTYPE
+!...
           NSCOUGV=0
           IGVP=0
 
@@ -1193,8 +1193,8 @@ C...
           ENDIF
 
           IF(ABS(NOUTGV).EQ.2) THEN
-            OPEN(94,FILE=DIRNAME//'/'//'fort.94',
-     &          ACCESS='DIRECT',RECL=NBYTE)
+            OPEN(94,FILE=DIRNAME//'/'//'fort.94',&
+          ACCESS='DIRECT',RECL=NBYTE)
             IF(NBYTE.EQ.4) THEN
               DO I=1,8
                 WRITE(94,REC=IGVP+I) RDES4(I)
@@ -1230,16 +1230,16 @@ C...
             WRITE(94,REC=IGVP+5) 2
             IGVP=IGVP+5
             CLOSE(94)                    ! DO THIS TO FLUSH THE WRITE BUFFER
-            OPEN(94,FILE=DIRNAME//'/'//'fort.94',
-     &         ACCESS='DIRECT',RECL=NBYTE)
+            OPEN(94,FILE=DIRNAME//'/'//'fort.94',&
+         ACCESS='DIRECT',RECL=NBYTE)
           ENDIF
           
-C.....INITILIZE GLOBAL SUSPENDED LOAD SEDIMENT FLUX SPOOL COUNTER
-C.....OPEN GLOBAL SEDIMENT FLUX OUTPUT FILE
-C.....WRITE OUT HEADER INFORMATION INCLUDING NDSETSV
-C.....(NO. OF GLOBAL VELOCITY DATA SETS TO BE SPOOLED),
-C.....NP, DT*NSPOOLGV, NSPOOLGV, IRTYPE
-C...
+!.....INITILIZE GLOBAL SUSPENDED LOAD SEDIMENT FLUX SPOOL COUNTER
+!.....OPEN GLOBAL SEDIMENT FLUX OUTPUT FILE
+!.....WRITE OUT HEADER INFORMATION INCLUDING NDSETSV
+!.....(NO. OF GLOBAL VELOCITY DATA SETS TO BE SPOOLED),
+!.....NP, DT*NSPOOLGV, NSPOOLGV, IRTYPE
+!...
           NSCOUGV=0
           IGVP=0
 
@@ -1251,8 +1251,8 @@ C...
           ENDIF
 
           IF(ABS(NOUTGV).EQ.2) THEN
-            OPEN(96,FILE=DIRNAME//'/'//'fort.96',
-     &          ACCESS='DIRECT',RECL=NBYTE)
+            OPEN(96,FILE=DIRNAME//'/'//'fort.96',&
+          ACCESS='DIRECT',RECL=NBYTE)
             IF(NBYTE.EQ.4) THEN
               DO I=1,8
                 WRITE(96,REC=IGVP+I) RDES4(I)
@@ -1288,8 +1288,8 @@ C...
             WRITE(96,REC=IGVP+5) 2
             IGVP=IGVP+5
             CLOSE(96)                    ! DO THIS TO FLUSH THE WRITE BUFFER
-            OPEN(96,FILE=DIRNAME//'/'//'fort.96',
-     &         ACCESS='DIRECT',RECL=NBYTE)
+            OPEN(96,FILE=DIRNAME//'/'//'fort.96',&
+         ACCESS='DIRECT',RECL=NBYTE)
           ENDIF
 
         ENDIF
