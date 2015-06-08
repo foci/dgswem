@@ -105,7 +105,8 @@
             dynP_IN = dynP(1,EL_IN,IRK)
 #endif
 
-#ifdef SED_LAY                  !When layered, these change
+!When layered, these change
+#ifdef SED_LAY                  
             HB(1,EL_IN,irk) = 0.D0
             do ll=1,layers
                HB(1,EL_IN,irk) = HB(1,EL_IN,irk) + bed(1,EL_IN,irk,ll)

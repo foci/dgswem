@@ -170,7 +170,8 @@
          MASS_EL_IN = (ZE(1,EL_IN,IRK)+HB(1,EL_IN,1))*AREAS(EL_IN)*0.5D0
          MASS_EL_EX = (ZE(1,EL_EX,IRK)+HB(1,EL_EX,1))*AREAS(EL_EX)*0.5D0
 
-#ifdef SED_LAY                  !Must add up the layers as they shift
+         !Must add up the layers as they shift
+#ifdef SED_LAY
          HB(1,EL_IN,irk) = 0.D0
          HB(1,EL_EX,irk) = 0.D0
          do ll=1,layers
@@ -206,7 +207,8 @@
             QY_IN = QY(1,EL_IN,IRK)
             HB_IN = BATHED(GP_IN,LED_IN,EL_IN,pa)
 
-#ifdef SED_LAY                  !When layered, these change
+            !When layered, these change
+#ifdef SED_LAY
             do ll = 1,layers
                bed_IN(ll) = bed(1,EL_IN,irk,ll)
             enddo
@@ -732,7 +734,8 @@
             dynP_IN = dynP(1,EL_IN,IRK)
 #endif
 
-#ifdef SED_LAY                  !Must add up the layers as they shift
+            !Must add up the layers as they shift           
+#ifdef SED_LAY
             HB(1,EL_IN,irk) = 0.D0
             do ll=1,layers
                bed_IN(ll) = bed(1,EL_IN,irk,ll)
@@ -947,7 +950,8 @@
             dynP_EX = dynP(1,EL_EX,IRK)
 #endif
 
-#ifdef SED_LAY                  !Must add up the layers as they shift
+            !Must add up the layers as they shift
+#ifdef SED_LAY
             HB(1,EL_EX,irk) = 0.D0
             do ll=1,layers
                bed_EX(ll) = bed(1,EL_EX,irk,ll)

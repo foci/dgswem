@@ -139,7 +139,8 @@
             dynPF = dynP(1,ELF,IRK)
 #endif
 
-#ifdef SED_LAY !This does not affect much here, hb and bed do not change at weirs
+!This does not affect much here, hb and bed do not change at weirs
+#ifdef SED_LAY 
             HB(1,ELB,irk) = 0.D0
             do ll=1,layers
                HB(1,ELB,irk) = HB(1,ELB,irk) + bed(1,ELB,irk,ll)

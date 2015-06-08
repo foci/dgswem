@@ -1024,7 +1024,8 @@
       G_HAT = F2_AVG - 0.5D0*EIGMAX*(JUMP(2)*NX2 + LEQ*JUMP(3)*NXY)
       H_HAT = F3_AVG - 0.5D0*EIGMAX*(JUMP(3)*NY2 + LEQ*JUMP(2)*NXY)
 
-#ifdef SED_LAY !this is not well-tested!
+!this is not well-tested!
+#ifdef SED_LAY 
 
 !.....Compute the stabilization term (v_nc in CMM's thesis) 
 !.....for the nonconservative product in the momentum eqn
@@ -1384,7 +1385,8 @@
 
       ENDIF
 
-#ifdef SED_LAY !Not thoroughly tested!!
+!Not thoroughly tested!!
+#ifdef SED_LAY 
 
 !.....Compute the stabilization term (v_nc in CMM's thesis) 
 !.....for the nonconservative product in the momentum eqn

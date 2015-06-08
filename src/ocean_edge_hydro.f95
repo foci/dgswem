@@ -109,7 +109,8 @@
             HB_IN = BATHED(I,LED,EL_IN,pa)
             SFAC_IN = SFACED(I,LED,EL_IN,pa)
             
-#ifdef SED_LAY                  !When layered, these change
+            !When layered, these change
+#ifdef SED_LAY 
             HB(:,EL_IN,irk) = 0.D0
             do ll=1,layers
                HB(1,EL_IN,irk) = HB(1,EL_IN,irk) + bed(1,EL_IN,irk,ll)
@@ -240,7 +241,8 @@
             dynP_EX = 0.D0 !What's the right setting here?
 #endif
 
-#ifdef SED_LAY                  !When layered, these change
+            !When layered, these change
+#ifdef SED_LAY
             bed_EX(:) = 10.D0 !bed_IN(:) 
 #endif
 

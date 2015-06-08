@@ -393,7 +393,8 @@
                endif
 #endif
 
-#ifdef SED_LAY !when chem or tracers are on, this coupling could be made tighter      
+!when chem or tracers are on, this coupling could be made tighter      
+#ifdef SED_LAY 
                
 !.....if the sensor is greater than the limit and the p is low increase
 !.....the order of p

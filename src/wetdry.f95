@@ -407,7 +407,8 @@
                QX(i,J,IRK+1) = 0.D0
                QY(i,J,IRK+1) = 0.D0
 
-#ifdef SED_LAY !Do we want to zero this out?
+               !Do we want to zero this out? 
+#ifdef SED_LAY
                do l=1,layers
                   bed(i,J,irk+1,l) = 0.D0
                enddo
