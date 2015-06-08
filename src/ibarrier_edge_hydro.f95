@@ -1,26 +1,26 @@
-C***********************************************************************
-C     
-C     SUBROUTINE IBARRIER_EDGE_HYDRO()
-C     
-C     This subroutine does the following:
-C     
-C     1.  Calculates the values of the necessary variables at the edge
-C     gauss points for INTERNAL BARRIER edges
-C     2.  Calls the appropriate subroutine to compute the flux at
-C     these points.
-C     3.  Computes the boundary integrals.
-C     
-C     Written by Ethan Kubatko (08-11-2008)
-C     
-C     01-10-2011 - cem - adapted for p_enrichment and multicomponent
-C     01-20-2012 - cem - multiphase added, we do not (natively)
-C                        transport sediment across weirs
-C     
-C***********************************************************************
+!***********************************************************************
+!     
+!     SUBROUTINE IBARRIER_EDGE_HYDRO()
+!     
+!     This subroutine does the following:
+!     
+!     1.  Calculates the values of the necessary variables at the edge
+!     gauss points for INTERNAL BARRIER edges
+!     2.  Calls the appropriate subroutine to compute the flux at
+!     these points.
+!     3.  Computes the boundary integrals.
+!     
+!     Written by Ethan Kubatko (08-11-2008)
+!     
+!     01-10-2011 - cem - adapted for p_enrichment and multicomponent
+!     01-20-2012 - cem - multiphase added, we do not (natively)
+!                        transport sediment across weirs
+!     
+!***********************************************************************
 
       SUBROUTINE IBARRIER_EDGE_HYDRO(IT)
       
-C.....Use appropriate modules
+!.....Use appropriate modules
 
       USE GLOBAL
       USE DG
@@ -28,7 +28,7 @@ C.....Use appropriate modules
 
       IMPLICIT NONE
 
-C.....Declare local variables
+!.....Declare local variables
 
       INTEGER GEDB, GEDF, LEDB, LEDF, ELB, ELF, GPB, GPF, L, WEIR_FLOW
       INTEGER IT, NB1, NB2, NF1, NF2,i,k,ll
@@ -45,13 +45,13 @@ C.....Declare local variables
       REAL(SZ) QB_N_INT, QF_N_INT, QB_N_EXT, QF_N_EXT
       REAL(SZ) QB_T_INT, QF_T_INT, QB_T_EXT, QF_T_EXT
 
-C.....Loop over the internal barrier segments (note: an internal barrier
-C.....segment consists of two internal barrier edges -- a "front" edge &
-C.....a "back" edge.
+!.....Loop over the internal barrier segments (note: an internal barrier
+!.....segment consists of two internal barrier edges -- a "front" edge &
+!.....a "back" edge.
       test_el = 0
       DO 1000 L = 1,NIBSEG
          
-C.......Obtain the global and local edges of the back and front sides
+!.......Obtain the global and local edges of the back and front sides
 
          GEDB = NIBSEGN(1,L)
          GEDF = NIBSEGN(2,L)
@@ -61,7 +61,7 @@ C.......Obtain the global and local edges of the back and front sides
          LEDB = NEDSD(1,GEDB)
          LEDF = NEDSD(1,GEDF)
          
-C.......Obtain the elements of the back and front sides
+!.......Obtain the elements of the back and front sides
 
          ELB = NEDEL(1,GEDB)
          ELF = NEDEL(1,GEDF)
@@ -87,7 +87,7 @@ C.......Obtain the elements of the back and front sides
 
          test_el = test_el+1
 
-C.......Retrieve the components of the normal vector to the edge
+!.......Retrieve the components of the normal vector to the edge
 
          NXB = COSNX(GEDB)
          NYB = SINNX(GEDB)
@@ -95,7 +95,7 @@ C.......Retrieve the components of the normal vector to the edge
          NXF = COSNX(GEDF)
          NYF = SINNX(GEDF)
          
-C.....Set the components for the tangential vector to the edge
+!.....Set the components for the tangential vector to the edge
 
          TXB = -NYB
          TYB =  NXB
@@ -103,14 +103,14 @@ C.....Set the components for the tangential vector to the edge
          TXF = -NYF
          TYF =  NXF
          
-C.......Compute the variables at the quadrature points
+!.......Compute the variables at the quadrature points
 
          DO I = 1,NEGP(pa)
             
             GPB = I
             GPF = NEGP(pa) - I + 1
             
-C.........Obtain the height of the barrier at the quadrature point
+!.........Obtain the height of the barrier at the quadrature point
 
             ZEB = ZE(1,ELB,IRK)
             QXB = QX(1,ELB,IRK)
@@ -192,8 +192,8 @@ C.........Obtain the height of the barrier at the quadrature point
             IF (WDFLG(ELB).EQ.1) ABOVEB = ZEB - IBHT(L)
             IF (WDFLG(ELF).EQ.1) ABOVEF = ZEF - IBHT(L)
             
-C.........Case 1:  Water is below barrier on both sides
-C     ---------------------------------------------
+!.........Case 1:  Water is below barrier on both sides
+!     ---------------------------------------------
             
             IF ((ABOVEF.LE.BARMIN).AND.(ABOVEB.LE.BARMIN)) THEN
                QB_N_INT = -(QXB*NXB + QYB*NYB)
@@ -203,8 +203,8 @@ C     ---------------------------------------------
                WEIR_FLOW = 0
                GOTO 100
                
-C.........Case 2:  Water is above on both sides and equal (within tol)
-C     ------------------------------------------------------------
+!.........Case 2:  Water is above on both sides and equal (within tol)
+!     ------------------------------------------------------------
                
             ELSEIF (ABS(ABOVEF-ABOVEB).LT.BARMIN) THEN
                QB_N_INT = -(QXB*NXB + QYB*NYB)
@@ -218,24 +218,24 @@ C     ------------------------------------------------------------
             SUBSUPF = 2.D0*ABOVEF/3.D0
             SUBSUPB = 2.D0*ABOVEB/3.D0
 
-C.........Case 3: Overtopping of barrier with water higher on front side
-C     Flow from front to back side
-C     -------------------------------------------------------------
+!.........Case 3: Overtopping of barrier with water higher on front side
+!     Flow from front to back side
+!     -------------------------------------------------------------
 
             IF ((ABOVEF.GT.ABOVEB).AND.(ABOVEF.GT.BARMIN)) THEN
                
                WEIR_FLOW = 1
                
-C...........Case 3a) Subcritical flow
-C     -------------------------
+!...........Case 3a) Subcritical flow
+!     -------------------------
 
                IF (ABOVEB.GT.SUBSUPF) THEN
-                  QF_N_INT = RAMPDG*IBCFSB(L)*ABOVEB
-     &                 *SQRT((2.D0*G*(ABOVEF-ABOVEB)))
+                  QF_N_INT = RAMPDG*IBCFSB(L)*ABOVEB&
+                      *SQRT((2.D0*G*(ABOVEF-ABOVEB)))
                   QF_T_INT = 0.D0
                   
-C...........Case 3b) Supercritical flow
-C     ---------------------------
+!...........Case 3b) Supercritical flow
+!     ---------------------------
 
                ELSE
                   QF_N_INT = RAMPDG*IBCFSP(L)*SUBSUPF*SQRT(SUBSUPF*G)
@@ -245,24 +245,24 @@ C     ---------------------------
 
             ENDIF
             
-C.........Case 4: Overtopping of barrier with water higher on back side
-C     Flow from back to front side
-C     --------------------------------------------------------------
+!.........Case 4: Overtopping of barrier with water higher on back side
+!     Flow from back to front side
+!     --------------------------------------------------------------
 
             IF ((ABOVEB.GT.ABOVEF).AND.(ABOVEB.GT.BARMIN)) THEN
                
                WEIR_FLOW = -1
                
-C...........Case 4a) Subcritical flow
-C     -------------------------
+!...........Case 4a) Subcritical flow
+!     -------------------------
 
                IF (ABOVEF.GT.SUBSUPB) THEN
-                  QB_N_INT = RAMPDG*IBCFSB(L)*ABOVEF
-     &                 *SQRT((2.D0*G*(ABOVEB-ABOVEF)))
+                  QB_N_INT = RAMPDG*IBCFSB(L)*ABOVEF&
+                      *SQRT((2.D0*G*(ABOVEB-ABOVEF)))
                   QB_T_INT = 0.D0
                   
-C...........Case 4b) Supercritical flow
-C     ---------------------------
+!...........Case 4b) Supercritical flow
+!     ---------------------------
                   
                ELSE
                   QB_N_INT = RAMPDG*IBCFSP(L)*SUBSUPB*SQRT(SUBSUPB*G)
@@ -275,7 +275,7 @@ C     ---------------------------
 
             IF (WEIR_FLOW.LE.0) THEN
 
-C...........Compute the numerical flux for the back side edge
+!...........Compute the numerical flux for the back side edge
 
                ZE_IN = ZEB
                QX_IN = QXB
@@ -318,17 +318,17 @@ C...........Compute the numerical flux for the back side edge
                NX = NXB
                NY = NYB
 
-C...........Reflect the velocity in the normal direction
+!...........Reflect the velocity in the normal direction
 
                Q_N_EXT = QB_N_INT
                Q_T_EXT = QB_T_INT
 
-C...........Compute the x and y components of the external state flow
+!...........Compute the x and y components of the external state flow
 
                QX_EX = ( TYB*Q_N_EXT - NYB*Q_T_EXT)/(NXB*TYB - NYB*TXB)
                QY_EX = (-TXB*Q_N_EXT + NXB*Q_T_EXT)/(NXB*TYB - NYB*TXB)
 
-C...........Compute the numerical flux
+!...........Compute the numerical flux
                
                CALL NUMERICAL_FLUX(IT)
                FB_HAT = F_HAT
@@ -414,7 +414,7 @@ C...........Compute the numerical flux
 
             IF (WEIR_FLOW.GE.0) THEN
                
-C...........Compute the numerical flux for the front side edge
+!...........Compute the numerical flux for the front side edge
 
                ZE_IN = ZEF
                QX_IN = QXF
@@ -447,12 +447,12 @@ C...........Compute the numerical flux for the front side edge
                NX = NXF
                NY = NYF
                
-C...........Reflect the velocity in the normal direction
+!...........Reflect the velocity in the normal direction
 
                Q_N_EXT = QF_N_INT
                Q_T_EXT = QF_T_INT
 
-C...........Compute the x and y components of the external state flow
+!...........Compute the x and y components of the external state flow
 
                QX_EX = ( TYF*Q_N_EXT - NYF*Q_T_EXT)/(NXF*TYF - NYF*TXF)
                QY_EX = (-TXF*Q_N_EXT + NXF*Q_T_EXT)/(NXF*TYF - NYF*TXF)
@@ -538,13 +538,13 @@ C...........Compute the x and y components of the external state flow
             ENDIF
             
  200        CONTINUE
-c     
+!     
             DO K = 1,DOFS(el)
 
-               WEGPB = 2.0*M_INV(K,pa)/AREAS(ELB)*XLEN(GEDB)
-     &              *PHI_EDGE(K,GPB,LEDB,pa)*WEGP(GPB,pa)
-               WEGPF = 2.0*M_INV(K,pa)/AREAS(ELF)*XLEN(GEDF)
-     &              *PHI_EDGE(K,GPF,LEDF,pa)*WEGP(GPF,pa)
+               WEGPB = 2.0*M_INV(K,pa)/AREAS(ELB)*XLEN(GEDB)&
+                   *PHI_EDGE(K,GPB,LEDB,pa)*WEGP(GPB,pa)
+               WEGPF = 2.0*M_INV(K,pa)/AREAS(ELF)*XLEN(GEDF)&
+                   *PHI_EDGE(K,GPF,LEDF,pa)*WEGP(GPF,pa)
 
                RHS_ZE(K,ELB,IRK) = RHS_ZE(K,ELB,IRK) - WEGPB*FB_HAT
                RHS_QX(K,ELB,IRK) = RHS_QX(K,ELB,IRK) - WEGPB*GB_HAT

@@ -1,31 +1,31 @@
-C***********************************************************************
-C     
-C     SUBROUTINE QUAD_PTS_EDGE()
-C     
-C     Stores the Gauss quadrature points and weights for up to 13 point
-C     quadrature rules on the interval (-1,1) (an n point Legendre-Gauss
-C     quadrature integrates a 2*n-1 degree polynomial exactly)
-C     
-C     Written by Ethan Kubatko (06-08-2004)
-C     
-C     Modifications for parallel runs, Shintaro Bunya, Aug 2005 
-C     
-C***********************************************************************
+!***********************************************************************
+!     
+!     SUBROUTINE QUAD_PTS_EDGE()
+!     
+!     Stores the Gauss quadrature points and weights for up to 13 point
+!     quadrature rules on the interval (-1,1) (an n point Legendre-Gauss
+!     quadrature integrates a 2*n-1 degree polynomial exactly)
+!     
+!     Written by Ethan Kubatko (06-08-2004)
+!     
+!     Modifications for parallel runs, Shintaro Bunya, Aug 2005 
+!     
+!***********************************************************************
 
       SUBROUTINE QUAD_PTS_EDGE(P,pad)
 
-C.....Use appropriate modules
+!.....Use appropriate modules
 
       USE GLOBAL
       USE DG
 
       IMPLICIT NONE
 
-C.....Declare local variables
+!.....Declare local variables
 
       INTEGER P,pad
 
-C.....Allocate the gauss points and weights arrays for the edge integral
+!.....Allocate the gauss points and weights arrays for the edge integral
       
       if (pad.eq.1.and.p.eq.1) then
 
@@ -35,12 +35,12 @@ C.....Allocate the gauss points and weights arrays for the edge integral
 
       endif
 
-C     sb moved to prep_DG.F
-C     C.....Compute the number of gauss points needed for the edge integrals
-C     
+!     sb moved to prep_DG.F
+!     C.....Compute the number of gauss points needed for the edge integrals
+!     
       NEGP(pad) = P + 1
       
-C.....Retrieve the correct gauss quadrature points for the edge integral
+!.....Retrieve the correct gauss quadrature points for the edge integral
       
       IF (NEGP(pad).EQ.2) THEN
 

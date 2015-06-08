@@ -1,13 +1,12 @@
-C-----------------------------------------------------------------------
-C     S U B R O U T I N E   W R I T E  O U T  A R R A Y  
-C-----------------------------------------------------------------------
-C     jgf48.03 This subroutine was created to write out a column 
-C     vector (i.e., nodal data such as water surface elevation or 
-C     pressure) to a file.
-C-----------------------------------------------------------------------
-Casey 090302: Added the filename as the last argument.
-      SUBROUTINE writeOutArray(lun, time, it, descript, pack_cmd,
-     &                         unpack_cmd, filepos, fn)
+!-----------------------------------------------------------------------
+!     S U B R O U T I N E   W R I T E  O U T  A R R A Y  
+!-----------------------------------------------------------------------
+!     jgf48.03 This subroutine was created to write out a column 
+!     vector (i.e., nodal data such as water surface elevation or 
+!     pressure) to a file.
+!-----------------------------------------------------------------------
+!asey 090302: Added the filename as the last argument.
+      SUBROUTINE writeOutArray(lun, time, it, descript, pack_cmd,unpack_cmd, filepos, fn)
 
 #ifdef SWAN
 
@@ -15,7 +14,7 @@ Casey 090302: Added the filename as the last argument.
       USE GLOBAL
       USE GLOBAL_IO, ONLY : collectFullDomainArray
       IMPLICIT NONE
-C     args
+!     args
       INTEGER, intent(in) :: lun ! logical unit number of file to write to
       REAL(8), intent(in) :: time ! seconds since cold start
       INTEGER, intent(in) :: it   ! number of time steps since cold start
@@ -23,28 +22,28 @@ C     args
       EXTERNAL :: pack_cmd   ! subroutine used to pack data on subdomain
       EXTERNAL :: unpack_cmd ! subroutine used to unpack data on proc 0
       INTEGER, intent(inout) :: filepos  ! current position in the output file
-C     local vars
-Casey 090302: Increase the length of the filename from 7 to 15.
+!     local vars
+!asey 090302: Increase the length of the filename from 7 to 15.
       CHARACTER(15) :: fn     ! outfile name (valid for lun between 10 and 99)
       INTEGER :: I           ! loop counter
 
-C     initialize output file name
-Casey 090302: The filename is now passed as an input argument.
-C     fn(1:5) = 'fort.'
-C     WRITE(fn(6:7),2) lun
+!     initialize output file name
+!asey 090302: The filename is now passed as an input argument.
+!     fn(1:5) = 'fort.'
+!     WRITE(fn(6:7),2) lun
 
-C     collect up the data from subdomains if running in parallel
+!     collect up the data from subdomains if running in parallel
       IF ((MNPROC.gt.1).and.(.not.WRITE_LOCAL_FILES)) THEN
-C         write(16,*) 'About to collectFullDomainArray' !jgfdebug48.03
+!         write(16,*) 'About to collectFullDomainArray' !jgfdebug48.03
          CALL collectFullDomainArray(descript, pack_cmd, unpack_cmd)
       ENDIF
 
-C     write data according to format specifier from fort.15 (e.g., NOUTE)
+!     write data according to format specifier from fort.15 (e.g., NOUTE)
       SELECT CASE (ABS(descript % specifier))
 
       CASE(1) !ascii text
 
-C         write(16,*) 'About to open globalio text file.' !jgfdebug48.03
+!         write(16,*) 'About to open globalio text file.' !jgfdebug48.03
          IF ( (MNPROC.gt.1).and.(MyProc.eq.0)
      &        .and.(.not.WRITE_LOCAL_FILES)) THEN
             OPEN(lun,FILE=TRIM(GLOBALDIR)//'/'//fn,
@@ -52,18 +51,18 @@ C         write(16,*) 'About to open globalio text file.' !jgfdebug48.03
             WRITE(lun,2120) time,IT
             IF (descript % num_items_per_record .eq. 1) THEN
                DO I=1, descript % num_fd_records
-C                  WRITE(16,*) I ! jgfdebug48.03
+!                  WRITE(16,*) I ! jgfdebug48.03
                   WRITE(lun,2453) I, descript % array_g(I)
                ENDDO
             ENDIF
             IF (descript % num_items_per_record .eq. 2) THEN
                DO I=1, descript % num_fd_records
-C                  WRITE(16,*) I ! jgfdebug48.03
+!                  WRITE(16,*) I ! jgfdebug48.03
                   WRITE(lun,2454) I, descript % array_g(I),
      &                               descript % array2_g(I)
                ENDDO
             ENDIF
-C            WRITE(16,*) 'About to close globalio text file.'!jgfdebug48.03
+!            WRITE(16,*) 'About to close globalio text file.'!jgfdebug48.03
             CLOSE(lun)
          ENDIF
 
@@ -177,8 +176,8 @@ C            WRITE(16,*) 'About to close globalio text file.'!jgfdebug48.03
 
 #endif
 
-C-----------------------------------------------------------------------
+!-----------------------------------------------------------------------
        END SUBROUTINE writeOutArray
-C-----------------------------------------------------------------------
+!-----------------------------------------------------------------------
 
 

@@ -1,22 +1,22 @@
-C***********************************************************************
-C     
-C     SUBROUTINE WETDRY()
-C     
-C     This subroutine performs wetting and drying -- for details see:
-C     
-C     "A Wetting and Drying Treatment for the Runge-Kutta Discontinuous
-C     Galerkin Solution to the Shallow Water Equations", Shintaro Bunya
-C     et al, Computer Methods in Applied Mechanics and Eng., in review.
-C     
-C     Written by Shintaro Bunya and Ethan Kubatko
-C     01-10-2011 - cem - adapted for p_enrichment and multicomponent
-C     
-C     
-C***********************************************************************
+!***********************************************************************
+!     
+!     SUBROUTINE WETDRY()
+!     
+!     This subroutine performs wetting and drying -- for details see:
+!     
+!     "A Wetting and Drying Treatment for the Runge-Kutta Discontinuous
+!     Galerkin Solution to the Shallow Water Equations", Shintaro Bunya
+!     et al, Computer Methods in Applied Mechanics and Eng., in review.
+!     
+!     Written by Shintaro Bunya and Ethan Kubatko
+!     01-10-2011 - cem - adapted for p_enrichment and multicomponent
+!     
+!     
+!***********************************************************************
 
       SUBROUTINE WETDRY()
       
-C.....Use appropriate modules
+!.....Use appropriate modules
       
       USE SIZES
       USE GLOBAL
@@ -24,7 +24,7 @@ C.....Use appropriate modules
       
       IMPLICIT NONE
 
-C.....Declare local variables
+!.....Declare local variables
 
       REAL(SZ), PARAMETER :: ZERO = 1.D-6
       REAL(SZ), PARAMETER :: HUGE = 1.D+6
@@ -47,13 +47,13 @@ C.....Declare local variables
       REAL(SZ) QX_HAT(3), QX_NODE(3), QY_HAT(3), QY_NODE(3)
       REAL(SZ) ZE_HAT(NCHECK(ph),ph), ZE_NODE(NCHECK(ph),ph)
       
-C.....Initialize node codes to dry
+!.....Initialize node codes to dry
 
       DO I = 1,NP
          NODECODE(I) = 0
       ENDDO
       
-C.....Loop over the elements
+!.....Loop over the elements
 
       DO 100 J = 1,NE
 
@@ -65,15 +65,15 @@ C.....Loop over the elements
          endif
 #endif
          
-C.......Retrieve vertex  numbers for element 
-C.......(the vertex numbers are the node #'s if p=1)
+!.......Retrieve vertex  numbers for element 
+!.......(the vertex numbers are the node #'s if p=1)
 
          No1 = NM(J,1)
          No2 = NM(J,2)
          No3 = NM(J,3)
          
-C.......Compute value of ZE and HT at each node, find HT max and min,
-C.......and count number of dry nodes
+!.......Compute value of ZE and HT at each node, find HT max and min,
+!.......and count number of dry nodes
 
          NDRYNODE = 0
          HT_MIN = HUGE
@@ -109,7 +109,7 @@ C.......and count number of dry nodes
             IF (HT_NODE(I).LE.(H0+ZERO)) NDRYNODE = NDRYNODE + 1
          ENDDO
          
-C.......Set "average" bathymetry based on p
+!.......Set "average" bathymetry based on p
 
          !Notice that the average is the average over the sum of the layers
          !DP_AVG = 1.D0/ncheck(pa) * (sum(DP_NODE(:,J,pa)))        
@@ -122,61 +122,61 @@ C.......Set "average" bathymetry based on p
          ENDIF
 #endif
 
-C-----------------------------------------------------------------------
-C.......Case 1: All nodes are wet
-C-----------------------------------------------------------------------
+!-----------------------------------------------------------------------
+!.......Case 1: All nodes are wet
+!-----------------------------------------------------------------------
 
                                 !print*,ndrynode
 
          IF (NDRYNODE.EQ.0) THEN
 
-C.........Case 1A:  Element was previously wet
-C----------------------------------------------
+!.........Case 1A:  Element was previously wet
+!----------------------------------------------
 
             IF (WDFLG(J).EQ.1) THEN
                
-C...........Make no adjustments and set element vertex codes to wet
+!...........Make no adjustments and set element vertex codes to wet
 
                ELEMENT_CHECK = 0
                NODECODE(No1) = 1
                NODECODE(No2) = 1
                NODECODE(No3) = 1
                
-C.........Case 1B:  Element was previously dry
-C----------------------------------------------
+!.........Case 1B:  Element was previously dry
+!----------------------------------------------
                
             ELSE
                
-C...........Make no adjustments now
+!...........Make no adjustments now
 
                ZE_HAT(:,pa) = ZE_NODE(:,pa)
 
-C...........But set flag to do element check
+!...........But set flag to do element check
 
                ELEMENT_CHECK = 1
 
             ENDIF
             
-C-----------------------------------------------------------------------
-C.......Case 2: All nodes are dry
-C-----------------------------------------------------------------------
+!-----------------------------------------------------------------------
+!.......Case 2: All nodes are dry
+!-----------------------------------------------------------------------
 
          ELSEIF (NDRYNODE.EQ.NCHECK(pa)) THEN
             
-C.........Set surface elevation parallel to bathymetry such that total
-C..........water depth at all points = average water depth
+!.........Set surface elevation parallel to bathymetry such that total
+!..........water depth at all points = average water depth
 
             ZE(:,J,IRK+1) = 0.D0
             ZE(1,J,IRK+1) = H0 - DP_AVG
             ZE(2,J,IRK+1) = -HB(2,J,1)
             ZE(3,J,IRK+1) = -HB(3,J,1)
 
-C.........Zero out the fluxes
+!.........Zero out the fluxes
 
             QX(:,J,IRK+1) = 0.D0
             QY(:,J,IRK+1) = 0.D0
             
-C.........Set flags to dry and skip element check
+!.........Set flags to dry and skip element check
 
             WDFLG(J) = 0
             ELEMENT_CHECK = 0
@@ -188,37 +188,37 @@ C.........Set flags to dry and skip element check
                QX(i,J,IRK+1) = 0.D0
                QY(i,J,IRK+1) = 0.D0
 
-c$$$#ifdef SED_LAY !is this more stable?
-c$$$               do l=1,layers 
-c$$$
-c$$$                  bed(i,J,IRK+1,l) = 0.D0
-c$$$
-c$$$               enddo
-c$$$#endif
+!$$$#ifdef SED_LAY !is this more stable?
+!$$$               do l=1,layers 
+!$$$
+!$$$                  bed(i,J,IRK+1,l) = 0.D0
+!$$$
+!$$$               enddo
+!$$$#endif
                
             enddo
 
             !transported quantities should still be stable
-c$$$            if (tracer_flag.eq.1) then
-c$$$               
-c$$$               iota(:,J,irk+1) = 0.D0
-c$$$               
-c$$$            endif
-c$$$            
-c$$$            if (chem_flag.eq.1) then
-c$$$               
-c$$$               iota(:,J,irk+1) = 0.D0
-c$$$               iota2(:,j,irk+1) = 0.D0
-c$$$               
-c$$$            endif            
+!$$$            if (tracer_flag.eq.1) then
+!$$$               
+!$$$               iota(:,J,irk+1) = 0.D0
+!$$$               
+!$$$            endif
+!$$$            
+!$$$            if (chem_flag.eq.1) then
+!$$$               
+!$$$               iota(:,J,irk+1) = 0.D0
+!$$$               iota2(:,j,irk+1) = 0.D0
+!$$$               
+!$$$            endif            
             
-C----------------------------------------------------------------------------
-C.......Case 4: At least one node (at GP) is dry and at least one node is wet
-C----------------------------------------------------------------------------
+!----------------------------------------------------------------------------
+!.......Case 4: At least one node (at GP) is dry and at least one node is wet
+!----------------------------------------------------------------------------
 
          ELSE
 
-C.........Set averages based on p
+!.........Set averages based on p
 
             IF (pa.EQ.0) THEN
                HT_AVG = H0
@@ -233,14 +233,14 @@ C.........Set averages based on p
                HT_AVG = HT_VOL/(0.5D0*AREAS(J))
             ENDIF
             
-C     --------------------------------------------------------------
-C.........Case 3A: Average water depth < H0
-C     --------------------------------------------------------------
+!     --------------------------------------------------------------
+!.........Case 3A: Average water depth < H0
+!     --------------------------------------------------------------
 
             IF (HT_AVG.LE.(H0+ZERO)) THEN
 
-C...........Set surface elevation parallel to bathymetry such that total
-C...........water depth at all points = average water depth
+!...........Set surface elevation parallel to bathymetry such that total
+!...........water depth at all points = average water depth
 
                ZE(:,J,IRK+1) = 0.D0
                ZE(1,J,IRK+1) = HT_AVG - DP_AVG
@@ -248,19 +248,19 @@ C...........water depth at all points = average water depth
                ZE(3,J,IRK+1) = -HB(3,J,1)
                ZE_HAT(:,pa) = ZE(1,J,IRK+1)
 
-C...........Zero out the fluxes
+!...........Zero out the fluxes
 
                QX(:,J,IRK+1) = 0.D0
                QY(:,J,IRK+1) = 0.D0
 
-C     --------------------------------------------------------------
-C.........Case 3B: Aaverage water depth > H0
-C     --------------------------------------------------------------
+!     --------------------------------------------------------------
+!.........Case 3B: Aaverage water depth > H0
+!     --------------------------------------------------------------
                
             ELSE
 
-C...........If p>1 then find a linear function that has the same average
-C...........water depth and the same linear components
+!...........If p>1 then find a linear function that has the same average
+!...........water depth and the same linear components
 
                IF (pa.GT.1) THEN
                                 !Notice the trick here.  Nodes = vertices
@@ -277,7 +277,7 @@ C...........water depth and the same linear components
 
                ENDIF
 
-C...........Reorder the nodes=vertices from shallowest to deepest
+!...........Reorder the nodes=vertices from shallowest to deepest
 
                L2H(1) = 1
                L2H(2) = 2
@@ -292,15 +292,15 @@ C...........Reorder the nodes=vertices from shallowest to deepest
                   ENDDO
                ENDDO
 
-C...........Compute the factors needed for nodal/vertex ajustment
+!...........Compute the factors needed for nodal/vertex ajustment
 
                DH_HAT(L2H(1)) = MAX(H0, HT_NODE(L2H(1))) - HT_NODE(L2H(1))
-               DH_HAT(L2H(2)) = MAX(H0, HT_NODE(L2H(2))-0.5*DH_HAT(L2H(1)))
-     &              - HT_NODE(L2H(2))
+               DH_HAT(L2H(2)) = MAX(H0, HT_NODE(L2H(2))-0.5*DH_HAT(L2H(1)))&
+                   - HT_NODE(L2H(2))
                DH_HAT(L2H(3)) = - DH_HAT(L2H(1)) - DH_HAT(L2H(2))
 
-C...........Adjust nodal/vertex heights, find location of maximum, sum nodal/vertex
-C...........fluxes on dry nodes, and count new # of dry nodes/vertices
+!...........Adjust nodal/vertex heights, find location of maximum, sum nodal/vertex
+!...........fluxes on dry nodes, and count new # of dry nodes/vertices
 
                NDRYNODE = 0
                QX_SUMs = 0
@@ -325,32 +325,32 @@ C...........fluxes on dry nodes, and count new # of dry nodes/vertices
                   ENDIF
                ENDDO
 
-C...........If all adjusted nodes/vertices are dry then zero out fluxes
+!...........If all adjusted nodes/vertices are dry then zero out fluxes
 
                IF (NDRYNODE.EQ.3) THEN
                   QX(:,J,IRK+1) = 0.D0
                   QY(:,J,IRK+1) = 0.D0
 
-c$$$  if (tracer_flag.eq.1) then
-c$$$  
-c$$$  iota(:,J,irk+1) = 0.D0
-c$$$  
-c$$$  endif
-c$$$
-c$$$  if (tracer_flag.eq.1) then
-c$$$  
-c$$$  iota(:,J,irk+1) = 0.D0
-c$$$  
-c$$$  endif
-c$$$  
-c$$$  if (chem_flag.eq.1) then
-c$$$  
-c$$$  iota(:,J,irk+1) = 0.D0
-c$$$  iota2(:,j,irk+1) = 0.D0
-c$$$  
-c$$$  endif 
+!$$$  if (tracer_flag.eq.1) then
+!$$$  
+!$$$  iota(:,J,irk+1) = 0.D0
+!$$$  
+!$$$  endif
+!$$$
+!$$$  if (tracer_flag.eq.1) then
+!$$$  
+!$$$  iota(:,J,irk+1) = 0.D0
+!$$$  
+!$$$  endif
+!$$$  
+!$$$  if (chem_flag.eq.1) then
+!$$$  
+!$$$  iota(:,J,irk+1) = 0.D0
+!$$$  iota2(:,j,irk+1) = 0.D0
+!$$$  
+!$$$  endif 
 
-C...........Else re-distribute nodal/vertex fluxes
+!...........Else re-distribute nodal/vertex fluxes
 
                ELSE
                   QX_SUMs = QX_SUMs/(3.D0-REAL(NDRYNODE))
@@ -373,13 +373,13 @@ C...........Else re-distribute nodal/vertex fluxes
                      ENDIF
                   ENDDO
 
-C.............Compute new linear modal dofs for x-direction flux
+!.............Compute new linear modal dofs for x-direction flux
 
                   QX(1,J,IRK+1) =  C13*(QX_HAT(1) + QX_HAT(2) + QX_HAT(3))
                   QX(2,J,IRK+1) = -C16*(QX_HAT(1) + QX_HAT(2))+C13*QX_HAT(3)
                   QX(3,J,IRK+1) = -0.5D0*QX_HAT(1) + 0.5D0*QX_HAT(2)
 
-C.............Compute new linear modal dofs for y-direction flux
+!.............Compute new linear modal dofs for y-direction flux
 
                   QY(1,J,IRK+1) =  C13*(QY_HAT(1) + QY_HAT(2) + QY_HAT(3))
                   QY(2,J,IRK+1) = -C16*(QY_HAT(1) + QY_HAT(2))+C13*QY_HAT(3)
@@ -387,11 +387,11 @@ C.............Compute new linear modal dofs for y-direction flux
 
                ENDIF
 
-C...........Compute new nodal surface elevations
+!...........Compute new nodal surface elevations
 
                ZE_HAT(1:3,pa) = HT_HAT(1:3) - DP_NODE(1:3,J,pa)
 
-C...........Compute the new linear modal dofs for the surface elevation
+!...........Compute the new linear modal dofs for the surface elevation
 
                ZE(2,J,IRK+1) = -C16*(ZE_HAT(1,pa) + ZE_HAT(2,pa)) + C13*ZE_HAT(3,pa)
                ZE(3,J,IRK+1) = -0.5D0*ZE_HAT(1,pa) + 0.5D0*ZE_HAT(2,pa)
@@ -399,7 +399,7 @@ C...........Compute the new linear modal dofs for the surface elevation
             ENDIF
             
 
-C.........If applicable zero out higher dofs
+!.........If applicable zero out higher dofs
 
             do i = 4,dofh
                
@@ -429,7 +429,7 @@ C.........If applicable zero out higher dofs
             enddo
 
 
-C.........Set flag to do element check
+!.........Set flag to do element check
 
             ELEMENT_CHECK = 1
             
@@ -448,20 +448,20 @@ C.........Set flag to do element check
             
          ENDIF
  
-C-----------------------------------------------------------------------
-C     End of cases
-C-----------------------------------------------------------------------
+!-----------------------------------------------------------------------
+!     End of cases
+!-----------------------------------------------------------------------
 
-C.......Element check:
-C.......Not clear to me what Shintaro is checking here (EJK)
-C.......Setting the lower bound
+!.......Element check:
+!.......Not clear to me what Shintaro is checking here (EJK)
+!.......Setting the lower bound
          
          IF (ELEMENT_CHECK.EQ.1) THEN
 
 !Now test to see if the water column at the min vertex is wet
             IF (MINVAL(ZE_HAT(:,pa)+DP_NODE(:,J,pa)).GT.H0 ) THEN
 
-C.........Make no adjustments and set element and node flags to wet
+!.........Make no adjustments and set element and node flags to wet
 
                WDFLG(J) = 1
                NODECODE(No1) = 1
@@ -470,7 +470,7 @@ C.........Make no adjustments and set element and node flags to wet
 
             ELSE
 
-C...........Make adjustments and set element node codes to dry
+!...........Make adjustments and set element node codes to dry
 
                QX(:,J,IRK+1) = 0.D0
                QY(:,J,IRK+1) = 0.D0

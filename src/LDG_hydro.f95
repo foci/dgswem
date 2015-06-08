@@ -1,19 +1,19 @@
-C***********************************************************************
-C     
-C     SUBROUTINE LDG_HYDRO(IT)
-C     
-C     Compute variable Z to be used in the LDG terms.
-C     
-C     Written by Shintaro Bunya (01-01-2007)
-C
-C     01-10-2011 - cem - adapted for p_enrichment and multicomponent
-C     06-01-2012 - cem - sediment diffusion added
-C     
-C***********************************************************************
+!***********************************************************************
+!     
+!     SUBROUTINE LDG_HYDRO(IT)
+!     
+!     Compute variable Z to be used in the LDG terms.
+!     
+!     Written by Shintaro Bunya (01-01-2007)
+!
+!     01-10-2011 - cem - adapted for p_enrichment and multicomponent
+!     06-01-2012 - cem - sediment diffusion added
+!     
+!***********************************************************************
 
       SUBROUTINE LDG_HYDRO(IT)
 
-C.....Use appropriate modules
+!.....Use appropriate modules
       
       USE SIZES,ONLY : SZ, myproc
       USE GLOBAL
@@ -26,7 +26,7 @@ C.....Use appropriate modules
 
       IMPLICIT NONE
       
-C.....Declare local variables
+!.....Declare local variables
 
       INTEGER IT,L,GED,NBOREL,NNBORS,NDRYNBORS,k,i,ll
       INTEGER Detected
@@ -36,7 +36,7 @@ C.....Declare local variables
 
       Allocate ( tmp_mz(dofh,2,1,MNE) )
 
-C.....Initialize for viscosity/diffusion
+!.....Initialize for viscosity/diffusion
 #ifdef WAVE_DIF
       HZ = 0.D0
 #endif 
@@ -48,27 +48,27 @@ C.....Initialize for viscosity/diffusion
       MZ = 0.d0
 #endif
      
-C.....Compute elevation specified edges
+!.....Compute elevation specified edges
 
       IF (NEEDS.GT.0)  CALL OCEAN_EDGE_LDG_HYDRO()
 
-C.....Compute no-normal flow edges
+!.....Compute no-normal flow edges
 
       IF (NLEDS.GT.0)  CALL LAND_EDGE_LDG_HYDRO()
 
-C.....Compute non-zero flow edges
+!.....Compute non-zero flow edges
 
       IF (NFEDS.GT.0)  CALL FLOW_EDGE_LDG_HYDRO()
       
-C.....Compute radiation edges
+!.....Compute radiation edges
 
       IF (NREDS.GT.0)  CALL RADIATION_EDGE_LDG_HYDRO()
 
-C.....Compute internal edges
+!.....Compute internal edges
 
       CALL INTERNAL_EDGE_LDG_HYDRO()
 
-C.....Loop over interior elements
+!.....Loop over interior elements
 
       CALL RHS_LDG_HYDRO()
 
@@ -97,8 +97,8 @@ C.....Loop over interior elements
 #ifdef WAVE_DIF
          if (entrop(1,L).gt.s0+kappa) then
             
-            HZ(:,:,:,L) = (bg_dif+e1(1)) *
-     &           (abs(lim_by+balance(1)))**pa * HZ(:,:,:,L)
+            HZ(:,:,:,L) = (bg_dif+e1(1)) *&
+           (abs(lim_by+balance(1)))**pa * HZ(:,:,:,L)
 
          else
 
@@ -109,12 +109,12 @@ C.....Loop over interior elements
 
          if (entrop(2,L).gt.s0+kappa) then
             
-            LZ(:,1,1,L) = (EVMAvg+e1(2) * 
-     &           (abs(lim_by+balance(2)))**pa)  * LZ(:,1,1,L)
-            LZ(:,1,2,L) = (EVMAvg+e1(2) *
-     &           (abs(lim_by+balance(2)))**pa ) * LZ(:,1,2,L)
-            LZ(:,2,1,L) = (EVMAvg+e1(2) *
-     &           (abs(lim_by+balance(2)))**pa ) * LZ(:,2,1,L)
+            LZ(:,1,1,L) = (EVMAvg+e1(2) * &
+           (abs(lim_by+balance(2)))**pa)  * LZ(:,1,1,L)
+            LZ(:,1,2,L) = (EVMAvg+e1(2) *&
+           (abs(lim_by+balance(2)))**pa ) * LZ(:,1,2,L)
+            LZ(:,2,1,L) = (EVMAvg+e1(2) *&
+           (abs(lim_by+balance(2)))**pa ) * LZ(:,2,1,L)
      
          else
 
@@ -125,15 +125,15 @@ C.....Loop over interior elements
 
          if (entrop(3,L).gt.s0+kappa) then
             
-            LZ(:,2,2,L) = (EVMAvg+e1(3) * 
-     &           (abs(lim_by+balance(3)))**pa) * LZ(:,2,2,L)
+            LZ(:,2,2,L) = (EVMAvg+e1(3) * &
+           (abs(lim_by+balance(3)))**pa) * LZ(:,2,2,L)
 
             if (entrop(2,L).le.s0+kappa) then
                
-               LZ(:,2,1,L) = (EVMAvg+e1(3) *
-     &              (abs(lim_by+balance(3)))**pa ) * LZ(:,2,1,L)
-               LZ(:,1,2,L) = (EVMAvg+e1(3) *
-     &              (abs(lim_by+balance(3)))**pa ) * LZ(:,1,2,L)
+               LZ(:,2,1,L) = (EVMAvg+e1(3) *&
+              (abs(lim_by+balance(3)))**pa ) * LZ(:,2,1,L)
+               LZ(:,1,2,L) = (EVMAvg+e1(3) *&
+              (abs(lim_by+balance(3)))**pa ) * LZ(:,1,2,L)
                
             endif
             
@@ -153,8 +153,8 @@ C.....Loop over interior elements
 #ifdef TRACE
          if (entrop(4,L).gt.s0+kappa) then
             
-            TZ(:,:,:,L) = (trc_dif+e1(4)) *
-     &           (abs(lim_by+balance(4)))**pa * TZ(:,:,:,L)
+            TZ(:,:,:,L) = (trc_dif+e1(4)) *&
+           (abs(lim_by+balance(4)))**pa * TZ(:,:,:,L)
 
          else
 
@@ -167,8 +167,8 @@ C.....Loop over interior elements
 
          if (entrop(5,L).gt.s0+kappa) then
             
-            MZ(:,:,:,L) = (SEVDMAvg+e1(5)) *
-     &           (abs(lim_by+balance(5)))**pa * MZ(:,:,:,L)
+            MZ(:,:,:,L) = (SEVDMAvg+e1(5)) *&
+           (abs(lim_by+balance(5)))**pa * MZ(:,:,:,L)
 
          else
 
@@ -195,7 +195,7 @@ C.....Loop over interior elements
 #endif
 
       enddo
-C********************************************
+!********************************************
 
 #ifdef CMPI
 #ifdef WAVE_DIF
@@ -217,24 +217,24 @@ C********************************************
       RETURN
       END SUBROUTINE
 
-C***********************************************************************
-C     
-C     SUBROUTINE OCEAN_EDGE_LDG_HYDRO( )
-C     
-C     This subroutine does the following:
-C     
-C     1.  Calculates the values of the necessary variables at the edge
-C     gauss points for NO-NORMAL FLOW edges
-C     2.  Compute the LDG flux at these points (sediment diffusion?).
-C     3.  Compute the boundary integrals.
-C     
-C     Written by Shintaro Bunya (01-04-2007)
-C     01-10-2011 - cem - adapted for p_enrichment and multicomponent
-C     
-C***********************************************************************
+!***********************************************************************
+!     
+!     SUBROUTINE OCEAN_EDGE_LDG_HYDRO( )
+!     
+!     This subroutine does the following:
+!     
+!     1.  Calculates the values of the necessary variables at the edge
+!     gauss points for NO-NORMAL FLOW edges
+!     2.  Compute the LDG flux at these points (sediment diffusion?).
+!     3.  Compute the boundary integrals.
+!     
+!     Written by Shintaro Bunya (01-04-2007)
+!     01-10-2011 - cem - adapted for p_enrichment and multicomponent
+!     
+!***********************************************************************
       SUBROUTINE OCEAN_EDGE_LDG_HYDRO()
 
-C.....Use appropriate modules
+!.....Use appropriate modules
 
       USE SIZES,ONLY : layers
       USE GLOBAL
@@ -242,7 +242,7 @@ C.....Use appropriate modules
 
       IMPLICIT NONE
 
-C.....Declare local variables
+!.....Declare local variables
 
       INTEGER L,LED,GED,k,I,ll
       REAL(SZ) QX_AVG, QY_AVG,ZE_AVG,bed_AVG(layers)
@@ -250,12 +250,12 @@ C.....Declare local variables
 
       DO 1000 L = 1, needs
          
-C.....Retrieve the global and local edge number
+!.....Retrieve the global and local edge number
 
          GED = NEEDN(L)
          LED = NEDSD(1,GED)
 
-C.....Retrieve the elements which share the edge
+!.....Retrieve the elements which share the edge
 
          EL_IN = NEDEL(1,GED)
 
@@ -267,17 +267,17 @@ C.....Retrieve the elements which share the edge
          endif
 #endif
          
-C.....Retrieve the components of the normal vector to the edge
+!.....Retrieve the components of the normal vector to the edge
          
          NX = COSNX(GED)
          NY = SINNX(GED)
          
-C.....Retrieve the nodes of the edge
+!.....Retrieve the nodes of the edge
          
          N1 = NEDNO(1,GED)
          N2 = NEDNO(2,GED)
          
-C.....Compute ZE, QX, QY, and HB at each edge Gauss quadrature point
+!.....Compute ZE, QX, QY, and HB at each edge Gauss quadrature point
 
          DO I = 1,NEGP(pa)
 
@@ -304,7 +304,7 @@ C.....Compute ZE, QX, QY, and HB at each edge Gauss quadrature point
             enddo
 #endif
            
-C.....Compute the solution at the interior state
+!.....Compute the solution at the interior state
 
             DO K = 1,DOFS(EL_IN)
 #ifdef WAVE_DIF
@@ -317,13 +317,13 @@ C.....Compute the solution at the interior state
 #endif
 #ifdef SED_LAY
                do ll=1,layers
-                  bed_IN(ll) = bed_IN(ll) 
-     &                 + bed(K,EL_IN,IRK,ll)*PHI_EDGE(K,I,LED,pa)
+                  bed_IN(ll) = bed_IN(ll) &
+                 + bed(K,EL_IN,IRK,ll)*PHI_EDGE(K,I,LED,pa)
                enddo
 #endif
             ENDDO
             
-C.....Set the exterior state flows equal to the interior state flows
+!.....Set the exterior state flows equal to the interior state flows
 
             QX_EX = QX_IN
             QY_EX = QY_IN
@@ -334,7 +334,7 @@ C.....Set the exterior state flows equal to the interior state flows
             enddo
 #endif
 
-C.....Take the average
+!.....Take the average
 #ifdef WAVE_DIF
             ZE_AVG = ZE_IN
 #endif
@@ -349,15 +349,15 @@ C.....Take the average
             enddo
 #endif
 
-C.....Compute the edge integral
+!.....Compute the edge integral
             
             DO K = 1,DOFS(EL_IN)
-               CALL EDGE_INT_LDG_HYDRO
-     &              (K,EL_IN,LED,GED,I,iota_AVG,ZE_AVG,QX_AVG,QY_AVG,NX,NY,pa)
+               CALL EDGE_INT_LDG_HYDRO&
+              (K,EL_IN,LED,GED,I,iota_AVG,ZE_AVG,QX_AVG,QY_AVG,NX,NY,pa)
 #ifdef SED_LAY
                do ll=1,layers
-                  CALL EDGE_INT_LDG_sediment
-     &                (K,EL_IN,LED,GED,I,bed_AVG(ll),NX,NY,pa,ll)
+                  CALL EDGE_INT_LDG_sediment&
+                (K,EL_IN,LED,GED,I,bed_AVG(ll),NX,NY,pa,ll)
                enddo
 #endif
             ENDDO
@@ -370,32 +370,32 @@ C.....Compute the edge integral
       END SUBROUTINE
 
 
-C***********************************************************************
-C     
-C     SUBROUTINE LAND_EDGE_HYDRO_LDG( )
-C     
-C     This subroutine does the following:
-C     
-C     1.  Calculates the values of the necessary variables at the edge
-C     gauss points for NO-NORMAL FLOW edges
-C     2.  Compute the LDG flux at these points.
-C     3.  Compute the boundary integrals.
-C     
-C     Written by Shintaro Bunya (01-02-2007)
-C     01-10-2011 - cem - adapted for p_enrichment and multicomponent
-C     
-C***********************************************************************
+!***********************************************************************
+!     
+!     SUBROUTINE LAND_EDGE_HYDRO_LDG( )
+!     
+!     This subroutine does the following:
+!     
+!     1.  Calculates the values of the necessary variables at the edge
+!     gauss points for NO-NORMAL FLOW edges
+!     2.  Compute the LDG flux at these points.
+!     3.  Compute the boundary integrals.
+!     
+!     Written by Shintaro Bunya (01-02-2007)
+!     01-10-2011 - cem - adapted for p_enrichment and multicomponent
+!     
+!***********************************************************************
 
       SUBROUTINE LAND_EDGE_LDG_HYDRO()
 
-C.....Use appropriate modules
+!.....Use appropriate modules
 
       USE SIZES,ONLY : SZ,layers
       USE GLOBAL
       USE DG
       IMPLICIT NONE
 
-C.....Declare local variables
+!.....Declare local variables
 
 
       INTEGER K,L,LED,GED,GP,i,kk,ll
@@ -405,12 +405,12 @@ C.....Declare local variables
       
       DO 1000 L = 1,NLEDS
          
-C.....Retrieve the global and local edge number
+!.....Retrieve the global and local edge number
          
          GED = NLEDN(L)
          LED = NEDSD(1,GED)
          
-C.....Retrieve the elements which share the edge
+!.....Retrieve the elements which share the edge
          
          EL_IN = NEDEL(1,GED)
          
@@ -422,17 +422,17 @@ C.....Retrieve the elements which share the edge
          endif
 #endif
 
-C.....Retrieve the components of the normal vector to the edge
+!.....Retrieve the components of the normal vector to the edge
          
          NX = COSNX(GED)
          NY = SINNX(GED)
          
-C.....Set the components for the tangential vector to the edge
+!.....Set the components for the tangential vector to the edge
          
          TX = -NY
          TY =  NX
 
-C.....Compute ZE, QX, QY, and HB at each Gauss point
+!.....Compute ZE, QX, QY, and HB at each Gauss point
 
          DO I = 1,NEGP(pa)
 #ifdef WAVE_DIF
@@ -449,7 +449,7 @@ C.....Compute ZE, QX, QY, and HB at each Gauss point
             enddo
 #endif
 
-C.....Compute the solution at the interior state
+!.....Compute the solution at the interior state
 
             DO K = 1,DOFS(EL_IN)
 #ifdef WAVE_DIF
@@ -468,17 +468,17 @@ C.....Compute the solution at the interior state
 
             ENDDO
             
-C.....Compute the velocity in the normal and tangental direction
+!.....Compute the velocity in the normal and tangental direction
             
             Q_N_INT = QX_IN*NX + QY_IN*NY
             Q_T_INT = QX_IN*TX + QY_IN*TY
 
-C.....Reflect the velocity in the normal direction
+!.....Reflect the velocity in the normal direction
 
             Q_N_EXT = -Q_N_INT
             Q_T_EXT =  Q_T_INT
             
-C.....Compute the x and y components of the external state flow
+!.....Compute the x and y components of the external state flow
 
             QX_EX = ( TY*Q_N_EXT - NY*Q_T_EXT)/(NX*TY - NY*TX)
             QY_EX = (-TX*Q_N_EXT + NX*Q_T_EXT)/(NX*TY - NY*TX)
@@ -490,7 +490,7 @@ C.....Compute the x and y components of the external state flow
 #endif            
 
 
-C.....Take the average
+!.....Take the average
 #ifdef WAVE_DIF
             ZE_AVG = ZE_IN
 #endif
@@ -505,15 +505,15 @@ C.....Take the average
             enddo
 #endif
 
-C.....Compute the edge integral
+!.....Compute the edge integral
 
             DO K = 1,DOFS(EL_IN)
-               CALL EDGE_INT_LDG_HYDRO
-     &              (K,EL_IN,LED,GED,I,iota_AVG,ZE_AVG,QX_AVG,QY_AVG,NX,NY,pa)
+               CALL EDGE_INT_LDG_HYDRO&
+              (K,EL_IN,LED,GED,I,iota_AVG,ZE_AVG,QX_AVG,QY_AVG,NX,NY,pa)
 #ifdef SED_LAY
                do ll=1,layers
-                  CALL EDGE_INT_LDG_sediment
-     &                 (K,EL_IN,LED,GED,I,bed_AVG(ll),NX,NY,pa,ll)
+                  CALL EDGE_INT_LDG_sediment&
+                 (K,EL_IN,LED,GED,I,bed_AVG(ll),NX,NY,pa,ll)
                enddo
 #endif
             ENDDO
@@ -526,25 +526,25 @@ C.....Compute the edge integral
       END SUBROUTINE
 
 
-C***********************************************************************
-C     
-C     SUBROUTINE FLOW_EDGE_LDG_HYDRO( )
-C     
-C     This subroutine does the following:
-C     
-C     1.  Calculates the values of the necessary variables at the edge
-C     gauss points for INTERNAL edges
-C     2.  Take the average of these values (sediment diffusion)
-C     3.  Perform boundary integration
-C     
-C     Written by Shintaro Bunya (01-05-2007)
-C     01-10-2011 - cem - adapted for p_enrichment and multicomponent
-C     
-C***********************************************************************
+!***********************************************************************
+!     
+!     SUBROUTINE FLOW_EDGE_LDG_HYDRO( )
+!     
+!     This subroutine does the following:
+!     
+!     1.  Calculates the values of the necessary variables at the edge
+!     gauss points for INTERNAL edges
+!     2.  Take the average of these values (sediment diffusion)
+!     3.  Perform boundary integration
+!     
+!     Written by Shintaro Bunya (01-05-2007)
+!     01-10-2011 - cem - adapted for p_enrichment and multicomponent
+!     
+!***********************************************************************
 
       SUBROUTINE FLOW_EDGE_LDG_HYDRO()
 
-C.....Use appropriate modules
+!.....Use appropriate modules
 
       USE SIZES,ONLY : layers
       USE GLOBAL
@@ -552,7 +552,7 @@ C.....Use appropriate modules
 
       IMPLICIT NONE
 
-C.....Declare local variables
+!.....Declare local variables
 
       INTEGER L, LED, GED,k,i,jj,ll
       REAL(SZ) TX, TY, QX_AVG, QY_AVG, bed_AVG(layers)
@@ -560,12 +560,12 @@ C.....Declare local variables
 
       DO 1000 L = 1,NFEDS
          
-C.....Retrieve the global and local edge number
+!.....Retrieve the global and local edge number
 
          GED = NFEDN(L)
          LED = NEDSD(1,GED)
 
-C.....Retrieve the element to which the edge belongs
+!.....Retrieve the element to which the edge belongs
 
          EL_IN = NEDEL(1,GED)
 
@@ -577,17 +577,17 @@ C.....Retrieve the element to which the edge belongs
          endif
 #endif
          
-C.....Retrieve the components of the normal vector to the edge
+!.....Retrieve the components of the normal vector to the edge
          
          NX = COSNX(GED)
          NY = SINNX(GED)
          
-C.....Set the components for the tangential vector to the edge
+!.....Set the components for the tangential vector to the edge
 
          TX = -NY
          TY =  NX
          
-C.....Compute ZE, QX, QY, and HB at each edge Gauss quadrature point
+!.....Compute ZE, QX, QY, and HB at each edge Gauss quadrature point
 
          DO I = 1,NEGP(pa)
 
@@ -612,7 +612,7 @@ C.....Compute ZE, QX, QY, and HB at each edge Gauss quadrature point
             enddo
 #endif
             
-C.....Compute the specified flow boundaries for the exterior state
+!.....Compute the specified flow boundaries for the exterior state
 
             Q_N_EXT = 0.D0
             DO JJ = 1,NFFR
@@ -626,10 +626,10 @@ C.....Compute the specified flow boundaries for the exterior state
                ARGJ = FAMIG(JJ)*(TIMEDG - NCYC*FPER(JJ)) + FFACE(JJ)
                RFF  = FFF(JJ)*RAMPExtFlux
                
-               QNAM_GP = 0.5D0*(QNAM_DG(JJ,L,1) + QNAM_DG(JJ,L,2))
-     &              + 0.5D0*(QNAM_DG(JJ,L,2) - QNAM_DG(JJ,L,1))*XEGP(I,pa)
-               QNPH_GP = 0.5D0*(QNPH_DG(JJ,L,1) + QNPH_DG(JJ,L,2))
-     &              + 0.5D0*(QNPH_DG(JJ,L,2) - QNPH_DG(JJ,L,1))*XEGP(I,pa)
+               QNAM_GP = 0.5D0*(QNAM_DG(JJ,L,1) + QNAM_DG(JJ,L,2))&
+              + 0.5D0*(QNAM_DG(JJ,L,2) - QNAM_DG(JJ,L,1))*XEGP(I,pa)
+               QNPH_GP = 0.5D0*(QNPH_DG(JJ,L,1) + QNPH_DG(JJ,L,2))&
+              + 0.5D0*(QNPH_DG(JJ,L,2) - QNPH_DG(JJ,L,1))*XEGP(I,pa)
                
                ARG = ARGJ - QNPH_GP
                
@@ -639,7 +639,7 @@ C.....Compute the specified flow boundaries for the exterior state
 
             ENDDO
             
-C.....Compute the solution at the interior state
+!.....Compute the solution at the interior state
 
             DO K = 1,DOFS(EL_IN)
 
@@ -662,7 +662,7 @@ C.....Compute the solution at the interior state
                QX_EX = -( TY*Q_N_EXT - NY*Q_T_EXT)/(NX*TY - NY*TX)
                QY_EX = -(-TX*Q_N_EXT + NX*Q_T_EXT)/(NX*TY - NY*TX)
             
-C.....Take the average
+!.....Take the average
 
 #ifdef WAVE_DIF
                ZE_AVG = ZE_IN
@@ -679,15 +679,15 @@ C.....Take the average
                enddo
 #endif
 
-C.....Compute the edge integral
+!.....Compute the edge integral
 
             DO K = 1,DOFS(EL_IN)
-               CALL EDGE_INT_LDG_HYDRO
-     &              (K,EL_IN,LED,GED,I,iota_AVG,ZE_AVG,QX_AVG,QY_AVG,NX,NY,pa)
+               CALL EDGE_INT_LDG_HYDRO&
+              (K,EL_IN,LED,GED,I,iota_AVG,ZE_AVG,QX_AVG,QY_AVG,NX,NY,pa)
 #ifdef SED_LAY
                do ll=1,layers
-                  CALL EDGE_INT_LDG_sediment
-     &                 (K,EL_IN,LED,GED,I,bed_AVG(ll),NX,NY,pa,ll)
+                  CALL EDGE_INT_LDG_sediment&
+                 (K,EL_IN,LED,GED,I,bed_AVG(ll),NX,NY,pa,ll)
                enddo
 #endif
             ENDDO
@@ -699,25 +699,25 @@ C.....Compute the edge integral
       END SUBROUTINE
 
 
-C***********************************************************************
-C     
-C     SUBROUTINE RADIATION_EDGE_LDG_HYDRO( )
-C     
-C     This subroutine does the following:
-C     
-C     1.  Calculates the values of the necessary variables at the edge
-C     gauss points for INTERNAL edges (sediment diffusion?)
-C     2.  Take the average of these values
-C     3.  Perform boundary integration
-C     
-C     Written by Shintaro Bunya (01-10-2007)
-C     01-10-2011 - cem - adapted for p_enrichment and multicomponent
-C     
-C***********************************************************************
+!***********************************************************************
+!     
+!     SUBROUTINE RADIATION_EDGE_LDG_HYDRO( )
+!     
+!     This subroutine does the following:
+!     
+!     1.  Calculates the values of the necessary variables at the edge
+!     gauss points for INTERNAL edges (sediment diffusion?)
+!     2.  Take the average of these values
+!     3.  Perform boundary integration
+!     
+!     Written by Shintaro Bunya (01-10-2007)
+!     01-10-2011 - cem - adapted for p_enrichment and multicomponent
+!     
+!***********************************************************************
 
       SUBROUTINE RADIATION_EDGE_LDG_HYDRO()
 
-C.....Use appropriate modules
+!.....Use appropriate modules
 
       USE SIZES,ONLY : layers
       USE GLOBAL
@@ -725,19 +725,19 @@ C.....Use appropriate modules
 
       IMPLICIT NONE
 
-C.....Declare local variables
+!.....Declare local variables
 
       INTEGER L, LED, GED,k,i,ll
       REAL(SZ) TX, TY
 
       DO 1000 L = 1,NREDS
          
-C.....Retrieve the global and local edge number
+!.....Retrieve the global and local edge number
 
          GED = NREDN(L)
          LED = NEDSD(1,GED)
 
-C.....Retrieve the elements which share the edge
+!.....Retrieve the elements which share the edge
 
          EL_IN = NEDEL(1,GED)
 
@@ -749,12 +749,12 @@ C.....Retrieve the elements which share the edge
          endif
 #endif
 
-C.....Retrieve the components of the normal vector to the edge
+!.....Retrieve the components of the normal vector to the edge
          
          NX = COSNX(GED)
          NY = SINNX(GED)
 
-C.....Compute ZE, QX, QY, and HB at each Gauss point
+!.....Compute ZE, QX, QY, and HB at each Gauss point
 
          DO I = 1,NEGP(pa)
             
@@ -772,7 +772,7 @@ C.....Compute ZE, QX, QY, and HB at each Gauss point
             enddo
 #endif
 
-C.....Compute the solution at the interior state
+!.....Compute the solution at the interior state
 
             DO K = 1,DOFS(EL_IN)
                
@@ -796,15 +796,15 @@ C.....Compute the solution at the interior state
 
             QX_IN = QX_IN*SFACED(I,LED,EL_IN,pa)
 
-C.....Compute the edge integral
+!.....Compute the edge integral
            
             DO K = 1,DOFS(EL_IN)
-               CALL EDGE_INT_LDG_HYDRO
-     &              (K,EL_IN,LED,GED,I,iota_IN,ZE_IN,QX_IN,QY_IN,NX,NY,pa)
+               CALL EDGE_INT_LDG_HYDRO&
+              (K,EL_IN,LED,GED,I,iota_IN,ZE_IN,QX_IN,QY_IN,NX,NY,pa)
 #ifdef SED_LAY
                do ll=1,layers
-                  CALL EDGE_INT_LDG_sediment
-     &                 (K,EL_IN,LED,GED,I,bed_IN(ll),NX,NY,pa,ll)
+                  CALL EDGE_INT_LDG_sediment&
+                 (K,EL_IN,LED,GED,I,bed_IN(ll),NX,NY,pa,ll)
                enddo
 #endif
             ENDDO
@@ -815,25 +815,25 @@ C.....Compute the edge integral
       RETURN
       END SUBROUTINE
 
-C***********************************************************************
-C     
-C     SUBROUTINE INTERNAL_EDGE_LDG_HYDRO( )
-C     
-C     This subroutine does the following:
-C     
-C     1.  Calculates the values of the necessary variables at the edge
-C     gauss points for INTERNAL edges (sediment diffusion?)
-C     2.  Take the average of these values
-C     3.  Perform boundary integration
-C     
-C     Written by Shintaro Bunya (01-02-2007)
-C     01-10-2011 - cem - adapted for p_enrichment and multicomponent
-C     
-C***********************************************************************
+!***********************************************************************
+!     
+!     SUBROUTINE INTERNAL_EDGE_LDG_HYDRO( )
+!     
+!     This subroutine does the following:
+!     
+!     1.  Calculates the values of the necessary variables at the edge
+!     gauss points for INTERNAL edges (sediment diffusion?)
+!     2.  Take the average of these values
+!     3.  Perform boundary integration
+!     
+!     Written by Shintaro Bunya (01-02-2007)
+!     01-10-2011 - cem - adapted for p_enrichment and multicomponent
+!     
+!***********************************************************************
 
       SUBROUTINE INTERNAL_EDGE_LDG_HYDRO()
 
-C.....Use appropriate modules
+!.....Use appropriate modules
       
       USE SIZES,ONLY : SZ,layers
       USE GLOBAL
@@ -841,7 +841,7 @@ C.....Use appropriate modules
 
       IMPLICIT NONE
 
-C.....Declare local variables
+!.....Declare local variables
 
       INTEGER L, LED_IN, LED_EX, GED, GP_IN, GP_EX,k,i,ll
       REAL(SZ) ZE_AVG,QX_AVG,QY_AVG,bed_AVG(layers),W_IN,W_EX
@@ -850,13 +850,13 @@ C.....Declare local variables
 
       DO 1000 L = 1,NIEDS
 
-C.....Retrieve the global and local edge number
+!.....Retrieve the global and local edge number
 
          GED = NIEDN(L)
          LED_IN = NEDSD(1,GED)
          LED_EX = NEDSD(2,GED)
 
-C.....Retrieve the elements which share the edge
+!.....Retrieve the elements which share the edge
 
          EL_IN = NEDEL(1,GED)
          EL_EX = NEDEL(2,GED)
@@ -875,12 +875,12 @@ C.....Retrieve the elements which share the edge
          endif
 #endif
 
-C.....Retrieve the components of the normal vector to the edge
+!.....Retrieve the components of the normal vector to the edge
 
          NX = COSNX(GED)
          NY = SINNX(GED)
 
-C.....Compute ZE, QX, QY, and HB at each edge Gauss quadrature point
+!.....Compute ZE, QX, QY, and HB at each edge Gauss quadrature point
 
          DO I = 1,NEGP(pa)
 
@@ -929,23 +929,23 @@ C.....Compute ZE, QX, QY, and HB at each edge Gauss quadrature point
 
 #ifdef SED_LAY
                do ll=1,layers
-                  bed_IN(ll) = bed_IN(ll) 
-     &                 + bed(K,EL_IN,IRK,ll)*PHI_EDGE(K,GP_IN,LED_IN,pa)
-                  bed_EX(ll) = bed_EX(ll) 
-     &                 + bed(K,EL_EX,IRK,ll)*PHI_EDGE(K,GP_EX,LED_EX,pa)
+                  bed_IN(ll) = bed_IN(ll) &
+                 + bed(K,EL_IN,IRK,ll)*PHI_EDGE(K,GP_IN,LED_IN,pa)
+                  bed_EX(ll) = bed_EX(ll) &
+                 + bed(K,EL_EX,IRK,ll)*PHI_EDGE(K,GP_EX,LED_EX,pa)
                enddo
 #endif
 
             ENDDO
 
-C.....Take the average
+!.....Take the average
 
 #ifdef WAVE_DIF
             ZE_AVG = 0.5D0*(ZE_IN + ZE_EX)
 #endif
 
-            QX_AVG = 0.5D0*(QX_IN*SFACED(GP_IN,LED_IN,EL_IN,pa) 
-     &           + QX_EX*SFACED(GP_EX,LED_EX,EL_EX,pa))
+            QX_AVG = 0.5D0*(QX_IN*SFACED(GP_IN,LED_IN,EL_IN,pa) &
+           + QX_EX*SFACED(GP_EX,LED_EX,EL_EX,pa))
             QY_AVG = 0.5D0*(QY_IN + QY_EX)
 
 #ifdef TRACE
@@ -958,14 +958,14 @@ C.....Take the average
             enddo
 #endif
 
-C.....Compute the edge integral
+!.....Compute the edge integral
 
             DO K = 1,DOFS(EL)
 
-               W_IN = 2.0*M_INV(K,pa)/AREAS(EL_IN)*XLEN(GED)*
-     &              PHI_EDGE(K,GP_IN,LED_IN,pa)*WEGP(GP_IN,pa)
-               W_EX = 2.0*M_INV(K,pa)/AREAS(EL_EX)*XLEN(GED)*
-     &              PHI_EDGE(K,GP_EX,LED_EX,pa)*WEGP(GP_EX,pa)
+               W_IN = 2.0*M_INV(K,pa)/AREAS(EL_IN)*XLEN(GED)*&
+              PHI_EDGE(K,GP_IN,LED_IN,pa)*WEGP(GP_IN,pa)
+               W_EX = 2.0*M_INV(K,pa)/AREAS(EL_EX)*XLEN(GED)*&
+              PHI_EDGE(K,GP_EX,LED_EX,pa)*WEGP(GP_EX,pa)
                
 #ifdef WAVE_DIF
                HZ(K,1,1,EL_IN) = HZ(K,1,1,EL_IN) - ZE_AVG*NX*W_IN
@@ -994,14 +994,14 @@ C.....Compute the edge integral
 
 #ifdef SED_LAY
                do ll=1,layers
-                  MZ(K,1,ll,EL_IN) = MZ(K,1,ll,EL_IN) 
-     &                 - bed_AVG(ll)*NX*W_IN
-                  MZ(K,2,ll,EL_IN) = MZ(K,2,ll,EL_IN) 
-     &                 - bed_AVG(ll)*NY*W_IN
-                  MZ(K,1,ll,EL_EX) = MZ(K,1,ll,EL_EX) 
-     &                 + bed_AVG(ll)*NX*W_EX
-                  MZ(K,2,ll,EL_EX) = MZ(K,2,ll,EL_EX) 
-     &                 + bed_AVG(ll)*NY*W_EX
+                  MZ(K,1,ll,EL_IN) = MZ(K,1,ll,EL_IN) &
+                 - bed_AVG(ll)*NX*W_IN
+                  MZ(K,2,ll,EL_IN) = MZ(K,2,ll,EL_IN) &
+                 - bed_AVG(ll)*NY*W_IN
+                  MZ(K,1,ll,EL_EX) = MZ(K,1,ll,EL_EX) &
+                 + bed_AVG(ll)*NX*W_EX
+                  MZ(K,2,ll,EL_EX) = MZ(K,2,ll,EL_EX) &
+                 + bed_AVG(ll)*NY*W_EX
                enddo
 #endif
 
@@ -1013,22 +1013,22 @@ C.....Compute the edge integral
       END SUBROUTINE
 
 
-C***********************************************************************
-C     
-C     SUBROUTINE EDGE_INT_LDG_HYDRO()
-C     
-C     This subroutine computes the edge integrals for the LDG boundary
-C     terms using Gauss quadrature and adds them to the LZ. (sediment diffusion?)
-C     
-C     Written by Shintaro Bunya (01-02-2007)
-C     01-10-2011 - cem - adapted for p_enrichment and multicomponent
-C     
-C***********************************************************************
+!***********************************************************************
+!     
+!     SUBROUTINE EDGE_INT_LDG_HYDRO()
+!     
+!     This subroutine computes the edge integrals for the LDG boundary
+!     terms using Gauss quadrature and adds them to the LZ. (sediment diffusion?)
+!     
+!     Written by Shintaro Bunya (01-02-2007)
+!     01-10-2011 - cem - adapted for p_enrichment and multicomponent
+!     
+!***********************************************************************
 
-      SUBROUTINE EDGE_INT_LDG_HYDRO(K,EL,LED,GED,GP,iota_Avg,ZE_Avg,QX_Avg,
-     &     QY_Avg,NX,NY,pa)
+      SUBROUTINE EDGE_INT_LDG_HYDRO(K,EL,LED,GED,GP,iota_Avg,ZE_Avg,QX_Avg,&
+     QY_Avg,NX,NY,pa)
 
-C.....Use appropriate modules
+!.....Use appropriate modules
 
       USE SIZES,ONLY : SZ,layers
       USE GLOBAL,ONLY : AREAS,nm
@@ -1036,63 +1036,63 @@ C.....Use appropriate modules
  
       IMPLICIT NONE
       
-C.....Declare local variables
+!.....Declare local variables
 
       INTEGER K,EL,LED,GED,GP,i,pa
       REAL(SZ) AREA, IMASS,n1,n2,n3,QX_Avg,QY_Avg
       Real(SZ) ZE_Avg,iota_Avg
       real(sz) NX,NY
       
-C.....Retrieve the element area
+!.....Retrieve the element area
       
       AREA = 0.5D0*AREAS(EL)
 
-C.....Comput the edge integral
+!.....Comput the edge integral
 
       IMASS = M_INV(K,pa)/(0.5D0*AREA)
 
 #ifdef WAVE_DIF
-      HZ(K,1,1,EL) = HZ(K,1,1,EL)
-     &     - IMASS*XLEN(GED)*0.5*ZE_Avg*PHI_EDGE(K,GP,LED,pa)*NX*WEGP(GP,pa)
-      HZ(K,2,2,EL) = HZ(K,2,2,EL)
-     &     - IMASS*XLEN(GED)*0.5*ZE_Avg*PHI_EDGE(K,GP,LED,pa)*NY*WEGP(GP,pa)
+      HZ(K,1,1,EL) = HZ(K,1,1,EL)&
+     - IMASS*XLEN(GED)*0.5*ZE_Avg*PHI_EDGE(K,GP,LED,pa)*NX*WEGP(GP,pa)
+      HZ(K,2,2,EL) = HZ(K,2,2,EL)&
+     - IMASS*XLEN(GED)*0.5*ZE_Avg*PHI_EDGE(K,GP,LED,pa)*NY*WEGP(GP,pa)
 #endif
-      LZ(K,1,1,EL) = LZ(K,1,1,EL)
-     &     - IMASS*XLEN(GED)*0.5*QX_Avg*PHI_EDGE(K,GP,LED,pa)*NX*WEGP(GP,pa)
-      LZ(K,1,2,EL) = LZ(K,1,2,EL)
-     &     - IMASS*XLEN(GED)*0.5*QX_Avg*PHI_EDGE(K,GP,LED,pa)*NY*WEGP(GP,pa)
-      LZ(K,2,1,EL) = LZ(K,2,1,EL)
-     &     - IMASS*XLEN(GED)*0.5*QY_Avg*PHI_EDGE(K,GP,LED,pa)*NX*WEGP(GP,pa)
-      LZ(K,2,2,EL) = LZ(K,2,2,EL)
-     &     - IMASS*XLEN(GED)*0.5*QY_Avg*PHI_EDGE(K,GP,LED,pa)*NY*WEGP(GP,pa)
+      LZ(K,1,1,EL) = LZ(K,1,1,EL)&
+     - IMASS*XLEN(GED)*0.5*QX_Avg*PHI_EDGE(K,GP,LED,pa)*NX*WEGP(GP,pa)
+      LZ(K,1,2,EL) = LZ(K,1,2,EL)&
+     - IMASS*XLEN(GED)*0.5*QX_Avg*PHI_EDGE(K,GP,LED,pa)*NY*WEGP(GP,pa)
+      LZ(K,2,1,EL) = LZ(K,2,1,EL)&
+     - IMASS*XLEN(GED)*0.5*QY_Avg*PHI_EDGE(K,GP,LED,pa)*NX*WEGP(GP,pa)
+      LZ(K,2,2,EL) = LZ(K,2,2,EL)&
+     - IMASS*XLEN(GED)*0.5*QY_Avg*PHI_EDGE(K,GP,LED,pa)*NY*WEGP(GP,pa)
 
 #ifdef TRACE
-      TZ(K,1,1,EL) = TZ(K,1,1,EL)
-     &     - IMASS*XLEN(GED)*0.5D0*iota_Avg*PHI_EDGE(K,GP,LED,pa)*NX*WEGP(GP,pa)
-      TZ(K,2,2,EL) = TZ(K,2,2,EL)
-     &     - IMASS*XLEN(GED)*0.5D0*iota_Avg*PHI_EDGE(K,GP,LED,pa)*NY*WEGP(GP,pa)
+      TZ(K,1,1,EL) = TZ(K,1,1,EL)&
+     - IMASS*XLEN(GED)*0.5D0*iota_Avg*PHI_EDGE(K,GP,LED,pa)*NX*WEGP(GP,pa)
+      TZ(K,2,2,EL) = TZ(K,2,2,EL)&
+     - IMASS*XLEN(GED)*0.5D0*iota_Avg*PHI_EDGE(K,GP,LED,pa)*NY*WEGP(GP,pa)
 
 #endif
       
       RETURN
       END SUBROUTINE
 
-C***********************************************************************
-C     
-C     SUBROUTINE EDGE_INT_LDG_sediment()
-C     
-C     This subroutine computes the edge integrals for the LDG boundary
-C     terms for sediment 
-C     
-C     2012 - cem
-C     
-C***********************************************************************
+!***********************************************************************
+!     
+!     SUBROUTINE EDGE_INT_LDG_sediment()
+!     
+!     This subroutine computes the edge integrals for the LDG boundary
+!     terms for sediment 
+!     
+!     2012 - cem
+!     
+!***********************************************************************
 
-      SUBROUTINE EDGE_INT_LDG_sediment
-     &     (K,EL,LED,GED,GP,bed_avg,NX,NY,pa,ll)
+      SUBROUTINE EDGE_INT_LDG_sediment&
+     (K,EL,LED,GED,GP,bed_avg,NX,NY,pa,ll)
                                 ! <ezpp-noinst>
       
-C.....Use appropriate modules
+!.....Use appropriate modules
 
       USE SIZES,ONLY : SZ,layers
       USE GLOBAL,ONLY : AREAS
@@ -1100,54 +1100,54 @@ C.....Use appropriate modules
 
       IMPLICIT NONE
       
-C.....Declare local variables
+!.....Declare local variables
 
       INTEGER K, EL, LED, GED, GP,i,pa,ll
       REAL(SZ) AREA, IMASS, bed_avg, NX, NY
       
-C.....Retrieve the element area
+!.....Retrieve the element area
       
       AREA = 0.5D0*AREAS(EL)
 
-C.....Comput the edge integral
+!.....Comput the edge integral
 
       IMASS = M_INV(K,pa)/(0.5D0*AREA)
 
-      MZ(K,1,ll,EL) = MZ(K,1,ll,EL)
-     &     - IMASS*XLEN(GED)*0.5*bed_avg*PHI_EDGE(K,GP,LED,pa)*NX*WEGP(GP,pa)
-      MZ(K,2,ll,EL) = MZ(K,2,ll,EL)
-     &     - IMASS*XLEN(GED)*0.5*bed_avg*PHI_EDGE(K,GP,LED,pa)*NY*WEGP(GP,pa)
+      MZ(K,1,ll,EL) = MZ(K,1,ll,EL)&
+     - IMASS*XLEN(GED)*0.5*bed_avg*PHI_EDGE(K,GP,LED,pa)*NX*WEGP(GP,pa)
+      MZ(K,2,ll,EL) = MZ(K,2,ll,EL)&
+     - IMASS*XLEN(GED)*0.5*bed_avg*PHI_EDGE(K,GP,LED,pa)*NY*WEGP(GP,pa)
       
       RETURN
       END SUBROUTINE
 
-C***********************************************************************
-C     
-C     SUBROUTINE RHS_LDG_HYDRO()
-C     
-C     This subroutine computes the area integrals for the LDG hydro and
-C     adds them into the LZ (+sediment diffusion)
-C     
-C     Written by Shintaro Bunya (01-02-2007)
-C     01-10-2011 - cem - adapted for p_enrichment and multicomponent
-C     2012 - cem - added sediment layers
-C***********************************************************************
+!***********************************************************************
+!     
+!     SUBROUTINE RHS_LDG_HYDRO()
+!     
+!     This subroutine computes the area integrals for the LDG hydro and
+!     adds them into the LZ (+sediment diffusion)
+!     
+!     Written by Shintaro Bunya (01-02-2007)
+!     01-10-2011 - cem - adapted for p_enrichment and multicomponent
+!     2012 - cem - added sediment layers
+!***********************************************************************
 
       SUBROUTINE RHS_LDG_HYDRO()
       
-C.....Use appropriate modules
+!.....Use appropriate modules
 
       USE SIZES,ONLY : layers,SZ
       USE GLOBAL,ONLY : NE,NM,N1,N2,N3,pdg_el,entrop
-      USE DG,ONLY : QX_IN,QY_IN,LZ,M_INV,SFAC_ELEM,ZE_IN,
-     &     DRPHI,DSPHI,DRDX,DRDY,DSDX,DSDY,bed,mz,hz,
-     &     WAGP,NAGP,DOFS,QX,QY,PHI_AREA,IRK,bed_IN,iota_IN,
-     &     slimit1,slimit2,slimit5,balance,
-     &     ze,iota,iota2,bed,irk,slimit3,slimit4,TZ
+      USE DG,ONLY : QX_IN,QY_IN,LZ,M_INV,SFAC_ELEM,ZE_IN,&
+     DRPHI,DSPHI,DRDX,DRDY,DSDX,DSDY,bed,mz,hz,&
+     WAGP,NAGP,DOFS,QX,QY,PHI_AREA,IRK,bed_IN,iota_IN,&
+     slimit1,slimit2,slimit5,balance,&
+     ze,iota,iota2,bed,irk,slimit3,slimit4,TZ
 
       IMPLICIT NONE
       
-C.....Declare local variables
+!.....Declare local variables
       INTEGER L,K,I,pa,ll,kk
       real(sz) ze_sensor1, qx_sensor1, qy_sensor1
       real(sz) ze_sensor2, qx_sensor2, qy_sensor2
@@ -1167,13 +1167,13 @@ C.....Declare local variables
          endif
 #endif
          
-C.....Retrieve the global node numbers for the element
+!.....Retrieve the global node numbers for the element
          
          N1 = NM(L,1)
          N2 = NM(L,2)
          N3 = NM(L,3)
          
-C.....Compute ZE, QX, QY, and HB at each area Gauss quadrature point
+!.....Compute ZE, QX, QY, and HB at each area Gauss quadrature point
 
          DO I = 1,NAGP(pa)
             
@@ -1210,60 +1210,60 @@ C.....Compute ZE, QX, QY, and HB at each area Gauss quadrature point
 
             ENDDO
 
-C.....Build the rhs
+!.....Build the rhs
                 
             DO K = 1,DOFS(L)
 #ifdef WAVE_DIF
-               HZ(K,1,1,L) = HZ(K,1,1,L)
-     &              + M_INV(K,pa)*ZE_IN*SFAC_ELEM(I,L,pa)* ! <--- ZE/Mk
-     &              ( DRPHI(K,I,pa)*DRDX(L) + DSPHI(K,I,pa)*DSDX(L) )* ! <--- dphi/dx
-     &              WAGP(I,pa)  ! <--- weight
-               HZ(K,2,2,L) = HZ(K,2,2,L)
-     &              + M_INV(K,pa)*ZE_IN* ! <--- ZE/Mk
-     &              ( DRPHI(K,I,pa)*DRDY(L) + DSPHI(K,I,pa)*DSDY(L) )* ! <--- dphi/dy
-     &              WAGP(I,pa)  ! <--- weight
+               HZ(K,1,1,L) = HZ(K,1,1,L)&
+                    + M_INV(K,pa)*ZE_IN*SFAC_ELEM(I,L,pa)*& ! <--- ZE/Mk
+                    ( DRPHI(K,I,pa)*DRDX(L) + DSPHI(K,I,pa)*DSDX(L) )*& ! <--- dphi/dx
+                    WAGP(I,pa)  ! <--- weight
+               HZ(K,2,2,L) = HZ(K,2,2,L)&
+                    + M_INV(K,pa)*ZE_IN*& ! <--- ZE/Mk
+                    ( DRPHI(K,I,pa)*DRDY(L) + DSPHI(K,I,pa)*DSDY(L) )*& ! <--- dphi/dy
+                    WAGP(I,pa)  ! <--- weight
 #endif
 
-               LZ(K,1,1,L) = LZ(K,1,1,L)
-     &              + M_INV(K,pa)*QX_IN*SFAC_ELEM(I,L,pa)* ! <--- QX/Mk
-     &              ( DRPHI(K,I,pa)*DRDX(L) + DSPHI(K,I,pa)*DSDX(L) )* ! <--- dphi/dx
-     &              WAGP(I,pa)  ! <--- weight
+               LZ(K,1,1,L) = LZ(K,1,1,L)&
+                   + M_INV(K,pa)*QX_IN*SFAC_ELEM(I,L,pa)*& ! <--- QX/Mk
+                   ( DRPHI(K,I,pa)*DRDX(L) + DSPHI(K,I,pa)*DSDX(L) )*& ! <--- dphi/dx
+                   WAGP(I,pa)  ! <--- weight
+               
+               LZ(K,1,2,L) = LZ(K,1,2,L)&
+                    + M_INV(K,pa)*QX_IN*& ! <--- QX/Mk
+                    ( DRPHI(K,I,pa)*DRDY(L) + DSPHI(K,I,pa)*DSDY(L) )*& ! <--- dphi/dy
+                    WAGP(I,pa)  ! <--- weight
 
-               LZ(K,1,2,L) = LZ(K,1,2,L)
-     &              + M_INV(K,pa)*QX_IN* ! <--- QX/Mk
-     &              ( DRPHI(K,I,pa)*DRDY(L) + DSPHI(K,I,pa)*DSDY(L) )* ! <--- dphi/dy
-     &              WAGP(I,pa)  ! <--- weight
+               LZ(K,2,1,L) = LZ(K,2,1,L)&
+                    + M_INV(K,pa)*QY_IN*SFAC_ELEM(I,L,pa)*& ! <--- QY/Mk
+                    ( DRPHI(K,I,pa)*DRDX(L) + DSPHI(K,I,pa)*DSDX(L) )*& ! <--- dphi/dx
+                    WAGP(I,pa)  ! <--- weight
 
-               LZ(K,2,1,L) = LZ(K,2,1,L)
-     &              + M_INV(K,pa)*QY_IN*SFAC_ELEM(I,L,pa)* ! <--- QY/Mk
-     &              ( DRPHI(K,I,pa)*DRDX(L) + DSPHI(K,I,pa)*DSDX(L) )* ! <--- dphi/dx
-     &              WAGP(I,pa)  ! <--- weight
-
-               LZ(K,2,2,L) = LZ(K,2,2,L)
-     &              + M_INV(K,pa)*QY_IN* ! <--- QY/Mk
-     &              ( DRPHI(K,I,pa)*DRDY(L) + DSPHI(K,I,pa)*DSDY(L) )* ! <--- dphi/dy
-     &              WAGP(I,pa)  ! <--- weight
+               LZ(K,2,2,L) = LZ(K,2,2,L)&
+                    + M_INV(K,pa)*QY_IN*& ! <--- QY/Mk
+                    ( DRPHI(K,I,pa)*DRDY(L) + DSPHI(K,I,pa)*DSDY(L) )*& ! <--- dphi/dy
+                    WAGP(I,pa)  ! <--- weight
 #ifdef TRACE
-               TZ(K,1,1,L) = TZ(K,1,1,L)
-     &              + M_INV(K,pa)*iota_IN*SFAC_ELEM(I,L,pa)* ! <--- iota*H/Mk
-     &              ( DRPHI(K,I,pa)*DRDX(L) + DSPHI(K,I,pa)*DSDX(L) )* ! <--- dphi/dx
-     &              WAGP(I,pa)  ! <--- weight
-               TZ(K,2,2,L) = TZ(K,2,2,L)
-     &              + M_INV(K,pa)*iota_IN* ! <--- iota*H/Mk
-     &              ( DRPHI(K,I,pa)*DRDY(L) + DSPHI(K,I,pa)*DSDY(L) )* ! <--- dphi/dy
-     &              WAGP(I,pa)  ! <--- weight
+               TZ(K,1,1,L) = TZ(K,1,1,L)&
+                    + M_INV(K,pa)*iota_IN*SFAC_ELEM(I,L,pa)*& ! <--- iota*H/Mk
+                    ( DRPHI(K,I,pa)*DRDX(L) + DSPHI(K,I,pa)*DSDX(L) )*& ! <--- dphi/dx
+                    WAGP(I,pa)  ! <--- weight
+               TZ(K,2,2,L) = TZ(K,2,2,L)&
+                    + M_INV(K,pa)*iota_IN*& ! <--- iota*H/Mk
+                    ( DRPHI(K,I,pa)*DRDY(L) + DSPHI(K,I,pa)*DSDY(L) )*& ! <--- dphi/dy
+                    WAGP(I,pa)  ! <--- weight
 #endif
 
 #ifdef SED_LAY
                do ll=1,layers
-                  MZ(K,1,ll,L) =  MZ(K,1,ll,L)
-     &                 + M_INV(K,pa)*bed_IN(ll)*SFAC_ELEM(I,L,pa)* 
-     &                 ( DRPHI(K,I,pa)*DRDX(L) + DSPHI(K,I,pa)*DSDX(L) )* 
-     &                 WAGP(I,pa) 
-                  MZ(K,2,ll,L) =  MZ(K,2,ll,L)
-     &                 + M_INV(K,pa)*bed_IN(ll)* 
-     &                 ( DRPHI(K,I,pa)*DRDY(L) + DSPHI(K,I,pa)*DSDY(L) )* 
-     &                 WAGP(I,pa) 
+                  MZ(K,1,ll,L) =  MZ(K,1,ll,L)&
+                 + M_INV(K,pa)*bed_IN(ll)*SFAC_ELEM(I,L,pa)* &
+                 ( DRPHI(K,I,pa)*DRDX(L) + DSPHI(K,I,pa)*DSDX(L) )* &
+                 WAGP(I,pa) 
+                  MZ(K,2,ll,L) =  MZ(K,2,ll,L)&
+                 + M_INV(K,pa)*bed_IN(ll)* &
+                 ( DRPHI(K,I,pa)*DRDY(L) + DSPHI(K,I,pa)*DSDY(L) )* &
+                 WAGP(I,pa) 
                enddo
 #endif
 
@@ -1304,22 +1304,22 @@ C.....Build the rhs
             
             do kk = 2, dofs(L)  !Compute the first sensor
 #ifdef WAVE_DIF 
-               ze_sensor1 = ze_sensor1 + (ze(kk,L,irk)* 
-     &              phi_area(kk,I,pa))**2.D0 * wagp(I,pa)
+               ze_sensor1 = ze_sensor1 + (ze(kk,L,irk)* &
+              phi_area(kk,I,pa))**2.D0 * wagp(I,pa)
 #endif
-               qx_sensor1 = qx_sensor1 + (qx(kk,L,irk)* 
-     &              phi_area(kk,I,pa))**2.D0 * wagp(I,pa)
-               qy_sensor1 = qy_sensor1 + (qy(kk,L,irk)* 
-     &              phi_area(kk,I,pa))**2.D0 * wagp(I,pa)
+               qx_sensor1 = qx_sensor1 + (qx(kk,L,irk)* &
+              phi_area(kk,I,pa))**2.D0 * wagp(I,pa)
+               qy_sensor1 = qy_sensor1 + (qy(kk,L,irk)* &
+              phi_area(kk,I,pa))**2.D0 * wagp(I,pa)
 #ifdef TRACE
-               iota_sensor1 = iota_sensor1 + (iota(kk,L,irk)
-     &              * phi_area(kk,I,pa))**2.D0 * wagp(I,pa)
+               iota_sensor1 = iota_sensor1 + (iota(kk,L,irk)&
+              * phi_area(kk,I,pa))**2.D0 * wagp(I,pa)
 #endif
                
 #ifdef SED_LAY       
                do ll=1,layers
-                  tbed_sensor1 = tbed_sensor1 + (bed(kk,L,irk,ll)* 
-     &                 phi_area(kk,I,pa))**2.D0 * wagp(I,pa)
+                  tbed_sensor1 = tbed_sensor1 + (bed(kk,L,irk,ll)* &
+                 phi_area(kk,I,pa))**2.D0 * wagp(I,pa)
                enddo
 #endif
 
@@ -1327,22 +1327,22 @@ C.....Build the rhs
             
             do kk = 1,dofs(L) !Compute the second sensor
 #ifdef WAVE_DIF 
-               ze_sensor2 = ze_sensor2 + (ze(kk,L,irk)* 
-     &              phi_area(kk,I,pa))**2.D0 * wagp(I,pa)
+               ze_sensor2 = ze_sensor2 + (ze(kk,L,irk)* &
+              phi_area(kk,I,pa))**2.D0 * wagp(I,pa)
 #endif
-               qx_sensor2 = qx_sensor2 + (qx(kk,L,irk)* 
-     &              phi_area(kk,I,pa))**2.D0 * wagp(I,pa)
-               qy_sensor2 = qy_sensor2 + (qy(kk,L,irk)* 
-     &              phi_area(kk,I,pa))**2.D0 * wagp(I,pa)
+               qx_sensor2 = qx_sensor2 + (qx(kk,L,irk)* &
+              phi_area(kk,I,pa))**2.D0 * wagp(I,pa)
+               qy_sensor2 = qy_sensor2 + (qy(kk,L,irk)* &
+              phi_area(kk,I,pa))**2.D0 * wagp(I,pa)
 #ifdef TRACE
-               iota_sensor2 = iota_sensor2 + (iota(kk,L,irk)
-     &              * phi_area(kk,I,pa))**2.D0 * wagp(I,pa)
+               iota_sensor2 = iota_sensor2 + (iota(kk,L,irk)&
+              * phi_area(kk,I,pa))**2.D0 * wagp(I,pa)
 #endif
                
 #ifdef SED_LAY       
                do ll=1,layers
-                  tbed_sensor2 = tbed_sensor2 + (bed(kk,L,irk,ll)* !Adjust sensor for multilayers!
-     &                 phi_area(kk,I,pa))**2.D0 * wagp(I,pa)
+                  tbed_sensor2 = tbed_sensor2 + (bed(kk,L,irk,ll)*& !Adjust sensor for multilayers!&
+                 phi_area(kk,I,pa))**2.D0 * wagp(I,pa)
                enddo
 #endif
 

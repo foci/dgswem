@@ -1,23 +1,23 @@
-C***********************************************************************
-C     
-C     SUBROUTINE ORTHOBASIS_EDGE()
-C     
-C     Evaluates the polynomials for the P degree orthogonal basis
-C     for a triangle at the edge integral gauss points.
-C     
-C     Reference for orthogonal basis:
-C     
-C     "A Discontinuous Galerkin Method for the Viscous MHD Equations",
-C     Journal of Computational Physics 152, 608-641 (1999)
-C     
-C     Written by Ethan Kubatko (06-08-2004)
-C     01-10-2011 - cem - adapted for p_enrichment
-C     
-C***********************************************************************
+!***********************************************************************
+!     
+!     SUBROUTINE ORTHOBASIS_EDGE()
+!     
+!     Evaluates the polynomials for the P degree orthogonal basis
+!     for a triangle at the edge integral gauss points.
+!     
+!     Reference for orthogonal basis:
+!     
+!     "A Discontinuous Galerkin Method for the Viscous MHD Equations",
+!     Journal of Computational Physics 152, 608-641 (1999)
+!     
+!     Written by Ethan Kubatko (06-08-2004)
+!     01-10-2011 - cem - adapted for p_enrichment
+!     
+!***********************************************************************
 
       SUBROUTINE ORTHOBASIS_EDGE(P,L)
 
-C.....Use appropriate modules
+!.....Use appropriate modules
 
       USE GLOBAL
       USE DG
@@ -28,13 +28,13 @@ C.....Use appropriate modules
       REAL(SZ) COEFF1,COEFF2,POLY1,POLY2,NUM,DEN,NUM1,DEN1,DEN2,DEN3,Z
       REAL(SZ) XGP,YGP
       
-C.....Loop over the 3 edges
+!.....Loop over the 3 edges
 
       III = 4
       DO 100 II = 1,3
 
-C.....Construct and evaluate the necessary Jacobi polynomials at the
-C.....edge integral gauss points and the edge mid point
+!.....Construct and evaluate the necessary Jacobi polynomials at the
+!.....edge integral gauss points and the edge mid point
          
          DO Q=1,NEGP(L)+1
             IF (II.EQ.1) THEN
@@ -93,16 +93,16 @@ C.....edge integral gauss points and the edge mid point
                         POLY2  = JACOBI(J-1,A+1,B+1,Q)
                         DEN = 2*(J-1+1)*(J-1+A+B+1)*(2*(J-1)+A+B)
                         
-                        JACOBI(J+1,A+1,B+1,Q) = (COEFF1*POLY1+COEFF2*POLY2)
-     &                       /DEN
+                        JACOBI(J+1,A+1,B+1,Q) = (COEFF1*POLY1+COEFF2*POLY2)&
+                       /DEN
                      ENDIF
                   ENDDO
                ENDDO
             ENDDO
          ENDDO
          
-C.....Construct and evaluate the orthogonal basis at the edge quadrature
-C.....points and the edge midpoint
+!.....Construct and evaluate the orthogonal basis at the edge quadrature
+!.....points and the edge midpoint
 
          DO Q=1,NEGP(L)+1
             
@@ -118,14 +118,14 @@ C.....points and the edge midpoint
 
             DO I=0,P
                DO J=0,P-I
-                  PHI2(I+1,J+1,Q) = JACOBI(I+1,1,1,Q)*((1.D0-YGP)/2.D0)**I
-     &                 *JACOBI(J+1,2*I+2,1,Q)
+                  PHI2(I+1,J+1,Q) = JACOBI(I+1,1,1,Q)*((1.D0-YGP)/2.D0)**I&
+                 *JACOBI(J+1,2*I+2,1,Q)
                ENDDO
             ENDDO
          ENDDO
 
-C.....Re-order the basis functions into hierarchical order and compute
-C.....the inverse of the mass matrix (diagonal)
+!.....Re-order the basis functions into hierarchical order and compute
+!.....the inverse of the mass matrix (diagonal)
 
          DO Q = 1,NEGP(L)+1
             M = 1

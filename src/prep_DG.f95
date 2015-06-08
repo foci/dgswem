@@ -1,34 +1,33 @@
-C***********************************************************************
-C     
-C     SUBROUTINE DG_PREP()
-C     
-C     This subroutine does preparatory stuff for DG
-C     
-C     Written by Ethan Kubatko (03-07-2005)
-C     
-C-----------------------------------------------------------------------
-C     
-C     mod history of hp_ADCIRC since v9
-C     
-C     v9_sb1       - Aug 05 - sb - parallelized
-C     v9_sb2       - Aug 05 - sb - wetting/drying
-C     v10_sb1      - Aug 05 - sb - reflect fort.12as an initial surface elevation
-C     v10_sb5      - Oct 03 - sb - consolidate Ethan's slope limiter
-C     v10_sb5      - Oct 24 - sb - DG.65 output is added
-C     - Aug 29, 2007 - Fixed bug for startdry = 1
-C     01-10-2011 - cem - adapted for p_enrichment and multicomponent
-C     06-01-2012 - cem -sediment added
-C     
-C***********************************************************************
+!***********************************************************************
+!     
+!     SUBROUTINE DG_PREP()
+!     
+!     This subroutine does preparatory stuff for DG
+!     
+!     Written by Ethan Kubatko (03-07-2005)
+!     
+!-----------------------------------------------------------------------
+!     
+!     mod history of hp_ADCIRC since v9
+!     
+!     v9_sb1       - Aug 05 - sb - parallelized
+!     v9_sb2       - Aug 05 - sb - wetting/drying
+!     v10_sb1      - Aug 05 - sb - reflect fort.12as an initial surface elevation
+!     v10_sb5      - Oct 03 - sb - consolidate Ethan's slope limiter
+!     v10_sb5      - Oct 24 - sb - DG.65 output is added
+!     - Aug 29, 2007 - Fixed bug for startdry = 1
+!     01-10-2011 - cem - adapted for p_enrichment and multicomponent
+!     06-01-2012 - cem -sediment added
+!     
+!***********************************************************************
 
       SUBROUTINE PREP_DG()
 
-C.....Use appropriate modules
+!.....Use appropriate modules
 
       USE GLOBAL
       USE DG
-      USE NodalAttributes, ONLY : STARTDRY, FRIC, GeoidOffset,
-     $     LoadGeoidOffset,LoadManningsN,ManningsN
+      USE NodalAttributes, ONLY : STARTDRY, FRIC, GeoidOffset,LoadGeoidOffset,LoadManningsN,ManningsN
 #ifdef CMPI
       USE MESSENGER_ELEM
       USE MESSENGER
@@ -36,15 +35,15 @@ C.....Use appropriate modules
 
       IMPLICIT NONE
       
-C.....Declare local variables
+!.....Declare local variables
 
       INTEGER II, l, P_0, DOF_0,j,k,kk,jj,i,chi,ll,mm
       REAL(SZ) AREA, ANGLE_SUM, HBB(3), CASUM, DP_MIN,temp_lay
       REAL(SZ) XI, YI, ZE1, ZE2, ZE3, l2er,l2erh2,xcen,ycen,epsl,pi_n
       REAL(SZ) ZP(3), DHBX, ell_1,ell_2,ell_3,int_hb,int_ze,int_yd
 
-      real(sz) checkarea,arint(2,2),rhsint(2),edgeint,dpsdx,psimid,
-     $     determ,sfacdub2max,sfacdub3max,R
+      real(sz) checkarea,arint(2,2),rhsint(2),edgeint,dpsdx,psimid
+      real(sz) determ,sfacdub2max,sfacdub3max,R
       integer i1,i2,sfac_flag,led
       integer ifac2max,ifac3max
 
@@ -62,13 +61,13 @@ C.....Declare local variables
       C16 = 1.D0/6.D0
       R = 6378206.4d0
 
-C     sb-PDG1 moved from other places
+!     sb-PDG1 moved from other places
 
-C.....Obtain RK time scheme parameters
+!.....Obtain RK time scheme parameters
 
       CALL RK_TIME()
       
-C.....Compute the degrees of freedom per element
+!.....Compute the degrees of freedom per element
 
       DOF = (pl+1)*(pl+2)/2
       dofx = (px+1)*(px+2)/2    ! dofx for variable functions f=f(x) 
@@ -77,7 +76,7 @@ C.....Compute the degrees of freedom per element
       dofh = (ph + 1)*(ph + 2)/2
 
 
-C.....Allocate some DG stuff
+!.....Allocate some DG stuff
 
       IF (PADAPT.EQ.1) THEN
 
@@ -94,17 +93,17 @@ C.....Allocate some DG stuff
       endif
 
 #ifdef SED_LAY
-C.....Initialize funtion parser for sediment types
+!.....Initialize funtion parser for sediment types
       init_parser = .false.
 #endif
 
 #ifdef SED_LAY
-C.....Initialize stabilizer sweep for A.D.
+!.....Initialize stabilizer sweep for A.D.
       stblzr = .false.
 #endif
 
 
-C.....Compute the number of gauss points needed for the edge integrals
+!.....Compute the number of gauss points needed for the edge integrals
 
       CALL ALLOC_DG4()          !moved here 6.28.10, for p_adapt because of messenger_elem      
 
@@ -134,7 +133,7 @@ C.....Compute the number of gauss points needed for the edge integrals
 !     cnd
 !     iwrite=0
       
-C.....Initilization for parallel DG run
+!.....Initilization for parallel DG run
 
 #ifdef CMPI
 
@@ -148,7 +147,7 @@ C.....Initilization for parallel DG run
 
 #endif
 
-C.....Create the edge based data
+!.....Create the edge based data
 
       IF(MYPROC.EQ.0) THEN
          PRINT*, 'CREATING EDGE DATA...'
@@ -165,7 +164,7 @@ C.....Create the edge based data
       IF (SLOPEFLAG.ge.4) CALL MESSAGE_START()
 #endif
 
-C.....Re-arrange elevation specified boundary segment data for DG
+!.....Re-arrange elevation specified boundary segment data for DG
 
       IF (NEEDS.GT.0) THEN
          CALL ALLOC_DG1(MNBFR)
@@ -196,7 +195,7 @@ C.....Re-arrange elevation specified boundary segment data for DG
          ENDDO
       ENDIF
 
-C.....Re-arrange non-zero flow specified boundary segment data for DG
+!.....Re-arrange non-zero flow specified boundary segment data for DG
 
       IF (NFEDS.GT.0) THEN
          CALL ALLOC_DG2(MNFFR)
@@ -204,8 +203,8 @@ C.....Re-arrange non-zero flow specified boundary segment data for DG
          JJ = 1
          DO I = 1,NFFR
             DO J = 1,NBOU
-               IF ( (SEGTYPE(J).EQ.2 ).OR.(SEGTYPE(J).EQ.12)
-     &              .OR.(SEGTYPE(J).EQ.22) ) THEN
+               IF ( (SEGTYPE(J).EQ.2 ).OR.(SEGTYPE(J).EQ.12)&
+              .OR.(SEGTYPE(J).EQ.22) ) THEN
                   DO K = 1,NVELL(J)-1
                      QNAM_DG(I,II,1) = QNAM(I,JJ)
                      QNAM_DG(I,II,2) = QNAM(I,JJ+1)
@@ -222,15 +221,15 @@ C.....Re-arrange non-zero flow specified boundary segment data for DG
          ENDDO
       ENDIF
       
-C.....If there are internal barriers allocate some stuff
+!.....If there are internal barriers allocate some stuff
 
       IF (NIBEDS.NE.0) CALL ALLOC_DG3(MNP)
 
-C.....Allocate the array for node to element table
+!.....Allocate the array for node to element table
 
       CALL ALLOC_NNOEL1(MNP)
 
-C.....Determine the number of elements connected at each node
+!.....Determine the number of elements connected at each node
 
       EL_COUNT = 0
       MAXEL = 1
@@ -242,11 +241,11 @@ C.....Determine the number of elements connected at each node
       ENDDO
       MAXEL = MAXVAL(EL_COUNT)
 
-C.....Allocate the array for the node to element table
+!.....Allocate the array for the node to element table
 
       CALL ALLOC_NNOEL2(MNP,MAXEL)
       
-C.....Construct node to element table
+!.....Construct node to element table
 
       EL_COUNT = 0
       DO K = 1,3
@@ -257,7 +256,7 @@ C.....Construct node to element table
          ENDDO
       ENDDO
 
-C.....Construct node to element angle table
+!.....Construct node to element angle table
 
       DO I = 1,MNP
          ETAMAX(I) = -99999
@@ -306,7 +305,7 @@ C.....Construct node to element angle table
 
 !     CALL ALLOC_DG4()
       
-C.....Initialize the DG arrays
+!.....Initialize the DG arrays
 
       ZE = 0.D0
       zeo = 0.D0
@@ -337,8 +336,8 @@ C.....Initialize the DG arrays
       WSX2(:) = 0
       WSY2(:) = 0
 
-C.....If using modal initial conditions transform the bathymetry from
-C.....nodal coordinates to modal dof
+!.....If using modal initial conditions transform the bathymetry from
+!.....nodal coordinates to modal dof
 
       DO J = 1,MNE
          N1 = NM(J,1)
@@ -349,8 +348,8 @@ C.....nodal coordinates to modal dof
          hbo(3,J,1) = -0.5D0*DP(N1) + 0.5D0*DP(N2)
 
          ydubo(1,J)= 1.D0/3.D0*(Y(N1) + Y(N2) + Y(N3))
-         ydubo(2,J) = -1.D0/6.D0*(Y(N1) + Y(N2))
-     $        + 1.D0/3.D0*Y(N3)
+         ydubo(2,J) = -1.D0/6.D0*(Y(N1) + Y(N2))&
+        + 1.D0/3.D0*Y(N3)
          ydubo(3,J) = -0.5D0*Y(N1) + 0.5D0*Y(N2)
 
       ENDDO
@@ -361,33 +360,33 @@ C.....nodal coordinates to modal dof
             N1 = NM(J,1)
             N2 = NM(J,2)
             N3 = NM(J,3)
-            MANN(1,J) =  1.D0/3.D0*(ManningsN(N1)
-     $           + ManningsN(N2) + ManningsN(N3))
-            MANN(2,J) = -1.D0/6.D0*(ManningsN(N1) 
-     $           + ManningsN(N2)) + 1.D0/3.D0*ManningsN(N3)
+            MANN(1,J) =  1.D0/3.D0*(ManningsN(N1)&
+           + ManningsN(N2) + ManningsN(N3))
+            MANN(2,J) = -1.D0/6.D0*(ManningsN(N1) &
+           + ManningsN(N2)) + 1.D0/3.D0*ManningsN(N3)
             MANN(3,J) = -0.5D0*ManningsN(N1) + 0.5D0*ManningsN(N2)
          ENDDO
       endif
 
       IF (MODAL_IC.EQ.0) THEN
-C     this assumes a cold start
+!     this assumes a cold start
          if (LoadGeoidOffset) then
             DO J = 1,NE
                N1 = NM(J,1)
                N2 = NM(J,2)
                N3 = NM(J,3)
-               zeo(1,J,1)=1.d0/3.d0*(GeoidOffset(N1)+GeoidOffset(N2)+
-     $              GeoidOffset(N3))
+               zeo(1,J,1)=1.d0/3.d0*(GeoidOffset(N1)+GeoidOffset(N2)+&
+              GeoidOffset(N3))
                IF (dof_0.NE.1) THEN
-                  zeo(2,J,1)=-1.d0/6.d0*(GeoidOffset(N1)+GeoidOffset(N2))
-     $                 +1.d0/3.d0*GeoidOffset(N3)
+                  zeo(2,J,1)=-1.d0/6.d0*(GeoidOffset(N1)+GeoidOffset(N2))&
+                 +1.d0/3.d0*GeoidOffset(N3)
                   zeo(3,J,1)=-.5d0*GeoidOffset(N1)+.5d0*GeoidOffset(N2)
                ENDIF
             ENDDO
          endif
       ENDIF
 
-C--   
+!--   
 
 !As part of initializing the system, let us determine the partials
 !of the sediment discharge equation, fed in by fort.dg
@@ -414,11 +413,11 @@ C--
          print *, 'PREP FOR WET/DRY BEGINS...'
       ENDIF
 
-C.....1. Set initial surface elevation above the bed elevation
-C.....if wetting-and-drying is enabled and the initial water depth is
-C.....not specified by fort.12
-C.....2. Set wet-and-dry elemental flags
-C.....3. Set the DOF at dry elements = 1
+!.....1. Set initial surface elevation above the bed elevation
+!.....if wetting-and-drying is enabled and the initial water depth is
+!.....not specified by fort.12
+!.....2. Set wet-and-dry elemental flags
+!.....3. Set the DOF at dry elements = 1
 
       NCHECK(1) = 3
       if (ph.gt.1) then
@@ -434,11 +433,11 @@ C.....3. Set the DOF at dry elements = 1
       H0H = H0 * 1.0
       HABSMIN = H0 * 1.0
             
-C.....Retrieve the normals to the edges
+!.....Retrieve the normals to the edges
 
       CALL CALC_NORMAL()
 
-C.....Retrieve the area integral gauss quadrature points
+!.....Retrieve the area integral gauss quadrature points
       
       do j=1,ph
          
@@ -446,7 +445,7 @@ C.....Retrieve the area integral gauss quadrature points
 
       enddo
 
-C.....Retrieve the edge integral gauss quadrature points
+!.....Retrieve the edge integral gauss quadrature points
       
       do j=1,ph
 
@@ -454,8 +453,8 @@ C.....Retrieve the edge integral gauss quadrature points
 
       enddo
 
-C.....Evaluate the orthogonal basis and its derivatives at the area
-C.....gauss quadrature points
+!.....Evaluate the orthogonal basis and its derivatives at the area
+!.....gauss quadrature points
 
       do j=1,ph
 
@@ -463,7 +462,7 @@ C.....gauss quadrature points
 
       enddo
 
-C.....Evaluate the orthogonal basis at the edge gauss quadrature points
+!.....Evaluate the orthogonal basis at the edge gauss quadrature points
 
       do j=1,ph
 
@@ -471,7 +470,7 @@ C.....Evaluate the orthogonal basis at the edge gauss quadrature points
 
       enddo
 
-C.....Do the L2-projection of the initial conditions
+!.....Do the L2-projection of the initial conditions
 
       hb = 0.D0
       qx = 0.D0
@@ -480,75 +479,75 @@ C.....Do the L2-projection of the initial conditions
       ydub = 0.d0
       hb1 = 0.D0
 
-c$$$      do k = 1,MNE
-c$$$
-c$$$         
-c$$$         n1 = NM(k,1)
-c$$$         n2 = NM(k,2)
-c$$$         n3 = NM(k,3)
-c$$$                                !Define lagrange transform
-c$$$
-c$$$         do mm = 1,nagp(ph)     !ICs should not have higher order than ph
-c$$$
-c$$$            ell_1 = -0.5D0 * ( xagp(mm,ph) + yagp(mm,ph) )
-c$$$            ell_2 =  0.5D0 * ( xagp(mm,ph) + 1.D0 )
-c$$$            ell_3 =  0.5D0 * ( yagp(mm,ph) + 1.D0 )
-c$$$
-c$$$            XBCbt(k) = x(n1)*ell_1 + x(n2)*ell_2 + x(n3)*ell_3
-c$$$            YBCbt(k) = y(n1)*ell_1 + y(n2)*ell_2 + y(n3)*ell_3
-c$$$
-c$$$
-c$$$            rev =  3.141592653589793D0 / 4.D0
-c$$$
-c$$$            Ox = XBCbt(k)*cos(rev) - YBCbt(k)*sin(rev)
-c$$$            Oy = YBCbt(k)*cos(rev) + XBCbt(k)*sin(rev)
-c$$$
-c$$$            radial(k) = min(sqrt( Ox**2 + (Oy + 0.25D0)**2 ), 0.18D0)/0.18D0
-c$$$
-c$$$
-c$$$            do j = 1,dofh
-c$$$
-c$$$               QX(j,k,1) = QX(j,k,1) + YBCbt(k) * wagp(mm,ph) * phi_area(j,mm,ph)
-c$$$
-c$$$               QY(j,k,1) = QY(j,k,1) - XBCbt(k) * wagp(mm,ph) * phi_area(j,mm,ph)        
-c$$$
-c$$$               iota(j,k,1) = iota(j,k,1) + 0.25D0 *( 1.0D0 + cos(3.141592653589793D0*radial(k)) ) 
-c$$$     &              * wagp(mm,ph) * phi_area(j,mm,ph)  
-c$$$               
-c$$$c$$$               iota(j,k,1) = iota(j,k,1) + 0.5D0 *( exp ( - ( (XBCbt(k)+.05D0)**2 + (YBCbt(k)+.05D0)**2  ) /0.001D0 ) ) 
-c$$$c$$$     &              * wagp(mm,ph) * phi_area(j,mm,ph) 
-c$$$
-c$$$               if( ( sqrt((Ox + 0.25D0 )**2 + Oy**2)).le.0.18D0.and.(sqrt((Ox + 0.25D0 )**2 + 
-c$$$     &              Oy**2)).ge.0.025D0.and.(Ox.le.(-0.23D0) )) then
-c$$$
-c$$$                  iota(j,k,1) = iota(j,k,1) + 1.0D0 * wagp(mm,ph) * phi_area(j,mm,ph) 
-c$$$
-c$$$               elseif(sqrt( (Ox -.25D0)**2 + Oy**2 ).le.0.18D0 ) then
-c$$$
-c$$$                  iota(j,k,1) =  iota(j,k,1) + (1.D0 - ( 1.D0 / 0.18D0 ) * sqrt((Ox -0.25D0)**2 + Oy**2 ) ) 
-c$$$     &                 * wagp(mm,ph) * phi_area(j,mm,ph) 
-c$$$
-c$$$               endif
-c$$$
-c$$$               hb(j,k,1) = hb(j,k,1) + 1.D0*wagp(mm,ph) * phi_area(j,mm,ph)
-c$$$
-c$$$            enddo
-c$$$
-c$$$
-c$$$         enddo
-c$$$
-c$$$                                ! get back the coeffs in each component
-c$$$
-c$$$         do j= 1,dofh
-c$$$
-c$$$            QX(j,k,1) =  QX(j,k,1) * M_inv(j,ph)
-c$$$            QY(j,k,1) =  QY(j,k,1) * M_inv(j,ph)
-c$$$            iota(j,k,1) =  iota(j,k,1) * M_inv(j,ph)
-c$$$            hb(j,k,1) =  hb(j,k,1) * M_inv(j,ph)
-c$$$
-c$$$         enddo
-c$$$
-c$$$      enddo
+!$$$      do k = 1,MNE
+!$$$
+!$$$         
+!$$$         n1 = NM(k,1)
+!$$$         n2 = NM(k,2)
+!$$$         n3 = NM(k,3)
+!$$$                                !Define lagrange transform
+!$$$
+!$$$         do mm = 1,nagp(ph)     !ICs should not have higher order than ph
+!$$$
+!$$$            ell_1 = -0.5D0 * ( xagp(mm,ph) + yagp(mm,ph) )
+!$$$            ell_2 =  0.5D0 * ( xagp(mm,ph) + 1.D0 )
+!$$$            ell_3 =  0.5D0 * ( yagp(mm,ph) + 1.D0 )
+!$$$
+!$$$            XBCbt(k) = x(n1)*ell_1 + x(n2)*ell_2 + x(n3)*ell_3
+!$$$            YBCbt(k) = y(n1)*ell_1 + y(n2)*ell_2 + y(n3)*ell_3
+!$$$
+!$$$
+!$$$            rev =  3.141592653589793D0 / 4.D0
+!$$$
+!$$$            Ox = XBCbt(k)*cos(rev) - YBCbt(k)*sin(rev)
+!$$$            Oy = YBCbt(k)*cos(rev) + XBCbt(k)*sin(rev)
+!$$$
+!$$$            radial(k) = min(sqrt( Ox**2 + (Oy + 0.25D0)**2 ), 0.18D0)/0.18D0
+!$$$
+!$$$
+!$$$            do j = 1,dofh
+!$$$
+!$$$               QX(j,k,1) = QX(j,k,1) + YBCbt(k) * wagp(mm,ph) * phi_area(j,mm,ph)
+!$$$
+!$$$               QY(j,k,1) = QY(j,k,1) - XBCbt(k) * wagp(mm,ph) * phi_area(j,mm,ph)        
+!$$$
+!$$$               iota(j,k,1) = iota(j,k,1) + 0.25D0 *( 1.0D0 + cos(3.141592653589793D0*radial(k)) ) 
+!$$$     &              * wagp(mm,ph) * phi_area(j,mm,ph)  
+!$$$               
+!$$$c$$$               iota(j,k,1) = iota(j,k,1) + 0.5D0 *( exp ( - ( (XBCbt(k)+.05D0)**2 + (YBCbt(k)+.05D0)**2  ) /0.001D0 ) ) 
+!$$$c$$$     &              * wagp(mm,ph) * phi_area(j,mm,ph) 
+!$$$
+!$$$               if( ( sqrt((Ox + 0.25D0 )**2 + Oy**2)).le.0.18D0.and.(sqrt((Ox + 0.25D0 )**2 + 
+!$$$     &              Oy**2)).ge.0.025D0.and.(Ox.le.(-0.23D0) )) then
+!$$$
+!$$$                  iota(j,k,1) = iota(j,k,1) + 1.0D0 * wagp(mm,ph) * phi_area(j,mm,ph) 
+!$$$
+!$$$               elseif(sqrt( (Ox -.25D0)**2 + Oy**2 ).le.0.18D0 ) then
+!$$$
+!$$$                  iota(j,k,1) =  iota(j,k,1) + (1.D0 - ( 1.D0 / 0.18D0 ) * sqrt((Ox -0.25D0)**2 + Oy**2 ) ) 
+!$$$     &                 * wagp(mm,ph) * phi_area(j,mm,ph) 
+!$$$
+!$$$               endif
+!$$$
+!$$$               hb(j,k,1) = hb(j,k,1) + 1.D0*wagp(mm,ph) * phi_area(j,mm,ph)
+!$$$
+!$$$            enddo
+!$$$
+!$$$
+!$$$         enddo
+!$$$
+!$$$                                ! get back the coeffs in each component
+!$$$
+!$$$         do j= 1,dofh
+!$$$
+!$$$            QX(j,k,1) =  QX(j,k,1) * M_inv(j,ph)
+!$$$            QY(j,k,1) =  QY(j,k,1) * M_inv(j,ph)
+!$$$            iota(j,k,1) =  iota(j,k,1) * M_inv(j,ph)
+!$$$            hb(j,k,1) =  hb(j,k,1) * M_inv(j,ph)
+!$$$
+!$$$         enddo
+!$$$
+!$$$      enddo
 
       !iotaa = iota
  
@@ -607,8 +606,8 @@ c$$$      enddo
          DPE_MIN(J) = MIN(DP(NM(J,1)),DP(NM(J,2)),DP(NM(J,3)))
       ENDDO
 
-C.....Compute the values of the nodal basis functions at the
-C.....area gauss quadrature points, at every p level chi
+!.....Compute the values of the nodal basis functions at the
+!.....area gauss quadrature points, at every p level chi
 
       do chi = 1,ph
          do I = 1,NAGP(chi)
@@ -618,7 +617,7 @@ C.....area gauss quadrature points, at every p level chi
          enddo
       enddo
       
-C.....Store the derivatives of the (linear) nodal basis functions
+!.....Store the derivatives of the (linear) nodal basis functions
 
       DRPSI(1) = -1.D0/2.D0
       DRPSI(2) =  1.D0/2.D0
@@ -628,12 +627,12 @@ C.....Store the derivatives of the (linear) nodal basis functions
       DSPSI(3) =  1.D0/2.D0
       
 
-C.....Pre-compute the derivatives of the coordinate transformation for
-C.....each element
+!.....Pre-compute the derivatives of the coordinate transformation for
+!.....each element
 
       DO J = 1,MNE
 
-C.....Retrieve the global node numbers for the element
+!.....Retrieve the global node numbers for the element
 
          N1 = NM(J,1)
          N2 = NM(J,2)
@@ -647,7 +646,7 @@ C.....Retrieve the global node numbers for the element
          AREA = (X1 - X3)*(Y2 - Y3) + (X3 - X2)*(Y1 - Y3)
          area=area*.5d0
 
-C.....Compute the derivatives of the coordinate transformation
+!.....Compute the derivatives of the coordinate transformation
 
          DRDX(J) = 1.D0/AREA*(Y(N3) - Y(N1))
          DSDX(J) = 1.D0/AREA*(Y(N1) - Y(N2))
@@ -655,13 +654,13 @@ C.....Compute the derivatives of the coordinate transformation
          DRDY(J) = 1.D0/AREA*(X(N1) - X(N3))
          DSDY(J) = 1.D0/AREA*(X(N2) - X(N1))
          
-C.......Compute elemental Coriolis and friction terms
+!.......Compute elemental Coriolis and friction terms
 
          CORI_EL(J) = (CORIF(N1) + CORIF(N2) + CORIF(N3))/3.D0
          FRIC_EL(J) = (FRIC(N1) + FRIC(N2) + FRIC(N3))/3.D0
 
-C.......Pre-compute the bathymetry and the gradient of the bathymetry at
-C.......the quadrature points and compute volume of water
+!.......Pre-compute the bathymetry and the gradient of the bathymetry at
+!.......the quadrature points and compute volume of water
 
          DP_VOL(J,:) = 0.D0
          SFAC_ELEM(:,J,:) = 0.D0
@@ -800,8 +799,8 @@ C.......the quadrature points and compute volume of water
 
          enddo
 
-C........Store bathymetry at triangular vertices and edge gauss points for wet-dry
-C........
+!........Store bathymetry at triangular vertices and edge gauss points for wet-dry
+!........
 
 
          do chi = 1,ph
@@ -860,7 +859,7 @@ C........
          ENDIF
       enddo
 
-C.....Integrate the basis functions
+!.....Integrate the basis functions
 
       PHI_INTEGRATED = 0.D0
       do chi = 1,ph
@@ -871,7 +870,7 @@ C.....Integrate the basis functions
          ENDDO
       ENDDO
 
-C.....Wetting and drying is not turned on
+!.....Wetting and drying is not turned on
 
       IF(NOLIFA.EQ.0.OR.NOLIFA.EQ.1) THEN
          DO J = 1,MNE
@@ -879,14 +878,14 @@ C.....Wetting and drying is not turned on
                                 !DOFS(J) = 3
          ENDDO
          
-C.....Wetting and drying is turned on but there are no dry nodes below
-C.....geoid
+!.....Wetting and drying is turned on but there are no dry nodes below
+!.....geoid
 
       ELSEIF (NOLIFA.EQ.2.AND.NSTARTDRY.EQ.0) THEN
 
          DO J = 1,MNE
             
-C.........Check to see if there are initially any dry nodes
+!.........Check to see if there are initially any dry nodes
 
                                 !ZE1 = 0.D0
                                 !ZE2 = 0.D0
@@ -899,7 +898,7 @@ C.........Check to see if there are initially any dry nodes
             IF (DP(NM(J,2)).LT.H0) ZE2 = max(ze2,H0 - DP(NM(J,2)))
             IF (DP(NM(J,3)).LT.H0) ZE3 = max(ze3,H0 - DP(NM(J,3)))
             
-C.........If so set initial surface elevation values
+!.........If so set initial surface elevation values
             
             IF ((ZE1 + ZE2 + ZE3)/3.D0.NE.ze(1,J,1)) THEN
                IF (p_0.EQ.0) THEN
@@ -922,7 +921,7 @@ C.........If so set initial surface elevation values
                   ENDIF
                ENDIF
 
-C............and set wet/dry flag (0 = dry, 1 = wet)
+!............and set wet/dry flag (0 = dry, 1 = wet)
 
                WDFLG(J) = 0
                DOFS(J) = dof_0
@@ -934,21 +933,21 @@ C............and set wet/dry flag (0 = dry, 1 = wet)
          ENDDO
 
 
-C.....If there are dry nodes below geoid
+!.....If there are dry nodes below geoid
 
       ELSEIF (NOLIFA.EQ.2.AND.NSTARTDRY.EQ.1) THEN
          
-C.......Loop over elements
+!.......Loop over elements
          
          DO J = 1,NE
 
-C........Retrieve global node numbers for element
+!........Retrieve global node numbers for element
 
             N1 = NM(J,1)
             N2 = NM(J,2)
             N3 = NM(J,3)
 
-C........Check to see if nodes are initially dry
+!........Check to see if nodes are initially dry
 
             ZE1 = 0
             ZE2 = 0
@@ -978,7 +977,7 @@ C........Check to see if nodes are initially dry
                endif
             ENDIF
 
-C.........If so set initial surface elevation values
+!.........If so set initial surface elevation values
 
             IF ((ZE1 + ZE2 + ZE3).NE.0) THEN
                IF (P_0.EQ.0) THEN
@@ -1001,7 +1000,7 @@ C.........If so set initial surface elevation values
                   ENDIF
                ENDIF
 
-C...........Set wet/dry flag (0 = dry, 1 = wet)
+!...........Set wet/dry flag (0 = dry, 1 = wet)
 
                WDFLG(J) = 0
                DOFS(J) = DOF_0
@@ -1017,7 +1016,7 @@ C...........Set wet/dry flag (0 = dry, 1 = wet)
          print *, ''
       ENDIF
 
-C.....Read in modal dof for initial conditions
+!.....Read in modal dof for initial conditions
 !Asserts error if you project onto lower order basis
 !That is, do not expect convergence
 
@@ -1045,7 +1044,7 @@ C.....Read in modal dof for initial conditions
          CLOSE(114)
       ENDIF
 
-C.....Read in modal dof for hot start conditions
+!.....Read in modal dof for hot start conditions
 
       IF (MODAL_IC.EQ.2) THEN
          OPEN(263,FILE=DIRNAME//'/'//'Hot_start.263')
@@ -1060,9 +1059,9 @@ C.....Read in modal dof for hot start conditions
 #ifdef DYNP
          OPEN(291,FILE=DIRNAME//'/'//'Hot_start.291')
 #endif
-c$$$#ifdef SED_LAY
-c$$$         OPEN(290,FILE=DIRNAME//'/'//'Hot_start.290')
-c$$$#endif
+!$$$#ifdef SED_LAY
+!$$$         OPEN(290,FILE=DIRNAME//'/'//'Hot_start.290')
+!$$$#endif
          READ(263,*) P_READ
          READ(264,*) P_READ,P_READ
          READ(214,*) ITHS
@@ -1084,11 +1083,11 @@ c$$$#endif
 #ifdef DYNP
                READ(291,*) dynP(K,J,1)
 #endif
-c$$$#ifdef SED_LAY
-c$$$               do ll=1,layers
-c$$$                  READ(290,*) bed(K,J,1,ll)
-c$$$               enddo
-c$$$#endif
+!$$$#ifdef SED_LAY
+!$$$               do ll=1,layers
+!$$$                  READ(290,*) bed(K,J,1,ll)
+!$$$               enddo
+!$$$#endif
             ENDDO
          ENDDO
          CLOSE(263)
@@ -1100,15 +1099,15 @@ c$$$#endif
 #ifdef CHEM
          CLOSE(289)
 #endif
-c$$$#ifdef SED_LAY
-c$$$         CLOSE(290)
-c$$$#endif
+!$$$#ifdef SED_LAY
+!$$$         CLOSE(290)
+!$$$#endif
 #ifdef DYNP
          CLOSE(291)
 #endif
       ENDIF
       
-C.....Initialize the DG.63 output file
+!.....Initialize the DG.63 output file
 
       IF (ABS(NOUTGE).EQ.1) THEN
          OPEN(631,FILE=DIRNAME//'/'//'DG.63')
@@ -1116,7 +1115,7 @@ C.....Initialize the DG.63 output file
          WRITE(631,3645) NDSETSE, dofh, DTDP*NSPOOLGE, NSPOOLGE, 1
       ENDIF
 
-C.....Initialize the DG.64 output file
+!.....Initialize the DG.64 output file
 
       IF (ABS(NOUTGV).EQ.1) THEN
          OPEN(641,FILE=DIRNAME//'/'//'DG.64')
@@ -1124,8 +1123,8 @@ C.....Initialize the DG.64 output file
          WRITE(641,3645) NDSETSV, dofh, DTDP*NSPOOLGV, NSPOOLGV, 2
       ENDIF
 
-C.....Initialize the DG.65 output file (contains elemental statuses such
-C.....as the wet/dry status.
+!.....Initialize the DG.65 output file (contains elemental statuses such
+!.....as the wet/dry status.
 
       IF ((ABS(NOUTGE).EQ.1).AND.(NOLIFA.GE.2)) THEN
          OPEN(651,FILE=DIRNAME//'/'//'DG.65')
@@ -1135,7 +1134,7 @@ C.....as the wet/dry status.
  3220 FORMAT(1X,A32,2X,A24,2X,A24)
  3645 FORMAT(1X,I10,1X,I10,1X,E15.7,1X,I5,1X,I5)
 
-C.....Set p back to original value if p = 0
+!.....Set p back to original value if p = 0
 
       IF (P_0.NE.pl) THEN
          PDG_EL(:) = 0
@@ -1149,7 +1148,7 @@ C.....Set p back to original value if p = 0
          pa = 0
       ENDIF
       
-C.....Compute basis functions at stations
+!.....Compute basis functions at stations
 
       IF (NSTAE.GT.0) THEN      ! Elevation stations
          CALL ALLOC_STAE( NSTAE )
@@ -1165,7 +1164,7 @@ C.....Compute basis functions at stations
          ENDDO
       ENDIF
 
-C.....Prep the slopelimiter
+!.....Prep the slopelimiter
 
       IF (SLOPEFLAG.NE.0) THEN
          IF(MYPROC.EQ.0)THEN
@@ -1177,9 +1176,9 @@ C.....Prep the slopelimiter
             print *, 'Finished'
          ENDIF
       ENDIF
-C--   
+!--   
 
-C.....Close files
+!.....Close files
 
       CLOSE(115)
       CLOSE(25)
@@ -1187,15 +1186,15 @@ C.....Close files
       RETURN
       END SUBROUTINE PREP_DG
 
-C***********************************************************************
-C     
-C     SUBROUTINE RK_TIME()
-C     
-C     This subroutine does preparatory stuff for DG
-C     
-C     Written by Ethan Kubatko (03-07-2005)
-C     
-C***********************************************************************
+!***********************************************************************
+!     
+!     SUBROUTINE RK_TIME()
+!     
+!     This subroutine does preparatory stuff for DG
+!     
+!     Written by Ethan Kubatko (03-07-2005)
+!     
+!***********************************************************************
 
       SUBROUTINE RK_TIME()
 
@@ -1208,13 +1207,13 @@ C***********************************************************************
       REAL(SZ) ARK, BRK, CASUM, MAX_BOA
       Real(SZ) eps_const,RKC_omega0,RKC_omega1
 
-C.....Allocate the time stepping arrays
+!.....Allocate the time stepping arrays
 
       NRK = RK_STAGE
       CALL ALLOC_RK()
 
 #ifdef RKSSP
-C.....The forward Euler method
+!.....The forward Euler method
 
       IF ((RK_STAGE.EQ.1).AND.(RK_ORDER.EQ.1)) THEN
 
@@ -1226,7 +1225,7 @@ C.....The forward Euler method
          ATVD(1,1) = 1.D0
          BTVD(1,1) = 1.D0
 
-C.....SSP(s,2) schemes
+!.....SSP(s,2) schemes
 
       ELSEIF (RK_ORDER.EQ.2) THEN
 
@@ -1251,7 +1250,7 @@ C.....SSP(s,2) schemes
             ENDDO
          ENDDO
 
-C.....SSP(3,3) scheme
+!.....SSP(3,3) scheme
 
       ELSEIF ((RK_STAGE.EQ.3).AND.(RK_ORDER.EQ.3)) THEN
 
@@ -1270,7 +1269,7 @@ C.....SSP(3,3) scheme
          BTVD(2,2) = 1.D0/4.D0
          BTVD(3,3) = 2.D0/3.D0
 
-C.....SSP(4,3) scheme
+!.....SSP(4,3) scheme
 
       ELSEIF ((RK_STAGE.EQ.4).AND.(RK_ORDER.EQ.3)) THEN
 
@@ -1290,7 +1289,7 @@ C.....SSP(4,3) scheme
          BTVD(3,3) = 1.D0/6.D0
          BTVD(4,4) = 1.D0/2.D0
 
-C.....SSP(5,3) scheme
+!.....SSP(5,3) scheme
 
       ELSEIF ((RK_STAGE.EQ.5).AND.(RK_ORDER.EQ.3)) THEN
 
@@ -1314,7 +1313,7 @@ C.....SSP(5,3) scheme
          BTVD(4,4) = 0.238458932846290D0
          BTVD(5,5) = 0.287632146308408D0
 
-C.....SSP(6,3) scheme
+!.....SSP(6,3) scheme
 
       ELSEIF ((RK_STAGE.EQ.6).AND.(RK_ORDER.EQ.3)) THEN
 
@@ -1340,7 +1339,7 @@ C.....SSP(6,3) scheme
          BTVD(5,5) = 0.284220721334261D0
          BTVD(6,6) = 0.240103497065900D0
 
-C.....SSP(7,3) scheme
+!.....SSP(7,3) scheme
 
       ELSEIF ((RK_STAGE.EQ.7).AND.(RK_ORDER.EQ.3)) THEN
 
@@ -1369,7 +1368,7 @@ C.....SSP(7,3) scheme
          BTVD(6,6) = 0.233213863663009D0
          BTVD(7,7) = 0.205181790464579D0
 
-C.....SSP(8,3) scheme
+!.....SSP(8,3) scheme
 
       ELSEIF ((RK_STAGE.EQ.8).AND.(RK_ORDER.EQ.3)) THEN
 
@@ -1401,7 +1400,7 @@ C.....SSP(8,3) scheme
          BTVD(7,7) = 0.127733653231944D0
          BTVD(8,8) = 0.195804015330143D0
 
-C.....SSP(5,4) scheme
+!.....SSP(5,4) scheme
 
       ELSEIF ((RK_STAGE.EQ.5).AND.(RK_ORDER.EQ.4)) THEN
 
@@ -1429,7 +1428,7 @@ C.....SSP(5,4) scheme
          BTVD(5,4) = 0.08460416338212D0
          BTVD(5,5) = 0.22600748319395D0
 
-C.....SSP(6,4) scheme
+!.....SSP(6,4) scheme
 
       ELSEIF ((RK_STAGE.EQ.6).AND.(RK_ORDER.EQ.4)) THEN
 
@@ -1460,7 +1459,7 @@ C.....SSP(6,4) scheme
          BTVD(6,5) = 0.04417328437472D0
          BTVD(6,6) = 0.14911300530736D0
 
-C.....SSP(7,4) scheme
+!.....SSP(7,4) scheme
 
       ELSEIF ((RK_STAGE.EQ.7).AND.(RK_ORDER.EQ.4)) THEN
 
@@ -1495,7 +1494,7 @@ C.....SSP(7,4) scheme
          BTVD(7,4) = 0.02888359354880D0
          BTVD(7,7) = 0.15609445267839D0
 
-C.....SSP(8,4) scheme
+!.....SSP(8,4) scheme
 
       ELSEIF ((RK_STAGE.EQ.8).AND.(RK_ORDER.EQ.4)) THEN
 
@@ -1536,7 +1535,7 @@ C.....SSP(8,4) scheme
 
       ENDIF
 
-C.....Compute the time dependent parameters
+!.....Compute the time dependent parameters
 
       DO K = 0,RK_STAGE-1
          DO I = 1,RK_STAGE
@@ -1555,7 +1554,7 @@ C.....Compute the time dependent parameters
          ENDDO
       ENDDO
 
-C.....Compute the maximum beta over alpha ratio at each stage
+!.....Compute the maximum beta over alpha ratio at each stage
 
       DO IRK = 1,RK_STAGE
          MAX_BOA = 0.D0
@@ -1571,8 +1570,8 @@ C.....Compute the maximum beta over alpha ratio at each stage
 
 #endif
 
-C-----------------------------------------------------------
-C.... Compute the Runge-Kutta Chebyshev (RKC) version
+!-----------------------------------------------------------
+!.... Compute the Runge-Kutta Chebyshev (RKC) version
 
 #ifdef RKC
          

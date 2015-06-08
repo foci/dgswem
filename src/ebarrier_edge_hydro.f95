@@ -1,27 +1,27 @@
       SUBROUTINE EBARRIER_EDGE_HYDRO(IT)
       
-C.....Use appropriate modules
+!.....Use appropriate modules
 
       USE GLOBAL
       USE DG
 
       IMPLICIT NONE
 
-C.....Declare local variables
+!.....Declare local variables
 
       INTEGER GED, LED, L,i,k,ll,IT
       REAL(SZ) ABOVE, SUBSUP, W_IN, TX, TY
 
-C.....Loop over the external barrier segments
+!.....Loop over the external barrier segments
 
       DO 1000 L = 1,NEBSEG
          
-C.......Obtain the global and local edge numbers
+!.......Obtain the global and local edge numbers
 
          GED = NEBSEGN(L)
          LED = NEDSD(1,GED)
 
-C.......Obtain the element
+!.......Obtain the element
 
          EL = NEDEL(1,GED)
          PA = PDG_EL(EL_IN)
@@ -34,21 +34,21 @@ C.......Obtain the element
          
          IF (WDFLG(EL).EQ.0) GOTO 1000
 
-C.....Retrieve the components of the normal vector to the edge
+!.....Retrieve the components of the normal vector to the edge
 
          NX = COSNX(GED)
          NY = SINNX(GED)
          
-C.....Set the components for the tangential vector to the edge
+!.....Set the components for the tangential vector to the edge
 
          TX = -NY
          TY =  NX
          
-C.......Compute the variables at the quadrature points
+!.......Compute the variables at the quadrature points
 
          DO I = 1,NEGP(pa)
             
-C.........Obtain the height of the barrier at the quadrature point
+!.........Obtain the height of the barrier at the quadrature point
 
             ZE_IN = ZE(1,EL,IRK)
             QX_IN = QX(1,EL,IRK)
@@ -114,22 +114,22 @@ C.........Obtain the height of the barrier at the quadrature point
             ABOVE  = ZE_IN - EBHT(L)
             SUBSUP = 2.D0*ABOVE/3.D0
             
-C.........Case 1:  Water is below barrier
-C     ---------------------------------------------
+!.........Case 1:  Water is below barrier
+!     ---------------------------------------------
             
             IF (ABOVE.LT.BARMIN) THEN
                Q_N_EXT = -(QX_IN*NX + QY_IN*NY)
                Q_T_EXT =   QX_IN*TX + QY_IN*TY
                
-C.........Case 2:  Water is above barrier
-C     ------------------------------------------------------------
+!.........Case 2:  Water is above barrier
+!     ------------------------------------------------------------
                
             ELSE
                Q_N_EXT = RAMPDG*EBCFSP(L)*SUBSUP*SQRT(SUBSUP*G)
                Q_T_EXT = 0.D0
             ENDIF
             
-C.....Set the exterior bed and surface elevation equal to the interior
+!.....Set the exterior bed and surface elevation equal to the interior
 
             ZE_EX = ZE_IN
             HB_EX = HB_IN
@@ -154,19 +154,19 @@ C.....Set the exterior bed and surface elevation equal to the interior
 
 #endif
 
-C.........Compute the x and y components of the external state flow
+!.........Compute the x and y components of the external state flow
 
             QX_EX = ( TY*Q_N_EXT - NY*Q_T_EXT)/(NX*TY - NY*TX)
             QY_EX = (-TX*Q_N_EXT + NX*Q_T_EXT)/(NX*TY - NY*TX)
             
-C.........Compute numerical flux
+!.........Compute numerical flux
             
             CALL NUMERICAL_FLUX(IT)
 
             DO K = 1,DOFS(EL)
 
-               W_IN = 2.0*M_INV(K,pa)/AREAS(EL)*XLEN(GED)
-     &              *PHI_EDGE(K,I,LED,pa)*WEGP(I,pa)
+               W_IN = 2.0*M_INV(K,pa)/AREAS(EL)*XLEN(GED)&
+              *PHI_EDGE(K,I,LED,pa)*WEGP(I,pa)
 
                RHS_ZE(K,EL,IRK) = RHS_ZE(K,EL,IRK) - W_IN*F_HAT
                RHS_QX(K,EL,IRK) = RHS_QX(K,EL,IRK) - W_IN*G_HAT

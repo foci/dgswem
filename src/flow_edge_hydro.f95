@@ -1,25 +1,25 @@
-C***********************************************************************
-C     
-C     SUBROUTINE FLOW_EDGE_HYDRO( )
-C     
-C     This subroutine does the following:
-C     
-C     1.  Calculates the values of the necessary variables at the edge
-C     gauss points for NON-ZERO FLUX edges
-C     2.  Calls the appropriate subroutine to compute the flux at
-C     these points.
-C     3.  Calls the appropriate subroutine to compute the boundary
-C     integrals.
-C     
-C     Written by Ethan Kubatko (06-11-2004)
+!***********************************************************************
+!     
+!     SUBROUTINE FLOW_EDGE_HYDRO( )
+!     
+!     This subroutine does the following:
+!     
+!     1.  Calculates the values of the necessary variables at the edge
+!     gauss points for NON-ZERO FLUX edges
+!     2.  Calls the appropriate subroutine to compute the flux at
+!     these points.
+!     3.  Calls the appropriate subroutine to compute the boundary
+!     integrals.
+!     
+!     Written by Ethan Kubatko (06-11-2004)
 
-C     01-10-2011 - cem - adapted for p_enrichment and multicomponent
-C     
-C***********************************************************************
+!     01-10-2011 - cem - adapted for p_enrichment and multicomponent
+!     
+!***********************************************************************
 
       SUBROUTINE FLOW_EDGE_HYDRO(IT)
 
-C.....Use appropriate modules
+!.....Use appropriate modules
 
       USE GLOBAL
       USE DG
@@ -29,7 +29,7 @@ C.....Use appropriate modules
 
       IMPLICIT NONE
 
-C.....Declare local variables
+!.....Declare local variables
 
       INTEGER L, LED, GED, i,k,jj,II,ll,IT,w
       Real(SZ) DEN2,U_AVG,V_AVG,VEL_NORMAL,q_RoeX, q_RoeY, q_Roe
@@ -40,16 +40,16 @@ C.....Declare local variables
       test_el = 0
       DO 1000 L = 1,NFEDS
          
-C.....Retrieve the global and local edge number
+!.....Retrieve the global and local edge number
 
          GED = NFEDN(L)
          LED = NEDSD(1,GED)
 
-C.....Retrieve the element to which the edge belongs
+!.....Retrieve the element to which the edge belongs
 
          EL_IN = NEDEL(1,GED)
 
-C.....Organize the dofs for the p_adaptivity
+!.....Organize the dofs for the p_adaptivity
 
          PA = PDG_EL(EL_IN)
 
@@ -59,21 +59,21 @@ C.....Organize the dofs for the p_adaptivity
          endif
 #endif
 
-C.....If the element is dry then skip the edge calculation
+!.....If the element is dry then skip the edge calculation
 
          IF (WDFLG(EL_IN).EQ.0) GOTO 1000
          
-C.....Retrieve the components of the normal vector to the edge
+!.....Retrieve the components of the normal vector to the edge
          
          NX = COSNX(GED)
          NY = SINNX(GED)
          
-C.....Set the components for the tangential vector to the edge
+!.....Set the components for the tangential vector to the edge
 
          TX = -NY
          TY =  NX
          
-C.....Compute ZE, QX, QY, and HB at each edge Gauss quadrature point
+!.....Compute ZE, QX, QY, and HB at each edge Gauss quadrature point
 
          DO I = 1,NEGP(pa)
 
@@ -132,7 +132,7 @@ C.....Compute ZE, QX, QY, and HB at each edge Gauss quadrature point
             LZ_YY_IN = 0.D0
 
             
-C.....Compute the specified flow boundaries for the exterior state
+!.....Compute the specified flow boundaries for the exterior state
 
             Q_N_EXT = 0.D0
             DO JJ = 1,NFFR
@@ -146,10 +146,10 @@ C.....Compute the specified flow boundaries for the exterior state
                ARGJ = FAMIG(JJ)*(TIMEDG - NCYC*FPER(JJ)) + FFACE(JJ)
                RFF  = FFF(JJ)*RAMPDG
                
-               QNAM_GP = 0.5D0*(QNAM_DG(JJ,L,1) + QNAM_DG(JJ,L,2))
-     &              + 0.5D0*(QNAM_DG(JJ,L,2) - QNAM_DG(JJ,L,1))*XEGP(I,PA)
-               QNPH_GP = 0.5D0*(QNPH_DG(JJ,L,1) + QNPH_DG(JJ,L,2))
-     &              + 0.5D0*(QNPH_DG(JJ,L,2) - QNPH_DG(JJ,L,1))*XEGP(I,PA)
+               QNAM_GP = 0.5D0*(QNAM_DG(JJ,L,1) + QNAM_DG(JJ,L,2))&
+              + 0.5D0*(QNAM_DG(JJ,L,2) - QNAM_DG(JJ,L,1))*XEGP(I,PA)
+               QNPH_GP = 0.5D0*(QNPH_DG(JJ,L,1) + QNPH_DG(JJ,L,2))&
+              + 0.5D0*(QNPH_DG(JJ,L,2) - QNPH_DG(JJ,L,1))*XEGP(I,PA)
                
                ARG = ARGJ - QNPH_GP
                
@@ -162,7 +162,7 @@ C.....Compute the specified flow boundaries for the exterior state
 
             ENDDO
             
-C.....Compute the solution at the interior state
+!.....Compute the solution at the interior state
 
                                 !HB_IN = BATHED(I,LED,EL_IN,pa)
 
@@ -224,7 +224,7 @@ C.....Compute the solution at the interior state
             ENDIF
 #endif
             
-C.....Set the exterior bed and surface elevation equal to the interior
+!.....Set the exterior bed and surface elevation equal to the interior
 
             ZE_EX = ZE_IN
             HB_EX = HB_IN
@@ -252,7 +252,7 @@ C.....Set the exterior bed and surface elevation equal to the interior
 
             CALL NUMERICAL_FLUX(IT,L)
 
-C.....Add LDG terms
+!.....Add LDG terms
 #ifdef WAVE_DIF
             F_HAT = F_HAT + HZ_X_IN*NX*SFAC_IN + HZ_Y_IN*NY
 #endif
@@ -269,12 +269,12 @@ C.....Add LDG terms
             enddo
 #endif
             
-C.....Compute the edge integral
+!.....Compute the edge integral
 
             DO K = 1,DOFS(EL_IN)
 
-               W_IN = 2.0*M_INV(K,pa)/AREAS(EL_IN)*XLEN(GED)*
-     &              PHI_EDGE(K,I,LED,pa)*WEGP(I,pa)
+               W_IN = 2.0*M_INV(K,pa)/AREAS(EL_IN)*XLEN(GED)*&
+              PHI_EDGE(K,I,LED,pa)*WEGP(I,pa)
 
                RHS_ZE(K,EL_IN,IRK) = RHS_ZE(K,EL_IN,IRK) - W_IN*F_HAT
                RHS_QX(K,EL_IN,IRK) = RHS_QX(K,EL_IN,IRK) - W_IN*G_HAT
@@ -301,9 +301,9 @@ C.....Compute the edge integral
 
             ENDDO
 
-c$$$  DO K = 1,DOFS(EL_IN)
-c$$$  CALL EDGE_INT_HYDRO(EL_IN, LED, GED, I, F_HAT, G_HAT, H_HAT,i_hat,j_hat,k,pa)
-c$$$  ENDDO
+!$$$  DO K = 1,DOFS(EL_IN)
+!$$$  CALL EDGE_INT_HYDRO(EL_IN, LED, GED, I, F_HAT, G_HAT, H_HAT,i_hat,j_hat,k,pa)
+!$$$  ENDDO
             
          ENDDO
 

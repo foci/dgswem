@@ -1,36 +1,36 @@
-C***********************************************************************
-C     
-C     SUBROUTINE OCEAN_EDGE_HYDRO( )
-C     
-C     This subroutine does the following:
-C     
-C     1.  Calculates the values of the necessary variables at the edge
-C     gauss points for ELEVATION SPECIFIED edges
-C     2.  Calls the appropriate subroutine to compute the flux at
-C     these points.
-C     3.  Calls the appropriate subroutine to compute the boundary
-C     integrals.
-C     
-C     Written by Ethan Kubatko (06-11-2004)
-C     
-C     01-10-2011 - cem - adapted for p_enrichment and multicomponent  
-C     
-C***********************************************************************
+!***********************************************************************
+!     
+!     SUBROUTINE OCEAN_EDGE_HYDRO( )
+!     
+!     This subroutine does the following:
+!     
+!     1.  Calculates the values of the necessary variables at the edge
+!     gauss points for ELEVATION SPECIFIED edges
+!     2.  Calls the appropriate subroutine to compute the flux at
+!     these points.
+!     3.  Calls the appropriate subroutine to compute the boundary
+!     integrals.
+!     
+!     Written by Ethan Kubatko (06-11-2004)
+!     
+!     01-10-2011 - cem - adapted for p_enrichment and multicomponent  
+!     
+!***********************************************************************
       SUBROUTINE OCEAN_EDGE_HYDRO(IT)
 
-C.....Use appropriate modules
+!.....Use appropriate modules
 
       USE GLOBAL
       USE DG
       Use SIZES, only: layers
-c     
+!     
       USE NodalAttributes, ONLY: GeoidOffset, LoadGeoidOffset
       use fparser
       use fparser2
 
       IMPLICIT NONE
 
-C.....Declare local variables
+!.....Declare local variables
       
       INTEGER L, LED, GED, i,k,jj,II,ll,IT,w
       Real(SZ) DEN2,U_AVG,V_AVG,VEL_NORMAL,q_RoeX, q_RoeY, q_Roe
@@ -42,12 +42,12 @@ C.....Declare local variables
       test_el = 0
       DO 1000 L = 1, needs
          
-C.....Retrieve the global and local edge number
+!.....Retrieve the global and local edge number
 
          GED = NEEDN(L)
          LED = NEDSD(1,GED)
 
-C.....Retrieve the elements which share the edge
+!.....Retrieve the elements which share the edge
 
          EL_IN = NEDEL(1,GED)
          
@@ -59,23 +59,23 @@ C.....Retrieve the elements which share the edge
          endif
 #endif
          
-C.....If the element is dry then skip the edge calculation
+!.....If the element is dry then skip the edge calculation
 
          IF (WDFLG(EL_IN).EQ.0) GOTO 1000
          
          test_el = test_el+1
          
-C.....Retrieve the components of the normal vector to the edge
+!.....Retrieve the components of the normal vector to the edge
          
          NX = COSNX(GED)
          NY = SINNX(GED)
          
-C.....Retrieve the nodes of the edge
+!.....Retrieve the nodes of the edge
          
          N1 = NEDNO(1,GED)
          N2 = NEDNO(2,GED)
          
-C.....Compute ZE, QX, QY, and HB at each edge Gauss quadrature point
+!.....Compute ZE, QX, QY, and HB at each edge Gauss quadrature point
 
          DO I = 1,NEGP(pa)
 
@@ -135,7 +135,7 @@ C.....Compute ZE, QX, QY, and HB at each edge Gauss quadrature point
             TZ_Y_IN = TZ(1,2,2,EL_IN)
 #endif
 
-C.....Compute the specified open ocean elevation
+!.....Compute the specified open ocean elevation
             
             DO JJ=1,NBFR
                
@@ -145,15 +145,15 @@ C.....Compute the specified open ocean elevation
                   NCYC = INT(TIMEDG/PER(JJ))
                ENDIF
                
-C...........Surface Elevation
+!...........Surface Elevation
 
                ARGJ = AMIG(JJ)*(TIMEDG - NCYC*PER(JJ)) + FACE(JJ)
                RFF = FF(JJ)*RAMPDG
                
-               EFA_GP = 0.5D0*(EFA_DG(JJ,L,1) + EFA_DG(JJ,L,2))
-     &                + 0.5D0*(EFA_DG(JJ,L,2) - EFA_DG(JJ,L,1))*XEGP(I,pa)
-               EMO_GP = 0.5D0*(EMO_DG(JJ,L,1) + EMO_DG(JJ,L,2))
-     &                + 0.5D0*(EMO_DG(JJ,L,2) - EMO_DG(JJ,L,1))*XEGP(I,pa)
+               EFA_GP = 0.5D0*(EFA_DG(JJ,L,1) + EFA_DG(JJ,L,2))&
+                + 0.5D0*(EFA_DG(JJ,L,2) - EFA_DG(JJ,L,1))*XEGP(I,pa)
+               EMO_GP = 0.5D0*(EMO_DG(JJ,L,1) + EMO_DG(JJ,L,2))&
+                + 0.5D0*(EMO_DG(JJ,L,2) - EMO_DG(JJ,L,1))*XEGP(I,pa)
 
                ARG = ARGJ - EFA_GP
                
@@ -162,7 +162,7 @@ C...........Surface Elevation
             ENDDO
 
 
-C.....Compute the solution at the interior state
+!.....Compute the solution at the interior state
 
             DO K = 2,DOFS(EL_IN)
 
@@ -211,7 +211,7 @@ C.....Compute the solution at the interior state
 
             ENDDO
 
-C.....Set the exterior value of the bathymetry equal to the interior
+!.....Set the exterior value of the bathymetry equal to the interior
 
             HB_EX = HB_IN
 
@@ -245,16 +245,16 @@ C.....Set the exterior value of the bathymetry equal to the interior
 #endif
 
 
-C.....Set the exterior state flows equal to the interior state flows
+!.....Set the exterior state flows equal to the interior state flows
 
             QX_EX = QX_IN
             QY_EX = QY_IN
 
-C.....Compute the Roe flux
+!.....Compute the Roe flux
 
             CALL NUMERICAL_FLUX(IT,test_el)
 
-C.....Add LDG terms
+!.....Add LDG terms
             
 #ifdef WAVE_DIF 
             F_HAT = F_HAT + HZ_X_IN*NX*SFAC_IN + HZ_Y_IN*NY
@@ -265,7 +265,7 @@ C.....Add LDG terms
             I_HAT = I_HAT + TZ_X_IN*NX*SFAC_IN + TZ_Y_IN*NY
 #endif
 
-C.....Add LDG terms for sediment
+!.....Add LDG terms for sediment
 
 #ifdef SED_LAY
             do ll=1,layers
@@ -273,11 +273,11 @@ C.....Add LDG terms for sediment
             enddo
 #endif
 
-C.....Compute the edge integral
+!.....Compute the edge integral
             DO K = 1,DOFS(EL_IN)
 
-               W_IN = 2.0*M_INV(K,pa)/AREAS(EL_IN)*XLEN(GED)*
-     &              PHI_EDGE(K,I,LED,pa)*WEGP(I,pa)
+               W_IN = 2.0*M_INV(K,pa)/AREAS(EL_IN)*XLEN(GED)*&
+              PHI_EDGE(K,I,LED,pa)*WEGP(I,pa)
 
                RHS_ZE(K,EL_IN,IRK) = RHS_ZE(K,EL_IN,IRK) - W_IN*F_HAT
                RHS_QX(K,EL_IN,IRK) = RHS_QX(K,EL_IN,IRK) - W_IN*G_HAT

@@ -1,31 +1,31 @@
-C***********************************************************************
-C     
-C     SUBROUTINE LAND_EDGE_HYDRO( )
-C     
-C     This subroutine does the following:
-C     
-C     1.  Calculates the values of the necessary variables at the edge
-C     gauss points for NO-NORMAL FLOW edges
-C     2.  Calls the appropriate subroutine to compute the flux at
-C     these points.
-C     3.  Calls the appropriate subroutine to compute the boundary
-C     integrals.
-C     
-C     Written by Ethan Kubatko (06-11-2004)
-C     
-C-----------------------------------------------------------------------
-C     
-C     01-02-2007, sb, Modified for LDG
-C     08-xx-2005, sb, Modifications for wetting/drying
-C     
-C     01-10-2011 - cem - adapted for p_enrichment and multicomponent
-C     06-02-2012 - cem - adapted for sediment
-C     
-C***********************************************************************
+!***********************************************************************
+!     
+!     SUBROUTINE LAND_EDGE_HYDRO( )
+!     
+!     This subroutine does the following:
+!     
+!     1.  Calculates the values of the necessary variables at the edge
+!     gauss points for NO-NORMAL FLOW edges
+!     2.  Calls the appropriate subroutine to compute the flux at
+!     these points.
+!     3.  Calls the appropriate subroutine to compute the boundary
+!     integrals.
+!     
+!     Written by Ethan Kubatko (06-11-2004)
+!     
+!-----------------------------------------------------------------------
+!     
+!     01-02-2007, sb, Modified for LDG
+!     08-xx-2005, sb, Modifications for wetting/drying
+!     
+!     01-10-2011 - cem - adapted for p_enrichment and multicomponent
+!     06-02-2012 - cem - adapted for sediment
+!     
+!***********************************************************************
 
       SUBROUTINE LAND_EDGE_HYDRO(IT)
 
-C.....Use appropriate modules
+!.....Use appropriate modules
 
       USE GLOBAL
       USE DG
@@ -33,7 +33,7 @@ C.....Use appropriate modules
 
       IMPLICIT NONE
 
-C.....Declare local variables
+!.....Declare local variables
 
       INTEGER L, LED, GED, i,k,jj,II,ll,IT,mm
       Real(SZ) DEN2,U_AVG,V_AVG,VEL_NORMAL,q_RoeX, q_RoeY, q_Roe
@@ -44,12 +44,12 @@ C.....Declare local variables
       test_el = 0
       DO 1000 L = 1,NLEDS
          
-C.....Retrieve the global and local edge number
+!.....Retrieve the global and local edge number
 
          GED = NLEDN(L)
          LED = NEDSD(1,GED)
 
-C.....Retrieve the elements which share the edge
+!.....Retrieve the elements which share the edge
 
          EL_IN = NEDEL(1,GED)
 
@@ -61,23 +61,23 @@ C.....Retrieve the elements which share the edge
          endif
 #endif
          
-C.....If the element is dry then skip the edge calculation
+!.....If the element is dry then skip the edge calculation
 
          IF (WDFLG(EL_IN).EQ.0) GOTO 1000
 
          test_el = test_el+1
 
-C.....Retrieve the components of the normal vector to the edge
+!.....Retrieve the components of the normal vector to the edge
          
          NX = COSNX(GED)
          NY = SINNX(GED)
          
-C.....Set the components for the tangential vector to the edge
+!.....Set the components for the tangential vector to the edge
          
          TX = -NY
          TY =  NX
 
-C.....Compute ZE, QX, QY, and HB at each Gauss point
+!.....Compute ZE, QX, QY, and HB at each Gauss point
 
          DO I = 1,NEGP(pa)
             
@@ -133,8 +133,8 @@ C.....Compute ZE, QX, QY, and HB at each Gauss point
 
             !Compute sediment diffusion contribution
 
-C.....Compute the solution at the interior state
-C.....(modified for wetting and drying)
+!.....Compute the solution at the interior state
+!.....(modified for wetting and drying)
 
             DO K = 2,DOFS(EL_IN)
                
@@ -188,17 +188,17 @@ C.....(modified for wetting and drying)
             ENDDO
 
 
-C.....Compute the velocity in the normal and tangental direction
+!.....Compute the velocity in the normal and tangental direction
       
             Q_N_INT = QX_IN*NX + QY_IN*NY
             Q_T_INT = QX_IN*TX + QY_IN*TY
 
-C.....Reflect the velocity in the normal direction
+!.....Reflect the velocity in the normal direction
 
             Q_N_EXT = -Q_N_INT
             Q_T_EXT =  Q_T_INT
             
-C.....Compute the x and y components of the external state flow
+!.....Compute the x and y components of the external state flow
 
  
             DEN = 1.D0/(NX*TY - NY*TX)
@@ -227,11 +227,11 @@ C.....Compute the x and y components of the external state flow
             bed_EX(:) = bed_IN(:)
 #endif
 
-C.....Compute the Roe flux
+!.....Compute the Roe flux
 
             CALL NUMERICAL_FLUX(IT,test_el)
 
-C.....Add LDG terms for viscosity
+!.....Add LDG terms for viscosity
 
 #ifdef WAVE_DIF
             F_HAT = F_HAT + HZ_X_IN*NX*SFAC_IN + HZ_Y_IN*NY
@@ -243,7 +243,7 @@ C.....Add LDG terms for viscosity
             I_HAT = I_HAT + TZ_X_IN*NX*SFAC_IN + TZ_Y_IN*NY
 #endif
 
-C.....Add LDG terms for sediment
+!.....Add LDG terms for sediment
 
 #ifdef SED_LAY
             do ll=1,layers
@@ -251,14 +251,14 @@ C.....Add LDG terms for sediment
             enddo
 #endif
             
-C.....Compute the edge integral
-C.....(modified for wetting and drying) 
+!.....Compute the edge integral
+!.....(modified for wetting and drying) 
 
-C.....Compute the edge integral
+!.....Compute the edge integral
             DO K = 1,DOFS(EL_IN)
 
-               W_IN = 2.0*M_INV(K,pa)/AREAS(EL_IN)*XLEN(GED)*
-     &              PHI_EDGE(K,I,LED,pa)*WEGP(I,pa)
+               W_IN = 2.0*M_INV(K,pa)/AREAS(EL_IN)*XLEN(GED)*&
+              PHI_EDGE(K,I,LED,pa)*WEGP(I,pa)
 
                RHS_ZE(K,EL_IN,IRK) = RHS_ZE(K,EL_IN,IRK) - W_IN*F_HAT
                RHS_QX(K,EL_IN,IRK) = RHS_QX(K,EL_IN,IRK) - W_IN*G_HAT
@@ -293,33 +293,33 @@ C.....Compute the edge integral
       END SUBROUTINE
 
 
-C***********************************************************************
-C     
-C     SUBROUTINE LAND_EDGE_HYDRO_POST( )
-C     
-C     This subroutine does the following:
-C     
-C     1.  Direct velocity at each node on land edges toward
-C     the tangential direction of the edge.
-C     (This procedure needs to be called after the wetting and 
-C     drying post-process.)
-C     
-C     Written by Shintaro Bunya (02-13-2006)
-C     
-C***********************************************************************
+!***********************************************************************
+!     
+!     SUBROUTINE LAND_EDGE_HYDRO_POST( )
+!     
+!     This subroutine does the following:
+!     
+!     1.  Direct velocity at each node on land edges toward
+!     the tangential direction of the edge.
+!     (This procedure needs to be called after the wetting and 
+!     drying post-process.)
+!     
+!     Written by Shintaro Bunya (02-13-2006)
+!     
+!***********************************************************************
 
       SUBROUTINE LAND_EDGE_HYDRO_POST()
 
-C.....Use appropriate modules
+!.....Use appropriate modules
 
       USE SIZES,ONLY : SZ,MYPROC,layers
       USE GLOBAL,ONLY : pdg_el 
-      USE DG,ONLY : NLEDS,NLEDN,NEDSD,NEDEL,COSNX,SINNX,QX,QY,
-     &     PHI_CORNER, IRK, EL_UPDATED,pa,DOFS
+      USE DG,ONLY : NLEDS,NLEDN,NEDSD,NEDEL,COSNX,SINNX,QX,QY,&
+     PHI_CORNER, IRK, EL_UPDATED,pa,DOFS
 
       IMPLICIT NONE
 
-C.....Declare local variables
+!.....Declare local variables
 
       INTEGER L, LED, GED, EL_IN, K, KK, NOD1, NOD2, NOD3, NEDGES
       REAL(SZ) NX, NY
@@ -331,12 +331,12 @@ C.....Declare local variables
       
       DO 1000 L=1, NLEDS
 
-C.....Retrieve the global and local edge number
+!.....Retrieve the global and local edge number
 
          GED = NLEDN(L)
          LED = NEDSD(1,GED)
 
-C.....Retrieve the elements which share the edge
+!.....Retrieve the elements which share the edge
 
          EL_IN = NEDEL(1,GED)
 
@@ -348,21 +348,21 @@ C.....Retrieve the elements which share the edge
          endif
 #endif
 
-C.....Apply the following sequences only on dry, drying, or wetting elements
+!.....Apply the following sequences only on dry, drying, or wetting elements
 
          IF(EL_UPDATED(EL_IN).EQ.0) CYCLE
 
-C.....Retrieve the components of the normal vector to the edge
+!.....Retrieve the components of the normal vector to the edge
          
          NX = COSNX(GED)
          NY = SINNX(GED)
          
-C.....Set the components for the tangential vector to the edge
+!.....Set the components for the tangential vector to the edge
          
          TX = -NY
          TY =  NX
 
-C.....Compute nodal QX and QY
+!.....Compute nodal QX and QY
 
          QXP(:) = 0.D0
          QYP(:) = 0.D0
@@ -376,19 +376,19 @@ C.....Compute nodal QX and QY
             
          ENDDO
 
-C.....Retrieve the end nodes of the edge and the other node
+!.....Retrieve the end nodes of the edge and the other node
 
          NOD1 = MOD(LED+0,3)+1
          NOD2 = MOD(LED+1,3)+1
          NOD3 = MOD(LED+2,3)+1
          
-C.....Modify QX and QY at the end nodes
+!.....Modify QX and QY at the end nodes
 
-C.......Node 1
+!.......Node 1
 
          IF(ABS( QXP(NOD1)*TX + QYP(NOD1)*TY ).GT.(10.D0**(-20.D0))) THEN
-            DIR = ( QXP(NOD1)*TX + QYP(NOD1)*TY )
-     &           / ABS( QXP(NOD1)*TX + QYP(NOD1)*TY )
+            DIR = ( QXP(NOD1)*TX + QYP(NOD1)*TY )&
+           / ABS( QXP(NOD1)*TX + QYP(NOD1)*TY )
 
 #if 1
             QXPN(NOD1) = DIR*QP(NOD1)*TX
@@ -402,11 +402,11 @@ C.......Node 1
             QYPN(NOD1) = 0.D0
          ENDIF
 
-C.......Node 2
+!.......Node 2
 
          IF(ABS( QXP(NOD2)*TX + QYP(NOD2)*TY ).GT.(10.D0**(-20.D0))) THEN
-            DIR = ( QXP(NOD2)*TX + QYP(NOD2)*TY )
-     &           / ABS( QXP(NOD2)*TX + QYP(NOD2)*TY )
+            DIR = ( QXP(NOD2)*TX + QYP(NOD2)*TY )&
+           / ABS( QXP(NOD2)*TX + QYP(NOD2)*TY )
 
 #if 1
             QXPN(NOD2) = DIR*QP(NOD2)*TX
@@ -420,12 +420,12 @@ C.......Node 2
             QYPN(NOD2) = 0.D0
          ENDIF
 
-C.......Node 3
+!.......Node 3
 
          QXPN(NOD3) = QXP(NOD3)
          QYPN(NOD3) = QYP(NOD3)
 
-C.....Inverse the modified QX and QY
+!.....Inverse the modified QX and QY
 
          QX(1,EL_IN,IRK+1) = 1.D0/3.D0*(QXPN(1)+QXPN(2)+QXPN(3))
          QX(2,EL_IN,IRK+1) =-1.D0/6.D0*(QXPN(1)+QXPN(2))+1.D0/3.D0*QXPN(3)

@@ -1,26 +1,26 @@
-C***********************************************************************
-C     
-C     SUBROUTINE PREP_SLOPELIM()
-C     
-C     This subroutine does preparatory stuff for the slope limiter
-C     
-C     Written by Ethan Kubatko (07-13-2005)
-C     01-10-2011 - cem - adapted for slew of new limiters
-C     NOTE: This is a very expensive step and can be saved in a file 
-C     for multiple runs; needs to be optimized still
-C     
-C***********************************************************************
+!***********************************************************************
+!     
+!     SUBROUTINE PREP_SLOPELIM()
+!     
+!     This subroutine does preparatory stuff for the slope limiter
+!     
+!     Written by Ethan Kubatko (07-13-2005)
+!     01-10-2011 - cem - adapted for slew of new limiters
+!     NOTE: This is a very expensive step and can be saved in a file 
+!     for multiple runs; needs to be optimized still
+!     
+!***********************************************************************
 
       SUBROUTINE PREP_SLOPELIM()
       
-C.....Use appropriate modules
+!.....Use appropriate modules
 
       USE GLOBAL
       USE DG
 
       IMPLICIT NONE
       
-C.....Declare local variables
+!.....Declare local variables
 
       INTEGER GED,i,j,ll,k,lll,mm,ell,nin,bbb,bmm
       Real(SZ) areau,xmax,xmin,ymax,ymin
@@ -38,21 +38,21 @@ C.....Declare local variables
       Allocate ( Full_M_inv(dofh,dofh), temp_p(dofh,dofh) )
       Allocate ( Taylor_mass(MNE,dofh,dofh),temp_t(dofh,dofh))
       
-C.....Initialize SL3
+!.....Initialize SL3
       
       SL3 = 0
 
-C.....Loop over the elements
+!.....Loop over the elements
 
       DO J = 1,MNE
          
-C.....Retrieve the nodal coordinates of the given element
+!.....Retrieve the nodal coordinates of the given element
 
          N1 = NM(J,1)
          N2 = NM(J,2)
          N3 = NM(J,3)
 
-C.....Compute the barycenter coordinates of the element and store
+!.....Compute the barycenter coordinates of the element and store
 
          XBC(J) = 1.D0/3.D0*(X(N1) + X(N2) + X(N3))
          YBC(J) = 1.D0/3.D0*(Y(N1) + Y(N2) + Y(N3))
@@ -60,38 +60,38 @@ C.....Compute the barycenter coordinates of the element and store
          X1 = XBC(J)
          Y1 = YBC(J)
          
-C.....Loop over the edges to fnd the neighboring elements
+!.....Loop over the edges to fnd the neighboring elements
 
          DO I = 1,3
             
-C.....Retrieve the global edge number of the element for the given edge
+!.....Retrieve the global edge number of the element for the given edge
 
             GED = NELED(I,J)
 
-C.....Retrieve the neighboring element number and store into an array
+!.....Retrieve the neighboring element number and store into an array
 
             EL_NBORS(I,J) = NEDEL(1,GED)
 
             IF (EL_NBORS(I,J).EQ.J) EL_NBORS(I,J) = NEDEL(2,GED)
 
-C.....If the element has an edge that is on boundary go to next element
-C     sb-2007/07/27 commented out
+!.....If the element has an edge that is on boundary go to next element
+!     sb-2007/07/27 commented out
 
-C     IF (EL_NBORS(I,J).EQ.0) GOTO 111
+!     IF (EL_NBORS(I,J).EQ.0) GOTO 111
             
          ENDDO
          
-C.....Set the 4th neighbroing element equal to the first
+!.....Set the 4th neighbroing element equal to the first
 
          EL_NBORS(4,J) = EL_NBORS(1,J)
 
-C.....Now loop over the three edges of the element again
+!.....Now loop over the three edges of the element again
 
          DO I = 1,3
 
             IF(EL_NBORS(I,J).EQ.0.OR.EL_NBORS(I+1,J).EQ.0) GOTO 110
             
-C.....Compute the barycenter coordinates of two neighboring elements
+!.....Compute the barycenter coordinates of two neighboring elements
 
             N1 = NM(EL_NBORS(I,J),1)
             N2 = NM(EL_NBORS(I,J),2)
@@ -107,18 +107,18 @@ C.....Compute the barycenter coordinates of two neighboring elements
             X3 = 1.D0/3.D0*(X(N1) + X(N2) + X(N3))
             Y3 = 1.D0/3.D0*(Y(N1) + Y(N2) + Y(N3))
             
-C.....Compute the time independent planar constant
+!.....Compute the time independent planar constant
 
             SL3(I,J) = X1*(Y2 - Y3) + X2*(Y3 - Y1) + X3*(Y1 - Y2)
 
             IF (SL3(I,J).LE.0.AND.SLOPEFLAG.NE.0) then
-           WRITE(16,*) 'WARNING. SL3(',I,',',J,') =',SL3(I,J),' <= 0.',
-     &              '    ELEMENT ',J,
-     &              ' WILL NOT BE CONSIDERED IN SLOPE LIMITING.'
+           WRITE(16,*) 'WARNING. SL3(',I,',',J,') =',SL3(I,J),' <= 0.',&
+                   '    ELEMENT ',J,&
+                   ' WILL NOT BE CONSIDERED IN SLOPE LIMITING.'
                WRITE(16,*)
-            WRITE(*,*) 'WARNING. SL3(',I,',',J,') =',SL3(I,J),' <= 0.',
-     &              '    ELEMENT ',J,
-     &              ' WILL NOT BE CONSIDERED IN SLOPE LIMITING.'
+            WRITE(*,*) 'WARNING. SL3(',I,',',J,') =',SL3(I,J),' <= 0.',&
+                   '    ELEMENT ',J,&
+                   ' WILL NOT BE CONSIDERED IN SLOPE LIMITING.'
                WRITE(*,*)
                SL3(I,J) = 0.D0
             ENDIF
@@ -130,9 +130,9 @@ C.....Compute the time independent planar constant
       ENDDO
 
 
-C******************************************************************************
-C.....Vertex-based slope limiter (need the following stuff for integration)
-C.....and must fill array for all possible p (ie. dofl:dofh)
+!******************************************************************************
+!.....Vertex-based slope limiter (need the following stuff for integration)
+!.....and must fill array for all possible p (ie. dofl:dofh)
 
       
 #ifdef SLOPEALL
@@ -164,21 +164,21 @@ C.....and must fill array for all possible p (ie. dofl:dofh)
       Nmatrix = 0.D0
 
 
-C.....Loop over p, and allocate for each order
+!.....Loop over p, and allocate for each order
 
       do ll = 1,ph
 
          if (ll.gt.0) then
             
-C.....Loop over the elements
+!.....Loop over the elements
 
             do k = 1,MNE
 
-C.....Set areas over the physical elements
+!.....Set areas over the physical elements
                
                areau = 0.5D0*AREAS(k)
 
-C.....Retrieve the nodal coordinates (above) of the given element
+!.....Retrieve the nodal coordinates (above) of the given element
 
                N1 = NM(k,1)
                N2 = NM(k,2)
@@ -187,7 +187,7 @@ C.....Retrieve the nodal coordinates (above) of the given element
                                 !areat = 0.5*(x(n2)*y(n3)-x(n3)*y(n2)+x(n3)*y(n1)-x(n1)*y(n3) + x(n1)*y(n2)-x(n2)*y(n1))
                                 !areat = areau
 
-C.....Find cell conditioners
+!.....Find cell conditioners
 
                xmax = max( x(n1),x(n2),x(n3) )
                xmin = min( x(n1),x(n2),x(n3) )
@@ -208,12 +208,12 @@ C.....Find cell conditioners
 
                
 
-C.....Compute the centroid coordinates of the base element in physical space
+!.....Compute the centroid coordinates of the base element in physical space
 
                XBCb(k) = ( x(n1) + x(n2) + x(n3) ) / 3.D0
                YBCb(k) = ( y(n1) + y(n2) + y(n3) ) / 3.D0
 
-C.....Transform quad points to physical space (for integration) xi --> x
+!.....Transform quad points to physical space (for integration) xi --> x
 
                do mm=1,nagp(ll)
 
@@ -226,29 +226,29 @@ C.....Transform quad points to physical space (for integration) xi --> x
 
                enddo
 
-C.....Find centroid coordinates in the master element frame
+!.....Find centroid coordinates in the master element frame
 
-               xi1BCb(k) =  ( (y(N3)-y(N1))*( XBCb(k) -0.5D0 * 
-     &              (x(N2) + x(N3))) + (x(N1) - x(N3))*(YBCb(k)
-     &              - 0.5D0*(y(N2) + y(N3)) ) ) / areau
-               xi2BCb(k) =  ( (y(N1)-y(N2))*( XBCb(k) -0.5D0 * (x(N2) 
-     &              + x(N3))) + (x(N2) - x(N1))*(YBCb(k)
-     &              - 0.5D0*(y(N2) + y(N3)) ) ) / areau
+               xi1BCb(k) =  ( (y(N3)-y(N1))*( XBCb(k) -0.5D0 * &
+              (x(N2) + x(N3))) + (x(N1) - x(N3))*(YBCb(k)&
+              - 0.5D0*(y(N2) + y(N3)) ) ) / areau
+               xi2BCb(k) =  ( (y(N1)-y(N2))*( XBCb(k) -0.5D0 * (x(N2) &
+              + x(N3))) + (x(N2) - x(N1))*(YBCb(k)&
+              - 0.5D0*(y(N2) + y(N3)) ) ) / areau
 
-C.....Find vertices in the master element frame
+!.....Find vertices in the master element frame
 
                do lll=1,3
 
-                  xi1vert(k,lll) =  ( (y(N3)-y(N1))*( x(nm(k,lll)) -0.5D0 * 
-     &                 (x(N2) + x(N3))) + (x(N1) - x(N3))* (y(nm(k,lll))
-     &                 - 0.5D0*(y(N2) + y(N3)) ) ) / areau
-                  xi2vert(k,lll) =  ( (y(N1)-y(N2))*( x(nm(k,lll)) -0.5D0 * 
-     &                 (x(N2) + x(N3))) + (x(N2) - x(N1))* (y(nm(k,lll))
-     &                 - 0.5D0*(y(N2) + y(N3)) ) ) / areau
+                  xi1vert(k,lll) =  ( (y(N3)-y(N1))*( x(nm(k,lll)) -0.5D0 * &
+                 (x(N2) + x(N3))) + (x(N1) - x(N3))* (y(nm(k,lll))&
+                 - 0.5D0*(y(N2) + y(N3)) ) ) / areau
+                  xi2vert(k,lll) =  ( (y(N1)-y(N2))*( x(nm(k,lll)) -0.5D0 * &
+                 (x(N2) + x(N3))) + (x(N2) - x(N1))* (y(nm(k,lll))&
+                 - 0.5D0*(y(N2) + y(N3)) ) ) / areau
 
                enddo
 
-C.....Find all neighbors of shared vertex
+!.....Find all neighbors of shared vertex
 
                do mm =1,MNE     !number of elements
 
@@ -258,28 +258,28 @@ C.....Find all neighbors of shared vertex
 
                         if( NM(k,lll).eq.NM(mm,nin).and.k.ne.mm ) then !find common vertices of "nearby" elements
                            
-C.....Compute the centroids of all conterminous (of codimension 2) elements (by vertex) of base element k in physical space
+!.....Compute the centroids of all conterminous (of codimension 2) elements (by vertex) of base element k in physical space
 
-                           XBCv(k,mm) = 1.D0/3.D0*( X(NM(mm,1)) + 
-     &                          X(NM(mm,2)) + X(NM(mm,3)) )
-                           YBCv(k,mm) = 1.D0/3.D0*( Y(NM(mm,1)) + 
-     &                          Y(NM(mm,2)) + Y(NM(mm,3)) )
+                           XBCv(k,mm) = 1.D0/3.D0*( X(NM(mm,1)) + &
+                          X(NM(mm,2)) + X(NM(mm,3)) )
+                           YBCv(k,mm) = 1.D0/3.D0*( Y(NM(mm,1)) + &
+                          Y(NM(mm,2)) + Y(NM(mm,3)) )
 
                                 !Stored_neighbors(k,mm,lll) = k*mm*lll !store neighboring elements
 
-C.....Convert the centroid coordinates of all conterminous (of codimension 2) elements (by vertex) 
-C.....of base element k to the master element space
+!.....Convert the centroid coordinates of all conterminous (of codimension 2) elements (by vertex) 
+!.....of base element k to the master element space
 
-                           xi1BCv(k,mm) = ( (y(NM(mm,3))-y(NM(mm,1)))*
-     &                          ( XBCv(k,mm) 
-     &                          -0.5D0 * (x(Nm(mm,2)) + x(NM(mm,3)))) + 
-     &                          (x(NM(mm,1)) - x(NM(mm,3)))*(YBCv(k,mm) 
-     &                          - 0.5D0*(y(NM(mm,2)) + y(NM(mm,3))) ) ) / areau
-                           xi2BCv(k,mm) = ( (y(NM(mm,1))-y(NM(mm,2)))*
-     &                          ( XBCv(k,mm) 
-     &                          -0.5D0 * (x(Nm(mm,2)) + x(NM(mm,3)))) + 
-     &                          (x(NM(mm,2)) - x(NM(mm,1)))*(YBCv(k,mm)
-     &                          - 0.5D0*(y(NM(mm,2)) + y(NM(mm,3))) ) ) / areau
+                           xi1BCv(k,mm) = ( (y(NM(mm,3))-y(NM(mm,1)))*&
+                          ( XBCv(k,mm) &
+                          -0.5D0 * (x(Nm(mm,2)) + x(NM(mm,3)))) + &
+                          (x(NM(mm,1)) - x(NM(mm,3)))*(YBCv(k,mm) &
+                          - 0.5D0*(y(NM(mm,2)) + y(NM(mm,3))) ) ) / areau
+                           xi2BCv(k,mm) = ( (y(NM(mm,1))-y(NM(mm,2)))*&
+                          ( XBCv(k,mm) &
+                          -0.5D0 * (x(Nm(mm,2)) + x(NM(mm,3)))) + &
+                          (x(NM(mm,2)) - x(NM(mm,1)))*(YBCv(k,mm)&
+                          - 0.5D0*(y(NM(mm,2)) + y(NM(mm,3))) ) ) / areau
                            
                         endif
                      enddo
@@ -289,8 +289,8 @@ C.....of base element k to the master element space
                enddo
 
 
-C.....Now compute the derivatives of the Taylor basis with respect to the physical 
-C.....basis using the transformation rules from the paper (e.g. Leibniz and Faa' di Bruno formulas)
+!.....Now compute the derivatives of the Taylor basis with respect to the physical 
+!.....basis using the transformation rules from the paper (e.g. Leibniz and Faa' di Bruno formulas)
                
                dxdxi1 = 0.5D0 * ( x(N2) - x(N1) )
                dydxi1 = 0.5D0 * ( y(N2) - y(N1) )
@@ -302,9 +302,9 @@ C.....basis using the transformation rules from the paper (e.g. Leibniz and Faa'
                dxi1dy = ( x(N1) - x(N3) ) / areau 
                dxi2dy = ( x(N2) - x(N1) ) / areau
 
-C.....Write the generalized Taylor basis of order p in physical 
-C.....coordinates (x(xi1,xi2), y(xi1,xi2)) and integrate over elements
-C.....using the physical to master transformation, e.g. T^-1:x-->xi
+!.....Write the generalized Taylor basis of order p in physical 
+!.....coordinates (x(xi1,xi2), y(xi1,xi2)) and integrate over elements
+!.....using the physical to master transformation, e.g. T^-1:x-->xi
 
                do i = 0,ll      !max polynomial degree in x
 
@@ -318,21 +318,21 @@ C.....using the physical to master transformation, e.g. T^-1:x-->xi
 
                      do mm = 1,NAGP(ll) !number of quad points
 
-                        Area_integral(k,i,j) = Area_integral(k,i,j) + 
-     &                       ( (  xtransform(k,mm) - XBCb(k) )**i 
-     &                       * (  ytransform(k,mm)- YBCb(k))**j * ( wagp(mm,ll) ) )
-     &                       * abs( dxdxi1*dydxi2 - dxdxi2*dydxi1 )
-     &                       / ( fact(i)*fact(j)*Deltx(k)**i * Delty(k)**j )		
+                        Area_integral(k,i,j) = Area_integral(k,i,j) + &
+                       ( (  xtransform(k,mm) - XBCb(k) )**i &
+                       * (  ytransform(k,mm)- YBCb(k))**j * ( wagp(mm,ll) ) )&
+                       * abs( dxdxi1*dydxi2 - dxdxi2*dydxi1 )&
+                       / ( fact(i)*fact(j)*Deltx(k)**i * Delty(k)**j )		
 
 
                      enddo
                      
                      do mm =1,nagp(ll) !at quad points
 
-                        f(k,mm,i,j) = (  xtransform(k,mm) - XBCb(k)  )**i 
-     &                       / ( fact(i) * Deltx(k)**i )
-                        g0(k,mm,i,j) = (  ytransform(k,mm) - YBCb(k)  )**j 
-     &                       / ( fact(j) * Delty(k)**j )		
+                        f(k,mm,i,j) = (  xtransform(k,mm) - XBCb(k)  )**i &
+                       / ( fact(i) * Deltx(k)**i )
+                        g0(k,mm,i,j) = (  ytransform(k,mm) - YBCb(k)  )**j &
+                       / ( fact(j) * Delty(k)**j )		
 
                         if (i.eq.0.and.j.eq.0) then
 
@@ -340,8 +340,8 @@ C.....using the physical to master transformation, e.g. T^-1:x-->xi
 
                         else
                            
-                           varsigma0(k,mm,i,j) = ( f(k,mm,i,j) * g0(k,mm,i,j) ) 
-     &                          - Area_integral(k,i,j)/areau
+                           varsigma0(k,mm,i,j) = ( f(k,mm,i,j) * g0(k,mm,i,j) ) &
+                          - Area_integral(k,i,j)/areau
 
                         endif
 
@@ -354,19 +354,19 @@ C.....using the physical to master transformation, e.g. T^-1:x-->xi
 
                         do mm = 1,nagp(ll) !number of quad points
 
-                           AreaV_integral(k,i,j,lll) = AreaV_integral(k,i,j,lll) + 
-     &                          ( (  x(nm(k,lll)) - XBCb(k) )**i 
-     &                          * (  y(nm(k,lll)) - YBCb(k) )**j * ( wagp(mm,ll) ) )
-     &                          * abs( dxdxi1*dydxi2 - dxdxi2*dydxi1 )
-     &                          / ( fact(i)*fact(j)*Deltx(k)**i * Delty(k)**j )
+                           AreaV_integral(k,i,j,lll) = AreaV_integral(k,i,j,lll) + &
+                          ( (  x(nm(k,lll)) - XBCb(k) )**i &
+                          * (  y(nm(k,lll)) - YBCb(k) )**j * ( wagp(mm,ll) ) )&
+                          * abs( dxdxi1*dydxi2 - dxdxi2*dydxi1 )&
+                          / ( fact(i)*fact(j)*Deltx(k)**i * Delty(k)**j )
 
                         enddo
 
-                        fv(k,lll,i,j) = (  x(nm(k,lll)) - XBCb(k) )**i / 
-     &                       ( fact(i) * Deltx(k)**i )
+                        fv(k,lll,i,j) = (  x(nm(k,lll)) - XBCb(k) )**i / &
+                       ( fact(i) * Deltx(k)**i )
                         
-                        g0v(k,lll,i,j) =  ( y(nm(k,lll)) - YBCb(k) )**j / 
-     &                       ( fact(j) * Delty(k)**j )
+                        g0v(k,lll,i,j) =  ( y(nm(k,lll)) - YBCb(k) )**j / &
+                       ( fact(j) * Delty(k)**j )
                         
                         if (i.eq.0.and.j.eq.0) then
 
@@ -374,9 +374,9 @@ C.....using the physical to master transformation, e.g. T^-1:x-->xi
 
                         else
                            
-                           varsigma0v(k,lll,i,j) = ( fv(k,lll,i,j) * 
-     &                          g0v(k,lll,i,j) ) 
-     &                          - Area_integral(k,i,j)/areau
+                           varsigma0v(k,lll,i,j) = ( fv(k,lll,i,j) * &
+                          g0v(k,lll,i,j) ) &
+                          - Area_integral(k,i,j)/areau
 
                         endif
 
@@ -388,7 +388,7 @@ C.....using the physical to master transformation, e.g. T^-1:x-->xi
 
 
 
-C.....Re-order the Taylor basis functions and componentwise derivatives into hierarchical order
+!.....Re-order the Taylor basis functions and componentwise derivatives into hierarchical order
 
                bbb = 1 
                do j = 0,ll
@@ -434,9 +434,9 @@ C.....Re-order the Taylor basis functions and componentwise derivatives into hie
                
 
 
-C.....Compute the inner product matrix Pmatrix, of the Taylor 
-C.....basis with the Dubiner basis, and compute the transformation 
-C.....matrix Nmatrix=Pmatrix*M(-1), using the mass matrix inverse M_inv,
+!.....Compute the inner product matrix Pmatrix, of the Taylor 
+!.....basis with the Dubiner basis, and compute the transformation 
+!.....matrix Nmatrix=Pmatrix*M(-1), using the mass matrix inverse M_inv,
 
                ell = (ll+1)*(ll+2)/2
 
@@ -454,14 +454,14 @@ C.....matrix Nmatrix=Pmatrix*M(-1), using the mass matrix inverse M_inv,
 
                      do mm=1,NAGP(ll)
                         
-                        pmatrix(k,i,j) = pmatrix(k,i,j)  + wagp(mm,ll) * 
-     &                       var2sigmag(k,mm,i) * phi_area(j,mm,ll) 
+                        pmatrix(k,i,j) = pmatrix(k,i,j)  + wagp(mm,ll) * &
+                       var2sigmag(k,mm,i) * phi_area(j,mm,ll) 
                         
 
                         temp_p(i,j) = pmatrix(k,i,j)
 
-                        Taylor_mass(k,i,j) = Taylor_mass(k,i,j) +  wagp(mm,ll) 
-     &                       *  var2sigmag(k,mm,i) *  var2sigmag(k,mm,j)
+                        Taylor_mass(k,i,j) = Taylor_mass(k,i,j) +  wagp(mm,ll) &
+                       *  var2sigmag(k,mm,i) *  var2sigmag(k,mm,j)
 
                         temp_t(i,j) = Taylor_mass(k,i,j)
 
@@ -479,7 +479,7 @@ C.....matrix Nmatrix=Pmatrix*M(-1), using the mass matrix inverse M_inv,
 
                tempmat(1:ell,1:ell) = Nmatrix(k,1:ell,1:ell,ell)
 
-C.....Invert the transformation matrix Nmatrix^(-1), 
+!.....Invert the transformation matrix Nmatrix^(-1), 
 
                Call Inv(tempmat(1:ell,1:ell), tempInv(1:ell,1:ell), ell) 
                
@@ -491,7 +491,7 @@ C.....Invert the transformation matrix Nmatrix^(-1),
 
       enddo                     !p_adapt
 
-C.....Construct focal neighbors for non-vertex based limiters
+!.....Construct focal neighbors for non-vertex based limiters
       
       focal_neigh = 0
       focal_up = 0
@@ -521,7 +521,7 @@ C.....Construct focal neighbors for non-vertex based limiters
       RETURN
       END SUBROUTINE PREP_SLOPELIM
 
-C.....Need factorial function for generalization
+!.....Need factorial function for generalization
 
 #ifdef SLOPEALL
 
@@ -543,7 +543,7 @@ C.....Need factorial function for generalization
 
 #endif
 
-C.....Subroutine to find the inverse of a square matrix by Guass-Jordan elimination
+!.....Subroutine to find the inverse of a square matrix by Guass-Jordan elimination
 
 #ifdef SLOPEALL
 

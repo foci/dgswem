@@ -1,29 +1,29 @@
 
-C***********************************************************************
-C     
-C     SUBROUTINE DG_HYDRO_TIMESTEP(IT)
-C     
-C     This is the main subroutine for the DG hydro
-C     
-C     Written by Ethan Kubatko (06-11-2004)
-C     
-C-----------------------------------------------------------------------
-C     
-C     Modification history on hp_DG_ADCIRC since v9_sb1
-C     
-C     v??     - 08/05    - sb - parallelized
-C     v??     - 08/05    - sb - wetting/drying
-C     v10_sb5 - 10/05    - sb - wetting/drying algorithm is improved
-C     v10_sb5 - 10/05    - sb - Ethan's slope limiter is consolidated
-C     v21     - 11/11    - cem - major update/p_enrich/slope/rkc etc
-C     v22     -  6/12    - cem - major update/sediment/diffusion/fluxes
-C     Moving to versioning control
-C     
-C***********************************************************************
+!***********************************************************************
+!     
+!     SUBROUTINE DG_HYDRO_TIMESTEP(IT)
+!     
+!     This is the main subroutine for the DG hydro
+!     
+!     Written by Ethan Kubatko (06-11-2004)
+!     
+!-----------------------------------------------------------------------
+!     
+!     Modification history on hp_DG_ADCIRC since v9_sb1
+!     
+!     v??     - 08/05    - sb - parallelized
+!     v??     - 08/05    - sb - wetting/drying
+!     v10_sb5 - 10/05    - sb - wetting/drying algorithm is improved
+!     v10_sb5 - 10/05    - sb - Ethan's slope limiter is consolidated
+!     v21     - 11/11    - cem - major update/p_enrich/slope/rkc etc
+!     v22     -  6/12    - cem - major update/sediment/diffusion/fluxes
+!     Moving to versioning control
+!     
+!***********************************************************************
 
       SUBROUTINE DG_HYDRO_TIMESTEP(IT)
 
-C.....Use appropriate modules
+!.....Use appropriate modules
       
       USE GLOBAL
       USE DG
@@ -33,20 +33,19 @@ C.....Use appropriate modules
 #endif
 
 #ifdef SWAN
-Casey 101118: Add variables for coupling to SWAN.
+!asey 101118: Add variables for coupling to SWAN.
       USE Couple2Swan, ONLY: ComputeWaveDrivenForces,
      &                       InterpoWeight
 #endif
 
       IMPLICIT NONE
       
-C.....Declare local variables
+!.....Declare local variables
 
 
       INTEGER IT,L,GED,NBOREL,NNBORS,NDRYNBORS,Istop,k,j,kk,i,mm
       INTEGER Detected,flagger,store
-      REAL(SZ) QBCT1,QBCT2,QBC1,QBC2,ZP(3),QXP(3),QXP_OLD(3),
-     $     QYP(3),QYP_OLD(3),ZP_OLD(3),ell_1,ell_2,ell_3
+      REAL(SZ) QBCT1,QBCT2,QBC1,QBC2,ZP(3),QXP(3),QXP_OLD(3),QYP(3),QYP_OLD(3),ZP_OLD(3),ell_1,ell_2,ell_3
       REAL(SZ) DPAVG, ITDT, ARK, BRK, CRK, DRK, ERK,s,alph,eta,seta
       Real(sz) tempx,tempy,rev,Ox,Oy,time_at,C_0,C_1,sig,sigma
 
@@ -54,23 +53,23 @@ C.....Declare local variables
 
       Allocate ( XB(MNE),YB(MNE),radial(MNE) )
 
-C.....Compute the current time
+!.....Compute the current time
 
       ITDT = IT*DTDP
       TIME_A = ITDT + STATIM*86400.D0
       TIMEH  = ITDT + (STATIM - REFTIM)*86400.D0
 
-C.....Update ETA1 (shintaro: do we need this?)
+!.....Update ETA1 (shintaro: do we need this?)
 
       DO I = 1,MNP
          ETA1(I) = ETA2(I)
       ENDDO
 
-C.....Begin Runge-Kutta time stepper
+!.....Begin Runge-Kutta time stepper
 
       DO 100 IRK = 1,NRK
          
-C.......Compute the DG time and DG ramp
+!.......Compute the DG time and DG ramp
 
 #ifdef RKSSP
  
@@ -95,7 +94,7 @@ C.......Compute the DG time and DG ramp
          ENDIF
          RAMP = RAMPDG
          
-C.......Obtain the meteorological forcing
+!.......Obtain the meteorological forcing
 
          IF (NWS.NE.0) CALL MET_FORCING(IT)
         
@@ -108,12 +107,12 @@ C.......Obtain the meteorological forcing
            !  RSNY1(I)=RSNY2(I)
            !END DO
 #ifdef SWAN
-Casey 090302: Added for coupling to SWAN.
+!asey 090302: Added for coupling to SWAN.
             IF((NRS.EQ.3).AND.(IRK.EQ.1)) THEN
               InterpoWeight = 1.0
               CALL ComputeWaveDrivenForces
-Casey 090707: We want to extrapolate forward in time.  Load the latest (current) forces
-C             into RSNX1/RSNY1, and then load the future forces into RSNX2/RSNY2.
+!asey 090707: We want to extrapolate forward in time.  Load the latest (current) forces
+!             into RSNX1/RSNY1, and then load the future forces into RSNX2/RSNY2.
               DO I=1,NP
                 RSX = RSNX1(I)
                 RSY = RSNY1(I)
@@ -132,54 +131,54 @@ C             into RSNX1/RSNY1, and then load the future forces into RSNX2/RSNY2
             WSX2(I) = WSX2(I) + RSX
             WSY2(I) = WSY2(I) + RSY
 #ifdef SWAN
-Casey 090302: Added these lines for output to the rads.64 file.
+!asey 090302: Added these lines for output to the rads.64 file.
             RSNXOUT(I) = RSX
             RSNYOUT(I) = RSY
 #endif
          ENDDO
       ENDIF
  
-C.......Compute tidal potential terms
+!.......Compute tidal potential terms
 
          IF (NTIP.NE.0) CALL TIDAL_POTENTIAL()
 
-C.......Compute LDG auxiliary equations
+!.......Compute LDG auxiliary equations
          
          IF (EVMSUM.NE.0.D0.or.artdif.eq.1) CALL LDG_HYDRO(IT)
          
-C.......Compute elevation specified edges
+!.......Compute elevation specified edges
 
          IF (NEEDS.GT.0)  CALL OCEAN_EDGE_HYDRO(IT)
 
-C.......Compute no-normal flow edges
+!.......Compute no-normal flow edges
 
          IF (NLEDS.GT.0)  CALL LAND_EDGE_HYDRO(IT)
 
-C.......Compute non-zero flow edges
+!.......Compute non-zero flow edges
 
          IF (NFEDS.GT.0)  CALL FLOW_EDGE_HYDRO(IT)
          
-C.......Compute radiation edges
+!.......Compute radiation edges
 
          IF (NREDS.GT.0)  CALL RADIATION_EDGE_HYDRO(IT)
 
-C.......Compute internal barrier edges
+!.......Compute internal barrier edges
 
          IF (NIBEDS.GT.0) CALL IBARRIER_EDGE_HYDRO(IT)
          
-C.......Compute external barrier edges
+!.......Compute external barrier edges
 
          IF (NIBEDS.GT.0) CALL EBARRIER_EDGE_HYDRO(IT)
          
-C.......Compute internal edges
+!.......Compute internal edges
 
          CALL INTERNAL_EDGE_HYDRO(IT)
 
-C.......Compute elements to finish building the rhs
+!.......Compute elements to finish building the rhs
          
          CALL RHS_DG_HYDRO()
 
-C.......SSP Runge-Kutta Time Scheme
+!.......SSP Runge-Kutta Time Scheme
 
          DO I = 1,IRK
             ARK = ATVD(IRK,I)
@@ -209,14 +208,14 @@ C.......SSP Runge-Kutta Time Scheme
      &                 + BRK*RHS_QY(K,J,I)
 
 
-C.......Compute the transported tracer term if flagged
+!.......Compute the transported tracer term if flagged
 
 #ifdef TRACE
                   iota(K,J,IRK+1) = iota(K,J,irk+1) + ARK*iota(K,J,I)
      &                 + BRK*RHS_iota(K,J,I)
 #endif
 
-C......Compute chemistry transported terms if flagged
+!......Compute chemistry transported terms if flagged
 
 #ifdef CHEM
                   iota(K,J,IRK+1) = iota(K,J,irk+1) + ARK*iota(K,J,I)
@@ -225,7 +224,7 @@ C......Compute chemistry transported terms if flagged
      &                 + BRK*RHS_iota2(K,J,I)
 #endif
 
-C.......Compute the dynamic pressure if flagged
+!.......Compute the dynamic pressure if flagged
 
 #ifdef DYNP
                   dynP(K,J,IRK+1) = dynP(K,J,irk+1) + ARK*dynP(K,J,I)
@@ -262,51 +261,51 @@ C.......Compute the dynamic pressure if flagged
          ENDIF
          RAMP = RAMPDG
          
-C.......Obtain the meteorological forcing
+!.......Obtain the meteorological forcing
 
          IF (NWS.NE.0) CALL MET_FORCING(IT)
          
-C.......Compute tidal potential terms
+!.......Compute tidal potential terms
 
          IF (NTIP.NE.0) CALL TIDAL_POTENTIAL()
 
-C.......Compute LDG auxiliary equations
+!.......Compute LDG auxiliary equations
          
          IF (EVMSUM.NE.0.D0.or.artdif.eq.1) CALL LDG_HYDRO(IT)
          
-C.......Compute elevation specified edges
+!.......Compute elevation specified edges
 
          IF (NEEDS.GT.0)  CALL OCEAN_EDGE_HYDRO(IT)
 
-C.......Compute no-normal flow edges
+!.......Compute no-normal flow edges
 
          IF (NLEDS.GT.0)  CALL LAND_EDGE_HYDRO(IT)
 
-C.......Compute non-zero flow edges
+!.......Compute non-zero flow edges
 
          IF (NFEDS.GT.0)  CALL FLOW_EDGE_HYDRO(IT)
          
-C.......Compute radiation edges
+!.......Compute radiation edges
 
          IF (NREDS.GT.0)  CALL RADIATION_EDGE_HYDRO(IT)
 
-C.......Compute internal barrier edges
+!.......Compute internal barrier edges
 
          IF (NIBEDS.GT.0) CALL IBARRIER_EDGE_HYDRO(IT)
          
-C.......Compute external barrier edges
+!.......Compute external barrier edges
 
          IF (NIBEDS.GT.0) CALL EBARRIER_EDGE_HYDRO(IT)
          
-C.......Compute internal edges
+!.......Compute internal edges
 
          CALL INTERNAL_EDGE_HYDRO(IT)
 
-C.......Compute elements to finish building the rhs
+!.......Compute elements to finish building the rhs
          
          CALL RHS_DG_HYDRO()
 
-C.......RKC Time Scheme
+!.......RKC Time Scheme
 
          if (irk.eq.1) then
 
@@ -334,14 +333,14 @@ C.......RKC Time Scheme
                   QY(K,J,IRK+1) = QY(K,J,irk+1)  + QY(K,J,1)
      &                 + BRK*RHS_QY(K,J,1)
                   
-C.......Compute the transported tracer term if flagged
+!.......Compute the transported tracer term if flagged
                   
 #ifdef TRACE
                   iota(K,J,IRK+1) = iota(K,J,irk+1) + iota(K,J,1)
      &                 + BRK*RHS_iota(K,J,1)
 #endif
                   
-C......Compute chemistry transported terms if flagged
+!......Compute chemistry transported terms if flagged
                   
 #ifdef CHEM
                   iota(K,J,IRK+1) = iota(K,J,irk+1) + iota(K,J,1)
@@ -350,7 +349,7 @@ C......Compute chemistry transported terms if flagged
      &                 + BRK*RHS_iota2(K,J,1)
 #endif
 
-C.......Compute the dynamic pressure if flagged
+!.......Compute the dynamic pressure if flagged
                   
 #ifdef DYNP
                   dynP(K,J,IRK+1) = dynP(K,J,irk+1) + dynP(K,J,1)
@@ -392,7 +391,7 @@ C.......Compute the dynamic pressure if flagged
      &                 + DRK*QY(K,J,irk-1) + BRK*RHS_QY(K,J,irk) + ERK*RHS_QY(K,J,1)
 
 
-C.......Compute the transported tracer term if flagged
+!.......Compute the transported tracer term if flagged
 
 #ifdef TRACE
                   iota(K,J,IRK+1) = iota(K,J,irk+1) + ARK*iota(K,J,1) + CRK*iota(K,J,irk)
@@ -400,7 +399,7 @@ C.......Compute the transported tracer term if flagged
 
 #endif
 
-C......Compute chemistry transported terms if flagged
+!......Compute chemistry transported terms if flagged
 
 #ifdef CHEM
                   iota(K,J,IRK+1) =  iota(K,J,irk+1) + ARK*iota(K,J,1) + CRK*iota(K,J,irk)
@@ -410,7 +409,7 @@ C......Compute chemistry transported terms if flagged
 
 #endif
 
-C.......Compute the dynamic pressure if flagged
+!.......Compute the dynamic pressure if flagged
 
 #ifdef DYNP
                   dynP(K,J,IRK+1) = dynP(K,J,irk+1) + ARK*dynP(K,J,1) + CRK*dynP(K,J,irk)
@@ -448,7 +447,7 @@ C.......Compute the dynamic pressure if flagged
 
 #endif
 
-C.......Apply the slopelimiter if appropriate
+!.......Apply the slopelimiter if appropriate
 
 #ifdef SLOPEALL
          CALL SLOPELIMITER()
@@ -466,26 +465,26 @@ C.......Apply the slopelimiter if appropriate
 #endif
 
 
-C.......Apply the wet-dry algorithm if appropriate
+!.......Apply the wet-dry algorithm if appropriate
 
       IF (NOLIFA .GE. 2) THEN
          CALL WETDRY()
       ENDIF
 
-c$$$C.......Apply the slopelimiter again if auxiliary variable is being used
-c$$$
-c$$$         if (EVMSUM.NE.0.D0.or.artdif.eq.1) then
-c$$$#ifdef SLOPEALL
-c$$$            CALL SLOPELIMITER()
-c$$$#endif
-c$$$            
-c$$$#ifdef SLOPE5
-c$$$            CALL SLOPELIMITER() 
-c$$$#endif
-c$$$         endif
+!$$$C.......Apply the slopelimiter again if auxiliary variable is being used
+!$$$
+!$$$         if (EVMSUM.NE.0.D0.or.artdif.eq.1) then
+!$$$#ifdef SLOPEALL
+!$$$            CALL SLOPELIMITER()
+!$$$#endif
+!$$$            
+!$$$#ifdef SLOPE5
+!$$$            CALL SLOPELIMITER() 
+!$$$#endif
+!$$$         endif
 
-C.......For parallel run update for dofs if slope limiter and/or wetting and
-C.......drying is being used
+!.......For parallel run update for dofs if slope limiter and/or wetting and
+!.......drying is being used
 
 #ifdef CMPI
          if (SLOPEFLAG.NE.0.OR.NOLIFA.GE.2) THEN
@@ -513,7 +512,7 @@ C.......drying is being used
          endif
 #endif
 
-C.......p_enrich soln and update
+!.......p_enrich soln and update
 
 #ifdef P_AD
          if (irk+1.eq.2) then
@@ -548,7 +547,7 @@ C.......p_enrich soln and update
 
  100  CONTINUE
 
-C.....Update variables for next time step
+!.....Update variables for next time step
 
 #ifdef FILTER 
       !Stabilization filtering 
@@ -577,7 +576,7 @@ C.....Update variables for next time step
             seta = eta**s
             sigma = exp(-alph*seta)
 
-C.......Filter the layers if flagged
+!.......Filter the layers if flagged
 
 #ifdef SED_LAY
             do l = 1,layers
@@ -592,14 +591,14 @@ C.......Filter the layers if flagged
             QY(K,J,NRK+1) = sigma*QY(K,J,nrk+1)
 
 
-C.......Filter the transported tracer term if flagged
+!.......Filter the transported tracer term if flagged
 
 #ifdef TRACE
             iota(K,J,NRK+1) = sigma*iota(K,J,nrk+1)
 
 #endif
 
-C......Filter chemistry transported terms if flagged
+!......Filter chemistry transported terms if flagged
 
 #ifdef CHEM
             iota(K,J,NRK+1) =  sigma*iota(K,J,nrk+1) 

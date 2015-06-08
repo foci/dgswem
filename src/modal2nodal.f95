@@ -3,35 +3,35 @@
 Casey 110422: Create new data structure with discontinuous information for SWAN.
       USE Couple2Adcirc, ONLY: PASS2SWAN
 #endif
-      USE DG,     ONLY: DOF,
-     &                  HB,
-     &                  ph,
-     &                  PHI_CORNER,
-     &                  QX,
-     &                  QY,
-     &                  WDFLG,
-     &                  ZE
-      USE GLOBAL, ONLY: AREA_SUM,
-     &                  AREAS,
-     &                  CEN_SUM,
-     &                  DP,
-     &                  EL_COUNT,
-     &                  ELETAB,
-     &                  ETA2,
-     &                  HB_DG,
-     &                  LEQ,
-     &                  MNP,
-     &                  N1,
-     &                  NBOR_EL,
-     &                  NLEQ,
-     &                  NO_NBORS,
-     &                  NM,
-     &                  QX_DG,
-     &                  QY_DG,
-     &                  SEDFLAG,
-     &                  UU2,
-     &                  VV2,
-     &                  ZE_DG
+      USE DG,     ONLY: DOF,&
+                  HB,&
+                  ph,&
+                  PHI_CORNER,&
+                  QX,&
+                  QY,&
+                  WDFLG,&
+                  ZE
+      USE GLOBAL, ONLY: AREA_SUM,&
+                  AREAS,&
+                  CEN_SUM,&
+                  DP,&
+                  EL_COUNT,&
+                  ELETAB,&
+                  ETA2,&
+                  HB_DG,&
+                  LEQ,&
+                  MNP,&
+                  N1,&
+                  NBOR_EL,&
+                  NLEQ,&
+                  NO_NBORS,&
+                  NM,&
+                  QX_DG,&
+                  QY_DG,&
+                  SEDFLAG,&
+                  UU2,&
+                  VV2,&
+                  ZE_DG
       USE SIZES,  ONLY: SZ
       IMPLICIT NONE
       INTEGER  :: I
@@ -123,9 +123,9 @@ Casey 110111: Create new data structure with discontinuous information for SWAN.
           PASS2SWAN(I)%ETA2(J) = REAL( ZE_DG(J) )
           PASS2SWAN(I)%UU2(J)  = REAL( QX_DG(J)*FH_NL )
           PASS2SWAN(I)%VV2(J)  = REAL( QY_DG(J)*FH_NL )
-          PASS2SWAN(I)%VELMAG(J)  = REAL( SQRT( PASS2SWAN(I)%UU2(J) *
-     &             PASS2SWAN(I)%UU2(J) + PASS2SWAN(I)%VV2(J) *
-     &             PASS2SWAN(I)%VV2(J) ) )
+          PASS2SWAN(I)%VELMAG(J)  = REAL( SQRT( PASS2SWAN(I)%UU2(J) *&
+             PASS2SWAN(I)%UU2(J) + PASS2SWAN(I)%VV2(J) *&
+             PASS2SWAN(I)%VV2(J) ) )
 #endif
         ENDDO
       ENDDO

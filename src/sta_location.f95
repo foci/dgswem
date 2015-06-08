@@ -1,13 +1,13 @@
-C***********************************************************************
-C
-C     SUBROUTINE STA_LOCATION()
-C
-C     This subroutine locates which element a station is located within
-C     and computes the basis functions at that location.
-C
-C     Written by Ethan Kubatko (02-22-2007)
-C
-C***********************************************************************
+!***********************************************************************
+!
+!     SUBROUTINE STA_LOCATION()
+!
+!     This subroutine locates which element a station is located within
+!     and computes the basis functions at that location.
+!
+!     Written by Ethan Kubatko (02-22-2007)
+!
+!***********************************************************************
 
       SUBROUTINE STA_LOCATION( XSTA, YSTA, PHI_STA, ELSTA )
       
@@ -23,7 +23,7 @@ C***********************************************************************
       REAL(SZ) XSTA, YSTA
       REAL(SZ) Z1, Z2, XP, YP, X1, X2, X3, Y1, Y2, Y3
       
-C.....Determine the boundary of the rectangle which enclose the element
+!.....Determine the boundary of the rectangle which enclose the element
 
       DO J = 1,NE
       
@@ -39,7 +39,7 @@ C.....Determine the boundary of the rectangle which enclose the element
         
       ENDDO
       
-C.....Loop over stations
+!.....Loop over stations
 
       XP = XSTA
       YP = YSTA
@@ -48,12 +48,12 @@ C.....Loop over stations
 
       DO 200 J = 1,NE
 
-C.....Deterime if the points falls within the bounding box of element
+!.....Deterime if the points falls within the bounding box of element
 
         IF ( (XP.LE.XR(J)).AND.(XP.GE.XL(J)).AND.
      &       (YP.LE.YT(J)).AND.(YP.GE.YB(J)) ) THEN
 
-C.....Retrieve the vertices of the element
+!.....Retrieve the vertices of the element
 
           X1 = X(NM(J,1))
           X2 = X(NM(J,2))
@@ -63,7 +63,7 @@ C.....Retrieve the vertices of the element
           Y2 = Y(NM(J,2))
           Y3 = Y(NM(J,3))
 
-C.....Transform to local Z element coordinates
+!.....Transform to local Z element coordinates
 
           Z1 = -1.D0/(AREAS(J))*( XP*(2.D0*Y1 - 2.D0*Y3) +
      &                            YP*(2.D0*X3 - 2.D0*X1) +
@@ -73,16 +73,16 @@ C.....Transform to local Z element coordinates
      &                            YP*(2.D0*X2 - 2.D0*X1) +
      &                   X1*Y2 + X1*Y3 - X2*Y1 - X2*Y3 - X3*Y1 + X3*Y2 )
 
-C.....Determine if the node falls within the given element
+!.....Determine if the node falls within the given element
 
           IF ( (Z1.GE.(-1)).AND.(Z2.GE.(-1)).AND.
      &        ((Z1 + Z2).LE.0) ) THEN
      
-C.............Store the element in the appropriate array
+!.............Store the element in the appropriate array
 
             ELSTA = J
               
-C.............Compute the basis functions at that point and store
+!.............Compute the basis functions at that point and store
               
             CALL ORTHOBASIS( Z1, Z2, pdg_el(j), DOF, PHI_STA, DPHIDZ1, DPHIDZ2 )
             GOTO 100
@@ -94,12 +94,12 @@ C.............Compute the basis functions at that point and store
       RETURN
       END SUBROUTINE STA_LOCATION
       
-C***********************************************************************
-C
-C     Subroutine to compute the values of the orthogonal basis at the
-C     given point
-C
-C***********************************************************************
+!***********************************************************************
+!
+!     Subroutine to compute the values of the orthogonal basis at the
+!     given point
+!
+!***********************************************************************
 
       SUBROUTINE ORTHOBASIS( X, Y, P, DOF, PHI, DPHIDZ1, DPHIDZ2 )
 
@@ -113,7 +113,7 @@ C***********************************************************************
       REAL(8) X, Y, Z
       REAL(8) NUM1, DEN, DEN1, COEFF1, COEFF2, POLY1, POLY2
 
-C.....Check to see if the point is one of the vertices of the element
+!.....Check to see if the point is one of the vertices of the element
 
       IF ( (X.EQ.-1).AND.(Y.EQ.-1) ) THEN
         DO I = 0,P
@@ -146,8 +146,8 @@ C.....Check to see if the point is one of the vertices of the element
         GOTO 111
       ENDIF
 
-C.....If not construct and evaluate the necessary Jacobi polynomials at
-C.....the given point
+!.....If not construct and evaluate the necessary Jacobi polynomials at
+!.....the given point
 
       DO A = 0,2*P+2
         DO B = 0,1
@@ -189,8 +189,8 @@ C.....the given point
         ENDDO
       ENDDO
 
-C.....Construct and evaluate the orthogonal basis and its derivatives at
-C.....the given point
+!.....Construct and evaluate the orthogonal basis and its derivatives at
+!.....the given point
 
       DO I = 0,P
         DO J = 0,P-I
@@ -224,7 +224,7 @@ C.....the given point
         ENDDO
       ENDDO
 
-C.....Re-order the basis functions into hierarchical order
+!.....Re-order the basis functions into hierarchical order
 
 111   K = 1
       DO J = 0,P

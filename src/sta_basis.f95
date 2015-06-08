@@ -1,12 +1,12 @@
-C***********************************************************************
-C
-C     SUBROUTINE STA_BASIS()
-C
-C     This subroutine computes the basis functions at a given station
-C
-C     Written by Ethan Kubatko
-C
-C***********************************************************************
+!***********************************************************************
+!
+!     SUBROUTINE STA_BASIS()
+!
+!     This subroutine computes the basis functions at a given station
+!
+!     Written by Ethan Kubatko
+!
+!***********************************************************************
 
       SUBROUTINE STA_BASIS( XSTA, YSTA, ELSTA, PHI_STA )
 
@@ -21,7 +21,7 @@ C***********************************************************************
       REAL(SZ) XSTA, YSTA, AREA
       REAL(SZ) Z1, Z2
 
-C.....Retrieve element coordinates and area
+!.....Retrieve element coordinates and area
 
       X1 = X(NM(ELSTA,1))
       X2 = X(NM(ELSTA,2))
@@ -33,17 +33,17 @@ C.....Retrieve element coordinates and area
 
       AREA = 0.5D0*AREAS(ELSTA)
       
-C.....Transform to local Z element coordinates
+!.....Transform to local Z element coordinates
 
-      Z1 = -1.D0/(2.D0*AREA)*( XSTA*(2.D0*Y1 - 2.D0*Y3) +
-     &                         YSTA*(2.D0*X3 - 2.D0*X1) +
-     &                   X1*Y2 + X1*Y3 - X2*Y1 + X2*Y3 - X3*Y1 - X3*Y2 )
+      Z1 = -1.D0/(2.D0*AREA)*( XSTA*(2.D0*Y1 - 2.D0*Y3) +&
+                         YSTA*(2.D0*X3 - 2.D0*X1) +&
+                   X1*Y2 + X1*Y3 - X2*Y1 + X2*Y3 - X3*Y1 - X3*Y2 )
 
-      Z2 =  1.D0/(2.D0*AREA)*( XSTA*(2.D0*Y1 - 2.D0*Y2) +
-     &                         YSTA*(2.D0*X2 - 2.D0*X1) +
-     &                   X1*Y2 + X1*Y3 - X2*Y1 - X2*Y3 - X3*Y1 + X3*Y2 )
+      Z2 =  1.D0/(2.D0*AREA)*( XSTA*(2.D0*Y1 - 2.D0*Y2) +&
+                         YSTA*(2.D0*X2 - 2.D0*X1) +&
+                   X1*Y2 + X1*Y3 - X2*Y1 - X2*Y3 - X3*Y1 + X3*Y2 )
 
-C.....Compute the basis functions at that point and store
+!.....Compute the basis functions at that point and store
 
       CALL ORTHOBASIS( Z1, Z2, PDG_EL(ELSTA), DOF, PHI, DPHIDZ1, DPHIDZ2 )
       PHI_STA(:) = PHI
@@ -51,14 +51,14 @@ C.....Compute the basis functions at that point and store
       RETURN
       END SUBROUTINE STA_BASIS
       
-C***********************************************************************
-C
-C     Subroutine to compute the values of the orthogonal basis at the
-C     given point
-C
-C     Written by Ethan Kubatko
-C
-C***********************************************************************
+!***********************************************************************
+!
+!     Subroutine to compute the values of the orthogonal basis at the
+!     given point
+!
+!     Written by Ethan Kubatko
+!
+!***********************************************************************
 
       SUBROUTINE ORTHOBASIS( X, Y, P, DOF, PHI, DPHIDZ1, DPHIDZ2 )
 
@@ -72,7 +72,7 @@ C***********************************************************************
       REAL(8) X, Y, Z
       REAL(8) NUM1, DEN, DEN1, COEFF1, COEFF2, POLY1, POLY2
 
-C.....Check to see if the point is one of the vertices of the element
+!.....Check to see if the point is one of the vertices of the element
 
       IF ( (X.EQ.-1).AND.(Y.EQ.-1) ) THEN
         DO I = 0,P
@@ -105,8 +105,8 @@ C.....Check to see if the point is one of the vertices of the element
         GOTO 111
       ENDIF
 
-C.....If not construct and evaluate the necessary Jacobi polynomials at
-C.....the given point
+!.....If not construct and evaluate the necessary Jacobi polynomials at
+!.....the given point
 
       DO A = 0,2*P+2
         DO B = 0,1
@@ -148,19 +148,19 @@ C.....the given point
         ENDDO
       ENDDO
 
-C.....Construct and evaluate the orthogonal basis and its derivatives at
-C.....the given point
+!.....Construct and evaluate the orthogonal basis and its derivatives at
+!.....the given point
 
       DO I = 0,P
         DO J = 0,P-I
-          PHI2(I+1,J+1) = JACOBI(I+1,1,1)*((1.D0-Y)/2.D0)**I
-     &                                            *JACOBI(J+1,2*I+2,1)
+          PHI2(I+1,J+1) = JACOBI(I+1,1,1)*((1.D0-Y)/2.D0)**I&
+                                            *JACOBI(J+1,2*I+2,1)
 
           IF (I.EQ.0) THEN
             DPHIDZ12(I+1,J+1) = 0.D0
           ELSE
-            DPHIDZ12(I+1,J+1) = 2.D0/(1.D0-Y)*(I+1.D0)/2.D0*
-     &                JACOBI(I,2,2)*((1-Y)/2.D0)**I*JACOBI(J+1,2*I+2,1)
+            DPHIDZ12(I+1,J+1) = 2.D0/(1.D0-Y)*(I+1.D0)/2.D0*&
+                JACOBI(I,2,2)*((1-Y)/2.D0)**I*JACOBI(J+1,2*I+2,1)
           ENDIF
 
           IF ((I.EQ.0).AND.(J.EQ.0)) THEN
@@ -168,22 +168,22 @@ C.....the given point
           ELSEIF ((I.EQ.0).AND.(J.GE.1)) THEN
             DPHIDZ22(I+1,J+1) = (J+2)/2.D0*JACOBI(J,3,2)
           ELSEIF ((J.EQ.0).AND.(I.GE.1)) THEN
-            DPHIDZ22(I+1,J+1) = 2.D0*(1.D0+X)/(1.D0-Y)**2*(I+1)/2.D0*
-     &                   JACOBI(I,2,2)*((1.D0-Y)/2.D0)**I*
-     &                   JACOBI(J+1,2*I+2,1) + JACOBI(I+1,1,1)*(-I/2.D0*
-     &                   ((1.D0-Y)/2.D0)**(I-1))*JACOBI(J+1,2*I+2,1)
+            DPHIDZ22(I+1,J+1) = 2.D0*(1.D0+X)/(1.D0-Y)**2*(I+1)/2.D0*&
+                   JACOBI(I,2,2)*((1.D0-Y)/2.D0)**I*&
+                   JACOBI(J+1,2*I+2,1) + JACOBI(I+1,1,1)*(-I/2.D0*&
+                   ((1.D0-Y)/2.D0)**(I-1))*JACOBI(J+1,2*I+2,1)
           ELSE
-            DPHIDZ22(I+1,J+1) = 2.D0*(1.D0+X)/(1.D0-Y)**2*(I+1)/2.D0*
-     &                   JACOBI(I,2,2)*((1.D0-Y)/2.D0)**I*
-     &                   JACOBI(J+1,2*I+2,1) + JACOBI(I+1,1,1)*(-I/2.D0*
-     &                   ((1.D0-Y)/2.D0)**(I-1))*JACOBI(J+1,2*I+2,1) +
-     &                   JACOBI(I+1,1,1)*((1.D0-Y)/2.D0)**I*
-     &                   (J+2*I+2)/2.D0*JACOBI(J,2*I+3,2)
+            DPHIDZ22(I+1,J+1) = 2.D0*(1.D0+X)/(1.D0-Y)**2*(I+1)/2.D0*&
+                   JACOBI(I,2,2)*((1.D0-Y)/2.D0)**I*&
+                   JACOBI(J+1,2*I+2,1) + JACOBI(I+1,1,1)*(-I/2.D0*&
+                   ((1.D0-Y)/2.D0)**(I-1))*JACOBI(J+1,2*I+2,1) +&
+                   JACOBI(I+1,1,1)*((1.D0-Y)/2.D0)**I*&
+                   (J+2*I+2)/2.D0*JACOBI(J,2*I+3,2)
           ENDIF
         ENDDO
       ENDDO
 
-C.....Re-order the basis functions into hierarchical order
+!.....Re-order the basis functions into hierarchical order
 
 111   K = 1
       DO J = 0,P

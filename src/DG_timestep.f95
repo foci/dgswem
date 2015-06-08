@@ -1,16 +1,16 @@
-C***********************************************************************
-C     
-C     SUBROUTINE DG_TIMESTEP(IT)
-C     
-C     This is the main subroutine for the DG hydro
-C     
-C     Written by Shintaro Bunya (01-01-2007)
-C     
-C***********************************************************************
+!***********************************************************************
+!     
+!     SUBROUTINE DG_TIMESTEP(IT)
+!     
+!     This is the main subroutine for the DG hydro
+!     
+!     Written by Shintaro Bunya (01-01-2007)
+!     
+!***********************************************************************
 
       SUBROUTINE DG_TIMESTEP(IT)
 
-C.....Use appropriate modules
+!.....Use appropriate modules
       
       USE SIZES, ONLY : SZ,layers
       USE GLOBAL, ONLY : SEDFLAG
@@ -21,15 +21,15 @@ C.....Use appropriate modules
 
       IMPLICIT NONE
 
-C.....Declare local variables
+!.....Declare local variables
 
       INTEGER IT
       
-C.....Hydrodynamics
+!.....Hydrodynamics
 
       CALL DG_HYDRO_TIMESTEP(IT)
 
-C.....Write out results
+!.....Write out results
 
 #ifdef CMPI
 #ifdef BLKOUT
@@ -49,20 +49,20 @@ C.....Write out results
       END SUBROUTINE
 
 
-C***********************************************************************
-C     
-C     SUBROUTINE SCRUTINIZE_SOLUTION(IT)
-C     
-C     Detect a negative water depth and a NaN in solution arrays and 
-C     terminate if either of them is found.
-C     
-C     Written by Shintaro Bunya (01-01-2007)
-C     
-C***********************************************************************
+!***********************************************************************
+!     
+!     SUBROUTINE SCRUTINIZE_SOLUTION(IT)
+!     
+!     Detect a negative water depth and a NaN in solution arrays and 
+!     terminate if either of them is found.
+!     
+!     Written by Shintaro Bunya (01-01-2007)
+!     
+!***********************************************************************
 
       SUBROUTINE SCRUTINIZE_SOLUTION(IT)
 
-C.....Use appropriate modules
+!.....Use appropriate modules
       
 #ifdef CMPI
       USE SIZES, ONLY : SZ,MYPROC,layers
@@ -75,7 +75,7 @@ C.....Use appropriate modules
 
       IMPLICIT NONE
       
-C.....Declare local variables
+!.....Declare local variables
 
       INTEGER IT,J,K,l
       LOGICAL Detected
@@ -83,7 +83,7 @@ C.....Declare local variables
 
       INTEGER ErrorElevExceeded
 
-C.....Detect negative mass
+!.....Detect negative mass
       ErrorElevExceeded=0
       DO J = 1,NE
          DPAVG =  1.D0/ncheck(pdg_el(j)) * (sum(DP_NODE(:,J,pdg_el(j)))) !(DP(NM(J,1))+DP(NM(J,2))+DP(NM(J,3)))/3.D0
@@ -97,8 +97,7 @@ C.....Detect negative mass
             PRINT *, '  HE(',1,',',J,',1) = ',ZE(1,J,1)+DPAVG
             PRINT *, '  DP = ',DP(NM(J,1)),DP(NM(J,2)),DP(NM(J,3))
             PRINT *, '  DPAVG = ',DPAVG
-            PRINT *, ' x,  y ',SLAM(NM(J,1))/DEG2RAD,
-     $           SFEA(NM(J,1))/DEG2RAD
+            PRINT *, ' x,  y ',SLAM(NM(J,1))/DEG2RAD,SFEA(NM(J,1))/DEG2RAD
             Detected = .TRUE.
             ErrorElevExceeded=1    
          ENDIF
@@ -116,34 +115,34 @@ C.....Detect negative mass
          STOP
       endif
 #else
-c$$$      IF(ErrorElevExceeded.NE.0) THEN
-c$$$         PRINT *, ''
-c$$$         PRINT *,'  PROGRAM WILL BE TERMINATED in DG_timestep'
-c$$$         PRINT *, ''
-c$$$         stop
-c$$$      ENDIF
+!$$$      IF(ErrorElevExceeded.NE.0) THEN
+!$$$         PRINT *, ''
+!$$$         PRINT *,'  PROGRAM WILL BE TERMINATED in DG_timestep'
+!$$$         PRINT *, ''
+!$$$         stop
+!$$$      ENDIF
 #endif
 
 
-c$$$
-c$$$         IF(Detected) THEN
-c$$$            PRINT *, ''
-c$$$            PRINT *,'  WRITING OUT THE LAST-MOMENT RESULTS...'
-c$$$            PRINT *, ''
-c$$$            CALL WRITE_RESULTS(IT,.TRUE.)
-c$$$            PRINT *, ''
-c$$$            PRINT *,'  PROGRAM WILL BE TERMINATED.'
-c$$$            PRINT *, ''
-c$$$#ifdef CMPI
-c$$$            call message_fini ()
-c$$$            STOP
-c$$$#else
-c$$$            stop
-c$$$#endif
-c$$$         ENDIF
-c$$$      ENDDO
+!$$$
+!$$$         IF(Detected) THEN
+!$$$            PRINT *, ''
+!$$$            PRINT *,'  WRITING OUT THE LAST-MOMENT RESULTS...'
+!$$$            PRINT *, ''
+!$$$            CALL WRITE_RESULTS(IT,.TRUE.)
+!$$$            PRINT *, ''
+!$$$            PRINT *,'  PROGRAM WILL BE TERMINATED.'
+!$$$            PRINT *, ''
+!$$$#ifdef CMPI
+!$$$            call message_fini ()
+!$$$            STOP
+!$$$#else
+!$$$            stop
+!$$$#endif
+!$$$         ENDIF
+!$$$      ENDDO
 
-C.....Detect NaN
+!.....Detect NaN
       
       DO J = 1,NE
          DO K = 1,DOF
@@ -155,8 +154,7 @@ C.....Detect NaN
                PRINT *, 'IN SUBDOMAIN ',MYPROC
 #endif
                PRINT *, '  ZE(',K,',',J,',1) IS ',ZE(K,J,1)
-               PRINT *, ' x,  y ',SLAM(NM(J,1))/DEG2RAD,
-     $              SFEA(NM(J,1))/DEG2RAD
+               PRINT *, ' x,  y ',SLAM(NM(J,1))/DEG2RAD,SFEA(NM(J,1))/DEG2RAD
                Detected = .TRUE.
                ErrorElevExceeded = 1
             ENDIF
@@ -166,8 +164,7 @@ C.....Detect NaN
 #endif
                PRINT *, ''
                PRINT *, '  QX(',K,',',J,',1) IS ',QX(K,J,1)
-               PRINT *, ' x,  y ',SLAM(NM(J,1))/DEG2RAD,
-     $              SFEA(NM(J,1))/DEG2RAD
+               PRINT *, ' x,  y ',SLAM(NM(J,1))/DEG2RAD,SFEA(NM(J,1))/DEG2RAD
                Detected = .TRUE.
                ErrorElevExceeded = 1
             ENDIF
@@ -177,8 +174,7 @@ C.....Detect NaN
 #endif
                PRINT *, ''
                PRINT *, '  QY(',K,',',J,',1) IS ',QY(K,J,1)
-               PRINT *, ' x,  y ',SLAM(NM(J,1))/DEG2RAD,
-     $              SFEA(NM(J,1))/DEG2RAD
+               PRINT *, ' x,  y ',SLAM(NM(J,1))/DEG2RAD,SFEA(NM(J,1))/DEG2RAD
                Detected = .TRUE.
                ErrorElevExceeded = 1
             ENDIF
@@ -249,35 +245,35 @@ C.....Detect NaN
             enddo
 #endif
 
-c$$$            IF(Detected) THEN
-c$$$               PRINT *, ''
-c$$$               PRINT *,'  WRITING OUT THE LAST-MOMENT RESULTS...'
-c$$$               PRINT *, ''
-c$$$               CALL WRITE_RESULTS(IT,.TRUE.)
-c$$$               PRINT *, ''
-c$$$               PRINT *,'  PROGRAM WILL BE TERMINATED.'
-c$$$               PRINT *, ''
-c$$$#ifdef CMPI
-c$$$               call message_fini()
-c$$$               STOP
-c$$$#else
-c$$$               stop
-c$$$#endif
-c$$$            ENDIF
+!$$$            IF(Detected) THEN
+!$$$               PRINT *, ''
+!$$$               PRINT *,'  WRITING OUT THE LAST-MOMENT RESULTS...'
+!$$$               PRINT *, ''
+!$$$               CALL WRITE_RESULTS(IT,.TRUE.)
+!$$$               PRINT *, ''
+!$$$               PRINT *,'  PROGRAM WILL BE TERMINATED.'
+!$$$               PRINT *, ''
+!$$$#ifdef CMPI
+!$$$               call message_fini()
+!$$$               STOP
+!$$$#else
+!$$$               stop
+!$$$#endif
+!$$$            ENDIF
          ENDDO
       ENDDO
 #ifdef CMPI
       CALL ErrorElevSum(ErrorElevExceeded)
-c      write(*,*) myproc,ErrorElevExceeded
+!      write(*,*) myproc,ErrorElevExceeded
       IF (ErrorElevExceeded.NE.0) THEN
          CALL MESSAGE_FINI()
          stop
       ENDIF
 #else
 !      write(*,*)ErrorElevExceeded
-c$$$      IF (ErrorElevExceeded.NE.0) THEN
-c$$$         STOP
-c$$$      ENDIF
+!$$$      IF (ErrorElevExceeded.NE.0) THEN
+!$$$         STOP
+!$$$      ENDIF
 #endif
 
       RETURN

@@ -1,19 +1,19 @@
-C***********************************************************************
-C     
-C     SUBROUTINE:  WRITE_RESULTS
-C     
-C     Taken from the timestep subroutine.  Modified to include
-C     interpolation of DG modal degrees of freedom to the nodes.  These
-C     multiple nodal values are then averaged to a single value.
-C     
-C     Aug ??, 2005, sb, Modifications for parallel runs
-C     Jan 01, 2007, sb, Files are forced to be written if FORCE_WRITE = .TRUE.
-C     
-C***********************************************************************
+!***********************************************************************
+!     
+!     SUBROUTINE:  WRITE_RESULTS
+!     
+!     Taken from the timestep subroutine.  Modified to include
+!     interpolation of DG modal degrees of freedom to the nodes.  These
+!     multiple nodal values are then averaged to a single value.
+!     
+!     Aug ??, 2005, sb, Modifications for parallel runs
+!     Jan 01, 2007, sb, Files are forced to be written if FORCE_WRITE = .TRUE.
+!     
+!***********************************************************************
 
       SUBROUTINE WRITE_RESULTS(IT,FORCE_WRITE)
 
-C.....Use appropriate modules
+!.....Use appropriate modules
 
       USE GLOBAL
       USE DG
@@ -24,7 +24,7 @@ C.....Use appropriate modules
       USE MESSENGER_ELEM 
 #endif
       
-C.....Declare local variables
+!.....Declare local variables
 
       INTEGER IT,I,K,Maxp(0:8),Minp(0:8)
       REAL(SZ) AREA, DEPTH, ANGLE_SUM, FH_NL, DP1, DP2, DP3, DP00, ZE00
@@ -38,8 +38,8 @@ C.....Declare local variables
       Allocate ( XBCbt(MNE),YBCbt(MNE),radial(MNE) )
       Allocate ( temper(mne) )
       
-C.....Transform from modal coordinates to nodal coordinates and average
-C.....to single nodal values 
+!.....Transform from modal coordinates to nodal coordinates and average
+!.....to single nodal values 
 
       ModetoNode = 0
 
@@ -209,10 +209,10 @@ C.....to single nodal values
                   do l=1,layers
 
                      bed_int(J,l) = bed_int(J,l) + WAGP(I,pa) 
-     &                    *PHI_AREA(K,I,pa)*bed(K,J,1,l)*0.5D0*AREAS(j)
+&                    *PHI_AREA(K,I,pa)*bed(K,J,1,l)*0.5D0*AREAS(j)
 
                      DPe(j)  = DPe(j) + WAGP(I,pa)*PHI_AREA(K,I,pa)*bed(K,J,1,l) 
-     &                    * 0.5D0 *AREAS(j)
+&                    * 0.5D0 *AREAS(j)
                      
                   enddo
 
@@ -279,11 +279,11 @@ C.....to single nodal values
          
       enddo
 
-C...  
-C...  OUTPUT ELEVATION RECORDING STATION INFORMATION IF NOUTE<>0 AND THE
-C.... TIME STEP FALLS WITHIN THE SPECIFIED WINDOW
-C...  CALCULATE ELEVATION SOLUTIONS AT STATIONS USING INTERPOLATION
-C...  
+!...  
+!...  OUTPUT ELEVATION RECORDING STATION INFORMATION IF NOUTE<>0 AND THE
+!.... TIME STEP FALLS WITHIN THE SPECIFIED WINDOW
+!...  CALCULATE ELEVATION SOLUTIONS AT STATIONS USING INTERPOLATION
+!...  
       
       IF(NOUTE.NE.0) THEN
          IF((IT.GT.NTCYSE).AND.(IT.LE.NTCYFE).OR.FORCE_WRITE) THEN
@@ -300,8 +300,8 @@ C...
                   NC2=NODECODE(NM(NNE(I),2))
                   NC3=NODECODE(NM(NNE(I),3))
                   NCELE=NC1*NC2*NC3
-c     IF(NCELE.EQ.1) ET00(I)=EE1*STAIE1(I)+EE2*STAIE2(I)
-c     &                                              +EE3*STAIE3(I)
+!     IF(NCELE.EQ.1) ET00(I)=EE1*STAIE1(I)+EE2*STAIE2(I)
+!     &                                              +EE3*STAIE3(I)
                   if (ncele.eq.1) then
                      ET00(I)=ee1
                   endif
@@ -346,11 +346,11 @@ c     &                                              +EE3*STAIE3(I)
          IF(IT.EQ.NTCYFE) CLOSE(82)
       ENDIF
 
-C...  
-C...  OUTPUT VELOCITY RECORDING STATION TIME SERIES INFORMATION IF NOUTV<>0
-C.... AND THE TIME STEP FALLS WITHIN THE SPECIFIED WINDOW
-C...  CALCULATE VELOCITY SOLUTIONS AT STATIONS USING INTERPOLATION
-C...  
+!...  
+!...  OUTPUT VELOCITY RECORDING STATION TIME SERIES INFORMATION IF NOUTV<>0
+!.... AND THE TIME STEP FALLS WITHIN THE SPECIFIED WINDOW
+!...  CALCULATE VELOCITY SOLUTIONS AT STATIONS USING INTERPOLATION
+!...  
       IF(NOUTV.NE.0) THEN
          IF((IT.GT.NTCYSV).AND.(IT.LE.NTCYFV).OR.FORCE_WRITE) THEN
             NSCOUV=NSCOUV+1
@@ -388,11 +388,11 @@ C...
          IF(IT.EQ.NTCYFV) CLOSE(62)
       ENDIF
 
-C...  
-C...  OUTPUT CONCENTRATION RECORDING STATION INFORMATION IF NOUTC<>0 AND THE
-C.... TIME STEP FALLS WITHIN THE SPECIFIED WINDOW
-C...  CALCULATE CONCENTRATION SOLUTIONS AT STATIONS USING INTERPOLATION
-C...  
+!...  
+!...  OUTPUT CONCENTRATION RECORDING STATION INFORMATION IF NOUTC<>0 AND THE
+!.... TIME STEP FALLS WITHIN THE SPECIFIED WINDOW
+!...  CALCULATE CONCENTRATION SOLUTIONS AT STATIONS USING INTERPOLATION
+!...  
 
       IF(NOUTC.NE.0) THEN
          IF((IT.GT.NTCYSC).AND.(IT.LE.NTCYFC).OR.FORCE_WRITE) THEN
@@ -414,8 +414,8 @@ C...
                   NC2=NODECODE(NM2)
                   NC3=NODECODE(NM3)
                   NCELE=NC1*NC2*NC3
-                  IF(NCELE.EQ.1) CC00(I)=C1*STAIC1(I)+C2*STAIC2(I)
-     &                 +C3*STAIC3(I)
+                  IF(NCELE.EQ.1) CC00(I)=C1*STAIC1(I)+C2*STAIC2(I)&
+                       +C3*STAIC3(I)
                   IF(NCELE.EQ.0) CC00(I)=-99999.
                END DO
                IF(ABS(NOUTC).EQ.1) THEN
@@ -440,11 +440,11 @@ C...
          IF(IT.EQ.NTCYFC) CLOSE(81)
       ENDIF
 
-C...  
-C...  OUTPUT METEOROLOGICAL RECORDING STATION INFORMATION IF NWS>0 AND THE
-C.... TIME STEP FALLS WITHIN THE SPECIFIED WINDOW
-C...  CALCULATE METEOROLOGICAL SOLUTIONS AT STATIONS USING INTERPOLATION
-C...  
+!...  
+!...  OUTPUT METEOROLOGICAL RECORDING STATION INFORMATION IF NWS>0 AND THE
+!.... TIME STEP FALLS WITHIN THE SPECIFIED WINDOW
+!...  CALCULATE METEOROLOGICAL SOLUTIONS AT STATIONS USING INTERPOLATION
+!...  
 
       IF((NWS.NE.0).AND.(NOUTM.NE.0)) THEN
          IF((IT.GT.NTCYSM).AND.(IT.LE.NTCYFM).OR.FORCE_WRITE) THEN
@@ -501,8 +501,8 @@ C...
          ENDIF
       ENDIF
 
-C.....Output the gloabl elevation data if NOUTGE ~= 0 and the
-C.....time step falls within the specified window
+!.....Output the gloabl elevation data if NOUTGE ~= 0 and the
+!.....time step falls within the specified window
 
       IF (NOUTGE.NE.0) THEN
          IF ((IT.GT.NTCYSGE).AND.(IT.LE.NTCYFGE).OR.FORCE_WRITE) THEN
@@ -600,7 +600,7 @@ C.....time step falls within the specified window
                  do i=1,np
                     if (ics.eq.2) then
                        write(777,7777) slam(i)/deg2rad, sfea(i)/deg2rad, 
-c                 write(777,7777) x(i), y(i), 
+!                 write(777,7777) x(i), y(i), 
      $                   dp(i), eta2(i), eta2(i)+dp(i),uu2(i),vv2(i),
      $           sqrt(uu2(i)**2+vv2(i)**2),sqrt(wsx2(i)**2+wsy2(i)**2),
      $                   myproc
@@ -623,7 +623,7 @@ c                 write(777,7777) x(i), y(i),
 
 #endif
 
-C.....Write DG.63 results
+!.....Write DG.63 results
                      
                      DO J = 1,NE
                         DO K = 1,DOFS(J)
@@ -631,7 +631,7 @@ C.....Write DG.63 results
                         ENDDO
                      ENDDO
                      
-C.....Write DG.65 results, elemental statuses (wet/dry)
+!.....Write DG.65 results, elemental statuses (wet/dry)
                      
                      IF (NOLIFA.GE.2) THEN
                         WRITE(651,2120) TIME_A, IT
@@ -671,10 +671,10 @@ C.....Write DG.65 results, elemental statuses (wet/dry)
          endif
       ENDIF
 
-C...  
-C...  OUTPUT GLOBAL VELOCITY DATA IF NOUTGV<>0 AND THE
-C.... TIME STEP FALLS WITHIN THE SPECIFIED WINDOW
-C...  
+!...  
+!...  OUTPUT GLOBAL VELOCITY DATA IF NOUTGV<>0 AND THE
+!.... TIME STEP FALLS WITHIN THE SPECIFIED WINDOW
+!...  
       IF (NOUTGV.NE.0) THEN
          IF ((IT.GT.NTCYSGV).AND.(IT.LE.NTCYFGV).OR.FORCE_WRITE) THEN
             NSCOUGV=NSCOUGV+1
@@ -683,14 +683,14 @@ C...
                   WRITE(64,2120) TIME_A,IT
                   WRITE(641,2120) TIME_A,IT
                   DO I = 1,NE
-C.....Had trouble writing out numbers with less than E-99 (EJK)
+!.....Had trouble writing out numbers with less than E-99 (EJK)
                      IF (ABS(UU2(I)).LE.(10.0**(-30))) UU2(I) = 0.D0
                      IF (ABS(VV2(I)).LE.(10.0**(-30))) VV2(I) = 0.D0
                      WRITE(64,2454) I,UU2(I),VV2(I)
  2454                FORMAT(2X,I8,2(2X,E16.8E3))
                   ENDDO
                   
-C.....Write DG.64 results
+!.....Write DG.64 results
 
                   DO J = 1,NE
                      DO K = 1,DOFS(J)
@@ -717,10 +717,10 @@ C.....Write DG.64 results
          IF(IT.EQ.NTCYFGV) CLOSE(641)
       ENDIF
 
-C...  
-C...  OUTPUT GLOBAL WIND STRESS and atmospheric pressure data IF NOUTGW<>0 AND THE
-C.... TIME STEP FALLS WITHIN THE SPECIFIED WINDOW
-C...  
+!...  
+!...  OUTPUT GLOBAL WIND STRESS and atmospheric pressure data IF NOUTGW<>0 AND THE
+!.... TIME STEP FALLS WITHIN THE SPECIFIED WINDOW
+!...  
       IF((NWS.NE.0).AND.(NOUTGW.NE.0)) THEN
          IF((IT.GT.NTCYSGW).AND.(IT.LE.NTCYFGW).OR.FORCE_WRITE) THEN
             NSCOUGW=NSCOUGW+1
@@ -789,10 +789,10 @@ C...
 #endif
       endif
 
-C...  
-C...  OUTPUT GLOBAL CONCENTRATION DATA IF NOUTGC<>0 AND THE
-C.... TIME STEP FALLS WITHIN THE SPECIFIED WINDOW
-C...  
+!...  
+!...  OUTPUT GLOBAL CONCENTRATION DATA IF NOUTGC<>0 AND THE
+!.... TIME STEP FALLS WITHIN THE SPECIFIED WINDOW
+!...  
       IF(NOUTGC.NE.0) THEN
          IF((IT.GT.NTCYSGC).AND.(IT.LE.NTCYFGC).OR.FORCE_WRITE) THEN
             NSCOUGC=NSCOUGC+1
@@ -825,32 +825,32 @@ C...
          IF(IT.EQ.NTCYFGC) CLOSE(83)
       ENDIF
 
-C...  
-C...  IF IHARIND=1 AND THE TIME STEP FALLS WITHIN THE SPECIFIED WINDOW AND
-C...  ON THE SPECIFIED INCREMENT, USE MODEL RESULTS TO UPDATE HARMONIC
-C...  ANALYSIS MATRIX AND LOAD VECTORS.  NOTE: AN 8 BYTE RECORD SHOULD BE
-C...  USED THROUGHOUT THE HARMONIC ANALYSIS SUBROUTINES, EVEN ON 32 BIT
-C...  WORKSTATIONS, SINCE IN THAT CASE THE HARMONIC ANALYSIS IS DONE IN
-C...  DOUBLE PRECISION.
-C...  
+!...  
+!...  IF IHARIND=1 AND THE TIME STEP FALLS WITHIN THE SPECIFIED WINDOW AND
+!...  ON THE SPECIFIED INCREMENT, USE MODEL RESULTS TO UPDATE HARMONIC
+!...  ANALYSIS MATRIX AND LOAD VECTORS.  NOTE: AN 8 BYTE RECORD SHOULD BE
+!...  USED THROUGHOUT THE HARMONIC ANALYSIS SUBROUTINES, EVEN ON 32 BIT
+!...  WORKSTATIONS, SINCE IN THAT CASE THE HARMONIC ANALYSIS IS DONE IN
+!...  DOUBLE PRECISION.
+!...  
       IF(IHARIND.EQ.1) THEN
          IF((IT.GT.ITHAS).AND.(IT.LE.ITHAF)) THEN
             IF(ICHA.EQ.NHAINC) ICHA=0
             ICHA=ICHA+1
             IF(ICHA.EQ.NHAINC) THEN
-C...  
-C.....UPDATE THE LHS MATRIX
-C...  
+!...  
+!.....UPDATE THE LHS MATRIX
+!...  
                CALL LSQUPDLHS(timeh,IT)
-C...  
-C.....IF DESIRED COMPUTE ELEVATION STATION INFORMATION AND UPDATE LOAD VECTOR
-C...  
+!...  
+!.....IF DESIRED COMPUTE ELEVATION STATION INFORMATION AND UPDATE LOAD VECTOR
+!...  
                IF(NHASE.EQ.1) THEN
                   DO I=1,NSTAE
-C     EE1=ETA2(NM(NNE(I),1))
-C     EE2=ETA2(NM(NNE(I),2))
-C     EE3=ETA2(NM(NNE(I),3))
-C     ET00(I)=EE1*STAIE1(I)+EE2*STAIE2(I)+EE3*STAIE3(I)
+!     EE1=ETA2(NM(NNE(I),1))
+!     EE2=ETA2(NM(NNE(I),2))
+!     EE3=ETA2(NM(NNE(I),3))
+!     ET00(I)=EE1*STAIE1(I)+EE2*STAIE2(I)+EE3*STAIE3(I)
                      ET00(I) = ZE(1,NNE(I),1)
                      DO K = 2,DOFH
                         ET00(I) = ET00(I) + ZE(K,NNE(I),1)*PHI_STAE(K,I)
@@ -858,19 +858,19 @@ C     ET00(I)=EE1*STAIE1(I)+EE2*STAIE2(I)+EE3*STAIE3(I)
                   ENDDO
                   CALL LSQUPDES(ET00,NSTAE)
                ENDIF
-C...  
-C.....IF DESIRED COMPUTE VELOCITY STATION INFORMATION AND UPDATE LOAD VECTOR
-C...  
+!...  
+!.....IF DESIRED COMPUTE VELOCITY STATION INFORMATION AND UPDATE LOAD VECTOR
+!...  
                IF(NHASV.EQ.1) THEN
                   DO I=1,NSTAV
-C     U11=UU2(NM(NNV(I),1))
-C     U22=UU2(NM(NNV(I),2))
-C     U33=UU2(NM(NNV(I),3))
-C     V11=VV2(NM(NNV(I),1))
-C     V22=VV2(NM(NNV(I),2))
-C     V33=VV2(NM(NNV(I),3))
-C     UU00(I)=U11*STAIV1(I)+U22*STAIV2(I)+U33*STAIV3(I)
-C     VV00(I)=V11*STAIV1(I)+V22*STAIV2(I)+V33*STAIV3(I)
+!     U11=UU2(NM(NNV(I),1))
+!     U22=UU2(NM(NNV(I),2))
+!     U33=UU2(NM(NNV(I),3))
+!     V11=VV2(NM(NNV(I),1))
+!     V22=VV2(NM(NNV(I),2))
+!     V33=VV2(NM(NNV(I),3))
+!     UU00(I)=U11*STAIV1(I)+U22*STAIV2(I)+U33*STAIV3(I)
+!     VV00(I)=V11*STAIV1(I)+V22*STAIV2(I)+V33*STAIV3(I)
                      DP1     = DPE(nnv(i)) !DP(NM(NNV(I),1))
                      !DP2     = DPE(nnv(i)) !DP(NM(NNV(I),2))
                      !DP3     = DPE(nnv(i)) !DP(NM(NNV(I),3))
@@ -890,19 +890,19 @@ C     VV00(I)=V11*STAIV1(I)+V22*STAIV2(I)+V33*STAIV3(I)
                   ENDDO
                   CALL LSQUPDVS(UU00,VV00,NSTAV)
                ENDIF
-C...  
-C.....IF DESIRED UPDATE GLOBAL ELEVATION LOAD VECTOR
-C...  
+!...  
+!.....IF DESIRED UPDATE GLOBAL ELEVATION LOAD VECTOR
+!...  
                IF(NHAGE.EQ.1) CALL LSQUPDEG(ETA2,NP)
-C...  
-C.....IF DESIRED UPDATE GLOBAL VELOCITY LOAD VECTOR
-C...  
+!...  
+!.....IF DESIRED UPDATE GLOBAL VELOCITY LOAD VECTOR
+!...  
                IF(NHAGV.EQ.1) CALL LSQUPDVG(UU2,VV2,NP)
 
             ENDIF
          ENDIF
 
-C...  LINES TO COMPUTE MEANS AND VARIANCES
+!...  LINES TO COMPUTE MEANS AND VARIANCES
 
          if (CHARMV) then
             IF(IT.GT.ITMV) THEN
@@ -921,19 +921,19 @@ C...  LINES TO COMPUTE MEANS AND VARIANCES
 
       ENDIF
 
-C...  
-C...  WRITE OUT HOT START INFORMATION IF NHSTAR=1 AND AT CORRECT TIME STEP
-C...  NOTE: THE HOT START FILES USE A RECORD LENGTH OF 8 ON BOTH 32 BIT
-C.... WORKSTATIONS AND THE 64 BIT CRAY.  THIS IS BECAUSE THE HARMONIC
-C.... ANALYSIS IS DONE IN DOUBLE PRECISION (64 BITS) ON WORKSTATIONS.
-C...  
+!...  
+!...  WRITE OUT HOT START INFORMATION IF NHSTAR=1 AND AT CORRECT TIME STEP
+!...  NOTE: THE HOT START FILES USE A RECORD LENGTH OF 8 ON BOTH 32 BIT
+!.... WORKSTATIONS AND THE 64 BIT CRAY.  THIS IS BECAUSE THE HARMONIC
+!.... ANALYSIS IS DONE IN DOUBLE PRECISION (64 BITS) ON WORKSTATIONS.
+!...  
       IF(NHSTAR.EQ.1) THEN
          ITEST=(IT/NHSINC)*NHSINC  
          IF(ITEST.EQ.IT) THEN
-            IF(IHSFIL.EQ.67) OPEN(67,FILE=DIRNAME//'/'//'fort.67',
-     &           ACCESS='DIRECT',RECL=8)
-            IF(IHSFIL.EQ.68) OPEN(68,FILE=DIRNAME//'/'//'fort.68',
-     &           ACCESS='DIRECT',RECL=8)
+            IF(IHSFIL.EQ.67) OPEN(67,FILE=DIRNAME//'/'//'fort.67',&
+            ACCESS='DIRECT',RECL=8)
+            IF(IHSFIL.EQ.68) OPEN(68,FILE=DIRNAME//'/'//'fort.68',&
+           ACCESS='DIRECT',RECL=8)
             IHOTSTP=1
             WRITE(IHSFIL,REC=IHOTSTP) IM
             IHOTSTP=2
@@ -979,15 +979,15 @@ C...
             WRITE(IHSFIL,REC=IHOTSTP+2) IGWP
             WRITE(IHSFIL,REC=IHOTSTP+3) NSCOUGW
             IHOTSTP=IHOTSTP+3
-C...  
-C...  IF APPROPRIATE ADD HARMONIC ANALYSIS INFORMATION TO HOT START FILE
-C...  
+!...  
+!...  IF APPROPRIATE ADD HARMONIC ANALYSIS INFORMATION TO HOT START FILE
+!...  
             IF((IHARIND.EQ.1).AND.(IT.GT.ITHAS)) THEN
                WRITE(IHSFIL,REC=IHOTSTP+1) ICHA
                IHOTSTP = IHOTSTP + 1
-               CALL HAHOUT(NP,NSTAE,NSTAV,NHASE,NHASV,NHAGE,NHAGV,
-     &              IHSFIL,IHOTSTP)
-C     
+               CALL HAHOUT(NP,NSTAE,NSTAV,NHASE,NHASV,NHAGE,NHAGV,&
+              IHSFIL,IHOTSTP)
+!     
                IF(NHASE.EQ.1) CALL HAHOUTES(NSTAE,IHSFIL,IHOTSTP)
                IF(NHASV.EQ.1) CALL HAHOUTVS(NSTAV,IHSFIL,IHOTSTP)
                IF(NHAGE.EQ.1) CALL HAHOUTEG(NP,IHSFIL,IHOTSTP)
@@ -1016,22 +1016,22 @@ C
                   ENDIF
                ENDIF
             endif               !  charmv
-c     
+!     
             
             IF (C3D) THEN
-c     CALL HSTART3D_OUT()
+!     CALL HSTART3D_OUT()
             ENDIF
 
-C...  
-C...  CLOSE THE HOT START OUTPUT FILE
-C...  
+!...  
+!...  CLOSE THE HOT START OUTPUT FILE
+!...  
             CLOSE(IHSFIL)
             IF(NSCREEN.EQ.1.AND.MYPROC.EQ.0) THEN
                WRITE(6,24541) IHSFIL,IT,TIME_A
             ENDIF
             WRITE(16,24541) IHSFIL,IT,TIME_A
-24541       FORMAT(1X,'HOT START OUTPUT WRITTEN TO UNIT ',I2,
-     &           ' AT TIME STEP = ',I9,' TIME = ',E15.8)
+24541       FORMAT(1X,'HOT START OUTPUT WRITTEN TO UNIT ',I2,&
+           ' AT TIME STEP = ',I9,' TIME = ',E15.8)
             IF(IHSFIL.EQ.67) THEN
                IHSFIL=68
             ELSE
@@ -1041,17 +1041,17 @@ C...
       ENDIF
       
 
-C...  FIND AND PRINT TO UNIT 6, THE MAXIMUM ELEVATION, THE MAXIMUM VELOCITY
-C.... AND THE NODE NUMBERS AT WHICH THEY OCCUR ON MYPROC=0
-C.... IF ELMAX EXCEEDS THRESHOLD, PRINT INFORMATION ON ALL PROCESSORS WHERE
-C.... THIS OCCURS 
-C...  
+!...  FIND AND PRINT TO UNIT 6, THE MAXIMUM ELEVATION, THE MAXIMUM VELOCITY
+!.... AND THE NODE NUMBERS AT WHICH THEY OCCUR ON MYPROC=0
+!.... IF ELMAX EXCEEDS THRESHOLD, PRINT INFORMATION ON ALL PROCESSORS WHERE
+!.... THIS OCCURS 
+!...  
       IF(NSCREEN.EQ.1) THEN
          ELMAX=0.0
          VELMAX=0.0
          KEMAX = 0
          KVMAX = 0
-c     
+!     
          imaxze=0.0
          elmaxe=0.0
          qmaxe=0.0
@@ -1067,7 +1067,7 @@ c
                KVMAX=I
             ENDIF
          END DO
-c     nd
+!     nd
          do i=1,ne
             if (wdflg(i).ne.0) then
                if (abs(ze(1,i,1)).gt.elmaxe) then
@@ -1085,33 +1085,33 @@ c     nd
          VELMAX=VELMAX**0.5d0
          
 #ifdef CMPI
-C     sb
-C     IF(MYPROC.EQ.0.AND.ELMAX.LT.200.0.AND.KEMAX.GT.0) THEN
-         IF( (MYPROC.EQ.0).AND.(ELMAX.LT.200.0).AND.
-     &        (MOD(IT,NSCREEN_INC).EQ.0) ) THEN
+!     sb
+!     IF(MYPROC.EQ.0.AND.ELMAX.LT.200.0.AND.KEMAX.GT.0) THEN
+         IF( (MYPROC.EQ.0).AND.(ELMAX.LT.200.0).AND.&
+        (MOD(IT,NSCREEN_INC).EQ.0) ) THEN
             if (kemax.eq.0) then 
                kemax = 1 
             endif
-       print*,'________________________________',
-     &       '__________________________________________'
+       print*,'________________________________',&
+       '__________________________________________'
             print*,''
 
-         WRITE(6,1991) IT,NUMITR,ETA2(KEMAX),KEMAX,VELMAX,KVMAX,
-     &           MYPROC
- 1991   FORMAT(1X,'TIME STEP =',I8,5X,'ITERATIONS =',I5,
-     &           /,2X,'ELMAX = ', E11.4,' AT NODE',I7,
-     &           2X,'SPEEDMAX = ',E11.4,' AT NODE',I7,
-     &           2X,'ON MYPRnOC = ',I4)
+         WRITE(6,1991) IT,NUMITR,ETA2(KEMAX),KEMAX,VELMAX,KVMAX,&
+           MYPROC
+ 1991   FORMAT(1X,'TIME STEP =',I8,5X,'ITERATIONS =',I5,&
+           /,2X,'ELMAX = ', E11.4,' AT NODE',I7,&
+           2X,'SPEEDMAX = ',E11.4,' AT NODE',I7,&
+           2X,'ON MYPRnOC = ',I4)
    !write(6,*) 'elmaxe, imaxze, qmaxe, imaxq ',elmaxe,imaxze,
                                 !$           qmaxe,imaxq
 
 
-c$$$  if (chem_flag.eq.1) then
-c$$$  print*,'__________________________________________________________________________'
-c$$$  print*,'|                       |                                                |'
-c$$$  print*,'| Chemistry turned "ON" |',' Maximum mass action =',-minval(MassMax(:)),' |'
-c$$$  print*,'|_______________________|________________________________________________|'
-c$$$  endif
+!$$$  if (chem_flag.eq.1) then
+!$$$  print*,'__________________________________________________________________________'
+!$$$  print*,'|                       |                                                |'
+!$$$  print*,'| Chemistry turned "ON" |',' Maximum mass action =',-minval(MassMax(:)),' |'
+!$$$  print*,'|_______________________|________________________________________________|'
+!$$$  endif
 
 
             if (padapt.eq.1) then
@@ -1137,63 +1137,63 @@ c$$$  endif
                print*,'With',ne,'total elements'               
             endif
 
-c$$$  if (slopeflag.eq.4.or.slopeflag.ge.6) then
-c$$$  
-c$$$  print*,''
-c$$$  print*,'p-adaptive slope limiting "ACTIVE."'
-c$$$  print*,''
-c$$$  print*,lim_count_roll,'elements of a total of'
-c$$$  print*,ne,'elements were VERTEX LIMITED'
-c$$$  print*,''
-c$$$  
-c$$$  endif
+!$$$  if (slopeflag.eq.4.or.slopeflag.ge.6) then
+!$$$  
+!$$$  print*,''
+!$$$  print*,'p-adaptive slope limiting "ACTIVE."'
+!$$$  print*,''
+!$$$  print*,lim_count_roll,'elements of a total of'
+!$$$  print*,ne,'elements were VERTEX LIMITED'
+!$$$  print*,''
+!$$$  
+!$$$  endif
 
-            print*,'___________________________________',
-     &          '_______________________________________'
+            print*,'___________________________________',&
+          '_______________________________________'
 
          ENDIF
-C     sb
-C     IF(ELMAX.GT.200.0.AND.KEMAX.GT.0) THEN
+!     sb
+!     IF(ELMAX.GT.200.0.AND.KEMAX.GT.0) THEN
          IF(ELMAX.GT.200.0) THEN
             if (kemax.eq.0) then 
                kemax = 1 
             endif
-            WRITE(6,1993) IT,NUMITR,ETA2(KEMAX),KEMAX,VELMAX,KVMAX,
-     &           MYPROC
-            WRITE(16,1993) IT,NUMITR,ETA2(KEMAX),KEMAX,VELMAX,KVMAX,
-     &           MYPROC
- 1993       FORMAT(1X,'TIME STEP =',I8,6X,'ITERATIONS =',I5,
-     &      /,2X,'ELMAX = ', E11.4,' AT NODE',I7,
-     &      2X,'SPEEDMAX = ',E11.4,' AT NODE',I7,
-     &      2X,'ON MYPROC = ',I4,' !!! WARNING - HIGH ELEVATION !!!')
+            WRITE(6,1993) IT,NUMITR,ETA2(KEMAX),KEMAX,VELMAX,KVMAX,&
+           MYPROC
+            WRITE(16,1993) IT,NUMITR,ETA2(KEMAX),KEMAX,VELMAX,KVMAX,&
+           MYPROC
+ 1993       FORMAT(1X,'TIME STEP =',I8,6X,'ITERATIONS =',I5,&
+      /,2X,'ELMAX = ', E11.4,' AT NODE',I7,&
+      2X,'SPEEDMAX = ',E11.4,' AT NODE',I7,&
+      2X,'ON MYPROC = ',I4,' !!! WARNING - HIGH ELEVATION !!!')
             STOP
          ENDIF
 
 
 #else
-C     sb
-C     IF(ELMAX.LT.200.0.AND.KEMAX.GT.0) THEN
+!     sb
+!     IF(ELMAX.LT.200.0.AND.KEMAX.GT.0) THEN
 
          IF(ELMAX.LT.200.0.and.(MOD(IT,NSCREEN_INC).EQ.0) ) THEN
             if (kemax.eq.0) then 
                kemax = 1 
             endif
-            print*,'______________________________________',
-     &            '____________________________________'
+            print*,'______________________________________',&
+            '____________________________________'
             print*,''
             WRITE(6,1992) IT,NUMITR,ETA2(KEMAX),KEMAX,VELMAX,KVMAX
- 1992       FORMAT(1X,'TIME STEP =',I8,5X,'ITERATIONS =',I5,
-     &           /,2X,'ELMAX = ', E11.4,' AT NODE',I7,
-     &           2X,'SPEEDMAX = ',E11.4,' AT NODE',I7)
+ 1992       FORMAT(1X,'TIME STEP =',I8,5X,'ITERATIONS =',I5,&
+           /,2X,'ELMAX = ', E11.4,' AT NODE',I7,&
+           2X,'SPEEDMAX = ',E11.4,' AT NODE',I7)
                                 !write(6,*) 'elmaxe, imaxze, qmaxe, imaxq ',elmaxe,imaxze,
                                 !$           qmaxe,imaxq
 
-c$$$  if (chem_flag.eq.1) then
-c$$$  print*,'__________________________________________________________________________'
-c$$$  print*,'|                       |                                                |'
-c$$$  print*,'| Chemistry turned "ON" |',' Maximum mass action =',-minval(MassMax(:)),' |'
-c$$$  print*,'|_______________________|________________________________________________|'
-c$$$  endif
+!$$$  if (chem_flag.eq.1) then
+!$$$  print*,'__________________________________________________________________________'
+!$$$  print*,'|                       |                                                |'
+!$$$  print*,'| Chemistry turned "ON" |',' Maximum mass action =',-minval(MassMax(:)),' |'
+!$$$  print*,'|_______________________|________________________________________________|'
+!$$$  endif
 
 
             if (padapt.eq.1) then
@@ -1219,36 +1219,36 @@ c$$$  endif
                print*,'With',ne,'total elements'               
             endif
 
-c$$$  if (slopeflag.eq.4.or.slopeflag.ge.6) then
-c$$$  
-c$$$  print*,''
-c$$$  print*,'p-adaptive slope limiting "ACTIVE."'
-c$$$  print*,''
-c$$$  print*,lim_count_roll,'elements of a total of'
-c$$$  print*,ne,'elements were VERTEX LIMITED'
-c$$$  print*,''
-c$$$  
-c$$$  endif
+!$$$  if (slopeflag.eq.4.or.slopeflag.ge.6) then
+!$$$  
+!$$$  print*,''
+!$$$  print*,'p-adaptive slope limiting "ACTIVE."'
+!$$$  print*,''
+!$$$  print*,lim_count_roll,'elements of a total of'
+!$$$  print*,ne,'elements were VERTEX LIMITED'
+!$$$  print*,''
+!$$$  
+!$$$  endif
 
-            print*,'___________________________________',
-     &          '_______________________________________'
+            print*,'___________________________________',&
+          '_______________________________________'
 
          ENDIF
-C     sb
-C     IF(ELMAX.GT.200.0.AND.KEMAX.GT.0) THEN
+!     sb
+!     IF(ELMAX.GT.200.0.AND.KEMAX.GT.0) THEN
          IF(ELMAX.GT.200.0) THEN
           WRITE(6,1994) IT,NUMITR,ETA2(KEMAX),KEMAX,VELMAX,KVMAX
           WRITE(16,1994) IT,NUMITR,ETA2(KEMAX),KEMAX,VELMAX,KVMAX
- 1994       FORMAT(1X,'TIME STEP =',I8,6X,'ITERATIONS =',I5,
-     &           /,2X,'ELMAX = ', E11.4,' AT NODE',I7,
-     &           2X,'SPEEDMAX = ',E11.4,' AT NODE',I7,
-     &           2X,' !!! WARNING - HIGH ELEVATION !!!')
+ 1994       FORMAT(1X,'TIME STEP =',I8,6X,'ITERATIONS =',I5,&
+           /,2X,'ELMAX = ', E11.4,' AT NODE',I7,&
+           2X,'SPEEDMAX = ',E11.4,' AT NODE',I7,&
+           2X,' !!! WARNING - HIGH ELEVATION !!!')
             STOP
          ENDIF
 #endif
       ENDIF
       
-C.....If applicable write out a DG hot start
+!.....If applicable write out a DG hot start
 
       IF ((DGHOT.EQ.1).AND.(MOD(IT,DGHOTSPOOL).EQ.0)) THEN
          
@@ -1311,98 +1311,98 @@ C.....If applicable write out a DG hot start
 #endif
       ENDIF
 
-C.....If end of run write out DG data
+!.....If end of run write out DG data
 
-C     IF (IT.EQ.NT) THEN
-C     H_TRI = SQRT((X(1)-X(2))**2 + (Y(1)-Y(2))**2)
-C     WRITE(88,*) H_TRI,P,0
-C     WRITE(89,*) H_TRI,P,0
-C     IF (MYPROC == 0) THEN
-C     PRINT*,'T FINAL =',NT*DTDP
-C     PRINT*,'DT =',DTDP
-C     PRINT*,'NT =',NT
-C     ENDIF
+!     IF (IT.EQ.NT) THEN
+!     H_TRI = SQRT((X(1)-X(2))**2 + (Y(1)-Y(2))**2)
+!     WRITE(88,*) H_TRI,P,0
+!     WRITE(89,*) H_TRI,P,0
+!     IF (MYPROC == 0) THEN
+!     PRINT*,'T FINAL =',NT*DTDP
+!     PRINT*,'DT =',DTDP
+!     PRINT*,'NT =',NT
+!     ENDIF
 
-C     DO J=1,MNE
-C     ZE_DG(1) = 0.D0
-C     QX_DG(1) = 0.D0
-C     QY_DG(1) = 0.D0
-C     
-C     DO K=1,DOF
-C     ZE_DG(1) = ZE_DG(1) + PHI_CENTER(K)*ZE(K,J,1)
-C     QX_DG(1) = QX_DG(1) + PHI_CENTER(K)*QX(K,J,1)
-C     QY_DG(1) = QY_DG(1) + PHI_CENTER(K)*QY(K,J,1)
-C     
-C     WRITE(88,*) ZE(K,J,1),QX(K,J,1),QY(K,J,1)
-C     
-C     ENDDO
-C     
-C     WRITE(89,*) ZE_DG(1),QX_DG(1),QY_DG(1)
-C     
-C     ENDDO
-C     ENDIF
-C...  
-C...  ****************** TIME STEPPING LOOP ENDS HERE ********************
-C...  
+!     DO J=1,MNE
+!     ZE_DG(1) = 0.D0
+!     QX_DG(1) = 0.D0
+!     QY_DG(1) = 0.D0
+!     
+!     DO K=1,DOF
+!     ZE_DG(1) = ZE_DG(1) + PHI_CENTER(K)*ZE(K,J,1)
+!     QX_DG(1) = QX_DG(1) + PHI_CENTER(K)*QX(K,J,1)
+!     QY_DG(1) = QY_DG(1) + PHI_CENTER(K)*QY(K,J,1)
+!     
+!     WRITE(88,*) ZE(K,J,1),QX(K,J,1),QY(K,J,1)
+!     
+!     ENDDO
+!     
+!     WRITE(89,*) ZE_DG(1),QX_DG(1),QY_DG(1)
+!     
+!     ENDDO
+!     ENDIF
+!...  
+!...  ****************** TIME STEPPING LOOP ENDS HERE ********************
+!...  
       RETURN
       END
 
-C***********************************************************************
-C
-C     SUBROUTINE:  WRITE_DG_IC
-C
-C     Outputs DG initial conditions
-C
-C     Written by Shintaro Bunya, Nov. 2005 
-C
-C***********************************************************************
+!***********************************************************************
+!
+!     SUBROUTINE:  WRITE_DG_IC
+!
+!     Outputs DG initial conditions
+!
+!     Written by Shintaro Bunya, Nov. 2005 
+!
+!***********************************************************************
 
       SUBROUTINE WRITE_DG_IC()
 
       USE GLOBAL
       USE DG
 
-C.....DG.63.IC = Record of the initial surface elevation
-C      OPEN(632,FILE=DIRNAME//'/'//'DG.63.IC')
-C      WRITE(632,3220) RUNDES, RUNID, AGRID
-C      WRITE(632,3645) 1, DOF, DTDP*NSPOOLGE, NSPOOLGE, 1
+!.....DG.63.IC = Record of the initial surface elevation
+!      OPEN(632,FILE=DIRNAME//'/'//'DG.63.IC')
+!      WRITE(632,3220) RUNDES, RUNID, AGRID
+!      WRITE(632,3645) 1, DOF, DTDP*NSPOOLGE, NSPOOLGE, 1
 
-C      WRITE(632,2120) 0.0, 1
-C      DO J = 1,NE
-C        DO K = 1,DOF
-C          WRITE(632,2453) J, ZE(K,J,1)
-C        ENDDO
-C      ENDDO
+!      WRITE(632,2120) 0.0, 1
+!      DO J = 1,NE
+!        DO K = 1,DOF
+!          WRITE(632,2453) J, ZE(K,J,1)
+!        ENDDO
+!      ENDDO
       
-C      CLOSE(632)
+!      CLOSE(632)
 
-C.....DG.64.IC = Record of the initial discharge
-C      OPEN(642,FILE=DIRNAME//'/'//'DG.64.IC')
-C      WRITE(642,3220) RUNDES, RUNID, AGRID
-C      WRITE(642,3645) 1, DOF, DTDP*NSPOOLGV, NSPOOLGV, 2
-C
-C      WRITE(642,2120) 0.0, 1
-C      DO J = 1,NE
-C        DO K = 1,DOF
-C          WRITE(642,2454) J, QX(K,J,1), QY(K,J,1)
-C        ENDDO
-C      ENDDO
-C
-C      CLOSE(642)
+!.....DG.64.IC = Record of the initial discharge
+!      OPEN(642,FILE=DIRNAME//'/'//'DG.64.IC')
+!      WRITE(642,3220) RUNDES, RUNID, AGRID
+!      WRITE(642,3645) 1, DOF, DTDP*NSPOOLGV, NSPOOLGV, 2
+!
+!      WRITE(642,2120) 0.0, 1
+!      DO J = 1,NE
+!        DO K = 1,DOF
+!          WRITE(642,2454) J, QX(K,J,1), QY(K,J,1)
+!        ENDDO
+!      ENDDO
+!
+!      CLOSE(642)
 
-C.....DG.65.IC = Record of the initial wet/dry flags
-C      IF (NOLIFA.GE.2) THEN
-C        OPEN(652,FILE=DIRNAME//'/'//'DG.65.IC')
-C        WRITE(652,3220) RUNDES, RUNID, AGRID
-C        WRITE(652,3645) 1, DOF, DTDP*NSPOOLGE, NSPOOLGE, 1
-C
-C        WRITE(652,2120) 0.0, 1
-C       DO J = 1,NE
-C          WRITE(652,2455) J,WDFLG(J)
-C       ENDDO
-C
-C        CLOSE(652)
-C      ENDIF
+!.....DG.65.IC = Record of the initial wet/dry flags
+!      IF (NOLIFA.GE.2) THEN
+!        OPEN(652,FILE=DIRNAME//'/'//'DG.65.IC')
+!        WRITE(652,3220) RUNDES, RUNID, AGRID
+!        WRITE(652,3645) 1, DOF, DTDP*NSPOOLGE, NSPOOLGE, 1
+!
+!        WRITE(652,2120) 0.0, 1
+!       DO J = 1,NE
+!          WRITE(652,2455) J,WDFLG(J)
+!       ENDDO
+!
+!        CLOSE(652)
+!      ENDIF
 
 2120  FORMAT(2X,E20.10,5X,I10)
 2453  FORMAT(2X,I8,2X,E16.8E3)
