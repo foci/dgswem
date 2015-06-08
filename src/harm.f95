@@ -1,105 +1,105 @@
-C***********************************************************************
-C PADCIRC RELEASE VERSION 41.11 09/14/2001  
-C    last changes in this file prior to VERSION 41.01
-C
-C  mod history
-C  v40.02mxxx - date - programmer - describe change 
-C                    - mark change in code with  cinitials-mxxx 
-c***********************************************************************
-c                                                                      *
-c   PADCIRC MODULE  ( HARM )                                           *
-c                                                                      *
-c   HA_SUBS.FOR     V3.01        11/9/95                               *
-c                                                                      *
-c   Least Square harmonic analysis of timeseries from ADCIRC2DDI_v27   *
-c                                                                      *
-c    Notes:                                                            *
-c    1.)  Both the left hand side matrix and the right hand side       *
-c         forcing vectors are continuously updated in time.  This      *
-c         eliminates the need to store time series outputs for later   *
-c         harmonic analysis.                                           *
-c    2.)  The left hand side matrix and the right hand side forcing    *
-c         vectors are output in the hotstart file and can be used to   *
-c         perform harmonic analysis on an incomplete run.              *
-c    3.)  Frequencies should be in rad/sec,times should be in sec.     *
-c                                                                      *
-c***********************************************************************
-c                                                                      *
-c    Program Written by:                                               *
-c          R.A. Luettich, IMS UNC                                      *
-c          J.J. Westerink, CE ND                                       *
-c                                                                      *
-c    Program Development History:                                      *
-c    1.) lsq_stations_v004 by JJW                                      *
-c    2.) LSQEX by RL used in 2D binary extr program                    *
-c    3.) LSQRL by RL used in 1D test codes                             *
-c    4.) LSQ2D v1.00-v2.26 by RL real time Harmonic Analysis for ADCIRC*
-c    5.) HA_SUBS v3.01 by RL real time HA for ADCIRC separate          *
-c        subroutines for elevation station, velocity station,          *
-c        global elevation and global velocity harmonic analysis        *
-c                                                                      *
-c***********************************************************************
-c                                                                      *
-c SUBROUTINE LSQUPDLHS updates the LHS matrix                          *
-c SUBROUTINE LSQUPDES updates the RHS load vector for elev stations    *
-c SUBROUTINE LSQUPDVS updates the RHS load vector for velocity stations*
-c SUBROUTINE LSQUPDEG updates the RHS load vector for elevation global *
-c SUBROUTINE LSQUPDVG updates the RHS load vector for velocity global  *
-c SUBROUTINE FULSOL fills out, decomposes and solves the matricies     *
-c SUBROUTINE LSQSOLES solves & writes output for elevation stations    *
-c SUBROUTINE LSQSOLVS solves & writes output for velocity stations     *
-c SUBROUTINE LSQSOLEG solves & writes output for elevation global      *
-c SUBROUTINE LSQSOLVG solves & writes output for velocity global       *
-c SUBROUTINE HAHOUT writes HA parameters & LHS matrix to hotstart file *
-c SUBROUTINE HAHOUTES writes elev sta RHS load vector to hotstart file *
-c SUBROUTINE HAHOUTVS writes vel sta RHS load vector to hotstart file  *
-c SUBROUTINE HAHOUTEG writes glob elev RHS load vector to hotstart file*
-c SUBROUTINE HAHOUTVG writes glob vel RHS load vector to hotstart file *
-c SUBROUTINE HACOLDS initializes HA param & LHS matrix for cold start  *
-c SUBROUTINE HACOLDSES initializes elev sta RHS load vec for cold start*
-c SUBROUTINE HACOLDSVS initializes vel sta RHS load vec for cold start *
-c SUBROUTINE HACOLDSEG initializes glob ele RHS load vec for cold start*
-c SUBROUTINE HACOLDSVG initializes glob vel RHS load vec for cold start*
-c SUBROUTINE HAHOTS initializes HA params & LHS matrix for a hot start *
-c SUBROUTINE HAHOTSES initializes elev sta RHS load vec for hot start  *
-c SUBROUTINE HAHOTSVS initializes vel sta RHS load vec for hot start   *
-c SUBROUTINE HAHOTSEG initializes glob elev RHS load vec for hot start *
-c SUBROUTINE HAHOTSVG initializes glob vel RHS load vec for hot start  *
-c                                                                      *
-c***********************************************************************
-c                                                                      *
-c    INPUT FILES:                                                      *
-c      - Frequency information is read in by ADCIRC from unit 15.      *
-c        This information is passed in common block LSQFREQS.          *
-c                                                                      *
-c      - If the model is hot start, input is read from UNIT 67 or 68   *
-c                                                                      *
-c    OUTPUT FILES:                                                     *
-C      UNIT 51 : HARMONIC CONSTITUENT ELEVATION VALUES AT SPECIFIED    *
-C                  ELEVATION RECORDING STATION COORDINATES (ASCII)     *
-C      UNIT 52 : HARMONIC CONSTITUENT VELOCITY VALUES AT SPECIFIED     *
-C                  VELOCITY RECORDING STATION COORDINATES  (ASCII)     *
-C      UNIT 53 : HARMONIC CONSTITUENT ELEVATIONS AT ALL NODES (ASCII)  *
-C      UNIT 54 : HARMONIC CONSTITUENT VELOCITIES AT ALL NODES (ASCII)  *
-C      UNIT 55 : COMPARISON BETWEEN THE MEAN AND VARIANCE OF THE TIME  *
-C                  SERIES GENERATED BY THE MODEL AND THE MEAN AND      *
-C                  VARIANCE OF A TIME SERIES RESYNTHESIZED FROM THE    *
-C                  COMPUTED HARMONIC CONSTITUENTS.  THIS GIVES AN      *
-C                  INDICATION OF HOW COMPLETE THE HARMONIC ANALYSIS    *
-C                  WAS. (ASCII)                                        *
-C      UNIT 67 or 68 : HOT START FILES (BINARY)                        *
-c                                                                      *
-c***********************************************************************
-C
+!***********************************************************************
+! PADCIRC RELEASE VERSION 41.11 09/14/2001  
+!    last changes in this file prior to VERSION 41.01
+!
+!  mod history
+!  v40.02mxxx - date - programmer - describe change 
+!                    - mark change in code with  cinitials-mxxx 
+!***********************************************************************
+!                                                                      *
+!   PADCIRC MODULE  ( HARM )                                           *
+!                                                                      *
+!   HA_SUBS.FOR     V3.01        11/9/95                               *
+!                                                                      *
+!   Least Square harmonic analysis of timeseries from ADCIRC2DDI_v27   *
+!                                                                      *
+!    Notes:                                                            *
+!    1.)  Both the left hand side matrix and the right hand side       *
+!         forcing vectors are continuously updated in time.  This      *
+!         eliminates the need to store time series outputs for later   *
+!         harmonic analysis.                                           *
+!    2.)  The left hand side matrix and the right hand side forcing    *
+!         vectors are output in the hotstart file and can be used to   *
+!         perform harmonic analysis on an incomplete run.              *
+!    3.)  Frequencies should be in rad/sec,times should be in sec.     *
+!                                                                      *
+!***********************************************************************
+!                                                                      *
+!    Program Written by:                                               *
+!          R.A. Luettich, IMS UNC                                      *
+!          J.J. Westerink, CE ND                                       *
+!                                                                      *
+!    Program Development History:                                      *
+!    1.) lsq_stations_v004 by JJW                                      *
+!    2.) LSQEX by RL used in 2D binary extr program                    *
+!    3.) LSQRL by RL used in 1D test codes                             *
+!    4.) LSQ2D v1.00-v2.26 by RL real time Harmonic Analysis for ADCIRC*
+!    5.) HA_SUBS v3.01 by RL real time HA for ADCIRC separate          *
+!        subroutines for elevation station, velocity station,          *
+!        global elevation and global velocity harmonic analysis        *
+!                                                                      *
+!***********************************************************************
+!                                                                      *
+! SUBROUTINE LSQUPDLHS updates the LHS matrix                          *
+! SUBROUTINE LSQUPDES updates the RHS load vector for elev stations    *
+! SUBROUTINE LSQUPDVS updates the RHS load vector for velocity stations*
+! SUBROUTINE LSQUPDEG updates the RHS load vector for elevation global *
+! SUBROUTINE LSQUPDVG updates the RHS load vector for velocity global  *
+! SUBROUTINE FULSOL fills out, decomposes and solves the matricies     *
+! SUBROUTINE LSQSOLES solves & writes output for elevation stations    *
+! SUBROUTINE LSQSOLVS solves & writes output for velocity stations     *
+! SUBROUTINE LSQSOLEG solves & writes output for elevation global      *
+! SUBROUTINE LSQSOLVG solves & writes output for velocity global       *
+! SUBROUTINE HAHOUT writes HA parameters & LHS matrix to hotstart file *
+! SUBROUTINE HAHOUTES writes elev sta RHS load vector to hotstart file *
+! SUBROUTINE HAHOUTVS writes vel sta RHS load vector to hotstart file  *
+! SUBROUTINE HAHOUTEG writes glob elev RHS load vector to hotstart file*
+! SUBROUTINE HAHOUTVG writes glob vel RHS load vector to hotstart file *
+! SUBROUTINE HACOLDS initializes HA param & LHS matrix for cold start  *
+! SUBROUTINE HACOLDSES initializes elev sta RHS load vec for cold start*
+! SUBROUTINE HACOLDSVS initializes vel sta RHS load vec for cold start *
+! SUBROUTINE HACOLDSEG initializes glob ele RHS load vec for cold start*
+! SUBROUTINE HACOLDSVG initializes glob vel RHS load vec for cold start*
+! SUBROUTINE HAHOTS initializes HA params & LHS matrix for a hot start *
+! SUBROUTINE HAHOTSES initializes elev sta RHS load vec for hot start  *
+! SUBROUTINE HAHOTSVS initializes vel sta RHS load vec for hot start   *
+! SUBROUTINE HAHOTSEG initializes glob elev RHS load vec for hot start *
+! SUBROUTINE HAHOTSVG initializes glob vel RHS load vec for hot start  *
+!                                                                      *
+!***********************************************************************
+!                                                                      *
+!    INPUT FILES:                                                      *
+!      - Frequency information is read in by ADCIRC from unit 15.      *
+!        This information is passed in common block LSQFREQS.          *
+!                                                                      *
+!      - If the model is hot start, input is read from UNIT 67 or 68   *
+!                                                                      *
+!    OUTPUT FILES:                                                     *
+!      UNIT 51 : HARMONIC CONSTITUENT ELEVATION VALUES AT SPECIFIED    *
+!                  ELEVATION RECORDING STATION COORDINATES (ASCII)     *
+!      UNIT 52 : HARMONIC CONSTITUENT VELOCITY VALUES AT SPECIFIED     *
+!                  VELOCITY RECORDING STATION COORDINATES  (ASCII)     *
+!      UNIT 53 : HARMONIC CONSTITUENT ELEVATIONS AT ALL NODES (ASCII)  *
+!      UNIT 54 : HARMONIC CONSTITUENT VELOCITIES AT ALL NODES (ASCII)  *
+!      UNIT 55 : COMPARISON BETWEEN THE MEAN AND VARIANCE OF THE TIME  *
+!                  SERIES GENERATED BY THE MODEL AND THE MEAN AND      *
+!                  VARIANCE OF A TIME SERIES RESYNTHESIZED FROM THE    *
+!                  COMPUTED HARMONIC CONSTITUENTS.  THIS GIVES AN      *
+!                  INDICATION OF HOW COMPLETE THE HARMONIC ANALYSIS    *
+!                  WAS. (ASCII)                                        *
+!      UNIT 67 or 68 : HOT START FILES (BINARY)                        *
+!                                                                      *
+!***********************************************************************
+!
       MODULE HARM
-C
+!
       USE SIZES
-C
+!
       REAL(8),PRIVATE,PARAMETER :: PI=3.141592653589793D0
       INTEGER NFREQ
       CHARACTER*10,ALLOCATABLE ::  NAMEFR(:)
       REAL(SZ),    ALLOCATABLE ::  HAFREQ(:),HAFF(:),HAFACE(:)
-C
+!
       INTEGER, PRIVATE,SAVE :: NZ, NF, MM, ITUD, ICALL
       REAL(8), PRIVATE,SAVE :: TIMEUD
       REAL(SZ),PRIVATE,ALLOCATABLE ::  HA(:,:)
@@ -110,23 +110,23 @@ C
       REAL(SZ),PRIVATE,ALLOCATABLE ::  STAULV(:,:),STAVLV(:,:)
 
 
-C-----------------END OF DECLARATIONS---------------------------------------
+!-----------------END OF DECLARATIONS---------------------------------------
 
 
       CONTAINS
 
 
       SUBROUTINE ALLOC_HA()
-C
-C***********************************************************************
-C  Allocate arays used by LSQ_HARM.
-C
-C  vjp 8/99
-C***********************************************************************
-C
+!
+!***********************************************************************
+!  Allocate arays used by LSQ_HARM.
+!
+!  vjp 8/99
+!***********************************************************************
+!
       ALLOCATE ( HAFREQ(MNHARF),HAFF(MNHARF),HAFACE(MNHARF) )
       ALLOCATE ( NAMEFR(MNHARF) )
-C
+!
       ALLOCATE ( HA(2*MNHARF,2*MNHARF) )
       ALLOCATE ( HAP(2*MNHARF),HAX(2*MNHARF) )
       ALLOCATE ( GLOELV(2*MNHARF,MNP) )
@@ -138,31 +138,31 @@ C
       END SUBROUTINE
 
 
-c***********************************************************************
-c   Subroutine to update the Left Hand Side Matrix                     *
-c                                                                      *
-c  TIME  - ABSOLUTE MODEL TIME (SEC)                                   *
-c  IT    - MODEL TIME STEP                                             *
-c  icall - number of times the subroutine has been called              *
-c  a     - Left Hand Side Matrix                                       *
-c                                                                      *
-c                        RL 11/7/95                                    *
-c***********************************************************************
-c
+!***********************************************************************
+!   Subroutine to update the Left Hand Side Matrix                     *
+!                                                                      *
+!  TIME  - ABSOLUTE MODEL TIME (SEC)                                   *
+!  IT    - MODEL TIME STEP                                             *
+!  icall - number of times the subroutine has been called              *
+!  a     - Left Hand Side Matrix                                       *
+!                                                                      *
+!                        RL 11/7/95                                    *
+!***********************************************************************
+!
       SUBROUTINE LSQUPDLHS(TIME,IT)
       IMPLICIT NONE
       INTEGER IT,I,J,I1,I2,J1,J2
       REAL(SZ) TF1,TF2
       REAL(8) TIME
-c
+!
       icall = icall + 1
-c
-c***** Update the Left Hand Side Matrix
-c  Note: this is a symmetric matrix and therefore only store
-c  the upper triangular part.  The lower part will be
-c  filled out in SUBROUTINE FULSOL prior to the matrix's decomposition
+!
+!***** Update the Left Hand Side Matrix
+!  Note: this is a symmetric matrix and therefore only store
+!  the upper triangular part.  The lower part will be
+!  filled out in SUBROUTINE FULSOL prior to the matrix's decomposition
 
-c   Take care of the steady constituent if included in the analysis
+!   Take care of the steady constituent if included in the analysis
 
       if(nf.eq.1) then
          ha(1,1)=icall
@@ -173,7 +173,7 @@ c   Take care of the steady constituent if included in the analysis
             end do
          endif
 
-c   Take care of the other constituents
+!   Take care of the other constituents
 
       do i=1,nfreq
          do j=i,nfreq
@@ -190,7 +190,7 @@ c   Take care of the other constituents
             end do
          end do
 
-c   Record update time and time step
+!   Record update time and time step
 
       TIMEUD = TIME
       ITUD = IT
@@ -199,27 +199,27 @@ c   Record update time and time step
       end subroutine
 
 
-c***********************************************************************
-c   Subroutine to update the Right Hand Side Load Vectors for the      *
-c   elevation station harmonic analysis.                               *
-c                                                                      *
-c  STAE  - STATION ELEVATION VALUES USED TO UPDATE LOAD VECTORS        *
-c  NSTAE - NUMBER OF TIDAL ELEVATION RECORDING STATIONS                *
-c                                                                      *
-c  STAELV - station elevation load vector                              *
-c                                                                      *
-c                        RL 11/8/95                                    *
-c***********************************************************************
-c
+!***********************************************************************
+!   Subroutine to update the Right Hand Side Load Vectors for the      *
+!   elevation station harmonic analysis.                               *
+!                                                                      *
+!  STAE  - STATION ELEVATION VALUES USED TO UPDATE LOAD VECTORS        *
+!  NSTAE - NUMBER OF TIDAL ELEVATION RECORDING STATIONS                *
+!                                                                      *
+!  STAELV - station elevation load vector                              *
+!                                                                      *
+!                        RL 11/8/95                                    *
+!***********************************************************************
+!
       SUBROUTINE LSQUPDES(STAE,NSTAE)
       IMPLICIT NONE
       INTEGER NSTAE,N,I,I1,I2
       REAL(SZ) TF1,CTF1,STF1
       REAL(SZ) STAE(MNSTAE)
-c
-c***** Update the Right Hand Side Load Vectors
-c
-c   Take care of the steady constituent if included in the analysis
+!
+!***** Update the Right Hand Side Load Vectors
+!
+!   Take care of the steady constituent if included in the analysis
 
       if(nz.eq.0) then
          do n=1,NSTAE
@@ -227,7 +227,7 @@ c   Take care of the steady constituent if included in the analysis
             end do
          endif
 
-c   Take care of the other constituents
+!   Take care of the other constituents
 
       do i=1,nfreq
          i1=2*i-nz
@@ -240,34 +240,34 @@ c   Take care of the other constituents
             STAELV(I2,N) = STAELV(I2,N) + STAE(N)*STF1
          end do
       end do
-C
+!
       return
       end subroutine
 
 
-c***********************************************************************
-c   Subroutine to update the Right Hand Side Load Vectors for the      *
-c   velocity station harmonic analysis.                                *
-c                                                                      *
-c  STAU  - STATION U VELOCITY VALUES USED TO UPDATE LOAD VECTORS       *
-c  STAV  - STATION V VELOCITY VALUES USED TO UPDATE LOAD VECTORS       *
-c  NSTAV - NUMBER OF TIDAL CURRENT RECORDING STATIONS                  *
-c                                                                      *
-c  STAULV - station u velocity load vector                             *
-c  STAVLV - station v velocity load vector                             *
-c                                                                      *
-c                        RL 11/8/95                                    *
-c***********************************************************************
-c
+!***********************************************************************
+!   Subroutine to update the Right Hand Side Load Vectors for the      *
+!   velocity station harmonic analysis.                                *
+!                                                                      *
+!  STAU  - STATION U VELOCITY VALUES USED TO UPDATE LOAD VECTORS       *
+!  STAV  - STATION V VELOCITY VALUES USED TO UPDATE LOAD VECTORS       *
+!  NSTAV - NUMBER OF TIDAL CURRENT RECORDING STATIONS                  *
+!                                                                      *
+!  STAULV - station u velocity load vector                             *
+!  STAVLV - station v velocity load vector                             *
+!                                                                      *
+!                        RL 11/8/95                                    *
+!***********************************************************************
+!
       SUBROUTINE LSQUPDVS(STAU,STAV,NSTAV)
       IMPLICIT NONE
       INTEGER NSTAV,N,I,I1,I2
       REAL(SZ) TF1,CTF1,STF1
       REAL(SZ) STAU(MNSTAV),STAV(MNSTAV)
-c
-c***** Update the Right Hand Side Load Vectors
-c
-c   Take care of the steady constituent if included in the analysis
+!
+!***** Update the Right Hand Side Load Vectors
+!
+!   Take care of the steady constituent if included in the analysis
 
       if(nz.eq.0) then
          do n=1,NSTAV
@@ -276,7 +276,7 @@ c   Take care of the steady constituent if included in the analysis
             end do
       endif
 
-c   Take care of the other constituents
+!   Take care of the other constituents
 
       do i=1,nfreq
          i1=2*i-nz
@@ -291,32 +291,32 @@ c   Take care of the other constituents
             STAVLV(I2,N) = STAVLV(I2,N) + STAV(N)*STF1
             end do
          end do
-C
+!
       return
       end subroutine
 
 
-c***********************************************************************
-c   Subroutine to update the Right Hand Side Load Vectors for the      *
-c   global elevation harmonic analysis.                                *
-c                                                                      *
-c  GLOE  - GLOBAL ELEVATION VALUES USED TO UPDATE LOAD VECTORS         *
-c  NP    - NUMBER OF POINTS IN GLOBAL GRID                             *
-c                                                                      *
-c  GLOELV - global elevation load vector                               *
-c                                                                      *
-c                        RL 11/8/95                                    *
-c***********************************************************************
-c
+!***********************************************************************
+!   Subroutine to update the Right Hand Side Load Vectors for the      *
+!   global elevation harmonic analysis.                                *
+!                                                                      *
+!  GLOE  - GLOBAL ELEVATION VALUES USED TO UPDATE LOAD VECTORS         *
+!  NP    - NUMBER OF POINTS IN GLOBAL GRID                             *
+!                                                                      *
+!  GLOELV - global elevation load vector                               *
+!                                                                      *
+!                        RL 11/8/95                                    *
+!***********************************************************************
+!
       SUBROUTINE LSQUPDEG(GLOE,NP)
       IMPLICIT NONE
       INTEGER I,J,NP,N,I1,I2,IR,IRE,K,JR
       REAL(SZ) TF1,CTF1,STF1
       REAL(SZ) GLOE(MNP)
-c
-c***** Update the Right Hand Side Load Vectors
-c
-c   Take care of the steady constituent if included in the analysis
+!
+!***** Update the Right Hand Side Load Vectors
+!
+!   Take care of the steady constituent if included in the analysis
 
       if(nz.eq.0) then
          do n=1,np
@@ -324,7 +324,7 @@ c   Take care of the steady constituent if included in the analysis
             end do
       endif
 
-c   Take care of the other constituents
+!   Take care of the other constituents
 
       do i=1,nfreq
          i1=2*i-nz
@@ -337,34 +337,34 @@ c   Take care of the other constituents
             GLOELV(I2,N)=GLOELV(I2,N)+GLOE(N)*STF1
             end do
          end do
-C
+!
       return
       end subroutine
 
 
-c***********************************************************************
-c   Subroutine to update the Right Hand Side Load Vectors for the      *
-c   global velocity harmonic analysis.                                 *
-c                                                                      *
-c  GLOU  - GLOBAL U VELOCITY VALUES USED TO UPDATE LOAD VECTORS        *
-c  GLOV  - GLOBAL V VELOCITY VALUES USED TO UPDATE LOAD VECTORS        *
-c  NP    - NUMBER OF POINTS IN GLOBAL GRID                             *
-c                                                                      *
-c  GLOULV - global u velocity load vector                              *
-c  GLOVLV - global v velocity load vector                              *
-c                                                                      *
-c                        RL 11/8/95                                    *
-c***********************************************************************
-c
+!***********************************************************************
+!   Subroutine to update the Right Hand Side Load Vectors for the      *
+!   global velocity harmonic analysis.                                 *
+!                                                                      *
+!  GLOU  - GLOBAL U VELOCITY VALUES USED TO UPDATE LOAD VECTORS        *
+!  GLOV  - GLOBAL V VELOCITY VALUES USED TO UPDATE LOAD VECTORS        *
+!  NP    - NUMBER OF POINTS IN GLOBAL GRID                             *
+!                                                                      *
+!  GLOULV - global u velocity load vector                              *
+!  GLOVLV - global v velocity load vector                              *
+!                                                                      *
+!                        RL 11/8/95                                    *
+!***********************************************************************
+!
       SUBROUTINE LSQUPDVG(GLOU,GLOV,NP)
       IMPLICIT NONE
       INTEGER NP,NPI1,I1,I2,N,I,J,IR,IRE,K,JR
       REAL(SZ) TF1,CTF1,STF1
       REAL(SZ) GLOU(MNP),GLOV(MNP)
-c
-c***** Update the Right Hand Side Load Vectors
-c
-c   Take care of the steady constituent if included in the analysis
+!
+!***** Update the Right Hand Side Load Vectors
+!
+!   Take care of the steady constituent if included in the analysis
 
       if(nz.eq.0) then
          do n=1,np
@@ -373,7 +373,7 @@ c   Take care of the steady constituent if included in the analysis
             end do
          endif
 
-c   Take care of the other constituents
+!   Take care of the other constituents
 
       do i=1,nfreq
          i1=2*i-nz
@@ -388,35 +388,35 @@ c   Take care of the other constituents
             GLOVLV(I2,N) = GLOVLV(I2,N) + GLOV(N)*STF1
             end do
          end do
-C
+!
       return
       end subroutine
 
 
-c***********************************************************************
-c   Subroutine to fill out, decompose and solve the lsq system         *
-c   Solves system a*x=b by l*d*l(tr) decomp in full storage mode       *
-c                                                                      *
-c   NOTE: This routine has been modified so that the filling out and   *
-c         decomposition (and only those operations) are done if        *
-c         idecom=0.                                                    *
-c                                                                      *
-c   mm  -  actual dimension of a matrix                                *
-c                                                                      *
-c                        rl 11/7/95                                    *
-c***********************************************************************
-c
+!***********************************************************************
+!   Subroutine to fill out, decompose and solve the lsq system         *
+!   Solves system a*x=b by l*d*l(tr) decomp in full storage mode       *
+!                                                                      *
+!   NOTE: This routine has been modified so that the filling out and   *
+!         decomposition (and only those operations) are done if        *
+!         idecom=0.                                                    *
+!                                                                      *
+!   mm  -  actual dimension of a matrix                                *
+!                                                                      *
+!                        rl 11/7/95                                    *
+!***********************************************************************
+!
       subroutine fulsol(idecom)
       implicit none
       integer idecom,i,j,ir,ire,k,jr
       real(sz),allocatable ::  c(:),y(:)
 
-c
-c**** If only want to fill out matrix and decomponse
-c
+!
+!**** If only want to fill out matrix and decomponse
+!
       if(idecom.eq.0) then
 
-c        Set up the lower triangular part of the LHS a matrix
+!        Set up the lower triangular part of the LHS a matrix
 
          do j=1,mm
             do i=j,mm
@@ -424,7 +424,7 @@ c        Set up the lower triangular part of the LHS a matrix
             end do
          end do
 
-c        Decomposition of matrix a
+!        Decomposition of matrix a
 
          do 100 ir=1,mm
             ire=ir+1
@@ -440,22 +440,22 @@ c        Decomposition of matrix a
          return
        endif
 
-c...    solve for y by forward substitution for l*y=p
+!...    solve for y by forward substitution for l*y=p
 
         allocate ( c(2*MNHARF),y(2*MNHARF) )
-c
+!
         do 120 ir=1,mm
            y(ir)=hap(ir)
            do 110 jr=1,ir-1
   110      y(ir)=y(ir)-ha(jr,ir)*y(jr)
   120   continue
 
-c...    calculate c=d**(-1)*y
+!...    calculate c=d**(-1)*y
 
         do 130 ir=1,mm
   130   c(ir)=y(ir)/ha(ir,ir)
 
-c...    solve for x by back-substituting for l(tr)*x=c
+!...    solve for x by back-substituting for l(tr)*x=c
 
         ir=mm
   140   continue
@@ -468,16 +468,16 @@ c...    solve for x by back-substituting for l(tr)*x=c
         end subroutine
 
 
-c***********************************************************************
-c   Subroutine to solve the system and write output for elevation      *
-c   stations.                                                          *
-c                                                                      *
-c   nf=0  if no steady constituent                                     *
-c   nf=1 if steady constituent                                         *
-c                                                                      *
-c                        R.L. 11/8/95                                  *
-c***********************************************************************
-c
+!***********************************************************************
+!   Subroutine to solve the system and write output for elevation      *
+!   stations.                                                          *
+!                                                                      *
+!   nf=0  if no steady constituent                                     *
+!   nf=1 if steady constituent                                         *
+!                                                                      *
+!                        R.L. 11/8/95                                  *
+!***********************************************************************
+!
       SUBROUTINE LSQSOLES(NSTAE,DIRNAME,LNAME)
       IMPLICIT NONE
       INTEGER NSTAE,LNAME,N,I,J,K,I1,I2
@@ -488,11 +488,11 @@ c
 #else 
       CHARACTER*1 DIRNAME
 #endif
-C
+!
       convrd=180.d0/pi
-c
-c**** Open elevation station harmonic output file and write header information
-c
+!
+!**** Open elevation station harmonic output file and write header information
+!
       open(51,file=DIRNAME(1:LNAME)//'/'//'fort.51')
       write(51,*) nfreq+nf
       do j=1,nfreq+nf
@@ -501,17 +501,17 @@ c
 3679  format(1x,e20.10,1x,f10.7,1x,f12.8,1x,a10)
       write(51,*) NSTAE
 
-c
-c**** AT each STATION TRANSFER each load vector to p and solve the system
-c
+!
+!**** AT each STATION TRANSFER each load vector to p and solve the system
+!
       DO N=1,NSTAE
          do k=1,mm
            hap(k)=STAELV(k,n)
            end do
          call fulsol(n)
 
-c        Compute amplitude and phase for each frequency making sure that the
-c        phase is between 0 and 360 deg.  Then write output.
+!        Compute amplitude and phase for each frequency making sure that the
+!        phase is between 0 and 360 deg.  Then write output.
 
          write(51,*) N
          do i=1,nfreq+nf
@@ -537,21 +537,21 @@ c        phase is between 0 and 360 deg.  Then write output.
             end do
 
          end do
-C
+!
       return
       end subroutine
 
 
-c***********************************************************************
-c   Subroutine to solve the system and write output for velocity       *
-c   stations.                                                          *
-c                                                                      *
-c   nf=0  if no steady constituent                                     *
-c   nf=1  if steady constituent                                        *
-c                                                                      *
-c                        R.L. 11/8/95                                  *
-c***********************************************************************
-c
+!***********************************************************************
+!   Subroutine to solve the system and write output for velocity       *
+!   stations.                                                          *
+!                                                                      *
+!   nf=0  if no steady constituent                                     *
+!   nf=1  if steady constituent                                        *
+!                                                                      *
+!                        R.L. 11/8/95                                  *
+!***********************************************************************
+!
       SUBROUTINE LSQSOLVS(NSTAV,DIRNAME,LNAME)
       IMPLICIT NONE
       INTEGER NSTAV,LNAME,I,J,N,K,I1,I2
@@ -563,13 +563,13 @@ c
 #else 
       CHARACTER*1 DIRNAME
 #endif
-c
+!
       convrd=180.d0/pi
-c
+!
       ALLOCATE ( Y(2*MNHARF) )
-c
-c**** Open velocity station harmonic output file and write header information
-c
+!
+!**** Open velocity station harmonic output file and write header information
+!
       open(52,file=DIRNAME(1:LNAME)//'/'//'fort.52')
       write(52,*) nfreq+nf
       do j=1,nfreq+nf
@@ -577,10 +577,10 @@ c
          end do
 3679  format(1x,e20.10,1x,f10.7,1x,f12.8,1x,a10)
       write(52,*) NSTAV
-c
-c**** AT each STATION, transfer each load vector to p, solve system, 
-c**** then write results
-c
+!
+!**** AT each STATION, transfer each load vector to p, solve system, 
+!**** then write results
+!
       DO N=1,NSTAV
          do k=1,mm
             hap(k) = STAVLV(k,n)
@@ -594,8 +594,8 @@ c
             end do
          call fulsol(n)
 
-c        Compute amplitude and phase for each frequency making sure that the
-c        phase is between 0 and 360 deg.  Then write output.
+!        Compute amplitude and phase for each frequency making sure that the
+!        phase is between 0 and 360 deg.  Then write output.
 
          write(52,*) N
          do i=1,nfreq+nf
@@ -637,26 +637,26 @@ c        phase is between 0 and 360 deg.  Then write output.
       end subroutine
 
 
-c***********************************************************************
-c   Subroutine to solve the system and write output for elevation      *
-c   globally.                                                          *
-c                                                                      *
-c   nf=0  if no steady constituent                                     *
-c   nf=1  if steady constituent                                        *
-c                                                                      *
-c                        R.L. 11/8/95                                  *
-c***********************************************************************
-c
+!***********************************************************************
+!   Subroutine to solve the system and write output for elevation      *
+!   globally.                                                          *
+!                                                                      *
+!   nf=0  if no steady constituent                                     *
+!   nf=1  if steady constituent                                        *
+!                                                                      *
+!                        R.L. 11/8/95                                  *
+!***********************************************************************
+!
       SUBROUTINE LSQSOLEG(NP,DIRNAME,LNAME,ELAV,ELVA)
       IMPLICIT NONE
-      integer LNAME,J,NP,N,K,I,I1,I2,IT,IFR,NEAVMAX,NEAVMIN,
-     &  NEVAMAX,NEVAMIN
+      integer LNAME,J,NP,N,K,I,I1,I2,IT,IFR,NEAVMAX,NEAVMIN,&
+       NEVAMAX,NEVAMIN
       REAL(8)  CONVRD 
       REAL(SZ) EAVMAX,EVAMAX,EAVMIN,EVAMIN,EMAGT
       REAL(SZ) PHASEDE,EAV,ESQ,TIME,RSE,FTIME,EAVDIF,EVADIF
       REAL(SZ) ELAV(MNP),ELVA(MNP)
       REAL(SZ),ALLOCATABLE  ::  PHASEE(:),EMAG(:)
-C
+!
       INTEGER NTSTEPS,ITMV
       REAL(8) TIMEBEG
       REAL(SZ) DT,FMV
@@ -666,13 +666,13 @@ C
 #else 
       CHARACTER*1 DIRNAME
 #endif
-c
+!
       convrd=180.d0/pi
-c
+!
       ALLOCATE ( PHASEE(MNHARF),EMAG(MNHARF) )
-c
-c**** Open velocity station harmonic output file and write header information
-c
+!
+!**** Open velocity station harmonic output file and write header information
+!
       open(53,file=DIRNAME(1:LNAME)//'/'//'fort.53')
       write(53,*) nfreq+nf
       do j=1,nfreq+nf
@@ -680,25 +680,25 @@ c
          end do
 3679  format(1x,e20.10,1x,f10.7,1x,f12.8,1x,a10)
       write(53,*) NP
-C
+!
       if (CHARMV) then
         EAVMAX=-999.
         EVAMAX=-999.
         EAVMIN= 999.
         EVAMIN= 999.
       end if
-c
-c***** AT each node transfer each load vector to p, solve and write output
-c
+!
+!***** AT each node transfer each load vector to p, solve and write output
+!
       DO N=1,NP
          do k=1,mm
             hap(k) = GLOELV(k,n)
             end do
          call fulsol(n)
-c
-c        Compute amplitude and phase for each frequency making sure that the
-c        phase is between 0 and 360 deg.  Then write output.
-c
+!
+!        Compute amplitude and phase for each frequency making sure that the
+!        phase is between 0 and 360 deg.  Then write output.
+!
          write(53,*) N
          do i=1,nfreq+nf
             if((nf.eq.1).and.(i.eq.1)) then
@@ -776,46 +776,42 @@ c
          end do
 
       if (charmv) then
-c
+!
       WRITE(16,7740)
- 7740 FORMAT(///,5X,'THE LARGEST VALUES OF THE RATIO ',
-     &              'RESYNTHESIZED ELEV TIME SERIES/RAW TIME SERIES:',/)
+ 7740 FORMAT(///,5X,'THE LARGEST VALUES OF THE RATIO ',&
+                   'RESYNTHESIZED ELEV TIME SERIES/RAW TIME SERIES:',/)
       WRITE(16,7741) EAVMAX,NEAVMAX
       WRITE(16,7742) EVAMAX,NEVAMAX
       WRITE(16,7747)
- 7747 FORMAT(/,5X,'THE LOWEST VALUES OF THE RATIO ',
-     &            'RESYNTHESIZED ELEV TIME SERIES/RAW TIME SERIES:',/)
+ 7747 FORMAT(/,5X,'THE LOWEST VALUES OF THE RATIO ',&
+                 'RESYNTHESIZED ELEV TIME SERIES/RAW TIME SERIES:',/)
       WRITE(16,7741) EAVMIN,NEAVMIN
       WRITE(16,7742) EVAMIN,NEVAMIN
  7741 FORMAT(9X,'  AVERAGE ELEVATION RATIO = ',E15.7,' AT NODE ',I8)
  7742 FORMAT(9X,' VARIANCE ELEVATION RATIO = ',E15.7,' AT NODE ',I8)
-c
+!
        endif  ! charmv
-c
+!
       return
       end subroutine
 
 
-c***********************************************************************
-c   Subroutine to solve the system and write output for velocity       *
-c   globally.                                                          *
-c                                                                      *
-c   nf=0  if no steady constituent                                     *
-c   nf=1  if steady constituent                                        *
-c                                                                      *
-c                        R.L. 11/10/95                                 *
-c***********************************************************************
-c
-      SUBROUTINE LSQSOLVG(NP,DIRNAME,LNAME,
-     &                    XVELAV,YVELAV,XVELVA,YVELVA)
+!***********************************************************************
+!   Subroutine to solve the system and write output for velocity       *
+!   globally.                                                          *
+!                                                                      *
+!   nf=0  if no steady constituent                                     *
+!   nf=1  if steady constituent                                        *
+!                                                                      *
+!                        R.L. 11/10/95                                 *
+!***********************************************************************
+!
+      SUBROUTINE LSQSOLVG(NP,DIRNAME,LNAME,XVELAV,YVELAV,XVELVA,YVELVA)
       IMPLICIT NONE
       INTEGER NP,LNAME,I,J,N,K,I1,I2,IT,IFR
-      INTEGER NUAVMAX,NUAVMIN,NVAVMAX,NVAVMIN,NUVAMAX,NUVAMIN,
-     &  NVVAMAX,NVVAMIN
+      INTEGER NUAVMAX,NUAVMIN,NVAVMAX,NVAVMIN,NUVAMAX,NUVAMIN,NVVAMAX,NVVAMIN
       REAL(SZ) UAV,VAV,USQ,VSQ,TIME,FTIME,RSU,RSV
-      REAL(SZ) UAVMAX,VAVMAX,UVAMAX,VVAMAX,UAVMIN,VAVMIN,
-     & UVAMIN,VVAMIN,PHASEDU,PHASEDV,UAVDIF,VAVDIF,UMAGT,VMAGT,
-     & UVADIF,VVADIF
+      REAL(SZ) UAVMAX,VAVMAX,UVAMAX,VVAMAX,UAVMIN,VAVMIN,UVAMIN,VVAMIN,PHASEDU,PHASEDV,UAVDIF,VAVDIF,UMAGT,VMAGT,UVADIF,VVADIF
       REAL(8) CONVRD
       REAL(SZ) XVELAV(MNP),YVELAV(MNP),XVELVA(MNP),YVELVA(MNP)
       REAL(SZ),ALLOCATABLE :: UMAG(:),VMAG(:),PHASEU(:),PHASEV(:)
@@ -829,15 +825,15 @@ c
 #else 
       CHARACTER*1 DIRNAME
 #endif
-c
+!
       convrd=180.d0/pi
-c
+!
       ALLOCATE ( Y(2*MNHARF) )
       ALLOCATE ( UMAG(MNHARF),VMAG(MNHARF) )
       ALLOCATE ( PHASEU(MNHARF),PHASEV(MNHARF) )
-c
-c**** Open velocity station harmonic output file and write header information
-c
+!
+!**** Open velocity station harmonic output file and write header information
+!
       open(54,file=DIRNAME(1:LNAME)//'/'//'fort.54')
       write(54,*) nfreq+nf
       do j=1,nfreq+nf
@@ -856,9 +852,9 @@ c
         UVAMIN= 999.
         VVAMIN= 999.
       endif ! charmv
-c
-c***** AT each node transfer each load vector to p, solve and write output
-c
+!
+!***** AT each node transfer each load vector to p, solve and write output
+!
       DO N=1,NP
          do k=1,mm
             hap(k) = GLOVLV(k,n)
@@ -909,10 +905,10 @@ c
  6636       format(2x,e16.8,1x,f11.4,2x,e16.8,1x,f11.4)
             end do
 
-CHARMV...UNCOMMENT THE FOLLOWING LINES TO COMPUTE MEANS AND VARIANCES
-CHARMV...FOR CHECKING THE HARMONIC ANALYSIS RESULTS.
-CHARMV...Resynthesize the time series to compute the average and variances.
-CHARMV...Compare resynthesized values with those computed during time stepping.
+!HARMV...UNCOMMENT THE FOLLOWING LINES TO COMPUTE MEANS AND VARIANCES
+!HARMV...FOR CHECKING THE HARMONIC ANALYSIS RESULTS.
+!HARMV...Resynthesize the time series to compute the average and variances.
+!HARMV...Compare resynthesized values with those computed during time stepping.
          if ( charmv ) then
          uav = 0.
          vav = 0.
@@ -1004,17 +1000,17 @@ CHARMV...Compare resynthesized values with those computed during time stepping.
          end do
 
       if ( charmv ) then 
-c
+!
       WRITE(16,7740)
- 7740 FORMAT(///,5X,'THE LARGEST VALUES OF THE RATIO ',
-     &              'RESYNTHESIZED VEL TIME SERIES/RAW TIME SERIES:',/)
+ 7740 FORMAT(///,5X,'THE LARGEST VALUES OF THE RATIO ',&
+                   'RESYNTHESIZED VEL TIME SERIES/RAW TIME SERIES:',/)
       WRITE(16,7743) UAVMAX,NUAVMAX
       WRITE(16,7744) UVAMAX,NUVAMAX
       WRITE(16,7745) VAVMAX,NVAVMAX
       WRITE(16,7746) VVAMAX,NVVAMAX
       WRITE(16,7747)
- 7747 FORMAT(//,5X,'THE LOWEST VALUES OF THE RATIO ',
-     &             'RESYNTHESIZED VEL TIME SERIES/RAW TIME SERIES:',/)
+ 7747 FORMAT(//,5X,'THE LOWEST VALUES OF THE RATIO ',&
+                  'RESYNTHESIZED VEL TIME SERIES/RAW TIME SERIES:',/)
       WRITE(16,7743) UAVMIN,NUAVMIN
       WRITE(16,7744) UVAMIN,NUVAMIN
       WRITE(16,7745) VAVMIN,NVAVMIN
@@ -1023,26 +1019,26 @@ c
  7744 FORMAT(9X,'VARIANCE U VELOCITY RATIO = ',E15.7,' AT NODE ',I8)
  7745 FORMAT(9X,' AVERAGE V VELOCITY RATIO = ',E15.7,' AT NODE ',I8)
  7746 FORMAT(9X,'VARIANCE V VELOCITY RATIO = ',E15.7,' AT NODE ',I8)
-c
+!
       endif ! charmv
-c
+!
       return
       end subroutine
 
 
-C
-c***********************************************************************
-c   Subroutine to initialize parameters for harmonic analysis with a   *
-c   cold start.                                                        *
-c                                                                      *
-c                        R.L.  11/9/95                                 *
-c***********************************************************************
-c
+!
+!***********************************************************************
+!   Subroutine to initialize parameters for harmonic analysis with a   *
+!   cold start.                                                        *
+!                                                                      *
+!                        R.L.  11/9/95                                 *
+!***********************************************************************
+!
       SUBROUTINE HACOLDS(HAFREQ)
       implicit none
       INTEGER I,J
       REAL(SZ) HAFREQ(MNHARF)
-C
+!
       if (hafreq(1).eq.0.0) then
          nz=0
          nf=1
@@ -1050,138 +1046,137 @@ C
          nz=1
          nf=0
       endif
-c
+!
       nfreq=nfreq-nf
       mm=2*nfreq+nf
-c
+!
       do i=1,mm
          do j=1,mm
             ha(i,j)=0.
          end do
       end do
       icall=0
-C
+!
       return
       end subroutine
 
 
-c***********************************************************************
-c   Subroutine to initialize global elevation load vectors for         *
-c   harmonic analysis with a cold start.                               *
-c                                                                      *
-c                        R.L.  11/9/95                                 *
-c***********************************************************************
-c
+!***********************************************************************
+!   Subroutine to initialize global elevation load vectors for         *
+!   harmonic analysis with a cold start.                               *
+!                                                                      *
+!                        R.L.  11/9/95                                 *
+!***********************************************************************
+!
       SUBROUTINE HACOLDSEG(NP)
       implicit none
       INTEGER NP,I,N
-c
+!
       do i=1,mm
          do N=1,NP
             GLOELV(I,N)=0.
          end do
       end do
-C
+!
       return
       end subroutine
 
 
-c***********************************************************************
-c   Subroutine to initialize elevation station load vectors for        *
-c   harmonic analysis with a cold start.                               *
-c                                                                      *
-c                        R.L.  11/9/95                                 *
-c***********************************************************************
-c
+!***********************************************************************
+!   Subroutine to initialize elevation station load vectors for        *
+!   harmonic analysis with a cold start.                               *
+!                                                                      *
+!                        R.L.  11/9/95                                 *
+!***********************************************************************
+!
       SUBROUTINE HACOLDSES(NSTAE)
       implicit none
       INTEGER  NSTAE
       INTEGER I,N
-C
+!
       do i=1,mm
          do N=1,NSTAE
             STAELV(I,N)=0.
          end do
       end do
-C
+!
       return
       end subroutine
 
 
-c***********************************************************************
-c   Subroutine to initialize global velocity load vectors for          *
-c   harmonic analysis with a cold start.                               *
-c                                                                      *
-c                        R.L.  11/9/95                                 *
-c***********************************************************************
-c
+!***********************************************************************
+!   Subroutine to initialize global velocity load vectors for          *
+!   harmonic analysis with a cold start.                               *
+!                                                                      *
+!                        R.L.  11/9/95                                 *
+!***********************************************************************
+!
       SUBROUTINE HACOLDSVG(NP)
       implicit none
       INTEGER NP,I,N
-C
+!
       do i=1,mm
          do N=1,NP
             GLOULV(I,N)=0.
             GLOVLV(I,N)=0.
          end do
       end do
-C
+!
       return
       end subroutine
 
 
-c***********************************************************************
-c   Subroutine to initialize elevation station load vectors for        *
-c   harmonic analysis with a cold start.                               *
-c                                                                      *
-c                        R.L.  11/9/95                                 *
-c***********************************************************************
-c
+!***********************************************************************
+!   Subroutine to initialize elevation station load vectors for        *
+!   harmonic analysis with a cold start.                               *
+!                                                                      *
+!                        R.L.  11/9/95                                 *
+!***********************************************************************
+!
       SUBROUTINE HACOLDSVS(NSTAV)
       implicit none
       INTEGER NSTAV,I,N
-c
+!
       do i=1,mm
          do N=1,NSTAV
             STAULV(I,N)=0.
             STAVLV(I,N)=0.
          enddo
       enddo
-C
+!
       return
       end subroutine
 
 
-c***********************************************************************
-c   Subroutine to read in and initialize harmonic analysis for a hot   *
-c   start.                                                             *
-c                                                                      *
-c   Checks are made to ensure agreement between values read in from    *
-c   the hotstart file and values read in from the UNIT 15 file.        *
-c                                                                      *
-c                        R.L. 11/9/95                                  *
-c***********************************************************************
-c
-      SUBROUTINE HAHOTS(NSTAE,NSTAV,NP,ISTAE,ISTAV,IGLOE,IGLOV,
-     &   NSCREEN,IHOTSTP,IHOT,MYPROC)
+!***********************************************************************
+!   Subroutine to read in and initialize harmonic analysis for a hot   *
+!   start.                                                             *
+!                                                                      *
+!   Checks are made to ensure agreement between values read in from    *
+!   the hotstart file and values read in from the UNIT 15 file.        *
+!                                                                      *
+!                        R.L. 11/9/95                                  *
+!***********************************************************************
+!
+      SUBROUTINE HAHOTS(NSTAE,NSTAV,NP,ISTAE,ISTAV,IGLOE,IGLOV,NSCREEN,IHOTSTP,IHOT,MYPROC)
       IMPLICIT NONE
       INTEGER NSTAE,NSTAV,NP, MYPROC
       INTEGER ISTAE, ISTAV, IGLOE, IGLOV, IFLAG, I, J
-C
+!
       INTEGER INFREQ, INSTAE, INSTAV, INP, INZ, INF
       INTEGER IISTAE, IISTAV, IIGLOE, IIGLOV,NSCREEN 
       INTEGER IHOTSTP, IHOT, IMM, IICALL
       REAL(SZ) FDIFF
-C
+!
       REAL(SZ),ALLOCATABLE ::  IFREQ(:),IFF(:),IFACE(:)
       CHARACTER*10,ALLOCATABLE :: INAMEFR(:)
-C
+!
       CHARACTER*16 FNAME
       CHARACTER*8 FNAM8(2)
       EQUIVALENCE (FNAM8(1),FNAME)
-c
-c***** Compute parameter values for checking
-c
+!
+!***** Compute parameter values for checking
+!
       if (hafreq(1).eq.0.0) then
         nz=0
         nf=1
@@ -1194,9 +1189,9 @@ c
 
       ALLOCATE ( IFREQ(MNHARF),IFF(MNHARF),IFACE(MNHARF) )
       ALLOCATE ( INAMEFR(MNHARF) )
-c
-c***** Read in and check various parameter values
-c
+!
+!***** Read in and check various parameter values
+!
       READ(IHOT,REC=IHOTSTP+1) inz
       READ(IHOT,REC=IHOTSTP+2) inf
       READ(IHOT,REC=IHOTSTP+3) imm
@@ -1210,7 +1205,7 @@ c
       READ(IHOT,REC=IHOTSTP+11) iicall
       READ(IHOT,REC=IHOTSTP+12) infreq
       IHOTSTP = IHOTSTP+12
-c
+!
       iflag=0
       if(nz.ne.inz) iflag=1
       if(nf.ne.inf) iflag=1
@@ -1223,7 +1218,7 @@ c
       if(igloe.ne.iigloe) iflag=1
       if(iglov.ne.iiglov) iflag=1
       if(nfreq.ne.infreq) iflag=1
-c
+!
       do i=1,nfreq+nf
          READ(IHOT,REC=IHOTSTP+1) FNAM8(1)
          READ(IHOT,REC=IHOTSTP+2) FNAM8(2)
@@ -1255,15 +1250,15 @@ c
          if(fdiff.ge.1.d-6) iflag=1
          end do
       if(iflag.eq.1) goto 999
-c
-c***** Read in time of most recent H.A. update
-c
+!
+!***** Read in time of most recent H.A. update
+!
       READ(IHOT,REC=IHOTSTP+1) TIMEUD
       READ(IHOT,REC=IHOTSTP+2) ITUD
       IHOTSTP = IHOTSTP + 2
-c
-c***** Read in RHS Matrix
-c
+!
+!***** Read in RHS Matrix
+!
       do i=1,mm
          do j=1,mm
             IHOTSTP = IHOTSTP + 1
@@ -1271,116 +1266,100 @@ c
          end do
          end do
 
-c
-c***** FATAL Error Messages
-c
+!
+!***** FATAL Error Messages
+!
  999  continue
       if(iflag.ne.0) then
          if(NSCREEN.EQ.1.AND.MYPROC.EQ.0) write(6,1000)
          write(16,1000)
-1000     FORMAT(////,5x,'***** DISCREPANCY IN HARMONIC ANALYSIS HOT ',
-     +                                            'START FILE *****',/)
+1000     FORMAT(////,5x,'***** DISCREPANCY IN HARMONIC ANALYSIS HOT START FILE *****',/)
          endif
 
       if(iflag.eq.1) then
          if(nz.ne.inz) then
             if(NSCREEN.EQ.1.AND.MYPROC.EQ.0) write(6,2010) inz,nz
             write(16,2010) inz,nz
-2010        format(5x,'NZ COMPUTED FROM UNIT 14 INPUT = ',I2,
-     +              ', NZ READ IN FROM HOT START FILE = ',I2,/)
+2010        format(5x,'NZ COMPUTED FROM UNIT 14 INPUT = ',I2,', NZ READ IN FROM HOT START FILE = ',I2,/)
             endif
          if(nf.ne.inf) then
             if(NSCREEN.EQ.1.AND.MYPROC.EQ.0) write(6,2020) inf,nf
             write(16,2020) inf,nf
-2020        format(5x,'NF COMPUTED FROM UNIT 14 INPUT = ',I2,
-     +              ', NF READ IN FROM HOT START FILE = ',I2,/)
+2020        format(5x,'NF COMPUTED FROM UNIT 14 INPUT = ',I2,', NF READ IN FROM HOT START FILE = ',I2,/)
             endif
          if(mm.ne.imm) then
             if(NSCREEN.EQ.1.AND.MYPROC.EQ.0) write(6,2030) imm,mm
             write(16,2030) imm,mm
-2030        format(5x,'MM COMPUTED FROM UNIT 14 INPUT = ',I2,
-     +              ', MM READ IN FROM HOT START FILE = ',I2,/)
+2030        format(5x,'MM COMPUTED FROM UNIT 14 INPUT = ',I2,                  ', MM READ IN FROM HOT START FILE = ',I2,/)
             endif
          if(np.ne.inp) then
             if(NSCREEN.EQ.1.AND.MYPROC.EQ.0) write(6,2040) inp,np
             write(16,2040) inp,np
-2040        format(5x,'NP READ IN FROM UNIT 15 = ',I2,
-     +              ', NP READ IN FROM HOT START FILE = ',I2,/)
+2040        format(5x,'NP READ IN FROM UNIT 15 = ',I2,                ', NP READ IN FROM HOT START FILE = ',I2,/)
             endif
          if(nstae.ne.instae) then
             if(NSCREEN.EQ.1.AND.MYPROC.EQ.0) write(6,2050) instae,nstae
             write(16,2050) instae,nstae
-2050        format(5x,'NSTAE READ IN FROM UNIT 15 = ',I2,
-     +              ', NSTAE READ IN FROM HOT START FILE = ',I2,/)
+2050        format(5x,'NSTAE READ IN FROM UNIT 15 = ',I2,                  ', NSTAE READ IN FROM HOT START FILE = ',I2,/)
             endif
          if(nstav.ne.instav) then
             if(NSCREEN.EQ.1.AND.MYPROC.EQ.0) write(6,2060) instav,nstav
             write(16,2060) instav,nstav
-2060        format(5x,'NSTAV READ IN FROM UNIT 15 = ',I2,
-     +              ', NSTAV READ IN FROM HOT START FILE = ',I2,/)
+2060        format(5x,'NSTAV READ IN FROM UNIT 15 = ',I2,                   ', NSTAV READ IN FROM HOT START FILE = ',I2,/)
             endif
          if(istae.ne.iistae) then
             if(NSCREEN.EQ.1.AND.MYPROC.EQ.0) write(6,2070) iistae,istae
             write(16,2070) iistae,istae
-2070        format(5x,'ISTAE READ IN FROM UNIT 15 = ',I2,
-     +              ', ISTAE READ IN FROM HOT START FILE = ',I2,/)
+2070        format(5x,'ISTAE READ IN FROM UNIT 15 = ',I2,                   ', ISTAE READ IN FROM HOT START FILE = ',I2,/)
             endif
          if(istav.ne.iistav) then
             if(NSCREEN.EQ.1.AND.MYPROC.EQ.0) write(6,2080) iistav,istav
             write(16,2080) iistav,istav
-2080        format(5x,'ISTAV READ IN FROM UNIT 15 = ',I2,
-     +              ', ISTAV READ IN FROM HOT START FILE = ',I2,/)
+2080        format(5x,'ISTAV READ IN FROM UNIT 15 = ',I2,                   ', ISTAV READ IN FROM HOT START FILE = ',I2,/)
             endif
          if(igloe.ne.iigloe) then
             if(NSCREEN.EQ.1.AND.MYPROC.EQ.0) write(6,2090) iigloe,igloe
             write(16,2090) iigloe,igloe
-2090        format(5x,'IGLOE READ IN FROM UNIT 15 = ',I2,
-     +              ', IGLOE READ IN FROM HOT START FILE = ',I2,/)
+2090        format(5x,'IGLOE READ IN FROM UNIT 15 = ',I2,                   ', IGLOE READ IN FROM HOT START FILE = ',I2,/)
             endif
          if(iglov.ne.iiglov) then
             if(NSCREEN.EQ.1.AND.MYPROC.EQ.0) write(6,2100) iiglov,iglov
             write(16,2100) iiglov,iglov
-2100        format(5x,'IGLOV READ IN FROM UNIT 15 = ',I2,
-     +              ', IGLOV READ IN FROM HOT START FILE = ',I2,/)
+2100        format(5x,'IGLOV READ IN FROM UNIT 15 = ',I2,                  ', IGLOV READ IN FROM HOT START FILE = ',I2,/)
             endif
          if(nfreq.ne.infreq) then
             if(NSCREEN.EQ.1.AND.MYPROC.EQ.0) write(6,2110) infreq,nfreq
             write(16,2110) infreq,nfreq
-2110        format(5x,'NFREQ COMPUTED FROM UNIT 15 INPUT = ',I2,
-     +              ', NFREQ READ IN FROM HOT START FILE = ',I2,/)
+2110        format(5x,'NFREQ COMPUTED FROM UNIT 15 INPUT = ',I2,                   ', NFREQ READ IN FROM HOT START FILE = ',I2,/)
             endif
          do i=1,nfreq+nf
             if(namefr(i).ne.inamefr(i)) then
-               if(NSCREEN.EQ.1.AND.MYPROC.EQ.0) 
-     &              write(6,2120) i,inamefr(i),namefr(i)
+               if(NSCREEN.EQ.1.AND.MYPROC.EQ.0) &
+                   write(6,2120) i,inamefr(i),namefr(i)
                write(16,2120) i,namefr(i),namefr(i)
-2120           format(5x,'FOR CONSTITUENT # ',I3,
-     +                 ', NAMEFR READ IN FROM UNIT 15 = ',A10,
-     +                 ', NAMEFR READ IN FROM HOT START FILE = ',A10,/)
+2120           format(5x,'FOR CONSTITUENT # ',I3,', NAMEFR READ IN FROM UNIT 15 = ',A10,', &
+                    NAMEFR READ IN FROM HOT START FILE = ',A10,/)
                endif
             if(hafreq(i).ne.ifreq(i)) then
-               if(NSCREEN.EQ.1.AND.MYPROC.EQ.0) 
-     &              write(6,2130) i,ifreq(i),hafreq(i)
+               if(NSCREEN.EQ.1.AND.MYPROC.EQ.0) &
+                   write(6,2130) i,ifreq(i),hafreq(i)
                write(16,2130) i,ifreq(i),hafreq(i)
-2130           format(5x,'FOR CONSTITUENT # ',I3,
-     +                 ', FREQ READ IN FROM UNIT 15 = ',D20.10,
-     +                 ', FREQ READ IN FROM HOT START FILE = ',D20.10,/)
+2130           format(5x,'FOR CONSTITUENT # ',I3,                      ', FREQ READ IN FROM UNIT 15 = ',D20.10,          &
+                    ', FREQ READ IN FROM HOT START FILE = ',D20.10,/)
                endif
             if(HAFF(i).ne.iFF(i)) then
-               if(NSCREEN.EQ.1.AND.MYPROC.EQ.0) 
-     &              write(6,2140) i,iff(i),haff(i)
+               if(NSCREEN.EQ.1.AND.MYPROC.EQ.0) &
+                   write(6,2140) i,iff(i),haff(i)
                write(16,2140) i,iff(i),haff(i)
-2140           format(5x,'FOR CONSTITUENT # ',I3,
-     +                 ', FF READ IN FROM UNIT 15 = ',F10.5,
-     +                 ', FF READ IN FROM HOT START FILE = ',F10.5,/)
+2140           format(5x,'FOR CONSTITUENT # ',I3,                      ', FF READ IN FROM UNIT 15 = ',F10.5,            &
+          ', FF READ IN FROM HOT START FILE = ',F10.5,/)
                endif
             if(HAFACE(i).ne.iFACE(i)) then
-               if(NSCREEN.EQ.1.AND.MYPROC.EQ.0) 
-     &              write(6,2150) i,iface(i),haface(i)
+               if(NSCREEN.EQ.1.AND.MYPROC.EQ.0) &
+                   write(6,2150) i,iface(i),haface(i)
                write(16,2150) i,iface(i),haface(i)
-2150           format(5x,'FOR CONSTITUENT # ',I3,
-     +                 ', FACE READ IN FROM UNIT 15 = ',F10.5,
-     +                 ', FACE READ IN FROM HOT START FILE = ',F10.5,/)
+2150           format(5x,'FOR CONSTITUENT # ',I3,                      ', FACE READ IN FROM UNIT 15 = ',F10.5,          &
+            ', FACE READ IN FROM HOT START FILE = ',F10.5,/)
                endif
             end do
          if(NSCREEN.EQ.1.AND.MYPROC.EQ.0) write(6,1010)
@@ -1393,67 +1372,67 @@ c
       end subroutine
 
 
-c***********************************************************************
-c   Subroutine to read in and initialize the global elevation load     *
-c   vector for harmonic analysis with a hot start.                     *
-c                                                                      *
-c                        R.L. 11/9/95                                  *
-c***********************************************************************
-c
+!***********************************************************************
+!   Subroutine to read in and initialize the global elevation load     *
+!   vector for harmonic analysis with a hot start.                     *
+!                                                                      *
+!                        R.L. 11/9/95                                  *
+!***********************************************************************
+!
       SUBROUTINE HAHOTSEG(NP,IHOTSTP,IHOT)
       implicit none
       integer np, ihotstp, ihot, n,i
-c
-c***** Read in Global Elevation LHS load vector
-c
+!
+!***** Read in Global Elevation LHS load vector
+!
          do n=1,np
             do i=1,mm
                IHOTSTP=IHOTSTP+1
                READ(IHOT,REC=IHOTSTP) GLOELV(I,N)
             end do
          end do
-C
+!
       return
       end subroutine
 
 
-c***********************************************************************
-c   Subroutine to read in and initialize the elevation station load    *
-c   vector for harmonic analysis with a hot start.                     *
-c                                                                      *
-c                        R.L. 11/9/95                                  *
-c***********************************************************************
-c
+!***********************************************************************
+!   Subroutine to read in and initialize the elevation station load    *
+!   vector for harmonic analysis with a hot start.                     *
+!                                                                      *
+!                        R.L. 11/9/95                                  *
+!***********************************************************************
+!
       SUBROUTINE HAHOTSES(NSTAE,IHOTSTP,IHOT)
       implicit none
       INTEGER NSTAE,IHOTSTP,IHOT,I,N
-c
-c***** Read in Station Elevation LHS load vector
-c
+!
+!***** Read in Station Elevation LHS load vector
+!
       do n=1,NSTAE
          do i=1,mm
             IHOTSTP=IHOTSTP+1
             READ(IHOT,REC=IHOTSTP) STAELV(I,N)
          end do
       end do
-C
+!
       return
       end subroutine
 
 
-c***********************************************************************
-c   Subroutine to read in and initialize the global velocity load      *
-c   vector for harmonic analysis with a hot start.                     *
-c                                                                      *
-c                        R.L. 11/9/95                                  *
-c***********************************************************************
-c
+!***********************************************************************
+!   Subroutine to read in and initialize the global velocity load      *
+!   vector for harmonic analysis with a hot start.                     *
+!                                                                      *
+!                        R.L. 11/9/95                                  *
+!***********************************************************************
+!
       SUBROUTINE HAHOTSVG(NP,IHOTSTP,IHOT)
       implicit none
       integer np, ihotstp, ihot, n, i
-c
-c***** Read in Global Velocity LHS load vector
-c
+!
+!***** Read in Global Velocity LHS load vector
+!
       do n=1,np
          do i=1,mm
             READ(IHOT,REC=IHOTSTP+1) GLOULV(I,N)
@@ -1461,24 +1440,24 @@ c
             IHOTSTP = IHOTSTP + 2
          end do
       end do
-C
+!
       return
       end subroutine
 
 
-c***********************************************************************
-c   Subroutine to read in and initialize the velocity station load     *
-c   vector for harmonic analysis with a hot start.                     *
-c                                                                      *
-c                        R.L. 11/9/95                                  *
-c***********************************************************************
-c
+!***********************************************************************
+!   Subroutine to read in and initialize the velocity station load     *
+!   vector for harmonic analysis with a hot start.                     *
+!                                                                      *
+!                        R.L. 11/9/95                                  *
+!***********************************************************************
+!
       SUBROUTINE HAHOTSVS(NSTAV,IHOTSTP,IHOT)
       implicit none
       INTEGER NSTAV,IHOTSTP,IHOT,N,I
-c
-c***** Read in Station Velocity LHS load vector
-c
+!
+!***** Read in Station Velocity LHS load vector
+!
       do n=1,NSTAV
          do i=1,mm
             READ(IHOT,REC=IHOTSTP+1) STAULV(I,N)
@@ -1486,20 +1465,19 @@ c
             IHOTSTP = IHOTSTP + 2
          enddo
       enddo
-C
+!
       return
       end subroutine
 
 
-c***********************************************************************
-c   Subroutine to write out to the hotstart file (UNITS 67 and 68)     *
-c   header information and the LHS matrix for the harmonic analysis    *
-c                                                                      *
-c                        R.L.  11/8/95                                 *
-c***********************************************************************
-c
-      SUBROUTINE HAHOUT(NP,NSTAE,NSTAV,ISTAE,ISTAV,IGLOE,IGLOV,
-     &  IOUNIT,IHOTSTP)
+!***********************************************************************
+!   Subroutine to write out to the hotstart file (UNITS 67 and 68)     *
+!   header information and the LHS matrix for the harmonic analysis    *
+!                                                                      *
+!                        R.L.  11/8/95                                 *
+!***********************************************************************
+!
+      SUBROUTINE HAHOUT(NP,NSTAE,NSTAV,ISTAE,ISTAV,IGLOE,IGLOV,IOUNIT,IHOTSTP)
       implicit none
       INTEGER NP,NSTAE,NSTAV,ISTAE,AE,ISTAV
       INTEGER IGLOE,IGLOV,IOUNIT,IHOTSTP,I,J
@@ -1507,9 +1485,9 @@ c
       CHARACTER*8 FNAM8(2)
       EQUIVALENCE (FNAM8(1),FNAME)
 
-c
-c***** Write Out various parameter values
-c
+!
+!***** Write Out various parameter values
+!
       WRITE(IOUNIT,REC=IHOTSTP+1) NZ
       WRITE(IOUNIT,REC=IHOTSTP+2) NF
       WRITE(IOUNIT,REC=IHOTSTP+3) MM
@@ -1535,16 +1513,16 @@ c
          IHOTSTP=IHOTSTP+3
       end do
 
-c
-c***** Write Out time of most recent H.A. update
-c
+!
+!***** Write Out time of most recent H.A. update
+!
       WRITE(IOUNIT,REC=IHOTSTP+1) TIMEUD
       WRITE(IOUNIT,REC=IHOTSTP+2) ITUD
       IHOTSTP=IHOTSTP+2
 
-c
-c***** Write Out LHS Matrix
-c
+!
+!***** Write Out LHS Matrix
+!
       do i=1,mm
          do j=1,mm
             IHOTSTP = IHOTSTP + 1
@@ -1556,20 +1534,20 @@ c
       end subroutine
 
 
-c***********************************************************************
-c   Subroutine to write global elevation harmonic analysis RHS load    *
-c   vector to a hot start file (UNITS 67 and 68)                       *
-c                                                                      *
-c                        R.L.  11/8/95                                 *
-c***********************************************************************
-c
+!***********************************************************************
+!   Subroutine to write global elevation harmonic analysis RHS load    *
+!   vector to a hot start file (UNITS 67 and 68)                       *
+!                                                                      *
+!                        R.L.  11/8/95                                 *
+!***********************************************************************
+!
       SUBROUTINE HAHOUTEG(NP,IOUNIT,IHOTSTP)
       implicit none
       INTEGER IOUNIT
       INTEGER NP,IHOTSTP,N,I 
-c
-c***** Write Out Global Elevation RHS load vector
-c
+!
+!***** Write Out Global Elevation RHS load vector
+!
       do n=1,np
          do i=1,mm
             IHOTSTP=IHOTSTP+1
@@ -1581,20 +1559,20 @@ c
       end subroutine
 
 
-c***********************************************************************
-c   Subroutine to write elevation station harmonic analysis RHS load   *
-c   vector to a hot start file (UNITS 67 and 68)                       *
-c                                                                      *
-c                        R.L.  11/8/95                                 *
-c***********************************************************************
-c
+!***********************************************************************
+!   Subroutine to write elevation station harmonic analysis RHS load   *
+!   vector to a hot start file (UNITS 67 and 68)                       *
+!                                                                      *
+!                        R.L.  11/8/95                                 *
+!***********************************************************************
+!
       SUBROUTINE HAHOUTES(NSTAE,IOUNIT,IHOTSTP)
       implicit none
       INTEGER NSTAE,IOUNIT,IHOTSTP,N,I
 
-c
-c***** Write Out Station Elevation RHS load vector
-c
+!
+!***** Write Out Station Elevation RHS load vector
+!
       do n=1,NSTAE
          do i=1,mm
             IHOTSTP=IHOTSTP+1
@@ -1606,20 +1584,20 @@ c
       end subroutine
 
 
-c***********************************************************************
-c   Subroutine to write global velocity harmonic analysis RHS load     *
-c   vector to a hot start file (UNITS 67 and 68)                       *
-c                                                                      *
-c                        R.L.  11/8/95                                 *
-c***********************************************************************
-c
+!***********************************************************************
+!   Subroutine to write global velocity harmonic analysis RHS load     *
+!   vector to a hot start file (UNITS 67 and 68)                       *
+!                                                                      *
+!                        R.L.  11/8/95                                 *
+!***********************************************************************
+!
       SUBROUTINE HAHOUTVG(NP,IOUNIT,IHOTSTP)
       implicit none
       INTEGER NP,IOUNIT,IHOTSTP,N,I
 
-c
-c***** Write Out Global Velocity RHS load vector
-c
+!
+!***** Write Out Global Velocity RHS load vector
+!
       do n=1,np
          do i=1,mm
             IHOTSTP=IHOTSTP+1
@@ -1633,19 +1611,19 @@ c
       end subroutine
 
 
-c***********************************************************************
-c   Subroutine to write velocity station harmonic analysis RHS load    *
-c   vector to a hot start file (UNITS 67 and 68)                       *
-c                                                                      *
-c                        R.L.  11/8/95                                 *
-c***********************************************************************
-c
+!***********************************************************************
+!   Subroutine to write velocity station harmonic analysis RHS load    *
+!   vector to a hot start file (UNITS 67 and 68)                       *
+!                                                                      *
+!                        R.L.  11/8/95                                 *
+!***********************************************************************
+!
       SUBROUTINE HAHOUTVS(NSTAV,IOUNIT,IHOTSTP)
       implicit none
       INTEGER NSTAV,IOUNIT,IHOTSTP,N,I
-c
-c***** Write Out Station Velocity LHS load vector
-c
+!
+!***** Write Out Station Velocity LHS load vector
+!
       do N=1,NSTAV
          do i=1,mm
             IHOTSTP=IHOTSTP+1
