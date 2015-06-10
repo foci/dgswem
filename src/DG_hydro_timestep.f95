@@ -34,8 +34,8 @@
 
 #ifdef SWAN
 !asey 101118: Add variables for coupling to SWAN.
-      USE Couple2Swan, ONLY: ComputeWaveDrivenForces,
-     &                       InterpoWeight
+      USE Couple2Swan, ONLY: ComputeWaveDrivenForces,&
+                            InterpoWeight
 #endif
 
       IMPLICIT NONE
@@ -72,6 +72,7 @@
 !.......Compute the DG time and DG ramp
 
 #ifdef RKSSP
+
  
          TIMEDG = TIME_A - DTDP + DTVD(IRK)*DTDP
          RAMPDG = 1.D0
@@ -79,13 +80,13 @@
          IF (NRAMP.GE.1) THEN
             IF (NRAMP.EQ.1) THEN
                RAMPDG = TANH((2.D0*((IT-1) + DTVD(IRK))*DTDP/86400.D0)/DRAMP)
-               RAMPExtFlux = 
-     $              TANH((2.D0*((IT-1) + DTVD(IRK))*DTDP/86400.D0)/DRAMPExtFlux)
+               RAMPExtFlux = &
+                   TANH((2.D0*((IT-1) + DTVD(IRK))*DTDP/86400.D0)/DRAMPExtFlux)
             ENDIF
             IF (NRAMP.EQ.2) THEN
                RAMPDG = TANH((2.D0*((IT-1) + DTVD(IRK))*DTDP/86400.D0)/DRAMP)
-               RAMPExtFlux = 
-     $              TANH((2.D0*((IT-1) + DTVD(IRK))*DTDP/86400.D0)/DRAMPExtFlux)
+               RAMPExtFlux = &
+                   TANH((2.D0*((IT-1) + DTVD(IRK))*DTDP/86400.D0)/DRAMPExtFlux)
             ENDIF
             IF (NRAMP.EQ.3) THEN
                WRITE(*,*) 'NRAMP = 3 not supported '
@@ -190,8 +191,8 @@
 
                   do l = 1,layers
                      
-                     bed(K,J,IRK+1,l) = bed(K,J,irk+1,l) + ARK*bed(K,J,I,l)
-     &                    + BRK*RHS_bed(K,J,I,l)
+                     bed(K,J,IRK+1,l) = bed(K,J,irk+1,l) + ARK*bed(K,J,I,l)&
+                         + BRK*RHS_bed(K,J,I,l)
 
                      !adjust for state variable represenation
                      ZE(K,J,IRK+1) = ZE(K,J,IRK+1) - BRK*RHS_bed(K,J,I,l)
@@ -200,35 +201,35 @@
                   enddo
 #endif
 
-                  ZE(K,J,IRK+1) = ZE(K,J,irk+1) + ARK*ZE(K,J,I)
-     &                 + BRK*RHS_ZE(K,J,I) 
-                  QX(K,J,IRK+1) = QX(K,J,irk+1) + ARK*QX(K,J,I)
-     &                 + BRK*RHS_QX(K,J,I)
-                  QY(K,J,IRK+1) = QY(K,J,irk+1) + ATVD(IRK,I)*QY(K,J,I)
-     &                 + BRK*RHS_QY(K,J,I)
+                  ZE(K,J,IRK+1) = ZE(K,J,irk+1) + ARK*ZE(K,J,I)&
+                      + BRK*RHS_ZE(K,J,I) 
+                  QX(K,J,IRK+1) = QX(K,J,irk+1) + ARK*QX(K,J,I)&
+                      + BRK*RHS_QX(K,J,I)
+                  QY(K,J,IRK+1) = QY(K,J,irk+1) + ATVD(IRK,I)*QY(K,J,I)&
+                      + BRK*RHS_QY(K,J,I)
 
 
 !.......Compute the transported tracer term if flagged
 
 #ifdef TRACE
-                  iota(K,J,IRK+1) = iota(K,J,irk+1) + ARK*iota(K,J,I)
-     &                 + BRK*RHS_iota(K,J,I)
+                  iota(K,J,IRK+1) = iota(K,J,irk+1) + ARK*iota(K,J,I)&
+                      + BRK*RHS_iota(K,J,I)
 #endif
 
 !......Compute chemistry transported terms if flagged
 
 #ifdef CHEM
-                  iota(K,J,IRK+1) = iota(K,J,irk+1) + ARK*iota(K,J,I)
-     &                 + BRK*RHS_iota(K,J,I)
-                  iota2(K,J,IRK+1) = iota2(K,J,irk+1) + ARK*iota2(K,J,I)
-     &                 + BRK*RHS_iota2(K,J,I)
+                  iota(K,J,IRK+1) = iota(K,J,irk+1) + ARK*iota(K,J,I)&
+                      + BRK*RHS_iota(K,J,I)
+                  iota2(K,J,IRK+1) = iota2(K,J,irk+1) + ARK*iota2(K,J,I)&
+                      + BRK*RHS_iota2(K,J,I)
 #endif
 
 !.......Compute the dynamic pressure if flagged
 
 #ifdef DYNP
-                  dynP(K,J,IRK+1) = dynP(K,J,irk+1) + ARK*dynP(K,J,I)
-     &                 + BRK*RHS_dynP(K,J,I)
+                  dynP(K,J,IRK+1) = dynP(K,J,irk+1) + ARK*dynP(K,J,I)&
+                      + BRK*RHS_dynP(K,J,I)
 #endif
 
 
@@ -240,19 +241,21 @@
 
 #ifdef RKC
 
+         print*,"Using RKC"
+
          TIMEDG = TIME_A - DTDP + RKC_c(IRK)*DTDP
          RAMPDG = 1.D0
          RAMPExtFlux = 1.0d0
          IF (NRAMP.GE.1) THEN
             IF (NRAMP.EQ.1) THEN
                RAMPDG = TANH((2.D0*(IT + RKC_c(IRK))*DTDP/86400.D0)/DRAMP)
-               RAMPExtFlux = 
-     $              TANH((2.D0*(IT + RKC_c(IRK))*DTDP/86400.D0)/DRAMPExtFlux)
+               RAMPExtFlux = &
+                    TANH((2.D0*(IT + RKC_c(IRK))*DTDP/86400.D0)/DRAMPExtFlux)
             ENDIF
             IF (NRAMP.EQ.2) THEN
                RAMPDG = TANH((2.D0*(IT + RKC_c(IRK))*DTDP/86400.D0)/DRAMP)
-               RAMPExtFlux = 
-     $              TANH((2.D0*(IT + RKC_c(IRK))*DTDP/86400.D0)/DRAMPExtFlux)
+               RAMPExtFlux = &
+                    TANH((2.D0*(IT + RKC_c(IRK))*DTDP/86400.D0)/DRAMPExtFlux)
             ENDIF
             IF (NRAMP.EQ.3) THEN
                WRITE(*,*) 'NRAMP = 3 not supported '
@@ -317,8 +320,8 @@
 #ifdef SED_LAY
                   do l = 1,layers
                      
-                     bed(K,J,IRK+1,l) = bed(K,J,irk+1,l) + bed(K,J,1,l) 
-     &                    + BRK*RHS_bed(K,J,1,l)
+                     bed(K,J,IRK+1,l) = bed(K,J,irk+1,l) + bed(K,J,1,l) &
+                         + BRK*RHS_bed(K,J,1,l)
 
                    !adjust for state variable represenation
                      ZE(K,J,IRK+1) = ZE(K,J,IRK+1) - BRK*RHS_bed(K,J,1,l)
@@ -326,34 +329,34 @@
                   enddo
 #endif
                   
-                  ZE(K,J,IRK+1) = ZE(K,J,irk+1) + ZE(K,J,1)
-     &                 + BRK*RHS_ZE(K,J,1)
-                  QX(K,J,IRK+1) = QX(K,J,irk+1) + QX(K,J,1)
-     &                 + BRK*RHS_QX(K,J,1)
-                  QY(K,J,IRK+1) = QY(K,J,irk+1)  + QY(K,J,1)
-     &                 + BRK*RHS_QY(K,J,1)
+                  ZE(K,J,IRK+1) = ZE(K,J,irk+1) + ZE(K,J,1)&
+                      + BRK*RHS_ZE(K,J,1)
+                  QX(K,J,IRK+1) = QX(K,J,irk+1) + QX(K,J,1)&
+                      + BRK*RHS_QX(K,J,1)
+                  QY(K,J,IRK+1) = QY(K,J,irk+1)  + QY(K,J,1)&
+                      + BRK*RHS_QY(K,J,1)
                   
 !.......Compute the transported tracer term if flagged
                   
 #ifdef TRACE
-                  iota(K,J,IRK+1) = iota(K,J,irk+1) + iota(K,J,1)
-     &                 + BRK*RHS_iota(K,J,1)
+                  iota(K,J,IRK+1) = iota(K,J,irk+1) + iota(K,J,1)&
+                      + BRK*RHS_iota(K,J,1)
 #endif
                   
 !......Compute chemistry transported terms if flagged
                   
 #ifdef CHEM
-                  iota(K,J,IRK+1) = iota(K,J,irk+1) + iota(K,J,1)
-     &                 + BRK*RHS_iota(K,J,1)
-                  iota2(K,J,IRK+1) = iota2(K,J,irk+1) + iota2(K,J,1)
-     &                 + BRK*RHS_iota2(K,J,1)
+                  iota(K,J,IRK+1) = iota(K,J,irk+1) + iota(K,J,1)&
+                       + BRK*RHS_iota(K,J,1)
+                  iota2(K,J,IRK+1) = iota2(K,J,irk+1) + iota2(K,J,1)&
+                       + BRK*RHS_iota2(K,J,1)
 #endif
 
 !.......Compute the dynamic pressure if flagged
                   
 #ifdef DYNP
-                  dynP(K,J,IRK+1) = dynP(K,J,irk+1) + dynP(K,J,1)
-     &                 + BRK*RHS_dynP(K,J,1)
+                  dynP(K,J,IRK+1) = dynP(K,J,irk+1) + dynP(K,J,1)&
+                      + BRK*RHS_dynP(K,J,1)
 #endif
                ENDDO
             ENDDO
@@ -373,8 +376,8 @@
 #ifdef SED_LAY
                   do l = 1,layers
                      
-                     bed(K,J,IRK+1,l) = bed(K,J,irk+1,l) + ARK*bed(K,J,1,l) + CRK*bed(K,J,irk,l)
-     &                    + DRK*bed(K,J,irk-1,l) + BRK*RHS_bed(K,J,irk,l) + ERK*RHS_bed(K,J,1,l)
+                     bed(K,J,IRK+1,l) = bed(K,J,irk+1,l) + ARK*bed(K,J,1,l) + CRK*bed(K,J,irk,l)&
+                         + DRK*bed(K,J,irk-1,l) + BRK*RHS_bed(K,J,irk,l) + ERK*RHS_bed(K,J,1,l)
 
 
                    !adjust for state variable represenation
@@ -383,37 +386,37 @@
                   enddo
 #endif
 
-                  ZE(K,J,IRK+1) = ZE(K,J,irk+1) + ARK*ZE(K,J,1) + CRK*ZE(K,J,irk)
-     &                 + DRK*ZE(K,J,irk-1) + BRK*RHS_ZE(K,J,irk) + ERK*RHS_ZE(K,J,1)
-                  QX(K,J,IRK+1) = QX(K,J,irk+1) + ARK*QX(K,J,1) + CRK*QX(K,J,irk)
-     &                 + DRK*QX(K,J,irk-1) + BRK*RHS_QX(K,J,irk) + ERK*RHS_QX(K,J,1)
-                  QY(K,J,IRK+1) = QY(K,J,irk+1) + ARK*QY(K,J,1) + CRK*QY(K,J,irk)
-     &                 + DRK*QY(K,J,irk-1) + BRK*RHS_QY(K,J,irk) + ERK*RHS_QY(K,J,1)
+                  ZE(K,J,IRK+1) = ZE(K,J,irk+1) + ARK*ZE(K,J,1) + CRK*ZE(K,J,irk)&
+                       + DRK*ZE(K,J,irk-1) + BRK*RHS_ZE(K,J,irk) + ERK*RHS_ZE(K,J,1)
+                  QX(K,J,IRK+1) = QX(K,J,irk+1) + ARK*QX(K,J,1) + CRK*QX(K,J,irk)&
+                       + DRK*QX(K,J,irk-1) + BRK*RHS_QX(K,J,irk) + ERK*RHS_QX(K,J,1)
+                  QY(K,J,IRK+1) = QY(K,J,irk+1) + ARK*QY(K,J,1) + CRK*QY(K,J,irk)&
+                       + DRK*QY(K,J,irk-1) + BRK*RHS_QY(K,J,irk) + ERK*RHS_QY(K,J,1)
 
 
 !.......Compute the transported tracer term if flagged
 
 #ifdef TRACE
-                  iota(K,J,IRK+1) = iota(K,J,irk+1) + ARK*iota(K,J,1) + CRK*iota(K,J,irk)
-     &                 + DRK*iota(K,J,irk-1) + BRK*RHS_iota(K,J,irk) + ERK*RHS_iota(K,J,1)
+                  iota(K,J,IRK+1) = iota(K,J,irk+1) + ARK*iota(K,J,1) + CRK*iota(K,J,irk)&
+                 + DRK*iota(K,J,irk-1) + BRK*RHS_iota(K,J,irk) + ERK*RHS_iota(K,J,1)
 
 #endif
 
 !......Compute chemistry transported terms if flagged
 
 #ifdef CHEM
-                  iota(K,J,IRK+1) =  iota(K,J,irk+1) + ARK*iota(K,J,1) + CRK*iota(K,J,irk)
-     &                 + DRK*iota(K,J,irk-1) + BRK*RHS_iota(K,J,irk) + ERK*RHS_iota(K,J,1)
-                  iota2(K,J,IRK+1) = iota2(K,J,irk+1) + ARK*iota2(K,J,1) + CRK*iota2(K,J,irk)
-     &                 + DRK*iota2(K,J,irk-1) + BRK*RHS_iota2(K,J,irk) + ERK*RHS_iota2(K,J,1)
+                  iota(K,J,IRK+1) =  iota(K,J,irk+1) + ARK*iota(K,J,1) + CRK*iota(K,J,irk)&
+                 + DRK*iota(K,J,irk-1) + BRK*RHS_iota(K,J,irk) + ERK*RHS_iota(K,J,1)
+                  iota2(K,J,IRK+1) = iota2(K,J,irk+1) + ARK*iota2(K,J,1) + CRK*iota2(K,J,irk)&
+                 + DRK*iota2(K,J,irk-1) + BRK*RHS_iota2(K,J,irk) + ERK*RHS_iota2(K,J,1)
 
 #endif
 
 !.......Compute the dynamic pressure if flagged
 
 #ifdef DYNP
-                  dynP(K,J,IRK+1) = dynP(K,J,irk+1) + ARK*dynP(K,J,1) + CRK*dynP(K,J,irk)
-     &                 + DRK*dynP(K,J,irk-1) + BRK*RHS_dynP(K,J,irk) + ERK*RHS_dynP(K,J,1)
+                  dynP(K,J,IRK+1) = dynP(K,J,irk+1) + ARK*dynP(K,J,1) + CRK*dynP(K,J,irk)&
+                 + DRK*dynP(K,J,irk-1) + BRK*RHS_dynP(K,J,irk) + ERK*RHS_dynP(K,J,1)
 
 #endif
 

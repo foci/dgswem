@@ -1337,8 +1337,7 @@
                if(NSCREEN.EQ.1.AND.MYPROC.EQ.0) &
                    write(6,2120) i,inamefr(i),namefr(i)
                write(16,2120) i,namefr(i),namefr(i)
-2120           format(5x,'FOR CONSTITUENT # ',I3,', NAMEFR READ IN FROM UNIT 15 = ',A10,', &
-                    NAMEFR READ IN FROM HOT START FILE = ',A10,/)
+2120           format(5x,'FOR CONSTITUENT # ',I3,', NAMEFR READ IN FROM UNIT 15 = ',A10,', NAMEFR READ IN FROM HOT START FILE = ',A10,/)
                endif
             if(hafreq(i).ne.ifreq(i)) then
                if(NSCREEN.EQ.1.AND.MYPROC.EQ.0) &

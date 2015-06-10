@@ -33,6 +33,4 @@ should be
 
 But more than this, I think that the string literal "empty" should be used rather than an undefined character sequence.
 
-
-
 ## List of Data Structures 

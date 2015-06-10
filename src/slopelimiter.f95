@@ -3260,8 +3260,8 @@
 !.....Declare local variables
 
       INTEGER L, LL, INC1,INC2,INC3,KDP,NN,IVAR,I,J,kk,k,varnum,bb,varnum_prev
-      REAL(SZ) ZEC(3),ZEVERTEX(3),DIF(3),SUMLOC,SUMDIF,SIGNDIF,
-     $     DIV,REDFAC,REDMAX,tmp1,tmp2,tmp3,bound
+      REAL(SZ) ZEC(3),ZEVERTEX(3),DIF(3),SUMLOC,SUMDIF,SIGNDIF
+      REAL(SZ)    DIV,REDFAC,REDMAX,tmp1,tmp2,tmp3,bound
       Real(SZ) ZEMIN1(3),ZEMAX1(3),QXMIN1(3),QXMAX1(3)
       Real(SZ) QYMIN1(3),QYMAX1(3)
       Real(SZ) iotaMIN1(3),iotaMAX1(3)
@@ -3624,8 +3624,8 @@
 !$$$
 !$$$               endif
 
-               ZE(2,I,IRK+1)=-1.d0/6.d0*(ZEVERTEX(1)+ZEVERTEX(2))
-     $              +1.d0/3.d0*ZEVERTEX(3)
+               ZE(2,I,IRK+1)=-1.d0/6.d0*(ZEVERTEX(1)+ZEVERTEX(2))&
+                   +1.d0/3.d0*ZEVERTEX(3)
                ZE(3,I,IRK+1)=-.5d0*ZEVERTEX(1)+.5d0*ZEVERTEX(2)
             ENDIF
             IF (IVAR.EQ.2) THEN
@@ -3644,8 +3644,8 @@
 !$$$
 !$$$               endif
 
-               QX(2,I,IRK+1)=-1.d0/6.d0*(ZEVERTEX(1)+ZEVERTEX(2))
-     $              +1.d0/3.d0*ZEVERTEX(3)
+               QX(2,I,IRK+1)=-1.d0/6.d0*(ZEVERTEX(1)+ZEVERTEX(2))&
+              +1.d0/3.d0*ZEVERTEX(3)
                QX(3,I,IRK+1)=-.5d0*ZEVERTEX(1)+.5d0*ZEVERTEX(2)
             ENDIF
             IF (IVAR.EQ.3) THEN
@@ -3663,8 +3663,8 @@
 !$$$
 !$$$               endif
 
-               QY(2,I,IRK+1)=-1.d0/6.d0*(ZEVERTEX(1)+ZEVERTEX(2))
-     $              +1.d0/3.d0*ZEVERTEX(3)
+               QY(2,I,IRK+1)=-1.d0/6.d0*(ZEVERTEX(1)+ZEVERTEX(2))&
+                   +1.d0/3.d0*ZEVERTEX(3)
                QY(3,I,IRK+1)=-.5d0*ZEVERTEX(1)+.5d0*ZEVERTEX(2)
             ENDIF
 
@@ -3685,8 +3685,8 @@
 !$$$
 !$$$               endif
                
-               iota(2,I,IRK+1)=-1.d0/6.d0*(ZEVERTEX(1)+ZEVERTEX(2))
-     $              +1.d0/3.d0*ZEVERTEX(3)
+               iota(2,I,IRK+1)=-1.d0/6.d0*(ZEVERTEX(1)+ZEVERTEX(2))&
+              +1.d0/3.d0*ZEVERTEX(3)
                iota(3,I,IRK+1)=-.5d0*ZEVERTEX(1)+.5d0*ZEVERTEX(2)
 
             ENDIF
@@ -3709,8 +3709,8 @@
 !$$$
 !$$$               endif
                
-               iota(2,I,IRK+1)=-1.d0/6.d0*(ZEVERTEX(1)+ZEVERTEX(2))
-     $              +1.d0/3.d0*ZEVERTEX(3)
+               iota(2,I,IRK+1)=-1.d0/6.d0*(ZEVERTEX(1)+ZEVERTEX(2))&
+                   +1.d0/3.d0*ZEVERTEX(3)
                iota(3,I,IRK+1)=-.5d0*ZEVERTEX(1)+.5d0*ZEVERTEX(2)
 
             ENDIF
@@ -3730,8 +3730,8 @@
 !$$$
 !$$$               endif
 
-               iota2(2,I,IRK+1)=-1.d0/6.d0*(ZEVERTEX(1)+ZEVERTEX(2))
-     $              +1.d0/3.d0*ZEVERTEX(3)
+               iota2(2,I,IRK+1)=-1.d0/6.d0*(ZEVERTEX(1)+ZEVERTEX(2))&
+                   +1.d0/3.d0*ZEVERTEX(3)
                iota2(3,I,IRK+1)=-.5d0*ZEVERTEX(1)+.5d0*ZEVERTEX(2)
             ENDIF
 #endif
@@ -3756,8 +3756,8 @@
 !$$$
 !$$$               endif
                
-               bed(2,I,IRK+1,l)=-1.d0/6.d0*(ZEVERTEX(1)+ZEVERTEX(2))
-     $              +1.d0/3.d0*ZEVERTEX(3)
+               bed(2,I,IRK+1,l)=-1.d0/6.d0*(ZEVERTEX(1)+ZEVERTEX(2))&
+                   +1.d0/3.d0*ZEVERTEX(3)
                bed(3,I,IRK+1,l)=-.5d0*ZEVERTEX(1)+.5d0*ZEVERTEX(2)
             
             
@@ -3803,8 +3803,8 @@
 !.....Declare local variables
 
       INTEGER L, LL, INC1,INC2,INC3,KDP,NN,IVAR,I,J,kk,k,varnum,bb,varnum_prev
-      REAL(SZ) ZEC(3),ZEVERTEX(3),DIF(3),SUMLOC,SUMDIF,SIGNDIF,
-     $     DIV,REDFAC,REDMAX,tmp1,tmp2,tmp3,bound
+      REAL(SZ) ZEC(3),ZEVERTEX(3),DIF(3),SUMLOC,SUMDIF,SIGNDIF
+      REAL(SZ)     DIV,REDFAC,REDMAX,tmp1,tmp2,tmp3,bound
       Real(SZ) ZEMIN1(3),ZEMAX1(3),QXMIN1(3),QXMAX1(3)
       Real(SZ) QYMIN1(3),QYMAX1(3)
       Real(SZ) iotaMIN1(3),iotaMAX1(3)
@@ -4167,8 +4167,8 @@
 !$$$
 !$$$               endif
 
-               ZE(2,I,IRK+1)=-1.d0/6.d0*(ZEVERTEX(1)+ZEVERTEX(2))
-     $              +1.d0/3.d0*ZEVERTEX(3)
+               ZE(2,I,IRK+1)=-1.d0/6.d0*(ZEVERTEX(1)+ZEVERTEX(2))&
+                   +1.d0/3.d0*ZEVERTEX(3)
                ZE(3,I,IRK+1)=-.5d0*ZEVERTEX(1)+.5d0*ZEVERTEX(2)
             ENDIF
             IF (IVAR.EQ.2) THEN
@@ -4187,8 +4187,8 @@
 !$$$
 !$$$               endif
 
-               QX(2,I,IRK+1)=-1.d0/6.d0*(ZEVERTEX(1)+ZEVERTEX(2))
-     $              +1.d0/3.d0*ZEVERTEX(3)
+               QX(2,I,IRK+1)=-1.d0/6.d0*(ZEVERTEX(1)+ZEVERTEX(2))&
+                   +1.d0/3.d0*ZEVERTEX(3)
                QX(3,I,IRK+1)=-.5d0*ZEVERTEX(1)+.5d0*ZEVERTEX(2)
             ENDIF
             IF (IVAR.EQ.3) THEN
@@ -4206,8 +4206,8 @@
 !$$$
 !$$$               endif
 
-               QY(2,I,IRK+1)=-1.d0/6.d0*(ZEVERTEX(1)+ZEVERTEX(2))
-     $              +1.d0/3.d0*ZEVERTEX(3)
+               QY(2,I,IRK+1)=-1.d0/6.d0*(ZEVERTEX(1)+ZEVERTEX(2))&
+              +1.d0/3.d0*ZEVERTEX(3)
                QY(3,I,IRK+1)=-.5d0*ZEVERTEX(1)+.5d0*ZEVERTEX(2)
             ENDIF
 
@@ -4228,8 +4228,8 @@
 !$$$
 !$$$               endif
                
-               iota(2,I,IRK+1)=-1.d0/6.d0*(ZEVERTEX(1)+ZEVERTEX(2))
-     $              +1.d0/3.d0*ZEVERTEX(3)
+               iota(2,I,IRK+1)=-1.d0/6.d0*(ZEVERTEX(1)+ZEVERTEX(2))&
+              +1.d0/3.d0*ZEVERTEX(3)
                iota(3,I,IRK+1)=-.5d0*ZEVERTEX(1)+.5d0*ZEVERTEX(2)
 
             ENDIF
@@ -4252,8 +4252,8 @@
 !$$$
 !$$$               endif
                
-               iota(2,I,IRK+1)=-1.d0/6.d0*(ZEVERTEX(1)+ZEVERTEX(2))
-     $              +1.d0/3.d0*ZEVERTEX(3)
+               iota(2,I,IRK+1)=-1.d0/6.d0*(ZEVERTEX(1)+ZEVERTEX(2))&
+              +1.d0/3.d0*ZEVERTEX(3)
                iota(3,I,IRK+1)=-.5d0*ZEVERTEX(1)+.5d0*ZEVERTEX(2)
 
             ENDIF
@@ -4273,8 +4273,8 @@
 !$$$
 !$$$               endif
 
-               iota2(2,I,IRK+1)=-1.d0/6.d0*(ZEVERTEX(1)+ZEVERTEX(2))
-     $              +1.d0/3.d0*ZEVERTEX(3)
+               iota2(2,I,IRK+1)=-1.d0/6.d0*(ZEVERTEX(1)+ZEVERTEX(2))&
+              +1.d0/3.d0*ZEVERTEX(3)
                iota2(3,I,IRK+1)=-.5d0*ZEVERTEX(1)+.5d0*ZEVERTEX(2)
             ENDIF
 #endif
@@ -4299,8 +4299,8 @@
 !$$$
 !$$$               endif
                
-               bed(2,I,IRK+1,l)=-1.d0/6.d0*(ZEVERTEX(1)+ZEVERTEX(2))
-     $              +1.d0/3.d0*ZEVERTEX(3)
+               bed(2,I,IRK+1,l)=-1.d0/6.d0*(ZEVERTEX(1)+ZEVERTEX(2))&
+              +1.d0/3.d0*ZEVERTEX(3)
                bed(3,I,IRK+1,l)=-.5d0*ZEVERTEX(1)+.5d0*ZEVERTEX(2)
             
             
@@ -4347,8 +4347,8 @@
 !.....Declare local variables
 
       INTEGER L, LL, INC1,INC2,INC3,KDP,NN,IVAR,I,J,kk,k,varnum,bb,varnum_prev
-      REAL(SZ) ZEC(3),ZEVERTEX(3),DIF(3),SUMLOC,SUMDIF,SIGNDIF,
-     $     DIV,REDFAC,REDMAX,tmp1,tmp2,tmp3,bound
+      REAL(SZ) ZEC(3),ZEVERTEX(3),DIF(3),SUMLOC,SUMDIF,SIGNDIF
+      REAL(SZ) DIV,REDFAC,REDMAX,tmp1,tmp2,tmp3,bound
       Real(SZ) ZEMIN1(3),ZEMAX1(3),QXMIN1(3),QXMAX1(3)
       Real(SZ) QYMIN1(3),QYMAX1(3)
       Real(SZ) iotaMIN1(3),iotaMAX1(3)
@@ -4714,8 +4714,8 @@
 !$$$
 !$$$               endif
 
-               ZE(2,I,IRK+1)=-1.d0/6.d0*(ZEVERTEX(1)+ZEVERTEX(2))
-     $              +1.d0/3.d0*ZEVERTEX(3)
+               ZE(2,I,IRK+1)=-1.d0/6.d0*(ZEVERTEX(1)+ZEVERTEX(2))&
+              +1.d0/3.d0*ZEVERTEX(3)
                ZE(3,I,IRK+1)=-.5d0*ZEVERTEX(1)+.5d0*ZEVERTEX(2)
             ENDIF
             IF (IVAR.EQ.2) THEN
@@ -4734,8 +4734,8 @@
 !$$$
 !$$$               endif
 
-               QX(2,I,IRK+1)=-1.d0/6.d0*(ZEVERTEX(1)+ZEVERTEX(2))
-     $              +1.d0/3.d0*ZEVERTEX(3)
+               QX(2,I,IRK+1)=-1.d0/6.d0*(ZEVERTEX(1)+ZEVERTEX(2))&
+              +1.d0/3.d0*ZEVERTEX(3)
                QX(3,I,IRK+1)=-.5d0*ZEVERTEX(1)+.5d0*ZEVERTEX(2)
             ENDIF
             IF (IVAR.EQ.3) THEN
@@ -4753,8 +4753,8 @@
 !$$$
 !$$$               endif
 
-               QY(2,I,IRK+1)=-1.d0/6.d0*(ZEVERTEX(1)+ZEVERTEX(2))
-     $              +1.d0/3.d0*ZEVERTEX(3)
+               QY(2,I,IRK+1)=-1.d0/6.d0*(ZEVERTEX(1)+ZEVERTEX(2))&
+              +1.d0/3.d0*ZEVERTEX(3)
                QY(3,I,IRK+1)=-.5d0*ZEVERTEX(1)+.5d0*ZEVERTEX(2)
             ENDIF
 
@@ -4775,8 +4775,8 @@
 !$$$
 !$$$               endif
                
-               iota(2,I,IRK+1)=-1.d0/6.d0*(ZEVERTEX(1)+ZEVERTEX(2))
-     $              +1.d0/3.d0*ZEVERTEX(3)
+               iota(2,I,IRK+1)=-1.d0/6.d0*(ZEVERTEX(1)+ZEVERTEX(2))&
+              +1.d0/3.d0*ZEVERTEX(3)
                iota(3,I,IRK+1)=-.5d0*ZEVERTEX(1)+.5d0*ZEVERTEX(2)
 
             ENDIF
@@ -4799,8 +4799,8 @@
 !$$$
 !$$$               endif
                
-               iota(2,I,IRK+1)=-1.d0/6.d0*(ZEVERTEX(1)+ZEVERTEX(2))
-     $              +1.d0/3.d0*ZEVERTEX(3)
+               iota(2,I,IRK+1)=-1.d0/6.d0*(ZEVERTEX(1)+ZEVERTEX(2))&
+              +1.d0/3.d0*ZEVERTEX(3)
                iota(3,I,IRK+1)=-.5d0*ZEVERTEX(1)+.5d0*ZEVERTEX(2)
 
             ENDIF
@@ -4820,8 +4820,8 @@
 !$$$
 !$$$               endif
 
-               iota2(2,I,IRK+1)=-1.d0/6.d0*(ZEVERTEX(1)+ZEVERTEX(2))
-     $              +1.d0/3.d0*ZEVERTEX(3)
+               iota2(2,I,IRK+1)=-1.d0/6.d0*(ZEVERTEX(1)+ZEVERTEX(2))&
+              +1.d0/3.d0*ZEVERTEX(3)
                iota2(3,I,IRK+1)=-.5d0*ZEVERTEX(1)+.5d0*ZEVERTEX(2)
             ENDIF
 #endif
@@ -4846,8 +4846,8 @@
 !$$$
 !$$$               endif
                
-               bed(2,I,IRK+1,l)=-1.d0/6.d0*(ZEVERTEX(1)+ZEVERTEX(2))
-     $              +1.d0/3.d0*ZEVERTEX(3)
+               bed(2,I,IRK+1,l)=-1.d0/6.d0*(ZEVERTEX(1)+ZEVERTEX(2))&
+              +1.d0/3.d0*ZEVERTEX(3)
                bed(3,I,IRK+1,l)=-.5d0*ZEVERTEX(1)+.5d0*ZEVERTEX(2)
             
             
@@ -8774,7 +8774,7 @@
 
       INTEGER L,LL,INC1,INC2,INC3,KDP,NN,IVAR,I,J,kk,k,varnum,ss,lll,l1,l2,l3
       REAL(SZ) ZEC(3),ZEVERTEX(3),DIF(3),SUMLOC,SUMDIF,SIGNDIF,ZEVERTEX2(3),
-     $     DIV,REDFAC,REDMAX,zek(MNE,3,1),zecc(MNE,3),zeve(MNE,3)
+      REAL(SZ) DIV,REDFAC,REDMAX,zek(MNE,3,1),zecc(MNE,3),zeve(MNE,3)
       Real(SZ), intent(inout) :: ZEder(MNE,dofh,1)
       Real(SZ), intent(inout) :: QXder(MNE,dofh,1)
       Real(SZ), intent(inout) :: QYder(MNE,dofh,1)
