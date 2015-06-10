@@ -193,7 +193,7 @@
       INTEGER :: comment,blank
       INTEGER :: eqind,exind
       LOGICAL :: found      
-      CHARACTER(100) :: temp,line,empty
+      CHARACTER(100) :: temp,line
       CHARACTER(15) :: test_opt
       CHARACTER(100) :: test_val
       
@@ -408,7 +408,6 @@
       
       INTEGER :: i
       INTEGER :: ncheck
-      CHARACTER(15) :: empty
       
       ! initialize fortdg structure
       DO i = 1,maxopt
@@ -416,7 +415,7 @@
         NULLIFY(fortdg(i)%rptr)
         NULLIFY(fortdg(i)%cptr)
         
-        fortdg(1)%key = empty
+        fortdg(i)%key = "empty"
         fortdg(i)%flag = 0        
       ENDDO
       
@@ -469,8 +468,9 @@
       ncheck = 0
       DO i = 1,maxopt
       
-        ! find and keep track of populated indicies
-        IF (fortdg(i)%key .ne. empty) THEN      
+        ! find and keep track of populated indicies         
+        ! zach temp debugging
+        IF (fortdg(i)%key .ne. "empty") THEN      
           nopt = nopt + 1      
           fortdg_ind(nopt) = i
         ENDIF
@@ -494,8 +494,8 @@
         ENDIF
       ENDDO
       
-!       PRINT*, "Number of options = ", nopt
-!       PRINT*, "Number of pointer associations = ", ncheck
+       PRINT*, "Number of options = ", nopt
+       PRINT*, "Number of pointer associations = ", ncheck
       
       ! ensure user has associated each keyword pointer
       IF (nopt /= ncheck) THEN

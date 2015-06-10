@@ -24,7 +24,14 @@ line (the line that needs to be continued) is commented... either the entire lin
 
 5. Added the following flags to gfortran compiler `-ffixed-line-length-none -ffree-line-length-none`
 
-6. comments after 
+6. Comments after `#ifdef`s throw a "extra tokens" compiler warning, so I'm moving the comments to the previous line just to avoid possible problems.
+
+7. Encountering errors in the `read_fort_dg` file; it looks like the "key" value was not property initialized. on line 419 of `read_fort_dg.F90` in the master branch:
+`fortdg(1)%key = empty`
+should be
+`fortdg(i)%key = empty`
+
+But more than this, I think that the string literal "empty" should be used rather than an undefined character sequence.
 
 
 
