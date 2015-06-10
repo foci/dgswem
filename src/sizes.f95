@@ -9,7 +9,7 @@
 !-----------------------------------------------------------------------
 !
 !     
-!     v10_sb5    - 10/11/05 - sb - Table that associates nodes to elements (NDEL!
+!     v10_sb5    - 10/11/05 - sb - Table that associates nodes to elements (NDEL)
 !
 !**************************************************************************
 !
@@ -40,8 +40,11 @@
 !   THAN 5 DIGITS OF PRECISION, THE MODEL RESULTS MAY NOT BE TRUSTWORTHY.
  
       INTEGER, PARAMETER ::  NPREC=7
-      INTEGER ::  MNPROC,MNE,MNP,MNEI,MNOPE,MNETA,MNBOU,MNVEL,MNTIF,MNBFR,MNFFR,MNSTAE,MNSTAV,MNSTAC,MNSTAM,MNHARF
+!
+      INTEGER ::  MNPROC,MNE,MNP,MNEI,MNOPE,MNETA,MNBOU,MNVEL,&
+       MNTIF,MNBFR,MNFFR,MNSTAE,MNSTAV,MNSTAC,MNSTAM,MNHARF
       INTEGER, TARGET :: layers
+!sb-
       INTEGER MNNDEL
 !--
 
@@ -111,7 +114,7 @@
         ENDDO
       ENDIF
 
-!C.....Default root working directory
+!.....Default root working directory
 
       IF (INPUTDIR == "") THEN
         ROOTDIR = '.'
@@ -120,7 +123,7 @@
         ROOTDIR = INPUTDIR
       ENDIF
       
-!C.....Set the global input directory
+!.....Set the global input directory
 
       GBLINPUTDIR = ROOTDIR
       
@@ -137,16 +140,16 @@
 !      if (.not. fileFound) then
 !        print *, "Failed to find prefix directory"
 !        call msg_abort()
-!C      end if
+!      end if
 
-!C      WRITE(INPUTDIR,'(2A)') TRIM(ROOTDIR),PREFIX(iprefix)
-!C      LNAME = LEN_TRIM(INPUTDIR)
-!C      WRITE(INPUTDIR(LNAME-3:LNAME),'(I4.4)') MYPROC
+!      WRITE(INPUTDIR,'(2A)') TRIM(ROOTDIR),PREFIX(iprefix)
+!      LNAME = LEN_TRIM(INPUTDIR)
+!      WRITE(INPUTDIR(LNAME-3:LNAME),'(I4.4)') MYPROC
 #else
-!C      WRITE(INPUTDIR,'(A)') TRIM(ROOTDIR)
+!      WRITE(INPUTDIR,'(A)') TRIM(ROOTDIR)
 #endif
 
-!Casey 121128: Uncommented these lines.
+!asey 121128: Uncommented these lines.
        if (GLOBALDIR == "") then
          ROOTDIR = '.'
        else

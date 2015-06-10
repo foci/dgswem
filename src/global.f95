@@ -73,7 +73,6 @@
 !
 !.....Declare variables used in sediment transport section
 !
-      INTEGER SEDFLAG, MAXEL, ELEM_ED, NBOR_ED, NBOR_EL,ITDG
       INTEGER, TARGET :: SEDFLAG
       INTEGER MAXEL, ELEM_ED, NBOR_ED, NBOR_EL,ITDG
       Integer tracer_flag, chem_flag
@@ -178,7 +177,7 @@
       REAL(SZ),ALLOCATABLE ::   WVNX2(:),WVNY2(:),PRN2(:)
       REAL(SZ),ALLOCATABLE ::   RSNX1(:),RSNY1(:),RSNX2(:),RSNY2(:)
 #ifdef SWAN
-!Casey 101118: Added the following arrays for output of radiation stress gradients.
+!asey 101118: Added the following arrays for output of radiation stress gradients.
       REAL(SZ),ALLOCATABLE,TARGET :: RSNXOUT(:), RSNYOUT(:)
 #endif
 !.....Allocate additional variables for wave friction
@@ -297,7 +296,8 @@
       CHARACTER*8  RDES8(4),RID8(3),AID8(3)
       CHARACTER*10 ALPHA
       CHARACTER*5,ALLOCATABLE :: TIPOTAG(:),BOUNTAG(:),FBOUNTAG(:)
-      EQUIVALENCE (RDES4(1),RDES8(1),RUNDES), (RID4(1),RID8(1),RUNID),(AID4(1),AID8(1),AGRID)
+      EQUIVALENCE (RDES4(1),RDES8(1),RUNDES), (RID4(1),RID8(1),RUNID),&
+                 (AID4(1),AID8(1),AGRID)
 
 !...
 !...EXPLICITLY DECLARE ADDITIONAL VARIABLES
@@ -346,7 +346,7 @@
       INTEGER  NTRSPC, NTRSPM, NUMITR, NW, NWET, NWSEGWI, NWSGGWI
       INTEGER  NCCHANGE
       INTEGER  IRAMPING
-
+!
       REAL(SZ) ADVECX, ADVECY, AGIRD, AH, AO12, AO6, ARG
       REAL(SZ) ARG1, ARG2, ARGJ, ARGJ1, ARGJ2, ARGSALT, ARGT
       REAL(SZ) ARGTP, AUV21, AUV22, BARAVGWT
@@ -478,6 +478,7 @@
       IF ( C3D) THEN
        ALLOCATE( DUU1(MNP),DUV1(MNP),DVV1(MNP),BSX1(MNP),BSY1(MNP))
        endif
+!
       RETURN
       END SUBROUTINE
 

@@ -271,10 +271,10 @@
             ENDIF
           ENDDO test
                     
-          IF (found == .false. .and. eqind > 0) THEN
+          IF (found .eqv. .false. .and. eqind > 0) THEN
             ! unmatched lines with an equal sign are either incorrect or no longer supported
             PRINT("(3A)"),"*** WARNING: ",test_opt, " is an incorrect or depreciated value ***"            
-          ELSE IF (found == .false.) THEN
+          ELSE IF (found .eqv. .false.) THEN
             ! unmatched lines without an equal sign are ignored
             PRINT("(A)"), "*** WARNING: non-comment line does not contain a keyword assignment***"           
           ENDIF
@@ -308,7 +308,7 @@
        quit = 0
        DO opt = 1,nopt
          i = fortdg_ind(opt)
-         IF (fortdg(i)%flag == 0 .and. fortdg(i)%required == .true.) THEN
+         IF (fortdg(i)%flag == 0 .and. fortdg(i)%required) THEN
            quit = 1   ! flag fatal error
          ENDIF
        ENDDO
@@ -320,7 +320,7 @@
           j = 0        
           DO opt = 1,nopt
             i = fortdg_ind(opt)
-            IF (fortdg(i)%flag == 0 .and. fortdg(i)%required == .true.) THEN
+            IF (fortdg(i)%flag == 0 .and. fortdg(i)%required) THEN
               j = j+1
               PRINT "(A,I3,2A)", "              ",j,") ",fortdg(i)%key
             ENDIF
@@ -336,7 +336,7 @@
           j = 0        
           DO opt = 1,nopt
             i = fortdg_ind(opt)
-            IF (fortdg(i)%flag == 0 .and. fortdg(i)%required == .false.) THEN
+            IF (fortdg(i)%flag == 0 .and. fortdg(i)%required .eqv. .false.) THEN
               
               j = j+1
               SELECT CASE (fortdg(i)%vartype) 
