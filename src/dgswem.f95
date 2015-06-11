@@ -16,16 +16,6 @@
           NoLiBF, NWP, Tau0, HBreak, FTheta, FGamma, Tau, CF, IFNLBF,&
           InitNAModule, ReadNodalAttr, InitNodalAttr, ESLM, ESLC,&
           IFLINBF, IFHYBF
-#ifdef SWAN
-!asey 110422: Create a new data structure with discontinuous information.
-!asey 121126: DEBUG.
-!     USE Couple2Adcirc, ONLY: PASS2SWAN
-!asey 101118: We need the following information to couple to unstructured SWAN.
-      USE Couple2Swan, ONLY: CouplingInterval,&
-                            PADCSWAN_FINAL,&
-                            PADCSWAN_INIT,&
-                            PADCSWAN_RUN
-#endif
 #ifdef CMPI
       USE MESSENGER_ELEM
 !--   
