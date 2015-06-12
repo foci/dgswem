@@ -292,8 +292,10 @@
 !     jgf46.00 Subroutine to read the nodal attributes file (unit 13).
 !
 !     ----------------------------------------------------------------
-      SUBROUTINE ReadNodalAttr(NScreen, ScreenUnit, MyProc, NAbOut)
+      SUBROUTINE ReadNodalAttr(s,NScreen, ScreenUnit, MyProc, NAbOut)
+        use sizes
       IMPLICIT NONE
+      type (sizes_type) :: s
       INTEGER, intent(in) :: NScreen ! nonzero for debug info to screen
       INTEGER, intent(in) :: ScreenUnit ! i/o for screen 
       INTEGER, intent(in) :: MyProc  ! in parallel, only MyProc=0 i/o to screen
@@ -344,7 +346,7 @@
           /,9X,'Must read Nodal Attributes File (unit 13).')
 !
 !     Determine if the Nodal Attributes File exists.
-      INQUIRE(FILE=TRIM(INPUTDIR)//'/'//'fort.13',EXIST=NAFound)
+      INQUIRE(FILE=TRIM(s%INPUTDIR)//'/'//'fort.13',EXIST=NAFound)
 !
       IF (.not.NAFound) THEN
          WRITE(16,1001)         ! Nodal Attributes file 
@@ -407,7 +409,7 @@
       WRITE(16,240) 
  240  FORMAT(/,9X,'Nodal Attributes File (unit 13) was found.',&
           ' Opening file.') 
-      OPEN(UNIT=13, FILE=DIRNAME//'/'//'fort.13', &
+      OPEN(UNIT=13, FILE=s%DIRNAME//'/'//'fort.13', &
          IOSTAT=ErrorIO)
       IF ( ErrorIO .GT. 0 ) THEN 
          WRITE(16,1001)         ! Nodal attribute file
@@ -1207,9 +1209,10 @@
 !     material.
 !
 !     ----------------------------------------------------------------
-      SUBROUTINE ReadLegacyStartDryFile(NP, NScreen, ScreenUnit, &
+      SUBROUTINE ReadLegacyStartDryFile(s,NP, NScreen, ScreenUnit, &
           MyProc, NAbOut)
       IMPLICIT NONE
+      type (sizes_type) :: s
       INTEGER, intent(in) :: NP ! number of nodes in grid file
       INTEGER, intent(in) :: NScreen ! nonzero for debug info to screen
       INTEGER, intent(in) :: ScreenUnit ! i/o for debug info to screen
@@ -1223,7 +1226,7 @@
       CHARACTER(len=80) AGRID2 ! users comment/description line
       REAL(SZ) DUM1, DUM2  ! data that we want to skip
 
-      OPEN(12,FILE=TRIM(INPUTDIR)//'/'//'fort.12')
+      OPEN(12,FILE=TRIM(s%INPUTDIR)//'/'//'fort.12')
 !
 !...  READ STARTDRY INFORMATION FROM UNIT 12 
       READ(12,'(A80)') AGRID2
@@ -1277,8 +1280,10 @@
 !     here purely as reference material.
 !
 !     ----------------------------------------------------------------
-      SUBROUTINE ReadLegacyBottomFrictionFile(NP, NScreen, ScreenUnit,MyProc, NAbOut)
+      SUBROUTINE ReadLegacyBottomFrictionFile(s, NP, NScreen, ScreenUnit,MyProc, NAbOut)
+        use sizes
       IMPLICIT NONE
+      type (sizes_type) :: s
       INTEGER, intent(in) :: NP ! number of nodes in grid file
       INTEGER, intent(in) :: NScreen ! nonzero for debug info to screen
       INTEGER, intent(in) :: ScreenUnit ! i/o for debug info to screen
@@ -1288,7 +1293,7 @@
       CHARACTER(len=80) AFRIC  ! user's comment/description line
       INTEGER NHG    ! node number from file
 
-      OPEN(21,FILE=TRIM(INPUTDIR)//'/'//'fort.21')
+      OPEN(21,FILE=TRIM(s%INPUTDIR)//'/'//'fort.21')
       READ(21,'(A80)') AFRIC
       DO I=1,NP
          READ(21,*) NHG,FRIC(NHG)

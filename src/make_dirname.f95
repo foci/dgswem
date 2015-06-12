@@ -1,5 +1,6 @@
 SUBROUTINE MAKE_DIRNAME(s)
   use sizes
+  implicit none
   type (sizes_type) :: s
   INTEGER :: IARGC, ARGCOUNT, I, iprefix
   CHARACTER(2048) :: CMDLINEARG
@@ -52,7 +53,7 @@ SUBROUTINE MAKE_DIRNAME(s)
   
   !.....Set the global input directory
   
-  GBLINPUTDIR = s%ROOTDIR
+  s%GBLINPUTDIR = s%ROOTDIR
   
 #ifdef CMPI
   !      iprefix = 0

@@ -70,11 +70,11 @@
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!      
 
-      SUBROUTINE READ_FIXED_FORT_DG()
+      SUBROUTINE READ_FIXED_FORT_DG(s)
       
       USE global, ONLY: dgswe,dg_to_cg,sedflag,reaction_rate,sed_equationX,sed_equationY, &
                         rhowat0,vertexslope
-      USE sizes, ONLY: layers,dirname
+      USE sizes
       USE dg, ONLY: padapt,pflag,gflag,diorism,pl,ph,px,slimit,plimit, &
                     pflag2con1,pflag2con2,lebesgueP,fluxtype,rk_stage,rk_order, &
                     modal_ic,dghot,dghotspool,slopeflag,slope_weight,porosity, &
@@ -83,13 +83,14 @@
             
       
       IMPLICIT NONE
-      
+      type (sizes_type) :: s
+
       INTEGER :: i
       CHARACTER(256) :: LINE
       
       CALL FORT_DG_SETUP()      
 
-      OPEN(25,FILE=DIRNAME//'/'//'fort.dg',POSITION="rewind")  
+      OPEN(25,FILE=s%DIRNAME//'/'//'fort.dg',POSITION="rewind")  
       
       PRINT*, ""
       PRINT("(A)"), "READING FIXED FORMAT FORT.DG..."
@@ -143,7 +144,7 @@
          READ(LINE,*) SLOPEFLAG,slope_weight
          vertexslope = .True.
       ENDIF
-      READ(25,*) SEDFLAG,porosity,SEVDM,layers
+      READ(25,*) SEDFLAG,porosity,SEVDM,s%layers
       READ(25,*) reaction_rate
       READ(25,*) MNES
       READ(25,*) artdif,kappa,s0,uniform_dif,tune_by_hand
@@ -180,12 +181,14 @@
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! 
  
-      SUBROUTINE READ_KEYWORD_FORT_DG()
+      SUBROUTINE READ_KEYWORD_FORT_DG(s)
       
-      USE sizes, ONLY: dirname
+      USE sizes
       USE global, ONLY: nfover
 
       IMPLICIT NONE
+      
+      type (sizes_type) :: s
       
       INTEGER :: i,j,opt
       INTEGER :: read_stat
@@ -205,7 +208,7 @@
       blank = 0
       
       
-      OPEN(25,FILE=DIRNAME//'/'//'fort.dg',POSITION="rewind")   
+      OPEN(25,FILE=s%DIRNAME//'/'//'fort.dg',POSITION="rewind")   
       
       PRINT*, ""
       PRINT("(A)"), "READING KEYWORD FORMAT FORT.DG..."
@@ -398,13 +401,15 @@
       
       
       USE global, ONLY: dgswe,dg_to_cg,sedflag,reaction_rate,sed_equationX,sed_equationY
-      USE sizes, ONLY: layers
+      USE sizes
       USE dg, ONLY: padapt,pflag,gflag,diorism,pl,ph,px,slimit,plimit, &
                     pflag2con1,pflag2con2,lebesgueP,fluxtype,rk_stage,rk_order, &
                     modal_ic,dghot,dghotspool,slopeflag,slope_weight,porosity, &
                     sevdm,mnes,artdif,kappa,s0,uniform_dif,tune_by_hand
       
       IMPLICIT NONE        
+
+      type (sizes_type) :: s
       
       INTEGER :: i
       INTEGER :: ncheck
@@ -468,7 +473,7 @@
       !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
       ! assign targets to the real variables
-      layers = layers_target
+      s%layers = layers_target
 
       
       nopt = 0

@@ -36,7 +36,7 @@ $(O_DIR):
 PREP_MSRC  =  presizes.f95 
 PGLO_MSRC  =  pre_global.f95  
 POST_MSRC  =  post_global.f95
-ADC_MSRC   =  sizes.f95 diff45_41.f95 global.f95 dg.f95 global_3dvs.f95 nodalattr.f95 fparser.f95 fparser2.f95 read_fort_dg.f95 make_dirname.f95
+ADC_MSRC   =  sizes.f95 diff45_41.f95 global.f95 dg.f95 nodalattr.f95 fparser.f95 fparser2.f95 read_fort_dg.f95 make_dirname.f95
 HARM_MSRC  =  harm.f95  
 WIND_MSRC  =  wind.f95  
 #Casey 121126: Add file for coupling to unstructured SWAN.
