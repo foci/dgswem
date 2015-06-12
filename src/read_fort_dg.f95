@@ -408,6 +408,9 @@
       
       INTEGER :: i
       INTEGER :: ncheck
+
+      !declare targets because we can't have targets in the data types
+      integer, target :: layers_target
       
       ! initialize fortdg structure
       DO i = 1,maxopt
@@ -449,7 +452,7 @@
       fortdg(23)%key = "sedflag";       fortdg(23)%iptr => sedflag;        fortdg(23)%required = .true.;     fortdg(23)%iptr = 0
       fortdg(24)%key = "porosity";      fortdg(24)%rptr => porosity;       fortdg(24)%required = .true.;     fortdg(24)%rptr = 0.0001
       fortdg(25)%key = "sevdm";         fortdg(25)%rptr => sevdm;          fortdg(25)%required = .true.;     fortdg(25)%rptr = 0.00001
-      fortdg(26)%key = "layers";        fortdg(26)%iptr => layers;         fortdg(26)%required = .false.;    fortdg(26)%iptr = 1
+      fortdg(26)%key = "layers";        fortdg(26)%iptr => layers_target;         fortdg(26)%required = .false.;    fortdg(26)%iptr = 1
       fortdg(27)%key = "rxn_rate";      fortdg(27)%rptr => reaction_rate;  fortdg(27)%required = .true.;     fortdg(27)%rptr = 1.0
       fortdg(28)%key = "nelem";         fortdg(28)%iptr => mnes;           fortdg(28)%required = .true.;     fortdg(28)%iptr = 23556
       fortdg(29)%key = "artdif";        fortdg(29)%iptr => artdif;         fortdg(29)%required = .true.;     fortdg(29)%iptr = 0
@@ -463,6 +466,10 @@
       !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
       ! End configuration
       !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+      ! assign targets to the real variables
+      layers = layers_target
+
       
       nopt = 0
       ncheck = 0

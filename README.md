@@ -34,3 +34,16 @@ should be
 But more than this, I think that the string literal "empty" should be used rather than an undefined character sequence.
 
 ## List of Data Structures 
+SIZES
+GLOBAL
+WIND
+FORT_DG
+DG
+
+## Converting MODULE variables into user defined types
+
+I'm starting with the `SIZES` module, since it's the smallest.  `PARAMETER` variables can't be inside the user defined type, which is fine since they are static. Nothing needs to be done inside the source code that use any of those variables. The rest of the variables are placed inside a block that starts with `type sizes_type`.  No `TARGET`s are allowed either, which only affects one variable in this module. The target property seems to be used in reading the keyword style fort.dg file, so I've modified the `read_fort_dg.f95` subroutine, adding a temporary variable `layers_target` and then later assigning that value to `layers`. I think we will need to do this for all of the variables read in via the fort.dg keyword style files.
+
+I've created a list of variables inside `sizes_type` mostly by hand. I've also created a bash script that uses `sed` to prepend `s%` to the beginning of each variable in the list. Each subroutine that uses members of `sizes_type` will need to be modified and passed the instance of `sizes_type` that we will call `s`. 
+
+This process will definitely produce some errors, and need to be manually checked.
