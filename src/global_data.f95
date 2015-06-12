@@ -1,79 +1,64 @@
-!**************************************************************************
-!  mod history
-!  v41.06mxxx  - date - programmer - describe change 
-!                    - mark change in code with  cinitials-mxxx
-!  v41.10      - 07/25/01 - rl - from 41.09 - bug fix in GWCE lateral viscosity term
-!  v41.09      - 06/30/01 - jw - from 41.08 - made minor mods as per vp version 41.05
-!  v41.06      - 04/02/01 - rl - changed MNWP to MNP in wind forcing 
-!                                ALLOCATION statements
-!  v41.02      - 09/04 - rl
-!  v40.02m004b - 05/17 - vjp - corrected dimensioning problem cvjpm004b
-!  v40.02m001  - 12/21 - jjw - add cross barrier pipes cjjwm001
-!-----------------------------------------------------------------------
-!
-!     v9_sb2.2.1 - 08/16/05 - sb - Hard bottom implementation
-!     v10_sb5    - 10/11/05 - sb - Table that associates nodes to elements (NODEELEM)
-!                - 10/27/05 - sb - H0L and H0H are added
-!
-!**************************************************************************
-! 
-      MODULE GLOBAL
-      USE SIZES
-!...
-!...SET GLOBAL PARAMETER CONSTANTS
-!...
+module global_data
+  implicit none
+  ! Parameters go here
 
-#ifdef SWAN
-!asey 121128: Added variables for the output of global files from SWAN.
-      INTEGER,ALLOCATABLE,TARGET :: NODES_LG(:)
-      INTEGER,PARAMETER :: BUFSIZE_MAX = 131072
-      INTEGER :: float_type
-      INTEGER :: integerBuffer(BUFSIZE_MAX)
-      INTEGER :: integerResultBuffer(BUFSIZE_MAX)
-      INTEGER :: NP_G
-      REAL(SZ) :: buf(BUFSIZE_MAX)
-      REAL(SZ) :: resultBuf(BUFSIZE_MAX)
-      TYPE OutputDataDescript_t
-        CHARACTER(12) :: file_name
-        CHARACTER(20) :: field_name
-        INTEGER,POINTER :: iarray(:)
-        INTEGER,POINTER :: iarray_g(:)
-        INTEGER,POINTER :: imap(:)
-        INTEGER :: int_initial_value
-        INTEGER :: num_fd_records
-        INTEGER :: num_items_per_record
-        INTEGER :: num_records_this
-        INTEGER :: specifier
-        LOGICAL :: ConsiderWetDry
-        REAL(SZ),POINTER :: array(:)
-        REAL(SZ),POINTER :: array2(:)
-        REAL(SZ),POINTER :: array3(:)
-        REAL(SZ),POINTER :: array_g(:)
-        REAL(SZ),POINTER :: array2_g(:)
-        REAL(SZ),POINTER :: array3_g(:)
-        REAL(SZ),POINTER :: hotstart(:)
-        REAL(SZ),POINTER :: hotstart_g(:)
-        REAL(SZ) :: initial_value
-        real(SZ) :: alternate_value
-      ENDTYPE OutputDataDescript_t
+  !...SET NUMBER OF BYTES "SZ" IN REAL(SZ) DECLARATIONS       
+  !...SET "NBYTE" FOR PROCESSING INPUT DATA RECORD LENGTH
+  
+  INTEGER, PARAMETER :: SZ = 8
+  INTEGER, PARAMETER :: NBYTE=8
+  
+  !...SET MAX OF DIGITS OF PRECISION "NPREC" THE GRID CAN BE EXPECTED TO HAVE
+  !...NOTE: IF THE GRID WAS BUILT ON A 32 BIT COMPUTER, IT SHOULD BE
+  !   ACCURATE TO ABOUT 7 DIGITS.  THUS, IF THE NODAL SPACING REQUIRES MORE
+  !   THAN 5 DIGITS OF PRECISION, THE MODEL RESULTS MAY NOT BE TRUSTWORTHY.
+  
+  INTEGER, PARAMETER ::  NPREC=7
+
+  !.....PI and degrees to radians conversions
+  REAL(8), PARAMETER  ::  PI=3.141592653589793D0
+  REAL(8), PARAMETER  ::  DEG2RAD = PI/180.D0
+  REAL(8), PARAMETER  ::  RAD2DEG = 180.D0/PI
+  
+  !.....parameters used in barrier overflow 
+  REAL(SZ), PARAMETER ::  BARMIN=0.01D0
+  
+
+  ! Other variables go here
+  type global_data_type
+
+     !from module sizes
+     INTEGER ::  MNPROC,MNE,MNP,MNEI,MNOPE,MNETA,MNBOU,MNVEL,&
+          MNTIF,MNBFR,MNFFR,MNSTAE,MNSTAV,MNSTAC,MNSTAM,MNHARF
+     INTEGER, TARGET :: layers
+     INTEGER MNNDEL
+     
+     LOGICAL C2DDI,C3D,C3DDSS,C3DVS,CLUMP,CTIP,CHARMV
+     !
+     ! For Definition of Working Directory
+     !
+     INTEGER,SAVE :: MYPROC
+     
+#ifdef CMPI
+     INTEGER,SAVE :: LNAME = 6
+     CHARACTER*6,SAVE :: DIRNAME = 'PE0000'
+#else
+     INTEGER,SAVE :: LNAME = 1
+     CHARACTER*1,SAVE :: DIRNAME = '.'
 #endif
+     
+     LOGICAL      :: WRITE_LOCAL_FILES
+     LOGICAL      :: WRITE_LOCAL_HOT_START_FILES
+     CHARACTER(256),  SAVE :: ROOTDIR
+     CHARACTER(2048), SAVE :: INPUTDIR, GLOBALDIR, LOCALDIR
+     CHARACTER(2048), SAVE :: GBLINPUTDIR, HOTSTARTDIR
+     
 
-      Logical vertexslope
-
-!.....PI and degrees to radians conversions
-      REAL(8), PARAMETER  ::  PI=3.141592653589793D0
-      REAL(8), PARAMETER  ::  DEG2RAD = PI/180.D0
-      REAL(8), PARAMETER  ::  RAD2DEG = 180.D0/PI
-
-!.....parameters used in barrier overflow 
-      REAL(SZ), PARAMETER ::  BARMIN=0.01D0
-      REAL(SZ) DEPAVG,DEPMAX,DEPMIN
-!
-!.....Sediment Transport stuff added (Ethan Kubatko 8-1-2003)
-!
-!.....Declare variables used in sediment transport section
-!
-      INTEGER, TARGET :: SEDFLAG
+     ! from module global
+     Logical vertexslope
+     REAL(SZ) DEPAVG,DEPMAX,DEPMIN
+     
+           INTEGER, TARGET :: SEDFLAG
       INTEGER MAXEL, ELEM_ED, NBOR_ED, NBOR_EL,ITDG
       Integer tracer_flag, chem_flag
       INTEGER N1,N2,NO_NBORS,NBOR,SEDFLAG_W, OPEN_INDEX
@@ -158,7 +143,6 @@
       REAL(SZ),ALLOCATABLE ::   QNAM(:,:),QNPH(:,:)
       REAL(SZ),ALLOCATABLE ::   QNIN1(:),QNIN2(:)
       REAL(SZ),ALLOCATABLE ::   CSI(:),SII(:)
-!      REAL(SZ),ALLOCATABLE ::   TAU0VAR(:)
       REAL(SZ),ALLOCATABLE ::   ET00(:),BT00(:)
       REAL(SZ),ALLOCATABLE ::   STAIE1(:),STAIE2(:),STAIE3(:)
       REAL(8),ALLOCATABLE ::    XEV(:),YEV(:),SLEV(:),SFEV(:)
@@ -176,11 +160,8 @@
       REAL(SZ),ALLOCATABLE ::   WVNX1(:),WVNY1(:),PRN1(:)
       REAL(SZ),ALLOCATABLE ::   WVNX2(:),WVNY2(:),PRN2(:)
       REAL(SZ),ALLOCATABLE ::   RSNX1(:),RSNY1(:),RSNX2(:),RSNY2(:)
-#ifdef SWAN
-!asey 101118: Added the following arrays for output of radiation stress gradients.
-      REAL(SZ),ALLOCATABLE,TARGET :: RSNXOUT(:), RSNYOUT(:)
-#endif
-!.....Allocate additional variables for wave friction
+
+      !.....Allocate additional variables for wave friction
       REAL(SZ),ALLOCATABLE ::   WAVE_T1(:),WAVE_H1(:),WAVE_A1(:),WAVE_D1(:)
       REAL(SZ),ALLOCATABLE ::   WAVE_T2(:),WAVE_H2(:),WAVE_A2(:),WAVE_D2(:)
       REAL(SZ),ALLOCATABLE ::   WAVE_T(:), WAVE_H(:), WAVE_A(:), WAVE_D(:)
@@ -254,21 +235,7 @@
       REAL(SZ),ALLOCATABLE ::   BK(:),BALPHA(:),BDELX(:)
       INTEGER, ALLOCATABLE ::   NBNNUM(:)
 
-!...
-!...DECLARE COMMON BLOCKS
-!...
-      INTEGER NTSTEPS,ITMV
-      REAL(SZ) DT,FMV
-      REAL(8) TIMEBEG
-      COMMON /MEANSQ/ TIMEBEG,DT,FMV,NTSTEPS,ITMV
-!
-      INTEGER NHARFR
-      COMMON /LSQFREQS/ NHARFR
-!
-      INTEGER NP,NOLICA,NOLIFA,NSCREEN,IHOT,ICS
-      COMMON /EXTMODE5/ NP,NOLICA,NOLIFA,NSCREEN,IHOT,ICS
-
-!...
+      !...
 !...DECLARE REAL(8) AND CHAR VARIABLES, EQUIVALENCES
 !...
       REAL(8) STATIM,REFTIM,TIME_A,DTDP,TIMEH,vdtdp,cfl_max
@@ -412,6 +379,7 @@
       REAL(8)  RNP_GLOBAL
       REAL(8)  REFSEC   ! required to run in either 32-bit or 64-bit
       
+<<<<<<< HEAD:src/global.f95
 
 
 !-------------------end of data declarations----------------------------------C
@@ -781,3 +749,18 @@
 
 
       END MODULE GLOBAL
+=======
+      INTEGER NTSTEPS,ITMV
+      REAL(SZ) DT,FMV
+      REAL(8) TIMEBEG
+      COMMON /MEANSQ/ TIMEBEG,DT,FMV,NTSTEPS,ITMV
+      !
+      INTEGER NHARFR
+      COMMON /LSQFREQS/ NHARFR
+      !
+      INTEGER NP,NOLICA,NOLIFA,NSCREEN,IHOT,ICS
+      COMMON /EXTMODE5/ NP,NOLICA,NOLIFA,NSCREEN,IHOT,ICS
+      
+      
+      
+>>>>>>> 9a3d50dc77bb1ad5928d1fc81912f9516cc9f0aa:src/global_data.f95

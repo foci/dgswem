@@ -1,0 +1,301 @@
+SUBROUTINE ALLOC_MAIN1()
+  !
+  !     Allocate space for Arrays dimensioned by MNE and MNP
+  !
+  ALLOCATE ( SLAM(MNP),SFEA(MNP),X(MNP),Y(MNP))
+  ALLOCATE ( DP(MNP),DP0(MNP),DPe(MNE),SFAC(MNP))!,STARTDRY(MNP))
+  ALLOCATE ( NM(MNE,3))
+  ALLOCATE ( NOT_AN_EDGE(MNP) )
+  ALLOCATE ( WEIR_BUDDY_NODE(MNP,2) )
+  ALLOCATE ( ONE_OR_TWO(MNP) )
+  ALLOCATE ( NELED(3,MNE))
+  ALLOCATE ( ETAS(MNP))
+  ALLOCATE ( QW(MNP))
+  !.....ek now allocated in nodal attributes
+  !      ALLOCATE ( FRIC(MNP),EVM(MNP))
+  ALLOCATE ( UU1(MNP),VV1(MNP))
+  ALLOCATE ( NNODECODE(MNP),NODEREP(MNP))
+  ALLOCATE ( NNEIGH(MNP),MJU(MNP),NODELE(MNP))
+  ALLOCATE ( NIBNODECODE(MNP),NNEIGH_ELEM(MNP))
+  !      ALLOCATE ( TAU0VAR(MNP))
+  ALLOCATE ( CH1(MNP),QB(MNP),QA(MNP),SOURSIN(MNP))!,EVC(MNP))
+  ALLOCATE ( TKXX(MNP),TKYY(MNP),TKXY(MNP))
+  ALLOCATE ( AREAS(MNE),SFACDUB(3,MNE),RTEMP2(MNE))
+  ALLOCATE ( YDUB(36,MNE,8))
+  ALLOCATE ( UU2(max(MNP,MNE)))
+  ALLOCATE ( VV2(max(MNP,MNE)))
+  ALLOCATE ( ETA1(max(MNP,MNE)),ETA2(max(MNP,MNE)), ETAMAX(MNP), MassMax(MNE) )
+  Allocate ( tracer(max(MNP,MNE)), tracer2(max(MNP,MNE)), bed_int(max(mnp,mne),layers), entrop(5,MNE) )
+  ALLOCATE ( CORIF(MNP), dyn_P(max(MNP,MNE)), pdg_el(MNE) )
+  ALLOCATE ( QU(MNP),QV(MNP))
+  ALLOCATE ( LBCODE(MNP))
+  ALLOCATE ( CSI(MNP),SII(MNP))
+  ALLOCATE ( NODECODE(MNP))
+  ALLOCATE (GRAVX(MNP),GRAVY(MNP))
+  ALLOCATE ( NIBCNT(MNP) )    !  added 7/31/2000 to fix wetdry bug
+  !sb-added by sb 10/11/2005
+  ALLOCATE( NNDEL(MNP) )
+  ALLOCATE( EDFLG(3,MNE) )
+  
+  !--
+  
+#ifdef CMPI
+  ALLOCATE ( IDUMY(1), DUMY1(1), DUMY2(1) )
+#endif
+  
+#ifdef CVEC
+  ALLOCATE ( QTEMA(MNE,3),QTEMB(MNE,3))
+#endif
+  
+  IF ( C3DDSS) THEN
+     ALLOCATE( AUV11(MNP),AUV12(MNP),AUV13(MNP),AUV14(MNP))
+  ELSEIF (C2DDI) THEN
+     ALLOCATE( AUV11(MNP),AUV12(MNP))
+     ALLOCATE( AUVXX(MNP),AUVYY(MNP),AUVXY(MNP),AUVYX(MNP))
+  ENDIF
+  
+  IF ( C3D) THEN
+     ALLOCATE( DUU1(MNP),DUV1(MNP),DVV1(MNP),BSX1(MNP),BSY1(MNP))
+  endif
+  !
+  RETURN
+END SUBROUTINE ALLOC_MAIN1
+
+
+      SUBROUTINE ALLOC_MAIN2()
+!
+!     Allocate space for Arrays dimensioned by MNOPE and MNETA
+!
+      ALLOCATE ( ESBIN1(MNETA),ESBIN2(MNETA))
+      ALLOCATE ( NBDV(MNOPE,MNETA))
+      ALLOCATE ( NVDLL(MNOPE),NBD(MNETA))
+      ALLOCATE ( EMO(MNBFR,MNETA),EFA(MNBFR,MNETA))
+      ALLOCATE ( UMO(MNBFR,MNETA),UFA(MNBFR,MNETA))
+      ALLOCATE ( VMO(MNBFR,MNETA),VFA(MNBFR,MNETA))
+
+      RETURN
+      END SUBROUTINE
+
+
+!
+!     Allocate space for nonperiodic zero and nonzero normal flow boundary arrays
+!     including barriers
+!
+      SUBROUTINE ALLOC_MAIN3()
+      ALLOCATE ( QN0(MNVEL),QN1(MNVEL),QN2(MNVEL))
+      ALLOCATE ( NBV(MNVEL),LBCODEI(MNVEL))
+      ALLOCATE ( BNDLEN2O3(MNVEL))
+      ALLOCATE ( ME2GW(MNVEL))
+      ALLOCATE ( CSII(MNVEL),SIII(MNVEL))
+      ALLOCATE ( BARLANHT(MNVEL),BARLANCFSP(MNVEL))
+      ALLOCATE ( BARLANHTR(MNVEL),BARLANCFSPR(MNVEL))
+      ALLOCATE ( BARINHT(MNVEL),BARINCFSB(MNVEL),BARINCFSP(MNVEL))
+      ALLOCATE ( PIPEHT(MNVEL),PIPECOEF(MNVEL),PIPEDIAM(MNVEL))
+      ALLOCATE ( IBCONN(MNVEL))
+      ALLOCATE ( BARINHTR(MNVEL),BARINCFSBR(MNVEL),BARINCFSPR(MNVEL))
+      ALLOCATE ( PIPEHTR(MNVEL),PIPECOEFR(MNVEL),PIPEDIAMR(MNVEL))
+      ALLOCATE ( IBCONNR(MNVEL),NTRAN1(MNVEL),NTRAN2(MNVEL))
+      ALLOCATE ( BTRAN3(MNVEL),BTRAN4(MNVEL),BTRAN5(MNVEL))
+      ALLOCATE ( BTRAN6(MNVEL),BTRAN7(MNVEL),BTRAN8(MNVEL))
+      ALLOCATE ( RBARWL1AVG(MNVEL),RBARWL2AVG(MNVEL))
+      ALLOCATE ( RPIPEWL1AVG(MNVEL),RPIPEWL2AVG(MNVEL))
+      ALLOCATE ( QNIN1(MNVEL),QNIN2(MNVEL))
+      ALLOCATE ( NBVV(MNBOU,0:MNVEL))
+      ALLOCATE ( NVELL(MNBOU))
+      ALLOCATE ( SEGTYPE(MNBOU))
+
+      RETURN
+      END SUBROUTINE
+
+
+!
+!     Allocate space for tidal potential terms 
+!
+      SUBROUTINE ALLOC_MAIN4a()
+      ALLOCATE ( TPK(MNTIF),AMIGT(MNTIF),FFT(MNTIF) )
+      ALLOCATE ( FACET(MNTIF),PERT(MNTIF),ETRF(MNTIF) )
+      ALLOCATE ( TIPOTAG(MNTIF) )
+
+      IF ( CTIP ) THEN
+        ALLOCATE( TIP1(MNP),TIP2(MNP))
+        ENDIF  
+
+      RETURN
+      END SUBROUTINE
+
+
+!
+!     Allocate space for Earth load/self-attraction tide 
+!
+      SUBROUTINE ALLOC_MAIN4b()
+      ALLOCATE ( SALTAMP(MNTIF,MNP),SALTPHA(MNTIF,MNP) )
+      RETURN
+      END SUBROUTINE
+
+
+!
+!     Allocate space for Arrays dimensioned by MNBFR      
+!
+      SUBROUTINE ALLOC_MAIN5()
+      ALLOCATE ( AMIG(MNBFR),PER(MNBFR))
+      ALLOCATE ( FF(MNBFR),FACE(MNBFR))
+      ALLOCATE ( BOUNTAG(MNBFR) )
+
+      RETURN
+      END SUBROUTINE
+
+
+
+!
+!     Allocate space for periodic normal flow boundary conditions
+!
+      SUBROUTINE ALLOC_MAIN6()
+      ALLOCATE ( QNAM(MNFFR,MNVEL),QNPH(MNFFR,MNVEL))
+      ALLOCATE ( FBOUNTAG(MNFFR))
+      ALLOCATE ( FAMIG(MNFFR), FFF(MNFFR), FFACE(MNFFR), FPER(MNFFR) )
+
+      RETURN
+      END SUBROUTINE
+
+
+!
+!     Allocate space for arrays used for station elevation output
+!
+      SUBROUTINE ALLOC_MAIN7()
+      ALLOCATE ( NNE(MNSTAE),ET00(MNSTAE),BT00(MNSTAE))
+      ALLOCATE ( STAIE1(MNSTAE),STAIE2(MNSTAE),STAIE3(MNSTAE))
+      ALLOCATE ( XEL(MNSTAE),YEL(MNSTAE),SLEL(MNSTAE),SFEL(MNSTAE))
+      RETURN
+      END SUBROUTINE
+
+
+!
+!     Allocate space for arrays used for station velocity output
+!
+      SUBROUTINE ALLOC_MAIN8()
+      ALLOCATE ( XEV(MNSTAV),YEV(MNSTAV),SLEV(MNSTAV),SFEV(MNSTAV))
+      ALLOCATE ( NNV(MNSTAV))
+      ALLOCATE ( UU00(MNSTAV),VV00(MNSTAV))
+      ALLOCATE ( STAIV1(MNSTAV),STAIV2(MNSTAV),STAIV3(MNSTAV))
+
+      RETURN
+      END SUBROUTINE
+
+
+!
+!     Allocate space for arrays used for station concentration output
+!
+      SUBROUTINE ALLOC_MAIN9()
+      ALLOCATE ( XEC(MNSTAC),YEC(MNSTAC),SLEC(MNSTAC),SFEC(MNSTAC))
+      ALLOCATE ( NNC(MNSTAC))
+      ALLOCATE ( CC00(MNSTAC))
+      ALLOCATE ( STAIC1(MNSTAC),STAIC2(MNSTAC),STAIC3(MNSTAC))
+
+      RETURN
+      END SUBROUTINE
+
+
+!
+!     Allocate space for arrays used for station meteorological output
+!
+      SUBROUTINE ALLOC_MAIN10()
+      ALLOCATE ( XEM(MNSTAM),YEM(MNSTAM),SLEM(MNSTAM),SFEM(MNSTAM))
+      ALLOCATE ( NNM(MNSTAM))
+      ALLOCATE ( RMU00(MNSTAM),RMV00(MNSTAM),RMP00(MNSTAM))
+      ALLOCATE ( STAIM1(MNSTAM),STAIM2(MNSTAM),STAIM3(MNSTAM))
+
+      RETURN
+      END SUBROUTINE
+
+
+!
+!     Allocate space for Arrays dimensioned by MNEI   
+!
+      SUBROUTINE ALLOC_MAIN11()
+
+!  Arrays used by JCG iterative solver
+
+      ALLOCATE( OBCCOEF(MNETA,MNEI-1),COEF(MNP,MNEI))
+      ALLOCATE( IWKSP(3*MNP),WKSP(4*MNP+400) )
+      ALLOCATE( IPARM(12),RPARM(12) )
+
+!  Neighbor Table
+
+      ALLOCATE ( NEITAB(MNP,MNEI),NEIGH_ELEM(MNP,MNEI))
+
+      RETURN
+      END SUBROUTINE
+
+
+!
+!     Allocate space for wind forcing   
+!
+      SUBROUTINE ALLOC_MAIN12()
+      ALLOCATE ( WSX1(MNP),WSY1(MNP),PR1(MNP) )
+      ALLOCATE ( WSX2(MNP),WSY2(MNP),PR2(MNP) )
+      ALLOCATE ( WVNX1(MNP),WVNY1(MNP),PRN1(MNP) )
+      ALLOCATE ( WVNX2(MNP),WVNY2(MNP),PRN2(MNP) )
+      ALLOCATE ( RSNX1(MNP),RSNY1(MNP),RSNX2(MNP),RSNY2(MNP) )
+      ALLOCATE ( WVNXOUT(MNP),WVNYOUT(MNP) )
+#ifdef SWAN
+!asey 101118: Added the next line for output of radiation stress gradients.
+      ALLOCATE ( RSNXOUT(MNP),RSNYOUT(MNP) )
+#endif
+      RETURN
+      END SUBROUTINE
+
+
+!
+!     Allocate space for bridge piling friction arrays   
+!
+      SUBROUTINE ALLOC_MAIN13()
+      ALLOCATE ( NBNNUM(MNP),BK(MNP),BALPHA(MNP),BDELX(MNP) )
+      RETURN
+      END SUBROUTINE
+!
+!     Allocate space for harmonic analysis means and variance calculations, this is in 
+!     global data because the variables are used in main source, outside of HA analysis
+!     subroutines.  This should probably be changed.
+!
+      SUBROUTINE ALLOC_MAIN14()
+      ALLOCATE ( XVELAV(MNP),YVELAV(MNP),XVELVA(MNP),YVELVA(MNP) )
+      ALLOCATE ( ELAV(MNP),ELVA(MNP) )
+      RETURN
+      END SUBROUTINE
+      
+!.....Allocate for wave friction
+
+      SUBROUTINE ALLOC_MAIN15()
+      ALLOCATE ( WAVE_T1(MNP),WAVE_H1(MNP),WAVE_A1(MNP),WAVE_D1(MNP) )
+      ALLOCATE ( WAVE_T2(MNP),WAVE_H2(MNP),WAVE_A2(MNP),WAVE_D2(MNP) )
+      ALLOCATE ( WAVE_T(MNP),WAVE_H(MNP),WAVE_A(MNP),WAVE_D(MNP) )
+      ALLOCATE ( WB(MNP) )
+      END SUBROUTINE
+
+!.....Allocate arrays used for node to element table
+!
+      SUBROUTINE ALLOC_NNOEL1(MNP)
+      ALLOCATE ( EL_COUNT(MNP) )
+      RETURN
+      END SUBROUTINE
+!
+      SUBROUTINE ALLOC_NNOEL2(MNP,MAXEL)
+      ALLOCATE ( DP_DG(MAXEL),DG_ANG(MAXEL) )
+      ALLOCATE ( NNOEL(MNP,MAXEL),CENTAB(MNP,MAXEL+1) )
+      ALLOCATE ( ELETAB(MNP,MAXEL+1),ANGTAB(MNP,MAXEL+1),dynP_DG(MAXEL) )
+      ALLOCATE ( ZE_DG(MAXEL), QX_DG(MAXEL), QY_DG(MAXEL), HB_DG(MAXEL))
+      Allocate ( iota2_DG(MAXEL), iota_DG(MAXEL), iotaa_DG(MAXEL) )
+      Allocate ( bed_DG(MAXEL,layers),bed_N_int(layers), bed_N_ext(layers) )
+      RETURN
+      END SUBROUTINE
+
+!sb
+!     Allocate space for Arrays dimensioned by MNNDEL
+!
+      SUBROUTINE ALLOC_MAIN16()
+
+!.....Node-to-elements table      
+      ALLOCATE( NDEL(MNP,MNNDEL) )
+
+      RETURN
+      END SUBROUTINE
