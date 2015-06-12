@@ -1,6 +1,6 @@
 
        MODULE WIND
-       USE SIZES, ONLY : SZ, LOCALDIR
+       USE SIZES, ONLY : SZ
        USE GLOBAL, ONLY : ScreenUnit
 #ifdef CMPI
 !      use messenger, only : msg_fini
@@ -129,9 +129,10 @@
 !                NWLAT,NWLON                                           *
 !***********************************************************************
 
-      SUBROUTINE NWS3GET(X,Y,SLAM,SFEA,WVNX,WVNY,IWTIME,IWYR,WTIMED,NP,NWLON,NWLAT,WLATMAX,WLONMIN,WLATINC,WLONINC,ICS,NScreen,ScreenUnit)
+      SUBROUTINE NWS3GET(s,X,Y,SLAM,SFEA,WVNX,WVNY,IWTIME,IWYR,WTIMED,NP,NWLON,NWLAT,WLATMAX,WLONMIN,WLATINC,WLONINC,ICS,NScreen,ScreenUnit)
       USE SIZES
       IMPLICIT NONE
+      type (sizes_type) :: s
       INTEGER, SAVE :: FIRSTCALL = 0
       INTEGER IWTIME,IWYR,IWMO,IWDAY,IWHR,NP,NWLON,NWLAT,ICS,I,J
       INTEGER NScreen,ScreenUnit
@@ -153,7 +154,7 @@
       IWMO = IWTIME/10000 - IWYR*100
       IWDAY = IWTIME/100 - IWYR*10000 - IWMO*100
       IWHR = IWTIME - IWYR*1000000 - IWMO*10000 - IWDAY*100
-      CALL TIMECONV(IWYR,IWMO,IWDAY,IWHR,0,0.0D0,WTIMED,MyProc,NScreen,ScreenUnit)
+      CALL TIMECONV(IWYR,IWMO,IWDAY,IWHR,0,0.0D0,WTIMED,s%MyProc,NScreen,ScreenUnit)
 !
       DO I=1,NWLAT
          READ(22,*) (WVXFN(I,J),J=1,NWLON)
@@ -570,9 +571,10 @@
 !                LATB,LONB; elminiated MNWP as a dimension             *
 !***********************************************************************
 
-      SUBROUTINE NWS10GET(NWSGGWI,FLON,FLAT,ULL,VLL,PLL,NP,RHOWAT0,G,LONB,LATB,WTIMINC)
+      SUBROUTINE NWS10GET(s,NWSGGWI,FLON,FLAT,ULL,VLL,PLL,NP,RHOWAT0,G,LONB,LATB,WTIMINC)
       USE SIZES
       IMPLICIT NONE
+      type (sizes_type) :: s
       INTEGER, SAVE :: FIRSTCALL = 0
       INTEGER N,NP,NWSGGWI,LONB,LATB,I,J,JJ,IEXT,IDIG1,IDIG2,IDIG3,KERR
       REAL*8 WTIMINC
@@ -592,8 +594,8 @@
       IF (FIRSTCALL.EQ.0) THEN
          FIRSTCALL = 1
          ALLOCATE ( UG(LATB*LONB),VG(LATB*LONB),PG(LATB*LONB) )
-         ALLOCATE ( N00(MNP),N10(MNP),N11(MNP),N01(MNP) )
-         ALLOCATE ( D00(MNP),D10(MNP),D11(MNP),D01(MNP) )
+         ALLOCATE ( N00(s%MNP),N10(s%MNP),N11(s%MNP),N01(s%MNP) )
+         ALLOCATE ( D00(s%MNP),D10(s%MNP),D11(s%MNP),D01(s%MNP) )
          ALLOCATE ( COLRAB(LATB),DUMMY(LATB),GCLAT(LATB),GCLON(LONB) )
       ENDIF
 !     
@@ -634,10 +636,10 @@
  1010 FORMAT(' File ',A8,' WAS NOT FOUND!  FATAL ERROR',/)
  1011 FORMAT(' File ',A8,' WAS FOUND!  Opening & Processing file',/)
 
-      if (myproc == 0) WRITE(screenunit,*) '  '
+      if (s%myproc == 0) WRITE(screenunit,*) '  '
       INQUIRE(FILE=FNAME1,EXIST=FOUND)
       IF(FOUND) GOTO 32
-      if (myproc == 0) WRITE(screenunit,1010) FNAME1
+      if (s%myproc == 0) WRITE(screenunit,1010) FNAME1
       WRITE(16,1010) FNAME1
 #ifdef CMPI
 !      call msg_fini()
@@ -949,9 +951,10 @@
 !                271,181                                               *
 !***********************************************************************
 
-      SUBROUTINE NWS11GET(NWSEGWI,IDSETFLG,FLON,FLAT,ULL,VLL,PLL,NP,RHOWAT0,G)
+      SUBROUTINE NWS11GET(s,NWSEGWI,IDSETFLG,FLON,FLAT,ULL,VLL,PLL,NP,RHOWAT0,G)
       USE SIZES
       IMPLICIT NONE
+      type (sizes_type) :: s
       INTEGER,SAVE  ::  ICALL = 0
       INTEGER NWSEGWI,IDSETFLG,NP,I,IEXT,IDIG1,IDIG2,IDIG3,KERR,N
       INTEGER IYEAR,IMONTH,IDAY,IHOUR
@@ -972,8 +975,8 @@
 !     
       IF (ICALL.EQ.0) THEN
          ICALL = 1
-         ALLOCATE ( N1(MNP),N2(MNP),N3(MNP) )
-         ALLOCATE ( D1(MNP),D2(MNP),D3(MNP),BETAU(MNP) )
+         ALLOCATE ( N1(s%MNP),N2(s%MNP),N3(s%MNP) )
+         ALLOCATE ( D1(s%MNP),D2(s%MNP),D3(s%MNP),BETAU(s%MNP) )
          ALLOCATE ( UE(181*271),VE(181*271),PE(181*271) )
       ENDIF
 !     
@@ -983,7 +986,7 @@
 !...  between the Eta-29 grid and the ADCIRC grid.
 
       IF((NWSEGWI.EQ.0).AND.(IDSETFLG.EQ.0)) THEN
-         if (myproc == 0) then
+         if (s%myproc == 0) then
           WRITE(screenunit,*) 'Computing ETA29 met field interp factors'
          endif
          DO I=1,NP
@@ -1010,16 +1013,16 @@
  1010 FORMAT(' File ',A8,' WAS NOT FOUND!  FATAL ERROR',/)
  1011 FORMAT(' File ',A8,' WAS FOUND!  Opening & Processing file',/)
 
-      if (myproc == 0) WRITE(screenunit,*) '  '
+      if (s%myproc == 0) WRITE(screenunit,*) '  '
       INQUIRE(FILE=FNAME1,EXIST=FOUND)
       IF(FOUND) GOTO 32
-      if (myproc == 0) WRITE(screenunit,1010) FNAME1
+      if (s%myproc == 0) WRITE(screenunit,1010) FNAME1
       WRITE(16,1010) FNAME1
 #ifdef CMPI
 !      call msg_fini()
 #endif
       STOP
- 32   if (myproc == 0) WRITE(screenunit,1011) FNAME1
+ 32   if (s%myproc == 0) WRITE(screenunit,1011) FNAME1
       IF((NWSEGWI.EQ.0).OR.(IDSETFLG.EQ.1)) OPEN(IEXT,FILE=FNAME1,status='old',access='sequential',form='unformatted',iostat=kerr)
 
 !...  Read the met data file
@@ -1699,9 +1702,10 @@
 !
 !     ----------------------------------------------------------------
 
-      SUBROUTINE HollandGet(X,Y,SLAM,SFEA,WVNX,WVNY,PRESS,NP,ICS,RHOWAT0,G,TIME,NSCREEN,ScreenUnit)
-      USE SIZES, ONLY : MyProc, LOCALDIR
+      SUBROUTINE HollandGet(s,X,Y,SLAM,SFEA,WVNX,WVNY,PRESS,NP,ICS,RHOWAT0,G,TIME,NSCREEN,ScreenUnit)
+      USE SIZES
       IMPLICIT NONE
+      type (sizes_type) :: s
       INTEGER, intent(in) :: NP,ICS
       REAL(SZ), intent(in) :: RHOWAT0,G,TIME
       REAL(8), intent(in), dimension(NP) :: X, Y, SLAM, SFEA
@@ -1751,7 +1755,7 @@
 !
 !     Get data for this time step.
 !      write(*,*) 'calling GetHolland',Firstcall
-      CALL GetHollandStormData(lat,lon,cpress,spd,rrp,rmw,tvx,tvy,time,nscreen,screenunit)
+      CALL GetHollandStormData(s,lat,lon,cpress,spd,rrp,rmw,tvx,tvy,time,nscreen,screenunit)
 !
 !     Calculate and limit central pressure deficit; some track files
 !     (e.g., Charley 2004) may have a central pressure greater than the
@@ -1886,9 +1890,10 @@
 !
 !     ----------------------------------------------------------------
 !
-      SUBROUTINE GetHollandStormData(LatOut,LonOut,CPressOut,SpdOut,RRPOut,RMWOut,TVXOut,TVYOut,Time,NScreen,ScreenUnit)
-      USE SIZES, ONLY : MyProc
+      SUBROUTINE GetHollandStormData(s,LatOut,LonOut,CPressOut,SpdOut,RRPOut,RMWOut,TVXOut,TVYOut,Time,NScreen,ScreenUnit)
+      USE SIZES
       IMPLICIT NONE
+      type (sizes_type) :: s
       REAL(SZ),intent(in) :: time
       INTEGER,intent(in) :: nscreen, screenunit
       REAL(SZ),intent(out) :: LatOut, LonOut, CPressOut
@@ -1985,7 +1990,7 @@
 !     Determine the time of this hindcast in seconds since the beginning
 !     of the year.
                CALL TimeConv(iYear(i),iMth(i),iDay(i),iHr(i),0,0.d0,&
-                   CastTime(i),MyProc,NScreen,ScreenUnit)
+                   CastTime(i),s%MyProc,NScreen,ScreenUnit)
 !
 !     Determine the CastTime in seconds since the beginning of the simulation.
                CastTime(i)=CastTime(i)-WindRefTime
@@ -2011,7 +2016,7 @@
 !     of the year.
                IF ( iFcstInc(i).eq.0 ) THEN
                   CALL TimeConv(iYear(i),iMth(i),iDay(i),iHr(i),0,0.d0,&
-                      CastTime(i),MyProc,NScreen,ScreenUnit)
+                      CastTime(i),s%MyProc,NScreen,ScreenUnit)
                   CastTime(i)=CastTime(i)-WindRefTime
                ELSE
                   FcstInc(i) = FcstInc(i) * 3600.d0 ! convert hours to seconds
@@ -2027,10 +2032,10 @@
 !
             CASE DEFAULT        ! unrecognized
                WRITE(16,1000)   ! unit 22 Holland Storm File
-               WRITE(16,1021) CastType(i),MyProc ! contains invalid name
+               WRITE(16,1021) CastType(i),s%MyProc ! contains invalid name
                WRITE(16,1031)   ! describe valid input
                WRITE(16,1041)   ! tell which column failed
-               IF (NScreen.ne.0.and.MyProc.eq.0) THEN
+               IF (NScreen.ne.0.and.s%MyProc.eq.0) THEN
                   WRITE(ScreenUnit,1000) ! unit 22 Holland Storm File
                   WRITE(ScreenUnit,1025) CastType(i) ! contains invalid name
                   WRITE(ScreenUnit,1031) ! describe valid input
@@ -2062,7 +2067,7 @@
             if ( i.gt.1 ) then
                write(16,2355) FcstInc(i-1)
             endif
-            IF (NScreen.ne.0.and.MyProc.eq.0) THEN
+            IF (NScreen.ne.0.and.s%MyProc.eq.0) THEN
                WRITE(ScreenUnit,1244) CastTime(i),Lat(i),Lon(i),&
                    Spd(i),CPress(i),RRP(i),RMW(i),WindRefTime
             ENDIF
@@ -2126,7 +2131,7 @@
                   WRITE(16,1061)
  1051             FORMAT('Does not contain times/dates that correspond')
  1061             FORMAT('to the ADCIRC current model time.')
-                  IF (NScreen.ne.0.and.MyProc.eq.0) THEN
+                  IF (NScreen.ne.0.and.s%MyProc.eq.0) THEN
                      WRITE(ScreenUnit,1000) ! unit 22 Holland Storm File
                      WRITE(ScreenUnit,1051)
                      WRITE(ScreenUnit,1061)

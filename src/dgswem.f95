@@ -10,7 +10,9 @@
       USE DFPORT
 #endif
       USE GLOBAL
+#ifdef HARM
       USE HARM
+#endif
       USE DG
       USE NodalAttributes, ONLY :&
           NoLiBF, NWP, Tau0, HBreak, FTheta, FGamma, Tau, CF, IFNLBF,&
@@ -292,8 +294,13 @@
 !.....Write heading to unit 16
       WRITE(16,1112)
       WRITE(16,17931)
+#ifdef CMPI
       IF (NSCREEN.EQ.1.AND.MYPROC.EQ.0) WRITE(6,1112)
       IF (NSCREEN.EQ.1.AND.MYPROC.EQ.0) WRITE(6,17931)
+#else      
+      IF (NSCREEN.EQ.1) WRITE(6,1112)
+      IF (NSCREEN.EQ.1) WRITE(6,17931)
+#endif
 
 !     sb...Write initial conditions
       CALL WRITE_DG_IC()
@@ -338,6 +345,8 @@
 !...  
 !...  IF IHARIND=1 SOLVE THE HARMONIC ANALYSIS PROBLEM AND WRITE OUTPUT
 !...  
+
+#ifdef HARM
       IF ((IHARIND.EQ.1).AND.(ITIME_A.GT.ITHAS)) THEN
 
 !...  LINES COMPUTE MEANS AND VARIANCES
@@ -375,7 +384,7 @@
          IF(NHASV.EQ.1) CALL LSQSOLVS(NSTAV,DIRNAME,LNAME)
 !     
       ENDIF
-      
+#endif      
 #ifdef SWAN
 !asey 101118: Let SWAN clean up stuff.
       CALL PADCSWAN_FINAL
@@ -430,28 +439,29 @@
 !     *
 !******************************************************************************
 !     
-      SUBROUTINE NEIGHB(NE,NP,NM,NNEIGH,NEIGH,NEIMIN,NEIMAX,X,Y,NSCREEN,NNEIGH_ELEM,NEIGH_ELEM)
+      SUBROUTINE NEIGHB(s,NE,NP,NM,NNEIGH,NEIGH,NEIMIN,NEIMAX,X,Y,NSCREEN,NNEIGH_ELEM,NEIGH_ELEM)
       USE SIZES
+      type (sizes_type) :: s
 !     
       INTEGER NP,NE,NEIMIN,NEIMAX,NSCREEN,N,NN,EN1,EN2,EN3,I,J
-      INTEGER :: NEIGH(MNP,MNEI),NNEIGH(MNP),NNEIGH_ELEM(MNP)
-      INTEGER NM(MNE,3),NEIGH_ELEM(MNP,MNEI)
-      REAL(8) X(MNP),Y(MNP),DELX,DELY,DIST
+      INTEGER :: NEIGH(S%MNP,S%MNEI),NNEIGH(S%MNP),NNEIGH_ELEM(S%MNP)
+      INTEGER NM(S%MNE,3),NEIGH_ELEM(S%MNP,S%MNEI)
+      REAL(8) X(S%MNP),Y(S%MNP),DELX,DELY,DIST
       REAL(8) ANGLELOW,ANGLEMORE,RAD2DEG
       REAL(8), ALLOCATABLE :: ANGLE(:)
       INTEGER,ALLOCATABLE :: NEITEM(:)
 !     
-      ALLOCATE ( ANGLE(MNEI) )
-      ALLOCATE ( NEITEM(MNP) )
+      ALLOCATE ( ANGLE(S%MNEI) )
+      ALLOCATE ( NEITEM(S%MNP) )
 !     
       RAD2DEG=45.0d0/ATAN(1.0d0)
 !     
       DO N=1,NP
          NNEIGH(N) = 0
-	 NNEIGH_ELEM(N) = 0
-         DO NN=1,MNEI
+         NNEIGH_ELEM(N) = 0
+         DO NN=1,S%MNEI
             NEIGH(N,NN) = 0
-	    NEIGH_ELEM(N,NN) = 0
+     NEIGH_ELEM(N,NN) = 0
          ENDDO
       ENDDO
 !     
@@ -459,31 +469,31 @@
          EN1 = NM(N,1)
          EN2 = NM(N,2)
          EN3 = NM(N,3)
-	 NNEIGH_ELEM(EN1) = NNEIGH_ELEM(EN1)+1
-	 NEIGH_ELEM(EN1,NNEIGH_ELEM(EN1)) = N
-	 NNEIGH_ELEM(EN2) = NNEIGH_ELEM(EN2)+1
-	 NEIGH_ELEM(EN2,NNEIGH_ELEM(EN2)) = N
-	 NNEIGH_ELEM(EN3) = NNEIGH_ELEM(EN3)+1
-	 NEIGH_ELEM(EN3,NNEIGH_ELEM(EN3)) = N
+  NNEIGH_ELEM(EN1) = NNEIGH_ELEM(EN1)+1
+  NEIGH_ELEM(EN1,NNEIGH_ELEM(EN1)) = N
+  NNEIGH_ELEM(EN2) = NNEIGH_ELEM(EN2)+1
+  NEIGH_ELEM(EN2,NNEIGH_ELEM(EN2)) = N
+  NNEIGH_ELEM(EN3) = NNEIGH_ELEM(EN3)+1
+  NEIGH_ELEM(EN3,NNEIGH_ELEM(EN3)) = N
          DO 20 J=1,NNEIGH(EN1)
  20         IF(EN2.EQ.NEIGH(EN1,J)) GOTO 25
             NNEIGH(EN1)=NNEIGH(EN1)+1
             NNEIGH(EN2)=NNEIGH(EN2)+1
-            IF((NNEIGH(EN1).GT.MNEI-1).OR.(NNEIGH(EN2).GT.MNEI-1)) GOTO 999
+            IF((NNEIGH(EN1).GT.S%MNEI-1).OR.(NNEIGH(EN2).GT.S%MNEI-1)) GOTO 999
             NEIGH(EN1,NNEIGH(EN1))=EN2
             NEIGH(EN2,NNEIGH(EN2))=EN1
  25         DO 30 J=1,NNEIGH(EN1)
  30            IF(EN3.EQ.NEIGH(EN1,J)) GOTO 35
                NNEIGH(EN1)=NNEIGH(EN1)+1
                NNEIGH(EN3)=NNEIGH(EN3)+1
-               IF((NNEIGH(EN1).GT.MNEI-1).OR.(NNEIGH(EN3).GT.MNEI-1)) GOTO 999
+               IF((NNEIGH(EN1).GT.S%MNEI-1).OR.(NNEIGH(EN3).GT.S%MNEI-1)) GOTO 999
                NEIGH(EN1,NNEIGH(EN1))=EN3
                NEIGH(EN3,NNEIGH(EN3))=EN1
  35            DO 50 J=1,NNEIGH(EN2)
  50               IF(EN3.EQ.NEIGH(EN2,J)) GOTO 10
                   NNEIGH(EN2)=NNEIGH(EN2)+1
                   NNEIGH(EN3)=NNEIGH(EN3)+1
-                  IF((NNEIGH(EN2).GT.MNEI-1).OR.(NNEIGH(EN3).GT.MNEI-1)) GOTO 999
+                  IF((NNEIGH(EN2).GT.S%MNEI-1).OR.(NNEIGH(EN3).GT.S%MNEI-1)) GOTO 999
                   NEIGH(EN2,NNEIGH(EN2))=EN3
                   NEIGH(EN3,NNEIGH(EN3))=EN2
  10            CONTINUE
