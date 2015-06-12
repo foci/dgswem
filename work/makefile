@@ -196,7 +196,7 @@ $(O_DIR)fparser2.o	                :  fparser2.f95 $(O_DIR)sizes.o
 $(O_DIR)global.o      			:  global.f95  $(O_DIR)sizes.o
 $(O_DIR)messenger.o   			:  messenger.f95  $(ADC_MOBJ)
 $(O_DIR)messenger_elem.o		:  messenger_elem.f95  $(ADC_MOBJ)
-$(O_DIR)harm.o        			:  harm.f95
+#$(O_DIR)harm.o        			:  harm.f95
 $(O_DIR)wind.o        			:  wind.f95
 $(O_DIR)itpackv.o     			:  itpackv.f95   $(ADC_MOBJ)
 $(O_DIR)dg.o          			:  dg.f95 sizes.f95 global.f95
@@ -210,11 +210,12 @@ $(ODIR)read_fort_dg.o                   :  read_fort_dg.f95 $(O_DIR)sizes.o $(O_
 
 #  adcirc & padcirc
 
+$(O_DIR)make_dirname.o              :  make_dirname.f95 $(ADC_MOBJ)
 $(O_DIR)owiwind.o   			:  owiwind.f95 $(ADC_MOBJ)
-$(O_DIR)read_input.o  			:  read_input.f95 $(ADC_MOBJ) $(HARM_MOBJ) $(WIND_MOBJ)
-$(O_DIR)cstart.o      			:  cstart.f95 $(ADC_MOBJ)  $(HARM_MOBJ)  $(WIND_MOBJ)
-$(O_DIR)hstart.o      			:  hstart.f95 $(ADC_MOBJ)  $(HARM_MOBJ)  $(WIND_MOBJ)
-$(O_DIR)dgswem.o      			:  dgswem.f95 $(ADC_MOBJ)  $(HARM_MOBJ) $(WIND_MOBJ) 
+$(O_DIR)read_input.o  			:  read_input.f95 $(ADC_MOBJ) $(WIND_MOBJ)
+$(O_DIR)cstart.o      			:  cstart.f95 $(ADC_MOBJ)  $(WIND_MOBJ)
+$(O_DIR)hstart.o      			:  hstart.f95 $(ADC_MOBJ)  $(WIND_MOBJ)
+$(O_DIR)dgswem.o      			:  dgswem.f95 $(ADC_MOBJ) $(WIND_MOBJ) 
 $(O_DIR)calc_normal.o         	:  calc_normal.f95 $(ADC_MOBJ)
 $(O_DIR)create_edge_data.o    	:  create_edge_data.f95 $(ADC_MOBJ)
 $(O_DIR)detector.o	      	:  detector.f95 $(ADC_MOBJ)
@@ -251,7 +252,6 @@ $(O_DIR)met_forcing.o               :  met_forcing.f95  $(ADC_MOBJ)
 $(O_DIR)sta_basis.o                 :  sta_basis.f95  $(ADC_MOBJ)
 $(O_DIR)modal2nodal.o               :  modal2nodal.f95  $(ADC_MOBJ)
 $(O_DIR)write_output.o              :  write_output.f95
-$(O_DIR)make_dirname.o              :  make_dirname.f95 $(ADC_MOBJ)
 #Casey 121126: Added the previous lines for modal2nodal.F and write_output.F.
 
 debug:

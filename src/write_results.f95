@@ -17,7 +17,9 @@
 
       USE GLOBAL
       USE DG
+#ifdef HARM
       USE HARM
+#endif
       use sizes, only:  myproc,layers
 
 #ifdef CMPI
@@ -833,6 +835,7 @@
 !...  WORKSTATIONS, SINCE IN THAT CASE THE HARMONIC ANALYSIS IS DONE IN
 !...  DOUBLE PRECISION.
 !...  
+#ifdef HARM
       IF(IHARIND.EQ.1) THEN
          IF((IT.GT.ITHAS).AND.(IT.LE.ITHAF)) THEN
             IF(ICHA.EQ.NHAINC) ICHA=0
@@ -901,6 +904,7 @@
 
             ENDIF
          ENDIF
+#endif
 
 !...  LINES TO COMPUTE MEANS AND VARIANCES
 

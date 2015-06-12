@@ -20,7 +20,9 @@
 !
       USE SIZES
       USE GLOBAL
+#ifdef HARM
       USE HARM
+#endif
       USE WIND
       USE OWIWIND, ONLY : NWS12INIT, NWS12GET
       USE NodalAttributes, ONLY : STARTDRY, GeoidOffset, LoadGeoidOffset
@@ -1013,6 +1015,7 @@
          ACCESS='DIRECT',RECL=NBYTE)
           ENDIF
 
+#ifdef harm
 !...
 !....INITIALIZE HARMONIC ANALYSIS MATRICES, MEAN AND SQUARE VECTORS
 !...
@@ -1034,6 +1037,7 @@
              ENDDO
            ENDIF !  charmv
         ENDIF
+#endif
 !
  1112 FORMAT(/,1X,79('_'))
  9883 FORMAT(' !!! NODE ',I6,' DRIED (LANDLOCKING)')
