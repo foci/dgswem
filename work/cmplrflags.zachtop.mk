@@ -5,7 +5,7 @@
   FFLAGS2       :=  -O2 -DLINUX
   FFLAGS3       :=  -O2 -DLINUX
   FFLAGS4       :=  -O2 -DLINUX
-  DA            :=  -DREAL8 -DCSCA -DLINUX -DRKSSP -DSLOPE5 -ffixed-line-length-none -ffree-line-length-none -Waliasing -Wno-tabs, -Wline-truncation -Wsurprising -fcheck=all
+  DA            :=  -DREAL8 -DCSCA -DLINUX -DRKSSP -DSLOPE5 -ffixed-line-length-none -ffree-line-length-none -Waliasing -Wno-tabs -Wline-truncation -Wsurprising -fcheck=all
   DP            :=  -DREAL8 -DCSCA -DLINUX -DCMPI -DBLKOUT
 #  DP            :=  -DREAL8 -DCSCA -DIBM -W132 -DCMPI -DBLKOUT
   DPRE          :=  -DREAL4 -DLINUX
