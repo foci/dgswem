@@ -17,14 +17,16 @@
 
                                 !Is this even used? -- CM
 
-      SUBROUTINE OCEAN_FLOW_EDGE_HYDRO(L,QBC)
+      SUBROUTINE OCEAN_FLOW_EDGE_HYDRO(s,L,QBC)
 
 !.....Use appropriate modules
-
+      use sizes
       USE GLOBAL
       USE DG
 
       IMPLICIT NONE
+
+      type (sizes_type) :: s
 
 !.....Declare local variables
 

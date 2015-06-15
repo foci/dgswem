@@ -170,7 +170,7 @@
          
 !.......Compute external barrier edges
 
-         IF (NIBEDS.GT.0) CALL EBARRIER_EDGE_HYDRO(IT)
+         IF (NIBEDS.GT.0) CALL EBARRIER_EDGE_HYDRO(s,IT)
          
 !.......Compute internal edges
 
@@ -299,7 +299,7 @@
          
 !.......Compute external barrier edges
 
-         IF (NIBEDS.GT.0) CALL EBARRIER_EDGE_HYDRO(IT)
+         IF (NIBEDS.GT.0) CALL EBARRIER_EDGE_HYDRO(s,IT)
          
 !.......Compute internal edges
 

@@ -1,11 +1,14 @@
-      SUBROUTINE EBARRIER_EDGE_HYDRO(IT)
+      SUBROUTINE EBARRIER_EDGE_HYDRO(s,IT)
       
 !.....Use appropriate modules
 
+      use sizes
       USE GLOBAL
       USE DG
 
       IMPLICIT NONE
+
+      type (sizes_type) :: s
 
 !.....Declare local variables
 
