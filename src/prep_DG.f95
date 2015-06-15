@@ -166,7 +166,7 @@
          PRINT*, 'CREATING EDGE DATA...'
          PRINT*, ''
       ENDIF
-      CALL CREATE_EDGE_DATA()
+      CALL CREATE_EDGE_DATA(s)
       IF(MYPROC_HERE.EQ.0) THEN
          print *, 'CREATING EDGE DATA DONE'
          print *, ''
@@ -454,7 +454,7 @@
       
       do j=1,ph
          
-         CALL QUAD_PTS_AREA(2*j,j)
+         CALL QUAD_PTS_AREA(s,2*j,j)
 
       enddo
 
@@ -462,7 +462,7 @@
       
       do j=1,ph
 
-         CALL QUAD_PTS_EDGE(j,j)
+         CALL QUAD_PTS_EDGE(s,j,j)
 
       enddo
 
@@ -1184,7 +1184,7 @@
             print *, 'Slope limiting prep begins, "kshanti"'
          ENDIF
          CALL ALLOC_SLOPELIM(s)
-         CALL PREP_SLOPELIM()
+         CALL PREP_SLOPELIM(s)
          IF(MYPROC_HERE.EQ.0)THEN
             print *, 'Finished'
          ENDIF

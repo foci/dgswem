@@ -11,7 +11,7 @@
 !     
 !***********************************************************************
 
-      SUBROUTINE LDG_HYDRO(IT)
+      SUBROUTINE LDG_HYDRO(s,IT)
 
 !.....Use appropriate modules
       

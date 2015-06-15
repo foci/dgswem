@@ -98,7 +98,7 @@
          
 !.......Obtain the meteorological forcing
 
-         IF (NWS.NE.0) CALL MET_FORCING(IT)
+         IF (NWS.NE.0) CALL MET_FORCING(s,IT)
         
         IF(NRS.GE.1) THEN
           IF(TIME_A.GT.RSTIME2) THEN
@@ -146,7 +146,7 @@
 
 !.......Compute LDG auxiliary equations
          
-         IF (EVMSUM.NE.0.D0.or.artdif.eq.1) CALL LDG_HYDRO(IT)
+         IF (EVMSUM.NE.0.D0.or.artdif.eq.1) CALL LDG_HYDRO(s,IT)
          
 !.......Compute elevation specified edges
 
@@ -267,7 +267,7 @@
          
 !.......Obtain the meteorological forcing
 
-         IF (NWS.NE.0) CALL MET_FORCING(IT)
+         IF (NWS.NE.0) CALL MET_FORCING(s,IT)
          
 !.......Compute tidal potential terms
 
@@ -275,7 +275,7 @@
 
 !.......Compute LDG auxiliary equations
          
-         IF (EVMSUM.NE.0.D0.or.artdif.eq.1) CALL LDG_HYDRO(IT)
+         IF (EVMSUM.NE.0.D0.or.artdif.eq.1) CALL LDG_HYDRO(s,IT)
          
 !.......Compute elevation specified edges
 
@@ -454,16 +454,16 @@
 !.......Apply the slopelimiter if appropriate
 
 #ifdef SLOPEALL
-         CALL SLOPELIMITER()
+         CALL SLOPELIMITER(s)
 #endif
 
 #ifdef SLOPE5
-         CALL SLOPELIMITER() 
+         CALL SLOPELIMITER(s) 
 #endif
 
 #ifdef STBLZR
          if (.not.stblzr) then
-            CALL SLOPELIMITER()
+            CALL SLOPELIMITER(s)
             stblzr = .true.
          endif
 #endif
@@ -520,7 +520,7 @@
 
 #ifdef P_AD
          if (irk+1.eq.2) then
-            CALL p_enrichment(it,0)
+            CALL p_enrichment(s,it,0)
          endif
 #ifdef CMPI
 

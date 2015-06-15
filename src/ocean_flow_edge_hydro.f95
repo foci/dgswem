@@ -147,7 +147,7 @@
 !.....Compute the edge integral
 
          DO K = 1,DOFS(EL_IN)
-            CALL EDGE_INT_HYDRO(EL_IN, LED, GED, I, F_HAT, G_HAT, H_HAT, i_hat, j_hat, k)
+            CALL EDGE_INT_HYDRO(s,EL_IN, LED, GED, I, F_HAT, G_HAT, H_HAT, i_hat, j_hat, k)
          ENDDO
          
       ENDDO

@@ -39,7 +39,7 @@
          write(*,*) 'mnproc ',mnproc
       ENDIF
       CALL MAKE_DIRNAME(s)       ! Establish Working Directory Name
-      CALL READ_INPUT()         ! Establish sizes by reading fort.14 and fort.15
+      CALL READ_INPUT(s)         ! Establish sizes by reading fort.14 and fort.15
 #else
       IMPLICIT NONE
      
@@ -172,8 +172,8 @@
 !     write(200+myproc,*) 'call prep_dg'
 !     write(200+myproc,*) 'back from prep_dg'
 
-      CALL PREP_DG()
-      CALL WRITE_RESULTS(0,.FALSE.)
+      CALL PREP_DG(s)
+      CALL WRITE_RESULTS(s,0,.FALSE.)
 
                                !cnd...for tecplot output
 !Casey 120813: Begin the OUT_TEC conditional.
