@@ -17,15 +17,18 @@
 !     
 !***********************************************************************
 
-      SUBROUTINE QUAD_PTS_AREA(PQ,pad)
+      SUBROUTINE QUAD_PTS_AREA(s,PQ,pad)
       
 !.....Use appropriate modules
 
       USE GLOBAL
       USE DG
+      use sizes
       
       IMPLICIT NONE
-      
+
+      type (sizes_type) :: s
+
 !.....Declare local variables
 
       INTEGER MM(42),MMh(42),N, PQ,i,k,pad,signal,phh,nh
@@ -757,7 +760,7 @@
          
 !.....Allocate XaGP, YaGP, and WaGP
 
-         CALL ALLOC_AREA_GAUSS()
+         CALL ALLOC_AREA_GAUSS(s)
 
       endif
 

@@ -30,7 +30,7 @@
 
 !.....Declare local variables
 
-      INTEGER IT,I,K,Maxp(0:8),Minp(0:8)
+      INTEGER IT,I,K,Maxp(0:8),Minp(0:8),J,KK
       REAL(SZ) AREA, DEPTH, ANGLE_SUM, FH_NL, DP1, DP2, DP3, DP00, ZE00
       LOGICAL FORCE_WRITE
       real(sz) qmaxe,elmaxe,tempx,tempy,rev,Ox,Oy,iota_error,iota_int
@@ -39,8 +39,8 @@
 
       Real(SZ),allocatable :: XBCbt(:),YBCbt(:),radial(:),temper(:)
 
-      Allocate ( XBCbt(MNE),YBCbt(MNE),radial(MNE) )
-      Allocate ( temper(mne) )
+      Allocate ( XBCbt(s%MNE),YBCbt(s%MNE),radial(s%MNE) )
+      Allocate ( temper(s%mne) )
       
 !.....Transform from modal coordinates to nodal coordinates and average
 !.....to single nodal values 
@@ -49,7 +49,7 @@
 
       if (ModetoNode.eq.1) then
 
-         DO I = 1,MNP
+         DO I = 1,S%MNP
 
             NO_NBORS = EL_COUNT(I)
 
@@ -1280,7 +1280,7 @@
          WRITE(264,*) PH, PH
          WRITE(214,*) IT
 
-         DO J = 1,MNE
+         DO J = 1,s%MNE
             DO K = 1,DOFH
                WRITE(263,*) ZE(K,J,1)
                WRITE(264,*) QX(K,J,1), QY(K,J,1)
@@ -1331,7 +1331,7 @@
 !     PRINT*,'NT =',NT
 !     ENDIF
 
-!     DO J=1,MNE
+!     DO J=1,s%MNE
 !     ZE_DG(1) = 0.D0
 !     QX_DG(1) = 0.D0
 !     QY_DG(1) = 0.D0

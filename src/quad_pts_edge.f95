@@ -12,14 +12,17 @@
 !     
 !***********************************************************************
 
-      SUBROUTINE QUAD_PTS_EDGE(P,pad)
+      SUBROUTINE QUAD_PTS_EDGE(s,P,pad)
 
 !.....Use appropriate modules
 
       USE GLOBAL
       USE DG
+      use sizes
 
       IMPLICIT NONE
+      
+      type (sizes_type) :: s
 
 !.....Declare local variables
 
@@ -31,7 +34,7 @@
 
          NEGP(ph) = ph + 1
 
-         CALL ALLOC_EDGE_GAUSS()
+         CALL ALLOC_EDGE_GAUSS(s)
 
       endif
 

@@ -2129,7 +2129,7 @@
       NIBSEG = 0
       NEBSEG = 0
       
-      CALL ALLOC_EDGES0()
+      CALL ALLOC_EDGES0(s)
 
       DO K=1,NBOU
          READ(14,*) NVELL(K),IBTYPE

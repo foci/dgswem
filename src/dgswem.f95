@@ -22,6 +22,8 @@
       USE MESSENGER_ELEM
 !--   
       IMPLICIT NONE
+
+      type (sizes_type) :: s
       
       INTEGER TESTFLAG,OUTITER,istop,i,ModetoNode
 !     sb-PDG1
@@ -36,19 +38,20 @@
       IF(MYPROC.EQ.0)THEN
          write(*,*) 'mnproc ',mnproc
       ENDIF
-      CALL MAKE_DIRNAME()       ! Establish Working Directory Name
+      CALL MAKE_DIRNAME(s)       ! Establish Working Directory Name
       CALL READ_INPUT()         ! Establish sizes by reading fort.14 and fort.15
 #else
       IMPLICIT NONE
-      
+     
+      type (sizes_type) :: s
 
       REAL(4) CPU_TIME,CPU_SEC(2)
       REAL(4) TARRAY(2)
       INTEGER TESTFLAG,OUTITER,i,ModetoNode
       character*80 tecfile, tecfile_max
 
-      CALL MAKE_DIRNAME()       ! Establish Working Directory Name
-      CALL READ_INPUT()         ! Establish sizes by reading fort.14 and fort.15
+      CALL MAKE_DIRNAME(s)       ! Establish Working Directory Name
+      CALL READ_INPUT(s)         ! Establish sizes by reading fort.14 and fort.15
 #endif         
 
       
@@ -448,13 +451,16 @@
       USE SIZES
       type (sizes_type) :: s
 !     
-      INTEGER NP,NE,NEIMIN,NEIMAX,NSCREEN,N,NN,EN1,EN2,EN3,I,J
+      INTEGER NP,NE,NEIMIN,NEIMAX,NSCREEN,N,NN,EN1,EN2,EN3,I,J,JJ,JLOW
       INTEGER :: NEIGH(S%MNP,S%MNEI),NNEIGH(S%MNP),NNEIGH_ELEM(S%MNP)
       INTEGER NM(S%MNE,3),NEIGH_ELEM(S%MNP,S%MNEI)
       REAL(8) X(S%MNP),Y(S%MNP),DELX,DELY,DIST
       REAL(8) ANGLELOW,ANGLEMORE,RAD2DEG
       REAL(8), ALLOCATABLE :: ANGLE(:)
       INTEGER,ALLOCATABLE :: NEITEM(:)
+
+      integer :: myproc_here
+      myproc_here = 0
 !     
       ALLOCATE ( ANGLE(S%MNEI) )
       ALLOCATE ( NEITEM(S%MNP) )
@@ -553,13 +559,13 @@
 !     TERMINATE PROGRAM IF MAXIMUM NUMBER OF NEIGHBORS SET TOO SMALL
 
  999           CONTINUE
-               IF(NSCREEN.EQ.1.AND.MYPROC.EQ.0) WRITE(6,99311)
+               IF(NSCREEN.EQ.1.AND.MYPROC_HERE.EQ.0) WRITE(6,99311)
                WRITE(16,99311)
 99311          FORMAT(////,1X,'!!!!!!!!!!  WARNING - FATAL ERROR !!!!!!!!!',              //,1X,'THE DIMENSIONING PARAMETER MNEI IS TOO SMALL'              /,1X,'USER MUST RE-DIMENSION PROGRAM',              //,1X,'!!!!!! EXECUTION WILL NOW BE TERMINATED !!!!!!',//)
                STOP
 
  998           CONTINUE
-               IF(NSCREEN.EQ.1.AND.MYPROC.EQ.0) WRITE(6,99312) I,NEITEM(J)
+               IF(NSCREEN.EQ.1.AND.MYPROC_HERE.EQ.0) WRITE(6,99312) I,NEITEM(J)
                WRITE(16,99312) I,NEITEM(J)
 99312          FORMAT(////,1X,'!!!!!!!!!!  WARNING - FATAL ERROR !!!!!!!!!',              //,1X,'NODES ',I7,' AND ',I7,         ' HAVE THE SAME COORDINATES'              //,1X,'!!!!!! EXECUTION WILL NOW BE TERMINATED !!!!!!',//)
 

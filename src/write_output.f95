@@ -6,9 +6,9 @@
 !     pressure) to a file.
 !-----------------------------------------------------------------------
 !asey 090302: Added the filename as the last argument.
+#ifdef SWAN
       SUBROUTINE writeOutArray(lun, time, it, descript, pack_cmd,unpack_cmd, filepos, fn)
 
-#ifdef SWAN
 
       USE SIZES
       USE GLOBAL
@@ -174,10 +174,10 @@
  2453 FORMAT(2x, i8, 2x, E20.10, E20.10, E20.10, E20.10)
  2454 FORMAT(2X,I8,2(2X,E15.8))
 
-#endif
 
 !-----------------------------------------------------------------------
        END SUBROUTINE writeOutArray
 !-----------------------------------------------------------------------
 
+#endif
 

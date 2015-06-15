@@ -118,7 +118,7 @@
 
 !.....Compute the number of gauss points needed for the edge integrals
 
-      CALL ALLOC_DG4()          !moved here 6.28.10, for p_adapt because of messenger_elem      
+      CALL ALLOC_DG4(s)          !moved here 6.28.10, for p_adapt because of messenger_elem      
 
          dofs(:) = dofl
          PDG_EL(:) = pl
@@ -439,7 +439,7 @@
          enddo
       endif
       
-      CALL ALLOC_DG_WETDRY()
+      CALL ALLOC_DG_WETDRY(s)
       PHI_CHECK = 0.D0
       PSI_CHECK = 0.D0
       H0L = H0
@@ -1183,7 +1183,7 @@
          IF(MYPROC_HERE.EQ.0)THEN
             print *, 'Slope limiting prep begins, "kshanti"'
          ENDIF
-         CALL ALLOC_SLOPELIM()
+         CALL ALLOC_SLOPELIM(s)
          CALL PREP_SLOPELIM()
          IF(MYPROC_HERE.EQ.0)THEN
             print *, 'Finished'
