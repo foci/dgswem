@@ -21,10 +21,10 @@
 !     
 !***********************************************************************
 
-      SUBROUTINE DG_HYDRO_TIMESTEP(IT)
+      SUBROUTINE DG_HYDRO_TIMESTEP(s,IT)
 
 !.....Use appropriate modules
-      
+      USE SIZES
       USE GLOBAL
       USE DG
 
@@ -42,16 +42,17 @@
       
 !.....Declare local variables
 
+      type (sizes_type) :: s
 
       INTEGER IT,L,GED,NBOREL,NNBORS,NDRYNBORS,Istop,k,j,kk,i,mm
       INTEGER Detected,flagger,store
       REAL(SZ) QBCT1,QBCT2,QBC1,QBC2,ZP(3),QXP(3),QXP_OLD(3),QYP(3),QYP_OLD(3),ZP_OLD(3),ell_1,ell_2,ell_3
-      REAL(SZ) DPAVG, ITDT, ARK, BRK, CRK, DRK, ERK,s,alph,eta,seta
+      REAL(SZ) DPAVG, ITDT, ARK, BRK, CRK, DRK, ERK,s_dg,alph,eta,seta
       Real(sz) tempx,tempy,rev,Ox,Oy,time_at,C_0,C_1,sig,sigma
 
       Real(SZ),allocatable :: XB(:),YB(:),radial(:)
 
-      Allocate ( XB(MNE),YB(MNE),radial(MNE) )
+      Allocate ( XB(S%MNE),YB(S%MNE),radial(S%MNE) )
 
 !.....Compute the current time
 
@@ -61,7 +62,7 @@
 
 !.....Update ETA1 (shintaro: do we need this?)
 
-      DO I = 1,MNP
+      DO I = 1,S%MNP
          ETA1(I) = ETA2(I)
       ENDDO
 
@@ -558,7 +559,7 @@
          DO K = 2,DOFS(J)
 
             alph = 10.D0
-            s = RK_stage
+            s_dg = RK_stage
 
             if (k.le.3) then
                eta = 1.D0 / ( pdg_el(j)+1.D0 )
@@ -576,7 +577,7 @@
                eta = 7.D0 / ( pdg_el(j)+1.D0 )               
             endif
 
-            seta = eta**s
+            seta = eta**s_dg
             sigma = exp(-alph*seta)
 
 !.......Filter the layers if flagged
@@ -614,7 +615,7 @@
 #endif
       
 
-      DO J = 1,MNE
+      DO J = 1,S%MNE
          
          DO K = 1,DOFS(J)
             ZE(K,J,1) = ZE(K,J,NRK+1)
@@ -640,7 +641,7 @@
       ENDDO
 
       DO KK = 2,NRK+1
-         DO J = 1,MNE
+         DO J = 1,S%MNE
             DO K = 1,DOFH
                ZE(K,J,KK) = 0.D0
                QX(K,J,KK) = 0.D0

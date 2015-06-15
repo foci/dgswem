@@ -7,11 +7,13 @@
 !
 !***********************************************************************
 
-      SUBROUTINE MET_FORCING(IT)
+      SUBROUTINE MET_FORCING(s,IT)
       
       USE GLOBAL
       USE DG
+#ifdef HARM
       USE HARM
+#endif
       USE SIZES
       USE WIND
 #ifdef OWIWIND
@@ -27,6 +29,8 @@
 #endif
       
       IMPLICIT NONE
+
+      type (sizes_type) :: s
       
       REAL(SZ) WindDragLimit
       INTEGER II, IT
@@ -150,7 +154,7 @@
           
 !.........Obtain the meteorological forcing data
           
-          CALL NWS3GET( X, Y, SLAM, SFEA, WVNX2, WVNY2, IWTIME, IWYR,&
+          CALL NWS3GET(s, X, Y, SLAM, SFEA, WVNX2, WVNY2, IWTIME, IWYR,&
                   WTIMED, NP, NWLON, NWLAT, WLATMAX, WLONMIN,&
                   WLATINC, WLONINC, ICS, NSCREEN, ScreenUnit )
          ENDIF
@@ -485,7 +489,7 @@
 !.......Obtain the meteorological forcing data
 !         write(*,*) 'calling HollandGet ',time_a
 
-        CALL HollandGet( X, Y, SLAM, SFEA, WVNX2, WVNY2, PRN2, NP, ICS,&
+        CALL HollandGet(s, X, Y, SLAM, SFEA, WVNX2, WVNY2, PRN2, NP, ICS,&
                    RHOWAT0, G, TIME_A, NSCREEN, ScreenUnit )
         DO II= 1,NP
           WINDX = WVNX2(II)
@@ -605,7 +609,7 @@
           
 !.........Obtain meteorological forcing data
           
-          CALL NWS10GET( NWSGGWI, SLAM, SFEA, WVNX2, WVNY2, PRN2, NP,&
+          CALL NWS10GET(s, NWSGGWI, SLAM, SFEA, WVNX2, WVNY2, PRN2, NP,&
                    RHOWAT0, G, NWLON, NWLAT, WTIMINC )
         ENDIF
         
@@ -687,7 +691,7 @@
             
 !.........Obtain meteorological forcing data
             
-          CALL NWS11GET( NWSEGWI, IDSETFLG, SLAM, SFEA, WVNX2, WVNY2,&
+          CALL NWS11GET(s, NWSEGWI, IDSETFLG, SLAM, SFEA, WVNX2, WVNY2,&
                    PRN2, NP, RHOWAT0, G )
         ENDIF
 

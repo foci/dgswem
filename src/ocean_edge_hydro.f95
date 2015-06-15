@@ -16,13 +16,13 @@
 !     01-10-2011 - cem - adapted for p_enrichment and multicomponent  
 !     
 !***********************************************************************
-      SUBROUTINE OCEAN_EDGE_HYDRO(IT)
+      SUBROUTINE OCEAN_EDGE_HYDRO(s,IT)
 
 !.....Use appropriate modules
 
       USE GLOBAL
       USE DG
-      Use SIZES, only: layers
+      Use SIZES
 !     
       USE NodalAttributes, ONLY: GeoidOffset, LoadGeoidOffset
       use fparser
@@ -30,13 +30,15 @@
 
       IMPLICIT NONE
 
+      type (sizes_type) :: s
+
 !.....Declare local variables
       
       INTEGER L, LED, GED, i,k,jj,II,ll,IT,w
       Real(SZ) DEN2,U_AVG,V_AVG,VEL_NORMAL,q_RoeX, q_RoeY, q_Roe
       REAL(SZ) TX, TY, HUU, HUV, GH2,FH_NL_IN,F1_NL,FX1_IN,FY1_IN
       REAL(SZ) LZ_XX_IN, LZ_XY_IN, LZ_YX_IN, LZ_YY_IN,W_IN,FX3_IN
-      Real(SZ) chi_pref,MZ_X_IN(layers),MZ_Y_IN(layers)
+      Real(SZ) chi_pref,MZ_X_IN(s%layers),MZ_Y_IN(s%layers)
       Real(SZ) HZ_X_IN,HZ_Y_IN,TZ_X_IN,TZ_Y_IN
 
       test_el = 0
@@ -112,7 +114,7 @@
             !When layered, these change
 #ifdef SED_LAY 
             HB(:,EL_IN,irk) = 0.D0
-            do ll=1,layers
+            do ll=1,s%layers
                HB(1,EL_IN,irk) = HB(1,EL_IN,irk) + bed(1,EL_IN,irk,ll)
 
                MZ_X_IN(ll) =  MZ(1,1,ll,EL_IN)
@@ -185,7 +187,7 @@
 #endif
 
 #ifdef SED_LAY
-               do ll = 1,layers
+               do ll = 1,s%layers
                   bed_IN(ll) = bed_IN(ll) + bed(K,EL_IN,IRK,ll)*PHI_EDGE(K,I,LED,pa)
                   HB_IN = HB_IN + bed(k,EL_IN,irk,ll)*PHI_EDGE(K,I,LED,pa)
 
@@ -270,7 +272,7 @@
 !.....Add LDG terms for sediment
 
 #ifdef SED_LAY
-            do ll=1,layers
+            do ll=1,s%layers
                bed_HAT(ll) = bed_HAT(ll) + MZ_X_IN(ll)*NX*SFAC_IN + MZ_Y_IN(ll)*NY
             enddo
 #endif
@@ -300,7 +302,7 @@
 
 #ifdef SED_LAY
                
-               do ll = 1,layers
+               do ll = 1,s%layers
                   RHS_bed(K,EL_IN,IRK,ll) = RHS_bed(K,EL_IN,IRK,ll) - W_IN*bed_HAT(ll)
                enddo
 #endif

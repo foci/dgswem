@@ -12,23 +12,26 @@
 !     
 !***********************************************************************
 
-      SUBROUTINE NUMERICAL_FLUX(IT,MM)
+      SUBROUTINE NUMERICAL_FLUX(s,IT,MM)
       
       USE DG,ONLY : FLUXTYPE
+      use sizes
 
       IMPLICIT NONE
+
+      type (sizes_type) :: s
 
       INTEGER IT,MM
 
 
       IF(FLUXTYPE.EQ.1) THEN
-         CALL ROE_FLUX(IT,MM)
+         CALL ROE_FLUX(s,IT,MM)
       ELSEIF(FLUXTYPE.EQ.2) THEN
-         CALL LLF_FLUX()
+         CALL LLF_FLUX(s)
       ELSEIF (FLUXTYPE.EQ.3) THEN
-         CALL HLLC_FLUX()
+         CALL HLLC_FLUX(s)
       ELSEIF (FLUXTYPE.EQ.4) THEN
-         CALL NCP_FLUX()
+         CALL NCP_FLUX(s)
       ELSE
          STOP 'INVALID FLUXTYPE'
       ENDIF
@@ -47,24 +50,26 @@
 !     Written by Ethan Kubatko (06-11-2004)
 !     
 !***********************************************************************
-      SUBROUTINE ROE_FLUX(IT,MM)
+      SUBROUTINE ROE_FLUX(s,IT,MM)
       
 !.....Use appropriate modules
 
       USE GLOBAL
       USE DG
-      use sizes, only: layers
+      use sizes
       use fparser
       use fparser2
 
       IMPLICIT NONE
+
+      type (sizes_type) :: s
       
 !.....Declare local variables
       
       INTEGER II,GED,ll,w,IT,kk,jj,MM,fast
       REAL(SZ) DEN, U_AVG, V_AVG, VEL_NORMAL, q_RoeX, q_RoeY, q_Roe
       Real(SZ) bedX_IN,bedX_EX,dtildeQx(4),dtildeQy(4)
-      Real(SZ) bedY_IN,bedY_EX, bed_AVG(layers),lambda4_IN,lambda4_EX
+      Real(SZ) bedY_IN,bedY_EX, bed_AVG(s%layers),lambda4_IN,lambda4_EX
       Real(SZ) rVncU,rVncV,lambda1_IN,lambda1_EX,lambda2_IN,lambda2_EX
       Real(SZ) lambda3_IN,lambda3_EX,Select_IN,Select_EX
       Real T1, T2, T3, T4
@@ -884,16 +889,17 @@
 !     
 !***********************************************************************
 
-      SUBROUTINE LLF_FLUX()
+      SUBROUTINE LLF_FLUX(s)
 
 !.....Use appropriate modules
 
       USE GLOBAL
       USE DG
-      use sizes, only: layers
+      use sizes
 
       IMPLICIT NONE
 
+      type (sizes_type) :: s
 
 !.....Declare local variables
 
@@ -1038,7 +1044,7 @@
       rVncU = 0.D0
       rVncV = 0.D0
 
-      do l=1,layers
+      do l=1,s%layers
 
          rVncU =  rVncU + 0.5D0*G*(HT_IN+HT_EX) &
         *(bed_EX(l)-bed_IN(l))*NX
@@ -1085,7 +1091,7 @@
       V_AVG = 0.5D0 * ( V_IN + V_EX )
       VEL_NORMAL = U_AVG*NX + V_AVG*NY
 
-      do l=1,layers
+      do l=1,s%layers
 
          if (vel_normal.ge.0) THEN   !CAUTION, only makes sense for single layer
             bed_HAT(l) = discharge_modelX_IN*NX + discharge_modelY_IN*NY
@@ -1152,16 +1158,18 @@
 !     
 !***********************************************************************
 
-      SUBROUTINE HLLC_FLUX()
+      SUBROUTINE HLLC_FLUX(s)
 
 !.....Use appropriate modules
 
       USE GLOBAL
       USE DG
-      use sizes, only: layers
+      use sizes
 
       IMPLICIT NONE
 
+      type (sizes_type) :: s
+      
 !.....Declare local variables
 
       INTEGER II,l
@@ -1399,7 +1407,7 @@
       rVncU = 0.D0
       rVncV = 0.D0
 
-      do l=1,layers
+      do l=1,s%layers
 
          rVncU =  rVncU + 0.5D0*G*(HT_IN+HT_EX) &
         *(bed_EX(l)-bed_IN(l))*NX
@@ -1464,7 +1472,7 @@
 
       q_Roe = q_RoeX*NX + q_RoeY*NY
 
-      do l=1,layers
+      do l=1,s%layers
 
          if (q_Roe.ge.0) THEN   !CAUTION, only makes sense for single layer
             bed_HAT(l) = discharge_modelX_IN*NX + discharge_modelY_IN*NY
@@ -1535,15 +1543,17 @@
 !     
 !***********************************************************************
 
-      SUBROUTINE NCP_FLUX()
+      SUBROUTINE NCP_FLUX(s)
 
 !.....Use appropriate modules
 
       USE GLOBAL
       USE DG
-      use sizes, only: layers
+      use sizes
 
       IMPLICIT NONE
+
+      type (sizes_type) :: s
 
 !.....Declare local variables
 
@@ -1654,7 +1664,7 @@
       rVncU = 0.D0
       rVncV = 0.D0
 
-      do ll=1,layers !should be fixed for multiple layers
+      do ll=1,s%layers !should be fixed for multiple layers
 
          rVncU =  rVncU + 0.5D0*G*(HT_IN+HT_EX) &
         *(bed_EX(ll)-bed_IN(ll))*NX
@@ -1701,7 +1711,7 @@
          G_HAT = FX2_IN*NX + FY2_IN*NY - 0.5D0*rVncU
          H_HAT = FX3_IN*NX + FY3_IN*NY - 0.5D0*rVncV
 
-         do ll = 1,layers        !CAUTION, only really makes sense for single layer
+         do ll = 1,s%layers        !CAUTION, only really makes sense for single layer
 
                bed_HAT(ll) = 0.5D0*(discharge_modelX_IN+discharge_modelX_EX)*NX &
            + 0.5D0*(discharge_modelY_IN+discharge_modelY_EX)*NY
@@ -1780,7 +1790,7 @@
               / (Select_EX-Select_IN)
 
 
-         do ll = 1,layers 
+         do ll = 1,s%layers 
 
             bed_HAT(ll) = ((Select_EX*(discharge_modelX_IN*NX + discharge_modelY_IN*NY)&
            - Select_IN*(discharge_modelX_EX*NX + discharge_modelY_EX*NY))) &
@@ -1832,7 +1842,7 @@
          G_HAT = FX2_EX*NX + FY2_EX*NY + 0.5D0*rVncU
          H_HAT = FX3_EX*NX + FY3_EX*NY + 0.5D0*rVncV
 
-         do ll = 1,layers        !CAUTION, only really makes sense for single layer
+         do ll = 1,s%layers        !CAUTION, only really makes sense for single layer
 
                bed_HAT(ll) = 0.5D0*(discharge_modelX_IN+discharge_modelX_EX)*NX &
            + 0.5D0*(discharge_modelY_IN+discharge_modelY_EX)*NY

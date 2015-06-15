@@ -8,11 +8,11 @@
 !     
 !***********************************************************************
 
-      SUBROUTINE DG_TIMESTEP(IT)
+      SUBROUTINE DG_TIMESTEP(s,IT)
 
 !.....Use appropriate modules
       
-      USE SIZES, ONLY : SZ,layers
+      USE SIZES
       USE GLOBAL, ONLY : SEDFLAG
 
 #ifdef CMPI
@@ -20,6 +20,8 @@
 #endif
 
       IMPLICIT NONE
+
+      type (sizes_type) :: s
 
 !.....Declare local variables
 
@@ -43,7 +45,7 @@
 #endif
 #endif
 
-      CALL SCRUTINIZE_SOLUTION(IT)
+      CALL SCRUTINIZE_SOLUTION(s,IT)
 
       RETURN
       END SUBROUTINE
@@ -60,7 +62,7 @@
 !     
 !***********************************************************************
 
-      SUBROUTINE SCRUTINIZE_SOLUTION(IT)
+      SUBROUTINE SCRUTINIZE_SOLUTION(s,IT)
 
 !.....Use appropriate modules
       
@@ -68,13 +70,15 @@
       USE SIZES, ONLY : SZ,MYPROC,layers
       USE MESSENGER_ELEM, ONLY: MESSAGE_FINI, ErrorElevSum
 #else
-      USE SIZES, ONLY : SZ,layers
+      USE SIZES
 #endif
       USE GLOBAL, ONLY : NE,NM,DP,X,Y,SLAM,SFEA,DEG2RAD,tracer_flag,chem_flag,pdg_el
       USE DG, ONLY : DOF,ZE,QX,QY,iota,iota2,dynP,bed,ncheck,dp_node
 
       IMPLICIT NONE
       
+      type (sizes_type) :: s
+
 !.....Declare local variables
 
       INTEGER IT,J,K,l
@@ -230,7 +234,7 @@
 #endif
 #ifdef SED_LAY
             
-            do l = 1,layers
+            do l = 1,s%layers
                IF(bed(K,J,1,l).NE.bed(K,J,1,l)) THEN
                   PRINT *, ''
                   

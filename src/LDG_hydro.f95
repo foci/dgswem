@@ -15,7 +15,7 @@
 
 !.....Use appropriate modules
       
-      USE SIZES,ONLY : SZ, myproc
+      USE SIZES
       USE GLOBAL
       USE DG
       USE NodalAttributes, ONLY : EVM
@@ -26,6 +26,8 @@
 
       IMPLICIT NONE
       
+      type (sizes_type) :: s
+
 !.....Declare local variables
 
       INTEGER IT,L,GED,NBOREL,NNBORS,NDRYNBORS,k,i,ll
@@ -34,7 +36,7 @@
       REAL(SZ) DPAVG,lim_by
       Real(SZ),Allocatable :: tmp_mz(:,:,:,:)
 
-      Allocate ( tmp_mz(dofh,2,1,MNE) )
+      Allocate ( tmp_mz(dofh,2,1,s%MNE) )
 
 !.....Initialize for viscosity/diffusion
 #ifdef WAVE_DIF
@@ -50,27 +52,27 @@
      
 !.....Compute elevation specified edges
 
-      IF (NEEDS.GT.0)  CALL OCEAN_EDGE_LDG_HYDRO()
+      IF (NEEDS.GT.0)  CALL OCEAN_EDGE_LDG_HYDRO(s)
 
 !.....Compute no-normal flow edges
 
-      IF (NLEDS.GT.0)  CALL LAND_EDGE_LDG_HYDRO()
+      IF (NLEDS.GT.0)  CALL LAND_EDGE_LDG_HYDRO(s)
 
 !.....Compute non-zero flow edges
 
-      IF (NFEDS.GT.0)  CALL FLOW_EDGE_LDG_HYDRO()
+      IF (NFEDS.GT.0)  CALL FLOW_EDGE_LDG_HYDRO(s)
       
 !.....Compute radiation edges
 
-      IF (NREDS.GT.0)  CALL RADIATION_EDGE_LDG_HYDRO()
+      IF (NREDS.GT.0)  CALL RADIATION_EDGE_LDG_HYDRO(s)
 
 !.....Compute internal edges
 
-      CALL INTERNAL_EDGE_LDG_HYDRO()
+      CALL INTERNAL_EDGE_LDG_HYDRO(s)
 
 !.....Loop over interior elements
 
-      CALL RHS_LDG_HYDRO()
+      CALL RHS_LDG_HYDRO(s)
 
       do L=1,NE
 
@@ -232,20 +234,22 @@
 !     01-10-2011 - cem - adapted for p_enrichment and multicomponent
 !     
 !***********************************************************************
-      SUBROUTINE OCEAN_EDGE_LDG_HYDRO()
+      SUBROUTINE OCEAN_EDGE_LDG_HYDRO(s)
 
 !.....Use appropriate modules
 
-      USE SIZES,ONLY : layers
+      USE SIZES
       USE GLOBAL
       USE DG
 
       IMPLICIT NONE
 
+      type (sizes_type) :: s
+
 !.....Declare local variables
 
       INTEGER L,LED,GED,k,I,ll
-      REAL(SZ) QX_AVG, QY_AVG,ZE_AVG,bed_AVG(layers)
+      REAL(SZ) QX_AVG, QY_AVG,ZE_AVG,bed_AVG(s%layers)
       REAL(SZ) iota_AVG
 
       DO 1000 L = 1, needs
@@ -298,7 +302,7 @@
 
             !deal with sediment
 #ifdef SED_LAY
-             do ll=1,layers
+             do ll=1,s%layers
                bed_IN(ll) = 0.D0
                bed_EX(ll) = 0.D0
             enddo
@@ -316,7 +320,7 @@
                iota_IN = iota_IN + iota(K,EL_IN,IRK)*PHI_EDGE(K,I,LED,pa)
 #endif
 #ifdef SED_LAY
-               do ll=1,layers
+               do ll=1,s%layers
                   bed_IN(ll) = bed_IN(ll) &
                  + bed(K,EL_IN,IRK,ll)*PHI_EDGE(K,I,LED,pa)
                enddo
@@ -329,7 +333,7 @@
             QY_EX = QY_IN
 
 #ifdef SED_LAY
-            do ll=1,layers
+            do ll=1,s%layers
                bed_EX(ll) = bed_IN(ll)
             enddo
 #endif
@@ -344,7 +348,7 @@
             iota_AVG = iota_IN
 #endif
 #ifdef SED_LAY
-            do ll=1,layers
+            do ll=1,s%layers
                bed_AVG(ll) = 0.5D0*( bed_IN(ll) + bed_EX(ll) )
             enddo
 #endif
@@ -353,9 +357,9 @@
             
             DO K = 1,DOFS(EL_IN)
                CALL EDGE_INT_LDG_HYDRO&
-              (K,EL_IN,LED,GED,I,iota_AVG,ZE_AVG,QX_AVG,QY_AVG,NX,NY,pa)
+              (s,K,EL_IN,LED,GED,I,iota_AVG,ZE_AVG,QX_AVG,QY_AVG,NX,NY,pa)
 #ifdef SED_LAY
-               do ll=1,layers
+               do ll=1,s%layers
                   CALL EDGE_INT_LDG_sediment&
                 (K,EL_IN,LED,GED,I,bed_AVG(ll),NX,NY,pa,ll)
                enddo
@@ -386,21 +390,22 @@
 !     
 !***********************************************************************
 
-      SUBROUTINE LAND_EDGE_LDG_HYDRO()
+      SUBROUTINE LAND_EDGE_LDG_HYDRO(s)
 
 !.....Use appropriate modules
 
-      USE SIZES,ONLY : SZ,layers
+      USE SIZES
       USE GLOBAL
       USE DG
       IMPLICIT NONE
 
-!.....Declare local variables
+      type (sizes_type) :: s
 
+!.....Declare local variables
 
       INTEGER K,L,LED,GED,GP,i,kk,ll
       REAL(SZ) AREA, IMASS
-      REAL(SZ) TX, TY, QX_AVG, QY_AVG, bed_AVG(layers)
+      REAL(SZ) TX, TY, QX_AVG, QY_AVG, bed_AVG(s%layers)
       REAL(SZ) ZE_AVG,iota_AVG
       
       DO 1000 L = 1,NLEDS
@@ -444,7 +449,7 @@
             iota_IN = 0.d0
 #endif
 #ifdef SED_LAY
-            do ll=1,layers
+            do ll=1,s%layers
                bed_IN(ll) = 0.D0
             enddo
 #endif
@@ -461,7 +466,7 @@
                iota_IN = iota_IN + iota(K,EL_IN,IRK)*PHI_EDGE(K,I,LED,pa)
 #endif
 #ifdef SED_LAY
-               do ll=1,layers
+               do ll=1,s%layers
                   bed_IN(ll) = bed_IN(ll) + bed(K,EL_IN,IRK,ll)*PHI_EDGE(K,I,LED,pa)
                enddo
 #endif
@@ -484,7 +489,7 @@
             QY_EX = (-TX*Q_N_EXT + NX*Q_T_EXT)/(NX*TY - NY*TX)
 
 #ifdef SED_LAY
-            do ll=1,layers !maybe this should be changed?
+            do ll=1,s%layers !maybe this should be changed?
                bed_EX(ll) =  bed_IN(ll)
             enddo
 #endif            
@@ -500,7 +505,7 @@
             iota_AVG = iota_IN
 #endif
 #ifdef SED_LAY
-            do ll=1,layers !take the Fronenius norm
+            do ll=1,s%layers !take the Fronenius norm
                bed_AVG(ll) = 0.5D0*( bed_IN(ll) + bed_EX(ll) )
             enddo
 #endif
@@ -509,9 +514,9 @@
 
             DO K = 1,DOFS(EL_IN)
                CALL EDGE_INT_LDG_HYDRO&
-              (K,EL_IN,LED,GED,I,iota_AVG,ZE_AVG,QX_AVG,QY_AVG,NX,NY,pa)
+              (s,K,EL_IN,LED,GED,I,iota_AVG,ZE_AVG,QX_AVG,QY_AVG,NX,NY,pa)
 #ifdef SED_LAY
-               do ll=1,layers
+               do ll=1,s%layers
                   CALL EDGE_INT_LDG_sediment&
                  (K,EL_IN,LED,GED,I,bed_AVG(ll),NX,NY,pa,ll)
                enddo
@@ -542,20 +547,22 @@
 !     
 !***********************************************************************
 
-      SUBROUTINE FLOW_EDGE_LDG_HYDRO()
+      SUBROUTINE FLOW_EDGE_LDG_HYDRO(s)
 
 !.....Use appropriate modules
 
-      USE SIZES,ONLY : layers
+      USE SIZES
       USE GLOBAL
       USE DG
 
       IMPLICIT NONE
 
+      type (sizes_type) :: s
+
 !.....Declare local variables
 
       INTEGER L, LED, GED,k,i,jj,ll
-      REAL(SZ) TX, TY, QX_AVG, QY_AVG, bed_AVG(layers)
+      REAL(SZ) TX, TY, QX_AVG, QY_AVG, bed_AVG(s%layers)
       REAL(SZ) iota_AVG,ZE_AVG
 
       DO 1000 L = 1,NFEDS
@@ -606,7 +613,7 @@
             iota_EX = 0.D0
 #endif
 #ifdef SED_LAY
-             do ll=1,layers
+             do ll=1,s%layers
                bed_IN(ll) = 0.D0
                bed_EX(ll) = 0.D0
             enddo
@@ -651,7 +658,7 @@
                QY_IN = QY_IN + QY(K,EL_IN,IRK)*PHI_EDGE(K,I,LED,pa)
 
 #ifdef SED_LAY
-               do ll=1,layers
+               do ll=1,s%layers
                   bed_in(ll) = bed_in(ll) + bed(K,EL_IN,IRK,ll)*PHI_EDGE(K,I,LED,pa)
                   bed_ex(ll) = bed_ex(ll) + bed(K,EL_IN,IRK,ll)*PHI_EDGE(K,I,LED,pa)
                enddo
@@ -674,7 +681,7 @@
 #endif
 
 #ifdef SED_LAY
-               do ll=1,layers
+               do ll=1,s%layers
                   bed_AVG(ll) = 0.5D0*( bed_IN(ll) + bed_EX(ll) )
                enddo
 #endif
@@ -683,9 +690,9 @@
 
             DO K = 1,DOFS(EL_IN)
                CALL EDGE_INT_LDG_HYDRO&
-              (K,EL_IN,LED,GED,I,iota_AVG,ZE_AVG,QX_AVG,QY_AVG,NX,NY,pa)
+              (s,K,EL_IN,LED,GED,I,iota_AVG,ZE_AVG,QX_AVG,QY_AVG,NX,NY,pa)
 #ifdef SED_LAY
-               do ll=1,layers
+               do ll=1,s%layers
                   CALL EDGE_INT_LDG_sediment&
                  (K,EL_IN,LED,GED,I,bed_AVG(ll),NX,NY,pa,ll)
                enddo
@@ -715,15 +722,17 @@
 !     
 !***********************************************************************
 
-      SUBROUTINE RADIATION_EDGE_LDG_HYDRO()
+      SUBROUTINE RADIATION_EDGE_LDG_HYDRO(s)
 
 !.....Use appropriate modules
 
-      USE SIZES,ONLY : layers
+      USE SIZES
       USE GLOBAL
       USE DG
 
       IMPLICIT NONE
+
+      type (sizes_type) :: s
 
 !.....Declare local variables
 
@@ -767,7 +776,7 @@
             iota_IN = 0.d0
 #endif
 #ifdef SED_LAY
-            do ll=1,layers
+            do ll=1,s%layers
                bed_IN(ll) = 0.D0
             enddo
 #endif
@@ -786,7 +795,7 @@
 #endif
 
 #ifdef SED_LAY
-               do ll=1,layers
+               do ll=1,s%layers
                   bed_in(ll) = bed_in(ll) + bed(K,EL_IN,IRK,ll)*PHI_EDGE(K,I,LED,pa)
                enddo
 #endif
@@ -800,9 +809,9 @@
            
             DO K = 1,DOFS(EL_IN)
                CALL EDGE_INT_LDG_HYDRO&
-              (K,EL_IN,LED,GED,I,iota_IN,ZE_IN,QX_IN,QY_IN,NX,NY,pa)
+              (s,K,EL_IN,LED,GED,I,iota_IN,ZE_IN,QX_IN,QY_IN,NX,NY,pa)
 #ifdef SED_LAY
-               do ll=1,layers
+               do ll=1,s%layers
                   CALL EDGE_INT_LDG_sediment&
                  (K,EL_IN,LED,GED,I,bed_IN(ll),NX,NY,pa,ll)
                enddo
@@ -831,20 +840,22 @@
 !     
 !***********************************************************************
 
-      SUBROUTINE INTERNAL_EDGE_LDG_HYDRO()
+      SUBROUTINE INTERNAL_EDGE_LDG_HYDRO(s)
 
 !.....Use appropriate modules
       
-      USE SIZES,ONLY : SZ,layers
+      USE SIZES
       USE GLOBAL
       USE DG
 
       IMPLICIT NONE
 
+      type (sizes_type) :: s
+
 !.....Declare local variables
 
       INTEGER L, LED_IN, LED_EX, GED, GP_IN, GP_EX,k,i,ll
-      REAL(SZ) ZE_AVG,QX_AVG,QY_AVG,bed_AVG(layers),W_IN,W_EX
+      REAL(SZ) ZE_AVG,QX_AVG,QY_AVG,bed_AVG(s%layers),W_IN,W_EX
       real(sz) iota_AVG
 
 
@@ -904,7 +915,7 @@
 
 !deal with sediment
 #ifdef SED_LAY
-            do ll=1,layers
+            do ll=1,s%layers
                bed_IN(ll) = 0.D0
                bed_EX(ll) = 0.D0
             enddo
@@ -928,7 +939,7 @@
 #endif
 
 #ifdef SED_LAY
-               do ll=1,layers
+               do ll=1,s%layers
                   bed_IN(ll) = bed_IN(ll) &
                  + bed(K,EL_IN,IRK,ll)*PHI_EDGE(K,GP_IN,LED_IN,pa)
                   bed_EX(ll) = bed_EX(ll) &
@@ -953,7 +964,7 @@
 #endif
 
 #ifdef SED_LAY
-            do ll=1,layers
+            do ll=1,s%layers
                bed_AVG(ll) = 0.5*( bed_IN(ll) + bed_EX(ll) )
             enddo
 #endif
@@ -993,7 +1004,7 @@
 #endif
 
 #ifdef SED_LAY
-               do ll=1,layers
+               do ll=1,s%layers
                   MZ(K,1,ll,EL_IN) = MZ(K,1,ll,EL_IN) &
                  - bed_AVG(ll)*NX*W_IN
                   MZ(K,2,ll,EL_IN) = MZ(K,2,ll,EL_IN) &
@@ -1025,16 +1036,18 @@
 !     
 !***********************************************************************
 
-      SUBROUTINE EDGE_INT_LDG_HYDRO(K,EL,LED,GED,GP,iota_Avg,ZE_Avg,QX_Avg,&
+      SUBROUTINE EDGE_INT_LDG_HYDRO(s,K,EL,LED,GED,GP,iota_Avg,ZE_Avg,QX_Avg,&
      QY_Avg,NX,NY,pa)
 
 !.....Use appropriate modules
 
-      USE SIZES,ONLY : SZ,layers
+      USE SIZES
       USE GLOBAL,ONLY : AREAS,nm
       USE DG,ONLY : M_INV,XLEN,PHI_EDGE,WEGP,LZ,HZ,TZ
  
       IMPLICIT NONE
+      
+      type (sizes_type) :: s
       
 !.....Declare local variables
 
@@ -1089,17 +1102,19 @@
 !***********************************************************************
 
       SUBROUTINE EDGE_INT_LDG_sediment&
-     (K,EL,LED,GED,GP,bed_avg,NX,NY,pa,ll)
+     (s,K,EL,LED,GED,GP,bed_avg,NX,NY,pa,ll)
                                 ! <ezpp-noinst>
       
 !.....Use appropriate modules
 
-      USE SIZES,ONLY : SZ,layers
+      USE SIZES
       USE GLOBAL,ONLY : AREAS
       USE DG,ONLY : M_INV,XLEN,PHI_EDGE,WEGP,MZ
 
       IMPLICIT NONE
       
+      type (sizes_type) :: s
+
 !.....Declare local variables
 
       INTEGER K, EL, LED, GED, GP,i,pa,ll
@@ -1133,11 +1148,11 @@
 !     2012 - cem - added sediment layers
 !***********************************************************************
 
-      SUBROUTINE RHS_LDG_HYDRO()
+      SUBROUTINE RHS_LDG_HYDRO(s)
       
 !.....Use appropriate modules
 
-      USE SIZES,ONLY : layers,SZ
+      USE SIZES
       USE GLOBAL,ONLY : NE,NM,N1,N2,N3,pdg_el,entrop
       USE DG,ONLY : QX_IN,QY_IN,LZ,M_INV,SFAC_ELEM,ZE_IN,&
      DRPHI,DSPHI,DRDX,DRDY,DSDX,DSDY,bed,mz,hz,&
@@ -1146,6 +1161,8 @@
      ze,iota,iota2,bed,irk,slimit3,slimit4,TZ
 
       IMPLICIT NONE
+
+      type (sizes_type) :: s
       
 !.....Declare local variables
       INTEGER L,K,I,pa,ll,kk
@@ -1187,7 +1204,7 @@
 #endif
 
 #ifdef SED_LAY
-            do ll=1,layers
+            do ll=1,s%layers
                bed_IN(ll) = 0.D0
             enddo
 #endif
@@ -1203,7 +1220,7 @@
 #endif
 
 #ifdef SED_LAY
-               do ll=1,layers
+               do ll=1,s%layers
                   bed_IN(ll) = bed_IN(ll) + bed(K,L,IRK,ll)*PHI_AREA(K,I,pa)
                enddo
 #endif
@@ -1255,7 +1272,7 @@
 #endif
 
 #ifdef SED_LAY
-               do ll=1,layers
+               do ll=1,s%layers
                   MZ(K,1,ll,L) =  MZ(K,1,ll,L)&
                  + M_INV(K,pa)*bed_IN(ll)*SFAC_ELEM(I,L,pa)* &
                  ( DRPHI(K,I,pa)*DRDX(L) + DSPHI(K,I,pa)*DSDX(L) )* &
@@ -1317,7 +1334,7 @@
 #endif
                
 #ifdef SED_LAY       
-               do ll=1,layers
+               do ll=1,s%layers
                   tbed_sensor1 = tbed_sensor1 + (bed(kk,L,irk,ll)* &
                  phi_area(kk,I,pa))**2.D0 * wagp(I,pa)
                enddo
@@ -1340,7 +1357,7 @@
 #endif
                
 #ifdef SED_LAY       
-               do ll=1,layers
+               do ll=1,s%layers
                   tbed_sensor2 = tbed_sensor2 + (bed(kk,L,irk,ll)*& !Adjust sensor for multilayers!&
                  phi_area(kk,I,pa))**2.D0 * wagp(I,pa)
                enddo

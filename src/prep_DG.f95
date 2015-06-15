@@ -21,10 +21,10 @@
 !     
 !***********************************************************************
 
-      SUBROUTINE PREP_DG()
+      SUBROUTINE PREP_DG(s)
 
 !.....Use appropriate modules
-
+      USE SIZES
       USE GLOBAL
       USE DG
       USE NodalAttributes, ONLY : STARTDRY, FRIC, GeoidOffset,LoadGeoidOffset,LoadManningsN,ManningsN
@@ -35,6 +35,9 @@
 
       IMPLICIT NONE
       
+      type (sizes_type) :: s
+      
+
 !.....Declare local variables
 
       INTEGER II, l, P_0, DOF_0,j,k,kk,jj,i,chi,ll,mm
@@ -53,13 +56,23 @@
       Real(SZ),allocatable :: iota_check(:),iota_check2(:),hbo(:,:,:), ydubo(:,:)
       Real(SZ),allocatable :: YELEM(:),YED(:),HB1(:,:,:,:), zeo(:,:,:)
 
-      Allocate ( XBCbt(MNE),YBCbt(MNE),radial(MNE),XB(MNE),YB(MNE),l2e(MNE) )
-      Allocate ( iota_check(MNE),iota_check2(MNE),hbo(36,MNE,1),ydubo(36,mne) ) 
-      Allocate ( YELEM(ph),YED(ph),hb1(36,mne,1,ph), zeo(36,mne,1) )
+      integer :: myproc_here
+
+      Allocate ( XBCbt(S%MNE),YBCbt(S%MNE),radial(S%MNE),XB(S%MNE),YB(S%MNE),l2e(S%MNE) )
+      Allocate ( iota_check(S%MNE),iota_check2(S%MNE),hbo(36,S%MNE,1),ydubo(36,s%mne) ) 
+      Allocate ( YELEM(ph),YED(ph),hb1(36,s%mne,1,ph), zeo(36,s%mne,1) )
+
 
       C13 = 1.D0/3.D0
       C16 = 1.D0/6.D0
       R = 6378206.4d0
+
+#ifdef CMPI
+      myproc_here = myproc
+#else
+      myproc_here = 0
+#endif
+
 
 !     sb-PDG1 moved from other places
 
@@ -149,12 +162,12 @@
 
 !.....Create the edge based data
 
-      IF(MYPROC.EQ.0) THEN
+      IF(MYPROC_HERE.EQ.0) THEN
          PRINT*, 'CREATING EDGE DATA...'
          PRINT*, ''
       ENDIF
       CALL CREATE_EDGE_DATA()
-      IF(MYPROC.EQ.0) THEN
+      IF(MYPROC_HERE.EQ.0) THEN
          print *, 'CREATING EDGE DATA DONE'
          print *, ''
       ENDIF
@@ -167,7 +180,7 @@
 !.....Re-arrange elevation specified boundary segment data for DG
 
       IF (NEEDS.GT.0) THEN
-         CALL ALLOC_DG1(MNBFR)
+         CALL ALLOC_DG1(s%MNBFR)
          II = 1
          JJ = 1
          DO I = 1,NBFR
@@ -198,7 +211,7 @@
 !.....Re-arrange non-zero flow specified boundary segment data for DG
 
       IF (NFEDS.GT.0) THEN
-         CALL ALLOC_DG2(MNFFR)
+         CALL ALLOC_DG2(s%MNFFR)
          II = 1
          JJ = 1
          DO I = 1,NFFR
@@ -223,18 +236,18 @@
       
 !.....If there are internal barriers allocate some stuff
 
-      IF (NIBEDS.NE.0) CALL ALLOC_DG3(MNP)
+      IF (NIBEDS.NE.0) CALL ALLOC_DG3(S%MNP)
 
 !.....Allocate the array for node to element table
 
-      CALL ALLOC_NNOEL1(MNP)
+      CALL ALLOC_NNOEL1(S)
 
 !.....Determine the number of elements connected at each node
 
       EL_COUNT = 0
       MAXEL = 1
       DO K = 1,3
-         DO J = 1,MNE
+         DO J = 1,S%MNE
             N1 = NM(J,K)
             EL_COUNT(N1) = EL_COUNT(N1) + 1
          ENDDO
@@ -243,13 +256,13 @@
 
 !.....Allocate the array for the node to element table
 
-      CALL ALLOC_NNOEL2(MNP,MAXEL)
+      CALL ALLOC_NNOEL2(S,MAXEL)
       
 !.....Construct node to element table
 
       EL_COUNT = 0
       DO K = 1,3
-         DO J = 1,MNE
+         DO J = 1,S%MNE
             N1 = NM(J,K)
             NNOEL(N1,1+EL_COUNT(N1)) = J
             EL_COUNT(N1) = EL_COUNT(N1) + 1
@@ -258,7 +271,7 @@
 
 !.....Construct node to element angle table
 
-      DO I = 1,MNP
+      DO I = 1,S%MNP
          ETAMAX(I) = -99999
          KK = 1
          ELETAB(I,1) = I
@@ -339,7 +352,7 @@
 !.....If using modal initial conditions transform the bathymetry from
 !.....nodal coordinates to modal dof
 
-      DO J = 1,MNE
+      DO J = 1,S%MNE
          N1 = NM(J,1)
          N2 = NM(J,2)
          N3 = NM(J,3)
@@ -392,7 +405,7 @@
 !of the sediment discharge equation, fed in by fort.dg
 
 #ifdef SED_LAY
-      IF(MYPROC.EQ.0)THEN
+      IF(MYPROC_HERE.EQ.0)THEN
          print*, 'Parsing the following sediment discharge equations:'
          print *, ''
          print*, 'In X we have: ', sed_equationX
@@ -409,7 +422,7 @@
       ENDIF
 #endif
 
-      IF(MYPROC.EQ.0) THEN
+      IF(MYPROC_HERE.EQ.0) THEN
          print *, 'PREP FOR WET/DRY BEGINS...'
       ENDIF
 
@@ -479,7 +492,7 @@
       ydub = 0.d0
       hb1 = 0.D0
 
-!$$$      do k = 1,MNE
+!$$$      do k = 1,S%MNE
 !$$$
 !$$$         
 !$$$         n1 = NM(k,1)
@@ -630,7 +643,7 @@
 !.....Pre-compute the derivatives of the coordinate transformation for
 !.....each element
 
-      DO J = 1,MNE
+      DO J = 1,S%MNE
 
 !.....Retrieve the global node numbers for the element
 
@@ -873,7 +886,7 @@
 !.....Wetting and drying is not turned on
 
       IF(NOLIFA.EQ.0.OR.NOLIFA.EQ.1) THEN
-         DO J = 1,MNE
+         DO J = 1,S%MNE
             WDFLG(J) = 1
                                 !DOFS(J) = 3
          ENDDO
@@ -883,7 +896,7 @@
 
       ELSEIF (NOLIFA.EQ.2.AND.NSTARTDRY.EQ.0) THEN
 
-         DO J = 1,MNE
+         DO J = 1,S%MNE
             
 !.........Check to see if there are initially any dry nodes
 
@@ -1011,7 +1024,7 @@
          ENDDO
       ENDIF
 
-      IF(MYPROC.EQ.0) THEN
+      IF(MYPROC_HERE.EQ.0) THEN
          print *, 'DONE'
          print *, ''
       ENDIF
@@ -1021,9 +1034,9 @@
 !That is, do not expect convergence
 
       IF (MODAL_IC.EQ.1) THEN
-         OPEN(163,FILE=DIRNAME//'/'//'Initial_Conditions.163')
-         OPEN(164,FILE=DIRNAME//'/'//'Initial_Conditions.164')
-         OPEN(114,FILE=DIRNAME//'/'//'Initial_Bathymetry.114')
+         OPEN(163,FILE=S%DIRNAME//'/'//'Initial_Conditions.163')
+         OPEN(164,FILE=S%DIRNAME//'/'//'Initial_Conditions.164')
+         OPEN(114,FILE=S%DIRNAME//'/'//'Initial_Bathymetry.114')
          READ(163,*) P_READ
          READ(164,*) P_READ,P_READ
          READ(114,*) P_READ
@@ -1031,7 +1044,7 @@
             PRINT*,'INCONSISTENCY IN P -- CHECK INPUT FILES'
             STOP
          ENDIF
-         DO J = 1,MNE
+         DO J = 1,S%MNE
             DO K = 1,DOFH
                READ(163,*) ze(K,J,1)
                READ(164,*) QX(K,J,1), QY(K,J,1)
@@ -1047,20 +1060,20 @@
 !.....Read in modal dof for hot start conditions
 
       IF (MODAL_IC.EQ.2) THEN
-         OPEN(263,FILE=DIRNAME//'/'//'Hot_start.263')
-         OPEN(264,FILE=DIRNAME//'/'//'Hot_start.264')
-         OPEN(214,FILE=DIRNAME//'/'//'Hot_start.214')
+         OPEN(263,FILE=S%DIRNAME//'/'//'Hot_start.263')
+         OPEN(264,FILE=S%DIRNAME//'/'//'Hot_start.264')
+         OPEN(214,FILE=S%DIRNAME//'/'//'Hot_start.214')
 #ifdef TRACE
-         OPEN(288,FILE=DIRNAME//'/'//'Hot_start.288')
+         OPEN(288,FILE=S%DIRNAME//'/'//'Hot_start.288')
 #endif
 #ifdef CHEM
-         OPEN(289,FILE=DIRNAME//'/'//'Hot_start.289')
+         OPEN(289,FILE=S%DIRNAME//'/'//'Hot_start.289')
 #endif
 #ifdef DYNP
-         OPEN(291,FILE=DIRNAME//'/'//'Hot_start.291')
+         OPEN(291,FILE=S%DIRNAME//'/'//'Hot_start.291')
 #endif
 !$$$#ifdef SED_LAY
-!$$$         OPEN(290,FILE=DIRNAME//'/'//'Hot_start.290')
+!$$$         OPEN(290,FILE=S%DIRNAME//'/'//'Hot_start.290')
 !$$$#endif
          READ(263,*) P_READ
          READ(264,*) P_READ,P_READ
@@ -1069,7 +1082,7 @@
             PRINT*,'INCONSISTENCY IN P -- CHECK INPUT FILES'
             STOP
          ENDIF
-         DO J = 1,MNE
+         DO J = 1,S%MNE
             DO K = 1,DOFH
                READ(263,*) ze(K,J,1)
                READ(264,*) QX(K,J,1), QY(K,J,1)
@@ -1110,7 +1123,7 @@
 !.....Initialize the DG.63 output file
 
       IF (ABS(NOUTGE).EQ.1) THEN
-         OPEN(631,FILE=DIRNAME//'/'//'DG.63')
+         OPEN(631,FILE=S%DIRNAME//'/'//'DG.63')
          WRITE(631,3220) RUNDES, RUNID, AGRID
          WRITE(631,3645) NDSETSE, dofh, DTDP*NSPOOLGE, NSPOOLGE, 1
       ENDIF
@@ -1118,7 +1131,7 @@
 !.....Initialize the DG.64 output file
 
       IF (ABS(NOUTGV).EQ.1) THEN
-         OPEN(641,FILE=DIRNAME//'/'//'DG.64')
+         OPEN(641,FILE=S%DIRNAME//'/'//'DG.64')
          WRITE(641,3220) RUNDES, RUNID, AGRID
          WRITE(641,3645) NDSETSV, dofh, DTDP*NSPOOLGV, NSPOOLGV, 2
       ENDIF
@@ -1127,7 +1140,7 @@
 !.....as the wet/dry status.
 
       IF ((ABS(NOUTGE).EQ.1).AND.(NOLIFA.GE.2)) THEN
-         OPEN(651,FILE=DIRNAME//'/'//'DG.65')
+         OPEN(651,FILE=S%DIRNAME//'/'//'DG.65')
          WRITE(651,3220) RUNDES, RUNID, AGRID
          WRITE(651,3645) NDSETSE, dofh, DTDP*NSPOOLGE, NSPOOLGE, 1
       ENDIF
@@ -1167,12 +1180,12 @@
 !.....Prep the slopelimiter
 
       IF (SLOPEFLAG.NE.0) THEN
-         IF(MYPROC.EQ.0)THEN
+         IF(MYPROC_HERE.EQ.0)THEN
             print *, 'Slope limiting prep begins, "kshanti"'
          ENDIF
          CALL ALLOC_SLOPELIM()
          CALL PREP_SLOPELIM()
-         IF(MYPROC.EQ.0)THEN
+         IF(MYPROC_HERE.EQ.0)THEN
             print *, 'Finished'
          ENDIF
       ENDIF

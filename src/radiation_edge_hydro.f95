@@ -17,14 +17,16 @@
 !     
 !***********************************************************************
 
-      SUBROUTINE RADIATION_EDGE_HYDRO(IT)
+      SUBROUTINE RADIATION_EDGE_HYDRO(s,IT)
 
 !.....Use appropriate modules
 
       USE GLOBAL
       USE DG
-      USE sizes, ONLY: myproc,layers
+      USE sizes
       IMPLICIT NONE
+      
+      type (sizes_type) :: s
 
 !.....Declare local variables
 
@@ -32,7 +34,7 @@
       REAL(SZ) TX, TY, W_IN, DEN
       REAL(SZ) LZ_XX_IN, LZ_XY_IN, LZ_YX_IN, LZ_YY_IN
       Real(sz) HZ_X_IN,HZ_Y_IN,TZ_X_IN,TZ_Y_IN
-      Real(SZ) MZ_X_IN(layers),MZ_Y_IN(layers)
+      Real(SZ) MZ_X_IN(s%layers),MZ_Y_IN(s%layers)
 
       test_el = 0
       DO 1000 L = 1,NREDS
@@ -108,7 +110,7 @@
 !When layered, these change
 #ifdef SED_LAY                  
             HB(1,EL_IN,irk) = 0.D0
-            do ll=1,layers
+            do ll=1,s%layers
                HB(1,EL_IN,irk) = HB(1,EL_IN,irk) + bed(1,EL_IN,irk,ll)
 
                MZ_X_IN(ll) =  MZ(K,1,ll,EL_IN)
@@ -154,7 +156,7 @@
 #endif
 
 #ifdef SED_LAY
-               do ll = 1,layers
+               do ll = 1,s%layers
                   bed_IN(ll) = bed_IN(ll) + bed(K,EL_IN,IRK,ll)*PHI_EDGE(K,I,LED,pa)
                   HB_IN = HB_IN + bed(k,EL_IN,irk,ll)*PHI_EDGE(K,I,LED,pa)
 
@@ -188,7 +190,7 @@
             SFAC_EX = SFAC_IN
 
 #ifdef SED_LAY
-               do ll = 1,layers
+               do ll = 1,s%layers
                   bed_EX(ll) = bed_IN(ll)
                enddo
 #endif
@@ -234,7 +236,7 @@
 #endif
 
 #ifdef SED_LAY
-               do ll = 1,layers
+               do ll = 1,s%layers
                   RHS_bed(K,EL_IN,IRK,ll) = RHS_bed(K,EL_IN,IRK,ll) - W_IN*bed_HAT(ll)
                enddo
 #endif

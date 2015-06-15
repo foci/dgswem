@@ -1,4 +1,4 @@
-      SUBROUTINE Modal2Nodal
+      SUBROUTINE Modal2Nodal(s)
 #ifdef SWAN
 Casey 110422: Create new data structure with discontinuous information for SWAN.
       USE Couple2Adcirc, ONLY: PASS2SWAN
@@ -20,7 +20,6 @@ Casey 110422: Create new data structure with discontinuous information for SWAN.
                   ETA2,&
                   HB_DG,&
                   LEQ,&
-                  MNP,&
                   N1,&
                   NBOR_EL,&
                   NLEQ,&
@@ -32,8 +31,11 @@ Casey 110422: Create new data structure with discontinuous information for SWAN.
                   UU2,&
                   VV2,&
                   ZE_DG
-      USE SIZES,  ONLY: SZ
+      USE SIZES
       IMPLICIT NONE
+
+      type (sizes_type) :: s
+      
       INTEGER  :: I
       INTEGER  :: J
       INTEGER  :: K
@@ -44,9 +46,9 @@ Casey 110422: Create new data structure with discontinuous information for SWAN.
       REAL(SZ) :: FH_NL
 #ifdef SWAN
 Casey 110111: Create new data structure with discontinuous information for SWAN.
-      IF(.NOT.ALLOCATED(PASS2SWAN)) ALLOCATE(PASS2SWAN(1:MNP))
+      IF(.NOT.ALLOCATED(PASS2SWAN)) ALLOCATE(PASS2SWAN(1:S%MNP))
 #endif
-      DO I = 1,MNP
+      DO I = 1,S%MNP
         NO_NBORS = EL_COUNT(I)
 #ifdef SWAN
 Casey 110111: Create new data structure with discontinuous information for SWAN.

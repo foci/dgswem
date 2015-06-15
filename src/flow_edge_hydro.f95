@@ -17,17 +17,19 @@
 !     
 !***********************************************************************
 
-      SUBROUTINE FLOW_EDGE_HYDRO(IT)
+      SUBROUTINE FLOW_EDGE_HYDRO(s,IT)
 
 !.....Use appropriate modules
 
       USE GLOBAL
       USE DG
-      use SIZES, only: layers
+      use SIZES
       use fparser
       use fparser2
 
       IMPLICIT NONE
+
+      type (sizes_type) :: s
 
 !.....Declare local variables
 
@@ -35,7 +37,7 @@
       Real(SZ) DEN2,U_AVG,V_AVG,VEL_NORMAL,q_RoeX, q_RoeY, q_Roe
       REAL(SZ) TX, TY,HZ_X_IN,HZ_Y_IN,TZ_X_IN,TZ_Y_IN
       REAL(SZ) LZ_XX_IN, LZ_XY_IN, LZ_YX_IN, LZ_YY_IN,W_IN
-      Real(SZ) VEI(3,3),chi_pref,C_char,MZ_X_IN(layers),MZ_Y_IN(layers)
+      Real(SZ) VEI(3,3),chi_pref,C_char,MZ_X_IN(s%layers),MZ_Y_IN(s%layers)
 
       test_el = 0
       DO 1000 L = 1,NFEDS
@@ -186,7 +188,7 @@
 #endif
 
 #ifdef SED_LAY
-               do ll = 1,layers
+               do ll = 1,s%layers
                   bed_IN(ll) = bed_IN(ll) + bed(K,EL_IN,IRK,ll)*PHI_EDGE(K,I,LED,pa)
                   HB_IN = HB_IN + bed(k,EL_IN,irk,ll)*PHI_EDGE(K,I,LED,pa)
                
@@ -264,7 +266,7 @@
 #endif
 
 #ifdef SED_LAY
-            do ll=1,layers
+            do ll=1,s%layers
                bed_HAT(ll) = bed_HAT(ll) + MZ_X_IN(ll)*NX*SFAC_IN + MZ_Y_IN(ll)*NY
             enddo
 #endif
@@ -294,7 +296,7 @@
 #endif
 
 #ifdef SED_LAY
-               do ll=1,layers
+               do ll=1,s%layers
                   RHS_bed(K,EL_IN,IRK,ll) =  RHS_bed(K,EL_IN,IRK,ll) - W_IN*bed_HAT(ll)
                enddo
 #endif

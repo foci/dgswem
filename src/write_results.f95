@@ -11,7 +11,7 @@
 !     
 !***********************************************************************
 
-      SUBROUTINE WRITE_RESULTS(IT,FORCE_WRITE)
+      SUBROUTINE WRITE_RESULTS(s,IT,FORCE_WRITE)
 
 !.....Use appropriate modules
 
@@ -20,12 +20,14 @@
 #ifdef HARM
       USE HARM
 #endif
-      use sizes, only:  myproc,layers
+      use sizes
 
 #ifdef CMPI
       USE MESSENGER_ELEM 
 #endif
       
+      type (sizes_type) :: s
+
 !.....Declare local variables
 
       INTEGER IT,I,K,Maxp(0:8),Minp(0:8)
@@ -108,7 +110,7 @@
 #endif
 
 #ifdef SED_LAY
-                        do l=1,layers
+                        do l=1,s%layers
                            bed_DG(J,l) = bed_DG(J,l) + PHI_CORNER(KK,K,ph)*bed(KK,NBOR_EL,1,l)
                            HB_DG(J) = HB_DG(J) + PHI_CORNER(KK,K,ph)*bed(KK,NBOR_EL,1,l)
                            iotaa_DG(J) = iotaa(1,NBOR_EL,1)
@@ -208,7 +210,7 @@
 #endif
 
 #ifdef SED_LAY
-                  do l=1,layers
+                  do l=1,s%layers
 
                      bed_int(J,l) = bed_int(J,l) + WAGP(I,pa) 
 &                    *PHI_AREA(K,I,pa)*bed(K,J,1,l)*0.5D0*AREAS(j)
@@ -238,7 +240,7 @@
             dpe(j)  = dpe(j)/(AREAS(J))
 
 #ifdef SED_LAY
-            do l=1,layers
+            do l=1,s%layers
                bed_int(j,l) = bed_int(j,l)/(AREAS(J))
             enddo
 #endif
@@ -762,7 +764,7 @@
       endif
 
       if (it.eq.nt) then
-         open(963,FILE=DIRNAME//'/'//'maxele.63')
+         open(963,FILE=S%DIRNAME//'/'//'maxele.63')
          write(963,*) np
          do i=1,np
             write(963,9633) etamax(i)
@@ -904,7 +906,6 @@
 
             ENDIF
          ENDIF
-#endif
 
 !...  LINES TO COMPUTE MEANS AND VARIANCES
 
@@ -924,6 +925,7 @@
 
 
       ENDIF
+#endif
 
 !...  
 !...  WRITE OUT HOT START INFORMATION IF NHSTAR=1 AND AT CORRECT TIME STEP
@@ -931,12 +933,13 @@
 !.... WORKSTATIONS AND THE 64 BIT CRAY.  THIS IS BECAUSE THE HARMONIC
 !.... ANALYSIS IS DONE IN DOUBLE PRECISION (64 BITS) ON WORKSTATIONS.
 !...  
+#ifdef HOTSTART
       IF(NHSTAR.EQ.1) THEN
          ITEST=(IT/NHSINC)*NHSINC  
          IF(ITEST.EQ.IT) THEN
-            IF(IHSFIL.EQ.67) OPEN(67,FILE=DIRNAME//'/'//'fort.67',&
+            IF(IHSFIL.EQ.67) OPEN(67,FILE=S%DIRNAME//'/'//'fort.67',&
             ACCESS='DIRECT',RECL=8)
-            IF(IHSFIL.EQ.68) OPEN(68,FILE=DIRNAME//'/'//'fort.68',&
+            IF(IHSFIL.EQ.68) OPEN(68,FILE=S%DIRNAME//'/'//'fort.68',&
            ACCESS='DIRECT',RECL=8)
             IHOTSTP=1
             WRITE(IHSFIL,REC=IHOTSTP) IM
@@ -1043,7 +1046,8 @@
             ENDIF
          ENDIF
       ENDIF
-      
+#endif      
+
 
 !...  FIND AND PRINT TO UNIT 6, THE MAXIMUM ELEVATION, THE MAXIMUM VELOCITY
 !.... AND THE NODE NUMBERS AT WHICH THEY OCCUR ON MYPROC=0
@@ -1256,20 +1260,20 @@
 
       IF ((DGHOT.EQ.1).AND.(MOD(IT,DGHOTSPOOL).EQ.0)) THEN
          
-         OPEN(263,FILE=DIRNAME//'/'//'Hot_start.263')
-         OPEN(264,FILE=DIRNAME//'/'//'Hot_start.264')
-         OPEN(214,FILE=DIRNAME//'/'//'Hot_start.214')
+         OPEN(263,FILE=S%DIRNAME//'/'//'Hot_start.263')
+         OPEN(264,FILE=S%DIRNAME//'/'//'Hot_start.264')
+         OPEN(214,FILE=S%DIRNAME//'/'//'Hot_start.214')
 #ifdef TRACE
-         OPEN(288,FILE=DIRNAME//'/'//'Hot_start.288')
+         OPEN(288,FILE=S%DIRNAME//'/'//'Hot_start.288')
 #endif
 #ifdef CHEM
-         OPEN(289,FILE=DIRNAME//'/'//'Hot_start.289')
+         OPEN(289,FILE=S%DIRNAME//'/'//'Hot_start.289')
 #endif
 #ifdef DYNP
-         OPEN(291,FILE=DIRNAME//'/'//'Hot_start.291')
+         OPEN(291,FILE=S%DIRNAME//'/'//'Hot_start.291')
 #endif
 #ifdef SED_LAY
-         OPEN(290,FILE=DIRNAME//'/'//'Hot_start.290')
+         OPEN(290,FILE=S%DIRNAME//'/'//'Hot_start.290')
 #endif
 
          WRITE(263,*) PH
@@ -1291,7 +1295,7 @@
                WRITE(291,*) dynP(K,J,1)
 #endif
 #ifdef SED_LAY
-               do ll=1,layers
+               do ll=1,s%layers
                   WRITE(290,*) bed(K,J,1,ll)
                enddo
 #endif
@@ -1367,7 +1371,7 @@
       USE DG
 
 !.....DG.63.IC = Record of the initial surface elevation
-!      OPEN(632,FILE=DIRNAME//'/'//'DG.63.IC')
+!      OPEN(632,FILE=S%DIRNAME//'/'//'DG.63.IC')
 !      WRITE(632,3220) RUNDES, RUNID, AGRID
 !      WRITE(632,3645) 1, DOF, DTDP*NSPOOLGE, NSPOOLGE, 1
 
@@ -1381,7 +1385,7 @@
 !      CLOSE(632)
 
 !.....DG.64.IC = Record of the initial discharge
-!      OPEN(642,FILE=DIRNAME//'/'//'DG.64.IC')
+!      OPEN(642,FILE=S%DIRNAME//'/'//'DG.64.IC')
 !      WRITE(642,3220) RUNDES, RUNID, AGRID
 !      WRITE(642,3645) 1, DOF, DTDP*NSPOOLGV, NSPOOLGV, 2
 !
@@ -1396,7 +1400,7 @@
 
 !.....DG.65.IC = Record of the initial wet/dry flags
 !      IF (NOLIFA.GE.2) THEN
-!        OPEN(652,FILE=DIRNAME//'/'//'DG.65.IC')
+!        OPEN(652,FILE=S%DIRNAME//'/'//'DG.65.IC')
 !        WRITE(652,3220) RUNDES, RUNID, AGRID
 !        WRITE(652,3645) 1, DOF, DTDP*NSPOOLGE, NSPOOLGE, 1
 !

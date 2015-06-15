@@ -28,17 +28,18 @@
 !
 !***********************************************************************
 
-      SUBROUTINE CREATE_EDGE_DATA()
+      SUBROUTINE CREATE_EDGE_DATA(s)
 
 !.....Use appropriate modules
 
       USE GLOBAL
       USE DG     
-      use sizes, only:  myproc
+      use sizes
 #ifdef CMPI
       USE MESSENGER_ELEM
 #endif
       IMPLICIT NONE
+      type (sizes_type) :: s
       
 !.....Declare local variables
 
@@ -54,7 +55,7 @@
 
 !.....Compute maximum number of edges
 
-      MNED = 3*MNE
+      MNED = 3*s%MNE
 
 !.....Allocate the edge data arrays
 
@@ -62,7 +63,7 @@
 
 !.....Generate the edge connectivity
 
-      DO J = 1,MNE
+      DO J = 1,S%MNE
         EDFLG(1,J) = 0
         EDFLG(2,J) = 0
         EDFLG(3,J) = 0
@@ -76,10 +77,13 @@
       NEDEL(:,:) = 0
 
       NEDGES = 0
-
+#ifdef CMPI
       IF(MYPROC.EQ.0) THEN
          PRINT *,'CREATING EDGE PAIRS...'
       ENDIF
+#else
+      PRINT *,'CREATING EDGE PAIRS...'
+#endif
 
       DO 30 IEL = 1,NE
         N1 = NM(IEL,1)
@@ -117,7 +121,9 @@
 
                 IF(EDFLG(JED,JEL).EQ.1) THEN
                   PRINT *,'POSSIBLE DUPLICATE ELEMENT'
+#ifdef CMPI
                   PRINT *,'MYPROC=',MYPROC
+#endif
                   PRINT *,'EL=',JEL,', J1=',J1,', J2=',J2
                   PRINT *,'  (CREATE_EDGE_DATA.F)'
                   PRINT *,'EXECUTION WILL BE TERMINATED'
@@ -138,10 +144,15 @@
 
       DEALLOCATE(EDFLG)
 
+#ifdef CMPI
       IF(MYPROC.EQ.0) THEN
          PRINT *,'DONE'
          PRINT *,''
       ENDIF
+#else
+         PRINT *,'DONE'
+         PRINT *,''
+#endif
 
 !.....Print out the edge-to-node and edge-to-element connectivity
 
@@ -447,6 +458,7 @@
       NERR = NEDGES - (NIEDS + NLEDS + NEEDS + NFEDS + NIBEDS + NEBEDS +&
                  NREDS)
 
+#ifdef CMPI
       IF(MYPROC.EQ.0) THEN
          WRITE(6,*) '  '
          WRITE(6,*) 'TOTAL NO. OF EDGES = ', NEDGES
@@ -463,6 +475,22 @@
          WRITE(6,*) 'NO. OF MISSING EDGES = ',NERR
          WRITE(6,*)  ''
       ENDIF
+#else
+         WRITE(6,*) '  '
+         WRITE(6,*) 'TOTAL NO. OF EDGES = ', NEDGES
+         WRITE(6,*) '  '
+         WRITE(6,*) 'NO. OF INTERNAL (NON-BOUNDARY) EDGES = ', NIEDS
+         WRITE(6,*) 'NO. OF NO-NORMAL FLOW EDGES = ', NLEDS
+         WRITE(6,*) 'NO. OF NON-ZERO NORMAL FLOW EDGES = ', NFEDS
+         WRITE(6,*) 'NO. OF ELEVATION SPECIFIED EDGES = ', NEEDS
+         WRITE(6,*) 'NO. OF EXTERNAL BARRIER EDGES = ', NEBEDS
+         WRITE(6,*) 'NO. OF INTERNAL BARRIER EDGES = ', NIBEDS
+         WRITE(6,*) 'NO. OF RADIATION EDGES = ', NREDS
+         WRITE(6,*) &
+        '-----------------------------------------------------'
+         WRITE(6,*) 'NO. OF MISSING EDGES = ',NERR
+         WRITE(6,*)  ''
+#endif
       WRITE(16,*) '  '
       WRITE(16,*) 'TOTAL NO. OF EDGES = ', NEDGES
       WRITE(16,*) '  '

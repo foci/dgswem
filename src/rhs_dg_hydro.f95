@@ -15,7 +15,7 @@
 !     01-10-2011 - cem - adapted for p_enrichment and multicomponent
 !     
 !***********************************************************************
-      SUBROUTINE RHS_DG_HYDRO()
+      SUBROUTINE RHS_DG_HYDRO(s)
       
 !.....Use appropriate modules
 
@@ -24,9 +24,11 @@
       USE NodalAttributes, ONLY : TAU, IFLINBF, IFHYBF, HBREAK, FTHETA,&
      FGAMMA,LoadManningsN,ManningsN,CF
 
-      USE sizes, ONLY: myproc,layers
+      USE sizes
 
       IMPLICIT NONE
+
+      type (sizes_type) :: s
       
 !.....Declare local variables
 
@@ -36,14 +38,14 @@
       REAL(SZ) PHI_AREA_KI,MN_IN, MassAction1st,MassAction2nd,fx,fy
       REAL(SZ) LZ_XX, LZ_XY, LZ_YX, LZ_YY, rate, s_mass, s_sed,b_0
       REAL(SZ) DEPTH, F1_NL, FU_NL, FV_NL, FG_NL, FH_NL, FW_NL
-      REAL(SZ) HUU, HVV, HUV, GH2,MZ_X(layers),MZ_Y(layers), fgauss, sig
+      REAL(SZ) HUU, HVV, HUV, GH2,MZ_X(s%layers),MZ_Y(s%layers), fgauss, sig
       REAL(SZ) DEPTH_C, FH_NL_C, UX_C, UY_C, UMAG_C, DTDPH,SFACQUAD
       Real(SZ) discharge_modelX_IN,discharge_modelY_IN
       Real(SZ) DH_X,DH_Y,phi_tot,C_0,HZ_X,HZ_Y,TZ_X,TZ_Y
 
       Real(SZ),allocatable :: XBCbt(:),YBCbt(:)
 
-      Allocate ( XBCbt(MNE),YBCbt(MNE) )
+      Allocate ( XBCbt(s%MNE),YBCbt(s%MNE) )
 
       DTDPH = 1.D0/DTDP
       DO 1000 L = 1, NE
@@ -124,7 +126,7 @@
             !When layered, these change
 #ifdef SED_LAY
             HB(:,L,irk) = 0.D0
-            do ll = 1,layers
+            do ll = 1,s%layers
                HB(1,L,irk) = HB(1,L,irk) + bed(1,L,irk,ll)
 
                MZ_X(ll) =  MZ(1,1,ll,L)
@@ -139,7 +141,7 @@
             DPHIDY = 0.D0
             HB(1,L,irk) = 0.D0
             do K = 1,DOFS(L)
-               do ll = 1,layers
+               do ll = 1,s%layers
                   HB(k,L,irk) = HB(k,L,irk) + bed(k,L,irk,ll)
                enddo
                DPHIDX = DRPHI(K,I,pa)*DRDX(L) + DSPHI(K,I,pa)*DSDX(L)
@@ -205,7 +207,7 @@
                DEPTH = ZE_IN + HB_IN
 
 #ifdef SED_LAY
-               do ll = 1,layers
+               do ll = 1,s%layers
                   bed_IN(ll) = bed_IN(ll) + bed(K,L,IRK,ll)*PHI_AREA(K,I,pa)
                   HB_IN = HB_IN + bed(K,L,irk,ll)*PHI_AREA(K,I,pa)
 
@@ -428,7 +430,7 @@
 
 #ifdef SED_LAY
 
-               do ll = 1,layers !only really makes sense for single layer
+               do ll = 1,s%layers !only really makes sense for single layer
 
                   RHS_bed(K,L,IRK,ll) = RHS_bed(K,L,IRK,ll) &
                  + XFAC(K,I,L,pa)*(discharge_modelX_IN+MZ_X(ll)*SFACQUAD)&

@@ -11,15 +11,17 @@
 !     
 !***********************************************************************
 
-      SUBROUTINE PREP_SLOPELIM()
+      SUBROUTINE PREP_SLOPELIM(s)
       
 !.....Use appropriate modules
-
+      use sizes
       USE GLOBAL
       USE DG
 
       IMPLICIT NONE
       
+      type (sizes_type) :: s
+
 !.....Declare local variables
 
       INTEGER GED,i,j,ll,k,lll,mm,ell,nin,bbb,bmm
@@ -34,9 +36,9 @@
       Real(SZ),Allocatable :: Taylor_mass(:,:,:)
 
       Allocate ( tempmat(dofh,dofh),tempInv(dofh,dofh), tempag(dofh,dofh) )
-      Allocate ( AreaV_integral(MNE,0:ph,0:ph,3), A(dofh,dofh) )
+      Allocate ( AreaV_integral(s%MNE,0:ph,0:ph,3), A(dofh,dofh) )
       Allocate ( Full_M_inv(dofh,dofh), temp_p(dofh,dofh) )
-      Allocate ( Taylor_mass(MNE,dofh,dofh),temp_t(dofh,dofh))
+      Allocate ( Taylor_mass(s%MNE,dofh,dofh),temp_t(dofh,dofh))
       
 !.....Initialize SL3
       
@@ -44,7 +46,7 @@
 
 !.....Loop over the elements
 
-      DO J = 1,MNE
+      DO J = 1,s%MNE
          
 !.....Retrieve the nodal coordinates of the given element
 
@@ -172,7 +174,7 @@
             
 !.....Loop over the elements
 
-            do k = 1,MNE
+            do k = 1,s%MNE
 
 !.....Set areas over the physical elements
                
@@ -250,7 +252,7 @@
 
 !.....Find all neighbors of shared vertex
 
-               do mm =1,MNE     !number of elements
+               do mm =1,S%MNE     !number of elements
 
                   do lll =1,3   !number of vertices
 
@@ -496,7 +498,7 @@
       focal_neigh = 0
       focal_up = 0
 
-      do j = 1,mne
+      do j = 1,s%MNE
 
          bmm = 1
 

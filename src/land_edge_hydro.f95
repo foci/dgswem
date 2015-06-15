@@ -23,15 +23,17 @@
 !     
 !***********************************************************************
 
-      SUBROUTINE LAND_EDGE_HYDRO(IT)
+      SUBROUTINE LAND_EDGE_HYDRO(s,IT)
 
 !.....Use appropriate modules
 
       USE GLOBAL
       USE DG
-      Use SIZES, only: layers
+      Use SIZES
 
       IMPLICIT NONE
+
+      type (sizes_type) :: s
 
 !.....Declare local variables
 
@@ -39,7 +41,7 @@
       Real(SZ) DEN2,U_AVG,V_AVG,VEL_NORMAL,q_RoeX, q_RoeY, q_Roe
       REAL(SZ) TX, TY, DEN,ell_1,ell_2,ell_3,HZ_X_IN,HZ_Y_IN
       REAL(SZ) LZ_XX_IN, LZ_XY_IN, LZ_YX_IN, LZ_YY_IN,W_IN
-      Real(SZ) MZ_X_IN(layers),MZ_Y_IN(layers),TZ_X_IN,TZ_Y_IN
+      Real(SZ) MZ_X_IN(s%layers),MZ_Y_IN(s%layers),TZ_X_IN,TZ_Y_IN
 
       test_el = 0
       DO 1000 L = 1,NLEDS
@@ -104,7 +106,7 @@
             !When layered, these change
 #ifdef SED_LAY
             HB(1,EL_IN,irk) = 0.D0
-            do ll=1,layers
+            do ll=1,s%layers
                HB(1,EL_IN,irk) = HB(1,EL_IN,irk) + bed(1,EL_IN,irk,ll)
 
                MZ_X_IN(ll) =  MZ(1,1,ll,EL_IN)
@@ -176,7 +178,7 @@
 #endif
 
 #ifdef SED_LAY
-               do ll = 1,layers
+               do ll = 1,s%layers
                   bed_IN(ll) = bed_IN(ll) + bed(K,EL_IN,IRK,ll)*PHI_EDGE(K,I,LED,pa)
                   HB_IN = HB_IN + bed(k,EL_IN,irk,ll)*PHI_EDGE(K,I,LED,pa)
 
@@ -247,7 +249,7 @@
 !.....Add LDG terms for sediment
 
 #ifdef SED_LAY
-            do ll=1,layers
+            do ll=1,s%layers
                bed_HAT(ll) = bed_HAT(ll) + MZ_X_IN(ll)*NX*SFAC_IN + MZ_Y_IN(ll)*NY
             enddo
 #endif
@@ -279,7 +281,7 @@
 #endif
 
 #ifdef SED_LAY
-               do ll = 1,layers
+               do ll = 1,s%layers
                   RHS_bed(K,EL_IN,IRK,ll) = RHS_bed(K,EL_IN,IRK,ll) - W_IN*bed_HAT(ll)
                enddo
 #endif
@@ -309,17 +311,18 @@
 !     
 !***********************************************************************
 
-      SUBROUTINE LAND_EDGE_HYDRO_POST()
+      SUBROUTINE LAND_EDGE_HYDRO_POST(s)
 
 !.....Use appropriate modules
 
-      USE SIZES,ONLY : SZ,MYPROC,layers
+      USE SIZES
       USE GLOBAL,ONLY : pdg_el 
       USE DG,ONLY : NLEDS,NLEDN,NEDSD,NEDEL,COSNX,SINNX,QX,QY,&
      PHI_CORNER, IRK, EL_UPDATED,pa,DOFS
 
       IMPLICIT NONE
 
+      type (sizes_type) :: s
 !.....Declare local variables
 
       INTEGER L, LED, GED, EL_IN, K, KK, NOD1, NOD2, NOD3, NEDGES

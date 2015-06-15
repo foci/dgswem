@@ -11,11 +11,14 @@
 !
 !***********************************************************************
 
-      SUBROUTINE SLOPELIMITER()
+      SUBROUTINE SLOPELIMITER(s)
 
+      USE SIZES
       USE DG, ONLY : SLOPEFLAG
       
       IMPLICIT NONE
+      
+      type (sizes_type) :: s
 
 #ifdef SLOPEALL
       IF (SLOPEFLAG.EQ.1) THEN
@@ -27,7 +30,7 @@
       ELSE IF (SLOPEFLAG.EQ.4) THEN
         CALL SLOPELIMITER4()
       ELSE IF (SLOPEFLAG.EQ.5) THEN
-        CALL SLOPELIMITER5()
+        CALL SLOPELIMITER5(s)
       ELSE IF (SLOPEFLAG.EQ.6) THEN
         CALL SLOPELIMITER6()
       ELSE IF (SLOPEFLAG.EQ.7) THEN
@@ -43,12 +46,12 @@
 
 #ifdef SLOPE5 
       IF (SLOPEFLAG .NE. 0) THEN
-        CALL SLOPELIMITER5()
+        CALL SLOPELIMITER5(s)
       ENDIF
 #endif
 
 #ifdef STBLZR
-        CALL SLOPELIMITER5()
+        CALL SLOPELIMITER5(s)
 #endif
     
 
@@ -3243,11 +3246,11 @@
 !     
 !***********************************************************************
 
-      SUBROUTINE SLOPELIMITER5()
+      SUBROUTINE SLOPELIMITER5(s)
 
 !.....Use appropriate modules
 
-      USE SIZES, ONLY : SZ,layers
+      USE SIZES
       USE GLOBAL
       USE DG
 
@@ -3256,6 +3259,8 @@
 #endif
 
       IMPLICIT NONE
+
+      type (sizes_type) :: s
 
 !.....Declare local variables
 
@@ -3277,7 +3282,7 @@
       Allocate ( QY_MIN1(NP),QY_MAX1(NP),QX_MAX1(NP) )
       Allocate ( iota_MIN1(NP),iota_MAX1(NP) )
       Allocate ( iota2_MIN1(NP),iota2_MAX1(NP) )
-      Allocate ( bed_MIN1(NP,layers),bed_MAX1(NP,layers) )
+      Allocate ( bed_MIN1(NP,s%layers),bed_MAX1(NP,s%layers) )
 
 !     FIND THE MAXIMUM AND MINIMUM OF EACH VARIABLE OVER ALL ELEMENTS 
 !     SHARING A NODE
@@ -3305,7 +3310,7 @@
 #endif
 
 #ifdef SED_LAY
-         do l=1,layers
+         do l=1,s%layers
             bed_MIN1(I,l) = 99999.
             bed_MAX1(I,l) =-99999.
          enddo
@@ -3333,7 +3338,7 @@
 
 
 #ifdef SED_LAY
-            do l=1,layers
+            do l=1,s%layers
                bed_DG(J,l) = bed(1,NBOR_EL,IRK+1,l)
             enddo
 #endif
@@ -3387,7 +3392,7 @@
 #endif
 
 #ifdef SED_LAY
-            do l=1,layers
+            do l=1,s%layers
                IF (bed_DG(J,l).LT.bed_MIN1(I,l))THEN
                   bed_MIN1(I,l)=bed_DG(J,l)
                ENDIF
@@ -3415,7 +3420,7 @@
 #endif
 
 #ifdef SED_LAY
-         do l = 1,layers
+         do l = 1,s%layers
             arraymax => bed_max1(:,l)
             arraymin => bed_min1(:,l)
             CALL UPDATER(arraymax,arraymin,QY_MAX1,2 )
@@ -3447,7 +3452,7 @@
 
 #ifdef SED_LAY
          varnum_prev = varnum
-         varnum = varnum_prev + layers
+         varnum = varnum_prev + s%layers
 #endif
 
          DO IVAR=1,varnum
@@ -3529,7 +3534,7 @@
 #endif
 
 #ifdef SED_LAY
-            do l=1,layers
+            do l=1,s%layers
                if (IVAR.eq.varnum_prev+l) then
                   ZEC(1)=bed(1,I,IRK+1,l)
                   ZEC(2)=bed(2,I,IRK+1,l)
@@ -3739,7 +3744,7 @@
 
 #ifdef SED_LAY
 
-         do l=1,layers
+         do l=1,s%layers
             if (IVAR.eq.varnum_prev+l) then
 
 !$$$              if( (abs(tmp1-ZEVERTEX(1)).ge.bound).or.
@@ -3786,11 +3791,11 @@
 !     
 !***********************************************************************
 
-      SUBROUTINE SLOPELIMITER5()
+      SUBROUTINE SLOPELIMITER5(s)
 
 !.....Use appropriate modules
 
-      USE SIZES, ONLY : SZ,layers
+      USE SIZES
       USE GLOBAL
       USE DG
 
@@ -3799,6 +3804,8 @@
 #endif
 
       IMPLICIT NONE
+      
+      type (sizes_type) :: s
 
 !.....Declare local variables
 
@@ -3820,7 +3827,7 @@
       Allocate ( QY_MIN1(NP),QY_MAX1(NP),QX_MAX1(NP) )
       Allocate ( iota_MIN1(NP),iota_MAX1(NP) )
       Allocate ( iota2_MIN1(NP),iota2_MAX1(NP) )
-      Allocate ( bed_MIN1(NP,layers),bed_MAX1(NP,layers) )
+      Allocate ( bed_MIN1(NP,s%layers),bed_MAX1(NP,s%layers) )
 
 !     FIND THE MAXIMUM AND MINIMUM OF EACH VARIABLE OVER ALL ELEMENTS 
 !     SHARING A NODE
@@ -3848,7 +3855,7 @@
 #endif
 
 #ifdef SED_LAY
-         do l=1,layers
+         do l=1,s%layers
             bed_MIN1(I,l) = 99999.
             bed_MAX1(I,l) =-99999.
          enddo
@@ -3876,7 +3883,7 @@
 
 
 #ifdef SED_LAY
-            do l=1,layers
+            do l=1,s%layers
                bed_DG(J,l) = bed(1,NBOR_EL,IRK+1,l)
             enddo
 #endif
@@ -3930,7 +3937,7 @@
 #endif
 
 #ifdef SED_LAY
-            do l=1,layers
+            do l=1,s%layers
                IF (bed_DG(J,l).LT.bed_MIN1(I,l))THEN
                   bed_MIN1(I,l)=bed_DG(J,l)
                ENDIF
@@ -3958,7 +3965,7 @@
 #endif
 
 #ifdef SED_LAY
-         do l = 1,layers
+         do l = 1,s%layers
             arraymax => bed_max1(:,l)
             arraymin => bed_min1(:,l)
             CALL UPDATER(arraymax,arraymin,QY_MAX1,2 )
@@ -3990,7 +3997,7 @@
 
 #ifdef SED_LAY
          varnum_prev = varnum
-         varnum = varnum_prev + layers
+         varnum = varnum_prev + s%layers
 #endif
 
          DO IVAR=1,varnum
@@ -4072,7 +4079,7 @@
 #endif
 
 #ifdef SED_LAY
-            do l=1,layers
+            do l=1,s%layers
                if (IVAR.eq.varnum_prev+l) then
                   ZEC(1)=bed(1,I,IRK+1,l)
                   ZEC(2)=bed(2,I,IRK+1,l)
@@ -4282,7 +4289,7 @@
 
 #ifdef SED_LAY
 
-         do l=1,layers
+         do l=1,s%layers
             if (IVAR.eq.varnum_prev+l) then
 
 !$$$              if( (abs(tmp1-ZEVERTEX(1)).ge.bound).or.
@@ -4334,7 +4341,7 @@
 
 !.....Use appropriate modules
 
-      USE SIZES, ONLY : SZ,layers
+      USE SIZES
       USE GLOBAL
       USE DG
 
@@ -4343,6 +4350,8 @@
 #endif
 
       IMPLICIT NONE
+
+      type (sizes_type) :: s
 
 !.....Declare local variables
 
@@ -4364,7 +4373,7 @@
       Allocate ( QY_MIN1(NP),QY_MAX1(NP),QX_MAX1(NP) )
       Allocate ( iota_MIN1(NP),iota_MAX1(NP) )
       Allocate ( iota2_MIN1(NP),iota2_MAX1(NP) )
-      Allocate ( bed_MIN1(NP,layers),bed_MAX1(NP,layers) )
+      Allocate ( bed_MIN1(NP,s%layers),bed_MAX1(NP,s%layers) )
 
 !     FIND THE MAXIMUM AND MINIMUM OF EACH VARIABLE OVER ALL ELEMENTS 
 !     SHARING A NODE
@@ -4392,7 +4401,7 @@
 #endif
 
 #ifdef SED_LAY
-         do l=1,layers
+         do l=1,s%layers
             bed_MIN1(I,l) = 99999.
             bed_MAX1(I,l) =-99999.
          enddo
@@ -4420,7 +4429,7 @@
 
 
 #ifdef SED_LAY
-            do l=1,layers
+            do l=1,s%layers
                bed_DG(J,l) = bed(1,NBOR_EL,IRK+1,l)
             enddo
 #endif
@@ -4474,7 +4483,7 @@
 #endif
 
 #ifdef SED_LAY
-            do l=1,layers
+            do l=1,s%layers
                IF (bed_DG(J,l).LT.bed_MIN1(I,l))THEN
                   bed_MIN1(I,l)=bed_DG(J,l)
                ENDIF
@@ -4502,7 +4511,7 @@
 #endif
 
 #ifdef SED_LAY
-         do l = 1,layers
+         do l = 1,s%layers
             arraymax => bed_max1(:,l)
             arraymin => bed_min1(:,l)
             CALL UPDATER(arraymax,arraymin,QY_MAX1,2 )
@@ -4537,7 +4546,7 @@
 
 #ifdef SED_LAY
          varnum_prev = varnum
-         varnum = varnum_prev + layers
+         varnum = varnum_prev + s%layers
 #endif
 
          DO IVAR=1,varnum
@@ -4619,7 +4628,7 @@
 #endif
 
 #ifdef SED_LAY
-            do l=1,layers
+            do l=1,s%layers
                if (IVAR.eq.varnum_prev+l) then
                   ZEC(1)=bed(1,I,IRK+1,l)
                   ZEC(2)=bed(2,I,IRK+1,l)
@@ -4829,7 +4838,7 @@
 
 #ifdef SED_LAY
 
-         do l=1,layers
+         do l=1,s%layers
             if (IVAR.eq.varnum_prev+l) then
 
 !$$$              if( (abs(tmp1-ZEVERTEX(1)).gt.bound).or.
@@ -8287,7 +8296,7 @@
 
 !.....Set limit values
       
-      CALL SLOPELIMITER5()
+      CALL SLOPELIMITER5(s)
 
       do k=1,ne
 

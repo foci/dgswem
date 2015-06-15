@@ -21,16 +21,18 @@
 !     01-02-2007, sb, Modified for LDG
 !     C***********************************************************************
 
-      SUBROUTINE INTERNAL_EDGE_HYDRO(IT)
+      SUBROUTINE INTERNAL_EDGE_HYDRO(s,IT)
 
 !.....Use appropriate modules
 
       USE GLOBAL
       USE DG
       USE NodalAttributes, ONLY :  ESLM
-      use sizes, only:  sz, myproc, layers
+      use sizes
 
       IMPLICIT NONE
+
+      type (sizes_type) :: s
 
 !.....Declare local variables
 
@@ -42,8 +44,8 @@
       REAL(SZ) HZ_X_EX, HZ_Y_EX, HZ_X_IN, HZ_Y_IN
       REAL(SZ) TZ_X_EX, TZ_Y_EX, TZ_X_IN, TZ_Y_IN
       REAL(SZ) EDFAC_IN, EDFAC_EX, DEN
-      REAL(SZ) XLEN_EL_IN, XLEN_EL_EX,MZ_X_EX(layers),MZ_Y_EX(layers)
-      REAL(SZ) MASS_EL_IN, MASS_EL_EX,MZ_X_IN(layers),MZ_Y_IN(layers)
+      REAL(SZ) XLEN_EL_IN, XLEN_EL_EX,MZ_X_EX(s%layers),MZ_Y_EX(s%layers)
+      REAL(SZ) MASS_EL_IN, MASS_EL_EX,MZ_X_IN(s%layers),MZ_Y_IN(s%layers)
       REAL(SZ), SAVE, ALLOCATABLE :: &
      RHS_ZE_IN(:), RHS_QX_IN(:), RHS_QY_IN(:),&
      RHS_ZE_EX(:), RHS_QX_EX(:), RHS_QY_EX(:)
@@ -68,7 +70,7 @@
       REAL(SZ) G_HAT_IN, H_HAT_IN
       REAL(SZ) G_HAT_EX, H_HAT_EX
       REAL(SZ) K_HAT_O
-      Real(SZ) bed_HAT_IN(layers),bed_HAT_EX(layers)
+      Real(SZ) bed_HAT_IN(s%layers),bed_HAT_EX(s%layers)
 !     
 
       IF(.NOT.ALLOCATED(RHS_ZE_IN)) THEN
@@ -150,7 +152,7 @@
 #endif
 
 #ifdef SED_LAY
-            do ll=1,layers
+            do ll=1,s%layers
                RHS_bed_IN(K,ll) = RHS_bed(k,EL_IN,IRK,ll)
                RHS_bed_EX(K,ll) = RHS_bed(k,EL_EX,IRK,ll)
             enddo
@@ -177,7 +179,7 @@
 #ifdef SED_LAY
          HB(1,EL_IN,irk) = 0.D0
          HB(1,EL_EX,irk) = 0.D0
-         do ll=1,layers
+         do ll=1,s%layers
             HB(1,EL_IN,irk) = HB(1,EL_IN,irk) + bed(1,EL_IN,irk,ll)
             HB(1,EL_EX,irk) = HB(1,EL_EX,irk) + bed(1,EL_EX,irk,ll)
          enddo
@@ -212,7 +214,7 @@
 
             !When layered, these change
 #ifdef SED_LAY
-            do ll = 1,layers
+            do ll = 1,s%layers
                bed_IN(ll) = bed(1,EL_IN,irk,ll)
             enddo
             HB_IN = HB(1,EL_IN,irk)
@@ -226,7 +228,7 @@
             HB_EX = BATHED(GP_EX,LED_EX,EL_EX,pa)
 
 #ifdef SED_LAY 
-            do ll = 1,layers
+            do ll = 1,s%layers
                bed_EX(ll) = bed(1,EL_EX,irk,ll)
             enddo
             HB_EX = HB(1,EL_EX,irk)
@@ -259,7 +261,7 @@
 
 
 #ifdef SED_LAY
-            do ll = 1,layers
+            do ll = 1,s%layers
                bed_IN(ll) = bed(1,EL_IN,IRK,ll)
                bed_EX(ll) = bed(1,EL_EX,IRK,ll)
                
@@ -317,7 +319,7 @@
 #endif
 
 #ifdef SED_LAY
-               do ll=1,layers
+               do ll=1,s%layers
                   bed_IN(ll) = bed_IN(ll) + bed(K,EL_IN,IRK,ll)*PHI_EDGE(K,GP_IN,LED_IN,pa)
                   bed_EX(ll) = bed_EX(ll) + bed(K,EL_EX,IRK,ll)*PHI_EDGE(K,GP_EX,LED_EX,pa)
                   HB_IN = HB_IN + bed(k,EL_IN,irk,ll)*PHI_EDGE(K,GP_IN,LED_IN,pa)
@@ -440,7 +442,7 @@
 #endif
 
 #ifdef SED_LAY
-                  do ll = 1,layers
+                  do ll = 1,s%layers
                      RHS_bed(K,EL_IN,IRK,ll) = RHS_bed_IN(K,ll)
                      RHS_bed(K,EL_EX,IRK,ll) = RHS_bed_EX(K,ll)
                   enddo
@@ -664,7 +666,7 @@
 
                                 !Let us add some sediment diffusion
 #ifdef SED_LAY
-            do ll=1,layers
+            do ll=1,s%layers
                bed_HAT_IN(ll) = bed_HAT_IN(ll) + 0.5D0 * ( (MZ_X_IN(ll)+&
               MZ_X_EX(ll))*SFAC_IN*NX+(MZ_Y_IN(ll)+MZ_Y_EX(ll))*NY)
 
@@ -708,7 +710,7 @@
 
 
 #ifdef SED_LAY
-               do ll = 1,layers
+               do ll = 1,s%layers
                   RHS_bed(K,EL_IN,IRK,ll) = RHS_bed(K,EL_IN,IRK,ll) - W_IN*bed_HAT_IN(ll) 
                   RHS_bed(K,EL_EX,IRK,ll) = RHS_bed(K,EL_EX,IRK,ll) + W_EX*bed_HAT_EX(ll)
                enddo
@@ -763,7 +765,7 @@
             !Must add up the layers as they shift
 #ifdef SED_LAY
             HB(1,EL_IN,irk) = 0.D0
-            do ll=1,layers
+            do ll=1,s%layers
                bed_IN(ll) = bed(1,EL_IN,irk,ll)
                HB(1,EL_IN,irk) = HB(1,EL_IN,irk) + bed(1,EL_IN,irk,ll)
 
@@ -811,7 +813,7 @@
 #endif
 
 #ifdef SED_LAY
-               do ll=1,layers
+               do ll=1,s%layers
                   bed_IN(ll) = bed_IN(ll) + bed(k,EL_IN,irk,ll)*PHI_EDGE(K,GP_IN,LED_IN,pa)
                   HB_IN = HB_IN + bed(k,EL_IN,irk,ll)*PHI_EDGE(K,GP_IN,LED_IN,pa)
                   
@@ -918,7 +920,7 @@
 !.....Add LDG terms for sediment diffusion
 
 #ifdef SED_LAY
-            do ll=1,layers
+            do ll=1,s%layers
                bed_HAT(ll) = bed_HAT(ll) + MZ_X_IN(ll)*SFAC_IN*NX &
               + MZ_Y_IN(ll)*NY
             enddo
@@ -947,7 +949,7 @@
 #endif
 
 #ifdef SED_LAY
-               do ll = 1,layers
+               do ll = 1,s%layers
                   RHS_bed(K,EL_IN,IRK,ll) = RHS_bed(K,EL_IN,IRK,ll) - W_IN*bed_HAT(ll) 
                enddo
 #endif
@@ -979,7 +981,7 @@
             !Must add up the layers as they shift
 #ifdef SED_LAY
             HB(1,EL_EX,irk) = 0.D0
-            do ll=1,layers
+            do ll=1,s%layers
                bed_EX(ll) = bed(1,EL_EX,irk,ll)
                HB(1,EL_EX,irk) = HB(1,EL_EX,irk) + bed(1,EL_EX,irk,ll)
                !sediment diffusion
@@ -1026,7 +1028,7 @@
 #endif
 
 #ifdef SED_LAY
-               do ll=1,layers
+               do ll=1,s%layers
                   bed_EX(ll) = bed_EX(ll) + bed(k,EL_EX,irk,ll)*PHI_EDGE(K,GP_EX,LED_EX,pa)
                   HB_EX = HB_EX + bed(k,EL_EX,irk,ll)*PHI_EDGE(K,GP_EX,LED_EX,pa)
                   
@@ -1138,7 +1140,7 @@
 !.....Add LDG terms for sediment diffusion
 
 #ifdef SED_LAY
-            do ll=1,layers
+            do ll=1,s%layers
                bed_HAT(ll) = bed_HAT(ll) + MZ_X_EX(ll)*SFAC_EX*NX &
               + MZ_Y_EX(ll)*NY
             enddo
@@ -1167,7 +1169,7 @@
 #endif
 
 #ifdef SED_LAY
-               do ll = 1,layers
+               do ll = 1,s%layers
                   RHS_bed(K,EL_EX,IRK,ll) = RHS_bed(K,EL_EX,IRK,ll) + W_EX*bed_HAT(ll) 
                enddo
 #endif

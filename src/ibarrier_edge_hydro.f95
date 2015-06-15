@@ -18,15 +18,17 @@
 !     
 !***********************************************************************
 
-      SUBROUTINE IBARRIER_EDGE_HYDRO(IT)
+      SUBROUTINE IBARRIER_EDGE_HYDRO(s,IT)
       
 !.....Use appropriate modules
 
       USE GLOBAL
       USE DG
-      USE SIZES, ONLY:  MYPROC, layers
+      USE SIZES
 
       IMPLICIT NONE
+
+      type (sizes_type) :: s
 
 !.....Declare local variables
 
@@ -142,12 +144,12 @@
 !This does not affect much here, hb and bed do not change at weirs
 #ifdef SED_LAY 
             HB(1,ELB,irk) = 0.D0
-            do ll=1,layers
+            do ll=1,s%layers
                HB(1,ELB,irk) = HB(1,ELB,irk) + bed(1,ELB,irk,ll)
             enddo
             HBB = HB(1,ELB,irk)
             HB(1,ELF,irk) = 0.D0
-            do ll=1,layers
+            do ll=1,s%layers 
                HB(1,ELF,irk) = HB(1,ELF,irk) + bed(1,ELF,irk,ll)
             enddo
             HBF = HB(1,ELF,irk)

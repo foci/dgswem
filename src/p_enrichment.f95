@@ -5,10 +5,11 @@
 !     In concert, was born and evolved -- cem
 !     
 !***********************************************************************
-      subroutine p_enrichment(it,irkp)
+      subroutine p_enrichment(s,it,irkp)
       
 !.....use appropriate modules
 
+      use sizes
       use global
       use dg
 
@@ -17,6 +18,8 @@
 #endif
 
       implicit none
+
+      type (sizes_type) :: s
 
 !.....declare local variables
 
@@ -33,21 +36,21 @@
       real(sz) ze_delta,qx_delta,qy_delta
       real(sz) avg_zesen,avg_qxsen,avg_qysen
       real(sz) temp_ze,temp_qx,temp_qy
-      real(sz) ze_sensor(mne) 
-      real(sz) qx_sensor(mne)
-      real(sz) qy_sensor(mne)
+      real(sz) ze_sensor(s%mne) 
+      real(sz) qx_sensor(s%mne)
+      real(sz) qy_sensor(s%mne)
 #ifdef TRACE
       real(sz) iota_sensor1, iota_sensor2, iota_center, iota_mid
       real(sz) maxiota_sensor, miniota_sensor, iota_delta
-      real(sz) avg_iotasen, temp_iota, iota_sensor(mne)
+      real(sz) avg_iotasen, temp_iota, iota_sensor(s%mne)
 #endif
 #ifdef CHEM
       real(sz) iota_sensor1, iota_sensor2, iota_center, iota_mid
       real(sz) maxiota_sensor, miniota_sensor, iota_delta
-      real(sz) avg_iotasen, temp_iota, iota_sensor(mne)
+      real(sz) avg_iotasen, temp_iota, iota_sensor(s%mne)
       real(sz) iota2_sensor1, iota2_sensor2, iota2_center 
       real(sz) iota2_mid, slimit5, maxiota2_sensor, miniota2_sensor
-      real(sz) iota2_delta, avg_iota2sen, temp_iota2, iota2_sensor(mne)
+      real(sz) iota2_delta, avg_iota2sen, temp_iota2, iota2_sensor(s%mne)
       
 #endif
 #ifdef SED_LAY
@@ -55,13 +58,13 @@
       real(sz) tbed_center, tbed_mid
       real(sz) mintbed_sensor,maxtbed_sensor
       real(sz) avg_tbedsen, temp_tbed
-      real(sz) tbed_sensor(mne)
+      real(sz) tbed_sensor(s%mne)
       real(sz) slimit6, tbed_delta
 #endif
 
 
 !......Set the initial arrays, note we work over the total bed load
-!......not the individual layers	
+!......not the individual layers
 
       if (pflag.eq.1) then
          
@@ -1070,7 +1073,7 @@
                   else
                      
                      ze_sensor(l) = 1.d0
-                     slimit1 = 2.d0	
+                     slimit1 = 2.d0
                      
                   endif
 
@@ -1082,7 +1085,7 @@
                   else
                      
                      qx_sensor(l) = 1.d0
-                     slimit2 = 2.d0	
+                     slimit2 = 2.d0
                      
                   endif
                   
@@ -1094,7 +1097,7 @@
                   else
                      
                      qy_sensor(l) = 1.d0
-                     slimit3 = 2.d0	
+                     slimit3 = 2.d0
                      
                   endif
                   
