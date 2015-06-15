@@ -142,7 +142,7 @@
          
 !.....Compute the Roe flux
 
-         CALL NUMERICAL_FLUX()
+         CALL NUMERICAL_FLUX(s)
          
 !.....Compute the edge integral
 

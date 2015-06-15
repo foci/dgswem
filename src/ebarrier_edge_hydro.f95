@@ -161,7 +161,7 @@
             
 !.........Compute numerical flux
             
-            CALL NUMERICAL_FLUX(IT)
+            CALL NUMERICAL_FLUX(s,IT)
 
             DO K = 1,DOFS(EL)
 

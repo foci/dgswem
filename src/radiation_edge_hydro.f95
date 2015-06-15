@@ -210,7 +210,7 @@
 
 !.....Compute the flux
 
-            CALL NUMERICAL_FLUX(IT,test_el)
+            CALL NUMERICAL_FLUX(s,IT,test_el)
             
 !.....Compute the edge integral
 

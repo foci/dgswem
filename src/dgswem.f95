@@ -61,7 +61,7 @@
 !...  
 !     
       IF (IHOT.EQ.0) THEN
-         CALL COLDSTART()
+         CALL COLDSTART(s)
       ELSE
 #ifdef HOTSTART
          CALL HOTSTART()
@@ -325,7 +325,7 @@
 !$$$            if (myproc.eq.0) write(*,*) 'timestep ',itime_a
 !$$$c     write(200+myproc,*) 'timestep ',itime_a,myproc
 !$$$         endif
-         CALL DG_TIMESTEP(ITIME_A)
+         CALL DG_TIMESTEP(s,ITIME_A)
 #ifdef SWAN
 !asey 090302: If it is time, then call the following subroutine
 !             to then call the SWAN time-stepping subroutine.

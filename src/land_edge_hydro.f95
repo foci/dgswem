@@ -232,7 +232,7 @@
 
 !.....Compute the Roe flux
 
-            CALL NUMERICAL_FLUX(IT,test_el)
+            CALL NUMERICAL_FLUX(s,IT,test_el)
 
 !.....Add LDG terms for viscosity
 

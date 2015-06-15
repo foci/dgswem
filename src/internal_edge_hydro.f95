@@ -378,7 +378,7 @@
 
 !.....Compute the numerical flux
             
-            CALL NUMERICAL_FLUX(IT,test_el)
+            CALL NUMERICAL_FLUX(s,IT,test_el)
 
 !......... dummy
             F_HAT_O  = F_HAT
@@ -490,7 +490,7 @@
 
                      HB_IN = HB_EX
                      SFAC_IN = SFAC_EX
-                     CALL NUMERICAL_FLUX(IT,test_el)
+                     CALL NUMERICAL_FLUX(s,IT,test_el)
 
                      F_HAT_O  = F_HAT
                      G_HAT_EX = G_HAT
@@ -527,7 +527,7 @@
                      NLEQG = 0.D0
                      G_TMP = G
                      G = 0.D0
-                     CALL NUMERICAL_FLUX(IT,test_el)
+                     CALL NUMERICAL_FLUX(s,IT,test_el)
                      NLEQG = NLEQG_TMP
                      G = G_TMP
                      G_HAT_IN = G_HAT
@@ -571,7 +571,7 @@
                      bed_EX(:) = bed_IN(:)
 #endif
 
-                     CALL NUMERICAL_FLUX(IT,test_el)
+                     CALL NUMERICAL_FLUX(s,IT,test_el)
                      F_HAT_O  = F_HAT
 
 #ifdef TRACE
@@ -607,7 +607,7 @@
                      NLEQG = 0.D0
                      G_TMP = G
                      G = 0.D0
-                     CALL NUMERICAL_FLUX(IT,test_el)
+                     CALL NUMERICAL_FLUX(s,IT,test_el)
                      NLEQG = NLEQG_TMP
                      G = G_TMP
                      G_HAT_EX = G_HAT
@@ -891,11 +891,11 @@
                NLEQG = 0.D0
                G_TMP = G
                G = 0.D0
-               CALL NUMERICAL_FLUX(IT,test_el)
+               CALL NUMERICAL_FLUX(s,IT,test_el)
                NLEQG = NLEQG_TMP
                G = G_TMP
             ELSE
-               CALL NUMERICAL_FLUX(IT,test_el)
+               CALL NUMERICAL_FLUX(s,IT,test_el)
             ENDIF
             F_HAT = 0.D0        ! Ensure zero mass flux
 
@@ -1112,11 +1112,11 @@
                NLEQG = 0.D0
                G_TMP = G
                G = 0.D0
-               CALL NUMERICAL_FLUX(IT,test_el)
+               CALL NUMERICAL_FLUX(s,IT,test_el)
                NLEQG = NLEQG_TMP
                G = G_TMP
             ELSE
-               CALL NUMERICAL_FLUX(IT,test_el)
+               CALL NUMERICAL_FLUX(s,IT,test_el)
             ENDIF
             F_HAT = 0.D0        ! Ensure zero mass flux
 

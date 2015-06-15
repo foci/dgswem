@@ -4115,7 +4115,7 @@
 
       IF (NFREQ.GT.0) THEN
          CALL ALLOC_HA()
-         CALL ALLOC_MAIN14()
+         CALL ALLOC_MAIN14(s)
       ENDIF
 
       IF(NFREQ.LT.0) THEN

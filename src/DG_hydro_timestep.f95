@@ -150,23 +150,23 @@
          
 !.......Compute elevation specified edges
 
-         IF (NEEDS.GT.0)  CALL OCEAN_EDGE_HYDRO(IT)
+         IF (NEEDS.GT.0)  CALL OCEAN_EDGE_HYDRO(s,IT)
 
 !.......Compute no-normal flow edges
 
-         IF (NLEDS.GT.0)  CALL LAND_EDGE_HYDRO(IT)
+         IF (NLEDS.GT.0)  CALL LAND_EDGE_HYDRO(s,IT)
 
 !.......Compute non-zero flow edges
 
-         IF (NFEDS.GT.0)  CALL FLOW_EDGE_HYDRO(IT)
+         IF (NFEDS.GT.0)  CALL FLOW_EDGE_HYDRO(s,IT)
          
 !.......Compute radiation edges
 
-         IF (NREDS.GT.0)  CALL RADIATION_EDGE_HYDRO(IT)
+         IF (NREDS.GT.0)  CALL RADIATION_EDGE_HYDRO(s,IT)
 
 !.......Compute internal barrier edges
 
-         IF (NIBEDS.GT.0) CALL IBARRIER_EDGE_HYDRO(IT)
+         IF (NIBEDS.GT.0) CALL IBARRIER_EDGE_HYDRO(s,IT)
          
 !.......Compute external barrier edges
 
@@ -174,11 +174,11 @@
          
 !.......Compute internal edges
 
-         CALL INTERNAL_EDGE_HYDRO(IT)
+         CALL INTERNAL_EDGE_HYDRO(s,IT)
 
 !.......Compute elements to finish building the rhs
          
-         CALL RHS_DG_HYDRO()
+         CALL RHS_DG_HYDRO(s)
 
 !.......SSP Runge-Kutta Time Scheme
 
@@ -279,23 +279,23 @@
          
 !.......Compute elevation specified edges
 
-         IF (NEEDS.GT.0)  CALL OCEAN_EDGE_HYDRO(IT)
+         IF (NEEDS.GT.0)  CALL OCEAN_EDGE_HYDRO(s,IT)
 
 !.......Compute no-normal flow edges
 
-         IF (NLEDS.GT.0)  CALL LAND_EDGE_HYDRO(IT)
+         IF (NLEDS.GT.0)  CALL LAND_EDGE_HYDRO(s,IT)
 
 !.......Compute non-zero flow edges
 
-         IF (NFEDS.GT.0)  CALL FLOW_EDGE_HYDRO(IT)
+         IF (NFEDS.GT.0)  CALL FLOW_EDGE_HYDRO(s,IT)
          
 !.......Compute radiation edges
 
-         IF (NREDS.GT.0)  CALL RADIATION_EDGE_HYDRO(IT)
+         IF (NREDS.GT.0)  CALL RADIATION_EDGE_HYDRO(s,IT)
 
 !.......Compute internal barrier edges
 
-         IF (NIBEDS.GT.0) CALL IBARRIER_EDGE_HYDRO(IT)
+         IF (NIBEDS.GT.0) CALL IBARRIER_EDGE_HYDRO(s,IT)
          
 !.......Compute external barrier edges
 
@@ -303,11 +303,11 @@
          
 !.......Compute internal edges
 
-         CALL INTERNAL_EDGE_HYDRO(IT)
+         CALL INTERNAL_EDGE_HYDRO(s,IT)
 
 !.......Compute elements to finish building the rhs
          
-         CALL RHS_DG_HYDRO()
+         CALL RHS_DG_HYDRO(s)
 
 !.......RKC Time Scheme
 

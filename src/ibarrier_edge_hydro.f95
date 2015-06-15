@@ -333,7 +333,7 @@
 
 !...........Compute the numerical flux
                
-               CALL NUMERICAL_FLUX(IT)
+               CALL NUMERICAL_FLUX(s,IT)
                FB_HAT = F_HAT
                GB_HAT = G_HAT
                HB_HAT = H_HAT
@@ -389,7 +389,7 @@
                      G_TMP = G
                      G = 0.D0
                   ENDIF
-                  CALL NUMERICAL_FLUX(IT)
+                  CALL NUMERICAL_FLUX(s,IT)
                   FF_HAT = F_HAT
                   GF_HAT = G_HAT
                   HF_HAT = H_HAT
@@ -460,7 +460,7 @@
                QX_EX = ( TYF*Q_N_EXT - NYF*Q_T_EXT)/(NXF*TYF - NYF*TXF)
                QY_EX = (-TXF*Q_N_EXT + NXF*Q_T_EXT)/(NXF*TYF - NYF*TXF)
 
-               CALL NUMERICAL_FLUX(IT)
+               CALL NUMERICAL_FLUX(s,IT)
                FF_HAT = F_HAT
                GF_HAT = G_HAT
                HF_HAT = H_HAT
@@ -514,7 +514,7 @@
                      G_TMP = G
                      G = 0.D0
                   ENDIF
-                  CALL NUMERICAL_FLUX(IT)
+                  CALL NUMERICAL_FLUX(s,IT)
                   FB_HAT = F_HAT
                   GB_HAT = G_HAT
 

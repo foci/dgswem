@@ -252,7 +252,7 @@
 
 #endif
 
-            CALL NUMERICAL_FLUX(IT,L)
+            CALL NUMERICAL_FLUX(s,IT,L)
 
 !.....Add LDG terms
 #ifdef WAVE_DIF
