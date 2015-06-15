@@ -14,7 +14,9 @@
       USE HARM
       USE SIZES
       USE WIND
+#ifdef OWIWIND
       USE OWIWIND,ONLY : NWS12INIT,NWS12GET
+#endif
       USE NodalAttributes
 #ifdef SWAN
 !asey 101118: We need these values from other places.
@@ -736,7 +738,7 @@
 !     sb46.28sb01 NWS=12 reads in raw OWI files 09/xx/2006
 !
 !-----------------------------------------------------------------------
-
+#ifdef OWIWIND
       IF(ABS(NWS).EQ.12) THEN
       
 !.......Determine if the met file time increment is exceeded
@@ -797,6 +799,7 @@
 #endif
         ENDDO
       ENDIF
+#endif
       
       RETURN
       END SUBROUTINE MET_FORCING

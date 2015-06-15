@@ -1,3 +1,4 @@
+#ifdef HOTSTART
 !**************************************************************************
 ! PADCIRC RELEASE VERSION 41.11 09/14/2001  
 !    last changes in this file VERSION 41.11
@@ -1958,3 +1959,4 @@
 
       RETURN
       END
+#endif

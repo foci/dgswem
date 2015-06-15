@@ -60,7 +60,7 @@ METIS1_SRC =  metis.f95
 METIS2_SRC =  metis2.f95
 PREP_SRC   =  adcprep.f95  decomp.f95   read_global.f95   prep.f95   interp.f95  machdep.f95
 POST_SRC   =  adcpost.f95    post.f95  compare.f95  diffmerge.f95
-ADC_SRC    =  dgswem.f95 owiwind.f95 read_input.f95 cstart.f95 hstart.f95 radiation_edge_hydro.f95 \
+ADC_SRC    =  dgswem.f95 read_input.f95 cstart.f95 hstart.f95 radiation_edge_hydro.f95 \
 	ibarrier_edge_hydro.f95 ebarrier_edge_hydro.f95  \
 	calc_normal.f95 create_edge_data.f95 detector.f95 \
 	DG_timestep.f95 DG_hydro_timestep.f95 \
@@ -211,7 +211,7 @@ $(ODIR)read_fort_dg.o                   :  read_fort_dg.f95 $(O_DIR)sizes.o $(O_
 #  adcirc & padcirc
 
 $(O_DIR)make_dirname.o              :  make_dirname.f95 $(ADC_MOBJ)
-$(O_DIR)owiwind.o   			:  owiwind.f95 $(ADC_MOBJ)
+#$(O_DIR)owiwind.o   			:  owiwind.f95 $(ADC_MOBJ)
 $(O_DIR)read_input.o  			:  read_input.f95 $(ADC_MOBJ) $(WIND_MOBJ)
 $(O_DIR)cstart.o      			:  cstart.f95 $(ADC_MOBJ)  $(WIND_MOBJ)
 $(O_DIR)hstart.o      			:  hstart.f95 $(ADC_MOBJ)  $(WIND_MOBJ)

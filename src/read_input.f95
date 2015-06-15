@@ -8,12 +8,14 @@
 !     
 !***********************************************************************
 
-      SUBROUTINE READ_INPUT()
-
+      SUBROUTINE READ_INPUT(s)
+      use sizes
 !.....Use appropriate modules
 
       USE GLOBAL
+#ifdef HARM
       USE HARM
+#endif
       USE WIND
       USE DG
       USE NodalAttributes, ONLY :&
@@ -30,11 +32,17 @@
 #endif
 
       IMPLICIT NONE
-      
+
+      type (sizes_type) :: s
+
 !.....Declare local variables
 
       INTEGER NIBP, IBN1, IK, NDISC, NBBN, NVEL2, II, i,j,jj,k
       CHARACTER(256) LINE,LINE2
+
+#ifndef HARM
+      integer nfreq_dummy
+#endif
       
 !     sb-PDG1 added
 #ifdef CMPI
@@ -62,8 +70,8 @@
       READ(80,*) IDUM80         !Skip NELG & NNODG
       READ(80,*) IDUM80         !Read in NPROC
       CLOSE(80)
-      IF(IDUM80.NE.MNPROC) THEN
-         IF(MYPROC.EQ.0) THEN
+      IF(IDUM80.NE.s%MNPROC) THEN
+         IF(s%MYPROC.EQ.0) THEN
             WRITE(*,'(A)') '*** ERROR IN PARALLEL SETUP!'
             WRITE(*,'(2A,I4,A)') '*** Number of CPUS for submitted job ',&
            '(NCPU = ',MNPROC,') is not equal to the'
@@ -81,25 +89,25 @@
 
 !.....Initialize all runtime option logicals to false
 
-      C2DDI  = .FALSE.
-      C3D    = .FALSE.
+      s%C2DDI  = .FALSE.
+      s%C3D    = .FALSE.
       vertexslope = .False.
-      C3DDSS = .FALSE.
-      C3DVS  = .FALSE.
-      CLUMP  = .FALSE.
-      CTIP   = .FALSE.
-      CHARMV = .FALSE.
+      s%C3DDSS = .FALSE.
+      s%C3DVS  = .FALSE.
+      s%CLUMP  = .FALSE.
+      s%CTIP   = .FALSE.
+      s%CHARMV = .FALSE.
 
 !.....Open statement for unit 14, 15, and 25 (fort.dg) input files
 
-      OPEN(14,FILE=DIRNAME//'/'//'fort.14')
-      OPEN(15,FILE=DIRNAME//'/'//'fort.15')
-      OPEN(17,FILE=DIRNAME//'/'//'fort.17')
-      OPEN(25,FILE=DIRNAME//'/'//'fort.dg')            
+      OPEN(14,FILE=s%DIRNAME//'/'//'fort.14')
+      OPEN(15,FILE=s%DIRNAME//'/'//'fort.15')
+      OPEN(17,FILE=s%DIRNAME//'/'//'fort.17')
+      OPEN(25,FILE=s%DIRNAME//'/'//'fort.dg')            
 
 !.....Open statement for unit 16 output file
       
-      OPEN(16,FILE=DIRNAME//'/'//'fort.16')
+      OPEN(16,FILE=s%DIRNAME//'/'//'fort.16')
 
 !.....General purpose format statements
 
@@ -116,7 +124,7 @@
       WRITE(16,1112)
       WRITE(16,1114)
       WRITE(16,1112)
-      IF (MYPROC.EQ.0) THEN
+      IF (s%MYPROC.EQ.0) THEN
          WRITE(6,1112)
          WRITE(6,1114)
          WRITE(6,1112)
@@ -195,9 +203,9 @@
       LINE2 = ADJUSTL(LINE)
       
       IF (LINE2(1:1) .EQ. "1") THEN
-        CALL read_fixed_fort_dg()   ! first line of old fort.dg is a 1 for the dgswe option
+        CALL read_fixed_fort_dg(s)   ! first line of old fort.dg is a 1 for the dgswe option
       ELSE
-        CALL read_keyword_fort_dg() ! otherwise assume keyword format
+        CALL read_keyword_fort_dg(s) ! otherwise assume keyword format
       ENDIF     
       
       RHOWAT0 = 1000.D0
@@ -249,7 +257,7 @@
       READ(15,*) NSCREEN
       NSCREEN_INC = NSCREEN
       IF (NSCREEN.NE.0) NSCREEN = 1
-      IF(NSCREEN.EQ.1.AND.MYPROC.EQ.0) THEN
+      IF(NSCREEN.EQ.1.AND.s%MYPROC.EQ.0) THEN
          WRITE(16,3561) NSCREEN
  3561    FORMAT(5X,'NSCREEN = ',I2,&
         /,9X,'SCREEN OUTPUT WILL BE PROVIDED TO UNIT 6',/)
@@ -263,7 +271,7 @@
 
       READ(15,*) IHOT
       IF ((IHOT.NE.0).AND.(IHOT.NE.67).AND.(IHOT.NE.68)) THEN
-         IF ((NSCREEN.EQ.1).AND.(MYPROC.EQ.0)) THEN
+         IF ((NSCREEN.EQ.1).AND.(s%MYPROC.EQ.0)) THEN
             WRITE(6,9972)
             WRITE(6,*) 'IHOT =',IHOT
             WRITE(6,9732)
@@ -295,7 +303,7 @@
 
       READ(15,*) ICS
       IF ((ICS.NE.1).AND.(ICS.NE.2)) THEN
-         IF ((NSCREEN.EQ.1).AND.(MYPROC.EQ.0)) THEN
+         IF ((NSCREEN.EQ.1).AND.(s%MYPROC.EQ.0)) THEN
             WRITE(6,9972)
             WRITE(6,*) 'ICS =',ICS
             WRITE(6,9735)
@@ -324,17 +332,17 @@
 
       READ(15,*) IM
       IF (IM.EQ.0) THEN
-         C2DDI = .TRUE.
+         s%C2DDI = .TRUE.
       ELSEIF (IM.EQ.1) THEN
-         C3D  = .TRUE.
-         C3DVS  = .TRUE.
+         s%C3D  = .TRUE.
+         s%C3DVS  = .TRUE.
       ELSEIF (IM.EQ.2) THEN
-         C3D  = .TRUE.
-         C3DDSS = .TRUE.
+         s%C3D  = .TRUE.
+         s%C3DDSS = .TRUE.
       ELSEIF (IM.EQ.10) THEN
-         C2DDI = .TRUE.
+         s%C2DDI = .TRUE.
       ELSE
-         IF ((NSCREEN.EQ.1).AND.(MYPROC.EQ.0)) THEN
+         IF ((NSCREEN.EQ.1).AND.(s%MYPROC.EQ.0)) THEN
             WRITE(6,9972)
             WRITE(6,*) 'IM =',IM
             WRITE(6,9721)
@@ -353,7 +361,7 @@
 
       READ(15,*) NOLIBF
       IF ((NOLIBF.LT.0).OR.(NOLIBF.GT.2)) THEN
-         IF ((NSCREEN.EQ.1).AND.(MYPROC.EQ.0)) THEN
+         IF ((NSCREEN.EQ.1).AND.(s%MYPROC.EQ.0)) THEN
             WRITE(6,9972)
             WRITE(6,*) 'NOLIBF =',NOLIBF
             WRITE(6,9722)
@@ -383,7 +391,7 @@
 
       READ(15,*) NOLIFA
       IF ((NOLIFA.LT.0).OR.(NOLIFA.GT.3)) THEN
-         IF ((NSCREEN.EQ.1).AND.(MYPROC.EQ.0)) THEN
+         IF ((NSCREEN.EQ.1).AND.(s%MYPROC.EQ.0)) THEN
             WRITE(6,9972)
             WRITE(6,*) 'NOLIFA =',NOLIFA
             WRITE(6,9723)
@@ -423,7 +431,7 @@
 
       READ(15,*) NOLICA
       IF ((NOLICA.LT.0).OR.(NOLICA.GT.1)) THEN
-         IF ((NSCREEN.EQ.1).AND.(MYPROC.EQ.0)) THEN
+         IF ((NSCREEN.EQ.1).AND.(s%MYPROC.EQ.0)) THEN
             WRITE(6,9972)
             WRITE(6,*) 'NOLICA =',NOLICA
             WRITE(6,9724)
@@ -450,7 +458,7 @@
 
       READ(15,*) NOLICAT
       IF ((NOLICAT.LT.0).OR.(NOLICAT.GT.1)) THEN
-         IF ((NSCREEN.EQ.1).AND.(MYPROC.EQ.0)) THEN
+         IF ((NSCREEN.EQ.1).AND.(s%MYPROC.EQ.0)) THEN
             WRITE(6,9972)
             WRITE(6,*) 'NOLICAT =',NOLICAT
             WRITE(6,9725)
@@ -465,7 +473,7 @@
          STOP
       ENDIF
       IF ((NOLIFA.GE.1).AND.(NOLICAT.EQ.0)) THEN
-         IF ((NSCREEN.EQ.1).AND.(MYPROC.EQ.0)) THEN
+         IF ((NSCREEN.EQ.1).AND.(s%MYPROC.EQ.0)) THEN
             WRITE(6,9972)
             WRITE(6,*) 'NOLICAT =',NOLICAT
             WRITE(6,9726)
@@ -491,7 +499,7 @@
          ENDIF
       ENDIF
       IF ((NOLIFA.EQ.0).AND.(NOLICAT.EQ.1)) THEN
-         IF ((NSCREEN.EQ.1).AND.(MYPROC.EQ.0)) THEN
+         IF ((NSCREEN.EQ.1).AND.(s%MYPROC.EQ.0)) THEN
             WRITE(6,9972)
             WRITE(6,*) 'NOLICAT =',NOLICAT
             WRITE(6,9726)
@@ -513,7 +521,7 @@
          ENDIF
       ENDIF
       IF (NOLICA.NE.NOLICAT) THEN
-         IF ((NSCREEN.EQ.1).AND.(MYPROC.EQ.0)) THEN
+         IF ((NSCREEN.EQ.1).AND.(s%MYPROC.EQ.0)) THEN
             WRITE(6,9972)
             WRITE(6,*) 'NOLICAT =',NOLICAT
             WRITE(6,9727)
@@ -550,13 +558,13 @@
 !.....Read and process NWP - spatially varying bottom friction
 
       READ(15,*) NWP
-      CALL ReadNodalAttr(NSCREEN, ScreenUnit, MYPROC, NABOUT) ! Ek added call to nodalatt
+      CALL ReadNodalAttr(s, NSCREEN, ScreenUnit, s%MYPROC, NABOUT) ! Ek added call to nodalatt
 
 !.....Read and process NCOR - spatially varying Coriolis parameter
 
       READ(15,*) NCOR
       IF ((NCOR.NE.0).AND.(NCOR.NE.1)) THEN
-         IF ((NSCREEN.EQ.1).AND.(MYPROC.EQ.0)) THEN
+         IF ((NSCREEN.EQ.1).AND.(s%MYPROC.EQ.0)) THEN
             WRITE(6,9972)
             WRITE(6,*) 'NCOR =',NCOR
             WRITE(6,9729)
@@ -571,7 +579,7 @@
          STOP
       ENDIF
       IF ((ICS.EQ.1).AND.(NCOR.EQ.1)) THEN
-         IF ((NSCREEN.EQ.1).AND.(MYPROC.EQ.0)) THEN
+         IF ((NSCREEN.EQ.1).AND.(s%MYPROC.EQ.0)) THEN
             WRITE(6,9972)
             WRITE(6,*) 'NCOR =',NCOR
             WRITE(6,9730)
@@ -604,7 +612,7 @@
 
       READ(15,*) NTIP
       IF ((NTIP.LT.0).OR.(NTIP.GT.2)) THEN
-         IF ((NSCREEN.EQ.1).AND.(MYPROC.EQ.0)) THEN
+         IF ((NSCREEN.EQ.1).AND.(s%MYPROC.EQ.0)) THEN
             WRITE(6,9972)
             WRITE(6,*) 'NTIP =',NTIP
             WRITE(6,9710)
@@ -620,7 +628,7 @@
       ENDIF
 
       IF ((ICS.EQ.1).AND.(NTIP.GE.1)) THEN
-         IF ((NSCREEN.EQ.1).AND.(MYPROC.EQ.0)) THEN
+         IF ((NSCREEN.EQ.1).AND.(s%MYPROC.EQ.0)) THEN
             WRITE(6,9972)
             WRITE(6,*) 'NTIP =',NTIP
             WRITE(6,9711)
@@ -637,7 +645,7 @@
         /,1X,'Spherical coordinates')
          STOP
       ENDIF
-      IF (NTIP.NE.0) CTIP = .TRUE.
+      IF (NTIP.NE.0) s%CTIP = .TRUE.
       IF (NTIP.EQ.0) THEN
          WRITE(16,235) NTIP
  235    FORMAT(/,5X,'NTIP = ',I2,&
@@ -674,7 +682,7 @@
    (ABS(NWS).NE.305).AND.(ABS(NWS).NE.306).AND.(ABS(NWS).NE.308).AND.&
    (ABS(NWS).NE.309).AND.(ABS(NWS).NE.310).AND.(ABS(NWS).NE.311).AND.&
    (ABS(NWS).NE.312)) THEN
-         IF ((NSCREEN.EQ.1).AND.(MYPROC.EQ.0)) THEN
+         IF ((NSCREEN.EQ.1).AND.(s%MYPROC.EQ.0)) THEN
             WRITE(6,9972)
             WRITE(6,*) 'NWS =',NWS
             WRITE(6,9712)
@@ -911,7 +919,7 @@
 
       READ(15,*) NRAMP
       IF ((NRAMP.NE.0).AND.(NRAMP.GT.7)) THEN
-         IF ((NSCREEN.EQ.1).AND.(MYPROC.EQ.0)) THEN
+         IF ((NSCREEN.EQ.1).AND.(s%MYPROC.EQ.0)) THEN
             WRITE(6,9972)
             WRITE(6,*) 'NRAMP =',NRAMP
             WRITE(6,9713)
@@ -941,7 +949,7 @@
       READ(15,*) G
       G2ROOT = SQRT(G/2.0d0)
       IF ((ICS.EQ.2).AND.(abs(G-9.81).gt.0.01)) THEN
-         IF ((NSCREEN.EQ.1).AND.(MYPROC.EQ.0)) THEN
+         IF ((NSCREEN.EQ.1).AND.(s%MYPROC.EQ.0)) THEN
             WRITE(6,9972)
             WRITE(6,*) 'G =',G
             WRITE(6,9714)
@@ -1019,7 +1027,7 @@
  1116    FORMAT(5X,'WIND REFERENCE TIME FOR SIMULATION = ',&
         I2,'/',I2,'/',I2,'  ',I2,':',I2,':',f7.4,/)
          CALL TIMECONV(IREFYR,IREFMO,IREFDAY,IREFHR,IREFMIN,REFSEC,&
-        WREFTIM, MyProc, NScreen, ScreenUnit )
+        WREFTIM, S%MYPROC, NScreen, ScreenUnit )
          IF (NRS.EQ.0) READ(15,*) NWLAT,NWLON,WLATMAX,WLONMIN,WLATINC,&
         WLONINC,WTIMINC
          IF (NRS.GE.1) READ(15,*) NWLAT,NWLON,WLATMAX,WLONMIN,WLATINC,&
@@ -1051,7 +1059,7 @@
            I2,'/',I2,'/',I2,'  ',I2,'H',/)
          ENDIF
          CALL TIMECONV(IREFYR,IREFMO,IREFDAY,IREFHR,0,0.0d0,&
-        WindRefTime, MyProc, NScreen, ScreenUnit)
+        WindRefTime, S%MYPROC, NScreen, ScreenUnit)
       ENDIF
 
       IF (NWS.EQ.10) THEN
@@ -1166,7 +1174,7 @@
 !     ------------
       CASE DEFAULT              ! fall-through
 !     ------------
-         IF(NSCREEN.NE.0.AND.MYPROC.EQ.0) THEN
+         IF(NSCREEN.NE.0.AND.s%MYPROC.EQ.0) THEN
             WRITE(ScreenUnit,9972)
             WRITE(ScreenUnit,*) 'NRAMP =',NRAMP
             WRITE(ScreenUnit,9713)
@@ -1223,8 +1231,8 @@
 
       READ(14,'(A24)') AGRID
       READ(14,*) NE,NP
-      MNP = NP
-      MNE = NE
+      s%MNP = NP
+      s%MNE = NE
       READ(15,*) SLAM0,SFEA0
       SLAM0 = SLAM0*DEG2RAD
       SFEA0 = SFEA0*DEG2RAD
@@ -1234,7 +1242,7 @@
 
 !.....Allocate arrays dimensioned by MNP and MNE
 
-      CALL ALLOC_MAIN1()
+      CALL ALLOC_MAIN1(s)
 
 !.....If ICS = 1 input nodal coordinates and bathymetry from unit 14
 !.....If either NTIP or NCOR = 1 compute the inverse CPP projection
@@ -1243,7 +1251,7 @@
          DO I = 1,NP
             READ(14,*) JKI,X(JKI),Y(JKI),DP(JKI)
             IF(JKI.NE.I) THEN
-               IF ((NSCREEN.EQ.1).AND.(MYPROC.EQ.0)) WRITE(6,99801)
+               IF ((NSCREEN.EQ.1).AND.(s%MYPROC.EQ.0)) WRITE(6,99801)
                WRITE(16,99801)
 99801          FORMAT(////,1X,'!!!!!!!!!!  WARNING - NONFATAL ',&
               'INPUT ERROR  !!!!!!!!!',&
@@ -1263,7 +1271,7 @@
          DO I = 1,NP
             READ(14,*) JKI,SLAM(JKI),SFEA(JKI),DP(JKI)
             IF (JKI.NE.I) THEN
-               IF ((NSCREEN.EQ.1).AND.(MYPROC.EQ.0)) WRITE(6,99801)
+               IF ((NSCREEN.EQ.1).AND.(s%MYPROC.EQ.0)) WRITE(6,99801)
                WRITE(16,99801)
             ENDIF
             SLAM(JKI) = DEG2RAD*SLAM(JKI)
@@ -1312,7 +1320,7 @@
          NNEIGH(NM(JKI,2)) = NNEIGH(NM(JKI,2)) + 1
          NNEIGH(NM(JKI,3)) = NNEIGH(NM(JKI,3)) + 1
          IF (JKI.NE.I) THEN
-            IF ((NSCREEN.EQ.1).AND.(MYPROC.EQ.0)) WRITE(6,99802)
+            IF ((NSCREEN.EQ.1).AND.(s%MYPROC.EQ.0)) WRITE(6,99802)
             WRITE(16,99802)
 99802       FORMAT(////,1X,'!!!!!!!!!!  WARNING - NONFATAL ',&
            'INPUT ERROR  !!!!!!!!!',&
@@ -1333,7 +1341,7 @@
          DIF2R = LOG10(DIF2R)
          DIF3R = LOG10(DIF3R)
          IF((DIF1R.GT.NPREC).OR.(DIF2R.GT.NPREC).OR.(DIF3R.GT.NPREC))THEN
-            IF ((NSCREEN.EQ.1).AND.(MYPROC.EQ.0)) WRITE(6,9898) JKI
+            IF ((NSCREEN.EQ.1).AND.(s%MYPROC.EQ.0)) WRITE(6,9898) JKI
             WRITE(16,9898) JKI
  9898       FORMAT(////,1X,'!!!!!!!!!!  WARNING  !!!!!!!!!',&
            //,1X,'IF THE GRID COORDINATES HAVE 32 BITS ',&
@@ -1347,7 +1355,7 @@
 
          AREAS(JKI) = (X1 - X3)*(Y2 - Y3) + (X3 - X2)*(Y1 - Y3)
          IF (AREAS(JKI).LT.0.0) THEN
-            IF((NSCREEN.EQ.1).AND.(MYPROC.EQ.0)) WRITE(6,9899) JKI
+            IF((NSCREEN.EQ.1).AND.(s%MYPROC.EQ.0)) WRITE(6,9899) JKI
             WRITE(16,9899) JKI
  9899       FORMAT(////,1X,'!!!!!!!!!!  WARNING - FATAL ERROR !!!!!!!!!',&
            //,1X,'THE CONNECTIVITY FOR ELEMENT ',I6,&
@@ -1393,7 +1401,7 @@
 
 !.....Open unit 12 file
 
-         OPEN(12,FILE=DIRNAME//'/'//'fort.12')
+         OPEN(12,FILE=S%DIRNAME//'/'//'fort.12')
 
 !.....Read startdry info from unit 12
 
@@ -1403,7 +1411,7 @@
 !.....Check that NE2 and NP2 mathe with grid file
 
          IF ((NE2.NE.NE).OR.(NP2.NE.NP)) THEN
-            IF ((NSCREEN.EQ.1).AND.(MYPROC.EQ.0)) WRITE(6,9900)
+            IF ((NSCREEN.EQ.1).AND.(s%MYPROC.EQ.0)) WRITE(6,9900)
             WRITE(16,9900)
  9900       FORMAT(////,1X,'!!!!!!!!!!  FATAL ERROR  !!!!!!!!!',&
            //,1X,'THE PARAMETER NE2 AND NP2 MUST MATCH NE AND NP ',&
@@ -1424,7 +1432,7 @@
                ENDIF
             ENDIF
             IF (JKI.NE.I) THEN
-               IF ((NSCREEN.EQ.1).AND.(MYPROC.EQ.0)) WRITE(6,99805)
+               IF ((NSCREEN.EQ.1).AND.(s%MYPROC.EQ.0)) WRITE(6,99805)
                WRITE(16,99805)
 99805          FORMAT(////,1X,'!!!!!!!!!!  WARNING - NONFATAL ',&
               'INPUT ERROR  !!!!!!!!!',&
@@ -1631,7 +1639,7 @@
             WRITE(16,106) TAU
  106        FORMAT(5X,'LINEAR BOTTOM FRICTION TAU =',F12.8,5X,'1/sec'/)
             IF(TAU.NE.TAU0) THEN !CHECK TAU VALUE AGAINST TAU0
-               IF(NSCREEN.EQ.1.AND.MYPROC.EQ.0) WRITE(6,9951)
+               IF(NSCREEN.EQ.1.AND.s%MYPROC.EQ.0) WRITE(6,9951)
                WRITE(16,9951)
  9951          FORMAT(////,1X,'!!!!!!!!!!  WARNING - NONFATAL ',&
               'INPUT ERROR  !!!!!!!!!',&
@@ -1746,7 +1754,7 @@
 !     in from unit 14 file.
 
       IF (NWP.GT.0)&
-     CALL InitNodalAttr(DP, NP, G, NScreen, ScreenUnit,MyProc,NAbOut)
+     CALL InitNodalAttr(DP, NP, G, NScreen, ScreenUnit,S%MYPROC,NAbOut)
       
 
 
@@ -1793,12 +1801,12 @@
 !...  
 
       READ(15,*) NTIF
-      mntif = ntif
-      if (ntif .eq. 0) mntif = 1
+      s%MNTIF = ntif
+      if (ntif .eq. 0) s%MNTIF = 1
 
 !.... allocate tidal potential arrays
 
-      call alloc_main4a()
+      call alloc_main4a(s)
 
 !.... READ TIDAL POTENTIAL AMPLITUDE, FREQUENCIES, NODAL FACTORS,
 !.... EQUILIBRIUM ARGUMENTS AND ALPHANUMERIC LABEL
@@ -1815,7 +1823,7 @@
 
 !...  LINES TO USE EARTH LOAD/SELF-ATTRACTION PART OF TIDAL POTENTIAL FORCING
 
-      CALL ALLOC_MAIN4b()
+      CALL ALLOC_MAIN4b(s)
       IF(NTIP.EQ.2) THEN
          OPEN(24,FILE='fort.24')
          DO I=1,NTIF
@@ -1866,7 +1874,7 @@
 !...  
       IF(((NTIP.EQ.0).AND.(NTIF.NE.0)).OR.((NTIP.NE.0).AND.&
      (NTIF.EQ.0))) THEN
-         IF(NSCREEN.EQ.1.AND.MYPROC.EQ.0) WRITE(6,9961)
+         IF(NSCREEN.EQ.1.AND.s%MYPROC.EQ.0) WRITE(6,9961)
          WRITE(16,9961)
  9961    FORMAT(////,1X,'!!!!!!!!!!  WARNING - NONFATAL ',&
         'INPUT ERROR  !!!!!!!!!',&
@@ -1874,7 +1882,7 @@
         'PARAMETERS) IS INCONSISTENT',&
         /,1X,'PLEASE CHECK THESE VALUES')
          IF(NFOVER.EQ.1) THEN
-            IF(NSCREEN.EQ.1.AND.MYPROC.EQ.0) WRITE(6,9987)
+            IF(NSCREEN.EQ.1.AND.s%MYPROC.EQ.0) WRITE(6,9987)
             WRITE(16,9987)
  9987       FORMAT(/,1X,'PROGRAM WILL OVERRIDE THE SPECIFIED ',&
            'INPUT AND NEGLECT TIDAL POTENTIAL TERMS',&
@@ -1882,7 +1890,7 @@
            //,1X,'!!!!!! EXECUTION WILL CONTINUE !!!!!!',//)
             NTIP=0
          ELSE
-            IF(NSCREEN.EQ.1.AND.MYPROC.EQ.0) WRITE(6,9973)
+            IF(NSCREEN.EQ.1.AND.s%MYPROC.EQ.0) WRITE(6,9973)
             WRITE(16,9973)
             STOP
          ENDIF
@@ -1916,12 +1924,12 @@
 !.... ALPHANUMERIC DESCRIPTOR
 !...  
  1893 READ(15,*) NBFR
-      MNBFR = NBFR
-      IF (NBFR.EQ.0) MNBFR = 1
+      s%MNBFR = NBFR
+      IF (NBFR.EQ.0) s%MNBFR = 1
 
 !     - Allocate arrays dimensioned by MNBFR
 
-      call alloc_main5()
+      call alloc_main5(s)
 
       WRITE(16,1112)
       WRITE(16,2106)
@@ -1965,16 +1973,16 @@
      ,I6)
 
 !     allocate arrays dimensioned by NOPE and NETA
-      MNOPE = NOPE
-      IF (NOPE.EQ.0) MNOPE = 1
-      MNETA = NETA
-      IF (NETA.EQ.0) MNETA = 1
+      s%MNOPE = NOPE
+      IF (NOPE.EQ.0) s%MNOPE = 1
+      s%MNETA = NETA
+      IF (NETA.EQ.0) s%MNETA = 1
 
-      call alloc_main2()     
+      call alloc_main2(s)     
 !...  
 !...  INPUT THE NODE NUMBERS ON EACH ELEVATION BOUNDARY FORCING SEGMENT
 !...  
-      MNEI=0
+      s%MNEI=0
       JNMM=0
       DO K=1,NOPE
          READ(14,*) NVDLL(K)
@@ -1987,7 +1995,7 @@
  1855       FORMAT(7X,I7)
             IF (NNEIGH(NBDV(K,I)).NE.0) THEN
                NNEIGH(NBDV(K,I))=NNEIGH(NBDV(K,I))+1
-               IF (NNEIGH(NBDV(K,I)).GT.MNEI) MNEI=NNEIGH(NBDV(K,I))
+               IF (NNEIGH(NBDV(K,I)).GT.s%MNEI) s%MNEI=NNEIGH(NBDV(K,I))
                NNEIGH(NBDV(K,I)) = 0
             ENDIF
 
@@ -1999,7 +2007,7 @@
 !...  CHECK TO MAKE SURE THAT JNMM EQUALS NETA
 !...  
       IF(NETA.NE.JNMM) THEN
-         IF(NSCREEN.EQ.1.AND.MYPROC.EQ.0) WRITE(6,9945)
+         IF(NSCREEN.EQ.1.AND.s%MYPROC.EQ.0) WRITE(6,9945)
          WRITE(16,9945)
  9945    FORMAT(////,1X,'!!!!!!!!!!  WARNING - NONFATAL INPUT ERROR ',&
         '!!!!!!!!!',&
@@ -2007,14 +2015,14 @@
         'THE TOTAL NUMBER OF BOUNDARY NODES',&
         /,1X,' FROM ALL THE SPECIFIED SEGMENTS COMBINED')
          IF(NFOVER.EQ.1) THEN
-            IF(NSCREEN.EQ.1.AND.MYPROC.EQ.0) WRITE(6,9989)
+            IF(NSCREEN.EQ.1.AND.s%MYPROC.EQ.0) WRITE(6,9989)
             WRITE(16,9989)
  9989       FORMAT(/,1X,'THE PROGRAM WILL NOW CORRECT THIS ERROR',&
            /,1X,'PLEASE CHECK YOUR INPUT CAREFULLY !!!',&
            //,1X,'!!!!!! EXECUTION WILL CONTINUE !!!!!!',//)
             NETA=JNMM
          ELSE
-            IF(NSCREEN.EQ.1.AND.MYPROC.EQ.0) WRITE(6,9973)
+            IF(NSCREEN.EQ.1.AND.s%MYPROC.EQ.0) WRITE(6,9973)
             WRITE(16,9973)
             STOP
          ENDIF
@@ -2100,13 +2108,13 @@
       WRITE(16,1881) NVEL
  1881 FORMAT(/,5X,'THE TOTAL NUMBER OF FLOW BOUNDARY NODES = ',I5)
 
-      MNBOU = NBOU
-      IF (NBOU.EQ.0) MNBOU = 1
-      MNVEL = NVEL*2            !Cvjp  -  11/28/99 -  upper bound guess for MNVEL
+      s%MNBOU = NBOU
+      IF (NBOU.EQ.0) s%MNBOU = 1
+      s%MNVEL = NVEL*2            !Cvjp  -  11/28/99 -  upper bound guess for MNVEL
 
 !.....Allocate space for nonperiodic zero and nonzero normal flow boundary arrays
 !.....including barriers
-      call alloc_main3()
+      call alloc_main3(s)
 
 !.....INPUT THE NUMBER OF NODES IN THE NEXT FLOW BOUNDARY SEGMENT
 !.....AND THE BOUNDARY TYPE
@@ -2135,7 +2143,7 @@
 !jj   wm001 - following 2 lines modified 
         .AND.(IBTYPE.NE.4).AND.(IBTYPE.NE.24)&
         .AND.(IBTYPE.NE.5).AND.(IBTYPE.NE.25).AND.(IBTYPE.NE.30)) THEN
-         IF(NSCREEN.EQ.1.AND.MYPROC.EQ.0) WRITE(6,9985) K
+         IF(NSCREEN.EQ.1.AND.s%MYPROC.EQ.0) WRITE(6,9985) K
          WRITE(16,9985) K
  9985    FORMAT(////,1X,'!!!!!!!!!!  WARNING - FATAL ERROR !!!!!!!!!',&
         //,1X,'THE FLOW BOUNDARY TYPE PARAMETER IBTYPE ',&
@@ -2671,7 +2679,7 @@
 !...........CHECK EXTERNAL BARRIER HEIGHTS AGAINST DEPTHS
             IF((IBTYPE.EQ.3).OR.(IBTYPE.EQ.13).OR.(IBTYPE.EQ.23)) THEN
                IF(BARLANHT(JGW).LT.-DP(NBV(JGW))) THEN
-                  IF(NSCREEN.EQ.1.AND.MYPROC.EQ.0) WRITE(6,8367) &
+                  IF(NSCREEN.EQ.1.AND.s%MYPROC.EQ.0) WRITE(6,8367) &
                  JGW,NBV(JGW),BARLANHT(JGW),DP(NBV(JGW))
                   WRITE(16,8367) JGW,NBV(JGW),BARLANHT(JGW),DP(NBV(JGW))
  8367             FORMAT(////,1X,'!!!!!!!!!!  FATAL INPUT ERROR   !!!'&
@@ -2683,7 +2691,7 @@
                  ,'THE ASSOCIATED GLOBAL NODE = ',E12.5,/,2X,&
                  'USER MUST SPECIFY CONSISTENT BARRIER HEIGHTS',&
                  ' AND DEPTHS')
-                  IF(NSCREEN.EQ.1.AND.MYPROC.EQ.0) WRITE(6,9973)
+                  IF(NSCREEN.EQ.1.AND.s%MYPROC.EQ.0) WRITE(6,9973)
                   WRITE(16,9973)
                   STOP
                ENDIF
@@ -2691,7 +2699,7 @@
 !...........CHECK INTERNAL BARRIER HEIGHTS AGAINST DEPTHS
             IF((IBTYPE.EQ.4).OR.(IBTYPE.EQ.24)) THEN
                IF(BARINHT(JGW).LT.-DP(NBV(JGW))) THEN
-                  IF(NSCREEN.EQ.1.AND.MYPROC.EQ.0) WRITE(6,8368) &
+                  IF(NSCREEN.EQ.1.AND.s%MYPROC.EQ.0) WRITE(6,8368) &
                  JGW,NBV(JGW),BARINHT(JGW),DP(NBV(JGW))
                   WRITE(16,8368) JGW,NBV(JGW),BARINHT(JGW),DP(NBV(JGW))
  8368             FORMAT(////,1X,'!!!!!!!!!!  FATAL INPUT ERROR   !!!'&
@@ -2703,7 +2711,7 @@
                  ,'THE ASSOCIATED GLOBAL NODE = ',E12.5,/,2X,&
                  'USER MUST SPECIFY CONSISTENT BARRIER HEIGHTS',&
                  ' AND DEPTHS')
-                  IF(NSCREEN.EQ.1.AND.MYPROC.EQ.0) WRITE(6,9973)
+                  IF(NSCREEN.EQ.1.AND.s%MYPROC.EQ.0) WRITE(6,9973)
                   WRITE(16,9973)
                   STOP
                ENDIF
@@ -2712,7 +2720,7 @@
 !...........CHECK INTERNAL BARRIER WITH PIPES BARRIER HEIGHTS AGAINST DEPTHS
             IF((IBTYPE.EQ.5).OR.(IBTYPE.EQ.25)) THEN
                IF(BARINHT(JGW).LT.-DP(NBV(JGW))) THEN
-                  IF(NSCREEN.EQ.1.AND.MYPROC.EQ.0) WRITE(6,8370) &
+                  IF(NSCREEN.EQ.1.AND.s%MYPROC.EQ.0) WRITE(6,8370) &
                  JGW,NBV(JGW),BARINHT(JGW),DP(NBV(JGW))
                   WRITE(16,8370) JGW,NBV(JGW),BARINHT(JGW),DP(NBV(JGW))
  8370             FORMAT(////,1X,'!!!!!!!!!!  FATAL INPUT ERROR   !!!'&
@@ -2724,7 +2732,7 @@
                  ,'THE ASSOCIATED GLOBAL NODE = ',E12.5,/,2X,&
                  'USER MUST SPECIFY CONSISTENT BARRIER HEIGHTS',&
                  ' AND DEPTHS')
-                  IF(NSCREEN.EQ.1.AND.MYPROC.EQ.0) WRITE(6,9973)
+                  IF(NSCREEN.EQ.1.AND.s%MYPROC.EQ.0) WRITE(6,9973)
                   WRITE(16,9973)
                   STOP
                ENDIF
@@ -2732,7 +2740,7 @@
 !...........CHECK INTERNAL BARRIER WITH PIPES PIPE HEIGHTS AGAINST DEPTHS
             IF((IBTYPE.EQ.5).OR.(IBTYPE.EQ.25)) THEN
                IF(PIPEHT(JGW).LT.-DP(NBV(JGW))) THEN
-                  IF(NSCREEN.EQ.1.AND.MYPROC.EQ.0) WRITE(6,8372) &
+                  IF(NSCREEN.EQ.1.AND.s%MYPROC.EQ.0) WRITE(6,8372) &
                  JGW,NBV(JGW),BARINHT(JGW),DP(NBV(JGW))
                   WRITE(16,8372) JGW,NBV(JGW),BARINHT(JGW),DP(NBV(JGW))
  8372             FORMAT(////,1X,'!!!!!!!!!!  FATAL INPUT ERROR   !!!'&
@@ -2744,7 +2752,7 @@
                  ,'THE ASSOCIATED GLOBAL NODE = ',E12.5,/,2X,&
                  'USER MUST SPECIFY CONSISTENT PIPE HEIGHTS',&
                  ' AND DEPTHS')
-                  IF(NSCREEN.EQ.1.AND.MYPROC.EQ.0) WRITE(6,9973)
+                  IF(NSCREEN.EQ.1.AND.s%MYPROC.EQ.0) WRITE(6,9973)
                   WRITE(16,9973)
                   STOP
                ENDIF
@@ -2761,7 +2769,7 @@
 !.................CHECK FOR ILLEGAL OVERLAPS
                      IF((LBCODEI(ICK).EQ.2).OR.(LBCODEI(ICK).EQ.3).OR.&
                     (LBCODEI(ICK).EQ.12).OR.(LBCODEI(ICK).EQ.13)) THEN 
-                        IF(NSCREEN.EQ.1.AND.MYPROC.EQ.0) WRITE(6,8567) &
+                        IF(NSCREEN.EQ.1.AND.s%MYPROC.EQ.0) WRITE(6,8567) &
                        JGW,NBV(JGW),ICK,NBV(ICK)
                         WRITE(16,8567) JGW,NBV(JGW),ICK,NBV(ICK)
  8567                   FORMAT(////,1X,'!!!!!!!!!!  FATAL INPUT ERROR   !!!'&
@@ -2774,7 +2782,7 @@
                        ,'BARRIER BOUNDARIES CAN ONLY OVERLAP WITH ',&
                        'NO NORMAL FLOW EXTERNAL BOUNDARIES',/&
                        2X,'(I.E. IBTYPE=0,10,20)')
-                        IF(NSCREEN.EQ.1.AND.MYPROC.EQ.0) WRITE(6,9973)
+                        IF(NSCREEN.EQ.1.AND.s%MYPROC.EQ.0) WRITE(6,9973)
                         WRITE(16,9973)
                         STOP
                      ENDIF
@@ -2854,14 +2862,14 @@
 !.....ONCE ALL FLOW BOUNDARY NODES HAVE BEEN PROCESSED, CHECK TO MAKE SURE
 !.....THAT JGW LE MNVEL.  NOTE, JME MUST BE < JGW.
 
-      IF(MNVEL.LT.JGW) THEN
-         IF(NSCREEN.EQ.1.AND.MYPROC.EQ.0) WRITE(6,9947)
+      IF(s%MNVEL.LT.JGW) THEN
+         IF(NSCREEN.EQ.1.AND.s%MYPROC.EQ.0) WRITE(6,9947)
          WRITE(16,9947)
  9947    FORMAT(////,1X,'!!!!!!!!!!  FATAL INPUT ERROR   !!!!!!!!!!!!',&
         //,1X,'THE DIMENSION PARAMETER MNVEL IS LESS THAN ',&
         'THE TOTAL NUMBER OF FLOW BOUNDARY NODES',&
         /,1X,'FROM ALL THE SPECIFIED FLOW SEGMENTS COMBINED',/)
-         IF(NSCREEN.EQ.1.AND.MYPROC.EQ.0) WRITE(6,9973)
+         IF(NSCREEN.EQ.1.AND.s%MYPROC.EQ.0) WRITE(6,9973)
          WRITE(16,9973)
          STOP
       ENDIF
@@ -2870,10 +2878,10 @@
       NVELME=JME
 
 !     
-      DO IK=1,MNP               ! FINISH DET. MAX # NEIGHBORS
-         IF(NNEIGH(IK).GT.MNEI) MNEI=NNEIGH(IK)
+      DO IK=1,s%MNP               ! FINISH DET. MAX # NEIGHBORS
+         IF(NNEIGH(IK).GT.s%MNEI) s%MNEI=NNEIGH(IK)
       ENDDO
-      MNEI = MNEI+1
+      s%MNEI = s%MNEI+1
 
 !     sb   Copied from read_input.F of v45.01
 !     estimate the maximum array space needed for the neighbor
@@ -2883,7 +2891,7 @@
 !     and in case the maximum number of nodes occurs at a boundary
 !     node
 
-      MNei = MNei+3
+      S%MNEI = S%MNEI+3
 
 
 !.....TRANSFER FLOW BOUNDARY INFORMATION INTO NODAL ARRAYS
@@ -2911,11 +2919,11 @@
 !......DATA.  IF THIS = 0, NORMAL FLOW DATA IS READ IN FROM THE FORT.20 FILE.
 
          READ(15,*) NFFR
-         MNFFR = NFFR
-         IF (NFFR.EQ.0) MNFFR = 1
+         s%MNFFR = NFFR
+         IF (NFFR.EQ.0) s%MNFFR = 1
 
 !.....Allocate space for periodic normal flow boundary conditions
-         call alloc_main6()
+         call alloc_main6(s)
 !     
          DO I=1,NVELME
             J=ME2GW(I)
@@ -3114,13 +3122,13 @@
 !.... CHECK INPUT PARAMETER NOUTE
 
       IF(ABS(NOUTE).GT.2) THEN
-         IF(NSCREEN.EQ.1.AND.MYPROC.EQ.0) WRITE(6,3002)
+         IF(NSCREEN.EQ.1.AND.s%MYPROC.EQ.0) WRITE(6,3002)
          WRITE(16,3002)
  3002    FORMAT(////,1X,'!!!!!!!!!!  WARNING - FATAL ERROR !!!!!!!!!',&
         //,1X,'YOUR SELECTION OF THE UNIT 15 INPUT PARAMETER',&
         ' NOUTE',&
         /,1X,'IS NOT AN ALLOWABLE VALUE.  CHECK YOUR INPUT!!')
-         IF(NSCREEN.EQ.1.AND.MYPROC.EQ.0) WRITE(6,9973)
+         IF(NSCREEN.EQ.1.AND.s%MYPROC.EQ.0) WRITE(6,9973)
          WRITE(16,9973)
          STOP
       ENDIF
@@ -3181,13 +3189,13 @@
          IF(ICS.EQ.2) WRITE(16,3009)
  3009    FORMAT(/,5X,'STATION   ELEMENT',3X,'LAMBDA(DEG)',&
         4X,'FEA(DEG)',10X,'XCP',12X,'YCP',/)
-         MNSTAE = NSTAE
+         s%MNSTAE = NSTAE
       ENDIF
-      IF (NSTAE.EQ.0) MNSTAE = 1
+      IF (NSTAE.EQ.0) s%MNSTAE = 1
 
 
 !     Allocate arrays dimensioned by MNSTAE
-      call alloc_main7()
+      call alloc_main7(s)
 
 
 !.... INPUT COORDINATES OF ELEVATION RECORDING STATIONS THEN COMPUTE
@@ -3230,7 +3238,7 @@
          END DO
 
          IF(NNE(I).EQ.0) THEN
-            IF(NSCREEN.EQ.1.AND.MYPROC.EQ.0) WRITE(6,9784) I
+            IF(NSCREEN.EQ.1.AND.s%MYPROC.EQ.0) WRITE(6,9784) I
             WRITE(16,9784) I
  9784       FORMAT(///,1X,'!!!!!!!!!!  WARNING - NONFATAL ',&
            'INPUT ERROR  !!!!!!!!!',//&
@@ -3239,14 +3247,14 @@
            /,1X,'COMPUTATIONAL DOMAIN,   PLEASE CHECK THE INPUT',&
            ' COORDINATES FOR THIS STATION')
             IF(NFOVER.EQ.1) THEN
-               IF(NSCREEN.EQ.1.AND.MYPROC.EQ.0) WRITE(6,9790) AEMIN
+               IF(NSCREEN.EQ.1.AND.s%MYPROC.EQ.0) WRITE(6,9790) AEMIN
                WRITE(16,9790) AEMIN
  9790          FORMAT(/,1X,'PROGRAM WILL ESTIMATE NEAREST ELEMENT',&
               /,1X,'PROXIMITY INDEX FOR THIS STATION EQUALS ',E15.6,&
               //,1X,'!!!!!! EXECUTION WILL CONTINUE !!!!!!',//)
                NNE(I)=KMIN
             ELSE
-               IF(NSCREEN.EQ.1.AND.MYPROC.EQ.0) WRITE(6,9791) AEMIN
+               IF(NSCREEN.EQ.1.AND.s%MYPROC.EQ.0) WRITE(6,9791) AEMIN
                WRITE(16,9791) AEMIN
  9791          FORMAT(/,1X,'PROGRAM WILL NOT CORRECT ERROR ',&
               'SINCE NON-FATAL ERROR OVERIDE OPTION, NFOVER,',&
@@ -3302,13 +3310,13 @@
 !.... CHECK INPUT PARAMETER NOUTV
 
       IF(ABS(NOUTV).GT.2) THEN
-         IF(NSCREEN.EQ.1.AND.MYPROC.EQ.0) WRITE(6,3102)
+         IF(NSCREEN.EQ.1.AND.s%MYPROC.EQ.0) WRITE(6,3102)
          WRITE(16,3102)
  3102    FORMAT(////,1X,'!!!!!!!!!!  WARNING - FATAL ERROR !!!!!!!!!',&
         //,1X,'YOUR SELECTION OF THE UNIT 15 INPUT PARAMETER',&
         ' NOUTV',&
         /,1X,'IS NOT AN ALLOWABLE VALUE.  CHECK YOUR INPUT!!')
-         IF(NSCREEN.EQ.1.AND.MYPROC.EQ.0) WRITE(6,9973)
+         IF(NSCREEN.EQ.1.AND.s%MYPROC.EQ.0) WRITE(6,9973)
          WRITE(16,9973)
          STOP
       ENDIF
@@ -3367,12 +3375,12 @@
          IF(ICS.EQ.2) WRITE(16,3109)
  3109    FORMAT(/,5X,'STATION   ELEMENT',3X,'LAMBDA(DEG)',&
         4X,'FEA(DEG)',10X,'XCP',12X,'YCP',/)
-         MNSTAV = NSTAV
+         s%MNSTAV = NSTAV
       ENDIF
-      IF (NSTAV.EQ.0) MNSTAV = 1
+      IF (NSTAV.EQ.0) s%MNSTAV = 1
 
 !     Allocate arrays dimensioned by MNSTAV
-      call alloc_main8()
+      call alloc_main8(s)
 
 !.... INPUT COORDINATES OF VELOCITY RECORDING STATIONS
 !.... THEN COMPUTE ELEMENT NO. WITHIN WHICH STATION LIES
@@ -3414,7 +3422,7 @@
          END DO
 
          IF(NNV(I).EQ.0) THEN
-            IF(NSCREEN.EQ.1.AND.MYPROC.EQ.0) WRITE(6,9786) I
+            IF(NSCREEN.EQ.1.AND.s%MYPROC.EQ.0) WRITE(6,9786) I
             WRITE(16,9786) I
  9786       FORMAT(///,1X,'!!!!!!!!!!  WARNING - NONFATAL ',&
            'INPUT ERROR  !!!!!!!!!',//&
@@ -3423,11 +3431,11 @@
            /,1X,'COMPUTATIONAL DOMAIN,   PLEASE CHECK THE INPUT'&
            ,' COORDINATES FOR THIS STATION')
             IF(NFOVER.EQ.1) THEN
-               IF(NSCREEN.EQ.1.AND.MYPROC.EQ.0) WRITE(6,9790) AEMIN
+               IF(NSCREEN.EQ.1.AND.s%MYPROC.EQ.0) WRITE(6,9790) AEMIN
                WRITE(16,9790) AEMIN
                NNV(I)=KMIN
             ELSE
-               IF(NSCREEN.EQ.1.AND.MYPROC.EQ.0) WRITE(6,9791) AEMIN
+               IF(NSCREEN.EQ.1.AND.s%MYPROC.EQ.0) WRITE(6,9791) AEMIN
                WRITE(16,9791) AEMIN
                STOP
             ENDIF
@@ -3478,13 +3486,13 @@
 !.....CHECK INPUT PARAMETER NOUTC
 
          IF(ABS(NOUTC).GT.2) THEN
-            IF(NSCREEN.EQ.1.AND.MYPROC.EQ.0) WRITE(6,3202)
+            IF(NSCREEN.EQ.1.AND.s%MYPROC.EQ.0) WRITE(6,3202)
             WRITE(16,3202)
  3202       FORMAT(////,1X,'!!!!!!!!!!  WARNING - FATAL ERROR !!!!!!!!!',&
            //,1X,'YOUR SELECTION OF THE UNIT 15 INPUT PARAMETER',&
            ' NOUTC',&
            /,1X,'IS NOT AN ALLOWABLE VALUE.  CHECK YOUR INPUT!!')
-            IF(NSCREEN.EQ.1.AND.MYPROC.EQ.0) WRITE(6,9973)
+            IF(NSCREEN.EQ.1.AND.s%MYPROC.EQ.0) WRITE(6,9973)
             WRITE(16,9973)
             STOP
          ENDIF
@@ -3544,11 +3552,11 @@
             IF(ICS.EQ.2) WRITE(16,3209)
  3209       FORMAT(/,5X,'STATION   ELEMENT',3X,'LAMBDA(DEG)',&
            4X,'FEA(DEG)',10X,'XCP',12X,'YCP',/)
-            MNSTAC = NSTAC
+            s%MNSTAC = NSTAC
          ENDIF
 
 !     Allocate arrays dimensioned by MNSTAC
-         call alloc_main9()
+         call alloc_main9(s)
 
 !.....INPUT COORDINATES OF CONCENTRATION RECORDING STATIONS
 !.....THEN COMPUTE ELEMENT NO. WITHIN WHICH STATION LIES
@@ -3590,7 +3598,7 @@
             END DO
 
             IF(NNC(I).EQ.0) THEN
-               IF(NSCREEN.EQ.1.AND.MYPROC.EQ.0) WRITE(6,9785) I
+               IF(NSCREEN.EQ.1.AND.s%MYPROC.EQ.0) WRITE(6,9785) I
                WRITE(16,9785) I
  9785          FORMAT(///,1X,'!!!!!!!!!!  WARNING - NONFATAL INPUT ERROR ',&
           '!!!!!!!!!',//,&
@@ -3599,11 +3607,11 @@
           ' COMPUTATIONAL DOMAIN,   PLEASE CHECK THE INPUT',&
           ' COORDINATES FOR THIS STATION')
                IF(NFOVER.EQ.1) THEN
-                  IF(NSCREEN.EQ.1.AND.MYPROC.EQ.0) WRITE(6,9790) AEMIN
+                  IF(NSCREEN.EQ.1.AND.s%MYPROC.EQ.0) WRITE(6,9790) AEMIN
                   WRITE(16,9790) AEMIN
                   NNC(I)=KMIN
                ELSE
-                  IF(NSCREEN.EQ.1.AND.MYPROC.EQ.0) WRITE(6,9791) AEMIN
+                  IF(NSCREEN.EQ.1.AND.s%MYPROC.EQ.0) WRITE(6,9791) AEMIN
                   WRITE(16,9791) AEMIN
                   STOP
                ENDIF
@@ -3636,7 +3644,7 @@
 
          END DO
       ENDIF
-      IF (NSTAC.EQ.0) MNSTAC = 1
+      IF (NSTAC.EQ.0) s%MNSTAC = 1
 
 !...  
 !...  IF METEOROLOICAL FORCING IS INCLUDED IN THE RUN, INPUT INFORMATION FOR MET
@@ -3659,13 +3667,13 @@
 !.....CHECK INPUT PARAMETER NOUTM
 
          IF(ABS(NOUTM).GT.2) THEN
-            IF(NSCREEN.EQ.1.AND.MYPROC.EQ.0) WRITE(6,3212)
+            IF(NSCREEN.EQ.1.AND.s%MYPROC.EQ.0) WRITE(6,3212)
             WRITE(16,3202)
  3212       FORMAT(////,1X,'!!!!!!!!!!  WARNING - FATAL ERROR !!!!!!!!!',&
            //,1X,'YOUR SELECTION OF THE UNIT 15 INPUT PARAMETER',&
            ' NOUTC',&
            /,1X,'IS NOT AN ALLOWABLE VALUE.  CHECK YOUR INPUT!!')
-            IF(NSCREEN.EQ.1.AND.MYPROC.EQ.0) WRITE(6,9973)
+            IF(NSCREEN.EQ.1.AND.s%MYPROC.EQ.0) WRITE(6,9973)
             WRITE(16,9973)
             STOP
          ENDIF
@@ -3724,11 +3732,11 @@
             IF(ICS.EQ.2) WRITE(16,3219)
  3219       FORMAT(/,5X,'STATION   ELEMENT',3X,'LAMBDA(DEG)',&
            4X,'FEA(DEG)',10X,'XCP',12X,'YCP',/)
-            MNSTAM = NSTAM
+            s%MNSTAM = NSTAM
          ENDIF
 
 !     Allocate arrays dimensioned by MNSTAM
-         call alloc_main10()
+         call alloc_main10(s)
 
 !.....INPUT COORDINATES OF METEOROLOGICAL RECORDING STATIONS
 !.....THEN COMPUTE ELEMENT NO. WITHIN WHICH STATION LIES
@@ -3770,7 +3778,7 @@
             END DO
 
             IF(NNM(I).EQ.0) THEN
-               IF(NSCREEN.EQ.1.AND.MYPROC.EQ.0) WRITE(6,9942) I
+               IF(NSCREEN.EQ.1.AND.s%MYPROC.EQ.0) WRITE(6,9942) I
                WRITE(16,9942) I
  9942          FORMAT(///,1X,'!!!!!!!!!!  WARNING - NONFATAL INPUT ERROR ',&
           '!!!!!!!!!',//,&
@@ -3779,11 +3787,11 @@
           ' COMPUTATIONAL DOMAIN,   PLEASE CHECK THE INPUT',&
           ' COORDINATES FOR THIS STATION')
                IF(NFOVER.EQ.1) THEN
-                  IF(NSCREEN.EQ.1.AND.MYPROC.EQ.0) WRITE(6,9790) AEMIN
+                  IF(NSCREEN.EQ.1.AND.s%MYPROC.EQ.0) WRITE(6,9790) AEMIN
                   WRITE(16,9790) AEMIN
                   NNM(I)=KMIN
                ELSE
-                  IF(NSCREEN.EQ.1.AND.MYPROC.EQ.0) WRITE(6,9791) AEMIN
+                  IF(NSCREEN.EQ.1.AND.s%MYPROC.EQ.0) WRITE(6,9791) AEMIN
                   WRITE(16,9791) AEMIN
                   STOP
                ENDIF
@@ -3816,7 +3824,7 @@
 
          END DO
       ENDIF
-      IF (NSTAM.EQ.0) MNSTAM = 1
+      IF (NSTAM.EQ.0) s%MNSTAM = 1
 
 !...  
 !...  INPUT INFORMATION ABOUT GLOBAL ELEVATION DATA OUTPUT
@@ -3834,13 +3842,13 @@
 !.... CHECK INPUT PARAMETER NOUTGE
 
       IF(ABS(NOUTGE).GT.2) THEN
-         IF(NSCREEN.EQ.1.AND.MYPROC.EQ.0) WRITE(6,3302)
+         IF(NSCREEN.EQ.1.AND.s%MYPROC.EQ.0) WRITE(6,3302)
          WRITE(16,3302)
  3302    FORMAT(////,1X,'!!!!!!!!!!  WARNING - FATAL ERROR !!!!!!!!!',&
         //,1X,'YOUR SELECTION OF THE UNIT 15 INPUT PARAMETER',&
         ' NOUTGE',&
         /,1X,'IS NOT AN ALLOWABLE VALUE.  CHECK YOUR INPUT!!')
-         IF(NSCREEN.EQ.1.AND.MYPROC.EQ.0) WRITE(6,9973)
+         IF(NSCREEN.EQ.1.AND.s%MYPROC.EQ.0) WRITE(6,9973)
          WRITE(16,9973)
          STOP
       ENDIF
@@ -3900,13 +3908,13 @@
 !.... CHECK INPUT PARAMETER NOUTGV
 
       IF(ABS(NOUTGV).GT.2) THEN
-         IF(NSCREEN.EQ.1.AND.MYPROC.EQ.0) WRITE(6,3352)
+         IF(NSCREEN.EQ.1.AND.s%MYPROC.EQ.0) WRITE(6,3352)
          WRITE(16,3352)
  3352    FORMAT(////,1X,'!!!!!!!!!!  WARNING - FATAL ERROR !!!!!!!!!',&
         //,1X,'YOUR SELECTION OF THE UNIT 15 INPUT PARAMETER',&
         ' NOUTGV',&
         /,1X,'IS NOT AN ALLOWABLE VALUE.  CHECK YOUR INPUT!!')
-         IF(NSCREEN.EQ.1.AND.MYPROC.EQ.0) WRITE(6,9973)
+         IF(NSCREEN.EQ.1.AND.s%MYPROC.EQ.0) WRITE(6,9973)
          WRITE(16,9973)
          STOP
       ENDIF
@@ -3969,13 +3977,13 @@
 !.....CHECK INPUT PARAMETER NOUTGC
 
          IF(ABS(NOUTGC).GT.2) THEN
-            IF(NSCREEN.EQ.1.AND.MYPROC.EQ.0) WRITE(6,3402)
+            IF(NSCREEN.EQ.1.AND.s%MYPROC.EQ.0) WRITE(6,3402)
             WRITE(16,3402)
  3402       FORMAT(////,1X,'!!!!!!!!!!  WARNING - FATAL ERROR !!!!!!!!!',&
            //,1X,'YOUR SELECTION OF THE UNIT 15 INPUT PARAMETER',&
            ' NOUTGC',&
            /,1X,'IS NOT AN ALLOWABLE VALUE.  CHECK YOUR INPUT!!')
-            IF(NSCREEN.EQ.1.AND.MYPROC.EQ.0) WRITE(6,9973)
+            IF(NSCREEN.EQ.1.AND.s%MYPROC.EQ.0) WRITE(6,9973)
             WRITE(16,9973)
             STOP
          ENDIF
@@ -4039,13 +4047,13 @@
 !......CHECK INPUT PARAMETER NOUTGW
 
          IF(ABS(NOUTGW).GT.2) THEN
-            IF(NSCREEN.EQ.1.AND.MYPROC.EQ.0) WRITE(6,3452)
+            IF(NSCREEN.EQ.1.AND.s%MYPROC.EQ.0) WRITE(6,3452)
             WRITE(16,3452)
  3452       FORMAT(////,1X,'!!!!!!!!!!  WARNING - FATAL ERROR !!!!!!!!!',&
            //,1X,'YOUR SELECTION OF THE UNIT 15 INPUT PARAMETER',&
            ' NOUTGW',&
            /,1X,'IS NOT AN ALLOWABLE VALUE.  CHECK YOUR INPUT!!')
-            IF(NSCREEN.EQ.1.AND.MYPROC.EQ.0) WRITE(6,3453)
+            IF(NSCREEN.EQ.1.AND.s%MYPROC.EQ.0) WRITE(6,3453)
             WRITE(16,3453)
             STOP
          ENDIF
@@ -4094,13 +4102,14 @@
 !...  
 !...  READ AND CHECK INFORMATION ABOUT HARMONIC ANALYSIS OF MODEL RESULTS
 !...  
+#ifdef harm
       READ(15,*) NFREQ 
       WRITE(16,99392) NFREQ  
 99392 FORMAT(////,1X,'HARMONIC ANALYSIS INFORMATION OUTPUT : ',&
      //,5X,'HARMONIC ANALYSIS PERFORMED FOR ',I4,' CONSTITUENTS',/)
-      MNHARF = NFREQ
+      s%MNHARF = NFREQ
 
-      IF (NFREQ.EQ.0) MNHARF = 1
+      IF (NFREQ.EQ.0) s%MNHARF = 1
 
 !     Allocate harmonic analysis arrays
 
@@ -4110,7 +4119,7 @@
       ENDIF
 
       IF(NFREQ.LT.0) THEN
-         IF(NSCREEN.EQ.1.AND.MYPROC.EQ.0) WRITE(6,99391)
+         IF(NSCREEN.EQ.1.AND.s%MYPROC.EQ.0) WRITE(6,99391)
          WRITE(16,99391)
 99391    FORMAT(////,1X,'!!!!!!!!!!  WARNING - FATAL ERROR !!!!!!!!!',&
         //,1X,'YOUR SELECTION OF NHARFR (A UNIT 15 '&
@@ -4118,7 +4127,7 @@
         'PLEASE CHECK YOUR INPUT',&
         //,1X,'!!!!!! EXECUTION WILL NOW BE TERMINATED !!!!!!',//)
          STOP
-      ENDIF
+      ENDIF      
       IF(NFREQ.GT.0) WRITE(16,2330)
  2330 FORMAT(/,7X,'FREQUENCY',4X,'NODAL FACTOR',6X,'EQU.ARG(DEG)',&
      1X,'CONSTITUENT',/)
@@ -4126,18 +4135,26 @@
          READ(15,'(A10)') NAMEFR(I)
          READ(15,*) HAFREQ(I),HAFF(I),HAFACE(I)
          WRITE(16,2331) HAFREQ(I),HAFF(I),HAFACE(I),NAMEFR(I)
+#else
+      READ(15,*) nfreq_dummy
+      IF (nfreq_dummy.EQ.0) s%MNHARF = 1
+      if (nfreq_dummy.ne.0) then
+         write(16,*) "HARM not supported. Stopping execution."
+         stop
+      end if
+#endif 
  2331    FORMAT(4X,F15.12,2X,F10.7,5X,F10.3,7X,A10)
  1201 CONTINUE
 
 !.... READ IN INTERVAL INFORMATION FOR HARMONIC ANALYSIS
 !.... COMPUTE THAS AND THAF IN TERMS OF THE NUMBER OF TIME STEPS
-
       READ(15,*) THAS,THAF,NHAINC,FMV
       ITHAS=INT((THAS-STATIM)*(86400.D0/DTDP) + 0.5d0)
       THAS=ITHAS*DTDP/86400.D0 + STATIM
       ITHAF=INT((THAF-STATIM)*(86400.D0/DTDP) + 0.5d0)
       THAF=ITHAF*DTDP/86400.D0 + STATIM
       ITMV = ITHAF - (ITHAF-ITHAS)*FMV
+#ifdef HARM
       IF(NFREQ.GT.0) THEN
          WRITE(16,34634) THAS,ITHAS,THAF,ITHAF,NHAINC
 34634    FORMAT(/,5X,'HARMONIC ANALYSIS WILL START AFTER THAS =',F8.3,&
@@ -4155,17 +4172,19 @@
         'SIMULATION.',/9X,' RESULTS ARE WRITTEN TO UNIT 55.')
 
       ELSE
+#endif
          WRITE(16,34645)
 34645    FORMAT(///,5X,'NO HARMONIC ANALYSIS WILL BE DONE')
+#ifdef HARM
       ENDIF
-
-      IF((FMV.GT.0.).AND.(NFREQ.GT.0).AND.(C2DDI)) CHARMV = .TRUE.
+      IF((FMV.GT.0.).AND.(NFREQ.GT.0).AND.(s%C2DDI)) s%CHARMV = .TRUE.
+#endif
 
 !.... READ IN AND WRITE OUT INFORMATION ON WHERE HARMONIC ANALYSIS WILL BE DONE
 
       READ(15,*) NHASE,NHASV,NHAGE,NHAGV
       IF((NHASE.LT.0).OR.(NHASE.GT.1)) THEN
-         IF(NSCREEN.EQ.1.AND.MYPROC.EQ.0) WRITE(6,99661)
+         IF(NSCREEN.EQ.1.AND.s%MYPROC.EQ.0) WRITE(6,99661)
          WRITE(16,99661)
 99661    FORMAT(////,1X,'!!!!!!!!!!  WARNING - NONFATAL ',&
         'INPUT ERROR  !!!!!!!!!',//&
@@ -4173,14 +4192,14 @@
         ,'INPUT PARAMETER) IS NOT AN ALLOWABLE VALUE',/,1X,&
         'PLEASE CHECK YOUR INPUT')
          IF(NFOVER.EQ.1) THEN
-            IF(NSCREEN.EQ.1.AND.MYPROC.EQ.0) WRITE(6,99671)
+            IF(NSCREEN.EQ.1.AND.s%MYPROC.EQ.0) WRITE(6,99671)
             WRITE(16,99671)
 99671       FORMAT(/,1X,'PROGRAM WILL OVERRIDE SPECIFIED INPUT',&
            ' AND SET NHASE EQUAL TO 0 ',&
            //,1X,'!!!!!! EXECUTION WILL CONTINUE !!!!!!',//)
             NHASE=0
          ELSE
-            IF(NSCREEN.EQ.1.AND.MYPROC.EQ.0) WRITE(6,9973)
+            IF(NSCREEN.EQ.1.AND.s%MYPROC.EQ.0) WRITE(6,9973)
             WRITE(16,9973)
             STOP
          ENDIF
@@ -4191,7 +4210,7 @@
         'WRITTEN TO UNIT 51')
       ENDIF
       IF((NHASV.LT.0).OR.(NHASV.GT.1)) THEN
-         IF(NSCREEN.EQ.1.AND.MYPROC.EQ.0) WRITE(6,99662)
+         IF(NSCREEN.EQ.1.AND.s%MYPROC.EQ.0) WRITE(6,99662)
          WRITE(16,99662)
 99662    FORMAT(////,1X,'!!!!!!!!!!  WARNING - NONFATAL ',&
         'INPUT ERROR  !!!!!!!!!',//&
@@ -4199,14 +4218,14 @@
         ,'INPUT PARAMETER) IS NOT AN ALLOWABLE VALUE',/,1X,&
         'PLEASE CHECK YOUR INPUT')
          IF(NFOVER.EQ.1) THEN
-            IF(NSCREEN.EQ.1.AND.MYPROC.EQ.0) WRITE(6,99672)
+            IF(NSCREEN.EQ.1.AND.s%MYPROC.EQ.0) WRITE(6,99672)
             WRITE(16,99672)
 99672       FORMAT(/,1X,'PROGRAM WILL OVERRIDE SPECIFIED INPUT',&
            ' AND SET NHASV EQUAL TO 0 ',&
            //,1X,'!!!!!! EXECUTION WILL CONTINUE !!!!!!',//)
             NHASV=0
          ELSE
-            IF(NSCREEN.EQ.1.AND.MYPROC.EQ.0) WRITE(6,9973)
+            IF(NSCREEN.EQ.1.AND.s%MYPROC.EQ.0) WRITE(6,9973)
             WRITE(16,9973)
             STOP
          ENDIF
@@ -4217,7 +4236,7 @@
         'WRITTEN TO UNIT 52')
       ENDIF
       IF((NHAGE.LT.0).OR.(NHAGE.GT.1)) THEN
-         IF(NSCREEN.EQ.1.AND.MYPROC.EQ.0) WRITE(6,99663)
+         IF(NSCREEN.EQ.1.AND.s%MYPROC.EQ.0) WRITE(6,99663)
          WRITE(16,99663)
 99663    FORMAT(////,1X,'!!!!!!!!!!  WARNING - NONFATAL ',&
         'INPUT ERROR  !!!!!!!!!',//&
@@ -4225,14 +4244,14 @@
         ,'INPUT PARAMETER) IS NOT AN ALLOWABLE VALUE',/,1X,&
         'PLEASE CHECK YOUR INPUT')
          IF(NFOVER.EQ.1) THEN
-            IF(NSCREEN.EQ.1.AND.MYPROC.EQ.0) WRITE(6,99673)
+            IF(NSCREEN.EQ.1.AND.s%MYPROC.EQ.0) WRITE(6,99673)
             WRITE(16,99673)
 99673       FORMAT(/,1X,'PROGRAM WILL OVERRIDE SPECIFIED INPUT',&
            ' AND SET NHAGE EQUAL TO 0 ',&
            //,1X,'!!!!!! EXECUTION WILL CONTINUE !!!!!!',//)
             NHAGE=0
          ELSE
-            IF(NSCREEN.EQ.1.AND.MYPROC.EQ.0) WRITE(6,9973)
+            IF(NSCREEN.EQ.1.AND.s%MYPROC.EQ.0) WRITE(6,9973)
             WRITE(16,9973)
             STOP
          ENDIF
@@ -4240,10 +4259,10 @@
       IF(NHAGE.EQ.1) THEN
          WRITE(16,34643)
 34643    FORMAT(///,5X,'GLOBAL ELEVATION HARMONIC ANAL WILL BE ',&
-        'WRITTEN TO UNIT 53')
+              'WRITTEN TO UNIT 53')
       ENDIF
       IF((NHAGV.LT.0).OR.(NHAGV.GT.1)) THEN
-         IF(NSCREEN.EQ.1.AND.MYPROC.EQ.0) WRITE(6,99664)
+         IF(NSCREEN.EQ.1.AND.s%MYPROC.EQ.0) WRITE(6,99664)
          WRITE(16,99664)
 99664    FORMAT(////,1X,'!!!!!!!!!!  WARNING - NONFATAL ',&
         'INPUT ERROR  !!!!!!!!!',//&
@@ -4251,14 +4270,14 @@
         ,'INPUT PARAMETER) IS NOT AN ALLOWABLE VALUE',/,1X,&
         'PLEASE CHECK YOUR INPUT')
          IF(NFOVER.EQ.1) THEN
-            IF(NSCREEN.EQ.1.AND.MYPROC.EQ.0) WRITE(6,99674)
+            IF(NSCREEN.EQ.1.AND.s%MYPROC.EQ.0) WRITE(6,99674)
             WRITE(16,99674)
 99674       FORMAT(/,1X,'PROGRAM WILL OVERRIDE SPECIFIED INPUT',&
            ' AND SET NHAGV EQUAL TO 0 ',&
            //,1X,'!!!!!! EXECUTION WILL CONTINUE !!!!!!',//)
             NHAGV=0
          ELSE
-            IF(NSCREEN.EQ.1.AND.MYPROC.EQ.0) WRITE(6,9973)
+            IF(NSCREEN.EQ.1.AND.s%MYPROC.EQ.0) WRITE(6,9973)
             WRITE(16,9973)
             STOP
          ENDIF
@@ -4268,11 +4287,13 @@
 34644    FORMAT(///,5X,'GLOBAL VELOCITY HARMONIC ANAL WILL BE ',&
         'WRITTEN TO UNIT 54')
       ENDIF
-
+      
 !.... ESTABLISH INDICATOR OF WHETHER ANY HARMONIC ANALYSIS WILL BE DONE
 
+#ifdef HARM
       IHARIND=NFREQ*(NHASE+NHASV+NHAGE+NHAGV)
       IF(IHARIND.GT.0) IHARIND=1
+#endif
 
 !...  
 !...  INPUT INFORMATION ABOUT HOT START OUTPUT
@@ -4281,7 +4302,7 @@
       WRITE(16,99655)
 99655 FORMAT(////,1X,'HOT START OUTPUT INFORMATION OUTPUT : ')
       IF((NHSTAR.LT.0).OR.(NHSTAR.GT.1)) THEN
-         IF(NSCREEN.EQ.1.AND.MYPROC.EQ.0) WRITE(6,99665)
+         IF(NSCREEN.EQ.1.AND.s%MYPROC.EQ.0) WRITE(6,99665)
          WRITE(16,99665)
 99665    FORMAT(////,1X,'!!!!!!!!!!  WARNING - NONFATAL ',&
         'INPUT ERROR  !!!!!!!!!',//&
@@ -4289,14 +4310,14 @@
         ,'INPUT PARAMETER) IS NOT AN ALLOWABLE VALUE',/,1X,&
         'PLEASE CHECK YOUR INPUT')
          IF(NFOVER.EQ.1) THEN
-            IF(NSCREEN.EQ.1.AND.MYPROC.EQ.0) WRITE(6,99675)
+            IF(NSCREEN.EQ.1.AND.s%MYPROC.EQ.0) WRITE(6,99675)
             WRITE(16,99675)
 99675       FORMAT(/,1X,'PROGRAM WILL OVERRIDE SPECIFIED INPUT',&
            ' AND SET NHSTAR EQUAL TO 0 ',&
            //,1X,'!!!!!! EXECUTION WILL CONTINUE !!!!!!',//)
             NHSTAR=0
          ELSE
-            IF(NSCREEN.EQ.1.AND.MYPROC.EQ.0) WRITE(6,9973)
+            IF(NSCREEN.EQ.1.AND.s%MYPROC.EQ.0) WRITE(6,9973)
             WRITE(16,9973)
             STOP
          ENDIF
@@ -4319,10 +4340,10 @@
 !     vjp 11/30/99 made lumping a compile time option
 
 #ifdef LUMP
-      CLUMP = .TRUE.
+      s%CLUMP = .TRUE.
       ILUMP=1
 #else
-      CLUMP = .FALSE.
+      s%CLUMP = .FALSE.
       ILUMP=0
 #endif
       
@@ -4332,25 +4353,25 @@
 99656 FORMAT(//,1X,'SOLVER INFORMATION OUTPUT : ')
 
 !     - allocate arrays dimensioned by MNEI
-      call alloc_main11()
+      call alloc_main11(s)
 
 !...  LINES TO USE THE ITERATIVE MATRIX SOLVER
 
       IF((ISLDIA.LT.0).OR.(ISLDIA.GT.5)) THEN
-         IF(NSCREEN.EQ.1.AND.MYPROC.EQ.0) WRITE(6,9920)
+         IF(NSCREEN.EQ.1.AND.s%MYPROC.EQ.0) WRITE(6,9920)
          WRITE(16,9920)
  9920    FORMAT(////,1X,'!!!!!!!!!!  WARNING - NONFATAL INPUT ERROR',&
         ' !!!!!!!!!',//,1X,'ISLDIA (A UNIT 15 INPUT PARAMETER) ',&
         'MUST BE 0-5',/,1X,'PLEASE CHECK YOUR INPUT')
          IF(NFOVER.EQ.1) THEN
-            IF(NSCREEN.EQ.1.AND.MYPROC.EQ.0) WRITE(6,9921)
+            IF(NSCREEN.EQ.1.AND.s%MYPROC.EQ.0) WRITE(6,9921)
             WRITE(16,9921)
  9921       FORMAT(/,1X,'PROGRAM WILL OVERRIDE SPECIFIED INPUT',&
            ' AND SET ISLDIA EQUAL TO 0 ',&
            //,1X,'!!!!!! EXECUTION WILL CONTINUE !!!!!!',//)
             ISLDIA=0
          ELSE
-            IF(NSCREEN.EQ.1.AND.MYPROC.EQ.0) WRITE(6,9973)
+            IF(NSCREEN.EQ.1.AND.s%MYPROC.EQ.0) WRITE(6,9973)
             WRITE(16,9973)
             STOP
          ENDIF
@@ -4361,7 +4382,7 @@
 !     READ(15,*) MNPROC
 !--   
 #else
-      MNPROC = 1
+      s%MNPROC = 1
 #endif
 
 !.....INITIALIZE AVERAGING FOR INTERNAL BARRIER WATER LEVELS
@@ -4380,13 +4401,13 @@
 !...  
 !...  COMPUTE THE NEIGHBOR TABLE
 !...  
-      IF(NSCREEN.EQ.1.AND.MYPROC.EQ.0) WRITE(6,1196)
+      IF(NSCREEN.EQ.1.AND.s%MYPROC.EQ.0) WRITE(6,1196)
       WRITE(16,1196)
  1196 FORMAT(/,1X,'THE NEIGHBOR TABLE IS BEING COMPUTED ',/)
 !     
       CALL NEIGHB(NE,NP,NM,NNEIGH,NEITAB,NEIMIN,NEIMAX,X,Y,NSCREEN,NNEIGH_ELEM,NEIGH_ELEM)
 !     
-      IF(NSCREEN.EQ.1.AND.MYPROC.EQ.0) &
+      IF(NSCREEN.EQ.1.AND.s%MYPROC.EQ.0) &
      WRITE(6,1195) NEIMIN,NEIMAX,NEIMAX
       WRITE(16,1195) NEIMIN,NEIMAX,NEIMAX
  1195 FORMAT(1X,'THE NEIGHBOR TABLE IS COMPLETED ',&
@@ -4397,41 +4418,41 @@
 
 !.....Allocate arrays dealing with wind forcing
 
-      CALL ALLOC_MAIN12()
+      CALL ALLOC_MAIN12(s)
       
 !.....Allocate arrays for wave modified bottom friction (EJK)
 
       IF ((FRW.EQ.1).OR.(NRS.EQ.1)) THEN
-         CALL ALLOC_MAIN15()
+         CALL ALLOC_MAIN15(s)
       ENDIF
       
 !     sb-
 !.....Count maximum of the number of the elements associated with a node
 
-      DO I = 1,MNP
+      DO I = 1,s%MNP
          NNDEL(I) = 0
       ENDDO
-      DO IK=1,MNE
+      DO IK=1,s%MNE
          NNDEL(NM(IK,1)) = NNDEL(NM(IK,1)) + 1
          NNDEL(NM(IK,2)) = NNDEL(NM(IK,2)) + 1
          NNDEL(NM(IK,3)) = NNDEL(NM(IK,3)) + 1
       ENDDO
-      MNNDEL = 0
-      DO IK=1,MNP
-         IF(NNDEL(IK).GT.MNNDEL) MNNDEL = NNDEL(IK)
+      s%MNNDEL = 0
+      DO IK=1,s%MNP
+         IF(NNDEL(IK).GT.s%MNNDEL) s%MNNDEL = NNDEL(IK)
       ENDDO
 
 !.....Allocate space for Arrays dimensioned by MNNDEL
-      CALL ALLOC_MAIN16()
+      CALL ALLOC_MAIN16(s)
       
-      DO I = 1,MNP
+      DO I = 1,s%MNP
          NNDEL(I) = 0
       ENDDO
 
 !.....Make node-to-elements table
 
 
-      DO IK=1,MNE
+      DO IK=1,s%MNE
          NM1 = NM(IK,1)
          NM2 = NM(IK,2)
          NM3 = NM(IK,3)
@@ -4449,8 +4470,8 @@
 
 !.....Write table of parameter sizes (vjp 11/28/99)
 
-      WRITE(16,4010) MNPROC,MNE,MNP,MNEI,MNOPE,MNETA,MNBOU,MNVEL,&
-     MNTIF,MNBFR,MNSTAE,MNSTAV,MNSTAC,MNSTAM,NWLAT,NWLON,MNHARF,MNFFR
+      WRITE(16,4010) s%MNPROC,s%MNE,s%MNP,s%MNEI,s%MNOPE,s%MNETA,s%MNBOU,s%MNVEL,&
+     s%MNTIF,s%MNBFR,s%MNSTAE,s%MNSTAV,s%MNSTAC,s%MNSTAM,NWLAT,NWLON,s%MNHARF,s%MNFFR
       IF (NWS.EQ.0) WRITE(16,4011)
       IF (NWS.EQ.1) WRITE(16,4012)
       IF (ABS(NWS).EQ.2) WRITE(16,4013)
@@ -4459,8 +4480,12 @@
       IF (ABS(NWS).EQ.5) WRITE(16,4115)
       IF (NWS.EQ.10) WRITE(16,4016)
       IF (NWS.EQ.11) WRITE(16,4017)
+#ifdef HARM
       IF ((NFREQ.EQ.0).OR.(FMV.EQ.0.)) WRITE(16,4021)
       IF ((NFREQ.GE.1).AND.(FMV.NE.0.)) WRITE(16,4022)
+#else
+      WRITE(16,4021)
+#endif      
       IF (ILUMP.EQ.0) WRITE(16,4031)
       IF (ILUMP.EQ.1) WRITE(16,4032)
       IF (IM.EQ.0) WRITE(16,4101)

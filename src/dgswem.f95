@@ -60,7 +60,12 @@
       IF (IHOT.EQ.0) THEN
          CALL COLDSTART()
       ELSE
+#ifdef HOTSTART
          CALL HOTSTART()
+#else
+         print*, "Hotstart not supported."
+         stop
+#endif
       ENDIF
 
 
