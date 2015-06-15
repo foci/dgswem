@@ -467,12 +467,14 @@
 !     
       RAD2DEG=45.0d0/ATAN(1.0d0)
 !     
+
+      print*, "NP=", np, "s%MNP=", s%MNP
       DO N=1,NP
          NNEIGH(N) = 0
          NNEIGH_ELEM(N) = 0
          DO NN=1,S%MNEI
             NEIGH(N,NN) = 0
-     NEIGH_ELEM(N,NN) = 0
+            NEIGH_ELEM(N,NN) = 0
          ENDDO
       ENDDO
 !     
