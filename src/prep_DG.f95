@@ -82,26 +82,26 @@
       
 !.....Compute the degrees of freedom per element
 
-      DOF = (pl+1)*(pl+2)/2
+      DOF = (dg%pl+1)*(dg%pl+2)/2
       dofx = (px+1)*(px+2)/2    ! dofx for variable functions f=f(x) 
-      P_0 = pl
-      DOF_0 = (pl+1)*(pl+2)/2   ! dof at lowest order when p!=0
+      P_0 = dg%pl
+      DOF_0 = (dg%pl+1)*(dg%pl+2)/2   ! dof at lowest order when p!=0
       dofh = (ph + 1)*(ph + 2)/2
 
 
 !.....Allocate some DG stuff
 
-      IF (PADAPT.EQ.1) THEN
+      IF (DG%PADAPT.EQ.1) THEN
 
          dofh = (ph + 1)*(ph + 2)/2
-         dofl = (pl + 1)*(pl + 2)/2
-         pa = pl
+         dofl = (dg%pl + 1)*(dg%pl + 2)/2
+         pa = dg%pl
            
-      elseif (padapt.eq.0) then 
+      elseif (dg%padapt.eq.0) then 
 
          dofh = dofh
          dofl = DOF_0
-         pa = pl
+         pa = dg%pl
 
       endif
 
@@ -121,25 +121,25 @@
       CALL ALLOC_DG4(s)          !moved here 6.28.10, for p_adapt because of messenger_elem      
 
          dofs(:) = dofl
-         PDG_EL(:) = pl
-         PDG(:) = pl  
+         PDG_EL(:) = dg%pl
+         PDG(:) = dg%pl  
          PCOUNT(:) = 0
-         pa = pl
+         pa = dg%pl
 
-      do chi=pl,ph
+      do chi=dg%pl,ph
          NEGP(chi) = chi + 1
       enddo
 
-      IF (pl.eq.0) THEN
+      IF (dg%pl.eq.0) THEN
 
          PDG_EL(:) = 1
          PDG(:) = 1     
          DOF    = 3
-         pl     = 1
+         dg%pl     = 1
          dofl   = 3
          P_0    = 0
          DOF_0  = 1 
-         NEGP(pl) = 2
+         NEGP(dg%pl) = 2
 
       ENDIF
 
@@ -153,7 +153,7 @@
       CALL MSG_TYPES_ELEM()     ! Determine Word Sizes for Message-Passing
       CALL MSG_TABLE_ELEM()     ! Read Message-Passing Tables
 
-      IF (SLOPEFLAG.ge.4) THEN
+      IF (DG%SLOPEFLAG.ge.4) THEN
          CALL MSG_TYPES()
          CALL MSG_TABLE()
       ENDIF
@@ -174,7 +174,7 @@
 
 #ifdef CMPI
       CALL MESSAGE_START_ELEM() ! Startup persistent message passing
-      IF (SLOPEFLAG.ge.4) CALL MESSAGE_START()
+      IF (DG%SLOPEFLAG.ge.4) CALL MESSAGE_START()
 #endif
 
 !.....Re-arrange elevation specified boundary segment data for DG
@@ -381,7 +381,7 @@
          ENDDO
       endif
 
-      IF (MODAL_IC.EQ.0) THEN
+      IF (DG%MODAL_IC.EQ.0) THEN
 !     this assumes a cold start
          if (LoadGeoidOffset) then
             DO J = 1,NE
@@ -568,7 +568,7 @@
       ze(1:dofh,:,1) = zeo(1:dofh,:,1)
       ydub(1:dofh,:,1) = ydubo(1:dofh,:)
 
-      do chi=pl,ph
+      do chi=dg%pl,ph
          hb1(1:dofh,:,1,chi) = hbo(1:dofh,:,1)
       enddo
 
@@ -592,7 +592,7 @@
       balance(:) = 0.D0
       entrop(:,:) = -100.D0
 
-      if (tune_by_hand.eq.1) then
+      if (dg%tune_by_hand.eq.1) then
 
          balance(4) = 0.D0     
          
@@ -972,7 +972,7 @@
             IF (STARTDRY(N3).EQ.1) ZE3 = H0 - DP(N3)
             IF (DP(N3).LT.H0) ZE3 = H0 - DP(N3)
 
-            IF (MODAL_IC.EQ.3) THEN
+            IF (DG%MODAL_IC.EQ.3) THEN
                IF (STARTDRY(N1).EQ.-88888) then
                   ZE1 = H0 - DP(N1)
                else
@@ -1033,7 +1033,7 @@
 !Asserts error if you project onto lower order basis
 !That is, do not expect convergence
 
-      IF (MODAL_IC.EQ.1) THEN
+      IF (DG%MODAL_IC.EQ.1) THEN
          OPEN(163,FILE=S%DIRNAME//'/'//'Initial_Conditions.163')
          OPEN(164,FILE=S%DIRNAME//'/'//'Initial_Conditions.164')
          OPEN(114,FILE=S%DIRNAME//'/'//'Initial_Bathymetry.114')
@@ -1059,7 +1059,7 @@
 
 !.....Read in modal dof for hot start conditions
 
-      IF (MODAL_IC.EQ.2) THEN
+      IF (DG%MODAL_IC.EQ.2) THEN
          OPEN(263,FILE=S%DIRNAME//'/'//'Hot_start.263')
          OPEN(264,FILE=S%DIRNAME//'/'//'Hot_start.264')
          OPEN(214,FILE=S%DIRNAME//'/'//'Hot_start.214')
@@ -1149,14 +1149,14 @@
 
 !.....Set p back to original value if p = 0
 
-      IF (P_0.NE.pl) THEN
+      IF (P_0.NE.dg%pl) THEN
          PDG_EL(:) = 0
          PDG(:) = 0
          DOF = 1
          DOFL = 1
          DOFS(:) = 1
          DOF_0 = 1
-         pl = 0
+         dg%pl = 0
                                 !p = 0
          pa = 0
       ENDIF
@@ -1179,7 +1179,7 @@
 
 !.....Prep the slopelimiter
 
-      IF (SLOPEFLAG.NE.0) THEN
+      IF (DG%SLOPEFLAG.NE.0) THEN
          IF(MYPROC_HERE.EQ.0)THEN
             print *, 'Slope limiting prep begins, "kshanti"'
          ENDIF
@@ -1222,13 +1222,13 @@
 
 !.....Allocate the time stepping arrays
 
-      NRK = RK_STAGE
+      NRK = DG%RK_STAGE
       CALL ALLOC_RK()
 
 #ifdef RKSSP
 !.....The forward Euler method
 
-      IF ((RK_STAGE.EQ.1).AND.(RK_ORDER.EQ.1)) THEN
+      IF ((DG%RK_STAGE.EQ.1).AND.(DG%RK_ORDER.EQ.1)) THEN
 
          ATVD(:,:) = 0.D0
          BTVD(:,:) = 0.D0
@@ -1240,7 +1240,7 @@
 
 !.....SSP(s,2) schemes
 
-      ELSEIF (RK_ORDER.EQ.2) THEN
+      ELSEIF (DG%RK_ORDER.EQ.2) THEN
 
          ATVD(:,:) = 0.D0
          BTVD(:,:) = 0.D0
@@ -1265,7 +1265,7 @@
 
 !.....SSP(3,3) scheme
 
-      ELSEIF ((RK_STAGE.EQ.3).AND.(RK_ORDER.EQ.3)) THEN
+      ELSEIF ((DG%RK_STAGE.EQ.3).AND.(DG%RK_ORDER.EQ.3)) THEN
 
          ATVD(:,:) = 0.D0
          BTVD(:,:) = 0.D0
@@ -1284,7 +1284,7 @@
 
 !.....SSP(4,3) scheme
 
-      ELSEIF ((RK_STAGE.EQ.4).AND.(RK_ORDER.EQ.3)) THEN
+      ELSEIF ((DG%RK_STAGE.EQ.4).AND.(DG%RK_ORDER.EQ.3)) THEN
 
          ATVD(:,:) = 0.D0
          BTVD(:,:) = 0.D0
@@ -1304,7 +1304,7 @@
 
 !.....SSP(5,3) scheme
 
-      ELSEIF ((RK_STAGE.EQ.5).AND.(RK_ORDER.EQ.3)) THEN
+      ELSEIF ((DG%RK_STAGE.EQ.5).AND.(DG%RK_ORDER.EQ.3)) THEN
 
          ATVD(:,:) = 0.D0
          BTVD(:,:) = 0.D0
@@ -1328,7 +1328,7 @@
 
 !.....SSP(6,3) scheme
 
-      ELSEIF ((RK_STAGE.EQ.6).AND.(RK_ORDER.EQ.3)) THEN
+      ELSEIF ((DG%RK_STAGE.EQ.6).AND.(DG%RK_ORDER.EQ.3)) THEN
 
          ATVD(:,:) = 0.D0
          BTVD(:,:) = 0.D0
@@ -1354,7 +1354,7 @@
 
 !.....SSP(7,3) scheme
 
-      ELSEIF ((RK_STAGE.EQ.7).AND.(RK_ORDER.EQ.3)) THEN
+      ELSEIF ((DG%RK_STAGE.EQ.7).AND.(DG%RK_ORDER.EQ.3)) THEN
 
          ATVD(:,:) = 0.D0
          BTVD(:,:) = 0.D0
@@ -1383,7 +1383,7 @@
 
 !.....SSP(8,3) scheme
 
-      ELSEIF ((RK_STAGE.EQ.8).AND.(RK_ORDER.EQ.3)) THEN
+      ELSEIF ((DG%RK_STAGE.EQ.8).AND.(DG%RK_ORDER.EQ.3)) THEN
 
          ATVD(:,:) = 0.D0
          BTVD(:,:) = 0.D0
@@ -1415,7 +1415,7 @@
 
 !.....SSP(5,4) scheme
 
-      ELSEIF ((RK_STAGE.EQ.5).AND.(RK_ORDER.EQ.4)) THEN
+      ELSEIF ((DG%RK_STAGE.EQ.5).AND.(DG%RK_ORDER.EQ.4)) THEN
 
          ATVD(:,:) = 0.D0
          BTVD(:,:) = 0.D0
@@ -1443,7 +1443,7 @@
 
 !.....SSP(6,4) scheme
 
-      ELSEIF ((RK_STAGE.EQ.6).AND.(RK_ORDER.EQ.4)) THEN
+      ELSEIF ((DG%RK_STAGE.EQ.6).AND.(DG%RK_ORDER.EQ.4)) THEN
 
          ATVD(:,:) = 0.D0
          BTVD(:,:) = 0.D0
@@ -1474,7 +1474,7 @@
 
 !.....SSP(7,4) scheme
 
-      ELSEIF ((RK_STAGE.EQ.7).AND.(RK_ORDER.EQ.4)) THEN
+      ELSEIF ((DG%RK_STAGE.EQ.7).AND.(DG%RK_ORDER.EQ.4)) THEN
 
          ATVD(:,:) = 0.D0
          BTVD(:,:) = 0.D0
@@ -1509,7 +1509,7 @@
 
 !.....SSP(8,4) scheme
 
-      ELSEIF ((RK_STAGE.EQ.8).AND.(RK_ORDER.EQ.4)) THEN
+      ELSEIF ((DG%RK_STAGE.EQ.8).AND.(DG%RK_ORDER.EQ.4)) THEN
 
          ATVD(:,:) = 0.D0
          BTVD(:,:) = 0.D0
@@ -1550,8 +1550,8 @@
 
 !.....Compute the time dependent parameters
 
-      DO K = 0,RK_STAGE-1
-         DO I = 1,RK_STAGE
+      DO K = 0,DG%RK_STAGE-1
+         DO I = 1,DG%RK_STAGE
             CASUM = 0.D0
             DO L = K+1,I-1
                CASUM = CASUM + CTVD(L,K+1)*ATVD(I,L+1)
@@ -1560,7 +1560,7 @@
          ENDDO
       ENDDO
 
-      DO K = 1,RK_STAGE-1
+      DO K = 1,DG%RK_STAGE-1
          DTVD(K+1) = 0.D0
          DO L = 0,K-1
             DTVD(K+1) = DTVD(K+1) + CTVD(K,L+1)
@@ -1569,7 +1569,7 @@
 
 !.....Compute the maximum beta over alpha ratio at each stage
 
-      DO IRK = 1,RK_STAGE
+      DO IRK = 1,DG%RK_STAGE
          MAX_BOA = 0.D0
          DO I = 1,IRK
             ARK = ATVD(IRK,I)
@@ -1634,7 +1634,7 @@
             
          enddo
 
-         if(RK_stage.gt.1) then
+         if(Dg%rk_stage.gt.1) then
 
             RKC_b(0) = RKC_b(2)
 
@@ -1662,8 +1662,8 @@
 
          RKC_c(1) = (RKC_c(2)) / (4.D0*RKC_omega0)
 
-         RKC_c(RK_stage) = 0.D0
-         RKC_c(RK_stage) = 1.D0
+         RKC_c(Dg%rk_stage) = 0.D0
+         RKC_c(Dg%rk_stage) = 1.D0
 
 #endif
 

@@ -24,25 +24,32 @@
 
       USE SIZES
 
-!.....Declare integer variables
+      CHARACTER (LEN=7), DIMENSION(4), PARAMETER :: varx = [ CHARACTER(7) :: &
+           'ZE_ROE', 'QX_ROE','QY_ROE','bed_ROE']
+      CHARACTER (LEN=7), DIMENSION(4), PARAMETER :: vary = [ CHARACTER(7) :: &
+           'ZE_ROE', 'QX_ROE','QY_ROE','bed_ROE']
 
-      INTEGER, TARGET :: DGFLAG,DGHOT,DGHOTSPOOL
+      type dg_type
+
+!.....Declare integer variables
+         
+      INTEGER :: DGFLAG,DGHOT,DGHOTSPOOL
+      INTEGER :: MNES,artdif,tune_by_hand
+      INTEGER :: MODAL_IC
+      INTEGER :: SLOPEFLAG
+      INTEGER :: FLUXTYPE
+      INTEGER :: RK_STAGE, RK_ORDER
+      Integer :: padapt,pflag,pl,ph,px,lebesgueP, gflag
       INTEGER DOF,dofh,dofl,dofx
       INTEGER EL
-      INTEGER, TARGET :: MNES,artdif,tune_by_hand
       INTEGER IRK
       INTEGER J1, J2, J3,negp_fixed,nagp_fixed
       INTEGER NAGP(8),NCHECK(8), NEGP(8), NEDGES, NRK !42 hardwires for ph=7
       INTEGER NIEDS, NLEDS, NEEDS, NFEDS, NREDS, NEBEDS, NIBEDS
       INTEGER NIBSEG, NEBSEG
       INTEGER MNED, MNLED, MNSED, MNRAED, MNRIED
-      INTEGER, TARGET :: MODAL_IC
       INTEGER P_READ
-      INTEGER, TARGET :: SLOPEFLAG
       INTEGER test_el
-      INTEGER, TARGET :: FLUXTYPE
-      INTEGER, TARGET :: RK_STAGE, RK_ORDER
-      Integer, TARGET :: padapt,pflag,pl,ph,px,lebesgueP, gflag
       INTEGER pa
       logical init_parser,stblzr
 !     
@@ -50,18 +57,19 @@
 
 !.....Declare real variables
 
+      REAL(SZ) :: diorism, porosity, SEVDM
+      Real(SZ) :: slimit,plimit,pflag2con1,pflag2con2
+      REAL(SZ) :: slope_weight
+      REAL(SZ) :: kappa,s0,uniform_dif
+
       REAL(SZ) C13, C16
-      REAL(SZ), TARGET :: diorism, porosity, SEVDM
       REAL(SZ) DOT, DHB_X, DHB_Y, DPHIDX, DPHIDY
-      Real(SZ), TARGET :: slimit,plimit,pflag2con1,pflag2con2
       REAL(SZ) EFA_GP, EMO_GP,slimit1,slimit2,slimit3
       REAL(SZ) EL_ANG,slimit4, bg_dif,trc_dif,slimit5
       REAL(SZ) FG_L,l2er_global,temperg
-      REAL(SZ), TARGET :: slope_weight
       REAL(SZ) HB_IN, HB_EX, H_TRI
       REAL(SZ) MAG1, MAG2
       REAL(SZ) NX, NY 
-      REAL(SZ), TARGET :: kappa,s0,uniform_dif
       REAL(SZ) SFAC_IN,SFAC_EX
       REAL(SZ) RAMPDG
       REAL(SZ) S1, S2, SAV, SOURCE_X, SOURCE_Y
@@ -82,20 +90,6 @@
       INTEGER, ALLOCATABLE :: DOFW(:)
       INTEGER, ALLOCATABLE :: EL_UPDATED(:)
       REAL(SZ), ALLOCATABLE :: LEDGE_NVEC(:,:,:)
-
-                                ! LEDGE_NVEC(1,1:3,1:NELEM) = whether a node is on the land boundary
-                                ! LEDGE_NVEC(2,1:3,1:NELEM) = x component of the normal vector
-                                ! LEDGE_NVEC(3,1:3,1:NELEM) = y component of the normal vector
-
-!Declare some stuff for function parsing for bed load
-
-      CHARACTER (LEN=7), DIMENSION(4), PARAMETER :: varx = [ CHARACTER(7) :: &
-           'ZE_ROE', 'QX_ROE','QY_ROE','bed_ROE']
-      CHARACTER (LEN=7), DIMENSION(4), PARAMETER :: vary = [ CHARACTER(7) :: &
-           'ZE_ROE', 'QX_ROE','QY_ROE','bed_ROE']
-
-!      CHARACTER (LEN=*), DIMENSION(4),  PARAMETER :: varx  = (/ 'ZE_ROE', 'QX_ROE','QY_ROE','bed_ROE' /)
-!      CHARACTER (LEN=*), DIMENSION(4),  PARAMETER :: vary  = (/ 'ZE_ROE', 'QX_ROE','QY_ROE','bed_ROE' /)
 
       CHARACTER (LEN=200) funcx(4), funcy(4)
       Real(sz)  valx(4), valy(4)
@@ -156,12 +150,12 @@
       REAL(SZ), ALLOCATABLE :: Q_HAT(:)
       REAL(SZ), ALLOCATABLE :: QIB(:)
       REAL(SZ), ALLOCATABLE :: QX(:,:,:), QY(:,:,:), ZE(:,:,:)
-      Real(SZ), ALLOCATABLE, target:: bed(:,:,:,:)
+      Real(SZ), ALLOCATABLE, target:: bed(:,:,:,:) !TODO: change this
       Real(SZ), Allocatable :: dynP(:,:,:),dynP_MAX(:), dynP_MIN(:)
       Real(SZ), Allocatable :: iota(:,:,:),iotaa(:,:,:),iota2(:,:,:)
       Real(SZ), Allocatable :: iota_MAX(:),iota_MIN(:),iotaa2(:,:,:),iotaa3(:,:,:)
       Real(SZ), Allocatable :: iota2_MAX(:),iota2_MIN(:)
-      Real(SZ), pointer :: arrayfix(:,:,:)
+      Real(SZ), pointer :: arrayfix(:,:,:) !TODO change this
       REAL(SZ), ALLOCATABLE :: CORI_EL(:), FRIC_EL(:)
       REAL(SZ), ALLOCATABLE :: ZE_MAX(:),ZE_MIN(:),DPE_MIN(:)
       REAL(SZ), ALLOCATABLE :: WATER_DEPTH_OLD(:,:),WATER_DEPTH(:,:)
@@ -232,6 +226,7 @@
       Real(SZ),Allocatable :: iotaconst(:,:),iota2const(:,:)
 #endif
 
+   end type dg_type
     
 !**********************END OF DATA DECLARATIONS ***********************
 

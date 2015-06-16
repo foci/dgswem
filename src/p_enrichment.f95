@@ -66,7 +66,7 @@
 !......Set the initial arrays, note we work over the total bed load
 !......not the individual layers
 
-      if (pflag.eq.1) then
+      if (dg%pflag.eq.1) then
          
          maxze_sensor = -100.d0 
          maxqx_sensor = -100.d0
@@ -270,7 +270,7 @@
                elseif ( ((ze_sensor(l).lt.slimit).and.&
                  (qx_sensor(l).lt.slimit).and.&
                  (qy_sensor(l).lt.slimit) ).and.&
-                 (pdg_el(l).gt.pl).and.&
+                 (pdg_el(l).gt.dg%pl).and.&
                  ( (it-pcount(l)).gt.plimit ) ) then
                   
                   pdg_el(l) = pdg_el(l) - 1
@@ -320,7 +320,7 @@
                  (qx_sensor(l).lt.slimit).and.&
                  (qy_sensor(l).lt.slimit).and.&
                  (iota_sensor(l).lt.slimit) ).and.&
-                 (pdg_el(l).gt.pl).and.&
+                 (pdg_el(l).gt.dg%pl).and.&
                  ( (it-pcount(l)).gt.plimit ) ) then
                   
                   pdg_el(l) = pdg_el(l) - 1
@@ -371,7 +371,7 @@
                  (qy_sensor(l).lt.slimit).and.&
                  (iota_sensor(l).lt.slimit).and.&
                  (iota2_sensor(l).lt.slimit)).and.&
-                 (pdg_el(l).gt.pl).and.&
+                 (pdg_el(l).gt.dg%pl).and.&
                  ( (it-pcount(l)).gt.plimit ) ) then
                   
                   pdg_el(l) = pdg_el(l) - 1
@@ -423,7 +423,7 @@
                  (qx_sensor(l).lt.slimit).and.&
                  (qy_sensor(l).lt.slimit).and.&
                  (tbed_sensor(l).lt.slimit) ).and.&
-                 (pdg_el(l).gt.pl).and.&
+                 (pdg_el(l).gt.dg%pl).and.&
                  ( (it-pcount(l)).gt.plimit ) ) then
                   
                   pdg_el(l) = pdg_el(l) - 1
@@ -535,21 +535,21 @@
                   endif
 #endif
                   
-                  avg_zesen = sum(ze_sensor)/MNES
-                  avg_qxsen = sum(qx_sensor)/MNES
-                  avg_qysen = sum(qy_sensor)/MNES
+                  avg_zesen = sum(ze_sensor)/DG%MNES
+                  avg_qxsen = sum(qx_sensor)/DG%MNES
+                  avg_qysen = sum(qy_sensor)/DG%MNES
                   
 #ifdef TRACE
-                  avg_iotasen = sum(iota_sensor)/MNES
+                  avg_iotasen = sum(iota_sensor)/DG%MNES
 #endif
 
 #ifdef CHEM                  
-                  avg_iotasen = sum(iota_sensor)/MNES
-                  avg_iota2sen = sum(iota2_sensor)/MNES
+                  avg_iotasen = sum(iota_sensor)/DG%MNES
+                  avg_iota2sen = sum(iota2_sensor)/DG%MNES
 #endif
 
 #ifdef SED_LAY
-                  avg_tbedsen = sum(tbed_sensor)/MNES
+                  avg_tbedsen = sum(tbed_sensor)/DG%MNES
 #endif
 
 #ifdef CMPI
@@ -692,7 +692,7 @@
                elseif ( ((ze_sensor(l).lt.ze_delta).and.&
                  (qx_sensor(l).lt.qx_delta).and.&
                  (qy_sensor(l).lt.qy_delta) ).and.&
-                 (pdg_el(l).gt.pl).and.&
+                 (pdg_el(l).gt.dg%pl).and.&
                  ( (it-pcount(l)).gt.plimit ) ) then
                   
                   pdg_el(l) = pdg_el(l) - 1
@@ -740,7 +740,7 @@
                  (temp_qx.lt.qx_delta).and.&
                  (temp_qy.lt.qy_delta).and.&
                  (temp_iota.lt.iota_delta)).and.&
-                 (pdg_el(l).gt.pl).and.&
+                 (pdg_el(l).gt.dg%pl).and.&
                  ( (it-pcount(l)).gt.plimit ) ) then
                   
                   pdg_el(l) = pdg_el(l) - 1
@@ -789,7 +789,7 @@
                  (qy_sensor(l).lt.qy_delta) ).and.&
                  (iota_sensor(l).lt.iota_delta).and.&
                  (iota2_sensor(l).lt.iota2_delta).and.&
-                 (pdg_el(l).gt.pl).and.&
+                 (pdg_el(l).gt.dg%pl).and.&
                  ( (it-pcount(l)).gt.plimit ) ) then
                   
                   pdg_el(l) = pdg_el(l) - 1
@@ -840,7 +840,7 @@
                  (temp_qx.lt.qx_delta).and.&
                  (temp_qy.lt.qy_delta).and.&
                  (temp_tbed.lt.tbed_delta)).and.&
-                 (pdg_el(l).gt.pl).and.&
+                 (pdg_el(l).gt.dg%pl).and.&
                  ( (it-pcount(l)).gt.plimit ) ) then
                   
                   pdg_el(l) = pdg_el(l) - 1
@@ -875,7 +875,7 @@
 !.... type 2 p-enrichment |
 !..........................
       
-      if (pflag.eq.2) then
+      if (dg%pflag.eq.2) then
 
          maxze_sensor = -100.d0 
          maxqx_sensor = -100.d0
@@ -904,8 +904,8 @@
 #endif
 
          
-         kon = pflag2con1       ! usually in [0,1]
-         kons = pflag2con2      ! usually 6 works
+         kon = dg%pflag2con1       ! usually in [0,1]
+         kons = dg%pflag2con2      ! usually 6 works
          lebesgue = lebesguep
          roo = 1.d0/lebesgue      
 
@@ -1207,7 +1207,7 @@
                elseif ( ((ze_sensor(l).ge.slimit1).or.&
                  (qx_sensor(l).ge.slimit2).or.&
                  (qy_sensor(l).ge.slimit3)).and.&
-                 (pdg_el(l).gt.pl) ) then !.and.
+                 (pdg_el(l).gt.dg%pl) ) then !.and.
                                 !&                    (it-pcount(l)).ge.plimit ) then
                   
                   pdg_el(l) = pdg_el(l) - 1
@@ -1246,7 +1246,7 @@
                  (qx_sensor(l).ge.slimit2).or.&
                  (qy_sensor(l).ge.slimit3).or.&
                  (iota_sensor(l).ge.slimit4)).and.&
-                 (pdg_el(l).gt.pl) ) then !.and.
+                 (pdg_el(l).gt.dg%pl) ) then !.and.
                                 !&                    (it-pcount(l)).ge.plimit ) then
                   
                   pdg_el(l) = pdg_el(l) - 1
@@ -1289,7 +1289,7 @@
                  (qy_sensor(l).ge.slimit3).or.&
                  (iota_sensor(l).ge.slimit4).or.&
                  (iota2_sensor(l).ge.slimit5)).and.&
-                 (pdg_el(l).gt.pl) ) then !.and.
+                 (pdg_el(l).gt.dg%pl) ) then !.and.
                                 !&                    (it-pcount(l)).ge.plimit ) then
                   
                   pdg_el(l) = pdg_el(l) - 1
@@ -1330,7 +1330,7 @@
                  (qx_sensor(l).ge.slimit2).or.&
                  (qy_sensor(l).ge.slimit3).or.&
                  (tbed_sensor(l).ge.slimit6)).and.&
-                 (pdg_el(l).gt.pl) ) then !.and.
+                 (pdg_el(l).gt.dg%pl) ) then !.and.
                                 !&                    (it-pcount(l)).ge.plimit ) then
                   
                   pdg_el(l) = pdg_el(l) - 1
@@ -1515,21 +1515,21 @@
                   endif
 #endif
                   
-                  avg_zesen = sum(ze_sensor)/MNES
-                  avg_qxsen = sum(qx_sensor)/MNES
-                  avg_qysen = sum(qy_sensor)/MNES
+                  avg_zesen = sum(ze_sensor)/DG%MNES
+                  avg_qxsen = sum(qx_sensor)/DG%MNES
+                  avg_qysen = sum(qy_sensor)/DG%MNES
                   
 #ifdef TRACE
-                  avg_iotasen = sum(iota_sensor)/MNES
+                  avg_iotasen = sum(iota_sensor)/DG%MNES
 #endif
                   
 #ifdef CHEM             
-                  avg_iotasen = sum(iota_sensor)/MNES
-                  avg_iota2sen = sum(iota2_sensor)/MNES
+                  avg_iotasen = sum(iota_sensor)/DG%MNES
+                  avg_iota2sen = sum(iota2_sensor)/DG%MNES
 #endif
 
 #ifdef SED_LAY
-                  avg_tbedsen = sum(tbed_sensor)/MNES
+                  avg_tbedsen = sum(tbed_sensor)/DG%MNES
 #endif
 
 #ifdef CMPI
@@ -1676,7 +1676,7 @@
                elseif ( ((temp_ze.ge.ze_delta).or.&
                  (temp_qx.ge.qx_delta).or.&
                  (temp_qy.ge.qy_delta) ).and.&
-                 (pdg_el(l).gt.pl) ) then !.and.
+                 (pdg_el(l).gt.dg%pl) ) then !.and.
                                 !&                    (it-pcount(l)).ge.plimit ) then
                   
                   pdg_el(l) = pdg_el(l) - 1
@@ -1715,7 +1715,7 @@
                  (temp_qx.ge.qx_delta).or.&
                  (temp_qy.ge.qy_delta).or.&
                  (temp_iota.ge.iota_delta)).and.&
-                 (pdg_el(l).gt.pl) ) then !.and.
+                 (pdg_el(l).gt.dg%pl) ) then !.and.
                                 !&                    (it-pcount(l)).ge.plimit) then
 
                   pdg_el(l) = pdg_el(l) - 1
@@ -1757,7 +1757,7 @@
                  (temp_qy.ge.qy_delta).or.&
                  (temp_iota.ge.iota_delta).or.&
                  (temp_iota2.ge.iota2_delta)).and.&
-                 (pdg_el(l).gt.pl) ) then !.and.
+                 (pdg_el(l).gt.dg%pl) ) then !.and.
                                 !&                    (it-pcount(l)).ge.plimit) then
 
                   pdg_el(l) = pdg_el(l) - 1
@@ -1798,7 +1798,7 @@
                  (temp_qx.ge.qx_delta).or.&
                  (temp_qy.ge.qy_delta).or.&
                  (temp_tbed.ge.tbed_delta)).and.&
-                 (pdg_el(l).gt.pl) ) then !.and.
+                 (pdg_el(l).gt.dg%pl) ) then !.and.
                                 !&                    (it-pcount(l)).ge.plimit) then
 
                   pdg_el(l) = pdg_el(l) - 1

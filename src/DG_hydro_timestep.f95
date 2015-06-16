@@ -146,7 +146,7 @@
 
 !.......Compute LDG auxiliary equations
          
-         IF (EVMSUM.NE.0.D0.or.artdif.eq.1) CALL LDG_HYDRO(s,IT)
+         IF (EVMSUM.NE.0.D0.or.dg%artdif.eq.1) CALL LDG_HYDRO(s,IT)
          
 !.......Compute elevation specified edges
 
@@ -275,7 +275,7 @@
 
 !.......Compute LDG auxiliary equations
          
-         IF (EVMSUM.NE.0.D0.or.artdif.eq.1) CALL LDG_HYDRO(s,IT)
+         IF (EVMSUM.NE.0.D0.or.dg%artdif.eq.1) CALL LDG_HYDRO(s,IT)
          
 !.......Compute elevation specified edges
 
@@ -477,7 +477,7 @@
 
 !$$$C.......Apply the slopelimiter again if auxiliary variable is being used
 !$$$
-!$$$         if (EVMSUM.NE.0.D0.or.artdif.eq.1) then
+!$$$         if (EVMSUM.NE.0.D0.or.dg%artdif.eq.1) then
 !$$$#ifdef SLOPEALL
 !$$$            CALL SLOPELIMITER()
 !$$$#endif
@@ -491,7 +491,7 @@
 !.......drying is being used
 
 #ifdef CMPI
-         if (SLOPEFLAG.NE.0.OR.NOLIFA.GE.2) THEN
+         if (DG%SLOPEFLAG.NE.0.OR.NOLIFA.GE.2) THEN
             CALL UPDATER_ELEM_MOD(ZE,QX,QY,IRK+1,3)
             
 #ifdef TRACE
@@ -559,7 +559,7 @@
          DO K = 2,DOFS(J)
 
             alph = 10.D0
-            s_dg = RK_stage
+            s_dg = Dg%rk_stage
 
             if (k.le.3) then
                eta = 1.D0 / ( pdg_el(j)+1.D0 )

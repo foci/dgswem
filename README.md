@@ -47,3 +47,5 @@ I'm starting with the `SIZES` module, since it's the smallest.  `PARAMETER` vari
 I've created a list of variables inside `sizes_type` mostly by hand. I've also created a bash script that uses `sed` to prepend `s%` to the beginning of each variable in the list. Each subroutine that uses members of `sizes_type` will need to be modified and passed the instance of `sizes_type` that we will call `s`. 
 
 This process will definitely produce some errors, and need to be manually checked.
+
+This is very useful for interactively replacing a variables in a large number of files: <http://ergoemacs.org/emacs/find_replace_inter.html>

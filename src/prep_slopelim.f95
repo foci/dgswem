@@ -113,7 +113,7 @@
 
             SL3(I,J) = X1*(Y2 - Y3) + X2*(Y3 - Y1) + X3*(Y1 - Y2)
 
-            IF (SL3(I,J).LE.0.AND.SLOPEFLAG.NE.0) then
+            IF (SL3(I,J).LE.0.AND.DG%SLOPEFLAG.NE.0) then
            WRITE(16,*) 'WARNING. SL3(',I,',',J,') =',SL3(I,J),' <= 0.',&
                    '    ELEMENT ',J,&
                    ' WILL NOT BE CONSIDERED IN SLOPE LIMITING.'

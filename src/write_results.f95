@@ -1122,7 +1122,7 @@
 !$$$  endif
 
 
-            if (padapt.eq.1) then
+            if (dg%padapt.eq.1) then
 
                do k=pl,ph
                   Minp(k) = 0
@@ -1145,7 +1145,7 @@
                print*,'With',ne,'total elements'               
             endif
 
-!$$$  if (slopeflag.eq.4.or.slopeflag.ge.6) then
+!$$$  if (dg%slopeflag.eq.4.or.dg%slopeflag.ge.6) then
 !$$$  
 !$$$  print*,''
 !$$$  print*,'p-adaptive slope limiting "ACTIVE."'
@@ -1204,7 +1204,7 @@
 !$$$  endif
 
 
-            if (padapt.eq.1) then
+            if (dg%padapt.eq.1) then
                
                do k=pl,ph
                   Minp(k) = 0
@@ -1227,7 +1227,7 @@
                print*,'With',ne,'total elements'               
             endif
 
-!$$$  if (slopeflag.eq.4.or.slopeflag.ge.6) then
+!$$$  if (dg%slopeflag.eq.4.or.dg%slopeflag.ge.6) then
 !$$$  
 !$$$  print*,''
 !$$$  print*,'p-adaptive slope limiting "ACTIVE."'
@@ -1258,7 +1258,7 @@
       
 !.....If applicable write out a DG hot start
 
-      IF ((DGHOT.EQ.1).AND.(MOD(IT,DGHOTSPOOL).EQ.0)) THEN
+      IF ((DG%DGHOT.EQ.1).AND.(MOD(IT,DG%DGHOTSPOOL).EQ.0)) THEN
          
          OPEN(263,FILE=S%DIRNAME//'/'//'Hot_start.263')
          OPEN(264,FILE=S%DIRNAME//'/'//'Hot_start.264')

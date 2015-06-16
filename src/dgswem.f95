@@ -24,6 +24,7 @@
       IMPLICIT NONE
 
       type (sizes_type) :: s
+      type (dg_type) :: dg
       
       INTEGER TESTFLAG,OUTITER,istop,i,ModetoNode
 !     sb-PDG1
@@ -39,7 +40,7 @@
          write(*,*) 'mnproc ',mnproc
       ENDIF
       CALL MAKE_DIRNAME(s)       ! Establish Working Directory Name
-      CALL READ_INPUT(s)         ! Establish sizes by reading fort.14 and fort.15
+      CALL READ_INPUT(s,dg)         ! Establish sizes by reading fort.14 and fort.15
 #else
       IMPLICIT NONE
      

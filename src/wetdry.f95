@@ -488,7 +488,7 @@
 !!!   If element is dry, or partially dry, p is forced down to linears !!!
 !!!   NOTE: This effects the global order of the solution if wetdry is on !!!
 
-                                !if (PADAPT.EQ.1) THEN
+                                !if (DG%PADAPT.EQ.1) THEN
 #ifdef P_AD
             if (pdg_el(j).gt.1) then
 
