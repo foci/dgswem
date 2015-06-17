@@ -36,7 +36,7 @@
       real(sz) qmaxe,elmaxe,tempx,tempy,rev,Ox,Oy,iota_error,iota_int
       real(sz) iota2_int,iota3_int,iota2_error,iota3_error
       integer imaxze,imaxq, ModetoNode
-
+ 
       Real(SZ),allocatable :: XBCbt(:),YBCbt(:),radial(:),temper(:)
 
       Allocate ( XBCbt(s%MNE),YBCbt(s%MNE),radial(s%MNE) )
@@ -90,34 +90,34 @@
 #endif
 
 
-                     DO KK = 2,DOFH
-                        ZE_DG(J) = ZE_DG(J) + PHI_CORNER(KK,K,ph)*ZE(KK,NBOR_EL,1)
-                        QX_DG(J) = QX_DG(J) + PHI_CORNER(KK,K,ph)*QX(KK,NBOR_EL,1)
-                        QY_DG(J) = QY_DG(J) + PHI_CORNER(KK,K,ph)*QY(KK,NBOR_EL,1)
+                     DO KK = 2,DG%DOFH
+                        ZE_DG(J) = ZE_DG(J) + PHI_CORNER(KK,K,dg%ph)*ZE(KK,NBOR_EL,1)
+                        QX_DG(J) = QX_DG(J) + PHI_CORNER(KK,K,dg%ph)*QX(KK,NBOR_EL,1)
+                        QY_DG(J) = QY_DG(J) + PHI_CORNER(KK,K,dg%ph)*QY(KK,NBOR_EL,1)
 
 #ifdef TRACE
-                        iota_DG(J) = iota_DG(J) + PHI_CORNER(KK,K,ph)*iota(KK,NBOR_EL,1)
-                        iotaa_DG(J) = iotaa_DG(J) + PHI_CORNER(KK,K,ph)*iotaa(KK,NBOR_EL,1)
+                        iota_DG(J) = iota_DG(J) + PHI_CORNER(KK,K,dg%ph)*iota(KK,NBOR_EL,1)
+                        iotaa_DG(J) = iotaa_DG(J) + PHI_CORNER(KK,K,dg%ph)*iotaa(KK,NBOR_EL,1)
 #endif
 
 #ifdef CHEM
-                        iota_DG(J) = iota_DG(J) + PHI_CORNER(KK,K,ph)*iota(KK,NBOR_EL,1)
-                        iota2_DG(J) = iota2_DG(J) + PHI_CORNER(KK,K,ph)*iota2(KK,NBOR_EL,1)
+                        iota_DG(J) = iota_DG(J) + PHI_CORNER(KK,K,dg%ph)*iota(KK,NBOR_EL,1)
+                        iota2_DG(J) = iota2_DG(J) + PHI_CORNER(KK,K,dg%ph)*iota2(KK,NBOR_EL,1)
 #endif
 
 #ifdef DYNP
-                        dynP_DG(J) = dynP_DG(J) + PHI_CORNER(KK,K,ph)*dynP(KK,NBOR_EL,1)
+                        dynP_DG(J) = dynP_DG(J) + PHI_CORNER(KK,K,dg%ph)*dynP(KK,NBOR_EL,1)
 #endif
 
 #ifdef SED_LAY
                         do l=1,s%layers
-                           bed_DG(J,l) = bed_DG(J,l) + PHI_CORNER(KK,K,ph)*bed(KK,NBOR_EL,1,l)
-                           HB_DG(J) = HB_DG(J) + PHI_CORNER(KK,K,ph)*bed(KK,NBOR_EL,1,l)
+                           bed_DG(J,l) = bed_DG(J,l) + PHI_CORNER(KK,K,dg%ph)*bed(KK,NBOR_EL,1,l)
+                           HB_DG(J) = HB_DG(J) + PHI_CORNER(KK,K,dg%ph)*bed(KK,NBOR_EL,1,l)
                            iotaa_DG(J) = iotaa(1,NBOR_EL,1)
                         enddo
 #else
 
-                        HB_DG(J) = HB_DG(J) + PHI_CORNER(KK,K,ph)*HB(KK,NBOR_EL,1)
+                        HB_DG(J) = HB_DG(J) + PHI_CORNER(KK,K,dg%ph)*HB(KK,NBOR_EL,1)
 #endif
                         
                      ENDDO
@@ -857,7 +857,7 @@
 !     EE3=ETA2(NM(NNE(I),3))
 !     ET00(I)=EE1*STAIE1(I)+EE2*STAIE2(I)+EE3*STAIE3(I)
                      ET00(I) = ZE(1,NNE(I),1)
-                     DO K = 2,DOFH
+                     DO K = 2,DG%DOFH
                         ET00(I) = ET00(I) + ZE(K,NNE(I),1)*PHI_STAE(K,I)
                      ENDDO
                   ENDDO
@@ -883,7 +883,7 @@
                      ZE00    = ZE(1,NNV(I),1)
                      UU00(I) = QX(1,NNV(I),1)
                      VV00(I) = QY(1,NNV(I),1)
-                     DO K = 2,DOFH
+                     DO K = 2,DG%DOFH
                         ZE00    = ZE00    + ZE(K,NNV(I),1)*PHI_STAV(K,I)
                         UU00(I) = UU00(I) + QX(K,NNV(I),1)*PHI_STAV(K,I)
                         VV00(I) = VV00(I) + QY(K,NNV(I),1)*PHI_STAV(K,I)
@@ -1124,7 +1124,7 @@
 
             if (dg%padapt.eq.1) then
 
-               do k=pl,ph
+               do k=pl,dg%ph
                   Minp(k) = 0
                   do i = 1,ne
                      if (pdg_el(i).eq.k) then
@@ -1137,7 +1137,7 @@
              print*,'|                      |                        |'
              print*,'|  Polynomial order    |     # of Elements      |'
              print*,'|______________________|________________________|'
-              do k=pl,ph
+              do k=pl,dg%ph
              print*,'|',k,'         |',Minp(k),'           |'
              print*,'|______________________|________________________|'
               enddo
@@ -1206,7 +1206,7 @@
 
             if (dg%padapt.eq.1) then
                
-               do k=pl,ph
+               do k=pl,dg%ph
                   Minp(k) = 0
                   do i = 1,ne
                      if (pdg_el(i).eq.k) then
@@ -1219,7 +1219,7 @@
              print*,'|                      |                        |'
              print*,'|  Polynomial order    |     # of Elements      |'
              print*,'|______________________|________________________|'
-               do k=pl,ph
+               do k=pl,dg%ph
              print*,'|',k,'         |',Minp(k),'           |'
              print*,'|______________________|________________________|'
                enddo
@@ -1276,12 +1276,12 @@
          OPEN(290,FILE=S%DIRNAME//'/'//'Hot_start.290')
 #endif
 
-         WRITE(263,*) PH
-         WRITE(264,*) PH, PH
+         WRITE(263,*) DG%PH
+         WRITE(264,*) DG%PH, DG%PH
          WRITE(214,*) IT
 
          DO J = 1,s%MNE
-            DO K = 1,DOFH
+            DO K = 1,DG%DOFH
                WRITE(263,*) ZE(K,J,1)
                WRITE(264,*) QX(K,J,1), QY(K,J,1)
                WRITE(214,*) HB(K,J,1), WDFLG(J)

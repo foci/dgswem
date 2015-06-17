@@ -36,7 +36,7 @@
       REAL(SZ) DPAVG,lim_by
       Real(SZ),Allocatable :: tmp_mz(:,:,:,:)
 
-      Allocate ( tmp_mz(dofh,2,1,s%MNE) )
+      Allocate ( tmp_mz(dg%dofh,2,1,s%MNE) )
 
 !.....Initialize for viscosity/diffusion
 #ifdef WAVE_DIF
@@ -872,13 +872,13 @@
          EL_IN = NEDEL(1,GED)
          EL_EX = NEDEL(2,GED)
 
-         EL = EL_IN
+         DG%EL = EL_IN
 
          IF (DOFS(EL_EX).LT.DOFS(EL_IN)) then
-            EL = EL_EX
+            DG%EL = EL_EX
          endif
 
-         pa = PDG_EL(EL)
+         pa = PDG_EL(DG%EL)
 
 #ifdef P0
          if (pa.eq.0) then
@@ -921,7 +921,7 @@
             enddo
 #endif
 
-            DO K = 1,DOFS(EL)
+            DO K = 1,DOFS(DG%EL)
 
 #ifdef WAVE_DIF
                ZE_IN = ZE_IN + ZE(K,EL_IN,IRK)*PHI_EDGE(K,GP_IN,LED_IN,pa)
@@ -971,7 +971,7 @@
 
 !.....Compute the edge integral
 
-            DO K = 1,DOFS(EL)
+            DO K = 1,DOFS(DG%EL)
 
                W_IN = 2.0*M_INV(K,pa)/AREAS(EL_IN)*XLEN(GED)*&
               PHI_EDGE(K,GP_IN,LED_IN,pa)*WEGP(GP_IN,pa)

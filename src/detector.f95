@@ -17,7 +17,7 @@
 
 !.....Declare local variables
 
-      INTEGER L,GED,LED_IN,LED_EX,II,IT,GP_IN(NEGP(ph)),GP_EX(NEGP(ph)),I,K,JJ
+      INTEGER L,GED,LED_IN,LED_EX,II,IT,GP_IN(NEGP(dg%ph)),GP_EX(NEGP(dg%ph)),I,K,JJ
       REAL(SZ) DEN
       
 !.....Set the inflow integrals and length to zero
@@ -97,7 +97,7 @@
             ZE_IN = 0.D0
             ZE_EX = 0.D0
 
-            DO K = 1,DOF
+            DO K = 1,DG%DOF
               ZE_IN = ZE_IN + ZE(K,L,IRK+1)*PHI_EDGE(K,GP_IN(I),LED_IN,pa)
             ENDDO
 
@@ -161,7 +161,7 @@
       
         ZE_NORM = 0.D0
      
-        DO I=1,NAGP(ph)
+        DO I=1,NAGP(dg%ph)
         
           ZE_IN = 0.D0
 

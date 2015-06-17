@@ -98,11 +98,11 @@
       
       READ(25,*) DGSWE
       READ(25,*) dg%padapt,dg%pflag
-      READ(25,*) gflag,diorism
-      READ(25,*) dg%pl,ph,px
+      READ(25,*) dg%gflag,diorism
+      READ(25,*) dg%pl,dg%ph,dg%px
       READ(25,*) slimit
       READ(25,*) plimit
-      READ(25,*) pflag2con1,pflag2con2,lebesgueP 
+      READ(25,*) pflag2con1,pflag2con2,dg%lebesgueP 
       READ(25,*) DG%FLUXTYPE
       READ(25,*) DG%RK_STAGE, DG%RK_ORDER
       READ(25,*) DG_TO_CG

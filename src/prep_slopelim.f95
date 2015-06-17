@@ -35,10 +35,10 @@
       Real(SZ),Allocatable :: Full_M_inv(:,:), temp_p(:,:),temp_t(:,:)
       Real(SZ),Allocatable :: Taylor_mass(:,:,:)
 
-      Allocate ( tempmat(dofh,dofh),tempInv(dofh,dofh), tempag(dofh,dofh) )
-      Allocate ( AreaV_integral(s%MNE,0:ph,0:ph,3), A(dofh,dofh) )
-      Allocate ( Full_M_inv(dofh,dofh), temp_p(dofh,dofh) )
-      Allocate ( Taylor_mass(s%MNE,dofh,dofh),temp_t(dofh,dofh))
+      Allocate ( tempmat(dg%dofh,dg%dofh),tempInv(dg%dofh,dg%dofh), tempag(dg%dofh,dg%dofh) )
+      Allocate ( AreaV_integral(s%MNE,0:dg%ph,0:dg%ph,3), A(dg%dofh,dg%dofh) )
+      Allocate ( Full_M_inv(dg%dofh,dg%dofh), temp_p(dg%dofh,dg%dofh) )
+      Allocate ( Taylor_mass(s%MNE,dg%dofh,dg%dofh),temp_t(dg%dofh,dg%dofh))
       
 !.....Initialize SL3
       
@@ -134,7 +134,7 @@
 
 !******************************************************************************
 !.....Vertex-based slope limiter (need the following stuff for integration)
-!.....and must fill array for all possible p (ie. dofl:dofh)
+!.....and must fill array for all possible p (ie. dg%dofl:dg%dofh)
 
       
 #ifdef SLOPEALL
@@ -168,7 +168,7 @@
 
 !.....Loop over p, and allocate for each order
 
-      do ll = 1,ph
+      do ll = 1,dg%ph
 
          if (ll.gt.0) then
             
@@ -219,9 +219,9 @@
 
                do mm=1,nagp(ll)
 
-                  ell_1 = -0.5D0 * ( xagp(mm,ph) + yagp(mm,ph) )
-                  ell_2 =  0.5D0 * ( xagp(mm,ph) + 1.D0 )
-                  ell_3 =  0.5D0 * ( yagp(mm,ph) + 1.D0 )
+                  ell_1 = -0.5D0 * ( xagp(mm,dg%ph) + yagp(mm,dg%ph) )
+                  ell_2 =  0.5D0 * ( xagp(mm,dg%ph) + 1.D0 )
+                  ell_3 =  0.5D0 * ( yagp(mm,dg%ph) + 1.D0 )
 
                   xtransform(k,mm) = x(n1)*ell_1 + x(n2)*ell_2 + x(n3)*ell_3
                   ytransform(k,mm) = y(n1)*ell_1 + y(n2)*ell_2 + y(n3)*ell_3

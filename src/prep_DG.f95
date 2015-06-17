@@ -60,7 +60,7 @@
 
       Allocate ( XBCbt(S%MNE),YBCbt(S%MNE),radial(S%MNE),XB(S%MNE),YB(S%MNE),l2e(S%MNE) )
       Allocate ( iota_check(S%MNE),iota_check2(S%MNE),hbo(36,S%MNE,1),ydubo(36,s%mne) ) 
-      Allocate ( YELEM(ph),YED(ph),hb1(36,s%mne,1,ph), zeo(36,s%mne,1) )
+      Allocate ( YELEM(dg%ph),YED(dg%ph),hb1(36,s%mne,1,dg%ph), zeo(36,s%mne,1) )
 
 
       C13 = 1.D0/3.D0
@@ -82,25 +82,25 @@
       
 !.....Compute the degrees of freedom per element
 
-      DOF = (dg%pl+1)*(dg%pl+2)/2
-      dofx = (px+1)*(px+2)/2    ! dofx for variable functions f=f(x) 
+      DG%DOF = (dg%pl+1)*(dg%pl+2)/2
+      dg%dofx = (dg%px+1)*(dg%px+2)/2    ! dg%dofx for variable functions f=f(x) 
       P_0 = dg%pl
       DOF_0 = (dg%pl+1)*(dg%pl+2)/2   ! dof at lowest order when p!=0
-      dofh = (ph + 1)*(ph + 2)/2
+      dg%dofh = (dg%ph + 1)*(dg%ph + 2)/2
 
 
 !.....Allocate some DG stuff
 
       IF (DG%PADAPT.EQ.1) THEN
 
-         dofh = (ph + 1)*(ph + 2)/2
-         dofl = (dg%pl + 1)*(dg%pl + 2)/2
+         dg%dofh = (dg%ph + 1)*(dg%ph + 2)/2
+         dg%dofl = (dg%pl + 1)*(dg%pl + 2)/2
          pa = dg%pl
            
       elseif (dg%padapt.eq.0) then 
 
-         dofh = dofh
-         dofl = DOF_0
+         dg%dofh = dg%dofh
+         dg%dofl = DOF_0
          pa = dg%pl
 
       endif
@@ -120,13 +120,13 @@
 
       CALL ALLOC_DG4(s)          !moved here 6.28.10, for p_adapt because of messenger_elem      
 
-         dofs(:) = dofl
+         dofs(:) = dg%dofl
          PDG_EL(:) = dg%pl
          PDG(:) = dg%pl  
          PCOUNT(:) = 0
          pa = dg%pl
 
-      do chi=dg%pl,ph
+      do chi=dg%pl,dg%ph
          NEGP(chi) = chi + 1
       enddo
 
@@ -134,9 +134,9 @@
 
          PDG_EL(:) = 1
          PDG(:) = 1     
-         DOF    = 3
+         DG%DOF    = 3
          dg%pl     = 1
-         dofl   = 3
+         dg%dofl   = 3
          P_0    = 0
          DOF_0  = 1 
          NEGP(dg%pl) = 2
@@ -285,14 +285,14 @@
                J3 = NEITAB(I,2)
             ENDIF
             DO J = 1,EL_COUNT(I)
-               EL = NNOEL(I,J)
-               N1 = NM(EL,1)
-               N2 = NM(EL,2)
-               N3 = NM(EL,3)
+               DG%EL = NNOEL(I,J)
+               N1 = NM(DG%EL,1)
+               N2 = NM(DG%EL,2)
+               N3 = NM(DG%EL,3)
                IF ((J1.EQ.N1).OR.(J1.EQ.N2).OR.(J1.EQ.N3)) THEN
                   IF ((J2.EQ.N1).OR.(J2.EQ.N2).OR.(J2.EQ.N3)) THEN
                      IF ((J3.EQ.N1).OR.(J3.EQ.N2).OR.(J3.EQ.N3)) THEN
-                        ELETAB(I,1+KK) = EL
+                        ELETAB(I,1+KK) = DG%EL
                         S2  = SFAC(J2)
                         SAV = (S1 + S2)/2.D0
                         VEC1(1) =      X(J1) - X(J2)
@@ -433,8 +433,8 @@
 !.....3. Set the DOF at dry elements = 1
 
       NCHECK(1) = 3
-      if (ph.gt.1) then
-         do chi = 2,ph
+      if (dg%ph.gt.1) then
+         do chi = 2,dg%ph
             NCHECK(chi) = NCHECK(1) + 3*negp(chi)
          enddo
       endif
@@ -452,7 +452,7 @@
 
 !.....Retrieve the area integral gauss quadrature points
       
-      do j=1,ph
+      do j=1,dg%ph
          
          CALL QUAD_PTS_AREA(s,2*j,j)
 
@@ -460,7 +460,7 @@
 
 !.....Retrieve the edge integral gauss quadrature points
       
-      do j=1,ph
+      do j=1,dg%ph
 
          CALL QUAD_PTS_EDGE(s,j,j)
 
@@ -469,7 +469,7 @@
 !.....Evaluate the orthogonal basis and its derivatives at the area
 !.....gauss quadrature points
 
-      do j=1,ph
+      do j=1,dg%ph
 
          CALL ORTHOBASIS_AREA(j,j)
 
@@ -477,7 +477,7 @@
 
 !.....Evaluate the orthogonal basis at the edge gauss quadrature points
 
-      do j=1,ph
+      do j=1,dg%ph
 
          CALL ORTHOBASIS_EDGE(j,j)
 
@@ -492,84 +492,13 @@
       ydub = 0.d0
       hb1 = 0.D0
 
-!$$$      do k = 1,S%MNE
-!$$$
-!$$$         
-!$$$         n1 = NM(k,1)
-!$$$         n2 = NM(k,2)
-!$$$         n3 = NM(k,3)
-!$$$                                !Define lagrange transform
-!$$$
-!$$$         do mm = 1,nagp(ph)     !ICs should not have higher order than ph
-!$$$
-!$$$            ell_1 = -0.5D0 * ( xagp(mm,ph) + yagp(mm,ph) )
-!$$$            ell_2 =  0.5D0 * ( xagp(mm,ph) + 1.D0 )
-!$$$            ell_3 =  0.5D0 * ( yagp(mm,ph) + 1.D0 )
-!$$$
-!$$$            XBCbt(k) = x(n1)*ell_1 + x(n2)*ell_2 + x(n3)*ell_3
-!$$$            YBCbt(k) = y(n1)*ell_1 + y(n2)*ell_2 + y(n3)*ell_3
-!$$$
-!$$$
-!$$$            rev =  3.141592653589793D0 / 4.D0
-!$$$
-!$$$            Ox = XBCbt(k)*cos(rev) - YBCbt(k)*sin(rev)
-!$$$            Oy = YBCbt(k)*cos(rev) + XBCbt(k)*sin(rev)
-!$$$
-!$$$            radial(k) = min(sqrt( Ox**2 + (Oy + 0.25D0)**2 ), 0.18D0)/0.18D0
-!$$$
-!$$$
-!$$$            do j = 1,dofh
-!$$$
-!$$$               QX(j,k,1) = QX(j,k,1) + YBCbt(k) * wagp(mm,ph) * phi_area(j,mm,ph)
-!$$$
-!$$$               QY(j,k,1) = QY(j,k,1) - XBCbt(k) * wagp(mm,ph) * phi_area(j,mm,ph)        
-!$$$
-!$$$               iota(j,k,1) = iota(j,k,1) + 0.25D0 *( 1.0D0 + cos(3.141592653589793D0*radial(k)) ) 
-!$$$     &              * wagp(mm,ph) * phi_area(j,mm,ph)  
-!$$$               
-!$$$c$$$               iota(j,k,1) = iota(j,k,1) + 0.5D0 *( exp ( - ( (XBCbt(k)+.05D0)**2 + (YBCbt(k)+.05D0)**2  ) /0.001D0 ) ) 
-!$$$c$$$     &              * wagp(mm,ph) * phi_area(j,mm,ph) 
-!$$$
-!$$$               if( ( sqrt((Ox + 0.25D0 )**2 + Oy**2)).le.0.18D0.and.(sqrt((Ox + 0.25D0 )**2 + 
-!$$$     &              Oy**2)).ge.0.025D0.and.(Ox.le.(-0.23D0) )) then
-!$$$
-!$$$                  iota(j,k,1) = iota(j,k,1) + 1.0D0 * wagp(mm,ph) * phi_area(j,mm,ph) 
-!$$$
-!$$$               elseif(sqrt( (Ox -.25D0)**2 + Oy**2 ).le.0.18D0 ) then
-!$$$
-!$$$                  iota(j,k,1) =  iota(j,k,1) + (1.D0 - ( 1.D0 / 0.18D0 ) * sqrt((Ox -0.25D0)**2 + Oy**2 ) ) 
-!$$$     &                 * wagp(mm,ph) * phi_area(j,mm,ph) 
-!$$$
-!$$$               endif
-!$$$
-!$$$               hb(j,k,1) = hb(j,k,1) + 1.D0*wagp(mm,ph) * phi_area(j,mm,ph)
-!$$$
-!$$$            enddo
-!$$$
-!$$$
-!$$$         enddo
-!$$$
-!$$$                                ! get back the coeffs in each component
-!$$$
-!$$$         do j= 1,dofh
-!$$$
-!$$$            QX(j,k,1) =  QX(j,k,1) * M_inv(j,ph)
-!$$$            QY(j,k,1) =  QY(j,k,1) * M_inv(j,ph)
-!$$$            iota(j,k,1) =  iota(j,k,1) * M_inv(j,ph)
-!$$$            hb(j,k,1) =  hb(j,k,1) * M_inv(j,ph)
-!$$$
-!$$$         enddo
-!$$$
-!$$$      enddo
-
-      !iotaa = iota
  
-      hb(1:dofh,:,1) = hbo(1:dofh,:,1)
-      ze(1:dofh,:,1) = zeo(1:dofh,:,1)
-      ydub(1:dofh,:,1) = ydubo(1:dofh,:)
+      hb(1:dg%dofh,:,1) = hbo(1:dg%dofh,:,1)
+      ze(1:dg%dofh,:,1) = zeo(1:dg%dofh,:,1)
+      ydub(1:dg%dofh,:,1) = ydubo(1:dg%dofh,:)
 
-      do chi=dg%pl,ph
-         hb1(1:dofh,:,1,chi) = hbo(1:dofh,:,1)
+      do chi=dg%pl,dg%ph
+         hb1(1:dg%dofh,:,1,chi) = hbo(1:dg%dofh,:,1)
       enddo
 
       !if layers are on, distribute them evenly across the total bed load
@@ -622,7 +551,7 @@
 !.....Compute the values of the nodal basis functions at the
 !.....area gauss quadrature points, at every p level chi
 
-      do chi = 1,ph
+      do chi = 1,dg%ph
          do I = 1,NAGP(chi)
             PSI1(I,chi) = -1.D0/2.D0*(XAGP(I,chi) + YAGP(I,chi))
             PSI2(I,chi) =  1.D0/2.D0*(XAGP(I,chi) + 1.D0)
@@ -678,7 +607,7 @@
          DP_VOL(J,:) = 0.D0
          SFAC_ELEM(:,J,:) = 0.D0
 
-         do chi = 1,ph
+         do chi = 1,dg%ph
 
             if (chi.gt.1) then
 
@@ -750,11 +679,11 @@
 
          enddo 
 
-         do chi = 1,ph
+         do chi = 1,dg%ph
             DP_VOL(J,chi) = 0.25D0*AREAS(J)*DP_VOL(J,chi)
          enddo
 
-         do chi = 1,ph
+         do chi = 1,dg%ph
 
             if (chi.ge.1) then
 
@@ -816,7 +745,7 @@
 !........
 
 
-         do chi = 1,ph
+         do chi = 1,dg%ph
 
             DO I = 1,3
                DP_NODE(I,J,chi) = DP(NM(J,I))
@@ -849,14 +778,14 @@
          PSI_CHECK(1,I) = -1.D0/2.D0*(XI + YI)
          PSI_CHECK(2,I) =  1.D0/2.D0*(XI + 1.D0)
          PSI_CHECK(3,I) =  1.D0/2.D0*(YI + 1.D0)
-         do chi = 1,ph
+         do chi = 1,dg%ph
             DO K = 1,(chi+1)*(chi+2)/2 
                PHI_CHECK(K,I,chi) = PHI_CORNER(K,I,chi)
             ENDDO
          enddo
       ENDDO
 
-      do chi =1,ph
+      do chi =1,dg%ph
          IF (NCHECK(chi).GT.3) THEN
             II = 4
             DO L = 1,3
@@ -875,7 +804,7 @@
 !.....Integrate the basis functions
 
       PHI_INTEGRATED = 0.D0
-      do chi = 1,ph
+      do chi = 1,dg%ph
          DO I = 1,NAGP(chi)
             DO K = 1,(chi+1)*(chi+2)/2
                PHI_INTEGRATED(K,chi) = PHI_INTEGRATED(K,chi) + WAGP(I,chi)*PHI_AREA(K,I,chi)
@@ -922,14 +851,14 @@
                      IF (dof_0.NE.1) THEN
                         ze(2,J,1)=0.d0
                         ze(3,J,1)=0.d0
-                        ze(4:dofh,J,1) = 0.D0 ! forced again for transparency
+                        ze(4:dg%dofh,J,1) = 0.D0 ! forced again for transparency
                      ENDIF
                   ELSE
                      ze(1,J,1)=(ZE1+ZE2+ZE3)/3.D0
                      IF (DOF_0.NE.1) THEN
                         ze(2,J,1) = -1.D0/6.D0*(ZE1 + ZE2) + 1.D0/3.D0*ZE3
                         ze(3,J,1) = -0.5D0*ZE1 + 0.5D0*ZE2
-                        ze(4:dofh,J,1) = 0.D0 ! forced again for transparency
+                        ze(4:dg%dofh,J,1) = 0.D0 ! forced again for transparency
                      ENDIF
                   ENDIF
                ENDIF
@@ -1001,14 +930,14 @@
                      IF (DOF_0.NE.1) THEN
                         ze(2,J,1)=0.d0
                         ze(3,J,1)=0.d0
-                        ze(4:dofh,J,1) = 0.D0 ! forced again for transparency
+                        ze(4:dg%dofh,J,1) = 0.D0 ! forced again for transparency
                      ENDIF
                   ELSE
                      ze(1,J,1)=(ZE1+ZE2+ZE3)/3.D0
                      IF (DOF_0.NE.1) THEN
                         ze(2,J,1) = -1.D0/6.D0*(ZE1 + ZE2) + 1.D0/3.D0*ZE3
                         ze(3,J,1) = -0.5D0*ZE1 + 0.5D0*ZE2
-                        ze(4:dofh,J,1) = 0.D0 ! forced again for transparency
+                        ze(4:dg%dofh,J,1) = 0.D0 ! forced again for transparency
                      ENDIF
                   ENDIF
                ENDIF
@@ -1040,12 +969,12 @@
          READ(163,*) P_READ
          READ(164,*) P_READ,P_READ
          READ(114,*) P_READ
-         IF (P_READ.NE.ph) THEN
+         IF (P_READ.NE.dg%ph) THEN
             PRINT*,'INCONSISTENCY IN P -- CHECK INPUT FILES'
             STOP
          ENDIF
          DO J = 1,S%MNE
-            DO K = 1,DOFH
+            DO K = 1,DG%DOFH
                READ(163,*) ze(K,J,1)
                READ(164,*) QX(K,J,1), QY(K,J,1)
                READ(114,*) HB(K,J,1)
@@ -1078,12 +1007,12 @@
          READ(263,*) P_READ
          READ(264,*) P_READ,P_READ
          READ(214,*) ITHS
-         IF (P_READ.NE.PH) THEN
+         IF (P_READ.NE.DG%PH) THEN
             PRINT*,'INCONSISTENCY IN P -- CHECK INPUT FILES'
             STOP
          ENDIF
          DO J = 1,S%MNE
-            DO K = 1,DOFH
+            DO K = 1,DG%DOFH
                READ(263,*) ze(K,J,1)
                READ(264,*) QX(K,J,1), QY(K,J,1)
                READ(214,*) HB(K,J,1), WDFLG(J)
@@ -1125,7 +1054,7 @@
       IF (ABS(NOUTGE).EQ.1) THEN
          OPEN(631,FILE=S%DIRNAME//'/'//'DG.63')
          WRITE(631,3220) RUNDES, RUNID, AGRID
-         WRITE(631,3645) NDSETSE, dofh, DTDP*NSPOOLGE, NSPOOLGE, 1
+         WRITE(631,3645) NDSETSE, dg%dofh, DTDP*NSPOOLGE, NSPOOLGE, 1
       ENDIF
 
 !.....Initialize the DG.64 output file
@@ -1133,7 +1062,7 @@
       IF (ABS(NOUTGV).EQ.1) THEN
          OPEN(641,FILE=S%DIRNAME//'/'//'DG.64')
          WRITE(641,3220) RUNDES, RUNID, AGRID
-         WRITE(641,3645) NDSETSV, dofh, DTDP*NSPOOLGV, NSPOOLGV, 2
+         WRITE(641,3645) NDSETSV, dg%dofh, DTDP*NSPOOLGV, NSPOOLGV, 2
       ENDIF
 
 !.....Initialize the DG.65 output file (contains elemental statuses such
@@ -1142,7 +1071,7 @@
       IF ((ABS(NOUTGE).EQ.1).AND.(NOLIFA.GE.2)) THEN
          OPEN(651,FILE=S%DIRNAME//'/'//'DG.65')
          WRITE(651,3220) RUNDES, RUNID, AGRID
-         WRITE(651,3645) NDSETSE, dofh, DTDP*NSPOOLGE, NSPOOLGE, 1
+         WRITE(651,3645) NDSETSE, dg%dofh, DTDP*NSPOOLGE, NSPOOLGE, 1
       ENDIF
  3220 FORMAT(1X,A32,2X,A24,2X,A24)
  3645 FORMAT(1X,I10,1X,I10,1X,E15.7,1X,I5,1X,I5)
@@ -1152,8 +1081,8 @@
       IF (P_0.NE.dg%pl) THEN
          PDG_EL(:) = 0
          PDG(:) = 0
-         DOF = 1
-         DOFL = 1
+         DG%DOF = 1
+         DG%DOFL = 1
          DOFS(:) = 1
          DOF_0 = 1
          dg%pl = 0

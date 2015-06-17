@@ -93,7 +93,7 @@ C      ZP(LN(3)) = 0.5D0*(ZP(LN(1))+ZP(LN(2)))
 
 C.....Compute elevations at node LN(3)
 
-      DO KK = 1,DOF
+      DO KK = 1,DG%DOF
         ZP(LN(3))  = ZP(LN(3)) + PHI_CORNER(KK,LN(3))*ZE(KK,EL_IN,IRK+1)
       ENDDO
 
@@ -107,11 +107,11 @@ C.....Compute elevations at node LN(3)
       ZE(3,EL_IN,IRK+1) = 
      &     -0.5D0*ZP(1)+0.5D0*ZP(2)
 #endif
-      ZE(2:DOF,EL_IN,IRK+1) = 0.D0
+      ZE(2:DG%DOF,EL_IN,IRK+1) = 0.D0
 
 #if 1
-      QX(2:DOF,EL_IN,IRK+1) = 0.D0
-      QY(2:DOF,EL_IN,IRK+1) = 0.D0
+      QX(2:DG%DOF,EL_IN,IRK+1) = 0.D0
+      QY(2:DG%DOF,EL_IN,IRK+1) = 0.D0
 #endif
 
 1000  CONTINUE

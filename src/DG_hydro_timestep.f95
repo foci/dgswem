@@ -642,7 +642,7 @@
 
       DO KK = 2,NRK+1
          DO J = 1,S%MNE
-            DO K = 1,DOFH
+            DO K = 1,DG%DOFH
                ZE(K,J,KK) = 0.D0
                QX(K,J,KK) = 0.D0
                QY(K,J,KK) = 0.D0

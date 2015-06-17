@@ -42,10 +42,10 @@
       REAL(SZ) ZE_VOL
 
       REAL(SZ) DH_HAT(3)
-      REAL(SZ) HT_HAT(NCHECK(ph)), HT_MODE(42)
-      REAL(SZ) HT_NODE(NCHECK(ph))
+      REAL(SZ) HT_HAT(NCHECK(dg%ph)), HT_MODE(42)
+      REAL(SZ) HT_NODE(NCHECK(dg%ph))
       REAL(SZ) QX_HAT(3), QX_NODE(3), QY_HAT(3), QY_NODE(3)
-      REAL(SZ) ZE_HAT(NCHECK(ph),ph), ZE_NODE(NCHECK(ph),ph)
+      REAL(SZ) ZE_HAT(NCHECK(dg%ph),dg%ph), ZE_NODE(NCHECK(dg%ph),dg%ph)
 
       REAL(SZ), PARAMETER:: HUGEVEL = 1.D+5  
       REAL(SZ):: HS0, U_HAT(3), V_HAT(3)
