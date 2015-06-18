@@ -74,17 +74,17 @@
 !     
 
       IF(.NOT.ALLOCATED(RHS_ZE_IN)) THEN
-         ALLOCATE ( RHS_ZE_IN(DG%DOFH),RHS_QX_IN(DG%DOFH),RHS_QY_IN(DG%DOFH) )
-         ALLOCATE ( RHS_ZE_EX(DG%DOFH),RHS_QX_EX(DG%DOFH),RHS_QY_EX(DG%DOFH) )
+         ALLOCATE ( RHS_ZE_IN(DOFH),RHS_QX_IN(DOFH),RHS_QY_IN(DOFH) )
+         ALLOCATE ( RHS_ZE_EX(DOFH),RHS_QX_EX(DOFH),RHS_QY_EX(DOFH) )
 #ifdef TRACE
-         Allocate ( rhs_iota_in(dg%dofh),rhs_iota_ex(dg%dofh) )
+         Allocate ( rhs_iota_in(dofh),rhs_iota_ex(dofh) )
 #endif
 #ifdef CHEM
-         Allocate ( rhs_iota_in(dg%dofh),rhs_iota2_in(dg%dofh) )
-         Allocate ( rhs_iota_ex(dg%dofh),rhs_iota2_ex(dg%dofh) )
+         Allocate ( rhs_iota_in(dofh),rhs_iota2_in(dofh) )
+         Allocate ( rhs_iota_ex(dofh),rhs_iota2_ex(dofh) )
 #endif
 #ifdef DYNP
-         Allocate ( rhs_dynP_IN(dg%dofh),rhs_dynP_EX(dg%dofh) )
+         Allocate ( rhs_dynP_IN(dofh),rhs_dynP_EX(dofh) )
 #endif
       ENDIF
 
@@ -102,13 +102,13 @@
          EL_IN = NEDEL(1,GED)
          EL_EX = NEDEL(2,GED)
 
-         DG%EL = EL_EX
+         EL = EL_EX
 
          if (DOFS(EL_EX).LT.DOFS(EL_IN)) then
-            DG%EL = EL_IN
+            EL = EL_IN
          endif
          
-         pa = PDG_EL(DG%EL)
+         pa = PDG_EL(EL)
 
 #ifdef P0
          if (pa.eq.0) then
@@ -124,7 +124,7 @@
 
 !.....Save the current RHS
 
-         DO K = 1,DOFS(DG%EL)
+         DO K = 1,DOFS(EL)
 
             RHS_ZE_IN(K) = RHS_ZE(K,EL_IN,IRK)
             RHS_QX_IN(K) = RHS_QX(K,EL_IN,IRK)
@@ -290,7 +290,7 @@
             LZ_YX_EX = LZ(1,2,1,EL_EX)
             LZ_YY_EX = LZ(1,2,2,EL_EX)
 
-            DO K = 2,DOFS(DG%EL)
+            DO K = 2,DOFS(EL)
 
                ZE_IN = ZE_IN + ZE(K,EL_IN,IRK)*PHI_EDGE(K,GP_IN,LED_IN,pa)
                QX_IN = QX_IN + QX(K,EL_IN,IRK)*PHI_EDGE(K,GP_IN,LED_IN,pa)
@@ -415,7 +415,7 @@
 
 !...........Put back the saved RHS
 
-               DO K = 1,DOFS(DG%EL)
+               DO K = 1,DOFS(EL)
                   RHS_ZE(K,EL_IN,IRK) = RHS_ZE_IN(K)
                   RHS_QX(K,EL_IN,IRK) = RHS_QX_IN(K)
                   RHS_QY(K,EL_IN,IRK) = RHS_QY_IN(K)
@@ -677,7 +677,7 @@
 
 !.....Compute the edge integral
 
-            DO K = 1,DOFS(DG%EL)
+            DO K = 1,DOFS(EL)
                
                W_IN = EDFAC_IN*EDGEQ(K,GP_IN,LED_IN,pa)
                W_EX = EDFAC_EX*EDGEQ(K,GP_EX,LED_EX,pa)
@@ -793,7 +793,7 @@
 
 #endif
 
-            DO K = 2,DOFS(DG%EL)
+            DO K = 2,DOFS(EL)
 
                ZE_IN = ZE_IN + ZE(K,EL_IN,IRK)*PHI_EDGE(K,GP_IN,LED_IN,pa)
                QX_IN = QX_IN + QX(K,EL_IN,IRK)*PHI_EDGE(K,GP_IN,LED_IN,pa)
@@ -927,7 +927,7 @@
 #endif
 
 !.....Compute the edge integral
-            DO K = 1,DOFS(DG%EL)
+            DO K = 1,DOFS(EL)
 
                W_IN = EDFAC_IN*EDGEQ(K,GP_IN,LED_IN,pa)
 
@@ -1008,7 +1008,7 @@
 
 #endif
 
-            DO K = 2,DOFS(DG%EL)
+            DO K = 2,DOFS(EL)
 
                ZE_EX = ZE_EX + ZE(K,EL_EX,IRK)*PHI_EDGE(K,GP_EX,LED_EX,pa)
                QX_EX = QX_EX + QX(K,EL_EX,IRK)*PHI_EDGE(K,GP_EX,LED_EX,pa)
@@ -1147,7 +1147,7 @@
 #endif
 
 !.....Compute the edge integral
-            DO K = 1,DOFS(DG%EL)
+            DO K = 1,DOFS(EL)
 
                W_EX = EDFAC_EX*EDGEQ(K,GP_EX,LED_EX,pa)
 

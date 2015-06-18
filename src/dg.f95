@@ -331,10 +331,10 @@
 !.....Set sizes for arrays used in orthobasis
 
       SUBROUTINE ALLOC_JACOBI()
-      ALLOCATE ( JACOBI(dg%ph+1,2*dg%ph+3,2,NAGP(dg%ph)+1) )
-      ALLOCATE ( DXPHI2(dg%ph+1,dg%ph+1,NAGP(dg%ph)+1),DYPHI2(dg%ph+1,dg%ph+1,NAGP(dg%ph)+1) )
-      ALLOCATE ( PHI2(dg%ph+1,dg%ph+1,NAGP(dg%ph)+1) )
-      ALLOCATE ( PHI_CORNER1(dg%ph+1,dg%ph+1,3,dg%ph) )
+      ALLOCATE ( JACOBI(ph+1,2*ph+3,2,NAGP(ph)+1) )
+      ALLOCATE ( DXPHI2(ph+1,ph+1,NAGP(ph)+1),DYPHI2(ph+1,ph+1,NAGP(ph)+1) )
+      ALLOCATE ( PHI2(ph+1,ph+1,NAGP(ph)+1) )
+      ALLOCATE ( PHI_CORNER1(ph+1,ph+1,3,ph) )
       RETURN
       END SUBROUTINE
       
@@ -342,17 +342,17 @@
       
       SUBROUTINE ALLOC_AREA_GAUSS(s)
         type (sizes_type) :: s
-      ALLOCATE ( XAGP(NAGP(dg%ph),dg%ph),YAGP(NAGP(dg%ph),dg%ph),WAGP(NAGP(dg%ph),dg%ph) ) 
-      ALLOCATE ( PHI_AREA(DOFH,NAGP(dg%ph)+1,dg%ph ) )
-      ALLOCATE ( DSPHI(DOFH,NAGP(dg%ph)+1,dg%ph),DRPHI(DOFH,NAGP(dg%ph)+1,dg%ph) )
-      ALLOCATE ( PHI_CORNER(DOFH,3,dg%ph),PHI_MID(DOFH,3,dg%ph) )
+      ALLOCATE ( XAGP(NAGP(ph),ph),YAGP(NAGP(ph),ph),WAGP(NAGP(ph),ph) ) 
+      ALLOCATE ( PHI_AREA(DOFH,NAGP(ph)+1,ph ) )
+      ALLOCATE ( DSPHI(DOFH,NAGP(ph)+1,ph),DRPHI(DOFH,NAGP(ph)+1,ph) )
+      ALLOCATE ( PHI_CORNER(DOFH,3,ph),PHI_MID(DOFH,3,ph) )
       ALLOCATE ( PHI_CENTER(DOFH,DOFH) )
-      ALLOCATE ( PSI1(NAGP(dg%ph),dg%ph),PSI2(NAGP(dg%ph),dg%ph),PSI3(NAGP(dg%ph),dg%ph) )
-      ALLOCATE ( BATH(NAGP(dg%ph),S%MNE,dg%ph),DBATHDX(NAGP(dg%ph),S%MNE,dg%ph) )
-      Allocate ( DBATHDY(NAGP(dg%ph),S%MNE,dg%ph) )
-      ALLOCATE ( SFAC_ELEM(NAGP(dg%ph),S%MNE,dg%ph) )
-      ALLOCATE ( XFAC(DOFH,NAGP(dg%ph),S%MNE,dg%ph), YFAC(DOFH,NAGP(dg%ph),S%MNE,dg%ph) )
-      ALLOCATE ( SRFAC(DOFH,NAGP(dg%ph),S%MNE,dg%ph) )
+      ALLOCATE ( PSI1(NAGP(ph),ph),PSI2(NAGP(ph),ph),PSI3(NAGP(ph),ph) )
+      ALLOCATE ( BATH(NAGP(ph),S%MNE,ph),DBATHDX(NAGP(ph),S%MNE,ph) )
+      Allocate ( DBATHDY(NAGP(ph),S%MNE,ph) )
+      ALLOCATE ( SFAC_ELEM(NAGP(ph),S%MNE,ph) )
+      ALLOCATE ( XFAC(DOFH,NAGP(ph),S%MNE,ph), YFAC(DOFH,NAGP(ph),S%MNE,ph) )
+      ALLOCATE ( SRFAC(DOFH,NAGP(ph),S%MNE,ph) )
       RETURN
       END SUBROUTINE
       
@@ -360,11 +360,11 @@
 
       SUBROUTINE ALLOC_EDGE_GAUSS(s)
         type (sizes_type) :: s
-      ALLOCATE ( XEGP(NEGP(dg%ph),dg%ph), WEGP(NEGP(dg%ph),dg%ph) )
-      ALLOCATE ( PHI_EDGE(DOFH,NEGP(dg%ph)+1,3,dg%ph) )
-      ALLOCATE ( M_INV(DOFH,dg%ph) )
-      ALLOCATE ( BATHED(NEGP(dg%ph),3,S%MNE,dg%ph),SFACED(NEGP(dg%ph),3,S%MNE,dg%ph) )
-      ALLOCATE ( EDGEQ(DOFH,NEGP(dg%ph),3,dg%ph) )
+      ALLOCATE ( XEGP(NEGP(ph),ph), WEGP(NEGP(ph),ph) )
+      ALLOCATE ( PHI_EDGE(DOFH,NEGP(ph)+1,3,ph) )
+      ALLOCATE ( M_INV(DOFH,ph) )
+      ALLOCATE ( BATHED(NEGP(ph),3,S%MNE,ph),SFACED(NEGP(ph),3,S%MNE,ph) )
+      ALLOCATE ( EDGEQ(DOFH,NEGP(ph),3,ph) )
       RETURN
       END SUBROUTINE
 
@@ -379,19 +379,19 @@
 
 !.....These are defined in prep_slopelim.F
 
-      Allocate ( fact(0:dg%ph) ,focal_neigh(S%MNE,3*S%MNEI),focal_up(S%MNE),bi(dofh),bj(dofh) )
+      Allocate ( fact(0:ph) ,focal_neigh(S%MNE,3*S%MNEI),focal_up(S%MNE),bi(dofh),bj(dofh) )
 
-      Allocate ( XBCb(S%MNE),YBCb(S%MNE),xi1(S%MNE,NAGP(dg%ph)),xi2(S%MNE,NAGP(dg%ph)) )
-      Allocate ( xtransform(S%MNE,NAGP(dg%ph)),ytransform(S%MNE,NAGP(dg%ph)) )
+      Allocate ( XBCb(S%MNE),YBCb(S%MNE),xi1(S%MNE,NAGP(ph)),xi2(S%MNE,NAGP(ph)) )
+      Allocate ( xtransform(S%MNE,NAGP(ph)),ytransform(S%MNE,NAGP(ph)) )
       Allocate ( xi1BCb(S%MNE),xi2BCb(S%MNE),xi1vert(S%MNE,3) )
       Allocate ( xi2vert(S%MNE,3),xtransformv(S%MNE,3),ytransformv(S%MNE,3) )
       Allocate ( XBCv(S%MNE,S%MNE),YBCv(S%MNE,S%MNE) )
-      Allocate ( xi1BCv(S%MNE,S%MNE),xi2BCv(S%MNE,S%MNE),Area_integral(S%MNE,0:dg%ph,0:dg%ph) )
-      Allocate ( f(S%MNE,NAGP(dg%ph),0:dg%ph,0:dg%ph),g0(S%MNE,NAGP(dg%ph),0:dg%ph,0:dg%ph) )
-      Allocate ( fv(S%MNE,3,0:dg%ph,0:dg%ph),g0v(S%MNE,3,0:dg%ph,0:dg%ph) )
-      Allocate ( varsigma0(S%MNE,NAGP(dg%ph),0:dg%ph,0:dg%ph) ) 
-      Allocate ( varsigma0v(S%MNE,3,0:dg%ph,0:dg%ph) )
-      Allocate ( pmatrix(S%MNE,dofh,dofh), var2sigmag(S%MNE,NAGP(dg%ph),dofh) )
+      Allocate ( xi1BCv(S%MNE,S%MNE),xi2BCv(S%MNE,S%MNE),Area_integral(S%MNE,0:ph,0:ph) )
+      Allocate ( f(S%MNE,NAGP(ph),0:ph,0:ph),g0(S%MNE,NAGP(ph),0:ph,0:ph) )
+      Allocate ( fv(S%MNE,3,0:ph,0:ph),g0v(S%MNE,3,0:ph,0:ph) )
+      Allocate ( varsigma0(S%MNE,NAGP(ph),0:ph,0:ph) ) 
+      Allocate ( varsigma0v(S%MNE,3,0:ph,0:ph) )
+      Allocate ( pmatrix(S%MNE,dofh,dofh), var2sigmag(S%MNE,NAGP(ph),dofh) )
       Allocate ( Nmatrix(S%MNE,dofh,dofh,dofh),NmatrixInv(S%MNE,dofh,dofh,dofh) )
       Allocate ( deltx(S%MNE),delty(S%MNE),var2sigmav(S%MNE,3,dofh))
 
@@ -434,10 +434,10 @@
       ALLOCATE ( EL_UPDATED(S%MNE) )
       ALLOCATE ( WDFLG_TMP(S%MNE) )
       ALLOCATE ( LEDGE_NVEC(3,3,S%MNE) )
-      ALLOCATE ( DP_VOL(S%MNE,dg%ph) )
-      ALLOCATE ( PHI_INTEGRATED(DOFH,dg%ph) )
-      ALLOCATE ( PHI_CHECK(DOFH,NCHECK(dg%ph),dg%ph) )
-      ALLOCATE ( DP_NODE(NCHECK(dg%ph),S%MNE,dg%ph) )
+      ALLOCATE ( DP_VOL(S%MNE,ph) )
+      ALLOCATE ( PHI_INTEGRATED(DOFH,ph) )
+      ALLOCATE ( PHI_CHECK(DOFH,NCHECK(ph),ph) )
+      ALLOCATE ( DP_NODE(NCHECK(ph),S%MNE,ph) )
       ALLOCATE ( PSI_CHECK(3,12*3) )
       RETURN
       END SUBROUTINE

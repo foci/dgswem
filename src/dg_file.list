@@ -1,0 +1,4 @@
+../scripts/sed_vars.bash calc_normal.f95 dg.list dg
+../scripts/sed_vars.bash create_edge_data.f95 dg.list dg
+../scripts/sed_vars.bash detector.f95 dg.list dg
+../scripts/sed_vars.bash DG_hydro_timestep.f95 dg.list dg 1 416

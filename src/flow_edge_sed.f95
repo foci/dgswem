@@ -61,7 +61,7 @@
 
 !.....Compute the solution at the interior state
 
-        DO K = 1,DG%DOF
+        DO K = 1,DOF
 
           ZE_IN = ZE_IN + ZE(K,EL_IN,1  )*PHI_EDGE(K,I,LED)
           QX_IN = QX_IN + QX(K,EL_IN,1  )*PHI_EDGE(K,I,LED)
@@ -145,7 +145,7 @@
 
 !.....Compute the edge integral
 
-        DO K = 1,DG%DOF
+        DO K = 1,DOF
           CALL EDGE_INT_SED(EL_IN,LED,GED,I,QS_HAT)
         ENDDO
 

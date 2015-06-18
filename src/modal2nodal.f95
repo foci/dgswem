@@ -95,11 +95,11 @@ Casey 110111: Create new data structure with discontinuous information for SWAN.
               QX_DG(J) = QX(1,NBOR_EL,1)
               QY_DG(J) = QY(1,NBOR_EL,1)
               HB_DG(J) = HB(1,NBOR_EL,1)
-              DO KK = 2,DG%DOF
-                ZE_DG(J) = ZE_DG(J) + PHI_CORNER(KK,K,dg%ph)*ZE(KK,NBOR_EL,1)
-                QX_DG(J) = QX_DG(J) + PHI_CORNER(KK,K,dg%ph)*QX(KK,NBOR_EL,1)
-                QY_DG(J) = QY_DG(J) + PHI_CORNER(KK,K,dg%ph)*QY(KK,NBOR_EL,1)
-                HB_DG(J) = HB_DG(J) + PHI_CORNER(KK,K,dg%ph)*HB(KK,NBOR_EL,1)
+              DO KK = 2,DOF
+                ZE_DG(J) = ZE_DG(J) + PHI_CORNER(KK,K,ph)*ZE(KK,NBOR_EL,1)
+                QX_DG(J) = QX_DG(J) + PHI_CORNER(KK,K,ph)*QX(KK,NBOR_EL,1)
+                QY_DG(J) = QY_DG(J) + PHI_CORNER(KK,K,ph)*QY(KK,NBOR_EL,1)
+                HB_DG(J) = HB_DG(J) + PHI_CORNER(KK,K,ph)*HB(KK,NBOR_EL,1)
               ENDDO
               AREA = 0.5*AREAS(NBOR_EL)
               AREA_SUM = AREA_SUM + AREA

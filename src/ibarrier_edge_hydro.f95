@@ -69,10 +69,10 @@
          ELF = NEDEL(1,GEDF)
 
          if (DOFS(ELB).LT.DOFS(ELF)) then
-            DG%EL = ELF
+            EL = ELF
          endif
 
-         pa = PDG_EL(DG%EL)
+         pa = PDG_EL(EL)
 
 #ifdef P0         
          if (pa.eq.0) then
@@ -157,7 +157,7 @@
 
 
 
-            DO K = 2,dofs(DG%EL)
+            DO K = 2,dofs(EL)
                ZEB = ZEB + ZE(K,ELB,IRK)*PHI_EDGE(K,GPB,LEDB,pa)
                QXB = QXB + QX(K,ELB,IRK)*PHI_EDGE(K,GPB,LEDB,pa)
                QYB = QYB + QY(K,ELB,IRK)*PHI_EDGE(K,GPB,LEDB,pa)
@@ -542,7 +542,7 @@
             
  200        CONTINUE
 !     
-            DO K = 1,DOFS(dg%el)
+            DO K = 1,DOFS(el)
 
                WEGPB = 2.0*M_INV(K,pa)/AREAS(ELB)*XLEN(GEDB)&
                    *PHI_EDGE(K,GPB,LEDB,pa)*WEGP(GPB,pa)

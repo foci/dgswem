@@ -49,3 +49,5 @@ I've created a list of variables inside `sizes_type` mostly by hand. I've also c
 This process will definitely produce some errors, and need to be manually checked.
 
 This is very useful for interactively replacing a variables in a large number of files: <http://ergoemacs.org/emacs/find_replace_inter.html>
+
+Using this sed command: ` sed 's:\(\bVAR\b\):g%\1:gi'` works fairly well for replacing things VAR with g%VAR. But watch out for repeated "g%"s 

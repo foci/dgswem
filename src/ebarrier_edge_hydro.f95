@@ -26,7 +26,7 @@
 
 !.......Obtain the element
 
-         DG%EL = NEDEL(1,GED)
+         EL = NEDEL(1,GED)
          PA = PDG_EL(EL_IN)
 
 #ifdef P0
@@ -35,7 +35,7 @@
          endif
 #endif
          
-         IF (WDFLG(DG%EL).EQ.0) GOTO 1000
+         IF (WDFLG(EL).EQ.0) GOTO 1000
 
 !.....Retrieve the components of the normal vector to the edge
 
@@ -53,66 +53,66 @@
             
 !.........Obtain the height of the barrier at the quadrature point
 
-            ZE_IN = ZE(1,DG%EL,IRK)
-            QX_IN = QX(1,DG%EL,IRK)
-            QY_IN = QY(1,DG%EL,IRK)
+            ZE_IN = ZE(1,EL,IRK)
+            QX_IN = QX(1,EL,IRK)
+            QY_IN = QY(1,EL,IRK)
             HB_IN = BATHED(I,LED,EL_IN,pa)
 
 #ifdef TRACE
-            iota_IN = iota(1,DG%EL,IRK)
+            iota_IN = iota(1,EL,IRK)
 #endif
 
 #ifdef CHEM
-            iota_IN = iota(1,DG%EL,IRK)
-            iota2_IN = iota2(1,DG%EL,IRK)
+            iota_IN = iota(1,EL,IRK)
+            iota2_IN = iota2(1,EL,IRK)
 #endif
 
 #ifdef DYNP
-            dynP_IN = dynP(1,DG%EL,IRK)
+            dynP_IN = dynP(1,EL,IRK)
 #endif
 
 #ifdef SED_LAY
-            HB(:,DG%EL,irk) = 0.D0
+            HB(:,EL,irk) = 0.D0
             do ll=1,layers
-               HB(1,DG%EL,irk) = HB(1,DG%EL,irk) + bed(1,DG%EL,irk,ll)
+               HB(1,EL,irk) = HB(1,EL,irk) + bed(1,EL,irk,ll)
             enddo
-            bed_IN(:) = bed(1,DG%EL,irk,:)
+            bed_IN(:) = bed(1,EL,irk,:)
             HB_IN = HB(1,EL_IN,irk)
 #endif
 
 
-            DO K = 2,DOFS(DG%EL)
-               ZE_IN = ZE_IN + ZE(K,DG%EL,IRK)*PHI_EDGE(K,I,LED,pa)
-               QX_IN = QX_IN + QX(K,DG%EL,IRK)*PHI_EDGE(K,I,LED,pa)
-               QY_IN = QY_IN + QY(K,DG%EL,IRK)*PHI_EDGE(K,I,LED,pa)
-               !HB_IN = HB_IN + HB(K,DG%EL,IRK)*PHI_EDGE(K,I,LED,pa)
+            DO K = 2,DOFS(EL)
+               ZE_IN = ZE_IN + ZE(K,EL,IRK)*PHI_EDGE(K,I,LED,pa)
+               QX_IN = QX_IN + QX(K,EL,IRK)*PHI_EDGE(K,I,LED,pa)
+               QY_IN = QY_IN + QY(K,EL,IRK)*PHI_EDGE(K,I,LED,pa)
+               !HB_IN = HB_IN + HB(K,EL,IRK)*PHI_EDGE(K,I,LED,pa)
 
 #ifdef TRACE
-               iota_IN = iota_IN + iota(K,DG%EL,IRK)*PHI_EDGE(K,I,LED,pa)
+               iota_IN = iota_IN + iota(K,EL,IRK)*PHI_EDGE(K,I,LED,pa)
 #endif
 
 #ifdef CHEM
-               iota_IN = iota_IN + iota(K,DG%EL,IRK)*PHI_EDGE(K,I,LED,pa)
-               iota2_IN = iota2_IN + iota2(K,DG%EL,IRK)*PHI_EDGE(K,I,LED,pa)
+               iota_IN = iota_IN + iota(K,EL,IRK)*PHI_EDGE(K,I,LED,pa)
+               iota2_IN = iota2_IN + iota2(K,EL,IRK)*PHI_EDGE(K,I,LED,pa)
 #endif
 
 #ifdef DYNP
-               dynP_IN = dynP_IN + dynP(K,DG%EL,IRK)*PHI_EDGE(K,I,LED,pa)
+               dynP_IN = dynP_IN + dynP(K,EL,IRK)*PHI_EDGE(K,I,LED,pa)
 #endif
 
 #ifdef SED_LAY
 
             do ll = 1,layers
                
-               bed_IN(ll) = bed_IN(ll) + bed(K,DG%EL,IRK,ll)*PHI_EDGE(K,I,LED,pa)
-               HB_IN = HB_IN + bed(k,DG%EL,irk,ll)*PHI_EDGE(K,I,LED,pa)
+               bed_IN(ll) = bed_IN(ll) + bed(K,EL,IRK,ll)*PHI_EDGE(K,I,LED,pa)
+               HB_IN = HB_IN + bed(k,EL,irk,ll)*PHI_EDGE(K,I,LED,pa)
                
             enddo
 #endif
 
             ENDDO
 
-            SFAC_IN = SFACED(I,LED,DG%EL,pa)
+            SFAC_IN = SFACED(I,LED,EL,pa)
 
             ABOVE  = ZE_IN - EBHT(L)
             SUBSUP = 2.D0*ABOVE/3.D0
@@ -166,33 +166,33 @@
             
             CALL NUMERICAL_FLUX(s,IT)
 
-            DO K = 1,DOFS(DG%EL)
+            DO K = 1,DOFS(EL)
 
-               W_IN = 2.0*M_INV(K,pa)/AREAS(DG%EL)*XLEN(GED)&
+               W_IN = 2.0*M_INV(K,pa)/AREAS(EL)*XLEN(GED)&
               *PHI_EDGE(K,I,LED,pa)*WEGP(I,pa)
 
-               RHS_ZE(K,DG%EL,IRK) = RHS_ZE(K,DG%EL,IRK) - W_IN*F_HAT
-               RHS_QX(K,DG%EL,IRK) = RHS_QX(K,DG%EL,IRK) - W_IN*G_HAT
-               RHS_QY(K,DG%EL,IRK) = RHS_QY(K,DG%EL,IRK) - W_IN*H_HAT
+               RHS_ZE(K,EL,IRK) = RHS_ZE(K,EL,IRK) - W_IN*F_HAT
+               RHS_QX(K,EL,IRK) = RHS_QX(K,EL,IRK) - W_IN*G_HAT
+               RHS_QY(K,EL,IRK) = RHS_QY(K,EL,IRK) - W_IN*H_HAT
 
 #ifdef TRACE
-               RHS_iota(K,DG%EL,IRK) = RHS_iota(K,DG%EL,IRK) - W_IN*I_HAT
+               RHS_iota(K,EL,IRK) = RHS_iota(K,EL,IRK) - W_IN*I_HAT
 #endif
 
 #ifdef CHEM
-               RHS_iota(K,DG%EL,IRK) = RHS_iota(K,DG%EL,IRK) - W_IN*I_HAT
-               RHS_iota2(K,DG%EL,IRK) = RHS_iota2(K,DG%EL,IRK) - W_IN*J_HAT
+               RHS_iota(K,EL,IRK) = RHS_iota(K,EL,IRK) - W_IN*I_HAT
+               RHS_iota2(K,EL,IRK) = RHS_iota2(K,EL,IRK) - W_IN*J_HAT
 #endif
 
 #ifdef DYNP
-               RHS_dynP(K,DG%EL,IRK) = RHS_dynP(K,DG%EL,IRK) - W_IN*I_HAT
+               RHS_dynP(K,EL,IRK) = RHS_dynP(K,EL,IRK) - W_IN*I_HAT
 #endif
 
 #ifdef SED_LAY
 
                do ll=1,layers
 
-                  RHS_bed(K,DG%EL,IRK,ll) = RHS_bed(K,DG%EL,IRK,ll) - W_IN*Bed_HAT(ll)
+                  RHS_bed(K,EL,IRK,ll) = RHS_bed(K,EL,IRK,ll) - W_IN*Bed_HAT(ll)
 
                enddo
 

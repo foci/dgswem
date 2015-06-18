@@ -47,7 +47,7 @@
       
       AREADG = 2.D0
       mm = 0.D0
-      phh = 2*dg%ph
+      phh = 2*ph
 
       IF (PQ.EQ.0) PQ = 2
 
@@ -753,9 +753,9 @@
 
       if (pad.eq.1.and.pq.eq.2) then
          
-         NAGP(dg%ph) = 0
+         NAGP(ph) = 0
          DO I=1,nh
-            NAGP(dg%ph) = NAGP(dg%ph) + MMh(I)
+            NAGP(ph) = NAGP(ph) + MMh(I)
          ENDDO
          
 !.....Allocate XaGP, YaGP, and WaGP

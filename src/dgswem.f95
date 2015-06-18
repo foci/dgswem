@@ -24,7 +24,6 @@
       IMPLICIT NONE
 
       type (sizes_type) :: s
-      type (dg_type) :: dg
       
       INTEGER TESTFLAG,OUTITER,istop,i,ModetoNode
 !     sb-PDG1
@@ -40,7 +39,7 @@
          write(*,*) 'mnproc ',mnproc
       ENDIF
       CALL MAKE_DIRNAME(s)       ! Establish Working Directory Name
-      CALL READ_INPUT(s,dg)         ! Establish sizes by reading fort.14 and fort.15
+      CALL READ_INPUT(s)         ! Establish sizes by reading fort.14 and fort.15
 #else
       IMPLICIT NONE
      
@@ -414,7 +413,7 @@
 !      CPU_TIME = TARRAY(1) + TARRAY(2)
       PRINT*,'CPU_TIME = ',CPU_TIME
       STOP
-      END
+   END  ! I think this is the end of the program? -zdb
 
 !******************************************************************************
 !     *

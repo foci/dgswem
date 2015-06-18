@@ -32,7 +32,7 @@
       
       if (pad.eq.1.and.p.eq.1) then
 
-         NEGP(dg%ph) = dg%ph + 1
+         NEGP(ph) = ph + 1
 
          CALL ALLOC_EDGE_GAUSS(s)
 

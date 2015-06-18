@@ -8,7 +8,7 @@
 !     
 !***********************************************************************
 
-      SUBROUTINE READ_INPUT(s,dg)
+      SUBROUTINE READ_INPUT(s)
       use sizes
 !.....Use appropriate modules
 
@@ -34,7 +34,6 @@
       IMPLICIT NONE
 
       type (sizes_type) :: s
-      type (dg_type) :: dg
 
 !.....Declare local variables
 
@@ -1425,7 +1424,7 @@
 
          DO I = 1,NP
             READ(12,*) JKI,DUM1,DUM2,STARTDRY(JKI)
-            IF (DG%MODAL_IC.NE.3) THEN
+            IF (MODAL_IC.NE.3) THEN
                IF (STARTDRY(JKI).EQ.-88888) THEN
                   STARTDRY(JKI) = 1
                ELSE

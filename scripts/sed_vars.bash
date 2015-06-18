@@ -1,13 +1,23 @@
 #!/bin/bash
 
 # check number of arguments
-if [ $# != 2 ]; then
-    echo "Usage: $0 source_code_filename variable_list"
-    exit 1
-fi
+#if [ $# != 2 ]; then
+#    echo "Usage: $0 source_code_filename variable_list prefix startline endline"
+#    exit 1
+#fi
 
 sourcecode="$1"
 varlist="$2"
+prefix="$3"
+
+if [ $# == 3 ]; then
+    startline=1
+    endline=`wc -l $sourcecode | awk '{print $1}'`
+else
+    startline="$4"
+    endline="$5"
+fi
+
 
 echo "source code file is $sourcecode and variable list is $varlist"
 
@@ -25,16 +35,17 @@ fi
 echo "Changing variables for \"$1\""
 
 # create temporary file
-touch sed_vars_temp_file.txt
 
 tempfile1="sed_vars_temp_file1.txt"
 tempfile2="sed_vars_temp_file2.txt"
 
+echo "sourcecode is \"$sourcecode\", varlist is \"$varlist\", startline is \"$startline\", endline is \"$endline\", prefix is \"$prefix\""
+
 cp $sourcecode $tempfile1
 while read -r var
 do
-    #echo "$var"
-    sed "s/$var/s%$var/g" $tempfile1 > $tempfile2
+#    echo "${startline},${endline}s:\(\b${var}\b\):${prefix}%\1:gi"
+    sed "${startline},${endline}s:\(\b${var}\b\):${prefix}%\1:gi" $tempfile1 > $tempfile2	
     cp $tempfile2 $tempfile1
 done < "$varlist"
 

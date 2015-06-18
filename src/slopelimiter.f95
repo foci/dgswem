@@ -21,31 +21,31 @@
       type (sizes_type) :: s
 
 #ifdef SLOPEALL
-      IF (DG%SLOPEFLAG.EQ.1) THEN
+      IF (SLOPEFLAG.EQ.1) THEN
         CALL SLOPELIMITER1()
-      ELSE IF (DG%SLOPEFLAG.EQ.2) THEN
+      ELSE IF (SLOPEFLAG.EQ.2) THEN
         CALL SLOPELIMITER2()
-      ELSE IF (DG%SLOPEFLAG.EQ.3) THEN
+      ELSE IF (SLOPEFLAG.EQ.3) THEN
         CALL SLOPELIMITER3()
-      ELSE IF (DG%SLOPEFLAG.EQ.4) THEN
+      ELSE IF (SLOPEFLAG.EQ.4) THEN
         CALL SLOPELIMITER4()
-      ELSE IF (DG%SLOPEFLAG.EQ.5) THEN
+      ELSE IF (SLOPEFLAG.EQ.5) THEN
         CALL SLOPELIMITER5(s)
-      ELSE IF (DG%SLOPEFLAG.EQ.6) THEN
+      ELSE IF (SLOPEFLAG.EQ.6) THEN
         CALL SLOPELIMITER6()
-      ELSE IF (DG%SLOPEFLAG.EQ.7) THEN
+      ELSE IF (SLOPEFLAG.EQ.7) THEN
         CALL SLOPELIMITER7()
-      ELSE IF (DG%SLOPEFLAG.EQ.8) THEN
+      ELSE IF (SLOPEFLAG.EQ.8) THEN
         CALL SLOPELIMITER8()
-      ELSE IF (DG%SLOPEFLAG.EQ.9) THEN
+      ELSE IF (SLOPEFLAG.EQ.9) THEN
         CALL SLOPELIMITER9()
-      ELSE IF (DG%SLOPEFLAG.EQ.10) THEN
+      ELSE IF (SLOPEFLAG.EQ.10) THEN
         CALL SLOPELIMITER10()
       ENDIF
 #endif
 
 #ifdef SLOPE5 
-      IF (DG%SLOPEFLAG .NE. 0) THEN
+      IF (SLOPEFLAG .NE. 0) THEN
         CALL SLOPELIMITER5(s)
       ENDIF
 #endif
@@ -958,16 +958,16 @@
 
          ALPHA1(I) = ( A(2,2)*B(1) - A(1,2)*B(2))/DTM
          IF (ALPHA1(I).LT.0) THEN
-            ZE(2:DG%DOF,L,IRK+1) = 0.D0
-            QX(2:DG%DOF,L,IRK+1) = 0.D0
-            QY(2:DG%DOF,L,IRK+1) = 0.D0
+            ZE(2:DOF,L,IRK+1) = 0.D0
+            QX(2:DOF,L,IRK+1) = 0.D0
+            QY(2:DOF,L,IRK+1) = 0.D0
             RETURN
          ENDIF
          ALPHA2(I) = (-A(2,1)*B(1) + A(1,1)*B(2))/DTM
          IF (ALPHA2(I).LT.0) THEN
-            ZE(2:DG%DOF,L,IRK+1) = 0.D0
-            QX(2:DG%DOF,L,IRK+1) = 0.D0
-            QY(2:DG%DOF,L,IRK+1) = 0.D0
+            ZE(2:DOF,L,IRK+1) = 0.D0
+            QX(2:DOF,L,IRK+1) = 0.D0
+            QY(2:DOF,L,IRK+1) = 0.D0
             RETURN
          ENDIF
       ENDDO
@@ -1296,16 +1296,16 @@
          DTM = A(1,1)*A(2,2) - A(1,2)*A(2,1) ! Compute the determinant
          ALPHA1(I) = ( A(2,2)*B(1) - A(1,2)*B(2))/DTM
          IF (ALPHA1(I).LT.0) THEN
-            ZE(2:DG%DOF,L,IRK+1) = 0.D0
-            QX(2:DG%DOF,L,IRK+1) = 0.D0
-            QY(2:DG%DOF,L,IRK+1) = 0.D0
+            ZE(2:DOF,L,IRK+1) = 0.D0
+            QX(2:DOF,L,IRK+1) = 0.D0
+            QY(2:DOF,L,IRK+1) = 0.D0
             RETURN
          ENDIF
          ALPHA2(I) = (-A(2,1)*B(1) + A(1,1)*B(2))/DTM
          IF (ALPHA2(I).LT.0) THEN
-            ZE(2:DG%DOF,L,IRK+1) = 0.D0
-            QX(2:DG%DOF,L,IRK+1) = 0.D0
-            QY(2:DG%DOF,L,IRK+1) = 0.D0
+            ZE(2:DOF,L,IRK+1) = 0.D0
+            QX(2:DOF,L,IRK+1) = 0.D0
+            QY(2:DOF,L,IRK+1) = 0.D0
             RETURN
          ENDIF
       ENDDO
@@ -3619,11 +3619,11 @@
 !$$$               if( (abs(tmp1-ZEVERTEX(1)).ge.bound).or.
 !$$$     &              (abs(tmp2-ZEVERTEX(2)).ge.bound).or.
 !$$$     &              (abs(tmp3-ZEVERTEX(3)).ge.bound).and.
-!$$$     &              (dg%slopeflag.eq.5) ) then
+!$$$     &              (slopeflag.eq.5) ) then
 !$$$
 !$$$                  ZE(4:dofs(i),i,irk+1)=0.D0
 !$$$
-!$$$                  if (dg%padapt.eq.1) then
+!$$$                  if (padapt.eq.1) then
 !$$$                     pdg_el(i) = 1
 !$$$                  endif 
 !$$$
@@ -3638,12 +3638,12 @@
 !$$$               if( (abs(tmp1-ZEVERTEX(1)).ge.bound).or.
 !$$$     &              (abs(tmp2-ZEVERTEX(2)).ge.bound).or.
 !$$$     &              (abs(tmp3-ZEVERTEX(3)).ge.bound).and.
-!$$$     &              (dg%slopeflag.eq.5) ) then
+!$$$     &              (slopeflag.eq.5) ) then
 !$$$
 !$$$
 !$$$                  QX(4:dofs(i),i,irk+1)=0.D0
 !$$$
-!$$$                  if (dg%padapt.eq.1) then
+!$$$                  if (padapt.eq.1) then
 !$$$                     pdg_el(i) = 1
 !$$$                  endif 
 !$$$
@@ -3658,11 +3658,11 @@
 !$$$               if( (abs(tmp1-ZEVERTEX(1)).ge.bound).or.
 !$$$     &              (abs(tmp2-ZEVERTEX(2)).ge.bound).or.
 !$$$     &              (abs(tmp3-ZEVERTEX(3)).ge.bound).and.
-!$$$     &              (dg%slopeflag.eq.5) ) then
+!$$$     &              (slopeflag.eq.5) ) then
 !$$$
 !$$$                  QY(4:dofs(i),i,irk+1)=0.D0
 !$$$
-!$$$                  if (dg%padapt.eq.1) then
+!$$$                  if (padapt.eq.1) then
 !$$$                     pdg_el(i) = 1
 !$$$                  endif 
 !$$$
@@ -3679,12 +3679,12 @@
 !$$$               if( (abs(tmp1-ZEVERTEX(1)).ge.bound).or.
 !$$$     &              (abs(tmp2-ZEVERTEX(2)).ge.bound).or.
 !$$$     &              (abs(tmp3-ZEVERTEX(3)).ge.bound).and.
-!$$$     &              (dg%slopeflag.eq.5) ) then
+!$$$     &              (slopeflag.eq.5) ) then
 !$$$
 !$$$
 !$$$                  iota(4:dofs(i),i,irk+1)=0.D0
 !$$$
-!$$$                  if (dg%padapt.eq.1) then
+!$$$                  if (padapt.eq.1) then
 !$$$                     pdg_el(i) = 1
 !$$$                  endif 
 !$$$
@@ -3703,12 +3703,12 @@
 !$$$               if( (abs(tmp1-ZEVERTEX(1)).ge.bound).or.
 !$$$     &              (abs(tmp2-ZEVERTEX(2)).ge.bound).or.
 !$$$     &              (abs(tmp3-ZEVERTEX(3)).ge.bound).and.
-!$$$     &              (dg%slopeflag.eq.5) ) then
+!$$$     &              (slopeflag.eq.5) ) then
 !$$$
 !$$$
 !$$$                  iota(4:dofs(i),i,irk+1)=0.D0
 !$$$
-!$$$                  if (dg%padapt.eq.1) then
+!$$$                  if (padapt.eq.1) then
 !$$$                     pdg_el(i) = 1
 !$$$                  endif 
 !$$$
@@ -3724,12 +3724,12 @@
 !$$$               if( (abs(tmp1-ZEVERTEX(1)).ge.bound).or.
 !$$$     &              (abs(tmp2-ZEVERTEX(2)).ge.bound).or.
 !$$$     &              (abs(tmp3-ZEVERTEX(3)).ge.bound).and.
-!$$$     &              (dg%slopeflag.eq.5) ) then
+!$$$     &              (slopeflag.eq.5) ) then
 !$$$
 !$$$
 !$$$                  iota2(4:dofs(i),i,irk+1)=0.D0
 !$$$
-!$$$                  if (dg%padapt.eq.1) then
+!$$$                  if (padapt.eq.1) then
 !$$$                     pdg_el(i) = 1
 !$$$                  endif 
 !$$$
@@ -3750,12 +3750,12 @@
 !$$$              if( (abs(tmp1-ZEVERTEX(1)).ge.bound).or.
 !$$$     &              (abs(tmp2-ZEVERTEX(2)).ge.bound).or.
 !$$$     &              (abs(tmp3-ZEVERTEX(3)).ge.bound).and.
-!$$$     &              (dg%slopeflag.eq.5) ) then
+!$$$     &              (slopeflag.eq.5) ) then
 !$$$
 !$$$
 !$$$                  bed(4:dofs(i),i,irk+1,l)=0.D0
 !$$$
-!$$$                  if (dg%padapt.eq.1) then
+!$$$                  if (padapt.eq.1) then
 !$$$                     pdg_el(i) = 1
 !$$$                  endif 
 !$$$
@@ -4164,11 +4164,11 @@
 !$$$               if( (abs(tmp1-ZEVERTEX(1)).ge.bound).or.
 !$$$     &              (abs(tmp2-ZEVERTEX(2)).ge.bound).or.
 !$$$     &              (abs(tmp3-ZEVERTEX(3)).ge.bound).and.
-!$$$     &              (dg%slopeflag.eq.5) ) then
+!$$$     &              (slopeflag.eq.5) ) then
 !$$$
 !$$$                  ZE(4:dofs(i),i,irk+1)=0.D0
 !$$$
-!$$$                  if (dg%padapt.eq.1) then
+!$$$                  if (padapt.eq.1) then
 !$$$                     pdg_el(i) = 1
 !$$$                  endif 
 !$$$
@@ -4183,12 +4183,12 @@
 !$$$               if( (abs(tmp1-ZEVERTEX(1)).ge.bound).or.
 !$$$     &              (abs(tmp2-ZEVERTEX(2)).ge.bound).or.
 !$$$     &              (abs(tmp3-ZEVERTEX(3)).ge.bound).and.
-!$$$     &              (dg%slopeflag.eq.5) ) then
+!$$$     &              (slopeflag.eq.5) ) then
 !$$$
 !$$$
 !$$$                  QX(4:dofs(i),i,irk+1)=0.D0
 !$$$
-!$$$                  if (dg%padapt.eq.1) then
+!$$$                  if (padapt.eq.1) then
 !$$$                     pdg_el(i) = 1
 !$$$                  endif 
 !$$$
@@ -4203,11 +4203,11 @@
 !$$$               if( (abs(tmp1-ZEVERTEX(1)).ge.bound).or.
 !$$$     &              (abs(tmp2-ZEVERTEX(2)).ge.bound).or.
 !$$$     &              (abs(tmp3-ZEVERTEX(3)).ge.bound).and.
-!$$$     &              (dg%slopeflag.eq.5) ) then
+!$$$     &              (slopeflag.eq.5) ) then
 !$$$
 !$$$                  QY(4:dofs(i),i,irk+1)=0.D0
 !$$$
-!$$$                  if (dg%padapt.eq.1) then
+!$$$                  if (padapt.eq.1) then
 !$$$                     pdg_el(i) = 1
 !$$$                  endif 
 !$$$
@@ -4224,12 +4224,12 @@
 !$$$               if( (abs(tmp1-ZEVERTEX(1)).ge.bound).or.
 !$$$     &              (abs(tmp2-ZEVERTEX(2)).ge.bound).or.
 !$$$     &              (abs(tmp3-ZEVERTEX(3)).ge.bound).and.
-!$$$     &              (dg%slopeflag.eq.5) ) then
+!$$$     &              (slopeflag.eq.5) ) then
 !$$$
 !$$$
 !$$$                  iota(4:dofs(i),i,irk+1)=0.D0
 !$$$
-!$$$                  if (dg%padapt.eq.1) then
+!$$$                  if (padapt.eq.1) then
 !$$$                     pdg_el(i) = 1
 !$$$                  endif 
 !$$$
@@ -4248,12 +4248,12 @@
 !$$$               if( (abs(tmp1-ZEVERTEX(1)).ge.bound).or.
 !$$$     &              (abs(tmp2-ZEVERTEX(2)).ge.bound).or.
 !$$$     &              (abs(tmp3-ZEVERTEX(3)).ge.bound).and.
-!$$$     &              (dg%slopeflag.eq.5) ) then
+!$$$     &              (slopeflag.eq.5) ) then
 !$$$
 !$$$
 !$$$                  iota(4:dofs(i),i,irk+1)=0.D0
 !$$$
-!$$$                  if (dg%padapt.eq.1) then
+!$$$                  if (padapt.eq.1) then
 !$$$                     pdg_el(i) = 1
 !$$$                  endif 
 !$$$
@@ -4269,12 +4269,12 @@
 !$$$               if( (abs(tmp1-ZEVERTEX(1)).ge.bound).or.
 !$$$     &              (abs(tmp2-ZEVERTEX(2)).ge.bound).or.
 !$$$     &              (abs(tmp3-ZEVERTEX(3)).ge.bound).and.
-!$$$     &              (dg%slopeflag.eq.5) ) then
+!$$$     &              (slopeflag.eq.5) ) then
 !$$$
 !$$$
 !$$$                  iota2(4:dofs(i),i,irk+1)=0.D0
 !$$$
-!$$$                  if (dg%padapt.eq.1) then
+!$$$                  if (padapt.eq.1) then
 !$$$                     pdg_el(i) = 1
 !$$$                  endif 
 !$$$
@@ -4295,12 +4295,12 @@
 !$$$              if( (abs(tmp1-ZEVERTEX(1)).ge.bound).or.
 !$$$     &              (abs(tmp2-ZEVERTEX(2)).ge.bound).or.
 !$$$     &              (abs(tmp3-ZEVERTEX(3)).ge.bound).and.
-!$$$     &              (dg%slopeflag.eq.5) ) then
+!$$$     &              (slopeflag.eq.5) ) then
 !$$$
 !$$$
 !$$$                  bed(4:dofs(i),i,irk+1,l)=0.D0
 !$$$
-!$$$                  if (dg%padapt.eq.1) then
+!$$$                  if (padapt.eq.1) then
 !$$$                     pdg_el(i) = 1
 !$$$                  endif 
 !$$$
@@ -4713,11 +4713,11 @@
 !$$$               if( (abs(tmp1-ZEVERTEX(1)).gt.bound).or.
 !$$$     &              (abs(tmp2-ZEVERTEX(2)).gt.bound).or.
 !$$$     &              (abs(tmp3-ZEVERTEX(3)).gt.bound).and.
-!$$$     &              (dg%slopeflag.eq.5) ) then
+!$$$     &              (slopeflag.eq.5) ) then
 !$$$
 !$$$                  ZE(4:dofs(i),i,irk+1)=0.D0
 !$$$
-!$$$                  if (dg%padapt.eq.1) then
+!$$$                  if (padapt.eq.1) then
 !$$$                     pdg_el(i) = 1
 !$$$                  endif 
 !$$$
@@ -4732,12 +4732,12 @@
 !$$$               if( (abs(tmp1-ZEVERTEX(1)).gt.bound).or.
 !$$$     &              (abs(tmp2-ZEVERTEX(2)).gt.bound).or.
 !$$$     &              (abs(tmp3-ZEVERTEX(3)).gt.bound).and.
-!$$$     &              (dg%slopeflag.eq.5) ) then
+!$$$     &              (slopeflag.eq.5) ) then
 !$$$
 !$$$
 !$$$                  QX(4:dofs(i),i,irk+1)=0.D0
 !$$$
-!$$$                  if (dg%padapt.eq.1) then
+!$$$                  if (padapt.eq.1) then
 !$$$                     pdg_el(i) = 1
 !$$$                  endif 
 !$$$
@@ -4752,11 +4752,11 @@
 !$$$               if( (abs(tmp1-ZEVERTEX(1)).gt.bound).or.
 !$$$     &              (abs(tmp2-ZEVERTEX(2)).gt.bound).or.
 !$$$     &              (abs(tmp3-ZEVERTEX(3)).gt.bound).and.
-!$$$     &              (dg%slopeflag.eq.5) ) then
+!$$$     &              (slopeflag.eq.5) ) then
 !$$$
 !$$$                  QY(4:dofs(i),i,irk+1)=0.D0
 !$$$
-!$$$                  if (dg%padapt.eq.1) then
+!$$$                  if (padapt.eq.1) then
 !$$$                     pdg_el(i) = 1
 !$$$                  endif 
 !$$$
@@ -4773,12 +4773,12 @@
 !$$$               if( (abs(tmp1-ZEVERTEX(1)).gt.bound).or.
 !$$$     &              (abs(tmp2-ZEVERTEX(2)).gt.bound).or.
 !$$$     &              (abs(tmp3-ZEVERTEX(3)).gt.bound).and.
-!$$$     &              (dg%slopeflag.eq.5) ) then
+!$$$     &              (slopeflag.eq.5) ) then
 !$$$
 !$$$
 !$$$                  iota(4:dofs(i),i,irk+1)=0.D0
 !$$$
-!$$$                  if (dg%padapt.eq.1) then
+!$$$                  if (padapt.eq.1) then
 !$$$                     pdg_el(i) = 1
 !$$$                  endif 
 !$$$
@@ -4797,12 +4797,12 @@
 !$$$               if( (abs(tmp1-ZEVERTEX(1)).gt.bound).or.
 !$$$     &              (abs(tmp2-ZEVERTEX(2)).gt.bound).or.
 !$$$     &              (abs(tmp3-ZEVERTEX(3)).gt.bound).and.
-!$$$     &              (dg%slopeflag.eq.5) ) then
+!$$$     &              (slopeflag.eq.5) ) then
 !$$$
 !$$$
 !$$$                  iota(4:dofs(i),i,irk+1)=0.D0
 !$$$
-!$$$                  if (dg%padapt.eq.1) then
+!$$$                  if (padapt.eq.1) then
 !$$$                     pdg_el(i) = 1
 !$$$                  endif 
 !$$$
@@ -4818,12 +4818,12 @@
 !$$$               if( (abs(tmp1-ZEVERTEX(1)).gt.bound).or.
 !$$$     &              (abs(tmp2-ZEVERTEX(2)).gt.bound).or.
 !$$$     &              (abs(tmp3-ZEVERTEX(3)).gt.bound).and.
-!$$$     &              (dg%slopeflag.eq.5) ) then
+!$$$     &              (slopeflag.eq.5) ) then
 !$$$
 !$$$
 !$$$                  iota2(4:dofs(i),i,irk+1)=0.D0
 !$$$
-!$$$                  if (dg%padapt.eq.1) then
+!$$$                  if (padapt.eq.1) then
 !$$$                     pdg_el(i) = 1
 !$$$                  endif 
 !$$$
@@ -4844,12 +4844,12 @@
 !$$$              if( (abs(tmp1-ZEVERTEX(1)).gt.bound).or.
 !$$$     &              (abs(tmp2-ZEVERTEX(2)).gt.bound).or.
 !$$$     &              (abs(tmp3-ZEVERTEX(3)).gt.bound).and.
-!$$$     &              (dg%slopeflag.eq.5) ) then
+!$$$     &              (slopeflag.eq.5) ) then
 !$$$
 !$$$
 !$$$                  bed(4:dofs(i),i,irk+1,l)=0.D0
 !$$$
-!$$$                  if (dg%padapt.eq.1) then
+!$$$                  if (padapt.eq.1) then
 !$$$                     pdg_el(i) = 1
 !$$$                  endif 
 !$$$
@@ -4906,10 +4906,10 @@
       Real(SZ), Allocatable :: iotaminel(:,:),iotamaxel(:,:)
       Real(SZ), Allocatable :: iota2minel(:,:),iota2maxel(:,:)
 
-      Allocate ( ZEminel(mne,dg%dofh),ZEmaxel(mne,dg%dofh),QXminel(mne,dg%dofh) )
-      Allocate ( QYminel(mne,dg%dofh),QYmaxel(mne,dg%dofh),QXmaxel(mne,dg%dofh) )
-      Allocate ( iotaminel(mne,dg%dofh),iotamaxel(mne,dg%dofh) )
-      Allocate ( iota2minel(mne,dg%dofh),iota2maxel(mne,dg%dofh) )
+      Allocate ( ZEminel(mne,dofh),ZEmaxel(mne,dofh),QXminel(mne,dofh) )
+      Allocate ( QYminel(mne,dofh),QYmaxel(mne,dofh),QXmaxel(mne,dofh) )
+      Allocate ( iotaminel(mne,dofh),iotamaxel(mne,dofh) )
+      Allocate ( iota2minel(mne,dofh),iota2maxel(mne,dofh) )
 
 
 !.....We work over the master element
@@ -6733,10 +6733,10 @@
       Real(SZ), Allocatable :: iotaminel(:,:),iotamaxel(:,:)
       Real(SZ), Allocatable :: iota2minel(:,:),iota2maxel(:,:)
 
-      Allocate ( ZEminel(mne,dg%dofh),ZEmaxel(mne,dg%dofh),QXminel(mne,dg%dofh) )
-      Allocate ( QYminel(mne,dg%dofh),QYmaxel(mne,dg%dofh),QXmaxel(mne,dg%dofh) )
-      Allocate ( iotaminel(mne,dg%dofh),iotamaxel(mne,dg%dofh) )
-      Allocate ( iota2minel(mne,dg%dofh),iota2maxel(mne,dg%dofh) )
+      Allocate ( ZEminel(mne,dofh),ZEmaxel(mne,dofh),QXminel(mne,dofh) )
+      Allocate ( QYminel(mne,dofh),QYmaxel(mne,dofh),QXmaxel(mne,dofh) )
+      Allocate ( iotaminel(mne,dofh),iotamaxel(mne,dofh) )
+      Allocate ( iota2minel(mne,dofh),iota2maxel(mne,dofh) )
 
 
 !.....We work over the master element
@@ -7575,17 +7575,17 @@
       Real(SZ), Allocatable :: iota2taylor0slope(:,:,:),iota2taylor0(:,:,:)
 
 
-      Allocate ( ZE_cand(mne,dg%dofh,1),QX_cand(mne,dg%dofh,1) )
-      Allocate ( QY_cand(mne,dg%dofh,1) ) 
-      Allocate ( iota_cand(mne,dg%dofh,1),iota2_cand(mne,dg%dofh,1) )
-      Allocate ( ZE_minmod(mne,dg%dofh,1),QX_minmod(mne,dg%dofh,1) )
-      Allocate ( QY_minmod(mne,dg%dofh,1) ) 
-      Allocate ( iota_minmod(mne,dg%dofh,1),iota2_minmod(mne,dg%dofh,1) )
-      Allocate ( ZEtaylor0slope(mne,dg%dofh,1),ZEtaylor0(MNE,dg%dofh,1))
-      Allocate ( QXtaylor0slope(mne,dg%dofh,1),QXtaylor0(MNE,dg%dofh,1))
-      Allocate ( QYtaylor0slope(mne,dg%dofh,1),QYtaylor0(MNE,dg%dofh,1))
-      Allocate ( iotataylor0slope(mne,dg%dofh,1),iotataylor0(MNE,dg%dofh,1))
-      Allocate ( iota2taylor0slope(mne,dg%dofh,1),iota2taylor0(MNE,dg%dofh,1))
+      Allocate ( ZE_cand(mne,dofh,1),QX_cand(mne,dofh,1) )
+      Allocate ( QY_cand(mne,dofh,1) ) 
+      Allocate ( iota_cand(mne,dofh,1),iota2_cand(mne,dofh,1) )
+      Allocate ( ZE_minmod(mne,dofh,1),QX_minmod(mne,dofh,1) )
+      Allocate ( QY_minmod(mne,dofh,1) ) 
+      Allocate ( iota_minmod(mne,dofh,1),iota2_minmod(mne,dofh,1) )
+      Allocate ( ZEtaylor0slope(mne,dofh,1),ZEtaylor0(MNE,dofh,1))
+      Allocate ( QXtaylor0slope(mne,dofh,1),QXtaylor0(MNE,dofh,1))
+      Allocate ( QYtaylor0slope(mne,dofh,1),QYtaylor0(MNE,dofh,1))
+      Allocate ( iotataylor0slope(mne,dofh,1),iotataylor0(MNE,dofh,1))
+      Allocate ( iota2taylor0slope(mne,dofh,1),iota2taylor0(MNE,dofh,1))
 
 
 
@@ -8373,9 +8373,9 @@
       Allocate ( ZE_MIN1(NP),ZE_MAX1(NP),QX_MIN1(NP) )
       Allocate ( QY_MIN1(NP),QY_MAX1(NP),QX_MAX1(NP) )
       Allocate ( iota_MIN1(NP),iota_MAX1(NP) )
-      Allocate ( iota2_MIN1(NP),iota2_MAX1(NP), temparray1(MNE,dg%dofh,1) )
-      Allocate (  temparray2(MNE,dg%dofh,1), temparray3(MNE,dg%dofh,1) )
-      Allocate (  temparray4(MNE,dg%dofh,1), temparray5(MNE,dg%dofh,1) )
+      Allocate ( iota2_MIN1(NP),iota2_MAX1(NP), temparray1(MNE,dofh,1) )
+      Allocate (  temparray2(MNE,dofh,1), temparray3(MNE,dofh,1) )
+      Allocate (  temparray4(MNE,dofh,1), temparray5(MNE,dofh,1) )
 
 !     FIND THE MAXIMUM AND MINIMUM OF EACH VARIABLE OVER ALL ELEMENTS 
 !     SHARING A NODE
@@ -8482,9 +8482,9 @@
       temparray5 = 0.D0
 #endif
 
-      do ll=dg%dofh,1,-1
+      do ll=dofh,1,-1
 
-         if(ll+floor(  0.5D0 + sqrt(real(2*ll)) )+1.le.dg%dofh) then
+         if(ll+floor(  0.5D0 + sqrt(real(2*ll)) )+1.le.dofh) then
 
 
             Call Slopelim_Aux(ZEtaylor(:,:,1),QXtaylor(:,:,1),QYtaylor(:,:,1),   
@@ -8784,11 +8784,11 @@
       INTEGER L,LL,INC1,INC2,INC3,KDP,NN,IVAR,I,J,kk,k,varnum,ss,lll,l1,l2,l3
       REAL(SZ) ZEC(3),ZEVERTEX(3),DIF(3),SUMLOC,SUMDIF,SIGNDIF,ZEVERTEX2(3),
       REAL(SZ) DIV,REDFAC,REDMAX,zek(MNE,3,1),zecc(MNE,3),zeve(MNE,3)
-      Real(SZ), intent(inout) :: ZEder(MNE,dg%dofh,1)
-      Real(SZ), intent(inout) :: QXder(MNE,dg%dofh,1)
-      Real(SZ), intent(inout) :: QYder(MNE,dg%dofh,1)
-      Real(SZ), intent(inout) :: iotader(MNE,dg%dofh,1)
-      Real(SZ), intent(inout) :: iota2der(MNE,dg%dofh,1)
+      Real(SZ), intent(inout) :: ZEder(MNE,dofh,1)
+      Real(SZ), intent(inout) :: QXder(MNE,dofh,1)
+      Real(SZ), intent(inout) :: QYder(MNE,dofh,1)
+      Real(SZ), intent(inout) :: iotader(MNE,dofh,1)
+      Real(SZ), intent(inout) :: iota2der(MNE,dofh,1)
       Real(SZ) ZEMIN1(3),ZEMAX1(3),QXMIN1(3),QXMAX1(3)
       Real(SZ) QYMIN1(3),QYMAX1(3)
       Real(SZ) iotaMIN1(3),iotaMAX1(3),zztop
