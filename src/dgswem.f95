@@ -145,7 +145,7 @@
          LEQ = 0.D0
       ENDIF
       NLEQG = NLEQ*G
-      FG_L = LEQ*G
+      dg%FG_L = LEQ*G
 
       IFWIND=1
       IF(IM.EQ.1) IFWIND=0
@@ -188,7 +188,7 @@
       tecfile_max = DIRNAME//'/'//'..'//'/'//'tecplot_max'//
      &     '/'//'tecplot.max_pe00000'
 
-                                !call iwrite(tecfile,14,19,myproc)
+                                !call dg%iwrite(tecfile,14,19,myproc)
 
       write(tecfile(45:49), "(i4.4)") myproc
       write(tecfile_max(42:46), "(i4.4)") myproc
@@ -204,7 +204,7 @@
 
       if (ModetoNode.eq.0) then
          write(777,*) 
-     $        'VARIABLES = "x", "y", "b", "ze", "H", "u", "v", "|v|","|w|","p","iota","iota2","sum","diff"'
+     $        'VARIABLES = "x", "y", "b", "dg%ze", "H", "u", "v", "|v|","|w|","p","dg%iota","dg%iota2","sum","diff"'
          write(777,*) 'ZONE ZONETYPE=FETRIANGLE ',
      $        'NODES=', np, 
      $        ' ELEMENTS=', ne, 
@@ -263,7 +263,7 @@
          enddo
       else
          write(777,*) 
-     $'VARIABLES = "x", "y", "b", "ze", "H", "u", "v", "|v|","|w|","PE"'
+     $'VARIABLES = "x", "y", "b", "dg%ze", "H", "u", "v", "|v|","|w|","PE"'
          write(777,*) 'ZONE ZONETYPE=FETRIANGLE ',
      $        'NODES=', np, 
      $        ' ELEMENTS=', ne, 
@@ -295,7 +295,7 @@
 #ifdef SWAN
 !asey 101118: Allow SWAN to initialize stuff before the start
 !             of the time step loop.  This subroutine is inside
-!             the 'couple2swan.F' src file.
+!             the 'couple2swan.dg%F' src file.
       CALL PADCSWAN_INIT
 #endif
 

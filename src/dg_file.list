@@ -3,25 +3,25 @@
 # in module dg with dg%
 
 #../scripts/sed_vars.bash calc_normal.f95 dg.list dg
-# subroutine calc_normal is called by prep_DG.f95
+# subroutine calc_normal is called by prep_DG.f95           DONE
 
 #../scripts/sed_vars.bash create_edge_data.f95 dg.list dg
-# subroutine create_edge_data is called by prep_DG.f95
+# subroutine create_edge_data is called by prep_DG.f95      DONE
 
-../scripts/sed_vars.bash DG_hydro_timestep.f95 dg.list dg
-#subroutine DG_hydro_timestep is called by DG_timestep.f95
+#../scripts/sed_vars.bash DG_hydro_timestep.f95 dg.list dg
+#subroutine DG_hydro_timestep is called by DG_timestep.f95  DONE
 
 ../scripts/sed_vars.bash dgswem.f95 dg.list dg 1 416
 #program DG_SWEM (ends on L416) uses module dg,
-#subroutines later in the file do NOT,
+#subroutines later in the file do NOT                       DONE
 
 #subroutine dg_timestep is called by dgswem.f95
 #subroutine scrutinize solution only uses a subset of the variables
-#so it needs it's own variable list
-../scripts/sed_vars.bash DG_timestep.f95 scrutinize_solution_dg.list 65 284
+#so it needs it's own variable list                         DONE
+../scripts/sed_vars.bash DG_timestep.f95 scrutinize_solution_dg.list dg 65 284
 
 ../scripts/sed_vars.bash ebarrier_edge_hydro.f95 dg.list dg 
-#sub is called by DG_hydro_timestep
+#sub is called by DG_hydro_timestep                         
 
 ../scripts/sed_vars.bash flow_edge_hydro.f95 dg.list dg 
 #sub is called by DG_hydro_timestep
@@ -54,10 +54,10 @@
 ../scripts/sed_vars.bash ocean_edge_hydro.f95 dg.list dg
 # called by DG_hydro_timestep.f95
 
-../scripts/sed_vars.bash orthbasis_area.f95 dg.list dg
+../scripts/sed_vars.bash orthobasis_area.f95 dg.list dg
 # called by prep_DG.f95
 
-../scripts/sed_vars.bash orthbasis_edge.f95 dg.list dg
+../scripts/sed_vars.bash orthobasis_edge.f95 dg.list dg
 # called by prep_DG.f95
 
 ../scripts/sed_vars.bash p_enrichment.f95 dg.list dg
