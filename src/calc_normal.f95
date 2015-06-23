@@ -25,26 +25,26 @@
 
 !.....Loop over the edges
 
-      DO I = 1,NEDGES
+      DO I = 1,dg%NEDGES
       
 !.....Retrieve the node numbers for the given edge
 
-        N1 = NEDNO(1,I)
-        N2 = NEDNO(2,I)
+        N1 = dg%NEDNO(1,I)
+        N2 = dg%NEDNO(2,I)
 
 !.....Compute an average SFAC to adjust normal for CPP coordinates
 
-        SAV = (SFAC(N1) + SFAC(N2))/2.0
+        dg%SAV = (SFAC(N1) + SFAC(N2))/2.0
         
 !.....Compute the length of the given egde
         
-        XLEN(I) = SQRT((Y(N2) - Y(N1))**2.D0                   + (X(N2) - X(N1))**2.D0)
+        dg%XLEN(I) = SQRT((Y(N2) - Y(N1))**2.D0                   + (X(N2) - X(N1))**2.D0)
      
 !.....Compute the components of the normal vector
 
-       !COSNX(I) = SAV*(Y(N2) - Y(N1))/XLEN(I)
-       COSNX(I) = (Y(N2) - Y(N1))/XLEN(I)
-       SINNX(I) = -(X(N2) - X(N1))/XLEN(I)
+       !dg%COSNX(I) = dg%SAV*(Y(N2) - Y(N1))/dg%XLEN(I)
+       dg%COSNX(I) = (Y(N2) - Y(N1))/dg%XLEN(I)
+       dg%SINNX(I) = -(X(N2) - X(N1))/dg%XLEN(I)
       ENDDO
         
       RETURN

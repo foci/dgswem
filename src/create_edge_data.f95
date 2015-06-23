@@ -1,6 +1,6 @@
 !***********************************************************************
 !
-!     SUBROUTINE  CREATE_EDGE_DATA.F
+!     SUBROUTINE  CREATE_EDGE_DATA.dg%F
 !
 !     This program takes the original ADCIRC data sets given in files
 !     'fort.14' and 'fort.15' and generates edge based data structures
@@ -55,7 +55,7 @@
 
 !.....Compute maximum number of edges
 
-      MNED = 3*s%MNE
+      dg%MNED = 3*s%MNE
 
 !.....Allocate the edge data arrays
 
@@ -73,10 +73,10 @@
       ENDDO
 
 
-      NEDNO(:,:) = 0
-      NEDEL(:,:) = 0
+      dg%NEDNO(:,:) = 0
+      dg%NEDEL(:,:) = 0
 
-      NEDGES = 0
+      dg%NEDGES = 0
 #ifdef CMPI
       IF(MYPROC.EQ.0) THEN
          PRINT *,'CREATING EDGE PAIRS...'
@@ -102,30 +102,30 @@
           I1 = LED(1,IED)
           I2 = LED(2,IED)
 
-          NEDGES = NEDGES + 1
-          ED_ID = NEDGES
+          dg%NEDGES = dg%NEDGES + 1
+          ED_ID = dg%NEDGES
           NELED(IED,IEL) = ED_ID
-          NEDNO(1,ED_ID) = I1
-          NEDNO(2,ED_ID) = I2
-          NEDEL(1,ED_ID) = IEL
+          dg%NEDNO(1,ED_ID) = I1
+          dg%NEDNO(2,ED_ID) = I2
+          dg%NEDEL(1,ED_ID) = IEL
           EDFLG(IED,IEL) = 1
 
           DO 15 JJEL = 1,NNDEL(I1)
             JEL = NDEL(I1,JJEL)
             IF(JEL.EQ.IEL) GOTO 15
             DO JED = 1,3
-              J1 = NM(JEL,MOD(JED+0,3)+1)
-              J2 = NM(JEL,MOD(JED+1,3)+1)
-              IF ( ((J1.EQ.I1).AND.(J2.EQ.I2)).OR.&
-             ((J1.EQ.I2).AND.(J2.EQ.I1)) ) THEN
+              dg%J1 = NM(JEL,MOD(JED+0,3)+1)
+              dg%J2 = NM(JEL,MOD(JED+1,3)+1)
+              IF ( ((dg%J1.EQ.I1).AND.(dg%J2.EQ.I2)).OR.&
+             ((dg%J1.EQ.I2).AND.(dg%J2.EQ.I1)) ) THEN
 
                 IF(EDFLG(JED,JEL).EQ.1) THEN
                   PRINT *,'POSSIBLE DUPLICATE ELEMENT'
 #ifdef CMPI
                   PRINT *,'MYPROC=',MYPROC
 #endif
-                  PRINT *,'EL=',JEL,', J1=',J1,', J2=',J2
-                  PRINT *,'  (CREATE_EDGE_DATA.F)'
+                  PRINT *,'dg%EL=',JEL,', dg%J1=',dg%J1,', dg%J2=',dg%J2
+                  PRINT *,'  (CREATE_EDGE_DATA.dg%F)'
                   PRINT *,'EXECUTION WILL BE TERMINATED'
                   PRINT *,'! CHECK THE GRID CAREFULLY !'
                   PRINT*,'--------------------------------------'
@@ -133,7 +133,7 @@
                 ENDIF
            
                 NELED(JED,JEL) = ED_ID
-                NEDEL(2,ED_ID) = JEL
+                dg%NEDEL(2,ED_ID) = JEL
                 EDFLG(JED,JEL) = 1
                 GOTO 10
               ENDIF
@@ -156,10 +156,10 @@
 
 !.....Print out the edge-to-node and edge-to-element connectivity
 
-      WRITE(17,*)NEDGES
-      DO IED = 1,NEDGES
-        WRITE(17,*)IED,NEDNO(1,IED),NEDNO(2,IED),NEDEL(1,IED),&
-             NEDEL(2,IED)
+      WRITE(17,*)dg%NEDGES
+      DO IED = 1,dg%NEDGES
+        WRITE(17,*)IED,dg%NEDNO(1,IED),dg%NEDNO(2,IED),dg%NEDEL(1,IED),&
+             dg%NEDEL(2,IED)
       ENDDO
         
 !.....Print out the element-to-edge connectivity
@@ -170,47 +170,47 @@
 
 !.....An index to keep track of the edges
 
-      DO I = 1,NEDGES
-        NCOUNT(I) = -1
+      DO I = 1,dg%NEDGES
+        dg%NCOUNT(I) = -1
       ENDDO
       
 !.....Zero out internal edge counter and array
 
-      NIEDS = 0
-      NIEDN = 0
+      dg%NIEDS = 0
+      dg%NIEDN = 0
       
 !.....Zero out land (no-normal flow) edge counter and array
 
-      NLEDS = 0
-      NLEDN = 0
+      dg%NLEDS = 0
+      dg%NLEDN = 0
       
 !.....Zero out elevation specified open edge counter and array
 
-      NEEDS = 0
-      NEEDN = 0
+      dg%NEEDS = 0
+      dg%NEEDN = 0
       
 !.....Zero out flow specified open edge counter and array
 
-      NFEDS = 0
-      NFEDN = 0
+      dg%NFEDS = 0
+      dg%NFEDN = 0
       
 !.....Zero out the radiation edge counter and array
 
-      NREDS = 0
-      NREDN = 0
+      dg%NREDS = 0
+      dg%NREDN = 0
       
 !.....Zero out internal and external barrier counters and arrays
 
-      NIBEDS = 0
-      NEBEDS = 0
+      dg%NIBEDS = 0
+      dg%NEBEDS = 0
 
-      NIBSEG = 0
-      NEBSEG = 0
+      dg%NIBSEG = 0
+      dg%NEBSEG = 0
       
-      NIBEDN  = 0
-      NEBEDN  = 0
-      NIBSEGN = 0
-      NEBSEGN = 0
+      dg%NIBEDN  = 0
+      dg%NEBEDN  = 0
+      dg%NIBSEGN = 0
+      dg%NEBSEGN = 0
 
 !.....Find node pairs that are not edges of elements (eg. an internal
 !.....barrier against a land boundary)
@@ -220,14 +220,14 @@
       DO 10130 II = 1,NVEL
         IF( (LBCODEI(II).EQ.4).OR.(LBCODEI(II).EQ.24).OR.&
       (LBCODEI(II).EQ.5).OR.(LBCODEI(II).EQ.25) ) THEN
-          J1 = NBV(II)      ! GLOBAL NODE NUMBER ON BACK SIDE OF BARRIER
-          J2 = IBCONN(II)   ! GLOBAL NODE NUMBER ON FRONT SIDE OF BARRIER
+          dg%J1 = NBV(II)      ! GLOBAL NODE NUMBER ON BACK SIDE OF BARRIER
+          dg%J2 = IBCONN(II)   ! GLOBAL NODE NUMBER ON FRONT SIDE OF BARRIER
           DO K = 1,NBOU
             IF ( (SEGTYPE(K).EQ.4 ).OR.(SEGTYPE(K).EQ.24) ) THEN
-              IF (WEIR_BUDDY_NODE(J1,1).EQ.0) THEN
-                WEIR_BUDDY_NODE(J1,1) = J2
+              IF (WEIR_BUDDY_NODE(dg%J1,1).EQ.0) THEN
+                WEIR_BUDDY_NODE(dg%J1,1) = dg%J2
               ELSE
-                WEIR_BUDDY_NODE(J1,2) = J2
+                WEIR_BUDDY_NODE(dg%J1,2) = dg%J2
               ENDIF
             ENDIF
             IF ( (SEGTYPE(K).EQ.0 ).OR.(SEGTYPE(K).EQ.3 ).OR.&
@@ -237,8 +237,8 @@
               DO IED = 1,NVELL(K)-1
                 N1 = NBVV(K,IED)
                 N2 = NBVV(K,IED+1)
-                IF ((N1.EQ.J1).OR.(N1.EQ.J2)) THEN
-                  IF ((N2.EQ.J1).OR.(N2.EQ.J2)) THEN
+                IF ((N1.EQ.dg%J1).OR.(N1.EQ.dg%J2)) THEN
+                  IF ((N2.EQ.dg%J1).OR.(N2.EQ.dg%J2)) THEN
                     NOT_AN_EDGE(N1) = 1
                     NOT_AN_EDGE(N2) = 1
                   ENDIF
@@ -249,8 +249,8 @@
               DO IED = 1,NVELL(K)-1
                 N1 = NBVV(K,IED)
                 N2 = NBVV(K,IED+1)
-                IF ((N1.EQ.J1).OR.(N1.EQ.J2)) THEN
-                  IF ((N2.EQ.J1).OR.(N2.EQ.J2)) THEN
+                IF ((N1.EQ.dg%J1).OR.(N1.EQ.dg%J2)) THEN
+                  IF ((N2.EQ.dg%J1).OR.(N2.EQ.dg%J2)) THEN
                     NOT_AN_EDGE(N1) = 1
                     NOT_AN_EDGE(N2) = 1
                   ENDIF
@@ -263,13 +263,13 @@
 
 !.....Find the interior edges
 
-      DO I = 1,NEDGES
-        IEL1 = NEDEL(1,I)
-        IEL2 = NEDEL(2,I)
+      DO I = 1,dg%NEDGES
+        IEL1 = dg%NEDEL(1,I)
+        IEL2 = dg%NEDEL(2,I)
         IF((IEL1.NE.0).AND.(IEL2.NE.0))THEN
-          NIEDS = NIEDS + 1
-          NIEDN(NIEDS) = I
-          NCOUNT(I) = 0
+          dg%NIEDS = dg%NIEDS + 1
+          dg%NIEDN(dg%NIEDS) = I
+          dg%NCOUNT(I) = 0
         ENDIF
       ENDDO
 
@@ -280,14 +280,14 @@
           N1 = NBDV(K,IED)
           N2 = NBDV(K,IED+1)
           IERROR = 0
-          DO JED = 1,NEDGES
-            J1 = NEDNO(1,JED)
-            J2 = NEDNO(2,JED)
-            IF ( (J1.EQ.N1).OR.(J1.EQ.N2) ) THEN
-              IF ( (J2.EQ.N1).OR.(J2.EQ.N2) ) THEN
-                NEEDS = NEEDS + 1
-                NEEDN(NEEDS) = JED
-                NCOUNT(JED) = 4
+          DO JED = 1,dg%NEDGES
+            dg%J1 = dg%NEDNO(1,JED)
+            dg%J2 = dg%NEDNO(2,JED)
+            IF ( (dg%J1.EQ.N1).OR.(dg%J1.EQ.N2) ) THEN
+              IF ( (dg%J2.EQ.N1).OR.(dg%J2.EQ.N2) ) THEN
+                dg%NEEDS = dg%NEEDS + 1
+                dg%NEEDN(dg%NEEDS) = JED
+                dg%NCOUNT(JED) = 4
                 IERROR = 1
               ENDIF
             ENDIF
@@ -319,9 +319,9 @@
           N2 = NBVV(K,IED+1)
 
           IERROR = 0
-          DO JED = 1,NEDGES
-            J1 = NEDNO(1,JED)
-            J2 = NEDNO(2,JED)
+          DO JED = 1,dg%NEDGES
+            dg%J1 = dg%NEDNO(1,JED)
+            dg%J2 = dg%NEDNO(2,JED)
             IF ((NOT_AN_EDGE(N1).EQ.1).AND.(NOT_AN_EDGE(N2).EQ.1)) THEN
 !              PRINT*,'NODES ',N1,' AND ',N2,' MAKE UP A BOUNDARY',
 !     &                  'SEGMENT THAT IS NOT AN EDGE TO AN ELEMENT; ',
@@ -330,77 +330,77 @@
               GOTO 10133
 !--
             ENDIF
-            IF ( (N1.EQ.J1).OR.(N1.EQ.J2) ) THEN
-              IF ( (N2.EQ.J1).OR.(N2.EQ.J2) ) THEN
+            IF ( (N1.EQ.dg%J1).OR.(N1.EQ.dg%J2) ) THEN
+              IF ( (N2.EQ.dg%J1).OR.(N2.EQ.dg%J2) ) THEN
 
                 IERROR = 1
-                NCOUNT(JED) = 1
+                dg%NCOUNT(JED) = 1
 
 !.....Determine the different boundary types
 
                 IF ( (SEGTYPE(K).EQ.0 ).OR.(SEGTYPE(K).EQ.10).OR.&
                (SEGTYPE(K).EQ.20) ) THEN
-                  NLEDS = NLEDS + 1
-                  NLEDN(NLEDS) = JED
+                  dg%NLEDS = dg%NLEDS + 1
+                  dg%NLEDN(dg%NLEDS) = JED
                 ENDIF
 
                 IF ( (SEGTYPE(K).EQ.1 ).OR.(SEGTYPE(K).EQ.11).OR.&
                (SEGTYPE(K).EQ.21) ) THEN
-                  NLEDS = NLEDS + 1
-                  NLEDN(NLEDS) = JED
+                  dg%NLEDS = dg%NLEDS + 1
+                  dg%NLEDN(dg%NLEDS) = JED
                 ENDIF
 
                 IF ( (SEGTYPE(K).EQ.2 ).OR.(SEGTYPE(K).EQ.12).OR.&
                (SEGTYPE(K).EQ.22) ) THEN
-                  NFEDS = NFEDS + 1
-                  NFEDN(NFEDS) = JED
+                  dg%NFEDS = dg%NFEDS + 1
+                  dg%NFEDN(dg%NFEDS) = JED
                 ENDIF
                 
                 IF ( (SEGTYPE(K).EQ.3 ).OR.(SEGTYPE(K).EQ.13).OR.&
                (SEGTYPE(K).EQ.23) ) THEN
-                  NEBSEG = NEBSEG + 1
-                  NEBEDS = NEBEDS + 1
-                  NEBEDN(NEBEDS) = JED
-                  NEBSEGN(NEBSEG) = JED
+                  dg%NEBSEG = dg%NEBSEG + 1
+                  dg%NEBEDS = dg%NEBEDS + 1
+                  dg%NEBEDN(dg%NEBEDS) = JED
+                  dg%NEBSEGN(dg%NEBSEG) = JED
                 ENDIF
                 
                 IF ( (SEGTYPE(K).EQ.4 ).OR.(SEGTYPE(K).EQ.14).OR.&
                (SEGTYPE(K).EQ.24) ) THEN
-                  NIBSEG = NIBSEG + 1
-                  NIBEDS = NIBEDS + 1
-                  NIBEDN(NIBEDS) = JED
-                  NIBSEGN(1,NIBSEG) = JED
+                  dg%NIBSEG = dg%NIBSEG + 1
+                  dg%NIBEDS = dg%NIBEDS + 1
+                  dg%NIBEDN(dg%NIBEDS) = JED
+                  dg%NIBSEGN(1,dg%NIBSEG) = JED
 
 !.....Find the edge on the opposite side of the barrier
 
-                  NN1 = BACKNODES(1,NIBSEG)
-                  NN2 = BACKNODES(2,NIBSEG)
+                  NN1 = dg%BACKNODES(1,dg%NIBSEG)
+                  NN2 = dg%BACKNODES(2,dg%NIBSEG)
 !                  if (myproc.eq.24) then
 !                     write(200+myproc,*) jed,nn1,nn2
 !                  endif
-                  DO JJED = 1,NEDGES
-                    JJ1 = NEDNO(1,JJED)
-                    JJ2 = NEDNO(2,JJED)
+                  DO JJED = 1,dg%NEDGES
+                    JJ1 = dg%NEDNO(1,JJED)
+                    JJ2 = dg%NEDNO(2,JJED)
                     IF ( (NN1.EQ.JJ1).OR.(NN1.EQ.JJ2) ) THEN
                       IF ( (NN2.EQ.JJ1).OR.(NN2.EQ.JJ2) ) THEN
-                        NIBEDS = NIBEDS + 1
-                        NIBEDN(NIBEDS) = JJED
-                        NIBSEGN(2,NIBSEG) = JJED
-                        NCOUNT(JJED) = 1
+                        dg%NIBEDS = dg%NIBEDS + 1
+                        dg%NIBEDN(dg%NIBEDS) = JJED
+                        dg%NIBSEGN(2,dg%NIBSEG) = JJED
+                        dg%NCOUNT(JJED) = 1
                         ONE_OR_TWO(N1) = 2
                         ONE_OR_TWO(N2) = 2
                       ENDIF
                     ENDIF
                   ENDDO
-!                  if (nibsegn(2,nibseg).eq.0) then
+!                  if (dg%nibsegn(2,dg%nibseg).eq.0) then
 !                     write(200+myproc,*) 'error in create_edge_data'
-!                     write(200+myproc,*) myproc,nibseg,jed,nn1,nn2
+!                     write(200+myproc,*) myproc,dg%nibseg,jed,nn1,nn2
 !                  endif
                 ENDIF
                 
                 IF ( (SEGTYPE(K).EQ.30) ) THEN
-                  NREDS = NREDS + 1
-                  NREDN(NREDS) = JED
+                  dg%NREDS = dg%NREDS + 1
+                  dg%NREDN(dg%NREDS) = JED
                 ENDIF
                 
               ENDIF
@@ -431,10 +431,10 @@
 !.....Check the order of the nodes assigned to an edge - important in
 !.....the calculation of the unit normal
 
-      DO I = 1,NEDGES
-        N1 = NEDNO(1,I)
-        N2 = NEDNO(2,I)
-        IEL = NEDEL(1,I)
+      DO I = 1,dg%NEDGES
+        N1 = dg%NEDNO(1,I)
+        N2 = dg%NEDNO(2,I)
+        IEL = dg%NEDEL(1,I)
         IF((N1.EQ.NM(IEL,2)).AND.(N2.EQ.NM(IEL,1))) THEN
           WRITE(6,*)'THE ORDER OF NODES ASSIGNED IS WRONG FOR EDGE',I
           WRITE(16,*)'THE ORDER OF NODES ASSIGNED IS WRONG FOR EDGE',I
@@ -455,21 +455,21 @@
 !.....Check for missing edges
 
 !sb-PDG1 modified
-      NERR = NEDGES - (NIEDS + NLEDS + NEEDS + NFEDS + NIBEDS + NEBEDS +&
-                 NREDS)
+      NERR = dg%NEDGES - (dg%NIEDS + dg%NLEDS + dg%NEEDS + dg%NFEDS + dg%NIBEDS + dg%NEBEDS +&
+                 dg%NREDS)
 
 #ifdef CMPI
       IF(MYPROC.EQ.0) THEN
          WRITE(6,*) '  '
-         WRITE(6,*) 'TOTAL NO. OF EDGES = ', NEDGES
+         WRITE(6,*) 'TOTAL NO. OF EDGES = ', dg%NEDGES
          WRITE(6,*) '  '
-         WRITE(6,*) 'NO. OF INTERNAL (NON-BOUNDARY) EDGES = ', NIEDS
-         WRITE(6,*) 'NO. OF NO-NORMAL FLOW EDGES = ', NLEDS
-         WRITE(6,*) 'NO. OF NON-ZERO NORMAL FLOW EDGES = ', NFEDS
-         WRITE(6,*) 'NO. OF ELEVATION SPECIFIED EDGES = ', NEEDS
-         WRITE(6,*) 'NO. OF EXTERNAL BARRIER EDGES = ', NEBEDS
-         WRITE(6,*) 'NO. OF INTERNAL BARRIER EDGES = ', NIBEDS
-         WRITE(6,*) 'NO. OF RADIATION EDGES = ', NREDS
+         WRITE(6,*) 'NO. OF INTERNAL (NON-BOUNDARY) EDGES = ', dg%NIEDS
+         WRITE(6,*) 'NO. OF NO-NORMAL FLOW EDGES = ', dg%NLEDS
+         WRITE(6,*) 'NO. OF NON-ZERO NORMAL FLOW EDGES = ', dg%NFEDS
+         WRITE(6,*) 'NO. OF ELEVATION SPECIFIED EDGES = ', dg%NEEDS
+         WRITE(6,*) 'NO. OF EXTERNAL BARRIER EDGES = ', dg%NEBEDS
+         WRITE(6,*) 'NO. OF INTERNAL BARRIER EDGES = ', dg%NIBEDS
+         WRITE(6,*) 'NO. OF RADIATION EDGES = ', dg%NREDS
          WRITE(6,*) &
         '-----------------------------------------------------'
          WRITE(6,*) 'NO. OF MISSING EDGES = ',NERR
@@ -477,39 +477,39 @@
       ENDIF
 #else
          WRITE(6,*) '  '
-         WRITE(6,*) 'TOTAL NO. OF EDGES = ', NEDGES
+         WRITE(6,*) 'TOTAL NO. OF EDGES = ', dg%NEDGES
          WRITE(6,*) '  '
-         WRITE(6,*) 'NO. OF INTERNAL (NON-BOUNDARY) EDGES = ', NIEDS
-         WRITE(6,*) 'NO. OF NO-NORMAL FLOW EDGES = ', NLEDS
-         WRITE(6,*) 'NO. OF NON-ZERO NORMAL FLOW EDGES = ', NFEDS
-         WRITE(6,*) 'NO. OF ELEVATION SPECIFIED EDGES = ', NEEDS
-         WRITE(6,*) 'NO. OF EXTERNAL BARRIER EDGES = ', NEBEDS
-         WRITE(6,*) 'NO. OF INTERNAL BARRIER EDGES = ', NIBEDS
-         WRITE(6,*) 'NO. OF RADIATION EDGES = ', NREDS
+         WRITE(6,*) 'NO. OF INTERNAL (NON-BOUNDARY) EDGES = ', dg%NIEDS
+         WRITE(6,*) 'NO. OF NO-NORMAL FLOW EDGES = ', dg%NLEDS
+         WRITE(6,*) 'NO. OF NON-ZERO NORMAL FLOW EDGES = ', dg%NFEDS
+         WRITE(6,*) 'NO. OF ELEVATION SPECIFIED EDGES = ', dg%NEEDS
+         WRITE(6,*) 'NO. OF EXTERNAL BARRIER EDGES = ', dg%NEBEDS
+         WRITE(6,*) 'NO. OF INTERNAL BARRIER EDGES = ', dg%NIBEDS
+         WRITE(6,*) 'NO. OF RADIATION EDGES = ', dg%NREDS
          WRITE(6,*) &
         '-----------------------------------------------------'
          WRITE(6,*) 'NO. OF MISSING EDGES = ',NERR
          WRITE(6,*)  ''
 #endif
       WRITE(16,*) '  '
-      WRITE(16,*) 'TOTAL NO. OF EDGES = ', NEDGES
+      WRITE(16,*) 'TOTAL NO. OF EDGES = ', dg%NEDGES
       WRITE(16,*) '  '
-      WRITE(16,*) 'NO. OF INTERNAL (NON-BOUNDARY) EDGES = ', NIEDS
-      WRITE(16,*) 'NO. OF NO-NORMAL FLOW EDGES = ', NLEDS
-      WRITE(16,*) 'NO. OF NON-ZERO NORMAL FLOW EDGES = ', NFEDS
-      WRITE(16,*) 'NO. OF ELEVATION SPECIFIED EDGES = ', NEEDS
-      WRITE(16,*) 'NO. OF EXTERNAL BARRIER EDGES = ', NEBEDS
-      WRITE(16,*) 'NO. OF INTERNAL BARRIER EDGES = ', NIBEDS
-      WRITE(16,*) 'NO. OF RADIATION EDGES = ', NREDS
+      WRITE(16,*) 'NO. OF INTERNAL (NON-BOUNDARY) EDGES = ', dg%NIEDS
+      WRITE(16,*) 'NO. OF NO-NORMAL FLOW EDGES = ', dg%NLEDS
+      WRITE(16,*) 'NO. OF NON-ZERO NORMAL FLOW EDGES = ', dg%NFEDS
+      WRITE(16,*) 'NO. OF ELEVATION SPECIFIED EDGES = ', dg%NEEDS
+      WRITE(16,*) 'NO. OF EXTERNAL BARRIER EDGES = ', dg%NEBEDS
+      WRITE(16,*) 'NO. OF INTERNAL BARRIER EDGES = ', dg%NIBEDS
+      WRITE(16,*) 'NO. OF RADIATION EDGES = ', dg%NREDS
       WRITE(16,*) &
         '-----------------------------------------------------'
       WRITE(16,*) 'NO. OF MISSING EDGES = ',NERR
       WRITE(16,*)  ''
 
-      DO I = 1,NEDGES
-        IF (NCOUNT(I).LT.0) THEN
-          N1 = NEDNO(1,I)
-          N2 = NEDNO(2,I)
+      DO I = 1,dg%NEDGES
+        IF (dg%NCOUNT(I).LT.0) THEN
+          N1 = dg%NEDNO(1,I)
+          N2 = dg%NEDNO(2,I)
 !sb-PDG1
 #ifdef CMPI
 !          WRITE(6,*)' '
@@ -524,94 +524,94 @@
 !          STOP
 #endif
 !--
-          NLEDS = NLEDS + 1
-          NLEDN(NLEDS) = I
+          dg%NLEDS = dg%NLEDS + 1
+          dg%NLEDN(dg%NLEDS) = I
         ENDIF
       ENDDO
       
 !.....Add internal barrier edges to land edge table for wet-dry
 !.....post-processing
 
-      DO I = 1,NIBEDS
-        NLEDN(NLEDS+I) = NIBEDN(I)
+      DO I = 1,dg%NIBEDS
+        dg%NLEDN(dg%NLEDS+I) = dg%NIBEDN(I)
       ENDDO
       
 !.....Print out the interior edges
 
-      WRITE(17,*) NIEDS,'       ! NUMBER OF INTERNAL EDGES'
-      DO I = 1,NIEDS
-        WRITE(17,*) I,NIEDN(I),nedno(1,niedn(i)),nedno(2,niedn(i))
+      WRITE(17,*) dg%NIEDS,'       ! NUMBER OF INTERNAL EDGES'
+      DO I = 1,dg%NIEDS
+        WRITE(17,*) I,dg%NIEDN(I),dg%nedno(1,dg%niedn(i)),dg%nedno(2,dg%niedn(i))
       ENDDO
 
 !.....Prin out land edges info.
 
-      WRITE(17,*) NLEDS,'       ! NUMBER OF NO-NORMAL FLOW EDGES'
-      IF (NLEDS.GT.0) THEN
-        DO I = 1,NLEDS
-          WRITE(17,*) I, NLEDN(I),nedno(1,nledn(i)),          nedno(2,nledn(i))
+      WRITE(17,*) dg%NLEDS,'       ! NUMBER OF NO-NORMAL FLOW EDGES'
+      IF (dg%NLEDS.GT.0) THEN
+        DO I = 1,dg%NLEDS
+          WRITE(17,*) I, dg%NLEDN(I),dg%nedno(1,dg%nledn(i)),          dg%nedno(2,dg%nledn(i))
         ENDDO
       ENDIF
       
 !.....Print out elevation specified edge info.
 
-      WRITE(17,*) NEEDS,'       ! NUMBER OF ELEVATION SPECIFIED EDGES'
-      IF (NEEDS.GT.0) THEN
-        DO I = 1,NEEDS
-          WRITE(17,*) I, NEEDN(I)
+      WRITE(17,*) dg%NEEDS,'       ! NUMBER OF ELEVATION SPECIFIED EDGES'
+      IF (dg%NEEDS.GT.0) THEN
+        DO I = 1,dg%NEEDS
+          WRITE(17,*) I, dg%NEEDN(I)
         ENDDO
       ENDIF
 
 !.....Print out non-zero flow edges info.
 
-      WRITE(17,*) NFEDS,'       ! NUMBER OF FLOW SPECIFIED EDGES'
-      IF (NFEDS.GT.0) THEN
-        DO I = 1,NFEDS
-          WRITE(17,*) I, NFEDN(I)
+      WRITE(17,*) dg%NFEDS,'       ! NUMBER OF FLOW SPECIFIED EDGES'
+      IF (dg%NFEDS.GT.0) THEN
+        DO I = 1,dg%NFEDS
+          WRITE(17,*) I, dg%NFEDN(I)
         ENDDO
       ENDIF
       
 !.....Print out external barrier edge info.
 
-      WRITE(17,*) NEBEDS,'       ! NUMBER OF EXTERNAL BARRIER EDGES'
-      IF (NEEDS.GT.0) THEN
-        DO I = 1,NEBEDS
-          WRITE(17,*) I, NEBEDN(I),nedno(1,nebedn(i)),          nedno(2,nebedn(i))
+      WRITE(17,*) dg%NEBEDS,'       ! NUMBER OF EXTERNAL BARRIER EDGES'
+      IF (dg%NEEDS.GT.0) THEN
+        DO I = 1,dg%NEBEDS
+          WRITE(17,*) I, dg%NEBEDN(I),dg%nedno(1,dg%nebedn(i)),          dg%nedno(2,dg%nebedn(i))
         ENDDO
       ENDIF
       
 !.....Print out internal barrier edge info.
 
-      WRITE(17,*) NIBEDS,'       ! NUMBER OF INTERNAL BARRIER EDGES'
-      IF (NIBEDS.GT.0) THEN
-        DO I = 1,NIBEDS
-          WRITE(17,*) I, NIBEDN(I),nedno(1,nibedn(i)),          nedno(2,nibedn(i))
+      WRITE(17,*) dg%NIBEDS,'       ! NUMBER OF INTERNAL BARRIER EDGES'
+      IF (dg%NIBEDS.GT.0) THEN
+        DO I = 1,dg%NIBEDS
+          WRITE(17,*) I, dg%NIBEDN(I),dg%nedno(1,dg%nibedn(i)),          dg%nedno(2,dg%nibedn(i))
 !          PRINT*,'INTERNAL BARRIER EDGE =',I
-!          PRINT*,'IS MADE UP OF NODES',NEDNO(1,NIBEDN(I)),'AND',
-!     &                                 NEDNO(2,NIBEDN(I))
+!          PRINT*,'IS MADE UP OF NODES',dg%NEDNO(1,dg%NIBEDN(I)),'AND',
+!     &                                 dg%NEDNO(2,dg%NIBEDN(I))
         ENDDO
       ENDIF
 
 !.....Print out radiation edges info.
 
-      WRITE(17,*) NREDS, '      ! NUMBER OF RADIATION EDGES'
-      IF (NREDS.GT.0) THEN
-        DO I = 1,NREDS
-          WRITE(17,*) I, NREDN(I)
+      WRITE(17,*) dg%NREDS, '      ! NUMBER OF RADIATION EDGES'
+      IF (dg%NREDS.GT.0) THEN
+        DO I = 1,dg%NREDS
+          WRITE(17,*) I, dg%NREDN(I)
         ENDDO
       ENDIF
       
 !.....Construct global edge to local edge (1,2, or 3) table
 
-      NEDSD(:,:) = 0.D0
-      DO I = 1,MNED
+      dg%NEDSD(:,:) = 0.D0
+      DO I = 1,dg%MNED
         DO K = 1,2
-          IF (NEDEL(K,I).NE.0) THEN
-            N1 = NELED(1,NEDEL(K,I))
-            N2 = NELED(2,NEDEL(K,I))
-            N3 = NELED(3,NEDEL(K,I))
-            IF (N1.EQ.I) NEDSD(K,I) = 1
-            IF (N2.EQ.I) NEDSD(K,I) = 2
-            IF (N3.EQ.I) NEDSD(K,I) = 3
+          IF (dg%NEDEL(K,I).NE.0) THEN
+            N1 = NELED(1,dg%NEDEL(K,I))
+            N2 = NELED(2,dg%NEDEL(K,I))
+            N3 = NELED(3,dg%NEDEL(K,I))
+            IF (N1.EQ.I) dg%NEDSD(K,I) = 1
+            IF (N2.EQ.I) dg%NEDSD(K,I) = 2
+            IF (N3.EQ.I) dg%NEDSD(K,I) = 3
           ENDIF
         ENDDO
       ENDDO
