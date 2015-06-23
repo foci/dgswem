@@ -68,3 +68,28 @@
 # prep_dg is called by dgswem
 # rk_time is called by prep_dg
 
+../scripts/sed_vars.bash prep_slopelim.f95 dg.list dg 1 524
+# only prep_slopelim uses dg
+
+../scripts/sed_vars.bash quad_pts_area.f95 dg.list dg
+../scripts/sed_vars.bash quad_pts_edge.f95 dg.list dg
+# both called by prep_DG.f95
+
+../scripts/sed_vars.bash radiation_edge_hydro.f95 dg.list dg
+# called by DG_hydro_timestep.f95
+
+# SKIPPING read_fort_dg
+
+../scripts/sed_vars.bash read_input.f95 dg.list dg
+# called by dgswem
+
+../scripts/sed_vars.bash rhs_dg_hydro.f95 dg.list dg
+# called by DG_hydro_timestep
+
+../scripts/sed_vars.bash slopelimiter.f95 dg.list dg 77 1823
+../scripts/sed_vars.bash slopelimiter.f95 dg.list dg 1894 8740
+# first sub only uses SLOPEFLAG, do this by hand <-- DON'T FORGET
+# deleted some commented out subs, so this will mess up line numbers
+# if i use a fresh file
+
+
