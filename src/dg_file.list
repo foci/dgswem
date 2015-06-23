@@ -49,7 +49,7 @@
 ../scripts/sed_vars.bash numerical_flux.f95 dg.list dg 53 1894
 #all subs use full dg module except the first one
 # subroutine numerical_flux only uses one variable, FLUXTYPE, so 
-# i'll do this by hand <-- DON'T FORGET
+# i'll do this by hand                                               <- MANUAL
 
 ../scripts/sed_vars.bash ocean_edge_hydro.f95 dg.list dg
 # called by DG_hydro_timestep.f95
@@ -78,7 +78,13 @@
 ../scripts/sed_vars.bash radiation_edge_hydro.f95 dg.list dg
 # called by DG_hydro_timestep.f95
 
-# SKIPPING read_fort_dg
+../scripts/sed_vars.bash read_fort_dg.f95 read_fixed_fort_dg_dg.list dg 73 179
+# read_fixed_fort_dg, called by read_input
+../scripts/sed_vars.bash read_fort_dg.f95 read_fixed_fort_dg_dg.list dg 73 179
+
+../scripts/sed_vars.bash read_fort_dg.f95 fort_dg_setup_dg.list dg 370 521
+# fort_dg_setup, called by read_keyword_fort_dg
+
 
 ../scripts/sed_vars.bash read_input.f95 dg.list dg
 # called by dgswem
@@ -88,8 +94,24 @@
 
 ../scripts/sed_vars.bash slopelimiter.f95 dg.list dg 77 1823
 ../scripts/sed_vars.bash slopelimiter.f95 dg.list dg 1894 8740
-# first sub only uses SLOPEFLAG, do this by hand <-- DON'T FORGET
+# first sub only uses SLOPEFLAG, do this by hand                    <-- MANUAL
 # deleted some commented out subs, so this will mess up line numbers
 # if i use a fresh file
+
+../scripts/sed_vars.bash sta_basis.f95 dg.list dg 1 52
+# called by prep_DG.f95
+
+# do sta_location.f95 by hand                                       <-- MANUAL
+
+../scripts/sed_vars.bash tidal_potential.f95 dg.list dg
+# called by DG_hydro_timestep
+
+../scripts/sed_vars.bash wetdry.f95 dg.list dg
+# called by DG_hydro_timestep
+
+../scripts/sed_vars.bash write_results.f95 dg.list dg
+# write_results called by dgswem and DG_timestep
+# write_dg_ic called by dgswem
+
 
 
