@@ -6,7 +6,7 @@
 !     node.  Note that the tidal potential term is defined linearly over
 !     an element regardless of the p used in the DG calculation.
 !
-!     (Taken from timestep.f)
+!     (Taken from timestep.dg%f)
 !
 !     Comments and general clean-up by Ethan Kubatko (06-02-2005)
 !
@@ -23,7 +23,7 @@
 
       INTEGER j,i
       
-      TIMEH_DG = TIMEH - DTDP + DTVD(IRK)*DTDP
+      dg%TIMEH_DG = TIMEH - DTDP + dg%DTVD(dg%IRK)*DTDP
       
 !.....Loop over the nodes
 
@@ -40,11 +40,11 @@
           IF (PERT(J).EQ.0.) THEN
             NCYC = 0
           ELSE
-            NCYC = INT(TIMEH_DG/PERT(J))
+            NCYC = INT(dg%TIMEH_DG/PERT(J))
           ENDIF
-          ARGT    = AMIGT(J)*(TIMEH_DG - NCYC*PERT(J)) + FACET(J)
-          TPMUL   = RAMPDG*ETRF(J)*TPK(J)*FFT(J)
-          SALTMUL = RAMPDG*FFT(J)
+          ARGT    = AMIGT(J)*(dg%TIMEH_DG - NCYC*PERT(J)) + FACET(J)
+          TPMUL   = dg%RAMPDG*ETRF(J)*TPK(J)*FFT(J)
+          SALTMUL = dg%RAMPDG*FFT(J)
           NA      = NINT(0.00014/AMIGT(J))
         
 !.....Semi-diurnal species

@@ -490,7 +490,7 @@
  9726    FORMAT(/,1X,'Your selection of NOLICAT (a UNIT 15 input ',&
         'parameter) is inconsistent with your ',&
         /,1X,'selection of NOLIFA and may lead to mass ',&
-        'balance problems')
+        'dg%balance problems')
          IF (NFOVER.EQ.1) THEN
             WRITE(6,9974)
          ELSE
@@ -538,7 +538,7 @@
  9727    FORMAT(/,1X,'Your selection of NOLICAT (a UNIT 15 input ',&
         'parameter) is inconsistent with your ',&
         /,1X,'selection of NOLICA and may lead to mass ',&
-        'balance problems')
+        'dg%balance problems')
          IF (NFOVER.EQ.1) THEN
             WRITE(6,9974)
          ELSE
@@ -1424,7 +1424,7 @@
 
          DO I = 1,NP
             READ(12,*) JKI,DUM1,DUM2,STARTDRY(JKI)
-            IF (MODAL_IC.NE.3) THEN
+            IF (dg%MODAL_IC.NE.3) THEN
                IF (STARTDRY(JKI).EQ.-88888) THEN
                   STARTDRY(JKI) = 1
                ELSE
@@ -2126,8 +2126,8 @@
       NFLUXIB=0
       NFLUXIBP=0
       NVELEXT=0
-      NIBSEG = 0
-      NEBSEG = 0
+      dg%NIBSEG = 0
+      dg%NEBSEG = 0
       
       CALL ALLOC_EDGES0(s)
 
@@ -2841,20 +2841,20 @@
 
       IF ((IBTYPE.EQ.3).OR.(IBTYPE.EQ.13).OR.(IBTYPE.EQ.23)) THEN
          DO I = 1,NVELL(K)-1
-            NEBSEG = NEBSEG + 1
-            EBHT(NEBSEG)   = 0.5D0*( BARLANHTR(I)   + BARLANHTR(I+1)   )
-            EBCFSP(NEBSEG) = 0.5D0*( BARLANCFSPR(I) + BARLANCFSPR(I+1) )
+            dg%NEBSEG = dg%NEBSEG + 1
+            dg%EBHT(dg%NEBSEG)   = 0.5D0*( BARLANHTR(I)   + BARLANHTR(I+1)   )
+            dg%EBCFSP(dg%NEBSEG) = 0.5D0*( BARLANCFSPR(I) + BARLANCFSPR(I+1) )
          ENDDO
       ENDIF
       
       IF ((IBTYPE.EQ.4).OR.(IBTYPE.EQ.24)) THEN
          DO I = 1,NVELL(K)-1
-            NIBSEG = NIBSEG + 1
-            IBHT(NIBSEG)   = 0.5D0*( BARINHTR(I)   + BARINHTR(I+1)   )
-            IBCFSB(NIBSEG) = 0.5D0*( BARINCFSBR(I) + BARINCFSBR(I+1) )
-            IBCFSP(NIBSEG) = 0.5D0*( BARINCFSPR(I) + BARINCFSPR(I+1) )
-            BACKNODES(1,NIBSEG) = IBCONNR(I)
-            BACKNODES(2,NIBSEG) = IBCONNR(I+1)
+            dg%NIBSEG = dg%NIBSEG + 1
+            dg%IBHT(dg%NIBSEG)   = 0.5D0*( BARINHTR(I)   + BARINHTR(I+1)   )
+            dg%IBCFSB(dg%NIBSEG) = 0.5D0*( BARINCFSBR(I) + BARINCFSBR(I+1) )
+            dg%IBCFSP(dg%NIBSEG) = 0.5D0*( BARINCFSPR(I) + BARINCFSPR(I+1) )
+            dg%BACKNODES(1,dg%NIBSEG) = IBCONNR(I)
+            dg%BACKNODES(2,dg%NIBSEG) = IBCONNR(I+1)
          ENDDO
       ENDIF
       ENDDO
@@ -2883,7 +2883,7 @@
       ENDDO
       s%MNEI = s%MNEI+1
 
-!     sb   Copied from read_input.F of v45.01
+!     sb   Copied from read_input.dg%F of v45.01
 !     estimate the maximum array space needed for the neighbor
 !     table by
 !     increasing this number by 2, to provide array space for the
