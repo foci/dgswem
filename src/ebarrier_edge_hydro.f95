@@ -1,4 +1,4 @@
-      SUBROUTINE EBARRIER_EDGE_HYDRO(s,dg,IT)
+      SUBROUTINE EBARRIER_EDGE_HYDRO(s,dg_here,IT)
       
 !.....Use appropriate modules
 
@@ -9,7 +9,7 @@
       IMPLICIT NONE
 
       type (sizes_type) :: s
-      type (dg_type) :: dg
+      type (dg_type) :: dg_here
 
 !.....Declare local variables
 
@@ -18,134 +18,134 @@
 
 !.....Loop over the external barrier segments
 
-      DO 1000 L = 1,dg%NEBSEG
+      DO 1000 L = 1,dg_here%NEBSEG
          
 !.......Obtain the global and local edge numbers
 
-         GED = dg%NEBSEGN(L)
-         LED = dg%NEDSD(1,GED)
+         GED = dg_here%NEBSEGN(L)
+         LED = dg_here%NEDSD(1,GED)
 
 !.......Obtain the element
 
-         dg%EL = dg%NEDEL(1,GED)
-         dg%PA = PDG_EL(EL_IN)
+         dg_here%EL = dg_here%NEDEL(1,GED)
+         dg_here%PA = PDG_EL(EL_IN)
 
 #ifdef P0
-         if (dg%pa.eq.0) then
-            dg%pa = 1
+         if (dg_here%pa.eq.0) then
+            dg_here%pa = 1
          endif
 #endif
          
-         IF (dg%WDFLG(dg%EL).EQ.0) GOTO 1000
+         IF (dg_here%WDFLG(dg_here%EL).EQ.0) GOTO 1000
 
 !.....Retrieve the components of the normal vector to the edge
 
-         dg%NX = dg%COSNX(GED)
-         dg%NY = dg%SINNX(GED)
+         dg_here%NX = dg_here%COSNX(GED)
+         dg_here%NY = dg_here%SINNX(GED)
          
 !.....Set the components for the tangential vector to the edge
 
-         TX = -dg%NY
-         TY =  dg%NX
+         TX = -dg_here%NY
+         TY =  dg_here%NX
          
 !.......Compute the variables at the quadrature points
 
-         DO I = 1,dg%NEGP(dg%pa)
+         DO I = 1,dg_here%NEGP(dg_here%pa)
             
 !.........Obtain the height of the barrier at the quadrature point
 
-            dg%ZE_IN = dg%ZE(1,dg%EL,dg%IRK)
-            dg%QX_IN = dg%QX(1,dg%EL,dg%IRK)
-            dg%QY_IN = dg%QY(1,dg%EL,dg%IRK)
-            dg%HB_IN = dg%BATHED(I,LED,EL_IN,dg%pa)
+            dg_here%ZE_IN = dg_here%ZE(1,dg_here%EL,dg_here%IRK)
+            dg_here%QX_IN = dg_here%QX(1,dg_here%EL,dg_here%IRK)
+            dg_here%QY_IN = dg_here%QY(1,dg_here%EL,dg_here%IRK)
+            dg_here%HB_IN = dg_here%BATHED(I,LED,EL_IN,dg_here%pa)
 
 #ifdef TRACE
-            dg%iota_IN = dg%iota(1,dg%EL,dg%IRK)
+            dg_here%iota_IN = dg_here%iota(1,dg_here%EL,dg_here%IRK)
 #endif
 
 #ifdef CHEM
-            dg%iota_IN = dg%iota(1,dg%EL,dg%IRK)
-            dg%iota2_IN = dg%iota2(1,dg%EL,dg%IRK)
+            dg_here%iota_IN = dg_here%iota(1,dg_here%EL,dg_here%IRK)
+            dg_here%iota2_IN = dg_here%iota2(1,dg_here%EL,dg_here%IRK)
 #endif
 
 #ifdef DYNP
-            dynP_IN = dg%dynP(1,dg%EL,dg%IRK)
+            dynP_IN = dg_here%dynP(1,dg_here%EL,dg_here%IRK)
 #endif
 
 #ifdef SED_LAY
-            dg%HB(:,dg%EL,dg%irk) = 0.D0
+            dg_here%HB(:,dg_here%EL,dg_here%irk) = 0.D0
             do ll=1,layers
-               dg%HB(1,dg%EL,dg%irk) = dg%HB(1,dg%EL,dg%irk) + dg%bed(1,dg%EL,dg%irk,ll)
+               dg_here%HB(1,dg_here%EL,dg_here%irk) = dg_here%HB(1,dg_here%EL,dg_here%irk) + dg_here%bed(1,dg_here%EL,dg_here%irk,ll)
             enddo
-            dg%bed_IN(:) = dg%bed(1,dg%EL,dg%irk,:)
-            dg%HB_IN = dg%HB(1,EL_IN,dg%irk)
+            dg_here%bed_IN(:) = dg_here%bed(1,dg_here%EL,dg_here%irk,:)
+            dg_here%HB_IN = dg_here%HB(1,EL_IN,dg_here%irk)
 #endif
 
 
-            DO K = 2,dg%DOFS(dg%EL)
-               dg%ZE_IN = dg%ZE_IN + dg%ZE(K,dg%EL,dg%IRK)*dg%PHI_EDGE(K,I,LED,dg%pa)
-               dg%QX_IN = dg%QX_IN + dg%QX(K,dg%EL,dg%IRK)*dg%PHI_EDGE(K,I,LED,dg%pa)
-               dg%QY_IN = dg%QY_IN + dg%QY(K,dg%EL,dg%IRK)*dg%PHI_EDGE(K,I,LED,dg%pa)
-               !dg%HB_IN = dg%HB_IN + dg%HB(K,dg%EL,dg%IRK)*dg%PHI_EDGE(K,I,LED,dg%pa)
+            DO K = 2,dg_here%DOFS(dg_here%EL)
+               dg_here%ZE_IN = dg_here%ZE_IN + dg_here%ZE(K,dg_here%EL,dg_here%IRK)*dg_here%PHI_EDGE(K,I,LED,dg_here%pa)
+               dg_here%QX_IN = dg_here%QX_IN + dg_here%QX(K,dg_here%EL,dg_here%IRK)*dg_here%PHI_EDGE(K,I,LED,dg_here%pa)
+               dg_here%QY_IN = dg_here%QY_IN + dg_here%QY(K,dg_here%EL,dg_here%IRK)*dg_here%PHI_EDGE(K,I,LED,dg_here%pa)
+               !dg_here%HB_IN = dg_here%HB_IN + dg_here%HB(K,dg_here%EL,dg_here%IRK)*dg_here%PHI_EDGE(K,I,LED,dg_here%pa)
 
 #ifdef TRACE
-               dg%iota_IN = dg%iota_IN + dg%iota(K,dg%EL,dg%IRK)*dg%PHI_EDGE(K,I,LED,dg%pa)
+               dg_here%iota_IN = dg_here%iota_IN + dg_here%iota(K,dg_here%EL,dg_here%IRK)*dg_here%PHI_EDGE(K,I,LED,dg_here%pa)
 #endif
 
 #ifdef CHEM
-               dg%iota_IN = dg%iota_IN + dg%iota(K,dg%EL,dg%IRK)*dg%PHI_EDGE(K,I,LED,dg%pa)
-               dg%iota2_IN = dg%iota2_IN + dg%iota2(K,dg%EL,dg%IRK)*dg%PHI_EDGE(K,I,LED,dg%pa)
+               dg_here%iota_IN = dg_here%iota_IN + dg_here%iota(K,dg_here%EL,dg_here%IRK)*dg_here%PHI_EDGE(K,I,LED,dg_here%pa)
+               dg_here%iota2_IN = dg_here%iota2_IN + dg_here%iota2(K,dg_here%EL,dg_here%IRK)*dg_here%PHI_EDGE(K,I,LED,dg_here%pa)
 #endif
 
 #ifdef DYNP
-               dynP_IN = dynP_IN + dg%dynP(K,dg%EL,dg%IRK)*dg%PHI_EDGE(K,I,LED,dg%pa)
+               dynP_IN = dynP_IN + dg_here%dynP(K,dg_here%EL,dg_here%IRK)*dg_here%PHI_EDGE(K,I,LED,dg_here%pa)
 #endif
 
 #ifdef SED_LAY
 
             do ll = 1,layers
                
-               dg%bed_IN(ll) = dg%bed_IN(ll) + dg%bed(K,dg%EL,dg%IRK,ll)*dg%PHI_EDGE(K,I,LED,dg%pa)
-               dg%HB_IN = dg%HB_IN + dg%bed(k,dg%EL,dg%irk,ll)*dg%PHI_EDGE(K,I,LED,dg%pa)
+               dg_here%bed_IN(ll) = dg_here%bed_IN(ll) + dg_here%bed(K,dg_here%EL,dg_here%IRK,ll)*dg_here%PHI_EDGE(K,I,LED,dg_here%pa)
+               dg_here%HB_IN = dg_here%HB_IN + dg_here%bed(k,dg_here%EL,dg_here%irk,ll)*dg_here%PHI_EDGE(K,I,LED,dg_here%pa)
                
             enddo
 #endif
 
             ENDDO
 
-            dg%SFAC_IN = dg%SFACED(I,LED,dg%EL,dg%pa)
+            dg_here%SFAC_IN = dg_here%SFACED(I,LED,dg_here%EL,dg_here%pa)
 
-            ABOVE  = dg%ZE_IN - dg%EBHT(L)
+            ABOVE  = dg_here%ZE_IN - dg_here%EBHT(L)
             SUBSUP = 2.D0*ABOVE/3.D0
             
 !.........Case 1:  Water is below barrier
 !     ---------------------------------------------
             
             IF (ABOVE.LT.BARMIN) THEN
-               Q_N_EXT = -(dg%QX_IN*dg%NX + dg%QY_IN*dg%NY)
-               Q_T_EXT =   dg%QX_IN*TX + dg%QY_IN*TY
+               Q_N_EXT = -(dg_here%QX_IN*dg_here%NX + dg_here%QY_IN*dg_here%NY)
+               Q_T_EXT =   dg_here%QX_IN*TX + dg_here%QY_IN*TY
                
 !.........Case 2:  Water is above barrier
 !     ------------------------------------------------------------
                
             ELSE
-               Q_N_EXT = dg%RAMPDG*dg%EBCFSP(L)*SUBSUP*SQRT(SUBSUP*G)
+               Q_N_EXT = dg_here%RAMPDG*dg_here%EBCFSP(L)*SUBSUP*SQRT(SUBSUP*G)
                Q_T_EXT = 0.D0
             ENDIF
             
-!.....Set the exterior dg%bed and surface elevation equal to the interior
+!.....Set the exterior dg_here%bed and surface elevation equal to the interior
 
-            dg%ZE_EX = dg%ZE_IN
-            dg%HB_EX = dg%HB_IN
-            dg%SFAC_EX = dg%SFAC_IN
+            dg_here%ZE_EX = dg_here%ZE_IN
+            dg_here%HB_EX = dg_here%HB_IN
+            dg_here%SFAC_EX = dg_here%SFAC_IN
 
 #ifdef TRACE
-            dg%iota_EX = dg%iota_IN
+            dg_here%iota_EX = dg_here%iota_IN
 #endif
 
 #ifdef CHEM
-            dg%iota_EX = dg%iota_IN
-            dg%iota2_EX = dg%iota2_IN
+            dg_here%iota_EX = dg_here%iota_IN
+            dg_here%iota2_EX = dg_here%iota2_IN
 #endif
 
 #ifdef DYNP
@@ -154,46 +154,46 @@
 
 #ifdef SED_LAY
 
-            dg%bed_EX(:) = dg%bed_IN(:)
+            dg_here%bed_EX(:) = dg_here%bed_IN(:)
 
 #endif
 
 !.........Compute the x and y components of the external state flow
 
-            dg%QX_EX = ( TY*Q_N_EXT - dg%NY*Q_T_EXT)/(dg%NX*TY - dg%NY*TX)
-            dg%QY_EX = (-TX*Q_N_EXT + dg%NX*Q_T_EXT)/(dg%NX*TY - dg%NY*TX)
+            dg_here%QX_EX = ( TY*Q_N_EXT - dg_here%NY*Q_T_EXT)/(dg_here%NX*TY - dg_here%NY*TX)
+            dg_here%QY_EX = (-TX*Q_N_EXT + dg_here%NX*Q_T_EXT)/(dg_here%NX*TY - dg_here%NY*TX)
             
 !.........Compute numerical flux
             
-            CALL NUMERICAL_FLUX(s,dg,IT)
+            CALL NUMERICAL_FLUX(s,dg_here,IT)
 
-            DO K = 1,dg%DOFS(dg%EL)
+            DO K = 1,dg_here%DOFS(dg_here%EL)
 
-               W_IN = 2.0*dg%M_INV(K,dg%pa)/AREAS(dg%EL)*dg%XLEN(GED)&
-              *dg%PHI_EDGE(K,I,LED,dg%pa)*dg%WEGP(I,dg%pa)
+               W_IN = 2.0*dg_here%M_INV(K,dg_here%pa)/AREAS(dg_here%EL)*dg_here%XLEN(GED)&
+              *dg_here%PHI_EDGE(K,I,LED,dg_here%pa)*dg_here%WEGP(I,dg_here%pa)
 
-               dg%RHS_ZE(K,dg%EL,dg%IRK) = dg%RHS_ZE(K,dg%EL,dg%IRK) - W_IN*F_HAT
-               dg%RHS_QX(K,dg%EL,dg%IRK) = dg%RHS_QX(K,dg%EL,dg%IRK) - W_IN*G_HAT
-               dg%RHS_QY(K,dg%EL,dg%IRK) = dg%RHS_QY(K,dg%EL,dg%IRK) - W_IN*H_HAT
+               dg_here%RHS_ZE(K,dg_here%EL,dg_here%IRK) = dg_here%RHS_ZE(K,dg_here%EL,dg_here%IRK) - W_IN*F_HAT
+               dg_here%RHS_QX(K,dg_here%EL,dg_here%IRK) = dg_here%RHS_QX(K,dg_here%EL,dg_here%IRK) - W_IN*G_HAT
+               dg_here%RHS_QY(K,dg_here%EL,dg_here%IRK) = dg_here%RHS_QY(K,dg_here%EL,dg_here%IRK) - W_IN*H_HAT
 
 #ifdef TRACE
-               dg%RHS_iota(K,dg%EL,dg%IRK) = dg%RHS_iota(K,dg%EL,dg%IRK) - W_IN*I_HAT
+               dg_here%RHS_iota(K,dg_here%EL,dg_here%IRK) = dg_here%RHS_iota(K,dg_here%EL,dg_here%IRK) - W_IN*I_HAT
 #endif
 
 #ifdef CHEM
-               dg%RHS_iota(K,dg%EL,dg%IRK) = dg%RHS_iota(K,dg%EL,dg%IRK) - W_IN*I_HAT
-               dg%RHS_iota2(K,dg%EL,dg%IRK) = dg%RHS_iota2(K,dg%EL,dg%IRK) - W_IN*J_HAT
+               dg_here%RHS_iota(K,dg_here%EL,dg_here%IRK) = dg_here%RHS_iota(K,dg_here%EL,dg_here%IRK) - W_IN*I_HAT
+               dg_here%RHS_iota2(K,dg_here%EL,dg_here%IRK) = dg_here%RHS_iota2(K,dg_here%EL,dg_here%IRK) - W_IN*J_HAT
 #endif
 
 #ifdef DYNP
-               dg%RHS_dynP(K,dg%EL,dg%IRK) = dg%RHS_dynP(K,dg%EL,dg%IRK) - W_IN*I_HAT
+               dg_here%RHS_dynP(K,dg_here%EL,dg_here%IRK) = dg_here%RHS_dynP(K,dg_here%EL,dg_here%IRK) - W_IN*I_HAT
 #endif
 
 #ifdef SED_LAY
 
                do ll=1,layers
 
-                  dg%RHS_bed(K,dg%EL,dg%IRK,ll) = dg%RHS_bed(K,dg%EL,dg%IRK,ll) - W_IN*dg%Bed_HAT(ll)
+                  dg_here%RHS_bed(K,dg_here%EL,dg_here%IRK,ll) = dg_here%RHS_bed(K,dg_here%EL,dg_here%IRK,ll) - W_IN*dg_here%Bed_HAT(ll)
 
                enddo
 

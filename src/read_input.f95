@@ -8,7 +8,7 @@
 !     
 !***********************************************************************
 
-      SUBROUTINE READ_INPUT(s,dg)
+      SUBROUTINE READ_INPUT(s,dg_here)
       use sizes
 !.....Use appropriate modules
 
@@ -34,7 +34,7 @@
       IMPLICIT NONE
 
       type (sizes_type) :: s
-      type (dg_type) :: dg
+      type (dg_type) :: dg_here
 
 !.....Declare local variables
 
@@ -204,9 +204,9 @@
       LINE2 = ADJUSTL(LINE)
       
       IF (LINE2(1:1) .EQ. "1") THEN
-        CALL read_fixed_fort_dg(s,dg)   ! first line of old fort.dg is a 1 for the dgswe option
+        CALL read_fixed_fort_dg(s,dg_here)   ! first line of old fort.dg is a 1 for the dgswe option
       ELSE
-        CALL read_keyword_fort_dg(s,dg) ! otherwise assume keyword format
+        CALL read_keyword_fort_dg(s,dg_here) ! otherwise assume keyword format
       ENDIF     
       
       RHOWAT0 = 1000.D0
@@ -491,7 +491,7 @@
  9726    FORMAT(/,1X,'Your selection of NOLICAT (a UNIT 15 input ',&
         'parameter) is inconsistent with your ',&
         /,1X,'selection of NOLIFA and may lead to mass ',&
-        'dg%balance problems')
+        'dg_here%balance problems')
          IF (NFOVER.EQ.1) THEN
             WRITE(6,9974)
          ELSE
@@ -539,7 +539,7 @@
  9727    FORMAT(/,1X,'Your selection of NOLICAT (a UNIT 15 input ',&
         'parameter) is inconsistent with your ',&
         /,1X,'selection of NOLICA and may lead to mass ',&
-        'dg%balance problems')
+        'dg_here%balance problems')
          IF (NFOVER.EQ.1) THEN
             WRITE(6,9974)
          ELSE
@@ -1425,7 +1425,7 @@
 
          DO I = 1,NP
             READ(12,*) JKI,DUM1,DUM2,STARTDRY(JKI)
-            IF (dg%MODAL_IC.NE.3) THEN
+            IF (dg_here%MODAL_IC.NE.3) THEN
                IF (STARTDRY(JKI).EQ.-88888) THEN
                   STARTDRY(JKI) = 1
                ELSE
@@ -2127,10 +2127,10 @@
       NFLUXIB=0
       NFLUXIBP=0
       NVELEXT=0
-      dg%NIBSEG = 0
-      dg%NEBSEG = 0
+      dg_here%NIBSEG = 0
+      dg_here%NEBSEG = 0
       
-      CALL ALLOC_EDGES0(s,dg)
+      CALL ALLOC_EDGES0(s,dg_here)
 
       DO K=1,NBOU
          READ(14,*) NVELL(K),IBTYPE
@@ -2842,20 +2842,20 @@
 
       IF ((IBTYPE.EQ.3).OR.(IBTYPE.EQ.13).OR.(IBTYPE.EQ.23)) THEN
          DO I = 1,NVELL(K)-1
-            dg%NEBSEG = dg%NEBSEG + 1
-            dg%EBHT(dg%NEBSEG)   = 0.5D0*( BARLANHTR(I)   + BARLANHTR(I+1)   )
-            dg%EBCFSP(dg%NEBSEG) = 0.5D0*( BARLANCFSPR(I) + BARLANCFSPR(I+1) )
+            dg_here%NEBSEG = dg_here%NEBSEG + 1
+            dg_here%EBHT(dg_here%NEBSEG)   = 0.5D0*( BARLANHTR(I)   + BARLANHTR(I+1)   )
+            dg_here%EBCFSP(dg_here%NEBSEG) = 0.5D0*( BARLANCFSPR(I) + BARLANCFSPR(I+1) )
          ENDDO
       ENDIF
       
       IF ((IBTYPE.EQ.4).OR.(IBTYPE.EQ.24)) THEN
          DO I = 1,NVELL(K)-1
-            dg%NIBSEG = dg%NIBSEG + 1
-            dg%IBHT(dg%NIBSEG)   = 0.5D0*( BARINHTR(I)   + BARINHTR(I+1)   )
-            dg%IBCFSB(dg%NIBSEG) = 0.5D0*( BARINCFSBR(I) + BARINCFSBR(I+1) )
-            dg%IBCFSP(dg%NIBSEG) = 0.5D0*( BARINCFSPR(I) + BARINCFSPR(I+1) )
-            dg%BACKNODES(1,dg%NIBSEG) = IBCONNR(I)
-            dg%BACKNODES(2,dg%NIBSEG) = IBCONNR(I+1)
+            dg_here%NIBSEG = dg_here%NIBSEG + 1
+            dg_here%IBHT(dg_here%NIBSEG)   = 0.5D0*( BARINHTR(I)   + BARINHTR(I+1)   )
+            dg_here%IBCFSB(dg_here%NIBSEG) = 0.5D0*( BARINCFSBR(I) + BARINCFSBR(I+1) )
+            dg_here%IBCFSP(dg_here%NIBSEG) = 0.5D0*( BARINCFSPR(I) + BARINCFSPR(I+1) )
+            dg_here%BACKNODES(1,dg_here%NIBSEG) = IBCONNR(I)
+            dg_here%BACKNODES(2,dg_here%NIBSEG) = IBCONNR(I+1)
          ENDDO
       ENDIF
       ENDDO

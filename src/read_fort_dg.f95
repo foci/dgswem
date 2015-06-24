@@ -70,7 +70,7 @@
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!      
 
-      SUBROUTINE READ_FIXED_FORT_DG(s,dg)
+      SUBROUTINE READ_FIXED_FORT_DG(s,dg_here)
       
       USE global, ONLY: dgswe,dg_to_cg,sedflag,reaction_rate,sed_equationX,sed_equationY, &
                         rhowat0,vertexslope
@@ -79,12 +79,12 @@
       
       IMPLICIT NONE
       type (sizes_type) :: s
-      type (dg_type) :: dg
+      type (dg_type) :: dg_here
 
       INTEGER :: i
       CHARACTER(256) :: LINE
       
-      CALL FORT_DG_SETUP()
+      CALL FORT_DG_SETUP(dg_here)
 
       OPEN(25,FILE=s%DIRNAME//'/'//'fort.dg',POSITION="rewind")  
       
@@ -93,64 +93,64 @@
       PRINT*, ""      
       
       READ(25,*) DGSWE
-      READ(25,*) dg%padapt,dg%pflag
-      READ(25,*) dg%gflag,dg%diorism
-      READ(25,*) dg%pl,dg%ph,dg%px
-      READ(25,*) dg%slimit
-      READ(25,*) dg%plimit
-      READ(25,*) dg%pflag2con1,dg%pflag2con2,dg%lebesgueP 
-      READ(25,*) dg%FLUXTYPE
-      READ(25,*) dg%RK_STAGE, dg%RK_ORDER
+      READ(25,*) dg_here%padapt,dg_here%pflag
+      READ(25,*) dg_here%gflag,dg_here%diorism
+      READ(25,*) dg_here%pl,dg_here%ph,dg_here%px
+      READ(25,*) dg_here%slimit
+      READ(25,*) dg_here%plimit
+      READ(25,*) dg_here%pflag2con1,dg_here%pflag2con2,dg_here%lebesgueP 
+      READ(25,*) dg_here%FLUXTYPE
+      READ(25,*) dg_here%RK_STAGE, dg_here%RK_ORDER
       READ(25,*) DG_TO_CG
-      READ(25,*) dg%MODAL_IC
-      READ(25,*) dg%DGHOT, dg%DGHOTSPOOL
+      READ(25,*) dg_here%MODAL_IC
+      READ(25,*) dg_here%DGHOT, dg_here%DGHOTSPOOL
       READ(25,"(A256)") LINE
-      READ(LINE,*) dg%SLOPEFLAG
-      IF(dg%SLOPEFLAG.EQ.2) THEN
-         READ(LINE,*) dg%SLOPEFLAG, dg%SL2_M, dg%SL2_NYU
+      READ(LINE,*) dg_here%SLOPEFLAG
+      IF(dg_here%SLOPEFLAG.EQ.2) THEN
+         READ(LINE,*) dg_here%SLOPEFLAG, dg_here%SL2_M, dg_here%SL2_NYU
       ENDIF
-      IF(dg%SLOPEFLAG.EQ.3) THEN
-         READ(LINE,*) dg%SLOPEFLAG, dg%SL2_M, dg%SL2_NYU, dg%SL3_MD
+      IF(dg_here%SLOPEFLAG.EQ.3) THEN
+         READ(LINE,*) dg_here%SLOPEFLAG, dg_here%SL2_M, dg_here%SL2_NYU, dg_here%SL3_MD
       ENDIF
-      IF(dg%SLOPEFLAG.EQ.4) THEN
-         READ(LINE,*) dg%SLOPEFLAG,dg%slope_weight
+      IF(dg_here%SLOPEFLAG.EQ.4) THEN
+         READ(LINE,*) dg_here%SLOPEFLAG,dg_here%slope_weight
          vertexslope = .True.
       ENDIF
-      IF(dg%SLOPEFLAG.EQ.5) THEN
-         READ(LINE,*) dg%SLOPEFLAG
+      IF(dg_here%SLOPEFLAG.EQ.5) THEN
+         READ(LINE,*) dg_here%SLOPEFLAG
          vertexslope = .True.
       ENDIF
-      IF(dg%SLOPEFLAG.EQ.6) THEN
-         READ(LINE,*) dg%SLOPEFLAG,dg%slope_weight
+      IF(dg_here%SLOPEFLAG.EQ.6) THEN
+         READ(LINE,*) dg_here%SLOPEFLAG,dg_here%slope_weight
          vertexslope = .True.
       ENDIF
-      IF(dg%SLOPEFLAG.EQ.7) THEN
-         READ(LINE,*) dg%SLOPEFLAG,dg%slope_weight
+      IF(dg_here%SLOPEFLAG.EQ.7) THEN
+         READ(LINE,*) dg_here%SLOPEFLAG,dg_here%slope_weight
          vertexslope = .True.
       ENDIF
-      IF(dg%SLOPEFLAG.EQ.8) THEN
-         READ(LINE,*) dg%SLOPEFLAG,dg%slope_weight
+      IF(dg_here%SLOPEFLAG.EQ.8) THEN
+         READ(LINE,*) dg_here%SLOPEFLAG,dg_here%slope_weight
          vertexslope = .True.
       ENDIF
-      IF(dg%SLOPEFLAG.EQ.9) THEN
-         READ(LINE,*) dg%SLOPEFLAG,dg%slope_weight
+      IF(dg_here%SLOPEFLAG.EQ.9) THEN
+         READ(LINE,*) dg_here%SLOPEFLAG,dg_here%slope_weight
          vertexslope = .True.
       ENDIF
-      IF(dg%SLOPEFLAG.EQ.10) THEN
-         READ(LINE,*) dg%SLOPEFLAG,dg%slope_weight
+      IF(dg_here%SLOPEFLAG.EQ.10) THEN
+         READ(LINE,*) dg_here%SLOPEFLAG,dg_here%slope_weight
          vertexslope = .True.
       ENDIF
-      READ(25,*) SEDFLAG,dg%porosity,dg%SEVDM,s%layers
+      READ(25,*) SEDFLAG,dg_here%porosity,dg_here%SEVDM,s%layers
       READ(25,*) reaction_rate
-      READ(25,*) dg%MNES
-      READ(25,*) dg%artdif,dg%kappa,dg%s0,dg%uniform_dif,dg%tune_by_hand
+      READ(25,*) dg_here%MNES
+      READ(25,*) dg_here%artdif,dg_here%kappa,dg_here%s0,dg_here%uniform_dif,dg_here%tune_by_hand
       READ(25,'(a)') sed_equationX
       READ(25,'(a)') sed_equationY
       
-      IF(dg%FLUXTYPE.NE.1.AND.dg%FLUXTYPE.NE.2.AND.dg%FLUXTYPE.NE.3.AND.dg%FLUXTYPE.NE.4) THEN
-         PRINT *, 'SPECIFIED dg%FLUXTYPE (=', dg%FLUXTYPE,') IS NOT ALLOWED.'
+      IF(dg_here%FLUXTYPE.NE.1.AND.dg_here%FLUXTYPE.NE.2.AND.dg_here%FLUXTYPE.NE.3.AND.dg_here%FLUXTYPE.NE.4) THEN
+         PRINT *, 'SPECIFIED dg_here%FLUXTYPE (=', dg_here%FLUXTYPE,') IS NOT ALLOWED.'
          PRINT *, 'EXECUTION WILL BE TERMINATED.'
-         STOP 'SPECIFIED dg%FLUXTYPE IS NOT ALLOWED.'
+         STOP 'SPECIFIED dg_here%FLUXTYPE IS NOT ALLOWED.'
       ENDIF     
       
       ! print inputs
@@ -177,7 +177,7 @@
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! 
  
-      SUBROUTINE READ_KEYWORD_FORT_DG(s,dg)
+      SUBROUTINE READ_KEYWORD_FORT_DG(s,dg_here)
       
       USE sizes
       USE global, ONLY: nfover
@@ -186,7 +186,7 @@
       IMPLICIT NONE
       
       type (sizes_type) :: s
-      type (dg_type) :: dg      
+      type (dg_type) :: dg_here
 
       INTEGER :: i,j,opt
       INTEGER :: read_stat
@@ -199,7 +199,7 @@
       CHARACTER(100) :: test_val
       
       ! initialize the fortdg option structure
-      CALL FORT_DG_SETUP(dg)
+      CALL FORT_DG_SETUP(dg_here)
       
       opt_read = 0
       comment = 0 
@@ -365,7 +365,7 @@
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!           
       
-      SUBROUTINE FORT_DG_SETUP(dg)
+      SUBROUTINE FORT_DG_SETUP(dg_here)
       
       ! Subroutine that configures the fort.dg options
       !
@@ -405,7 +405,7 @@
       IMPLICIT NONE        
 
       type (sizes_type) :: s
-      type (dg_type) :: dg
+      type (dg_type) :: dg_here
       
       INTEGER :: i
       INTEGER :: ncheck
@@ -501,35 +501,35 @@
 
       ! assign targets to the real variables
       s%layers = layers_target
-      dg%dghot = dghot_target
-      dg%dghotspool = dghotspool_target
-      dg%mnes = mnes_target
-      dg%artdif = artdif_target
-      dg%tune_by_hand = tune_by_hand_target
-      dg%modal_ic = modal_ic_target
-      dg%slopeflag = slopeflag_target
-      dg%fluxtype = fluxtype_target
-      dg%rk_stage = rk_stage_target
-      dg%rk_order = rk_order_target
-      dg%padapt = padapt_target
-      dg%pflag = pflag_target
-      dg%pl = pl_target
-      dg%ph = ph_target
-      dg%px = px_target
-      dg%lebesegueP = lebesgueP_target
-      dg%gflag = gflag_target
+      dg_here%dghot = dghot_target
+      dg_here%dghotspool = dghotspool_target
+      dg_here%mnes = mnes_target
+      dg_here%artdif = artdif_target
+      dg_here%tune_by_hand = tune_by_hand_target
+      dg_here%modal_ic = modal_ic_target
+      dg_here%slopeflag = slopeflag_target
+      dg_here%fluxtype = fluxtype_target
+      dg_here%rk_stage = rk_stage_target
+      dg_here%rk_order = rk_order_target
+      dg_here%padapt = padapt_target
+      dg_here%pflag = pflag_target
+      dg_here%pl = pl_target
+      dg_here%ph = ph_target
+      dg_here%px = px_target
+      dg_here%lebesgueP = lebesgueP_target
+      dg_here%gflag = gflag_target
       
-      dg%diorism = diorism_target
-      dg%porosity = porosity_target
-      dg%sevdm = sevdm_target
-      dg%slimit = slimit_target
-      dg%plimit = plimit_target
-      dg%pflag2con1 = pflag2con1_target
-      dg%pflag2con2 = pflag2con2_target
-      dg%slope_weight = slope_weight_target
-      dg%kappa = kappa_target
-      dg%s0 = s0_target
-      dg%uniform_dif = uniform_dif_target
+      dg_here%diorism = diorism_target
+      dg_here%porosity = porosity_target
+      dg_here%sevdm = sevdm_target
+      dg_here%slimit = slimit_target
+      dg_here%plimit = plimit_target
+      dg_here%pflag2con1 = pflag2con1_target
+      dg_here%pflag2con2 = pflag2con2_target
+      dg_here%slope_weight = slope_weight_target
+      dg_here%kappa = kappa_target
+      dg_here%s0 = s0_target
+      dg_here%uniform_dif = uniform_dif_target
 
       
       nopt = 0

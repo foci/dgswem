@@ -18,7 +18,7 @@
 !     
 !***********************************************************************
 
-      SUBROUTINE IBARRIER_EDGE_HYDRO(s,dg,IT)
+      SUBROUTINE IBARRIER_EDGE_HYDRO(s,dg_here,IT)
       
 !.....Use appropriate modules
 
@@ -29,7 +29,7 @@
       IMPLICIT NONE
 
       type (sizes_type) :: s
-      type (dg_type) :: dg
+      type (dg_type) :: dg_here
 
 !.....Declare local variables
 
@@ -51,52 +51,52 @@
 !.....Loop over the internal barrier segments (note: an internal barrier
 !.....segment consists of two internal barrier edges -- a "front" edge &
 !.....a "back" edge.
-      dg%test_el = 0
-      DO 1000 L = 1,dg%NIBSEG
+      dg_here%test_el = 0
+      DO 1000 L = 1,dg_here%NIBSEG
          
 !.......Obtain the global and local edges of the back and front sides
 
-         GEDB = dg%NIBSEGN(1,L)
-         GEDF = dg%NIBSEGN(2,L)
+         GEDB = dg_here%NIBSEGN(1,L)
+         GEDF = dg_here%NIBSEGN(2,L)
 
          if (gedf.eq.0) go to 1000
          
-         LEDB = dg%NEDSD(1,GEDB)
-         LEDF = dg%NEDSD(1,GEDF)
+         LEDB = dg_here%NEDSD(1,GEDB)
+         LEDF = dg_here%NEDSD(1,GEDF)
          
 !.......Obtain the elements of the back and front sides
 
-         ELB = dg%NEDEL(1,GEDB)
-         ELF = dg%NEDEL(1,GEDF)
+         ELB = dg_here%NEDEL(1,GEDB)
+         ELF = dg_here%NEDEL(1,GEDF)
 
-         if (dg%DOFS(ELB).LT.dg%DOFS(ELF)) then
-            dg%EL = ELF
+         if (dg_here%DOFS(ELB).LT.dg_here%DOFS(ELF)) then
+            dg_here%EL = ELF
          endif
 
-         dg%pa = PDG_EL(dg%EL)
+         dg_here%pa = PDG_EL(dg_here%EL)
 
 #ifdef P0         
-         if (dg%pa.eq.0) then
-            dg%pa = 1
+         if (dg_here%pa.eq.0) then
+            dg_here%pa = 1
          endif
 #endif
          
-         NB1 = dg%NEDNO(1,GEDB)
-         NB2 = dg%NEDNO(2,GEDB)
+         NB1 = dg_here%NEDNO(1,GEDB)
+         NB2 = dg_here%NEDNO(2,GEDB)
          
-         NF1 = dg%NEDNO(1,GEDF)
-         NF2 = dg%NEDNO(2,GEDF)
-         IF((dg%WDFLG(ELB).EQ.0).AND.(dg%WDFLG(ELF).EQ.0)) GOTO 1000
+         NF1 = dg_here%NEDNO(1,GEDF)
+         NF2 = dg_here%NEDNO(2,GEDF)
+         IF((dg_here%WDFLG(ELB).EQ.0).AND.(dg_here%WDFLG(ELF).EQ.0)) GOTO 1000
 
-         dg%test_el = dg%test_el+1
+         dg_here%test_el = dg_here%test_el+1
 
 !.......Retrieve the components of the normal vector to the edge
 
-         NXB = dg%COSNX(GEDB)
-         NYB = dg%SINNX(GEDB)
+         NXB = dg_here%COSNX(GEDB)
+         NYB = dg_here%SINNX(GEDB)
          
-         NXF = dg%COSNX(GEDF)
-         NYF = dg%SINNX(GEDF)
+         NXF = dg_here%COSNX(GEDF)
+         NYF = dg_here%SINNX(GEDF)
          
 !.....Set the components for the tangential vector to the edge
 
@@ -108,93 +108,93 @@
          
 !.......Compute the variables at the quadrature points
 
-         DO I = 1,dg%NEGP(dg%pa)
+         DO I = 1,dg_here%NEGP(dg_here%pa)
             
             GPB = I
-            GPF = dg%NEGP(dg%pa) - I + 1
+            GPF = dg_here%NEGP(dg_here%pa) - I + 1
             
 !.........Obtain the height of the barrier at the quadrature point
 
-            ZEB = dg%ZE(1,ELB,dg%IRK)
-            QXB = dg%QX(1,ELB,dg%IRK)
-            QYB = dg%QY(1,ELB,dg%IRK)
-            HBB = dg%BATHED(GPB,LEDB,ELB,dg%pa)
+            ZEB = dg_here%ZE(1,ELB,dg_here%IRK)
+            QXB = dg_here%QX(1,ELB,dg_here%IRK)
+            QYB = dg_here%QY(1,ELB,dg_here%IRK)
+            HBB = dg_here%BATHED(GPB,LEDB,ELB,dg_here%pa)
             
-            ZEF = dg%ZE(1,ELF,dg%IRK)
-            QXF = dg%QX(1,ELF,dg%IRK)
-            QYF = dg%QY(1,ELF,dg%IRK)
-            HBF = dg%BATHED(GPF,LEDF,ELF,dg%pa)
+            ZEF = dg_here%ZE(1,ELF,dg_here%IRK)
+            QXF = dg_here%QX(1,ELF,dg_here%IRK)
+            QYF = dg_here%QY(1,ELF,dg_here%IRK)
+            HBF = dg_here%BATHED(GPF,LEDF,ELF,dg_here%pa)
 
 #ifdef TRACE
-            iotaB = dg%iota(1,ELB,dg%IRK)
-            iotaF = dg%iota(1,ELF,dg%IRK)
+            iotaB = dg_here%iota(1,ELB,dg_here%IRK)
+            iotaF = dg_here%iota(1,ELF,dg_here%IRK)
 #endif
 
 #ifdef CHEM
-            iotaB = dg%iota(1,ELB,dg%IRK)
-            iota2B = dg%iota2(1,ELB,dg%IRK)
-            iotaF = dg%iota(1,ELF,dg%IRK)
-            iota2F = dg%iota2(1,ELF,dg%IRK)
+            iotaB = dg_here%iota(1,ELB,dg_here%IRK)
+            iota2B = dg_here%iota2(1,ELB,dg_here%IRK)
+            iotaF = dg_here%iota(1,ELF,dg_here%IRK)
+            iota2F = dg_here%iota2(1,ELF,dg_here%IRK)
 #endif
 
 #ifdef DYNP
-            dynPB = dg%dynP(1,ELB,dg%IRK)
-            dynPF = dg%dynP(1,ELF,dg%IRK)
+            dynPB = dg_here%dynP(1,ELB,dg_here%IRK)
+            dynPF = dg_here%dynP(1,ELF,dg_here%IRK)
 #endif
 
-!This does not affect much here, dg%hb and dg%bed do not change at weirs
+!This does not affect much here, dg_here%hb and dg_here%bed do not change at weirs
 #ifdef SED_LAY 
-            dg%HB(1,ELB,dg%irk) = 0.D0
+            dg_here%HB(1,ELB,dg_here%irk) = 0.D0
             do ll=1,s%layers
-               dg%HB(1,ELB,dg%irk) = dg%HB(1,ELB,dg%irk) + dg%bed(1,ELB,dg%irk,ll)
+               dg_here%HB(1,ELB,dg_here%irk) = dg_here%HB(1,ELB,dg_here%irk) + dg_here%bed(1,ELB,dg_here%irk,ll)
             enddo
-            HBB = dg%HB(1,ELB,dg%irk)
-            dg%HB(1,ELF,dg%irk) = 0.D0
+            HBB = dg_here%HB(1,ELB,dg_here%irk)
+            dg_here%HB(1,ELF,dg_here%irk) = 0.D0
             do ll=1,s%layers 
-               dg%HB(1,ELF,dg%irk) = dg%HB(1,ELF,dg%irk) + dg%bed(1,ELF,dg%irk,ll)
+               dg_here%HB(1,ELF,dg_here%irk) = dg_here%HB(1,ELF,dg_here%irk) + dg_here%bed(1,ELF,dg_here%irk,ll)
             enddo
-            HBF = dg%HB(1,ELF,dg%irk)
+            HBF = dg_here%HB(1,ELF,dg_here%irk)
 #endif
 
 
 
-            DO K = 2,dg%dofs(dg%EL)
-               ZEB = ZEB + dg%ZE(K,ELB,dg%IRK)*dg%PHI_EDGE(K,GPB,LEDB,dg%pa)
-               QXB = QXB + dg%QX(K,ELB,dg%IRK)*dg%PHI_EDGE(K,GPB,LEDB,dg%pa)
-               QYB = QYB + dg%QY(K,ELB,dg%IRK)*dg%PHI_EDGE(K,GPB,LEDB,dg%pa)
-                                !HBB = HBB + dg%HB(K,ELB,1  )*dg%PHI_EDGE(K,GPB,LEDB,dg%pa)
+            DO K = 2,dg_here%dofs(dg_here%EL)
+               ZEB = ZEB + dg_here%ZE(K,ELB,dg_here%IRK)*dg_here%PHI_EDGE(K,GPB,LEDB,dg_here%pa)
+               QXB = QXB + dg_here%QX(K,ELB,dg_here%IRK)*dg_here%PHI_EDGE(K,GPB,LEDB,dg_here%pa)
+               QYB = QYB + dg_here%QY(K,ELB,dg_here%IRK)*dg_here%PHI_EDGE(K,GPB,LEDB,dg_here%pa)
+                                !HBB = HBB + dg_here%HB(K,ELB,1  )*dg_here%PHI_EDGE(K,GPB,LEDB,dg_here%pa)
 
-               ZEF = ZEF + dg%ZE(K,ELF,dg%IRK)*dg%PHI_EDGE(K,GPF,LEDF,dg%pa)
-               QXF = QXF + dg%QX(K,ELF,dg%IRK)*dg%PHI_EDGE(K,GPF,LEDF,dg%pa)
-               QYF = QYF + dg%QY(K,ELF,dg%IRK)*dg%PHI_EDGE(K,GPF,LEDF,dg%pa)
-                                !HBF = HBF + dg%HB(K,ELF,1  )*dg%PHI_EDGE(K,GPF,LEDF,dg%pa)
+               ZEF = ZEF + dg_here%ZE(K,ELF,dg_here%IRK)*dg_here%PHI_EDGE(K,GPF,LEDF,dg_here%pa)
+               QXF = QXF + dg_here%QX(K,ELF,dg_here%IRK)*dg_here%PHI_EDGE(K,GPF,LEDF,dg_here%pa)
+               QYF = QYF + dg_here%QY(K,ELF,dg_here%IRK)*dg_here%PHI_EDGE(K,GPF,LEDF,dg_here%pa)
+                                !HBF = HBF + dg_here%HB(K,ELF,1  )*dg_here%PHI_EDGE(K,GPF,LEDF,dg_here%pa)
 #ifdef TRACE
-               iotaB = iotaB + dg%iota(K,ELB,dg%IRK)*dg%PHI_EDGE(K,GPB,LEDB,dg%pa)
-               iotaF = iotaF + dg%iota(K,ELF,dg%IRK)*dg%PHI_EDGE(K,GPF,LEDF,dg%pa)
+               iotaB = iotaB + dg_here%iota(K,ELB,dg_here%IRK)*dg_here%PHI_EDGE(K,GPB,LEDB,dg_here%pa)
+               iotaF = iotaF + dg_here%iota(K,ELF,dg_here%IRK)*dg_here%PHI_EDGE(K,GPF,LEDF,dg_here%pa)
 #endif
 
 #ifdef CHEM
-               iotaB = iotaB + dg%iota(K,ELB,dg%IRK)*dg%PHI_EDGE(K,GPB,LEDB,dg%pa)
-               iotaF = iotaF + dg%iota(K,ELF,dg%IRK)*dg%PHI_EDGE(K,GPF,LEDF,dg%pa)
-               iota2B = iota2B + dg%iota2(K,ELB,dg%IRK)*dg%PHI_EDGE(K,GPB,LEDB,dg%pa)
-               iota2B = iota2F + dg%iota2(K,ELF,dg%IRK)*dg%PHI_EDGE(K,GPF,LEDF,dg%pa)
+               iotaB = iotaB + dg_here%iota(K,ELB,dg_here%IRK)*dg_here%PHI_EDGE(K,GPB,LEDB,dg_here%pa)
+               iotaF = iotaF + dg_here%iota(K,ELF,dg_here%IRK)*dg_here%PHI_EDGE(K,GPF,LEDF,dg_here%pa)
+               iota2B = iota2B + dg_here%iota2(K,ELB,dg_here%IRK)*dg_here%PHI_EDGE(K,GPB,LEDB,dg_here%pa)
+               iota2B = iota2F + dg_here%iota2(K,ELF,dg_here%IRK)*dg_here%PHI_EDGE(K,GPF,LEDF,dg_here%pa)
 #endif
 
 #ifdef DYNP
-               dynPB = dynPB + dg%dynP(K,ELB,dg%IRK)*dg%PHI_EDGE(K,GPB,LEDB,dg%pa)
-               dynPF = dynPF + dg%dynP(K,ELF,dg%IRK)*dg%PHI_EDGE(K,GPF,LEDF,dg%pa)
+               dynPB = dynPB + dg_here%dynP(K,ELB,dg_here%IRK)*dg_here%PHI_EDGE(K,GPB,LEDB,dg_here%pa)
+               dynPF = dynPF + dg_here%dynP(K,ELF,dg_here%IRK)*dg_here%PHI_EDGE(K,GPF,LEDF,dg_here%pa)
 #endif
 
             ENDDO
 
 
-            SFACB = dg%SFACED(I,LEDB,ELB,dg%pa)
-            SFACF = dg%SFACED(I,LEDF,ELF,dg%pa)
+            SFACB = dg_here%SFACED(I,LEDB,ELB,dg_here%pa)
+            SFACF = dg_here%SFACED(I,LEDF,ELF,dg_here%pa)
             
             ABOVEB = 0
             ABOVEF = 0 
-            IF (dg%WDFLG(ELB).EQ.1) ABOVEB = ZEB - dg%IBHT(L)
-            IF (dg%WDFLG(ELF).EQ.1) ABOVEF = ZEF - dg%IBHT(L)
+            IF (dg_here%WDFLG(ELB).EQ.1) ABOVEB = ZEB - dg_here%IBHT(L)
+            IF (dg_here%WDFLG(ELF).EQ.1) ABOVEF = ZEF - dg_here%IBHT(L)
             
 !.........Case 1:  Water is below barrier on both sides
 !     ---------------------------------------------
@@ -234,7 +234,7 @@
 !     -------------------------
 
                IF (ABOVEB.GT.SUBSUPF) THEN
-                  QF_N_INT = dg%RAMPDG*dg%IBCFSB(L)*ABOVEB&
+                  QF_N_INT = dg_here%RAMPDG*dg_here%IBCFSB(L)*ABOVEB&
                       *SQRT((2.D0*G*(ABOVEF-ABOVEB)))
                   QF_T_INT = 0.D0
                   
@@ -242,7 +242,7 @@
 !     ---------------------------
 
                ELSE
-                  QF_N_INT = dg%RAMPDG*dg%IBCFSP(L)*SUBSUPF*SQRT(SUBSUPF*G)
+                  QF_N_INT = dg_here%RAMPDG*dg_here%IBCFSP(L)*SUBSUPF*SQRT(SUBSUPF*G)
                   QF_T_INT = 0.D0
                ENDIF
                GOTO 100
@@ -261,7 +261,7 @@
 !     -------------------------
 
                IF (ABOVEF.GT.SUBSUPB) THEN
-                  QB_N_INT = dg%RAMPDG*dg%IBCFSB(L)*ABOVEF&
+                  QB_N_INT = dg_here%RAMPDG*dg_here%IBCFSB(L)*ABOVEF&
                       *SQRT((2.D0*G*(ABOVEB-ABOVEF)))
                   QB_T_INT = 0.D0
                   
@@ -269,7 +269,7 @@
 !     ---------------------------
                   
                ELSE
-                  QB_N_INT = dg%RAMPDG*dg%IBCFSP(L)*SUBSUPB*SQRT(SUBSUPB*G)
+                  QB_N_INT = dg_here%RAMPDG*dg_here%IBCFSP(L)*SUBSUPB*SQRT(SUBSUPB*G)
                   QB_T_INT = 0.D0
                ENDIF
                GOTO 100
@@ -281,46 +281,46 @@
 
 !...........Compute the numerical flux for the back side edge
 
-               dg%ZE_IN = ZEB
-               dg%QX_IN = QXB
-               dg%QY_IN = QYB
-               dg%HB_IN = HBB
+               dg_here%ZE_IN = ZEB
+               dg_here%QX_IN = QXB
+               dg_here%QY_IN = QYB
+               dg_here%HB_IN = HBB
 
-               dg%SFAC_IN = SFACB
+               dg_here%SFAC_IN = SFACB
 
 #ifdef TRACE
-               dg%iota_IN = iotaB
+               dg_here%iota_IN = iotaB
 #endif
 
 #ifdef CHEM
-               dg%iota_IN = iotaB
-               dg%iota2_IN = iota2B
+               dg_here%iota_IN = iotaB
+               dg_here%iota2_IN = iota2B
 #endif
 
 #ifdef DYNP
                dynP_IN = dynPB
 #endif
                
-               dg%ZE_EX = ZEB
-               dg%HB_EX = HBB
+               dg_here%ZE_EX = ZEB
+               dg_here%HB_EX = HBB
 
-               dg%SFAC_EX = SFACB
+               dg_here%SFAC_EX = SFACB
 
 #ifdef TRACE
-               dg%iota_EX = iotaB
+               dg_here%iota_EX = iotaB
 #endif
 
 #ifdef CHEM
-               dg%iota_EX = iotaB
-               dg%iota2_EX = iota2B
+               dg_here%iota_EX = iotaB
+               dg_here%iota2_EX = iota2B
 #endif
 
 #ifdef DYNP
                dynP_EX = dynPB
 #endif
                
-               dg%NX = NXB
-               dg%NY = NYB
+               dg_here%NX = NXB
+               dg_here%NY = NYB
 
 !...........Reflect the velocity in the normal direction
 
@@ -329,12 +329,12 @@
 
 !...........Compute the x and y components of the external state flow
 
-               dg%QX_EX = ( TYB*Q_N_EXT - NYB*Q_T_EXT)/(NXB*TYB - NYB*TXB)
-               dg%QY_EX = (-TXB*Q_N_EXT + NXB*Q_T_EXT)/(NXB*TYB - NYB*TXB)
+               dg_here%QX_EX = ( TYB*Q_N_EXT - NYB*Q_T_EXT)/(NXB*TYB - NYB*TXB)
+               dg_here%QY_EX = (-TXB*Q_N_EXT + NXB*Q_T_EXT)/(NXB*TYB - NYB*TXB)
 
 !...........Compute the numerical flux
                
-               CALL NUMERICAL_FLUX(s,dg,IT)
+               CALL NUMERICAL_FLUX(s,dg_here,IT)
                FB_HAT = F_HAT
                GB_HAT = G_HAT
                HB_HAT = H_HAT
@@ -353,30 +353,30 @@
 #endif
 
                IF (WEIR_FLOW.LT.0) THEN
-                  dg%ZE_IN = ZEF
-                  dg%QX_IN = QXF
-                  dg%QY_IN = QYF
-                  dg%HB_IN = HBF
-                  dg%ZE_EX = ZEF
-                  dg%HB_EX = HBF
+                  dg_here%ZE_IN = ZEF
+                  dg_here%QX_IN = QXF
+                  dg_here%QY_IN = QYF
+                  dg_here%HB_IN = HBF
+                  dg_here%ZE_EX = ZEF
+                  dg_here%HB_EX = HBF
 
-                  dg%SFAC_IN = SFACF
-                  dg%SFAC_EX = SFACF
+                  dg_here%SFAC_IN = SFACF
+                  dg_here%SFAC_EX = SFACF
 
 
-                  dg%NX = NXF
-                  dg%NY = NYF
+                  dg_here%NX = NXF
+                  dg_here%NY = NYF
                   
 #ifdef TRACE
-                  dg%iota_IN = iotaF
-                  dg%iota_EX = iotaF
+                  dg_here%iota_IN = iotaF
+                  dg_here%iota_EX = iotaF
 #endif
 
 #ifdef CHEM
-                  dg%iota_IN = iotaF
-                  dg%iota2_IN = iota2F
-                  dg%iota_EX = iotaF
-                  dg%iota2_EX = iota2F
+                  dg_here%iota_IN = iotaF
+                  dg_here%iota2_IN = iota2F
+                  dg_here%iota_EX = iotaF
+                  dg_here%iota2_EX = iota2F
 #endif
 
 #ifdef DYNP
@@ -384,13 +384,13 @@
                   dynP_EX = iotaF
 #endif
 
-                  IF (dg%WDFLG(ELF).EQ.0) THEN
+                  IF (dg_here%WDFLG(ELF).EQ.0) THEN
                      NLEQG_TMP = NLEQG
                      NLEQG = 0.D0
                      G_TMP = G
                      G = 0.D0
                   ENDIF
-                  call numerical_flux(s,dg,IT)
+                  call numerical_flux(s,dg_here,IT)
                   FF_HAT = F_HAT
                   GF_HAT = G_HAT
                   HF_HAT = H_HAT
@@ -408,7 +408,7 @@
                   KF_HAT = K_HAT
 #endif
 
-                  IF (dg%WDFLG(ELF).EQ.0) THEN
+                  IF (dg_here%WDFLG(ELF).EQ.0) THEN
                      NLEQG = NLEQG_TMP
                      G = G_TMP
                   ENDIF
@@ -420,27 +420,27 @@
                
 !...........Compute the numerical flux for the front side edge
 
-               dg%ZE_IN = ZEF
-               dg%QX_IN = QXF
-               dg%QY_IN = QYF
-               dg%HB_IN = HBF
+               dg_here%ZE_IN = ZEF
+               dg_here%QX_IN = QXF
+               dg_here%QY_IN = QYF
+               dg_here%HB_IN = HBF
 
-               dg%ZE_EX = ZEF
-               dg%HB_EX = HBF
+               dg_here%ZE_EX = ZEF
+               dg_here%HB_EX = HBF
 
-               dg%SFAC_IN = SFACF
-               dg%SFAC_EX = SFACF
+               dg_here%SFAC_IN = SFACF
+               dg_here%SFAC_EX = SFACF
 
 #ifdef TRACE
-               dg%iota_IN = iotaF
-               dg%iota_EX = iotaF
+               dg_here%iota_IN = iotaF
+               dg_here%iota_EX = iotaF
 #endif
 
 #ifdef CHEM
-               dg%iota_IN = iotaF
-               dg%iota_EX = iotaF
-               dg%iota2_IN = iota2F
-               dg%iota2_EX = iota2F
+               dg_here%iota_IN = iotaF
+               dg_here%iota_EX = iotaF
+               dg_here%iota2_IN = iota2F
+               dg_here%iota2_EX = iota2F
 #endif
 
 #ifdef DYNP
@@ -448,8 +448,8 @@
                dynP_EX = dynPF
 #endif
 
-               dg%NX = NXF
-               dg%NY = NYF
+               dg_here%NX = NXF
+               dg_here%NY = NYF
                
 !...........Reflect the velocity in the normal direction
 
@@ -458,10 +458,10 @@
 
 !...........Compute the x and y components of the external state flow
 
-               dg%QX_EX = ( TYF*Q_N_EXT - NYF*Q_T_EXT)/(NXF*TYF - NYF*TXF)
-               dg%QY_EX = (-TXF*Q_N_EXT + NXF*Q_T_EXT)/(NXF*TYF - NYF*TXF)
+               dg_here%QX_EX = ( TYF*Q_N_EXT - NYF*Q_T_EXT)/(NXF*TYF - NYF*TXF)
+               dg_here%QY_EX = (-TXF*Q_N_EXT + NXF*Q_T_EXT)/(NXF*TYF - NYF*TXF)
 
-               call numerical_flux(s,dg,IT)
+               call numerical_flux(s,dg_here,IT)
                FF_HAT = F_HAT
                GF_HAT = G_HAT
                HF_HAT = H_HAT
@@ -480,26 +480,26 @@
 #endif
                
                IF (WEIR_FLOW.GT.0) THEN
-                  dg%ZE_IN = ZEB
-                  dg%QX_IN = QXB
-                  dg%QY_IN = QYB
-                  dg%HB_IN = HBB
-                  dg%ZE_EX = ZEB
-                  dg%HB_EX = HBB
+                  dg_here%ZE_IN = ZEB
+                  dg_here%QX_IN = QXB
+                  dg_here%QY_IN = QYB
+                  dg_here%HB_IN = HBB
+                  dg_here%ZE_EX = ZEB
+                  dg_here%HB_EX = HBB
 
-                  dg%SFAC_IN = SFACB
-                  dg%SFAC_EX = SFACB
+                  dg_here%SFAC_IN = SFACB
+                  dg_here%SFAC_EX = SFACB
 
 #ifdef TRACE
-                  dg%iota_IN = iotaB
-                  dg%iota_EX = iotaB
+                  dg_here%iota_IN = iotaB
+                  dg_here%iota_EX = iotaB
 #endif
 
 #ifdef CHEM
-                  dg%iota_IN = iotaB
-                  dg%iota2_IN = iota2B
-                  dg%iota_EX = iotaB
-                  dg%iota2_EX = iota2B
+                  dg_here%iota_IN = iotaB
+                  dg_here%iota2_IN = iota2B
+                  dg_here%iota_EX = iotaB
+                  dg_here%iota2_EX = iota2B
 #endif
 
 #ifdef DYNP
@@ -507,15 +507,15 @@
                   dynP_EX = dynPB
 #endif
 
-                  dg%NX = NXB
-                  dg%NY = NYB
-                  IF (dg%WDFLG(ELB).EQ.0) THEN
+                  dg_here%NX = NXB
+                  dg_here%NY = NYB
+                  IF (dg_here%WDFLG(ELB).EQ.0) THEN
                      NLEQG_TMP = NLEQG
                      NLEQG = 0.D0
                      G_TMP = G
                      G = 0.D0
                   ENDIF
-                  call numerical_flux(s,dg,IT)
+                  call numerical_flux(s,dg_here,IT)
                   FB_HAT = F_HAT
                   GB_HAT = G_HAT
 
@@ -532,7 +532,7 @@
                   KB_HAT = K_HAT
 #endif
 
-                  IF (dg%WDFLG(ELB).EQ.0) THEN
+                  IF (dg_here%WDFLG(ELB).EQ.0) THEN
                      NLEQG = NLEQG_TMP
                      G = G_TMP
                   ENDIF
@@ -543,37 +543,37 @@
             
  200        CONTINUE
 !     
-            DO K = 1,dg%DOFS(dg%el)
+            DO K = 1,dg_here%DOFS(dg_here%el)
 
-               WEGPB = 2.0*dg%M_INV(K,dg%pa)/AREAS(ELB)*dg%XLEN(GEDB)&
-                   *dg%PHI_EDGE(K,GPB,LEDB,dg%pa)*dg%WEGP(GPB,dg%pa)
-               WEGPF = 2.0*dg%M_INV(K,dg%pa)/AREAS(ELF)*dg%XLEN(GEDF)&
-                   *dg%PHI_EDGE(K,GPF,LEDF,dg%pa)*dg%WEGP(GPF,dg%pa)
+               WEGPB = 2.0*dg_here%M_INV(K,dg_here%pa)/AREAS(ELB)*dg_here%XLEN(GEDB)&
+                   *dg_here%PHI_EDGE(K,GPB,LEDB,dg_here%pa)*dg_here%WEGP(GPB,dg_here%pa)
+               WEGPF = 2.0*dg_here%M_INV(K,dg_here%pa)/AREAS(ELF)*dg_here%XLEN(GEDF)&
+                   *dg_here%PHI_EDGE(K,GPF,LEDF,dg_here%pa)*dg_here%WEGP(GPF,dg_here%pa)
 
-               dg%RHS_ZE(K,ELB,dg%IRK) = dg%RHS_ZE(K,ELB,dg%IRK) - WEGPB*FB_HAT
-               dg%RHS_QX(K,ELB,dg%IRK) = dg%RHS_QX(K,ELB,dg%IRK) - WEGPB*GB_HAT
-               dg%RHS_QY(K,ELB,dg%IRK) = dg%RHS_QY(K,ELB,dg%IRK) - WEGPB*HB_HAT
+               dg_here%RHS_ZE(K,ELB,dg_here%IRK) = dg_here%RHS_ZE(K,ELB,dg_here%IRK) - WEGPB*FB_HAT
+               dg_here%RHS_QX(K,ELB,dg_here%IRK) = dg_here%RHS_QX(K,ELB,dg_here%IRK) - WEGPB*GB_HAT
+               dg_here%RHS_QY(K,ELB,dg_here%IRK) = dg_here%RHS_QY(K,ELB,dg_here%IRK) - WEGPB*HB_HAT
 
-               dg%RHS_ZE(K,ELF,dg%IRK) = dg%RHS_ZE(K,ELF,dg%IRK) - WEGPF*FF_HAT
-               dg%RHS_QX(K,ELF,dg%IRK) = dg%RHS_QX(K,ELF,dg%IRK) - WEGPF*GF_HAT
-               dg%RHS_QY(K,ELF,dg%IRK) = dg%RHS_QY(K,ELF,dg%IRK) - WEGPF*HF_HAT
+               dg_here%RHS_ZE(K,ELF,dg_here%IRK) = dg_here%RHS_ZE(K,ELF,dg_here%IRK) - WEGPF*FF_HAT
+               dg_here%RHS_QX(K,ELF,dg_here%IRK) = dg_here%RHS_QX(K,ELF,dg_here%IRK) - WEGPF*GF_HAT
+               dg_here%RHS_QY(K,ELF,dg_here%IRK) = dg_here%RHS_QY(K,ELF,dg_here%IRK) - WEGPF*HF_HAT
 
 #ifdef TRACE
-               dg%RHS_iota(K,ELB,dg%IRK) = dg%RHS_iota(K,ELB,dg%IRK) - WEGPB*IB_HAT
-               dg%RHS_iota(K,ELF,dg%IRK) = dg%RHS_iota(K,ELF,dg%IRK) - WEGPB*IF_HAT
+               dg_here%RHS_iota(K,ELB,dg_here%IRK) = dg_here%RHS_iota(K,ELB,dg_here%IRK) - WEGPB*IB_HAT
+               dg_here%RHS_iota(K,ELF,dg_here%IRK) = dg_here%RHS_iota(K,ELF,dg_here%IRK) - WEGPB*IF_HAT
 #endif
 
 #ifdef CHEM
-               dg%RHS_iota(K,ELB,dg%IRK) = dg%RHS_iota(K,ELB,dg%IRK) - WEGPB*IB_HAT
-               dg%RHS_iota(K,ELF,dg%IRK) = dg%RHS_iota(K,ELF,dg%IRK) - WEGPB*IF_HAT
+               dg_here%RHS_iota(K,ELB,dg_here%IRK) = dg_here%RHS_iota(K,ELB,dg_here%IRK) - WEGPB*IB_HAT
+               dg_here%RHS_iota(K,ELF,dg_here%IRK) = dg_here%RHS_iota(K,ELF,dg_here%IRK) - WEGPB*IF_HAT
                
-               dg%RHS_iota2(K,ELB,dg%IRK) = dg%RHS_iota2(K,ELB,dg%IRK) - WEGPB*JB_HAT
-               dg%RHS_iota2(K,ELF,dg%IRK) = dg%RHS_iota2(K,ELF,dg%IRK) - WEGPB*JF_HAT
+               dg_here%RHS_iota2(K,ELB,dg_here%IRK) = dg_here%RHS_iota2(K,ELB,dg_here%IRK) - WEGPB*JB_HAT
+               dg_here%RHS_iota2(K,ELF,dg_here%IRK) = dg_here%RHS_iota2(K,ELF,dg_here%IRK) - WEGPB*JF_HAT
 #endif
 
 #ifdef DYNP
-               dg%RHS_dynP(K,ELB,dg%IRK) = dg%RHS_dynP(K,ELB,dg%IRK) - WEGPB*KB_HAT
-               dg%RHS_dynP(K,ELF,dg%IRK) = dg%RHS_dynP(K,ELF,dg%IRK) - WEGPB*KF_HAT
+               dg_here%RHS_dynP(K,ELB,dg_here%IRK) = dg_here%RHS_dynP(K,ELB,dg_here%IRK) - WEGPB*KB_HAT
+               dg_here%RHS_dynP(K,ELF,dg_here%IRK) = dg_here%RHS_dynP(K,ELF,dg_here%IRK) - WEGPB*KF_HAT
 #endif
 
             ENDDO

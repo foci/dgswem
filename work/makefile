@@ -62,7 +62,7 @@ PREP_SRC   =  adcprep.f95  decomp.f95   read_global.f95   prep.f95   interp.f95 
 POST_SRC   =  adcpost.f95    post.f95  compare.f95  diffmerge.f95
 ADC_SRC    =  dgswem.f95 read_input.f95 cstart.f95 hstart.f95 radiation_edge_hydro.f95 \
 	ibarrier_edge_hydro.f95 ebarrier_edge_hydro.f95  \
-	calc_normal.f95 create_edge_data.f95 detector.f95 \
+	calc_normal.f95 create_edge_data.f95 \
 	DG_timestep.f95 DG_hydro_timestep.f95 \
 	edge_int_hydro.f95 flow_edge_hydro.f95 \
 	internal_edge_hydro.f95 land_edge_hydro.f95 \
@@ -218,7 +218,6 @@ $(O_DIR)hstart.o      			:  hstart.f95 $(ADC_MOBJ)  $(WIND_MOBJ)
 $(O_DIR)dgswem.o      			:  dgswem.f95 $(ADC_MOBJ) $(WIND_MOBJ) 
 $(O_DIR)calc_normal.o         	:  calc_normal.f95 $(ADC_MOBJ)
 $(O_DIR)create_edge_data.o    	:  create_edge_data.f95 $(ADC_MOBJ)
-$(O_DIR)detector.o	      	:  detector.f95 $(ADC_MOBJ)
 $(O_DIR)DG_timestep.o         	:  DG_timestep.f95 $(ADC_MOBJ)
 $(O_DIR)DG_hydro_timestep.o   	:  DG_hydro_timestep.f95 $(ADC_MOBJ)
 $(O_DIR)edge_int_hydro.o      	:  edge_int_hydro.f95 $(ADC_MOBJ)

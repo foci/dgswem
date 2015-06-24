@@ -10,7 +10,7 @@
 !
 !***********************************************************************
 
-      SUBROUTINE CALC_NORMAL(dg)
+      SUBROUTINE CALC_NORMAL(dg_here)
 
 !.....Use appropriate modules
 
@@ -19,7 +19,7 @@
       
       IMPLICIT NONE
 
-      type (dg_type) :: dg
+      type (dg_type) :: dg_here
 
 !.....Declare local variables
 
@@ -27,26 +27,26 @@
 
 !.....Loop over the edges
 
-      DO I = 1,dg%NEDGES
+      DO I = 1,dg_here%NEDGES
       
 !.....Retrieve the node numbers for the given edge
 
-        N1 = dg%NEDNO(1,I)
-        N2 = dg%NEDNO(2,I)
+        N1 = dg_here%NEDNO(1,I)
+        N2 = dg_here%NEDNO(2,I)
 
 !.....Compute an average SFAC to adjust normal for CPP coordinates
 
-        dg%SAV = (SFAC(N1) + SFAC(N2))/2.0
+        dg_here%SAV = (SFAC(N1) + SFAC(N2))/2.0
         
 !.....Compute the length of the given egde
         
-        dg%XLEN(I) = SQRT((Y(N2) - Y(N1))**2.D0                   + (X(N2) - X(N1))**2.D0)
+        dg_here%XLEN(I) = SQRT((Y(N2) - Y(N1))**2.D0                   + (X(N2) - X(N1))**2.D0)
      
 !.....Compute the components of the normal vector
 
-       !dg%COSNX(I) = dg%SAV*(Y(N2) - Y(N1))/dg%XLEN(I)
-       dg%COSNX(I) = (Y(N2) - Y(N1))/dg%XLEN(I)
-       dg%SINNX(I) = -(X(N2) - X(N1))/dg%XLEN(I)
+       !dg_here%COSNX(I) = dg_here%SAV*(Y(N2) - Y(N1))/dg_here%XLEN(I)
+       dg_here%COSNX(I) = (Y(N2) - Y(N1))/dg_here%XLEN(I)
+       dg_here%SINNX(I) = -(X(N2) - X(N1))/dg_here%XLEN(I)
       ENDDO
         
       RETURN

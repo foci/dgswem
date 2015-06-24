@@ -24,7 +24,7 @@
       IMPLICIT NONE
 
       type (sizes_type) :: s
-      type (dg_type) :: dg
+      type (dg_type) :: dg_here
       
       INTEGER TESTFLAG,OUTITER,istop,i,ModetoNode
 !     sb-PDG1
@@ -40,11 +40,12 @@
          write(*,*) 'mnproc ',mnproc
       ENDIF
       CALL MAKE_DIRNAME(s)       ! Establish Working Directory Name
-      CALL READ_INPUT(s,dg)         ! Establish sizes by reading fort.14 and fort.15
+      CALL READ_INPUT(s,dg_here)         ! Establish sizes by reading fort.14 and fort.15
 #else
       IMPLICIT NONE
      
       type (sizes_type) :: s
+      type (dg_type) :: dg_here
 
       REAL(4) CPU_TIME,CPU_SEC(2)
       REAL(4) TARRAY(2)
@@ -52,7 +53,7 @@
       character*80 tecfile, tecfile_max
 
       CALL MAKE_DIRNAME(s)       ! Establish Working Directory Name
-      CALL READ_INPUT(s,dg)         ! Establish sizes by reading fort.14 and fort.15
+      CALL READ_INPUT(s,dg_here)         ! Establish sizes by reading fort.14 and fort.15
 #endif         
 
       
@@ -146,7 +147,7 @@
          LEQ = 0.D0
       ENDIF
       NLEQG = NLEQ*G
-      dg%FG_L = LEQ*G
+      dg_here%FG_L = LEQ*G
 
       IFWIND=1
       IF(IM.EQ.1) IFWIND=0
@@ -173,8 +174,8 @@
 !     write(200+myproc,*) 'call prep_dg'
 !     write(200+myproc,*) 'back from prep_dg'
 
-      CALL PREP_DG(s,dg)
-      CALL WRITE_RESULTS(s,dg,0,.FALSE.)
+      CALL PREP_DG(s,dg_here)
+      CALL WRITE_RESULTS(s,dg_here,0,.FALSE.)
 
                                !cnd...for tecplot output
 !Casey 120813: Begin the OUT_TEC conditional.
@@ -205,7 +206,7 @@
 
       if (ModetoNode.eq.0) then
          write(777,*) 
-     $        'VARIABLES = "x", "y", "b", "dg%ze", "H", "u", "v", "|v|","|w|","p","dg%iota","dg%iota2","sum","diff"'
+     $        'VARIABLES = "x", "y", "b", "dg_here%ze", "H", "u", "v", "|v|","|w|","p","dg_here%iota","dg_here%iota2","sum","diff"'
          write(777,*) 'ZONE ZONETYPE=FETRIANGLE ',
      $        'NODES=', np, 
      $        ' ELEMENTS=', ne, 
@@ -264,7 +265,7 @@
          enddo
       else
          write(777,*) 
-     $'VARIABLES = "x", "y", "b", "dg%ze", "H", "u", "v", "|v|","|w|","PE"'
+     $'VARIABLES = "x", "y", "b", "dg_here%ze", "H", "u", "v", "|v|","|w|","PE"'
          write(777,*) 'ZONE ZONETYPE=FETRIANGLE ',
      $        'NODES=', np, 
      $        ' ELEMENTS=', ne, 
@@ -312,7 +313,7 @@
 #endif
 
 !     sb...Write initial conditions
-      CALL WRITE_DG_IC(dg)
+      CALL WRITE_DG_IC(dg_here)
 #ifdef CMPI
 !     istop=1
 !     if (istop.eq.1) then
@@ -326,7 +327,7 @@
 !$$$            if (myproc.eq.0) write(*,*) 'timestep ',itime_a
 !$$$c     write(200+myproc,*) 'timestep ',itime_a,myproc
 !$$$         endif
-         CALL DG_TIMESTEP(s,dg,ITIME_A)
+         CALL DG_TIMESTEP(s,dg_here,ITIME_A)
 #ifdef SWAN
 !asey 090302: If it is time, then call the following subroutine
 !             to then call the SWAN time-stepping subroutine.

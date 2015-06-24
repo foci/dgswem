@@ -8,7 +8,7 @@
 !     
 !***********************************************************************
 
-      SUBROUTINE DG_TIMESTEP(s,dg,IT)
+      SUBROUTINE DG_TIMESTEP(s,dg_here,IT)
 
 !.....Use appropriate modules
       
@@ -19,10 +19,12 @@
       USE MESSENGER_ELEM
 #endif
 
+      USE DG
+
       IMPLICIT NONE
 
       type (sizes_type) :: s
-      type (dg_type) :: dg
+      type (dg_type) :: dg_here
 
 !.....Declare local variables
 
@@ -30,7 +32,7 @@
       
 !.....Hydrodynamics
 
-      CALL DG_HYDRO_TIMESTEP(s,dg,IT)
+      CALL DG_HYDRO_TIMESTEP(s,dg_here,IT)
 
 !.....Write out results
 
@@ -39,14 +41,14 @@
       CALL MSG_BLOCKSYNC_START()
 #endif
 #endif
-      CALL WRITE_RESULTS(s,dg,IT,.FALSE.)
+      CALL WRITE_RESULTS(s,dg_here,IT,.FALSE.)
 #ifdef CMPI
 #ifdef BLKOUT
       CALL MSG_BLOCKSYNC_FINISH()
 #endif
 #endif
 
-      CALL SCRUTINIZE_SOLUTION(s,dg,IT)
+      CALL SCRUTINIZE_SOLUTION(s,dg_here,IT)
 
       RETURN
       END SUBROUTINE
@@ -63,7 +65,7 @@
 !     
 !***********************************************************************
 
-      SUBROUTINE SCRUTINIZE_SOLUTION(s,dg,IT)
+      SUBROUTINE SCRUTINIZE_SOLUTION(s,dg_here,IT)
 
 !.....Use appropriate modules
       
@@ -79,7 +81,7 @@
       IMPLICIT NONE
       
       type (sizes_type) :: s
-      type (dg_type) :: dg
+      type (dg_type) :: dg_here
 
 !.....Declare local variables
 
@@ -92,15 +94,15 @@
 !.....Detect negative mass
       ErrorElevExceeded=0
       DO J = 1,NE
-         DPAVG =  1.D0/dg%ncheck(pdg_el(j)) * (sum(dg%DP_NODE(:,J,pdg_el(j)))) !(DP(NM(J,1))+DP(NM(J,2))+DP(NM(J,3)))/3.D0
+         DPAVG =  1.D0/dg_here%ncheck(pdg_el(j)) * (sum(dg_here%DP_NODE(:,J,pdg_el(j)))) !(DP(NM(J,1))+DP(NM(J,2))+DP(NM(J,3)))/3.D0
          Detected = .FALSE.
-         IF((dg%ZE(1,J,1)+DPAVG).LE.0.D0) THEN
+         IF((dg_here%ZE(1,J,1)+DPAVG).LE.0.D0) THEN
             PRINT *, ''
 #ifdef CMPI
             PRINT *, 'IN SUBDOMAIN ',MYPROC
 #endif
-            PRINT *, '  dg%ZE(',1,',',J,',1) = ',dg%ZE(1,J,1)
-            PRINT *, '  HE(',1,',',J,',1) = ',dg%ZE(1,J,1)+DPAVG
+            PRINT *, '  dg_here%ZE(',1,',',J,',1) = ',dg_here%ZE(1,J,1)
+            PRINT *, '  HE(',1,',',J,',1) = ',dg_here%ZE(1,J,1)+DPAVG
             PRINT *, '  DP = ',DP(NM(J,1)),DP(NM(J,2)),DP(NM(J,3))
             PRINT *, '  DPAVG = ',DPAVG
             PRINT *, ' x,  y ',SLAM(NM(J,1))/DEG2RAD,SFEA(NM(J,1))/DEG2RAD
@@ -151,48 +153,48 @@
 !.....Detect NaN
       
       DO J = 1,NE
-         DO K = 1,dg%DOF
+         DO K = 1,dg_here%DOF
 
             Detected = .FALSE.
-            IF(dg%ZE(K,J,1).NE.dg%ZE(K,J,1)) THEN
+            IF(dg_here%ZE(K,J,1).NE.dg_here%ZE(K,J,1)) THEN
                PRINT *, ''
 #ifdef CMPI
                PRINT *, 'IN SUBDOMAIN ',MYPROC
 #endif
-               PRINT *, '  dg%ZE(',K,',',J,',1) IS ',dg%ZE(K,J,1)
+               PRINT *, '  dg_here%ZE(',K,',',J,',1) IS ',dg_here%ZE(K,J,1)
                PRINT *, ' x,  y ',SLAM(NM(J,1))/DEG2RAD,SFEA(NM(J,1))/DEG2RAD
                Detected = .TRUE.
                ErrorElevExceeded = 1
             ENDIF
-            IF(dg%QX(K,J,1).NE.dg%QX(K,J,1)) THEN
+            IF(dg_here%QX(K,J,1).NE.dg_here%QX(K,J,1)) THEN
 #ifdef CMPI
                PRINT *, 'IN SUBDOMAIN ',MYPROC
 #endif
                PRINT *, ''
-               PRINT *, '  dg%QX(',K,',',J,',1) IS ',dg%QX(K,J,1)
+               PRINT *, '  dg_here%QX(',K,',',J,',1) IS ',dg_here%QX(K,J,1)
                PRINT *, ' x,  y ',SLAM(NM(J,1))/DEG2RAD,SFEA(NM(J,1))/DEG2RAD
                Detected = .TRUE.
                ErrorElevExceeded = 1
             ENDIF
-            IF(dg%QY(K,J,1).NE.dg%QY(K,J,1)) THEN
+            IF(dg_here%QY(K,J,1).NE.dg_here%QY(K,J,1)) THEN
 #ifdef CMPI
                PRINT *, 'IN SUBDOMAIN ',MYPROC
 #endif
                PRINT *, ''
-               PRINT *, '  dg%QY(',K,',',J,',1) IS ',dg%QY(K,J,1)
+               PRINT *, '  dg_here%QY(',K,',',J,',1) IS ',dg_here%QY(K,J,1)
                PRINT *, ' x,  y ',SLAM(NM(J,1))/DEG2RAD,SFEA(NM(J,1))/DEG2RAD
                Detected = .TRUE.
                ErrorElevExceeded = 1
             ENDIF
 
 #ifdef TRACE
-            IF(dg%iota(K,J,1).NE.dg%iota(K,J,1)) THEN
+            IF(dg_here%iota(K,J,1).NE.dg_here%iota(K,J,1)) THEN
                PRINT *, ''
 
 #ifdef CMPI
                PRINT *, 'IN SUBDOMAIN ',MYPROC
 #endif
-               PRINT *, '  dg%iota(',K,',',J,',1) IS ',dg%iota(K,J,1)
+               PRINT *, '  dg_here%iota(',K,',',J,',1) IS ',dg_here%iota(K,J,1)
                PRINT *, ' x,  y ',X(NM(J,1)),Y(NM(J,1))
                Detected = .TRUE.
                ErrorElevExceeded = 1
@@ -200,21 +202,21 @@
 #endif
             
 #ifdef CHEM
-            IF(dg%iota(K,J,1).NE.dg%iota(K,J,1)) THEN
+            IF(dg_here%iota(K,J,1).NE.dg_here%iota(K,J,1)) THEN
                PRINT *, ''
 #ifdef CMPI
                PRINT *, 'IN SUBDOMAIN ',MYPROC
 #endif
-               PRINT *, '  dg%iota(',K,',',J,',1) IS ',dg%iota(K,J,1)
+               PRINT *, '  dg_here%iota(',K,',',J,',1) IS ',dg_here%iota(K,J,1)
                PRINT *, ' x,  y ',X(NM(J,1)),Y(NM(J,1))
                Detected = .TRUE.
             ENDIF
-            IF(dg%iota2(K,J,1).NE.dg%iota2(K,J,1)) THEN
+            IF(dg_here%iota2(K,J,1).NE.dg_here%iota2(K,J,1)) THEN
                PRINT *, ''
 #ifdef CMPI
                PRINT *, 'IN SUBDOMAIN ',MYPROC
 #endif
-               PRINT *, '  dg%iota2(',K,',',J,',1) IS ',dg%iota2(K,J,1)
+               PRINT *, '  dg_here%iota2(',K,',',J,',1) IS ',dg_here%iota2(K,J,1)
                PRINT *, ' x,  y ',X(NM(J,1)),Y(NM(J,1))
                Detected = .TRUE.
                ErrorElevExceeded = 1
@@ -222,13 +224,13 @@
 #endif
 
 #ifdef DYNP
-            IF(dg%dynP(K,J,1).NE.dg%dynP(K,J,1)) THEN
+            IF(dg_here%dynP(K,J,1).NE.dg_here%dynP(K,J,1)) THEN
                PRINT *, ''
 
 #ifdef CMPI
                PRINT *, 'IN SUBDOMAIN ',MYPROC
 #endif
-               PRINT *, '  dg%dynP(',K,',',J,',1) IS ',dg%dynP(K,J,1)
+               PRINT *, '  dg_here%dynP(',K,',',J,',1) IS ',dg_here%dynP(K,J,1)
                PRINT *, ' x,  y ',X(NM(J,1)),Y(NM(J,1))
                Detected = .TRUE.
                ErrorElevExceeded = 1
@@ -237,13 +239,13 @@
 #ifdef SED_LAY
             
             do l = 1,s%layers
-               IF(dg%bed(K,J,1,l).NE.dg%bed(K,J,1,l)) THEN
+               IF(dg_here%bed(K,J,1,l).NE.dg_here%bed(K,J,1,l)) THEN
                   PRINT *, ''
                   
 #ifdef CMPI
                   PRINT *, 'IN SUBDOMAIN ',MYPROC
 #endif
-                  PRINT *, '  dg%bed(',K,',',J,',1,',l,') IS ', dg%bed(K,J,1,l)
+                  PRINT *, '  dg_here%bed(',K,',',J,',1,',l,') IS ', dg_here%bed(K,J,1,l)
                   PRINT *, ' x,  y ',X(NM(J,1)),Y(NM(J,1))
                   Detected = .TRUE.
                   ErrorElevExceeded = 1
