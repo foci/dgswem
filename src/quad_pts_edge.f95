@@ -35,7 +35,7 @@
 
          dg%NEGP(dg%ph) = dg%ph + 1
 
-         CALL ALLOC_EDGE_GAUSS(s)
+         CALL ALLOC_EDGE_GAUSS(s,dg)
 
       endif
 

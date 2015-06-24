@@ -36,7 +36,7 @@
 
       if (L.eq.1.and.p.eq.1) then
 
-         CALL ALLOC_JACOBI()
+         CALL ALLOC_JACOBI(dg)
 
       endif
 

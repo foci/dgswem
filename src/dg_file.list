@@ -81,6 +81,8 @@
 ../scripts/sed_vars.bash radiation_edge_hydro.f95 dg.list dg
 # called by DG_hydro_timestep.f95
 
+
+# read_fort_dg.f95 auto translate really did not go correctly.
 ../scripts/sed_vars.bash read_fort_dg.f95 read_fixed_fort_dg_dg.list dg 73 179
 # read_fixed_fort_dg, called by read_input
 ../scripts/sed_vars.bash read_fort_dg.f95 read_fixed_fort_dg_dg.list dg 73 179
@@ -105,6 +107,7 @@
 # called by prep_DG.f95
 
 # do sta_location.f95 by hand                                       <-- MANUAL
+# this also doesn't seem to be called anywhere
 
 ../scripts/sed_vars.bash tidal_potential.f95 dg.list dg
 # called by DG_hydro_timestep
@@ -118,3 +121,8 @@
 
 
 
+# Notes:
+# target :: bed, is this only used for sedlay?
+
+
+../scripts/sed_vars.bash dg.f95 dg.list dg 251 258

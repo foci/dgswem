@@ -60,7 +60,7 @@
 
 !.....Allocate the edge data arrays
 
-      CALL ALLOC_EDGES1()
+      CALL ALLOC_EDGES1(dg)
 
 !.....Generate the edge connectivity
 

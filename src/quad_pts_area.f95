@@ -761,7 +761,7 @@
          
 !.....Allocate dg%XaGP, dg%YaGP, and dg%WaGP
 
-         CALL ALLOC_AREA_GAUSS(s)
+         CALL ALLOC_AREA_GAUSS(s,dg)
 
       endif
 

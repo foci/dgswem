@@ -118,7 +118,7 @@
 
 !.....Compute the number of gauss points needed for the edge integrals
 
-      CALL ALLOC_DG4(s)          !moved here 6.28.10, for p_adapt because of messenger_elem      
+      CALL ALLOC_DG4(s,dg)          !moved here 6.28.10, for p_adapt because of messenger_elem      
 
          dg%dofs(:) = dg%dofl
          PDG_EL(:) = dg%pl
@@ -180,7 +180,7 @@
 !.....Re-arrange elevation specified boundary segment data for DG
 
       IF (dg%NEEDS.GT.0) THEN
-         CALL ALLOC_DG1(s%MNBFR)
+         CALL ALLOC_DG1(dg,s%MNBFR)
          II = 1
          JJ = 1
          DO I = 1,NBFR
@@ -211,7 +211,7 @@
 !.....Re-arrange non-zero flow specified boundary segment data for DG
 
       IF (dg%NFEDS.GT.0) THEN
-         CALL ALLOC_DG2(s%MNFFR)
+         CALL ALLOC_DG2(dg,s%MNFFR)
          II = 1
          JJ = 1
          DO I = 1,NFFR
@@ -236,7 +236,7 @@
       
 !.....If there are internal barriers allocate some stuff
 
-      IF (dg%NIBEDS.NE.0) CALL ALLOC_DG3(S%MNP)
+      IF (dg%NIBEDS.NE.0) CALL ALLOC_DG3(dg,S%MNP)
 
 !.....Allocate the array for node to element table
 
@@ -439,7 +439,7 @@
          enddo
       endif
       
-      CALL ALLOC_DG_WETDRY(s)
+      CALL ALLOC_DG_WETDRY(s,dg)
       dg%PHI_CHECK = 0.D0
       dg%PSI_CHECK = 0.D0
       H0L = H0
@@ -1164,14 +1164,14 @@
 !.....Compute basis functions at stations
 
       IF (NSTAE.GT.0) THEN      ! Elevation stations
-         CALL ALLOC_STAE( NSTAE )
+         CALL ALLOC_STAE(dg, NSTAE )
          DO I = 1,NSTAE
             CALL STA_BASIS(dg, XEL(I), YEL(I),  NNE(I), dg%PHI_STAE(:,I) )
          ENDDO
       ENDIF
       
       IF (NSTAV.GT.0) THEN      ! Velocity Stations
-         CALL ALLOC_STAV( NSTAV )
+         CALL ALLOC_STAV(dg, NSTAV )
          DO I = 1,NSTAV
             CALL STA_BASIS(dg, XEV(I), YEV(I),  NNV(I), dg%PHI_STAV(:,I) )
          ENDDO
@@ -1183,7 +1183,7 @@
          IF(MYPROC_HERE.EQ.0)THEN
             print *, 'Slope limiting prep begins, "kshanti"'
          ENDIF
-         CALL ALLOC_SLOPELIM(s)
+         CALL ALLOC_SLOPELIM(s,dg)
          CALL PREP_SLOPELIM(s,dg)
          IF(MYPROC_HERE.EQ.0)THEN
             print *, 'Finished'
