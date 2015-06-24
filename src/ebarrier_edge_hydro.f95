@@ -17,134 +17,134 @@
 
 !.....Loop over the external barrier segments
 
-      DO 1000 L = 1,NEBSEG
+      DO 1000 L = 1,dg%NEBSEG
          
 !.......Obtain the global and local edge numbers
 
-         GED = NEBSEGN(L)
-         LED = NEDSD(1,GED)
+         GED = dg%NEBSEGN(L)
+         LED = dg%NEDSD(1,GED)
 
 !.......Obtain the element
 
-         EL = NEDEL(1,GED)
-         PA = PDG_EL(EL_IN)
+         dg%EL = dg%NEDEL(1,GED)
+         dg%PA = PDG_EL(EL_IN)
 
 #ifdef P0
-         if (pa.eq.0) then
-            pa = 1
+         if (dg%pa.eq.0) then
+            dg%pa = 1
          endif
 #endif
          
-         IF (WDFLG(EL).EQ.0) GOTO 1000
+         IF (dg%WDFLG(dg%EL).EQ.0) GOTO 1000
 
 !.....Retrieve the components of the normal vector to the edge
 
-         NX = COSNX(GED)
-         NY = SINNX(GED)
+         dg%NX = dg%COSNX(GED)
+         dg%NY = dg%SINNX(GED)
          
 !.....Set the components for the tangential vector to the edge
 
-         TX = -NY
-         TY =  NX
+         TX = -dg%NY
+         TY =  dg%NX
          
 !.......Compute the variables at the quadrature points
 
-         DO I = 1,NEGP(pa)
+         DO I = 1,dg%NEGP(dg%pa)
             
 !.........Obtain the height of the barrier at the quadrature point
 
-            ZE_IN = ZE(1,EL,IRK)
-            QX_IN = QX(1,EL,IRK)
-            QY_IN = QY(1,EL,IRK)
-            HB_IN = BATHED(I,LED,EL_IN,pa)
+            dg%ZE_IN = dg%ZE(1,dg%EL,dg%IRK)
+            dg%QX_IN = dg%QX(1,dg%EL,dg%IRK)
+            dg%QY_IN = dg%QY(1,dg%EL,dg%IRK)
+            dg%HB_IN = dg%BATHED(I,LED,EL_IN,dg%pa)
 
 #ifdef TRACE
-            iota_IN = iota(1,EL,IRK)
+            dg%iota_IN = dg%iota(1,dg%EL,dg%IRK)
 #endif
 
 #ifdef CHEM
-            iota_IN = iota(1,EL,IRK)
-            iota2_IN = iota2(1,EL,IRK)
+            dg%iota_IN = dg%iota(1,dg%EL,dg%IRK)
+            dg%iota2_IN = dg%iota2(1,dg%EL,dg%IRK)
 #endif
 
 #ifdef DYNP
-            dynP_IN = dynP(1,EL,IRK)
+            dynP_IN = dg%dynP(1,dg%EL,dg%IRK)
 #endif
 
 #ifdef SED_LAY
-            HB(:,EL,irk) = 0.D0
+            dg%HB(:,dg%EL,dg%irk) = 0.D0
             do ll=1,layers
-               HB(1,EL,irk) = HB(1,EL,irk) + bed(1,EL,irk,ll)
+               dg%HB(1,dg%EL,dg%irk) = dg%HB(1,dg%EL,dg%irk) + dg%bed(1,dg%EL,dg%irk,ll)
             enddo
-            bed_IN(:) = bed(1,EL,irk,:)
-            HB_IN = HB(1,EL_IN,irk)
+            dg%bed_IN(:) = dg%bed(1,dg%EL,dg%irk,:)
+            dg%HB_IN = dg%HB(1,EL_IN,dg%irk)
 #endif
 
 
-            DO K = 2,DOFS(EL)
-               ZE_IN = ZE_IN + ZE(K,EL,IRK)*PHI_EDGE(K,I,LED,pa)
-               QX_IN = QX_IN + QX(K,EL,IRK)*PHI_EDGE(K,I,LED,pa)
-               QY_IN = QY_IN + QY(K,EL,IRK)*PHI_EDGE(K,I,LED,pa)
-               !HB_IN = HB_IN + HB(K,EL,IRK)*PHI_EDGE(K,I,LED,pa)
+            DO K = 2,dg%DOFS(dg%EL)
+               dg%ZE_IN = dg%ZE_IN + dg%ZE(K,dg%EL,dg%IRK)*dg%PHI_EDGE(K,I,LED,dg%pa)
+               dg%QX_IN = dg%QX_IN + dg%QX(K,dg%EL,dg%IRK)*dg%PHI_EDGE(K,I,LED,dg%pa)
+               dg%QY_IN = dg%QY_IN + dg%QY(K,dg%EL,dg%IRK)*dg%PHI_EDGE(K,I,LED,dg%pa)
+               !dg%HB_IN = dg%HB_IN + dg%HB(K,dg%EL,dg%IRK)*dg%PHI_EDGE(K,I,LED,dg%pa)
 
 #ifdef TRACE
-               iota_IN = iota_IN + iota(K,EL,IRK)*PHI_EDGE(K,I,LED,pa)
+               dg%iota_IN = dg%iota_IN + dg%iota(K,dg%EL,dg%IRK)*dg%PHI_EDGE(K,I,LED,dg%pa)
 #endif
 
 #ifdef CHEM
-               iota_IN = iota_IN + iota(K,EL,IRK)*PHI_EDGE(K,I,LED,pa)
-               iota2_IN = iota2_IN + iota2(K,EL,IRK)*PHI_EDGE(K,I,LED,pa)
+               dg%iota_IN = dg%iota_IN + dg%iota(K,dg%EL,dg%IRK)*dg%PHI_EDGE(K,I,LED,dg%pa)
+               dg%iota2_IN = dg%iota2_IN + dg%iota2(K,dg%EL,dg%IRK)*dg%PHI_EDGE(K,I,LED,dg%pa)
 #endif
 
 #ifdef DYNP
-               dynP_IN = dynP_IN + dynP(K,EL,IRK)*PHI_EDGE(K,I,LED,pa)
+               dynP_IN = dynP_IN + dg%dynP(K,dg%EL,dg%IRK)*dg%PHI_EDGE(K,I,LED,dg%pa)
 #endif
 
 #ifdef SED_LAY
 
             do ll = 1,layers
                
-               bed_IN(ll) = bed_IN(ll) + bed(K,EL,IRK,ll)*PHI_EDGE(K,I,LED,pa)
-               HB_IN = HB_IN + bed(k,EL,irk,ll)*PHI_EDGE(K,I,LED,pa)
+               dg%bed_IN(ll) = dg%bed_IN(ll) + dg%bed(K,dg%EL,dg%IRK,ll)*dg%PHI_EDGE(K,I,LED,dg%pa)
+               dg%HB_IN = dg%HB_IN + dg%bed(k,dg%EL,dg%irk,ll)*dg%PHI_EDGE(K,I,LED,dg%pa)
                
             enddo
 #endif
 
             ENDDO
 
-            SFAC_IN = SFACED(I,LED,EL,pa)
+            dg%SFAC_IN = dg%SFACED(I,LED,dg%EL,dg%pa)
 
-            ABOVE  = ZE_IN - EBHT(L)
+            ABOVE  = dg%ZE_IN - dg%EBHT(L)
             SUBSUP = 2.D0*ABOVE/3.D0
             
 !.........Case 1:  Water is below barrier
 !     ---------------------------------------------
             
             IF (ABOVE.LT.BARMIN) THEN
-               Q_N_EXT = -(QX_IN*NX + QY_IN*NY)
-               Q_T_EXT =   QX_IN*TX + QY_IN*TY
+               Q_N_EXT = -(dg%QX_IN*dg%NX + dg%QY_IN*dg%NY)
+               Q_T_EXT =   dg%QX_IN*TX + dg%QY_IN*TY
                
 !.........Case 2:  Water is above barrier
 !     ------------------------------------------------------------
                
             ELSE
-               Q_N_EXT = RAMPDG*EBCFSP(L)*SUBSUP*SQRT(SUBSUP*G)
+               Q_N_EXT = dg%RAMPDG*dg%EBCFSP(L)*SUBSUP*SQRT(SUBSUP*G)
                Q_T_EXT = 0.D0
             ENDIF
             
-!.....Set the exterior bed and surface elevation equal to the interior
+!.....Set the exterior dg%bed and surface elevation equal to the interior
 
-            ZE_EX = ZE_IN
-            HB_EX = HB_IN
-            SFAC_EX = SFAC_IN
+            dg%ZE_EX = dg%ZE_IN
+            dg%HB_EX = dg%HB_IN
+            dg%SFAC_EX = dg%SFAC_IN
 
 #ifdef TRACE
-            iota_EX = iota_IN
+            dg%iota_EX = dg%iota_IN
 #endif
 
 #ifdef CHEM
-            iota_EX = iota_IN
-            iota2_EX = iota2_IN
+            dg%iota_EX = dg%iota_IN
+            dg%iota2_EX = dg%iota2_IN
 #endif
 
 #ifdef DYNP
@@ -153,46 +153,46 @@
 
 #ifdef SED_LAY
 
-            bed_EX(:) = bed_IN(:)
+            dg%bed_EX(:) = dg%bed_IN(:)
 
 #endif
 
 !.........Compute the x and y components of the external state flow
 
-            QX_EX = ( TY*Q_N_EXT - NY*Q_T_EXT)/(NX*TY - NY*TX)
-            QY_EX = (-TX*Q_N_EXT + NX*Q_T_EXT)/(NX*TY - NY*TX)
+            dg%QX_EX = ( TY*Q_N_EXT - dg%NY*Q_T_EXT)/(dg%NX*TY - dg%NY*TX)
+            dg%QY_EX = (-TX*Q_N_EXT + dg%NX*Q_T_EXT)/(dg%NX*TY - dg%NY*TX)
             
 !.........Compute numerical flux
             
             CALL NUMERICAL_FLUX(s,IT)
 
-            DO K = 1,DOFS(EL)
+            DO K = 1,dg%DOFS(dg%EL)
 
-               W_IN = 2.0*M_INV(K,pa)/AREAS(EL)*XLEN(GED)&
-              *PHI_EDGE(K,I,LED,pa)*WEGP(I,pa)
+               W_IN = 2.0*dg%M_INV(K,dg%pa)/AREAS(dg%EL)*dg%XLEN(GED)&
+              *dg%PHI_EDGE(K,I,LED,dg%pa)*dg%WEGP(I,dg%pa)
 
-               RHS_ZE(K,EL,IRK) = RHS_ZE(K,EL,IRK) - W_IN*F_HAT
-               RHS_QX(K,EL,IRK) = RHS_QX(K,EL,IRK) - W_IN*G_HAT
-               RHS_QY(K,EL,IRK) = RHS_QY(K,EL,IRK) - W_IN*H_HAT
+               dg%RHS_ZE(K,dg%EL,dg%IRK) = dg%RHS_ZE(K,dg%EL,dg%IRK) - W_IN*F_HAT
+               dg%RHS_QX(K,dg%EL,dg%IRK) = dg%RHS_QX(K,dg%EL,dg%IRK) - W_IN*G_HAT
+               dg%RHS_QY(K,dg%EL,dg%IRK) = dg%RHS_QY(K,dg%EL,dg%IRK) - W_IN*H_HAT
 
 #ifdef TRACE
-               RHS_iota(K,EL,IRK) = RHS_iota(K,EL,IRK) - W_IN*I_HAT
+               dg%RHS_iota(K,dg%EL,dg%IRK) = dg%RHS_iota(K,dg%EL,dg%IRK) - W_IN*I_HAT
 #endif
 
 #ifdef CHEM
-               RHS_iota(K,EL,IRK) = RHS_iota(K,EL,IRK) - W_IN*I_HAT
-               RHS_iota2(K,EL,IRK) = RHS_iota2(K,EL,IRK) - W_IN*J_HAT
+               dg%RHS_iota(K,dg%EL,dg%IRK) = dg%RHS_iota(K,dg%EL,dg%IRK) - W_IN*I_HAT
+               dg%RHS_iota2(K,dg%EL,dg%IRK) = dg%RHS_iota2(K,dg%EL,dg%IRK) - W_IN*J_HAT
 #endif
 
 #ifdef DYNP
-               RHS_dynP(K,EL,IRK) = RHS_dynP(K,EL,IRK) - W_IN*I_HAT
+               dg%RHS_dynP(K,dg%EL,dg%IRK) = dg%RHS_dynP(K,dg%EL,dg%IRK) - W_IN*I_HAT
 #endif
 
 #ifdef SED_LAY
 
                do ll=1,layers
 
-                  RHS_bed(K,EL,IRK,ll) = RHS_bed(K,EL,IRK,ll) - W_IN*Bed_HAT(ll)
+                  dg%RHS_bed(K,dg%EL,dg%IRK,ll) = dg%RHS_bed(K,dg%EL,dg%IRK,ll) - W_IN*dg%Bed_HAT(ll)
 
                enddo
 

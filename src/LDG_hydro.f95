@@ -1043,7 +1043,7 @@
 
       USE SIZES
       USE GLOBAL,ONLY : AREAS,nm
-      USE DG,ONLY : M_INV,XLEN,PHI_EDGE,WEGP,LZ,HZ,TZ
+      USE DG
  
       IMPLICIT NONE
       
@@ -1109,7 +1109,7 @@
 
       USE SIZES
       USE GLOBAL,ONLY : AREAS
-      USE DG,ONLY : M_INV,XLEN,PHI_EDGE,WEGP,MZ
+      USE DG
 
       IMPLICIT NONE
       
@@ -1154,11 +1154,7 @@
 
       USE SIZES
       USE GLOBAL,ONLY : NE,NM,N1,N2,N3,pdg_el,entrop
-      USE DG,ONLY : QX_IN,QY_IN,LZ,M_INV,SFAC_ELEM,ZE_IN,&
-     DRPHI,DSPHI,DRDX,DRDY,DSDX,DSDY,bed,mz,hz,&
-     WAGP,NAGP,DOFS,QX,QY,PHI_AREA,IRK,bed_IN,iota_IN,&
-     slimit1,slimit2,slimit5,balance,&
-     ze,iota,iota2,bed,irk,slimit3,slimit4,TZ
+      USE DG
 
       IMPLICIT NONE
 
@@ -1190,38 +1186,38 @@
          N2 = NM(L,2)
          N3 = NM(L,3)
          
-!.....Compute ZE, QX, QY, and HB at each area Gauss quadrature point
+!.....Compute dg%ZE, dg%QX, dg%QY, and HB at each area Gauss quadrature point
 
-         DO I = 1,NAGP(pa)
+         DO I = 1,dg%NAGP(pa)
             
 #ifdef WAVE_DIF
-            ZE_IN = 0.D0
+            dg%ZE_IN = 0.D0
 #endif
-            QX_IN = 0.D0
-            QY_IN = 0.D0
+            dg%QX_IN = 0.D0
+            dg%QY_IN = 0.D0
 #ifdef TRACE
-            iota_IN = 0.D0
+            dg%iota_IN = 0.D0
 #endif
 
 #ifdef SED_LAY
             do ll=1,s%layers
-               bed_IN(ll) = 0.D0
+               dg%bed_IN(ll) = 0.D0
             enddo
 #endif
             
-            DO K = 1,DOFS(L)
+            DO K = 1,dg%DOFS(L)
 #ifdef WAVE_DIF
-               ZE_IN = ZE_IN + ZE(K,L,IRK)*PHI_AREA(K,I,pa)
+               dg%ZE_IN = dg%ZE_IN + dg%ZE(K,L,dg%dg%IRK)*dg%PHI_AREA(K,I,pa)
 #endif
-               QX_IN = QX_IN + QX(K,L,IRK)*PHI_AREA(K,I,pa)
-               QY_IN = QY_IN + QY(K,L,IRK)*PHI_AREA(K,I,pa)
+               dg%QX_IN = dg%QX_IN + dg%QX(K,L,dg%dg%IRK)*dg%PHI_AREA(K,I,pa)
+               dg%QY_IN = dg%QY_IN + dg%QY(K,L,dg%dg%IRK)*dg%PHI_AREA(K,I,pa)
 #ifdef TRACE
-               iota_IN = iota_IN + iota(K,L,IRK)*PHI_AREA(K,I,pa)
+               dg%iota_IN = dg%iota_IN + dg%iota(K,L,dg%dg%IRK)*dg%PHI_AREA(K,I,pa)
 #endif
 
 #ifdef SED_LAY
                do ll=1,s%layers
-                  bed_IN(ll) = bed_IN(ll) + bed(K,L,IRK,ll)*PHI_AREA(K,I,pa)
+                  dg%bed_IN(ll) = dg%bed_IN(ll) + dg%dg%bed(K,L,dg%dg%IRK,ll)*dg%PHI_AREA(K,I,pa)
                enddo
 #endif
 
@@ -1229,58 +1225,58 @@
 
 !.....Build the rhs
                 
-            DO K = 1,DOFS(L)
+            DO K = 1,dg%DOFS(L)
 #ifdef WAVE_DIF
-               HZ(K,1,1,L) = HZ(K,1,1,L)&
-                    + M_INV(K,pa)*ZE_IN*SFAC_ELEM(I,L,pa)*& ! <--- ZE/Mk
-                    ( DRPHI(K,I,pa)*DRDX(L) + DSPHI(K,I,pa)*DSDX(L) )*& ! <--- dphi/dx
-                    WAGP(I,pa)  ! <--- weight
-               HZ(K,2,2,L) = HZ(K,2,2,L)&
-                    + M_INV(K,pa)*ZE_IN*& ! <--- ZE/Mk
-                    ( DRPHI(K,I,pa)*DRDY(L) + DSPHI(K,I,pa)*DSDY(L) )*& ! <--- dphi/dy
-                    WAGP(I,pa)  ! <--- weight
+               dg%HZ(K,1,1,L) = dg%HZ(K,1,1,L)&
+                    + dg%M_INV(K,pa)*dg%ZE_IN*dg%SFAC_ELEM(I,L,pa)*& ! <--- dg%ZE/Mk
+                    ( dg%DRPHI(K,I,pa)*dg%DRDX(L) + dg%DSPHI(K,I,pa)*dg%DSDX(L) )*& ! <--- dphi/dx
+                    dg%WAGP(I,pa)  ! <--- weight
+               dg%HZ(K,2,2,L) = dg%HZ(K,2,2,L)&
+                    + dg%M_INV(K,pa)*dg%ZE_IN*& ! <--- dg%ZE/Mk
+                    ( dg%DRPHI(K,I,pa)*dg%DRDY(L) + dg%DSPHI(K,I,pa)*dg%DSDY(L) )*& ! <--- dphi/dy
+                    dg%WAGP(I,pa)  ! <--- weight
 #endif
 
-               LZ(K,1,1,L) = LZ(K,1,1,L)&
-                   + M_INV(K,pa)*QX_IN*SFAC_ELEM(I,L,pa)*& ! <--- QX/Mk
-                   ( DRPHI(K,I,pa)*DRDX(L) + DSPHI(K,I,pa)*DSDX(L) )*& ! <--- dphi/dx
-                   WAGP(I,pa)  ! <--- weight
+               dg%LZ(K,1,1,L) = dg%LZ(K,1,1,L)&
+                   + dg%M_INV(K,pa)*dg%QX_IN*dg%SFAC_ELEM(I,L,pa)*& ! <--- dg%QX/Mk
+                   ( dg%DRPHI(K,I,pa)*dg%DRDX(L) + dg%DSPHI(K,I,pa)*dg%DSDX(L) )*& ! <--- dphi/dx
+                   dg%WAGP(I,pa)  ! <--- weight
                
-               LZ(K,1,2,L) = LZ(K,1,2,L)&
-                    + M_INV(K,pa)*QX_IN*& ! <--- QX/Mk
-                    ( DRPHI(K,I,pa)*DRDY(L) + DSPHI(K,I,pa)*DSDY(L) )*& ! <--- dphi/dy
-                    WAGP(I,pa)  ! <--- weight
+               dg%LZ(K,1,2,L) = dg%LZ(K,1,2,L)&
+                    + dg%M_INV(K,pa)*dg%QX_IN*& ! <--- dg%QX/Mk
+                    ( dg%DRPHI(K,I,pa)*dg%DRDY(L) + dg%DSPHI(K,I,pa)*dg%DSDY(L) )*& ! <--- dphi/dy
+                    dg%WAGP(I,pa)  ! <--- weight
 
-               LZ(K,2,1,L) = LZ(K,2,1,L)&
-                    + M_INV(K,pa)*QY_IN*SFAC_ELEM(I,L,pa)*& ! <--- QY/Mk
-                    ( DRPHI(K,I,pa)*DRDX(L) + DSPHI(K,I,pa)*DSDX(L) )*& ! <--- dphi/dx
-                    WAGP(I,pa)  ! <--- weight
+               dg%LZ(K,2,1,L) = dg%LZ(K,2,1,L)&
+                    + dg%M_INV(K,pa)*dg%QY_IN*dg%SFAC_ELEM(I,L,pa)*& ! <--- dg%QY/Mk
+                    ( dg%DRPHI(K,I,pa)*dg%DRDX(L) + dg%DSPHI(K,I,pa)*dg%DSDX(L) )*& ! <--- dphi/dx
+                    dg%WAGP(I,pa)  ! <--- weight
 
-               LZ(K,2,2,L) = LZ(K,2,2,L)&
-                    + M_INV(K,pa)*QY_IN*& ! <--- QY/Mk
-                    ( DRPHI(K,I,pa)*DRDY(L) + DSPHI(K,I,pa)*DSDY(L) )*& ! <--- dphi/dy
-                    WAGP(I,pa)  ! <--- weight
+               dg%LZ(K,2,2,L) = dg%LZ(K,2,2,L)&
+                    + dg%M_INV(K,pa)*dg%QY_IN*& ! <--- dg%QY/Mk
+                    ( dg%DRPHI(K,I,pa)*dg%DRDY(L) + dg%DSPHI(K,I,pa)*dg%DSDY(L) )*& ! <--- dphi/dy
+                    dg%WAGP(I,pa)  ! <--- weight
 #ifdef TRACE
-               TZ(K,1,1,L) = TZ(K,1,1,L)&
-                    + M_INV(K,pa)*iota_IN*SFAC_ELEM(I,L,pa)*& ! <--- iota*H/Mk
-                    ( DRPHI(K,I,pa)*DRDX(L) + DSPHI(K,I,pa)*DSDX(L) )*& ! <--- dphi/dx
-                    WAGP(I,pa)  ! <--- weight
-               TZ(K,2,2,L) = TZ(K,2,2,L)&
-                    + M_INV(K,pa)*iota_IN*& ! <--- iota*H/Mk
-                    ( DRPHI(K,I,pa)*DRDY(L) + DSPHI(K,I,pa)*DSDY(L) )*& ! <--- dphi/dy
-                    WAGP(I,pa)  ! <--- weight
+               dg%TZ(K,1,1,L) = dg%TZ(K,1,1,L)&
+                    + dg%M_INV(K,pa)*dg%iota_IN*dg%SFAC_ELEM(I,L,pa)*& ! <--- dg%iota*H/Mk
+                    ( dg%DRPHI(K,I,pa)*dg%DRDX(L) + dg%DSPHI(K,I,pa)*dg%DSDX(L) )*& ! <--- dphi/dx
+                    dg%WAGP(I,pa)  ! <--- weight
+               dg%TZ(K,2,2,L) = dg%TZ(K,2,2,L)&
+                    + dg%M_INV(K,pa)*dg%iota_IN*& ! <--- dg%iota*H/Mk
+                    ( dg%DRPHI(K,I,pa)*dg%DRDY(L) + dg%DSPHI(K,I,pa)*dg%DSDY(L) )*& ! <--- dphi/dy
+                    dg%WAGP(I,pa)  ! <--- weight
 #endif
 
 #ifdef SED_LAY
                do ll=1,s%layers
-                  MZ(K,1,ll,L) =  MZ(K,1,ll,L)&
-                 + M_INV(K,pa)*bed_IN(ll)*SFAC_ELEM(I,L,pa)* &
-                 ( DRPHI(K,I,pa)*DRDX(L) + DSPHI(K,I,pa)*DSDX(L) )* &
-                 WAGP(I,pa) 
-                  MZ(K,2,ll,L) =  MZ(K,2,ll,L)&
-                 + M_INV(K,pa)*bed_IN(ll)* &
-                 ( DRPHI(K,I,pa)*DRDY(L) + DSPHI(K,I,pa)*DSDY(L) )* &
-                 WAGP(I,pa) 
+                  dg%MZ(K,1,ll,L) =  dg%MZ(K,1,ll,L)&
+                 + dg%M_INV(K,pa)*dg%bed_IN(ll)*dg%SFAC_ELEM(I,L,pa)* &
+                 ( dg%DRPHI(K,I,pa)*dg%DRDX(L) + dg%DSPHI(K,I,pa)*dg%DSDX(L) )* &
+                 dg%WAGP(I,pa) 
+                  dg%MZ(K,2,ll,L) =  dg%MZ(K,2,ll,L)&
+                 + dg%M_INV(K,pa)*dg%bed_IN(ll)* &
+                 ( dg%DRPHI(K,I,pa)*dg%DRDY(L) + dg%DSPHI(K,I,pa)*dg%DSDY(L) )* &
+                 dg%WAGP(I,pa) 
                enddo
 #endif
 
@@ -1289,9 +1285,9 @@
 
 #ifdef ARTDIF
 
-         slimit1 = -100.D0
-         slimit2 = -100.D0
-         slimit3 = -100.D0
+         dg%slimit1 = -100.D0
+         dg%slimit2 = -100.D0
+         dg%slimit3 = -100.D0
 
          entrop(:,L) = -100.D0
            
@@ -1306,60 +1302,60 @@
          qy_sensor2 = 0.d0
 
 #ifdef TRACE
-         slimit4 = -100.D0 
+         dg%slimit4 = -100.D0 
          iota_sensor1 = 0.d0
          iota_sensor2 = 0.d0
 #endif
          
 #ifdef SED_LAY
-         slimit5 = -100.D0
+         dg%slimit5 = -100.D0
          tbed_sensor1 = 0.d0
          tbed_sensor2 = 0.d0
 #endif
          
-         do I = 1,NAGP(pa)
+         do I = 1,dg%NAGP(pa)
             
-            do kk = 2, dofs(L)  !Compute the first sensor
+            do kk = 2, dg%dofs(L)  !Compute the first sensor
 #ifdef WAVE_DIF 
-               ze_sensor1 = ze_sensor1 + (ze(kk,L,irk)* &
-              phi_area(kk,I,pa))**2.D0 * wagp(I,pa)
+               ze_sensor1 = ze_sensor1 + (dg%ze(kk,L,dg%dg%irk)* &
+              dg%phi_area(kk,I,pa))**2.D0 * dg%wagp(I,pa)
 #endif
-               qx_sensor1 = qx_sensor1 + (qx(kk,L,irk)* &
-              phi_area(kk,I,pa))**2.D0 * wagp(I,pa)
-               qy_sensor1 = qy_sensor1 + (qy(kk,L,irk)* &
-              phi_area(kk,I,pa))**2.D0 * wagp(I,pa)
+               qx_sensor1 = qx_sensor1 + (dg%qx(kk,L,dg%dg%irk)* &
+              dg%phi_area(kk,I,pa))**2.D0 * dg%wagp(I,pa)
+               qy_sensor1 = qy_sensor1 + (dg%qy(kk,L,dg%dg%irk)* &
+              dg%phi_area(kk,I,pa))**2.D0 * dg%wagp(I,pa)
 #ifdef TRACE
-               iota_sensor1 = iota_sensor1 + (iota(kk,L,irk)&
-              * phi_area(kk,I,pa))**2.D0 * wagp(I,pa)
+               iota_sensor1 = iota_sensor1 + (dg%iota(kk,L,dg%dg%irk)&
+              * dg%phi_area(kk,I,pa))**2.D0 * dg%wagp(I,pa)
 #endif
                
 #ifdef SED_LAY       
                do ll=1,s%layers
-                  tbed_sensor1 = tbed_sensor1 + (bed(kk,L,irk,ll)* &
-                 phi_area(kk,I,pa))**2.D0 * wagp(I,pa)
+                  tbed_sensor1 = tbed_sensor1 + (dg%dg%bed(kk,L,dg%dg%irk,ll)* &
+                 dg%phi_area(kk,I,pa))**2.D0 * dg%wagp(I,pa)
                enddo
 #endif
 
             enddo
             
-            do kk = 1,dofs(L) !Compute the second sensor
+            do kk = 1,dg%dofs(L) !Compute the second sensor
 #ifdef WAVE_DIF 
-               ze_sensor2 = ze_sensor2 + (ze(kk,L,irk)* &
-              phi_area(kk,I,pa))**2.D0 * wagp(I,pa)
+               ze_sensor2 = ze_sensor2 + (dg%ze(kk,L,dg%dg%irk)* &
+              dg%phi_area(kk,I,pa))**2.D0 * dg%wagp(I,pa)
 #endif
-               qx_sensor2 = qx_sensor2 + (qx(kk,L,irk)* &
-              phi_area(kk,I,pa))**2.D0 * wagp(I,pa)
-               qy_sensor2 = qy_sensor2 + (qy(kk,L,irk)* &
-              phi_area(kk,I,pa))**2.D0 * wagp(I,pa)
+               qx_sensor2 = qx_sensor2 + (dg%qx(kk,L,dg%dg%irk)* &
+              dg%phi_area(kk,I,pa))**2.D0 * dg%wagp(I,pa)
+               qy_sensor2 = qy_sensor2 + (dg%qy(kk,L,dg%dg%irk)* &
+              dg%phi_area(kk,I,pa))**2.D0 * dg%wagp(I,pa)
 #ifdef TRACE
-               iota_sensor2 = iota_sensor2 + (iota(kk,L,irk)&
-              * phi_area(kk,I,pa))**2.D0 * wagp(I,pa)
+               iota_sensor2 = iota_sensor2 + (dg%iota(kk,L,dg%dg%irk)&
+              * dg%phi_area(kk,I,pa))**2.D0 * dg%wagp(I,pa)
 #endif
                
 #ifdef SED_LAY       
                do ll=1,s%layers
-                  tbed_sensor2 = tbed_sensor2 + (bed(kk,L,irk,ll)*& !Adjust sensor for multilayers!&
-                 phi_area(kk,I,pa))**2.D0 * wagp(I,pa)
+                  tbed_sensor2 = tbed_sensor2 + (dg%dg%bed(kk,L,dg%dg%irk,ll)*& !Adjust sensor for multilayers!&
+                 dg%phi_area(kk,I,pa))**2.D0 * dg%wagp(I,pa)
                enddo
 #endif
 
@@ -1368,29 +1364,29 @@
          enddo
 #ifdef WAVE_DIF 
          if  (ze_sensor2.gt.1.0e-4.and.ze_sensor1.gt.1.0e-4 ) then
-            slimit1 = log10( ze_sensor1/ze_sensor2 ) + balance(1)
-            entrop(1,L) = slimit1
+            dg%slimit1 = log10( ze_sensor1/ze_sensor2 ) + dg%balance(1)
+            entrop(1,L) = dg%slimit1
          endif
 #endif
          if (qx_sensor2.gt.1.0e-4.and.qx_sensor1.gt.1.0e-4 ) then
-            slimit2 = log10( qx_sensor1/qx_sensor2 ) + balance(2)
-            entrop(2,L) = slimit2
+            dg%slimit2 = log10( qx_sensor1/qx_sensor2 ) + dg%balance(2)
+            entrop(2,L) = dg%slimit2
          endif
          if ( qy_sensor2.gt.1.0e-4.and.qy_sensor1.gt.1.0e-4 ) then
-            slimit3 = log10( qy_sensor1/qy_sensor2 ) + balance(3)
-            entrop(3,L) = slimit3
+            dg%slimit3 = log10( qy_sensor1/qy_sensor2 ) + dg%balance(3)
+            entrop(3,L) = dg%slimit3
          endif
 #ifdef TRACE
           if ( iota_sensor2.gt.1.0e-4.and.iota_sensor1.gt.1.0e-4 ) then
-            slimit4 = log10( iota_sensor1/iota_sensor2 ) + balance(4)
-            entrop(4,L) = slimit4
+            dg%slimit4 = log10( iota_sensor1/iota_sensor2 ) + dg%balance(4)
+            entrop(4,L) = dg%slimit4
           endif
 #endif
          
 #ifdef SED_LAY
          if ( tbed_sensor2.gt.1.0e-4.and.tbed_sensor1.gt.1.0e-4 ) then
-            slimit5 = log10( tbed_sensor1/tbed_sensor2 ) + balance(5)
-            entrop(5,L) = slimit5 
+            dg%slimit5 = log10( tbed_sensor1/tbed_sensor2 ) + dg%balance(5)
+            entrop(5,L) = dg%slimit5 
         endif
 #endif
                   

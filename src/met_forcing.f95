@@ -38,7 +38,7 @@
 !.....Set the wind drag limit
 
       WindDragLimit = 0.002
-      RampMete = rampdg
+      RampMete = dg%rampdg
 
 !asey 130710: Added this section.
       IF(WTIME1.LT.ITHS*DTDP)THEN
@@ -63,7 +63,7 @@
            
 !..........Apply the met ramp function
 
-!           RampMete = RAMPDG
+!           RampMete = dg%RAMPDG
            
            WSX2(II)    = RampMete*WSX2(II)
            WSY2(II)    = RampMete*WSY2(II)
@@ -116,7 +116,7 @@
           
 !.........Apply mete ramp
 
-!          RampMete = RAMPDG
+!          RampMete = dg%RAMPDG
           
           WSX2(II)    = RampMete*WINDX
           WSY2(II)    = RampMete*WINDY
@@ -183,7 +183,7 @@
            ENDIF
            
 !..........Apply met ramp
-!           RampMete = RAMPDG
+!           RampMete = dg%RAMPDG
            WSX2(II)    = RampMete*0.001293D0*WDRAGCO*WINDX*WINDMAG
            WSY2(II)    = RampMete*0.001293D0*WDRAGCO*WINDY*WINDMAG
            WVNXOUT(II) = RampMete*WINDX
@@ -255,7 +255,7 @@
           ENDIF
             
 !.........Apply met ramp
-!           RampMete = RAMPDG
+!           RampMete = dg%RAMPDG
           WSX2(II)    = RampMete*0.001293d0*WDRAGCO*WINDX*WINDMAG
           WSY2(II)    = RampMete*0.001293d0*WDRAGCO*WINDY*WINDMAG
           PR2(II)     = RampMete*(PRN1(II)+WTRATIO*(PRN2(II)- PRN1(II)))

@@ -50,6 +50,7 @@
       real(sz) avg_iotasen, temp_iota, iota_sensor(s%mne)
       real(sz) iota2_sensor1, iota2_sensor2, iota2_center 
       real(sz) iota2_mid, slimit5, maxiota2_sensor, miniota2_sensor
+      ! slimit5 is part of module DG but also being declared as a local variable
       real(sz) iota2_delta, avg_iota2sen, temp_iota2, iota2_sensor(s%mne)
       
 #endif
@@ -63,10 +64,10 @@
 #endif
 
 
-!......Set the initial arrays, note we work over the total bed load
+!......Set the initial arrays, note we work over the total dg%bed load
 !......not the individual layers
 
-      if (pflag.eq.1) then
+      if (dg%pflag.eq.1) then
          
          maxze_sensor = -100.d0 
          maxqx_sensor = -100.d0
@@ -96,7 +97,7 @@
          
          do l = 1,ne
             
-            pa = pdg_el(l)
+            dg%pa = pdg_el(l)
             
 !..........................
 !.... type 1 p-enrichment |
@@ -142,26 +143,26 @@
             y_mid(2) = 1.d0/2.d0*(y(n3) + y(n1))
             y_mid(3) = 1.d0/2.d0*(y(n1) + y(n2))
             
-            if (pa.ge.1) then   ! since the pa=0 case is vacuous
+            if (dg%pa.ge.1) then   ! since the dg%pa=0 case is vacuous
                
-               do k = 1,dofs(l)
+               do k = 1,dg%dofs(l)
                   
-                  ze_center = ze_center + ze(k,l,irk+1)*phi_center(k,pa)
-                  qx_center = qx_center + qx(k,l,irk+1)*phi_center(k,pa)
-                  qy_center = qy_center + qy(k,l,irk+1)*phi_center(k,pa)
+                  ze_center = ze_center + dg%ze(k,l,dg%irk+1)*dg%phi_center(k,dg%pa)
+                  qx_center = qx_center + dg%qx(k,l,dg%irk+1)*dg%phi_center(k,dg%pa)
+                  qy_center = qy_center + dg%qy(k,l,dg%irk+1)*dg%phi_center(k,dg%pa)
                   
 #ifdef TRACE
-                  iota_center = iota_center + iota(k,l,irk+1)*phi_center(k,pa)
+                  iota_center = iota_center + dg%iota(k,l,dg%irk+1)*dg%phi_center(k,dg%pa)
 #endif
                   
 #ifdef CHEM            
-                  iota_center = iota_center + iota(k,l,irk+1)*phi_center(k,pa)
-                  iota2_center = iota2_center + iota2(k,l,irk+1)*phi_center(k,pa)
+                  iota_center = iota_center + dg%iota(k,l,dg%irk+1)*dg%phi_center(k,dg%pa)
+                  iota2_center = iota2_center + dg%iota2(k,l,dg%irk+1)*dg%phi_center(k,dg%pa)
 #endif
 
 #ifdef SED_LAY
                   do ll=1,layers
-                     tbed_center = tbed_center + bed(k,l,irk+1,ll)*phi_center(k,pa)
+                     tbed_center = tbed_center + dg%bed(k,l,dg%irk+1,ll)*dg%phi_center(k,dg%pa)
                   enddo
 #endif
                   
@@ -194,26 +195,26 @@
               (y_mid(i) - y_center)**2.d0 )
                
                
-               if (pa.ge.1) then
+               if (dg%pa.ge.1) then
                   
-                  do k = 1,dofs(l)
+                  do k = 1,dg%dofs(l)
                      
-                     ze_mid = ze_mid + ze(k,l,irk+1)*phi_mid(k,i,pa)
-                     qx_mid = qx_mid + qx(k,l,irk+1)*phi_mid(k,i,pa)
-                     qy_mid = qy_mid + qy(k,l,irk+1)*phi_mid(k,i,pa)
+                     ze_mid = ze_mid + dg%ze(k,l,dg%irk+1)*dg%phi_mid(k,i,dg%pa)
+                     qx_mid = qx_mid + dg%qx(k,l,dg%irk+1)*dg%phi_mid(k,i,dg%pa)
+                     qy_mid = qy_mid + dg%qy(k,l,dg%irk+1)*dg%phi_mid(k,i,dg%pa)
                      
 #ifdef TRACE
-                     iota_mid = iota_mid + iota(k,l,irk+1)*phi_mid(k,i,pa)
+                     iota_mid = iota_mid + dg%iota(k,l,dg%irk+1)*dg%phi_mid(k,i,dg%pa)
 #endif
                      
 #ifdef CHEM               
-                     iota_mid = iota_mid + iota(k,l,irk+1)*phi_mid(k,i,pa)
-                     iota2_mid = iota2_mid + iota2(k,l,irk+1)*phi_mid(k,i,pa)
+                     iota_mid = iota_mid + dg%iota(k,l,dg%irk+1)*dg%phi_mid(k,i,dg%pa)
+                     iota2_mid = iota2_mid + dg%iota2(k,l,dg%irk+1)*dg%phi_mid(k,i,dg%pa)
 #endif
 
 #ifdef SED_LAY
                      do ll=1,layers
-                        tbed_mid = tbed_mid + bed(k,l,irk+1,ll)*phi_mid(k,i,pa)
+                        tbed_mid = tbed_mid + dg%bed(k,l,dg%irk+1,ll)*dg%phi_mid(k,i,dg%pa)
                      enddo
 #endif
                      
@@ -241,7 +242,7 @@
             enddo
             
             
-            if (gflag.eq.0) then ! dioristic algorithm is OFF
+            if (dg%gflag.eq.0) then ! dioristic algorithm is OFF
                
 #ifdef TRACE
 
@@ -254,41 +255,41 @@
 !.....if the sensor is greater than the limit and the p is low increase
 !.....the order of p
 
-               if ( ( (qy_sensor(l).ge.slimit).or.&
-              (qx_sensor(l).ge.slimit).or.&
-              (ze_sensor(l).ge.slimit) ).and.&
-              (pdg_el(l).lt.ph) ) then
+               if ( ( (qy_sensor(l).ge.dg%slimit).or.&
+              (qx_sensor(l).ge.dg%slimit).or.&
+              (ze_sensor(l).ge.dg%slimit) ).and.&
+              (pdg_el(l).lt.dg%ph) ) then
                   
                   pdg_el(l) = pdg_el(l) + 1 
-                  dofs(l) = (pdg_el(l) +1 )*(pdg_el(l) +2 ) / 2
+                  dg%dofs(l) = (pdg_el(l) +1 )*(pdg_el(l) +2 ) / 2
                   
-                  pcount(l) = it
+                  dg%pcount(l) = it
                   
 !.....if the sensor is less than the limit and the p is high decrease
 !.....the order of p
                   
-               elseif ( ((ze_sensor(l).lt.slimit).and.&
-                 (qx_sensor(l).lt.slimit).and.&
-                 (qy_sensor(l).lt.slimit) ).and.&
-                 (pdg_el(l).gt.pl).and.&
-                 ( (it-pcount(l)).gt.plimit ) ) then
+               elseif ( ((ze_sensor(l).lt.dg%slimit).and.&
+                 (qx_sensor(l).lt.dg%slimit).and.&
+                 (qy_sensor(l).lt.dg%slimit) ).and.&
+                 (pdg_el(l).gt.dg%pl).and.&
+                 ( (it-dg%pcount(l)).gt.dg%plimit ) ) then
                   
                   pdg_el(l) = pdg_el(l) - 1
-                  dofs(l) = (pdg_el(l) + 1 )*(pdg_el(l) + 2 ) / 2
+                  dg%dofs(l) = (pdg_el(l) + 1 )*(pdg_el(l) + 2 ) / 2
                   
-                  ze(dofs(l)+1:dofh,l,irk+1) = 0.d0
-                  qx(dofs(l)+1:dofh,l,irk+1) = 0.d0
-                  qy(dofs(l)+1:dofh,l,irk+1) = 0.d0
+                  dg%ze(dg%dofs(l)+1:dg%dofh,l,dg%irk+1) = 0.d0
+                  dg%qx(dg%dofs(l)+1:dg%dofh,l,dg%irk+1) = 0.d0
+                  dg%qy(dg%dofs(l)+1:dg%dofh,l,dg%irk+1) = 0.d0
                   
-                  pcount(l) = it
+                  dg%pcount(l) = it
                   
                   
-               elseif (pdg_el(l).eq.0.and.( (it-pcount(l)).gt.plimit ) ) then
+               elseif (pdg_el(l).eq.0.and.( (it-dg%pcount(l)).gt.dg%plimit ) ) then
                   
                   pdg_el(l) = pdg_el(l) + 1 
-                  dofs(l) = (pdg_el(l) + 1 )*(pdg_el(l) + 2 ) / 2
+                  dg%dofs(l) = (pdg_el(l) + 1 )*(pdg_el(l) + 2 ) / 2
                   
-                  pcount(l) = it
+                  dg%pcount(l) = it
                   
                endif
 
@@ -299,47 +300,47 @@
 !.....if the sensor is greater than the limit and the p is low increase
 !.....the order of p
 
-               if ( ( (qy_sensor(l).ge.slimit).or.&
-              (qx_sensor(l).ge.slimit).or.&
-              (ze_sensor(l).ge.slimit).or.&
-              ( iota_sensor(l).ge.slimit) ).and.&
-              (pdg_el(l).lt.ph).and.&
-              ( (it-pcount(l)).gt.plimit ) ) then
+               if ( ( (qy_sensor(l).ge.dg%slimit).or.&
+              (qx_sensor(l).ge.dg%slimit).or.&
+              (ze_sensor(l).ge.dg%slimit).or.&
+              ( iota_sensor(l).ge.dg%slimit) ).and.&
+              (pdg_el(l).lt.dg%ph).and.&
+              ( (it-dg%pcount(l)).gt.dg%plimit ) ) then
                   
                   pdg_el(l) = pdg_el(l) + 1 
-                  dofs(l) = (pdg_el(l) +1 )*(pdg_el(l) +2 ) / 2
+                  dg%dofs(l) = (pdg_el(l) +1 )*(pdg_el(l) +2 ) / 2
                   
-                  pcount(l) = it
+                  dg%pcount(l) = it
                   
                   
 !.....if the sensor is less than the limit and the p is high decrease
 !.....the order of p
                   
                   
-               elseif ( ((ze_sensor(l).lt.slimit).and.&
-                 (qx_sensor(l).lt.slimit).and.&
-                 (qy_sensor(l).lt.slimit).and.&
-                 (iota_sensor(l).lt.slimit) ).and.&
-                 (pdg_el(l).gt.pl).and.&
-                 ( (it-pcount(l)).gt.plimit ) ) then
+               elseif ( ((ze_sensor(l).lt.dg%slimit).and.&
+                 (qx_sensor(l).lt.dg%slimit).and.&
+                 (qy_sensor(l).lt.dg%slimit).and.&
+                 (iota_sensor(l).lt.dg%slimit) ).and.&
+                 (pdg_el(l).gt.dg%pl).and.&
+                 ( (it-dg%pcount(l)).gt.dg%plimit ) ) then
                   
                   pdg_el(l) = pdg_el(l) - 1
-                  dofs(l) = (pdg_el(l) + 1 )*(pdg_el(l) + 2 ) / 2
+                  dg%dofs(l) = (pdg_el(l) + 1 )*(pdg_el(l) + 2 ) / 2
                   
-                  ze(dofs(l)+1:dofh,l,irk+1) = 0.d0
-                  iota(dofs(l)+1:dofh,l,irk+1) = 0.d0
-                  qx(dofs(l)+1:dofh,l,irk+1) = 0.d0
-                  qy(dofs(l)+1:dofh,l,irk+1) = 0.d0
+                  dg%ze(dg%dofs(l)+1:dg%dofh,l,dg%irk+1) = 0.d0
+                  dg%iota(dg%dofs(l)+1:dg%dofh,l,dg%irk+1) = 0.d0
+                  dg%qx(dg%dofs(l)+1:dg%dofh,l,dg%irk+1) = 0.d0
+                  dg%qy(dg%dofs(l)+1:dg%dofh,l,dg%irk+1) = 0.d0
                   
-                  pcount(l) = it
+                  dg%pcount(l) = it
                   
                   
-               elseif (pdg_el(l).eq.0.and.( (it-pcount(l)).gt.plimit ) ) then
+               elseif (pdg_el(l).eq.0.and.( (it-dg%pcount(l)).gt.dg%plimit ) ) then
                   
                   pdg_el(l) = pdg_el(l) + 1 
-                  dofs(l) = (pdg_el(l) + 1 )*(pdg_el(l) + 2 ) / 2
+                  dg%dofs(l) = (pdg_el(l) + 1 )*(pdg_el(l) + 2 ) / 2
                   
-                  pcount(l) = it
+                  dg%pcount(l) = it
                   
                endif
 
@@ -350,48 +351,48 @@
 !.....if the sensor is greater than the limit and the p is low increase
 !.....the order of p
                
-               if ( ( (qy_sensor(l).ge.slimit).or.&
-              (qx_sensor(l).ge.slimit).or.&
-              (ze_sensor(l).ge.slimit).or.&
-              (iota_sensor(l).ge.slimit).or.&
-              (iota2_sensor(l).ge.slimit) ).and.&
-              (pdg_el(l).lt.ph) ) then
+               if ( ( (qy_sensor(l).ge.dg%slimit).or.&
+              (qx_sensor(l).ge.dg%slimit).or.&
+              (ze_sensor(l).ge.dg%slimit).or.&
+              (iota_sensor(l).ge.dg%slimit).or.&
+              (iota2_sensor(l).ge.dg%slimit) ).and.&
+              (pdg_el(l).lt.dg%ph) ) then
                   
                   pdg_el(l) = pdg_el(l) + 1 
-                  dofs(l) = (pdg_el(l) +1 )*(pdg_el(l) +2 ) / 2
+                  dg%dofs(l) = (pdg_el(l) +1 )*(pdg_el(l) +2 ) / 2
                   
-                  pcount(l) = it
+                  dg%pcount(l) = it
                   
                   
 !.....if the sensor is less than the limit and the p is high decrease
 !.....the order of p
                   
-               elseif ( ((ze_sensor(l).lt.slimit).and.&
-                 (qx_sensor(l).lt.slimit).and.&
-                 (qy_sensor(l).lt.slimit).and.&
-                 (iota_sensor(l).lt.slimit).and.&
-                 (iota2_sensor(l).lt.slimit)).and.&
-                 (pdg_el(l).gt.pl).and.&
-                 ( (it-pcount(l)).gt.plimit ) ) then
+               elseif ( ((ze_sensor(l).lt.dg%slimit).and.&
+                 (qx_sensor(l).lt.dg%slimit).and.&
+                 (qy_sensor(l).lt.dg%slimit).and.&
+                 (iota_sensor(l).lt.dg%slimit).and.&
+                 (iota2_sensor(l).lt.dg%slimit)).and.&
+                 (pdg_el(l).gt.dg%pl).and.&
+                 ( (it-dg%pcount(l)).gt.dg%plimit ) ) then
                   
                   pdg_el(l) = pdg_el(l) - 1
-                  dofs(l) = (pdg_el(l) + 1 )*(pdg_el(l) + 2 ) / 2
+                  dg%dofs(l) = (pdg_el(l) + 1 )*(pdg_el(l) + 2 ) / 2
                   
-                  ze(dofs(l)+1:dofh,l,irk+1) = 0.d0
-                  iota(dofs(l)+1:dofh,l,irk+1) = 0.d0
-                  iota2(dofs(l)+1:dofh,l,irk+1) = 0.d0
-                  qx(dofs(l)+1:dofh,l,irk+1) = 0.d0
-                  qy(dofs(l)+1:dofh,l,irk+1) = 0.d0
+                  dg%ze(dg%dofs(l)+1:dg%dofh,l,dg%irk+1) = 0.d0
+                  dg%iota(dg%dofs(l)+1:dg%dofh,l,dg%irk+1) = 0.d0
+                  dg%iota2(dg%dofs(l)+1:dg%dofh,l,dg%irk+1) = 0.d0
+                  dg%qx(dg%dofs(l)+1:dg%dofh,l,dg%irk+1) = 0.d0
+                  dg%qy(dg%dofs(l)+1:dg%dofh,l,dg%irk+1) = 0.d0
                   
-                  pcount(l) = it
+                  dg%pcount(l) = it
                   
                   
-               elseif (pdg_el(l).eq.0.and.( (it-pcount(l)).gt.plimit ) ) then
+               elseif (pdg_el(l).eq.0.and.( (it-dg%pcount(l)).gt.dg%plimit ) ) then
                   
                   pdg_el(l) = pdg_el(l) + 1 
-                  dofs(l) = (pdg_el(l) + 1 )*(pdg_el(l) + 2 ) / 2
+                  dg%dofs(l) = (pdg_el(l) + 1 )*(pdg_el(l) + 2 ) / 2
                   
-                  pcount(l) = it
+                  dg%pcount(l) = it
                   
                endif
 #endif
@@ -402,48 +403,48 @@
 !.....if the sensor is greater than the limit and the p is low increase
 !.....the order of p
 
-               if ( ( (qy_sensor(l).ge.slimit).or.&
-              (qx_sensor(l).ge.slimit).or.&
-              (ze_sensor(l).ge.slimit).or.&
-              (tbed_sensor(l).ge.slimit) ).and.&
-              (pdg_el(l).lt.ph).and.&
-              ( (it-pcount(l)).gt.plimit ) ) then
+               if ( ( (qy_sensor(l).ge.dg%slimit).or.&
+              (qx_sensor(l).ge.dg%slimit).or.&
+              (ze_sensor(l).ge.dg%slimit).or.&
+              (tbed_sensor(l).ge.dg%slimit) ).and.&
+              (pdg_el(l).lt.dg%ph).and.&
+              ( (it-dg%pcount(l)).gt.dg%plimit ) ) then
                   
                   pdg_el(l) = pdg_el(l) + 1 
-                  dofs(l) = (pdg_el(l) +1 )*(pdg_el(l) +2 ) / 2
+                  dg%dofs(l) = (pdg_el(l) +1 )*(pdg_el(l) +2 ) / 2
                   
-                  pcount(l) = it
+                  dg%pcount(l) = it
                   
                   
 !.....if the sensor is less than the limit and the p is high decrease
 !.....the order of p
                   
                   
-               elseif ( ((ze_sensor(l).lt.slimit).and.&
-                 (qx_sensor(l).lt.slimit).and.&
-                 (qy_sensor(l).lt.slimit).and.&
-                 (tbed_sensor(l).lt.slimit) ).and.&
-                 (pdg_el(l).gt.pl).and.&
-                 ( (it-pcount(l)).gt.plimit ) ) then
+               elseif ( ((ze_sensor(l).lt.dg%slimit).and.&
+                 (qx_sensor(l).lt.dg%slimit).and.&
+                 (qy_sensor(l).lt.dg%slimit).and.&
+                 (tbed_sensor(l).lt.dg%slimit) ).and.&
+                 (pdg_el(l).gt.dg%pl).and.&
+                 ( (it-dg%pcount(l)).gt.dg%plimit ) ) then
                   
                   pdg_el(l) = pdg_el(l) - 1
-                  dofs(l) = (pdg_el(l) + 1 )*(pdg_el(l) + 2 ) / 2
+                  dg%dofs(l) = (pdg_el(l) + 1 )*(pdg_el(l) + 2 ) / 2
                   
-                  ze(dofs(l)+1:dofh,l,irk+1) = 0.d0
-                  iota(dofs(l)+1:dofh,l,irk+1) = 0.d0
-                  qx(dofs(l)+1:dofh,l,irk+1) = 0.d0
-                  qy(dofs(l)+1:dofh,l,irk+1) = 0.d0
-                  bed(dofs(l)+1:dofh,l,irk+1,:)=0.d0
+                  dg%ze(dg%dofs(l)+1:dg%dofh,l,dg%irk+1) = 0.d0
+                  dg%iota(dg%dofs(l)+1:dg%dofh,l,dg%irk+1) = 0.d0
+                  dg%qx(dg%dofs(l)+1:dg%dofh,l,dg%irk+1) = 0.d0
+                  dg%qy(dg%dofs(l)+1:dg%dofh,l,dg%irk+1) = 0.d0
+                  dg%bed(dg%dofs(l)+1:dg%dofh,l,dg%irk+1,:)=0.d0
                   
-                  pcount(l) = it
+                  dg%pcount(l) = it
                   
                   
-               elseif (pdg_el(l).eq.0.and.( (it-pcount(l)).gt.plimit ) ) then
+               elseif (pdg_el(l).eq.0.and.( (it-dg%pcount(l)).gt.dg%plimit ) ) then
                   
                   pdg_el(l) = pdg_el(l) + 1 
-                  dofs(l) = (pdg_el(l) + 1 )*(pdg_el(l) + 2 ) / 2
+                  dg%dofs(l) = (pdg_el(l) + 1 )*(pdg_el(l) + 2 ) / 2
                   
-                  pcount(l) = it
+                  dg%pcount(l) = it
                   
                endif
 
@@ -453,7 +454,7 @@
 
          enddo
 
-         if (gflag.eq.1) then   ! dioristic algorithm is ON
+         if (dg%gflag.eq.1) then   ! dioristic algorithm is ON
 
             avg_zesen = 0.d0
             avg_qxsen = 0.d0
@@ -535,21 +536,21 @@
                   endif
 #endif
                   
-                  avg_zesen = sum(ze_sensor)/MNES
-                  avg_qxsen = sum(qx_sensor)/MNES
-                  avg_qysen = sum(qy_sensor)/MNES
+                  avg_zesen = sum(ze_sensor)/dg%MNES
+                  avg_qxsen = sum(qx_sensor)/dg%MNES
+                  avg_qysen = sum(qy_sensor)/dg%MNES
                   
 #ifdef TRACE
-                  avg_iotasen = sum(iota_sensor)/MNES
+                  avg_iotasen = sum(iota_sensor)/dg%MNES
 #endif
 
 #ifdef CHEM                  
-                  avg_iotasen = sum(iota_sensor)/MNES
-                  avg_iota2sen = sum(iota2_sensor)/MNES
+                  avg_iotasen = sum(iota_sensor)/dg%MNES
+                  avg_iota2sen = sum(iota2_sensor)/dg%MNES
 #endif
 
 #ifdef SED_LAY
-                  avg_tbedsen = sum(tbed_sensor)/MNES
+                  avg_tbedsen = sum(tbed_sensor)/dg%MNES
 #endif
 
 #ifdef CMPI
@@ -611,21 +612,21 @@
 #endif
             
 
-            ze_delta = ( diorism / 100.d0 )* (abs(maxze_sensor - minze_sensor) )
-            qx_delta = ( diorism / 100.d0 )* (abs(maxqx_sensor - minqx_sensor) )
-            qy_delta = ( diorism / 100.d0 )* (abs(maxqy_sensor - minqy_sensor) )   
+            ze_delta = ( dg%diorism / 100.d0 )* (abs(maxze_sensor - minze_sensor) )
+            qx_delta = ( dg%diorism / 100.d0 )* (abs(maxqx_sensor - minqx_sensor) )
+            qy_delta = ( dg%diorism / 100.d0 )* (abs(maxqy_sensor - minqy_sensor) )   
             
 #ifdef TRACE
-            iota_delta = ( diorism / 100.d0 )* (abs(maxiota_sensor - miniota_sensor) )
+            iota_delta = ( dg%diorism / 100.d0 )* (abs(maxiota_sensor - miniota_sensor) )
 #endif
             
 #ifdef CHEM
-            iota_delta = ( diorism / 100.d0 )* (abs(maxiota_sensor - miniota_sensor) )
-            iota2_delta = ( diorism / 100.d0 )* (abs(maxiota2_sensor - miniota2_sensor) )
+            iota_delta = ( dg%diorism / 100.d0 )* (abs(maxiota_sensor - miniota_sensor) )
+            iota2_delta = ( dg%diorism / 100.d0 )* (abs(maxiota2_sensor - miniota2_sensor) )
 #endif
 
 #ifdef SED_LAY    
-            tbed_delta = ( diorism / 100.d0 )* (abs(maxtbed_sensor - mintbed_sensor) )
+            tbed_delta = ( dg%diorism / 100.d0 )* (abs(maxtbed_sensor - mintbed_sensor) )
 #endif
 
             
@@ -679,12 +680,12 @@
                if ( ( (qy_sensor(l).ge.qy_delta).or.&
               (qx_sensor(l).ge.qx_delta).or.&
               (ze_sensor(l).ge.ze_delta) ).and.&
-              (pdg_el(l).lt.ph) ) then
+              (pdg_el(l).lt.dg%ph) ) then
                   
                   pdg_el(l) = pdg_el(l) + 1 
-                  dofs(l) = (pdg_el(l) +1 )*(pdg_el(l) +2 ) / 2
+                  dg%dofs(l) = (pdg_el(l) +1 )*(pdg_el(l) +2 ) / 2
                   
-                  pcount(l) = it
+                  dg%pcount(l) = it
                   
 !.....if the sensor is less than the limit and the p is high decrease
 !.....the order of p
@@ -692,25 +693,25 @@
                elseif ( ((ze_sensor(l).lt.ze_delta).and.&
                  (qx_sensor(l).lt.qx_delta).and.&
                  (qy_sensor(l).lt.qy_delta) ).and.&
-                 (pdg_el(l).gt.pl).and.&
-                 ( (it-pcount(l)).gt.plimit ) ) then
+                 (pdg_el(l).gt.dg%pl).and.&
+                 ( (it-dg%pcount(l)).gt.dg%plimit ) ) then
                   
                   pdg_el(l) = pdg_el(l) - 1
-                  dofs(l) = (pdg_el(l) + 1 )*(pdg_el(l) + 2 ) / 2
+                  dg%dofs(l) = (pdg_el(l) + 1 )*(pdg_el(l) + 2 ) / 2
                   
-                  ze(dofs(l)+1:dofh,l,irk+1) = 0.d0
-                  qx(dofs(l)+1:dofh,l,irk+1) = 0.d0
-                  qy(dofs(l)+1:dofh,l,irk+1) = 0.d0
+                  dg%ze(dg%dofs(l)+1:dg%dofh,l,dg%irk+1) = 0.d0
+                  dg%qx(dg%dofs(l)+1:dg%dofh,l,dg%irk+1) = 0.d0
+                  dg%qy(dg%dofs(l)+1:dg%dofh,l,dg%irk+1) = 0.d0
                   
-                  pcount(l) = it
+                  dg%pcount(l) = it
                   
                elseif (pdg_el(l).eq.0.and.&
-                 ( (it-pcount(l)).gt.plimit ) ) then
+                 ( (it-dg%pcount(l)).gt.dg%plimit ) ) then
                   
                   pdg_el(l) = pdg_el(l) + 1 
-                  dofs(l) = (pdg_el(l) + 1 )*(pdg_el(l) + 2 ) / 2
+                  dg%dofs(l) = (pdg_el(l) + 1 )*(pdg_el(l) + 2 ) / 2
                   
-                  pcount(l) = it
+                  dg%pcount(l) = it
                   
                endif
 #endif
@@ -725,13 +726,13 @@
               (temp_qx.ge.qx_delta).or.&
               (temp_ze.ge.ze_delta).or.&
               (temp_iota.ge.iota_delta)).and.&
-              (pdg_el(l).lt.ph).and.&
-              ( (it-pcount(l)).gt.plimit ) ) then
+              (pdg_el(l).lt.dg%ph).and.&
+              ( (it-dg%pcount(l)).gt.dg%plimit ) ) then
                   
                   pdg_el(l) = pdg_el(l) + 1 
-                  dofs(l) = (pdg_el(l) +1 )*(pdg_el(l) +2 ) / 2
+                  dg%dofs(l) = (pdg_el(l) +1 )*(pdg_el(l) +2 ) / 2
                   
-                  pcount(l) = it
+                  dg%pcount(l) = it
                   
 !.....if the sensor is less than the limit and the p is high decrease
 !.....the order of p
@@ -740,26 +741,26 @@
                  (temp_qx.lt.qx_delta).and.&
                  (temp_qy.lt.qy_delta).and.&
                  (temp_iota.lt.iota_delta)).and.&
-                 (pdg_el(l).gt.pl).and.&
-                 ( (it-pcount(l)).gt.plimit ) ) then
+                 (pdg_el(l).gt.dg%pl).and.&
+                 ( (it-dg%pcount(l)).gt.dg%plimit ) ) then
                   
                   pdg_el(l) = pdg_el(l) - 1
-                  dofs(l) = (pdg_el(l) + 1 )*(pdg_el(l) + 2 ) / 2
+                  dg%dofs(l) = (pdg_el(l) + 1 )*(pdg_el(l) + 2 ) / 2
                   
-                  ze(dofs(l)+1:dofh,l,irk+1) = 0.d0
-                  qx(dofs(l)+1:dofh,l,irk+1) = 0.d0
-                  qy(dofs(l)+1:dofh,l,irk+1) = 0.d0
-                  iota(dofs(l)+1:dofh,l,irk+1) = 0.d0
+                  dg%ze(dg%dofs(l)+1:dg%dofh,l,dg%irk+1) = 0.d0
+                  dg%qx(dg%dofs(l)+1:dg%dofh,l,dg%irk+1) = 0.d0
+                  dg%qy(dg%dofs(l)+1:dg%dofh,l,dg%irk+1) = 0.d0
+                  dg%iota(dg%dofs(l)+1:dg%dofh,l,dg%irk+1) = 0.d0
                   
-                  pcount(l) = it
+                  dg%pcount(l) = it
                   
                elseif (pdg_el(l).eq.0.and.&
-                 ( (it-pcount(l)).gt.plimit ) ) then
+                 ( (it-dg%pcount(l)).gt.dg%plimit ) ) then
                   
                   pdg_el(l) = pdg_el(l) + 1 
-                  dofs(l) = (pdg_el(l) + 1 )*(pdg_el(l) + 2 ) / 2
+                  dg%dofs(l) = (pdg_el(l) + 1 )*(pdg_el(l) + 2 ) / 2
                   
-                  pcount(l) = it
+                  dg%pcount(l) = it
                   
                endif
 #endif
@@ -774,12 +775,12 @@
               (ze_sensor(l).ge.ze_delta).or.&
               iota_sensor(l).ge.iota_delta.or.&
               iota2_sensor(l).ge.iota2_delta).and.&
-              (pdg_el(l).lt.ph) ) then
+              (pdg_el(l).lt.dg%ph) ) then
                   
                   pdg_el(l) = pdg_el(l) + 1 
-                  dofs(l) = (pdg_el(l) +1 )*(pdg_el(l) +2 ) / 2
+                  dg%dofs(l) = (pdg_el(l) +1 )*(pdg_el(l) +2 ) / 2
                   
-                  pcount(l) = it
+                  dg%pcount(l) = it
                   
 !.....if the sensor is less than the limit and the p is high decrease
 !.....the order of p
@@ -789,27 +790,27 @@
                  (qy_sensor(l).lt.qy_delta) ).and.&
                  (iota_sensor(l).lt.iota_delta).and.&
                  (iota2_sensor(l).lt.iota2_delta).and.&
-                 (pdg_el(l).gt.pl).and.&
-                 ( (it-pcount(l)).gt.plimit ) ) then
+                 (pdg_el(l).gt.dg%pl).and.&
+                 ( (it-dg%pcount(l)).gt.dg%plimit ) ) then
                   
                   pdg_el(l) = pdg_el(l) - 1
-                  dofs(l) = (pdg_el(l) + 1 )*(pdg_el(l) + 2 ) / 2
+                  dg%dofs(l) = (pdg_el(l) + 1 )*(pdg_el(l) + 2 ) / 2
                   
-                  ze(dofs(l)+1:dofh,l,irk+1) = 0.d0
-                  qx(dofs(l)+1:dofh,l,irk+1) = 0.d0
-                  qy(dofs(l)+1:dofh,l,irk+1) = 0.d0
-                  iota(dofs(l)+1:dofh,l,irk+1) = 0.d0
-                  iota2(dofs(l)+1:dofh,l,irk+1) = 0.d0
+                  dg%ze(dg%dofs(l)+1:dg%dofh,l,dg%irk+1) = 0.d0
+                  dg%qx(dg%dofs(l)+1:dg%dofh,l,dg%irk+1) = 0.d0
+                  dg%qy(dg%dofs(l)+1:dg%dofh,l,dg%irk+1) = 0.d0
+                  dg%iota(dg%dofs(l)+1:dg%dofh,l,dg%irk+1) = 0.d0
+                  dg%iota2(dg%dofs(l)+1:dg%dofh,l,dg%irk+1) = 0.d0
                   
-                  pcount(l) = it
+                  dg%pcount(l) = it
                   
                elseif (pdg_el(l).eq.0.and.&
-                 ( (it-pcount(l)).gt.plimit ) ) then
+                 ( (it-dg%pcount(l)).gt.dg%plimit ) ) then
                   
                   pdg_el(l) = pdg_el(l) + 1 
-                  dofs(l) = (pdg_el(l) + 1 )*(pdg_el(l) + 2 ) / 2
+                  dg%dofs(l) = (pdg_el(l) + 1 )*(pdg_el(l) + 2 ) / 2
                   
-                  pcount(l) = it
+                  dg%pcount(l) = it
                   
                endif
 #endif
@@ -825,13 +826,13 @@
               (temp_qx.ge.qx_delta).or.&
               (temp_ze.ge.ze_delta).or.&
               (temp_tbed.ge.tbed_delta)).and.&
-              (pdg_el(l).lt.ph).and.&
-              ( (it-pcount(l)).gt.plimit ) ) then
+              (pdg_el(l).lt.dg%ph).and.&
+              ( (it-dg%pcount(l)).gt.dg%plimit ) ) then
                   
                   pdg_el(l) = pdg_el(l) + 1 
-                  dofs(l) = (pdg_el(l) +1 )*(pdg_el(l) +2 ) / 2
+                  dg%dofs(l) = (pdg_el(l) +1 )*(pdg_el(l) +2 ) / 2
                   
-                  pcount(l) = it
+                  dg%pcount(l) = it
                   
 !.....if the sensor is less than the limit and the p is high decrease
 !.....the order of p
@@ -840,27 +841,27 @@
                  (temp_qx.lt.qx_delta).and.&
                  (temp_qy.lt.qy_delta).and.&
                  (temp_tbed.lt.tbed_delta)).and.&
-                 (pdg_el(l).gt.pl).and.&
-                 ( (it-pcount(l)).gt.plimit ) ) then
+                 (pdg_el(l).gt.dg%pl).and.&
+                 ( (it-dg%pcount(l)).gt.dg%plimit ) ) then
                   
                   pdg_el(l) = pdg_el(l) - 1
-                  dofs(l) = (pdg_el(l) + 1 )*(pdg_el(l) + 2 ) / 2
+                  dg%dofs(l) = (pdg_el(l) + 1 )*(pdg_el(l) + 2 ) / 2
                   
-                  ze(dofs(l)+1:dofh,l,irk+1) = 0.d0
-                  qx(dofs(l)+1:dofh,l,irk+1) = 0.d0
-                  qy(dofs(l)+1:dofh,l,irk+1) = 0.d0
-                  iota(dofs(l)+1:dofh,l,irk+1) = 0.d0
-                  bed(dofs(l)+1:dofh,l,irk+1,:)=0.d0
+                  dg%ze(dg%dofs(l)+1:dg%dofh,l,dg%irk+1) = 0.d0
+                  dg%qx(dg%dofs(l)+1:dg%dofh,l,dg%irk+1) = 0.d0
+                  dg%qy(dg%dofs(l)+1:dg%dofh,l,dg%irk+1) = 0.d0
+                  dg%iota(dg%dofs(l)+1:dg%dofh,l,dg%irk+1) = 0.d0
+                  dg%bed(dg%dofs(l)+1:dg%dofh,l,dg%irk+1,:)=0.d0
                   
-                  pcount(l) = it
+                  dg%pcount(l) = it
                   
                elseif (pdg_el(l).eq.0.and.&
-                 ( (it-pcount(l)).gt.plimit ) ) then
+                 ( (it-dg%pcount(l)).gt.dg%plimit ) ) then
                   
                   pdg_el(l) = pdg_el(l) + 1 
-                  dofs(l) = (pdg_el(l) + 1 )*(pdg_el(l) + 2 ) / 2
+                  dg%dofs(l) = (pdg_el(l) + 1 )*(pdg_el(l) + 2 ) / 2
                   
-                  pcount(l) = it
+                  dg%pcount(l) = it
                   
                endif
 #endif
@@ -875,7 +876,7 @@
 !.... type 2 p-enrichment |
 !..........................
       
-      if (pflag.eq.2) then
+      if (dg%pflag.eq.2) then
 
          maxze_sensor = -100.d0 
          maxqx_sensor = -100.d0
@@ -904,9 +905,9 @@
 #endif
 
          
-         kon = pflag2con1       ! usually in [0,1]
-         kons = pflag2con2      ! usually 6 works
-         lebesgue = lebesguep
+         kon = dg%pflag2con1       ! usually in [0,1]
+         kons = dg%pflag2con2      ! usually 6 works
+         lebesgue = dg%lebesguep
          roo = 1.d0/lebesgue      
 
          do l=1,ne
@@ -926,7 +927,7 @@
 
 #ifdef SED_LA
 !$$$            do ll=1,layers
-!$$$               tbed_center = tbed_center + bed(k,l,irk+1,ll)*phi_center(k,pa)
+!$$$               tbed_center = tbed_center + dg%bed(k,l,dg%irk+1,ll)*dg%phi_center(k,dg%pa)
 !$$$            enddo
             tbed_sensor(l) = 0.d0            
 #endif
@@ -939,16 +940,16 @@
             qx_sensor2 = 0.d0
             qy_sensor2 = 0.d0
             
-            slimit1 = 0.d0 
-            slimit2 = 0.d0
-            slimit3 = 0.d0
+            dg%slimit1 = 0.d0 
+            dg%slimit2 = 0.d0
+            dg%slimit3 = 0.d0
 
 #ifdef TRACE
             iota_sensor1 = 0.d0
 
             iota_sensor2 = 0.d0
             
-            slimit4 = 0.d0
+            dg%slimit4 = 0.d0
 #endif
             
 #ifdef CHEM      
@@ -958,8 +959,8 @@
             iota_sensor2 = 0.d0
             iota2_sensor2 = 0.d0
             
-            slimit4 = 0.d0
-            slimit5 = 0.d0
+            dg%slimit4 = 0.d0
+            dg%slimit5 = 0.d0
 #endif
 
 #ifdef SED_LAY
@@ -970,42 +971,42 @@
             slimit6 = 0.d0
 #endif
 
-            pa = pdg_el(l)
+            dg%pa = pdg_el(l)
 
                                 !compute the first sensor type          
-            if (pa.eq.0) then
+            if (dg%pa.eq.0) then
                
                cycle
                
             else
 
-               do k = (pa*(pa+1))/2 + 1 ,dofs(l)
-                  do mm = 1,nagp(pa)
+               do k = (dg%pa*(dg%pa+1))/2 + 1 ,dg%dofs(l)
+                  do mm = 1,dg%nagp(dg%pa)
                      
-                     ze_sensor1 = ze_sensor1 + abs(ze(k,l,irkp+1)* &
-                    phi_area(k,mm,pa))**lebesgue * wagp(mm,pa)
-                     qx_sensor1 = qx_sensor1 + abs(qx(k,l,irkp+1)* &
-                    phi_area(k,mm,pa))**lebesgue * wagp(mm,pa)
-                     qy_sensor1 = qy_sensor1 + abs(qy(k,l,irkp+1)* &
-                    phi_area(k,mm,pa))**lebesgue * wagp(mm,pa)
+                     ze_sensor1 = ze_sensor1 + abs(dg%ze(k,l,irkp+1)* &
+                    dg%phi_area(k,mm,dg%pa))**lebesgue * dg%wagp(mm,dg%pa)
+                     qx_sensor1 = qx_sensor1 + abs(dg%qx(k,l,irkp+1)* &
+                    dg%phi_area(k,mm,dg%pa))**lebesgue * dg%wagp(mm,dg%pa)
+                     qy_sensor1 = qy_sensor1 + abs(dg%qy(k,l,irkp+1)* &
+                    dg%phi_area(k,mm,dg%pa))**lebesgue * dg%wagp(mm,dg%pa)
                      
 #ifdef TRACE       
-                     iota_sensor1 = iota_sensor1 + abs(iota(k,l,irkp+1)* &
-                    phi_area(k,mm,pa))**lebesgue * wagp(mm,pa)
+                     iota_sensor1 = iota_sensor1 + abs(dg%iota(k,l,irkp+1)* &
+                    dg%phi_area(k,mm,dg%pa))**lebesgue * dg%wagp(mm,dg%pa)
 #endif
                      
 #ifdef CHEM                
-                     iota_sensor1  = iota_sensor1 + abs(iota(k,l,irkp+1)* &
-                    phi_area(k,mm,pa))**lebesgue * wagp(mm,pa)
-                     iota2_sensor1 = iota2_sensor1 + abs(iota2(k,l,irkp+1)* &
-                    phi_area(k,mm,pa))**lebesgue * wagp(mm,pa)
+                     iota_sensor1  = iota_sensor1 + abs(dg%iota(k,l,irkp+1)* &
+                    dg%phi_area(k,mm,dg%pa))**lebesgue * dg%wagp(mm,dg%pa)
+                     iota2_sensor1 = iota2_sensor1 + abs(dg%iota2(k,l,irkp+1)* &
+                    dg%phi_area(k,mm,dg%pa))**lebesgue * dg%wagp(mm,dg%pa)
 #endif
 
 #ifdef SED_LAY       
 
                      do ll=1,layers
-                        tbed_sensor1 = tbed_sensor1 + abs(bed(k,l,irkp+1,ll)* &
-                       phi_area(k,mm,pa))**lebesgue * wagp(mm,pa)
+                        tbed_sensor1 = tbed_sensor1 + abs(dg%bed(k,l,irkp+1,ll)* &
+                       dg%phi_area(k,mm,dg%pa))**lebesgue * dg%wagp(mm,dg%pa)
                      enddo
 #endif
                      
@@ -1016,40 +1017,40 @@
             
                                 !compute the second sensor type
 
-            if (pa.eq.0) then
+            if (dg%pa.eq.0) then
                
                cycle
                
             else
                
-               do k = 1, dofs(l)
+               do k = 1, dg%dofs(l)
 
-                  do mm=1,nagp(pa)
+                  do mm=1,dg%nagp(dg%pa)
                      
-                     ze_sensor2 = ze_sensor2 + abs(ze(k,l,irkp+1)* &
-                    phi_area(k,mm,pa))**lebesgue * wagp(mm,pa)
-                     qx_sensor2 = qx_sensor2 + abs(qx(k,l,irkp+1)* &
-                    phi_area(k,mm,pa))**lebesgue * wagp(mm,pa)
-                     qy_sensor2 = qy_sensor2 + abs(qy(k,l,irkp+1)* &
-                    phi_area(k,mm,pa))**lebesgue * wagp(mm,pa)
+                     ze_sensor2 = ze_sensor2 + abs(dg%ze(k,l,irkp+1)* &
+                    dg%phi_area(k,mm,dg%pa))**lebesgue * dg%wagp(mm,dg%pa)
+                     qx_sensor2 = qx_sensor2 + abs(dg%qx(k,l,irkp+1)* &
+                    dg%phi_area(k,mm,dg%pa))**lebesgue * dg%wagp(mm,dg%pa)
+                     qy_sensor2 = qy_sensor2 + abs(dg%qy(k,l,irkp+1)* &
+                    dg%phi_area(k,mm,dg%pa))**lebesgue * dg%wagp(mm,dg%pa)
                      
 #ifdef TRACE
-                     iota_sensor2 = iota_sensor2 + abs(iota(k,l,irkp+1)* &
-                    phi_area(k,mm,pa))**lebesgue * wagp(mm,pa)
+                     iota_sensor2 = iota_sensor2 + abs(dg%iota(k,l,irkp+1)* &
+                    dg%phi_area(k,mm,dg%pa))**lebesgue * dg%wagp(mm,dg%pa)
 #endif
                      
 #ifdef CHEM
-                     iota_sensor2 = iota_sensor2 + abs(iota(k,l,irkp+1)* &
-                    phi_area(k,mm,pa))**lebesgue * wagp(mm,pa)
-                     iota2_sensor2 = iota2_sensor2 + abs(iota2(k,l,irkp+1)* &
-                    phi_area(k,mm,pa))**lebesgue * wagp(mm,pa)
+                     iota_sensor2 = iota_sensor2 + abs(dg%iota(k,l,irkp+1)* &
+                    dg%phi_area(k,mm,dg%pa))**lebesgue * dg%wagp(mm,dg%pa)
+                     iota2_sensor2 = iota2_sensor2 + abs(dg%iota2(k,l,irkp+1)* &
+                    dg%phi_area(k,mm,dg%pa))**lebesgue * dg%wagp(mm,dg%pa)
 #endif
 
                      
 #ifdef SED_LAY
                      do ll=1,layers
-                        tbed_sensor2 = tbed_sensor2 + abs(bed(k,l,irkp+1,ll)* &
-                       phi_area(k,mm,pa))**lebesgue * wagp(mm,pa)
+                        tbed_sensor2 = tbed_sensor2 + abs(dg%bed(k,l,irkp+1,ll)* &
+                       dg%phi_area(k,mm,dg%pa))**lebesgue * dg%wagp(mm,dg%pa)
                      enddo
 #endif
                      
@@ -1061,43 +1062,43 @@
 
 !................................................................
 
-            if (gflag.eq.0) then !dioristic algorithm OFF
+            if (dg%gflag.eq.0) then !dioristic algorithm OFF
                
-               if (pa.gt.0) then
+               if (dg%pa.gt.0) then
                   
                   if  (ze_sensor2.gt.1.0e-12.and.ze_sensor1.gt.1.0e-12 ) then
                      
                      ze_sensor(l) = log10( ( (ze_sensor1 )**roo) / (ze_sensor2**roo) )
-                     slimit1 = log10(kon*real(pdg_el(l))**(- lebesgue**2)) - kons
+                     dg%slimit1 = log10(kon*real(pdg_el(l))**(- lebesgue**2)) - kons
                      
                   else
                      
                      ze_sensor(l) = 1.d0
-                     slimit1 = 2.d0
+                     dg%slimit1 = 2.d0
                      
                   endif
 
                   if (qx_sensor2.gt.1.0e-12.and.qx_sensor1.gt.1.0e-12 ) then
                      
                      qx_sensor(l) = log10( ( (qx_sensor1)**roo) / (qx_sensor2**roo) )
-                     slimit2 = log10(kon*real(pdg_el(l))**(- lebesgue**2)) - kons
+                     dg%slimit2 = log10(kon*real(pdg_el(l))**(- lebesgue**2)) - kons
                      
                   else
                      
                      qx_sensor(l) = 1.d0
-                     slimit2 = 2.d0
+                     dg%slimit2 = 2.d0
                      
                   endif
                   
                   if ( qy_sensor2.gt.1.0e-12.and.qy_sensor1.gt.1.0e-12 ) then
                      
                      qy_sensor(l) = log10( ((qy_sensor1)**roo) / (qy_sensor2**roo) )
-                     slimit3 = log10(kon*real(pdg_el(l))**(- lebesgue**2)) - kons
+                     dg%slimit3 = log10(kon*real(pdg_el(l))**(- lebesgue**2)) - kons
                      
                   else
                      
                      qy_sensor(l) = 1.d0
-                     slimit3 = 2.d0
+                     dg%slimit3 = 2.d0
                      
                   endif
                   
@@ -1105,12 +1106,12 @@
                   if ( iota_sensor2.gt.1.0e-12.and.iota_sensor1.gt.1.0e-12 ) then
                      
                      iota_sensor(l) = log10( ( (iota_sensor1)**roo) / (iota_sensor2**roo) )
-                     slimit4 = log10(kon*real(pdg_el(l))**(- lebesgue**2)) - kons
+                     dg%slimit4 = log10(kon*real(pdg_el(l))**(- lebesgue**2)) - kons
                      
                   else
                      
                      iota_sensor(l) = 1.d0
-                     slimit4 = 2.d0
+                     dg%slimit4 = 2.d0
                      
                      
                   endif
@@ -1120,24 +1121,24 @@
                   if ( iota_sensor2.gt.1.0e-12.and.iota_sensor1.gt.1.0e-12) then
                      
                      iota_sensor(l) = log10( ( (iota_sensor1 )**roo) / (iota_sensor2**roo) )
-                     slimit4 = log10(kon*real(pdg_el(l))**(- lebesgue**2)) - kons
+                     dg%slimit4 = log10(kon*real(pdg_el(l))**(- lebesgue**2)) - kons
                      
                   else
                      
                      iota_sensor(l) = 1.d0
-                     slimit4 = 2.d0
+                     dg%slimit4 = 2.d0
                      
                   endif
                   
                   if ( iota2_sensor2.gt.1.0e-12.and.iota2_sensor1.gt.1.0e-12 ) then
                      
                      iota2_sensor(l) = log10( ( (iota2_sensor1)**roo) / (iota2_sensor2**roo) )
-                     slimit5 = log10(kon*real(pdg_el(l))**(- lebesgue**2)) - kons
+                     dg%slimit5 = log10(kon*real(pdg_el(l))**(- lebesgue**2)) - kons
                      
                   else
                      
                      iota2_sensor(l) = 1.d0
-                     slimit5 = 2.d0
+                     dg%slimit5 = 2.d0
                      
                   endif
 #endif
@@ -1159,17 +1160,17 @@
                   
                else 
                   
-                  ze_sensor(l) = slimit1
-                  qx_sensor(l) = slimit2
-                  qy_sensor(l) = slimit3
+                  ze_sensor(l) = dg%slimit1
+                  qx_sensor(l) = dg%slimit2
+                  qy_sensor(l) = dg%slimit3
                   
 #ifdef TRACE
-                  iota_sensor(l) = slimit4
+                  iota_sensor(l) = dg%slimit4
 #endif
                   
 #ifdef CHEM            
-                  iota_sensor(l) = slimit4
-                  iota2_sensor(l) = slimit5
+                  iota_sensor(l) = dg%slimit4
+                  iota2_sensor(l) = dg%slimit5
 #endif
 
 #ifdef SED_LAY
@@ -1190,34 +1191,34 @@
 !.....the order of p
 
                
-               if ( ((ze_sensor(l).lt.slimit1).and.&
-              (qx_sensor(l).lt.slimit2).and.&
-              (qy_sensor(l).lt.slimit3)).and.&
-              (pdg_el(l).lt.ph).and.&
-              (it-pcount(l)).ge.plimit )  then
+               if ( ((ze_sensor(l).lt.dg%slimit1).and.&
+              (qx_sensor(l).lt.dg%slimit2).and.&
+              (qy_sensor(l).lt.dg%slimit3)).and.&
+              (pdg_el(l).lt.dg%ph).and.&
+              (it-dg%pcount(l)).ge.dg%plimit )  then
                   
                   pdg_el(l) = pdg_el(l) + 1
-                  dofs(l) = (pdg_el(l) + 1 )*(pdg_el(l) +2 ) / 2
+                  dg%dofs(l) = (pdg_el(l) + 1 )*(pdg_el(l) +2 ) / 2
                   
-                  pcount(l) = it
+                  dg%pcount(l) = it
                   
 !.....if the sensor is more than the limit and the p is high decrease
 !.....the order of p
                   
-               elseif ( ((ze_sensor(l).ge.slimit1).or.&
-                 (qx_sensor(l).ge.slimit2).or.&
-                 (qy_sensor(l).ge.slimit3)).and.&
-                 (pdg_el(l).gt.pl) ) then !.and.
-                                !&                    (it-pcount(l)).ge.plimit ) then
+               elseif ( ((ze_sensor(l).ge.dg%slimit1).or.&
+                 (qx_sensor(l).ge.dg%slimit2).or.&
+                 (qy_sensor(l).ge.dg%slimit3)).and.&
+                 (pdg_el(l).gt.dg%pl) ) then !.and.
+                                !&                    (it-dg%pcount(l)).ge.dg%plimit ) then
                   
                   pdg_el(l) = pdg_el(l) - 1
-                  dofs(l) = (pdg_el(l) + 1 )*(pdg_el(l) + 2 ) / 2
+                  dg%dofs(l) = (pdg_el(l) + 1 )*(pdg_el(l) + 2 ) / 2
                   
-                  ze(dofs(l)+1:dofh,l,irkp+1) = 0.d0
-                  qx(dofs(l)+1:dofh,l,irkp+1) = 0.d0
-                  qy(dofs(l)+1:dofh,l,irkp+1) = 0.d0  
+                  dg%ze(dg%dofs(l)+1:dg%dofh,l,irkp+1) = 0.d0
+                  dg%qx(dg%dofs(l)+1:dg%dofh,l,irkp+1) = 0.d0
+                  dg%qy(dg%dofs(l)+1:dg%dofh,l,irkp+1) = 0.d0  
 
-                                !pcount(l) = it 
+                                !dg%pcount(l) = it 
 
                endif
 #endif
@@ -1227,37 +1228,37 @@
 !.....if the sensor is less than the limit and the p is low increase
 !.....the order of p
                
-               if ( ( (ze_sensor(l).lt.slimit1).and.&
-              (qx_sensor(l).lt.slimit2).and.&
-              (qy_sensor(l).lt.slimit3).and.&
-              (iota_sensor(l).lt.slimit4)).and.&
-              (pdg_el(l).lt.ph).and.&
-              (it-pcount(l)).ge.plimit ) then
+               if ( ( (ze_sensor(l).lt.dg%slimit1).and.&
+              (qx_sensor(l).lt.dg%slimit2).and.&
+              (qy_sensor(l).lt.dg%slimit3).and.&
+              (iota_sensor(l).lt.dg%slimit4)).and.&
+              (pdg_el(l).lt.dg%ph).and.&
+              (it-dg%pcount(l)).ge.dg%plimit ) then
                   
                   pdg_el(l) = pdg_el(l) + 1
-                  dofs(l) = (pdg_el(l) + 1 )*(pdg_el(l) +2 ) / 2
+                  dg%dofs(l) = (pdg_el(l) + 1 )*(pdg_el(l) +2 ) / 2
                   
-                  pcount(l) = it
+                  dg%pcount(l) = it
                   
 !.....if the sensor is more than the limit and the p is high decrease
 !.....the order of p
                   
-               elseif ( ((ze_sensor(l).ge.slimit1).or.&
-                 (qx_sensor(l).ge.slimit2).or.&
-                 (qy_sensor(l).ge.slimit3).or.&
-                 (iota_sensor(l).ge.slimit4)).and.&
-                 (pdg_el(l).gt.pl) ) then !.and.
-                                !&                    (it-pcount(l)).ge.plimit ) then
+               elseif ( ((ze_sensor(l).ge.dg%slimit1).or.&
+                 (qx_sensor(l).ge.dg%slimit2).or.&
+                 (qy_sensor(l).ge.dg%slimit3).or.&
+                 (iota_sensor(l).ge.dg%slimit4)).and.&
+                 (pdg_el(l).gt.dg%pl) ) then !.and.
+                                !&                    (it-dg%pcount(l)).ge.dg%plimit ) then
                   
                   pdg_el(l) = pdg_el(l) - 1
-                  dofs(l) = (pdg_el(l) + 1 )*(pdg_el(l) + 2 ) / 2
+                  dg%dofs(l) = (pdg_el(l) + 1 )*(pdg_el(l) + 2 ) / 2
                   
-                  ze(dofs(l)+1:dofh,l,irkp+1) = 0.d0
-                  iota(dofs(l)+1:dofh,l,irkp+1) = 0.d0
-                  qx(dofs(l)+1:dofh,l,irkp+1) = 0.d0
-                  qy(dofs(l)+1:dofh,l,irkp+1) = 0.d0
+                  dg%ze(dg%dofs(l)+1:dg%dofh,l,irkp+1) = 0.d0
+                  dg%iota(dg%dofs(l)+1:dg%dofh,l,irkp+1) = 0.d0
+                  dg%qx(dg%dofs(l)+1:dg%dofh,l,irkp+1) = 0.d0
+                  dg%qy(dg%dofs(l)+1:dg%dofh,l,irkp+1) = 0.d0
                   
-                                !pcount(l) = it
+                                !dg%pcount(l) = it
                   
                endif
 #endif
@@ -1268,40 +1269,40 @@
 !.....the order of p
                
                
-               if ( ( (ze_sensor(l).lt.slimit1).and.&
-              (qx_sensor(l).lt.slimit2).and.&
-              (qy_sensor(l).lt.slimit3).and.&
-              (iota_sensor(l).lt.slimit4).and.&
-              (iota2_sensor(l).lt.slimit5)).and. &
-              (pdg_el(l).lt.ph).and. &
-              (it-pcount(l)).ge.plimit) then
+               if ( ( (ze_sensor(l).lt.dg%slimit1).and.&
+              (qx_sensor(l).lt.dg%slimit2).and.&
+              (qy_sensor(l).lt.dg%slimit3).and.&
+              (iota_sensor(l).lt.dg%slimit4).and.&
+              (iota2_sensor(l).lt.dg%slimit5)).and. &
+              (pdg_el(l).lt.dg%ph).and. &
+              (it-dg%pcount(l)).ge.dg%plimit) then
                   
                   pdg_el(l) = pdg_el(l) + 1
-                  dofs(l) = (pdg_el(l) + 1 )*(pdg_el(l) +2 ) / 2
+                  dg%dofs(l) = (pdg_el(l) + 1 )*(pdg_el(l) +2 ) / 2
                   
-                  pcount(l) = it
+                  dg%pcount(l) = it
                   
 !.....if the sensor is more than the limit and the p is high decrease
 !.....the order of p
                   
-               elseif ( ((ze_sensor(l).ge.slimit1).or.&
-                 (qx_sensor(l).ge.slimit2).or.&
-                 (qy_sensor(l).ge.slimit3).or.&
-                 (iota_sensor(l).ge.slimit4).or.&
-                 (iota2_sensor(l).ge.slimit5)).and.&
-                 (pdg_el(l).gt.pl) ) then !.and.
-                                !&                    (it-pcount(l)).ge.plimit ) then
+               elseif ( ((ze_sensor(l).ge.dg%slimit1).or.&
+                 (qx_sensor(l).ge.dg%slimit2).or.&
+                 (qy_sensor(l).ge.dg%slimit3).or.&
+                 (iota_sensor(l).ge.dg%slimit4).or.&
+                 (iota2_sensor(l).ge.dg%slimit5)).and.&
+                 (pdg_el(l).gt.dg%pl) ) then !.and.
+                                !&                    (it-dg%pcount(l)).ge.dg%plimit ) then
                   
                   pdg_el(l) = pdg_el(l) - 1
-                  dofs(l) = (pdg_el(l) + 1 )*(pdg_el(l) + 2 ) / 2
+                  dg%dofs(l) = (pdg_el(l) + 1 )*(pdg_el(l) + 2 ) / 2
                   
-                  ze(dofs(l)+1:dofh,l,irkp+1) = 0.d0
-                  iota(dofs(l)+1:dofh,l,irkp+1) = 0.d0
-                  iota2(dofs(l)+1:dofh,l,irkp+1) = 0.d0
-                  qx(dofs(l)+1:dofh,l,irkp+1) = 0.d0
-                  qy(dofs(l)+1:dofh,l,irkp+1) = 0.d0
+                  dg%ze(dg%dofs(l)+1:dg%dofh,l,irkp+1) = 0.d0
+                  dg%iota(dg%dofs(l)+1:dg%dofh,l,irkp+1) = 0.d0
+                  dg%iota2(dg%dofs(l)+1:dg%dofh,l,irkp+1) = 0.d0
+                  dg%qx(dg%dofs(l)+1:dg%dofh,l,irkp+1) = 0.d0
+                  dg%qy(dg%dofs(l)+1:dg%dofh,l,irkp+1) = 0.d0
 
-                                !pcount(l) = it
+                                !dg%pcount(l) = it
                   
                endif
 #endif
@@ -1311,37 +1312,37 @@
 !.....if the sensor is less than the limit and the p is low increase
 !.....the order of p
                
-               if ( ( (ze_sensor(l).lt.slimit1).and.&
-              (qx_sensor(l).lt.slimit2).and.&
-              (qy_sensor(l).lt.slimit3).and.&
+               if ( ( (ze_sensor(l).lt.dg%slimit1).and.&
+              (qx_sensor(l).lt.dg%slimit2).and.&
+              (qy_sensor(l).lt.dg%slimit3).and.&
               (tbed_sensor(l).lt.slimit6)).and.&
-              (pdg_el(l).lt.ph).and.&
-              (it-pcount(l)).ge.plimit ) then
+              (pdg_el(l).lt.dg%ph).and.&
+              (it-dg%pcount(l)).ge.dg%plimit ) then
                   
                   pdg_el(l) = pdg_el(l) + 1
-                  dofs(l) = (pdg_el(l) + 1 )*(pdg_el(l) +2 ) / 2
+                  dg%dofs(l) = (pdg_el(l) + 1 )*(pdg_el(l) +2 ) / 2
                   
-                  pcount(l) = it
+                  dg%pcount(l) = it
                   
 !.....if the sensor is more than the limit and the p is high decrease
 !.....the order of p
                   
-               elseif ( ((ze_sensor(l).ge.slimit1).or.&
-                 (qx_sensor(l).ge.slimit2).or.&
-                 (qy_sensor(l).ge.slimit3).or.&
+               elseif ( ((ze_sensor(l).ge.dg%slimit1).or.&
+                 (qx_sensor(l).ge.dg%slimit2).or.&
+                 (qy_sensor(l).ge.dg%slimit3).or.&
                  (tbed_sensor(l).ge.slimit6)).and.&
-                 (pdg_el(l).gt.pl) ) then !.and.
-                                !&                    (it-pcount(l)).ge.plimit ) then
+                 (pdg_el(l).gt.dg%pl) ) then !.and.
+                                !&                    (it-dg%pcount(l)).ge.dg%plimit ) then
                   
                   pdg_el(l) = pdg_el(l) - 1
-                  dofs(l) = (pdg_el(l) + 1 )*(pdg_el(l) + 2 ) / 2
+                  dg%dofs(l) = (pdg_el(l) + 1 )*(pdg_el(l) + 2 ) / 2
                   
-                  ze(dofs(l)+1:dofh,l,irkp+1) = 0.d0
-                  bed(dofs(l)+1:dofh,l,irkp+1,:) = 0.d0
-                  qx(dofs(l)+1:dofh,l,irkp+1) = 0.d0
-                  qy(dofs(l)+1:dofh,l,irkp+1) = 0.d0
+                  dg%ze(dg%dofs(l)+1:dg%dofh,l,irkp+1) = 0.d0
+                  dg%bed(dg%dofs(l)+1:dg%dofh,l,irkp+1,:) = 0.d0
+                  dg%qx(dg%dofs(l)+1:dg%dofh,l,irkp+1) = 0.d0
+                  dg%qy(dg%dofs(l)+1:dg%dofh,l,irkp+1) = 0.d0
                   
-                                !pcount(l) = it
+                                !dg%pcount(l) = it
                   
                endif
 #endif
@@ -1349,7 +1350,7 @@
             endif
 !................................................................
 
-            if (gflag.eq.1) then ! dioristic algorithm ON
+            if (dg%gflag.eq.1) then ! dioristic algorithm ON
 
                if (ze_sensor2.gt.1.0e-12.and.ze_sensor1.gt.1.0e-12 ) then
                   
@@ -1434,7 +1435,7 @@
          enddo
 
 
-         if (gflag.eq.1) then   !if dioristic algorithm ON
+         if (dg%gflag.eq.1) then   !if dioristic algorithm ON
 
             avg_zesen = 0.d0
             avg_qxsen = 0.d0
@@ -1515,21 +1516,21 @@
                   endif
 #endif
                   
-                  avg_zesen = sum(ze_sensor)/MNES
-                  avg_qxsen = sum(qx_sensor)/MNES
-                  avg_qysen = sum(qy_sensor)/MNES
+                  avg_zesen = sum(ze_sensor)/dg%MNES
+                  avg_qxsen = sum(qx_sensor)/dg%MNES
+                  avg_qysen = sum(qy_sensor)/dg%MNES
                   
 #ifdef TRACE
-                  avg_iotasen = sum(iota_sensor)/MNES
+                  avg_iotasen = sum(iota_sensor)/dg%MNES
 #endif
                   
 #ifdef CHEM             
-                  avg_iotasen = sum(iota_sensor)/MNES
-                  avg_iota2sen = sum(iota2_sensor)/MNES
+                  avg_iotasen = sum(iota_sensor)/dg%MNES
+                  avg_iota2sen = sum(iota2_sensor)/dg%MNES
 #endif
 
 #ifdef SED_LAY
-                  avg_tbedsen = sum(tbed_sensor)/MNES
+                  avg_tbedsen = sum(tbed_sensor)/dg%MNES
 #endif
 
 #ifdef CMPI
@@ -1590,21 +1591,21 @@
             tbed_delta = 0.d0
 #endif
             
-            ze_delta = ( diorism / 100.d0 )* (abs(maxze_sensor - minze_sensor) )
-            qx_delta = ( diorism / 100.d0 )* (abs(maxqx_sensor - minqx_sensor) )
-            qy_delta = ( diorism / 100.d0 )* (abs(maxqy_sensor - minqy_sensor) )   
+            ze_delta = ( dg%diorism / 100.d0 )* (abs(maxze_sensor - minze_sensor) )
+            qx_delta = ( dg%diorism / 100.d0 )* (abs(maxqx_sensor - minqx_sensor) )
+            qy_delta = ( dg%diorism / 100.d0 )* (abs(maxqy_sensor - minqy_sensor) )   
             
 #ifdef TRACE
-            iota_delta = ( diorism / 100.d0 )* (abs(maxiota_sensor - miniota_sensor) )
+            iota_delta = ( dg%diorism / 100.d0 )* (abs(maxiota_sensor - miniota_sensor) )
 #endif
             
 #ifdef CHEM
-            iota_delta = ( diorism / 100.d0 )* (abs(maxiota_sensor - miniota_sensor) )
-            iota2_delta = ( diorism / 100.d0 )* (abs(maxiota2_sensor - miniota2_sensor) )
+            iota_delta = ( dg%diorism / 100.d0 )* (abs(maxiota_sensor - miniota_sensor) )
+            iota2_delta = ( dg%diorism / 100.d0 )* (abs(maxiota2_sensor - miniota2_sensor) )
 #endif
 
 #ifdef SED_LAY
-            tbed_delta = ( diorism / 100.d0 )* (abs(maxtbed_sensor - mintbed_sensor) )
+            tbed_delta = ( dg%diorism / 100.d0 )* (abs(maxtbed_sensor - mintbed_sensor) )
 #endif
             
             do l = 1,ne
@@ -1662,13 +1663,13 @@
                if ( ( (temp_qy.lt.qy_delta).and.&
               (temp_qx.lt.qx_delta).and.&
               (temp_ze.lt.ze_delta) ).and.&
-              (pdg_el(l).lt.ph).and.&
-              (it-pcount(l)).ge.plimit ) then
+              (pdg_el(l).lt.dg%ph).and.&
+              (it-dg%pcount(l)).ge.dg%plimit ) then
                   
                   pdg_el(l) = pdg_el(l) + 1 
-                  dofs(l) = (pdg_el(l) +1 )*(pdg_el(l) +2 ) / 2
+                  dg%dofs(l) = (pdg_el(l) +1 )*(pdg_el(l) +2 ) / 2
                   
-                  pcount(l) = it
+                  dg%pcount(l) = it
                   
 !.....if the sensor is more than delta and the p is high decrease
 !.....the order of p
@@ -1676,17 +1677,17 @@
                elseif ( ((temp_ze.ge.ze_delta).or.&
                  (temp_qx.ge.qx_delta).or.&
                  (temp_qy.ge.qy_delta) ).and.&
-                 (pdg_el(l).gt.pl) ) then !.and.
-                                !&                    (it-pcount(l)).ge.plimit ) then
+                 (pdg_el(l).gt.dg%pl) ) then !.and.
+                                !&                    (it-dg%pcount(l)).ge.dg%plimit ) then
                   
                   pdg_el(l) = pdg_el(l) - 1
-                  dofs(l) = (pdg_el(l) + 1 )*(pdg_el(l) + 2 ) / 2
+                  dg%dofs(l) = (pdg_el(l) + 1 )*(pdg_el(l) + 2 ) / 2
                   
-                  ze(dofs(l)+1:dofh,l,irkp+1) = 0.d0
-                  qx(dofs(l)+1:dofh,l,irkp+1) = 0.d0
-                  qy(dofs(l)+1:dofh,l,irkp+1) = 0.d0
+                  dg%ze(dg%dofs(l)+1:dg%dofh,l,irkp+1) = 0.d0
+                  dg%qx(dg%dofs(l)+1:dg%dofh,l,irkp+1) = 0.d0
+                  dg%qy(dg%dofs(l)+1:dg%dofh,l,irkp+1) = 0.d0
 
-                                !pcount(l) = it
+                                !dg%pcount(l) = it
                   
                endif
 #endif
@@ -1700,13 +1701,13 @@
               (temp_qx.lt.qx_delta).and.&
               (temp_ze.lt.ze_delta).and.&
               (temp_iota.lt.iota_delta)).and.&
-              (pdg_el(l).lt.ph).and.&
-              (it-pcount(l)).ge.plimit ) then
+              (pdg_el(l).lt.dg%ph).and.&
+              (it-dg%pcount(l)).ge.dg%plimit ) then
 
                   pdg_el(l) = pdg_el(l) + 1 
-                  dofs(l) = (pdg_el(l) +1 )*(pdg_el(l) +2 ) / 2
+                  dg%dofs(l) = (pdg_el(l) +1 )*(pdg_el(l) +2 ) / 2
 
-                  pcount(l) = it
+                  dg%pcount(l) = it
                   
 !.....if the sensor is less than delta and the p is high decrease
 !.....the order of p
@@ -1715,18 +1716,18 @@
                  (temp_qx.ge.qx_delta).or.&
                  (temp_qy.ge.qy_delta).or.&
                  (temp_iota.ge.iota_delta)).and.&
-                 (pdg_el(l).gt.pl) ) then !.and.
-                                !&                    (it-pcount(l)).ge.plimit) then
+                 (pdg_el(l).gt.dg%pl) ) then !.and.
+                                !&                    (it-dg%pcount(l)).ge.dg%plimit) then
 
                   pdg_el(l) = pdg_el(l) - 1
-                  dofs(l) = (pdg_el(l) + 1 )*(pdg_el(l) + 2 ) / 2
+                  dg%dofs(l) = (pdg_el(l) + 1 )*(pdg_el(l) + 2 ) / 2
                   
-                  ze(dofs(l)+1:dofh,l,irkp+1) = 0.d0
-                  qx(dofs(l)+1:dofh,l,irkp+1) = 0.d0
-                  qy(dofs(l)+1:dofh,l,irkp+1) = 0.d0
-                  iota(dofs(l)+1:dofh,l,irkp+1) = 0.d0
+                  dg%ze(dg%dofs(l)+1:dg%dofh,l,irkp+1) = 0.d0
+                  dg%qx(dg%dofs(l)+1:dg%dofh,l,irkp+1) = 0.d0
+                  dg%qy(dg%dofs(l)+1:dg%dofh,l,irkp+1) = 0.d0
+                  dg%iota(dg%dofs(l)+1:dg%dofh,l,irkp+1) = 0.d0
 
-                                !pcount(l) = it
+                                !dg%pcount(l) = it
                   
                endif
 #endif
@@ -1741,13 +1742,13 @@
               (temp_ze.lt.ze_delta).and.&
               (temp_iota.lt.iota_delta).and.&
               (temp_iota2.lt.iota2_delta)).and.&
-              (pdg_el(l).lt.ph).and.&
-              (it-pcount(l)).ge.plimit ) then
+              (pdg_el(l).lt.dg%ph).and.&
+              (it-dg%pcount(l)).ge.dg%plimit ) then
 
                   pdg_el(l) = pdg_el(l) + 1 
-                  dofs(l) = (pdg_el(l) +1 )*(pdg_el(l) +2 ) / 2
+                  dg%dofs(l) = (pdg_el(l) +1 )*(pdg_el(l) +2 ) / 2
 
-                  pcount(l) = it
+                  dg%pcount(l) = it
                   
 !.....if the sensor is less than delta and the p is high decrease
 !.....the order of p
@@ -1757,19 +1758,19 @@
                  (temp_qy.ge.qy_delta).or.&
                  (temp_iota.ge.iota_delta).or.&
                  (temp_iota2.ge.iota2_delta)).and.&
-                 (pdg_el(l).gt.pl) ) then !.and.
-                                !&                    (it-pcount(l)).ge.plimit) then
+                 (pdg_el(l).gt.dg%pl) ) then !.and.
+                                !&                    (it-dg%pcount(l)).ge.dg%plimit) then
 
                   pdg_el(l) = pdg_el(l) - 1
-                  dofs(l) = (pdg_el(l) + 1 )*(pdg_el(l) + 2 ) / 2
+                  dg%dofs(l) = (pdg_el(l) + 1 )*(pdg_el(l) + 2 ) / 2
                   
-                  ze(dofs(l)+1:dofh,l,irkp+1) = 0.d0
-                  qx(dofs(l)+1:dofh,l,irkp+1) = 0.d0
-                  qy(dofs(l)+1:dofh,l,irkp+1) = 0.d0
-                  iota(dofs(l)+1:dofh,l,irkp+1) = 0.d0
-                  iota2(dofs(l)+1:dofh,l,irkp+1) = 0.d0
+                  dg%ze(dg%dofs(l)+1:dg%dofh,l,irkp+1) = 0.d0
+                  dg%qx(dg%dofs(l)+1:dg%dofh,l,irkp+1) = 0.d0
+                  dg%qy(dg%dofs(l)+1:dg%dofh,l,irkp+1) = 0.d0
+                  dg%iota(dg%dofs(l)+1:dg%dofh,l,irkp+1) = 0.d0
+                  dg%iota2(dg%dofs(l)+1:dg%dofh,l,irkp+1) = 0.d0
 
-                                !pcount(l) = it
+                                !dg%pcount(l) = it
                   
                endif         
 #endif
@@ -1783,13 +1784,13 @@
               (temp_qx.lt.qx_delta).and.&
               (temp_ze.lt.ze_delta).and.&
               (temp_tbed.lt.tbed_delta)).and.&
-              (pdg_el(l).lt.ph).and.&
-              (it-pcount(l)).ge.plimit ) then
+              (pdg_el(l).lt.dg%ph).and.&
+              (it-dg%pcount(l)).ge.dg%plimit ) then
 
                   pdg_el(l) = pdg_el(l) + 1 
-                  dofs(l) = (pdg_el(l) +1 )*(pdg_el(l) +2 ) / 2
+                  dg%dofs(l) = (pdg_el(l) +1 )*(pdg_el(l) +2 ) / 2
 
-                  pcount(l) = it
+                  dg%pcount(l) = it
                   
 !.....if the sensor is less than delta and the p is high decrease
 !.....the order of p
@@ -1798,18 +1799,18 @@
                  (temp_qx.ge.qx_delta).or.&
                  (temp_qy.ge.qy_delta).or.&
                  (temp_tbed.ge.tbed_delta)).and.&
-                 (pdg_el(l).gt.pl) ) then !.and.
-                                !&                    (it-pcount(l)).ge.plimit) then
+                 (pdg_el(l).gt.dg%pl) ) then !.and.
+                                !&                    (it-dg%pcount(l)).ge.dg%plimit) then
 
                   pdg_el(l) = pdg_el(l) - 1
-                  dofs(l) = (pdg_el(l) + 1 )*(pdg_el(l) + 2 ) / 2
+                  dg%dofs(l) = (pdg_el(l) + 1 )*(pdg_el(l) + 2 ) / 2
                   
-                  ze(dofs(l)+1:dofh,l,irkp+1) = 0.d0
-                  qx(dofs(l)+1:dofh,l,irkp+1) = 0.d0
-                  qy(dofs(l)+1:dofh,l,irkp+1) = 0.d0
-                  bed(dofs(l)+1:dofh,l,irkp+1,:) = 0.d0
+                  dg%ze(dg%dofs(l)+1:dg%dofh,l,irkp+1) = 0.d0
+                  dg%qx(dg%dofs(l)+1:dg%dofh,l,irkp+1) = 0.d0
+                  dg%qy(dg%dofs(l)+1:dg%dofh,l,irkp+1) = 0.d0
+                  dg%bed(dg%dofs(l)+1:dg%dofh,l,irkp+1,:) = 0.d0
 
-                                !pcount(l) = it
+                                !dg%pcount(l) = it
                   
                endif
 #endif
@@ -1824,17 +1825,17 @@
 !.....deal with the interior barrier problem, by making the front and back elements agree
 !.....at the min of the union for stability
 
-      if (nibseg.gt.0) then
+      if (dg%nibseg.gt.0) then
 
-         do j = 1,nibseg
+         do j = 1,dg%nibseg
 
-            if ( pdg_el(nedel(1,nibsegn(1,j))).ne.pdg_el(nedel(1,nibsegn(2,j))) ) then
+            if ( pdg_el(dg%nedel(1,dg%nibsegn(1,j))).ne.pdg_el(dg%nedel(1,dg%nibsegn(2,j))) ) then
 
-               pdg_el(nedel(1,nibsegn(1,j))) = max(pdg_el(nedel(1,nibsegn(1,j))), pdg_el(nedel(1,nibsegn(2,j))) )
-               pdg_el(nedel(2,nibsegn(1,j))) = max(pdg_el(nedel(1,nibsegn(1,j))), pdg_el(nedel(1,nibsegn(2,j))) )
+               pdg_el(dg%nedel(1,dg%nibsegn(1,j))) = max(pdg_el(dg%nedel(1,dg%nibsegn(1,j))), pdg_el(dg%nedel(1,dg%nibsegn(2,j))) )
+               pdg_el(dg%nedel(2,dg%nibsegn(1,j))) = max(pdg_el(dg%nedel(1,dg%nibsegn(1,j))), pdg_el(dg%nedel(1,dg%nibsegn(2,j))) )
 
-               dofs(nedel(1,nibsegn(1,j))) = max(dofs(nedel(1,nibsegn(1,j))), dofs(nedel(1,nibsegn(2,j))) )
-               dofs(nedel(2,nibsegn(1,j))) = max(dofs(nedel(1,nibsegn(1,j))), dofs(nedel(1,nibsegn(2,j))) )
+               dg%dofs(dg%nedel(1,dg%nibsegn(1,j))) = max(dg%dofs(dg%nedel(1,dg%nibsegn(1,j))), dg%dofs(dg%nedel(1,dg%nibsegn(2,j))) )
+               dg%dofs(dg%nedel(2,dg%nibsegn(1,j))) = max(dg%dofs(dg%nedel(1,dg%nibsegn(1,j))), dg%dofs(dg%nedel(1,dg%nibsegn(2,j))) )
 
             endif
 

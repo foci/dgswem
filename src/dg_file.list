@@ -21,20 +21,20 @@
 ../scripts/sed_vars.bash DG_timestep.f95 scrutinize_solution_dg.list dg 65 284
 
 ../scripts/sed_vars.bash ebarrier_edge_hydro.f95 dg.list dg 
-#sub is called by DG_hydro_timestep                         
+#sub is called by DG_hydro_timestep                         DONE
 
 ../scripts/sed_vars.bash flow_edge_hydro.f95 dg.list dg 
-#sub is called by DG_hydro_timestep
+#sub is called by DG_hydro_timestep                         DONE
 
 ../scripts/sed_vars.bash ibarrier_edge_hydro.f95 dg.list dg 
-#sub is called by DG_hydro_timestep
+#sub is called by DG_hydro_timestep                         DONE
 
 ../scripts/sed_vars.bash internal_edge_hydro.f95 dg.list dg 
-#sub is called by DG_hydro_timestep
+#sub is called by DG_hydro_timestep                         DONE
 
 ../scripts/sed_vars.bash land_edge_hydro.f95 dg.list dg 1 313
 # land_edge_hydro is called by DG_hydro_timestep
-# land_edge_hydro_post is not called
+# land_edge_hydro_post is not called                        DONE
 
 ../scripts/sed_vars.bash LDG_hydro.f95 dg.list dg 1 1024
 # subroutines LDG_hydro, ocean_edge_ldg_hydro, land_edge_hydro_ldg,
@@ -42,34 +42,37 @@
 ../scripts/sed_vars.bash LDG_hydro.f95 edge_int_ldg_hydro_dg.list dg 1039 1091
 ../scripts/sed_vars.bash LDG_hydro.f95 edge_int_ldg_sediment_dg.list dg 1104 1137
 ../scripts/sed_vars.bash LDG_hydro.f95 rhs_ldg_hydro_dg.list dg 1151 1402
+#                                                          DONE
+
 
 ../scripts/sed_vars.bash met_forcing.f95 dg.list dg
-# called by DG_hydro_timestep
+# called by DG_hydro_timestep                              DONE
 
 ../scripts/sed_vars.bash numerical_flux.f95 dg.list dg 53 1894
 #all subs use full dg module except the first one
 # subroutine numerical_flux only uses one variable, FLUXTYPE, so 
 # i'll do this by hand                                               <- MANUAL
+#                                                         DONE
 
 ../scripts/sed_vars.bash ocean_edge_hydro.f95 dg.list dg
-# called by DG_hydro_timestep.f95
+# called by DG_hydro_timestep.f95                         DONE
 
 ../scripts/sed_vars.bash orthobasis_area.f95 dg.list dg
-# called by prep_DG.f95
+# called by prep_DG.f95                                   DONE
 
 ../scripts/sed_vars.bash orthobasis_edge.f95 dg.list dg
-# called by prep_DG.f95
+# called by prep_DG.f95                                   DONE
 
 ../scripts/sed_vars.bash p_enrichment.f95 dg.list dg
-# called by DG_hydro_timestep.f95
+# called by DG_hydro_timestep.f95                         DONE
 
 ../scripts/sed_vars.bash prep_DG.f95 dg.list dg
 # both subs use full dg module.
 # prep_dg is called by dgswem
-# rk_time is called by prep_dg
+# rk_time is called by prep_dg                            DONE
 
 ../scripts/sed_vars.bash prep_slopelim.f95 dg.list dg 1 524
-# only prep_slopelim uses dg
+# only prep_slopelim uses dg                              DONE
 
 ../scripts/sed_vars.bash quad_pts_area.f95 dg.list dg
 ../scripts/sed_vars.bash quad_pts_edge.f95 dg.list dg
