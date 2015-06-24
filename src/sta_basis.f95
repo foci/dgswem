@@ -8,13 +8,15 @@
 !
 !***********************************************************************
 
-      SUBROUTINE STA_BASIS( XSTA, YSTA, ELSTA, PHI_STA )
+      SUBROUTINE STA_BASIS(dg, XSTA, YSTA, ELSTA, PHI_STA )
 
       USE GLOBAL
       USE DG
       USE SIZES
 
       IMPLICIT NONE
+
+      type (dg_type) :: dg
 
       INTEGER ELSTA, NSTA
       REAL(SZ) PHI_STA(dg%DOF)

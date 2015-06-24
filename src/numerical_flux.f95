@@ -12,7 +12,7 @@
 !     
 !***********************************************************************
 
-      SUBROUTINE NUMERICAL_FLUX(s,IT,MM)
+      SUBROUTINE NUMERICAL_FLUX(s,dg,IT,MM)
       
       USE DG
       use sizes
@@ -20,18 +20,19 @@
       IMPLICIT NONE
 
       type (sizes_type) :: s
+      type (dg_type) :: dg
 
       INTEGER IT,MM
 
 
       IF(dg%FLUXTYPE.EQ.1) THEN
-         CALL ROE_FLUX(s,IT,MM)
+         CALL ROE_FLUX(s,dg,IT,MM)
       ELSEIF(dg%FLUXTYPE.EQ.2) THEN
-         CALL LLF_FLUX(s)
+         CALL LLF_FLUX(s,dg)
       ELSEIF (dg%FLUXTYPE.EQ.3) THEN
-         CALL HLLC_FLUX(s)
+         CALL HLLC_FLUX(s,dg)
       ELSEIF (dg%FLUXTYPE.EQ.4) THEN
-         CALL NCP_FLUX(s)
+         CALL NCP_FLUX(s,dg)
       ELSE
          STOP 'INVALID FLUXTYPE'
       ENDIF
@@ -50,7 +51,7 @@
 !     Written by Ethan Kubatko (06-11-2004)
 !     
 !***********************************************************************
-      SUBROUTINE ROE_FLUX(s,IT,MM)
+      SUBROUTINE ROE_FLUX(s,dg,IT,MM)
       
 !.....Use appropriate modules
 
@@ -63,6 +64,7 @@
       IMPLICIT NONE
 
       type (sizes_type) :: s
+      type (dg_type) :: dg
       
 !.....Declare local variables
       
@@ -889,7 +891,7 @@
 !     
 !***********************************************************************
 
-      SUBROUTINE LLF_FLUX(s)
+      SUBROUTINE LLF_FLUX(s,dg)
 
 !.....Use appropriate modules
 
@@ -900,6 +902,7 @@
       IMPLICIT NONE
 
       type (sizes_type) :: s
+      type (dg_type) :: dg
 
 !.....Declare local variables
 
@@ -1158,7 +1161,7 @@
 !     
 !***********************************************************************
 
-      SUBROUTINE HLLC_FLUX(s)
+      SUBROUTINE HLLC_FLUX(s,dg)
 
 !.....Use appropriate modules
 
@@ -1169,7 +1172,8 @@
       IMPLICIT NONE
 
       type (sizes_type) :: s
-      
+      type (dg_type) :: dg
+
 !.....Declare local variables
 
       INTEGER II,l
@@ -1543,7 +1547,7 @@
 !     
 !***********************************************************************
 
-      SUBROUTINE NCP_FLUX(s)
+      SUBROUTINE NCP_FLUX(s,dg)
 
 !.....Use appropriate modules
 
@@ -1554,6 +1558,7 @@
       IMPLICIT NONE
 
       type (sizes_type) :: s
+      type (dg_type) :: dg
 
 !.....Declare local variables
 

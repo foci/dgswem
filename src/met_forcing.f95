@@ -7,7 +7,7 @@
 !
 !***********************************************************************
 
-      SUBROUTINE MET_FORCING(s,IT)
+      SUBROUTINE MET_FORCING(s,dg,IT)
       
       USE GLOBAL
       USE DG
@@ -31,6 +31,7 @@
       IMPLICIT NONE
 
       type (sizes_type) :: s
+      type (dg_type) :: dg
       
       REAL(SZ) WindDragLimit
       INTEGER II, IT

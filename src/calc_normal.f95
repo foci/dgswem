@@ -10,7 +10,7 @@
 !
 !***********************************************************************
 
-      SUBROUTINE CALC_NORMAL()
+      SUBROUTINE CALC_NORMAL(dg)
 
 !.....Use appropriate modules
 
@@ -18,7 +18,9 @@
       USE DG
       
       IMPLICIT NONE
-      
+
+      type (dg_type) :: dg
+
 !.....Declare local variables
 
       INTEGER IEL, IED,i

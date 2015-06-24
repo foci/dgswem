@@ -8,7 +8,7 @@
 !     
 !***********************************************************************
 
-      SUBROUTINE DG_TIMESTEP(s,IT)
+      SUBROUTINE DG_TIMESTEP(s,dg,IT)
 
 !.....Use appropriate modules
       
@@ -22,6 +22,7 @@
       IMPLICIT NONE
 
       type (sizes_type) :: s
+      type (dg_type) :: dg
 
 !.....Declare local variables
 
@@ -29,7 +30,7 @@
       
 !.....Hydrodynamics
 
-      CALL DG_HYDRO_TIMESTEP(s,IT)
+      CALL DG_HYDRO_TIMESTEP(s,dg,IT)
 
 !.....Write out results
 
@@ -38,14 +39,14 @@
       CALL MSG_BLOCKSYNC_START()
 #endif
 #endif
-      CALL WRITE_RESULTS(s,IT,.FALSE.)
+      CALL WRITE_RESULTS(s,dg,IT,.FALSE.)
 #ifdef CMPI
 #ifdef BLKOUT
       CALL MSG_BLOCKSYNC_FINISH()
 #endif
 #endif
 
-      CALL SCRUTINIZE_SOLUTION(s,IT)
+      CALL SCRUTINIZE_SOLUTION(s,dg,IT)
 
       RETURN
       END SUBROUTINE
@@ -62,7 +63,7 @@
 !     
 !***********************************************************************
 
-      SUBROUTINE SCRUTINIZE_SOLUTION(s,IT)
+      SUBROUTINE SCRUTINIZE_SOLUTION(s,dg,IT)
 
 !.....Use appropriate modules
       
@@ -78,6 +79,7 @@
       IMPLICIT NONE
       
       type (sizes_type) :: s
+      type (dg_type) :: dg
 
 !.....Declare local variables
 

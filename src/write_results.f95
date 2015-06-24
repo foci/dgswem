@@ -11,7 +11,7 @@
 !     
 !***********************************************************************
 
-      SUBROUTINE WRITE_RESULTS(s,IT,FORCE_WRITE)
+      SUBROUTINE WRITE_RESULTS(s,dg,IT,FORCE_WRITE)
 
 !.....Use appropriate modules
 
@@ -27,6 +27,7 @@
 #endif
       
       type (sizes_type) :: s
+      type (dg_type) :: dg
 
 !.....Declare local variables
 
@@ -1365,10 +1366,12 @@
 !
 !***********************************************************************
 
-      SUBROUTINE WRITE_DG_IC()
+      SUBROUTINE WRITE_DG_IC(dg)
 
       USE GLOBAL
       USE DG
+
+      type (dg_type) :: dg
 
 !.....DG.63.IC = Record of the initial surface elevation
 !      OPEN(632,FILE=S%DIRNAME//'/'//'DG.63.IC')

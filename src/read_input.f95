@@ -8,7 +8,7 @@
 !     
 !***********************************************************************
 
-      SUBROUTINE READ_INPUT(s)
+      SUBROUTINE READ_INPUT(s,dg)
       use sizes
 !.....Use appropriate modules
 
@@ -34,6 +34,7 @@
       IMPLICIT NONE
 
       type (sizes_type) :: s
+      type (dg_type) :: dg
 
 !.....Declare local variables
 
@@ -203,9 +204,9 @@
       LINE2 = ADJUSTL(LINE)
       
       IF (LINE2(1:1) .EQ. "1") THEN
-        CALL read_fixed_fort_dg(s)   ! first line of old fort.dg is a 1 for the dgswe option
+        CALL read_fixed_fort_dg(s,dg)   ! first line of old fort.dg is a 1 for the dgswe option
       ELSE
-        CALL read_keyword_fort_dg(s) ! otherwise assume keyword format
+        CALL read_keyword_fort_dg(s,dg) ! otherwise assume keyword format
       ENDIF     
       
       RHOWAT0 = 1000.D0

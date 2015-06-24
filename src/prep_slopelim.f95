@@ -11,7 +11,7 @@
 !     
 !***********************************************************************
 
-      SUBROUTINE PREP_SLOPELIM(s)
+      SUBROUTINE PREP_SLOPELIM(s,dg)
       
 !.....Use appropriate modules
       use sizes
@@ -21,6 +21,7 @@
       IMPLICIT NONE
       
       type (sizes_type) :: s
+      type (dg_type) :: dg
 
 !.....Declare local variables
 

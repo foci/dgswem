@@ -9,17 +9,19 @@
 !
 !***********************************************************************
 
-      SUBROUTINE STA_LOCATION( XSTA, YSTA, PHI_STA, ELSTA )
+      SUBROUTINE STA_LOCATION(dg, XSTA, YSTA, PHI_STA, ELSTA )
       
       USE GLOBAL, ONLY : X, Y, NE, NM, AREAS
-      USE DG, ONLY : DOF, PDG_EL
+      USE DG
       USE SIZES
 
       IMPLICIT NONE
 
+      type (dg_type) :: dg
+
       INTEGER XL(NE), XR(NE), YB(NE), YT(NE)
       INTEGER J, ELSTA, NSTA, N1, N2, N3
-      REAL(SZ) PHI_STA(DOF), DPHIDZ1(DOF), DPHIDZ2(DOF)
+      REAL(SZ) PHI_STA(DG%DOF), DPHIDZ1(DG%DOF), DPHIDZ2(DG%DOF)
       REAL(SZ) XSTA, YSTA
       REAL(SZ) Z1, Z2, XP, YP, X1, X2, X3, Y1, Y2, Y3
       
@@ -84,7 +86,7 @@
               
 !.............Compute the basis functions at that point and store
               
-            CALL ORTHOBASIS( Z1, Z2, pdg_el(j), DOF, PHI_STA, DPHIDZ1, DPHIDZ2 )
+            CALL ORTHOBASIS( Z1, Z2, dg%pdg_el(j), DG%DOF, PHI_STA, DPHIDZ1, DPHIDZ2 )
             GOTO 100
           ENDIF
         ENDIF

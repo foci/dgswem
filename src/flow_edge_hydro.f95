@@ -17,7 +17,7 @@
 !     
 !***********************************************************************
 
-      SUBROUTINE FLOW_EDGE_HYDRO(s,IT)
+      SUBROUTINE FLOW_EDGE_HYDRO(s,dg,IT)
 
 !.....Use appropriate modules
 
@@ -30,6 +30,7 @@
       IMPLICIT NONE
 
       type (sizes_type) :: s
+      type (dg_type) :: dg
 
 !.....Declare local variables
 
@@ -252,7 +253,7 @@
 
 #endif
 
-            CALL NUMERICAL_FLUX(s,IT,L)
+            CALL NUMERICAL_FLUX(s,dg,IT,L)
 
 !.....Add LDG terms
 #ifdef WAVE_DIF

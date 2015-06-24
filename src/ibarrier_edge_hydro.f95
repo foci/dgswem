@@ -18,7 +18,7 @@
 !     
 !***********************************************************************
 
-      SUBROUTINE IBARRIER_EDGE_HYDRO(s,IT)
+      SUBROUTINE IBARRIER_EDGE_HYDRO(s,dg,IT)
       
 !.....Use appropriate modules
 
@@ -29,6 +29,7 @@
       IMPLICIT NONE
 
       type (sizes_type) :: s
+      type (dg_type) :: dg
 
 !.....Declare local variables
 
@@ -333,7 +334,7 @@
 
 !...........Compute the numerical flux
                
-               CALL NUMERICAL_FLUX(s,IT)
+               CALL NUMERICAL_FLUX(s,dg,IT)
                FB_HAT = F_HAT
                GB_HAT = G_HAT
                HB_HAT = H_HAT
@@ -389,7 +390,7 @@
                      G_TMP = G
                      G = 0.D0
                   ENDIF
-                  CALL NUMERICAL_FLUX(s,IT)
+                  call numerical_flux(s,dg,IT)
                   FF_HAT = F_HAT
                   GF_HAT = G_HAT
                   HF_HAT = H_HAT
@@ -460,7 +461,7 @@
                dg%QX_EX = ( TYF*Q_N_EXT - NYF*Q_T_EXT)/(NXF*TYF - NYF*TXF)
                dg%QY_EX = (-TXF*Q_N_EXT + NXF*Q_T_EXT)/(NXF*TYF - NYF*TXF)
 
-               CALL NUMERICAL_FLUX(s,IT)
+               call numerical_flux(s,dg,IT)
                FF_HAT = F_HAT
                GF_HAT = G_HAT
                HF_HAT = H_HAT
@@ -514,7 +515,7 @@
                      G_TMP = G
                      G = 0.D0
                   ENDIF
-                  CALL NUMERICAL_FLUX(s,IT)
+                  call numerical_flux(s,dg,IT)
                   FB_HAT = F_HAT
                   GB_HAT = G_HAT
 

@@ -11,14 +11,15 @@
 !
 !***********************************************************************
 
-      SUBROUTINE SLOPELIMITER(s)
+      SUBROUTINE SLOPELIMITER(s,dg)
 
       USE SIZES
-      USE DG, ONLY : SLOPEFLAG
+      USE DG
       
       IMPLICIT NONE
       
       type (sizes_type) :: s
+      type (dg_type) :: dg
 
 #ifdef SLOPEALL
       IF (SLOPEFLAG.EQ.1) THEN
@@ -30,7 +31,7 @@
       ELSE IF (SLOPEFLAG.EQ.4) THEN
         CALL SLOPELIMITER4()
       ELSE IF (SLOPEFLAG.EQ.5) THEN
-        CALL SLOPELIMITER5(s)
+        CALL SLOPELIMITER5(s,dg)
       ELSE IF (SLOPEFLAG.EQ.6) THEN
         CALL SLOPELIMITER6()
       ELSE IF (SLOPEFLAG.EQ.7) THEN
@@ -46,12 +47,12 @@
 
 #ifdef SLOPE5 
       IF (SLOPEFLAG .NE. 0) THEN
-        CALL SLOPELIMITER5(s)
+        CALL SLOPELIMITER5(s,dg)
       ENDIF
 #endif
 
 #ifdef STBLZR
-        CALL SLOPELIMITER5(s)
+        CALL SLOPELIMITER5(s,dg)
 #endif
     
 
@@ -74,7 +75,7 @@
 !     
 !***********************************************************************
 
-      SUBROUTINE SLOPELIMITER1()
+      SUBROUTINE SLOPELIMITER1(dg)
 
 !.....Use appropriate modules
 
@@ -82,6 +83,8 @@
       USE DG
 
       IMPLICIT NONE
+
+      type (dg_type) :: dg
 
 !.....Declare local variables
 
@@ -414,7 +417,7 @@
 !     
 !***********************************************************************
 
-      SUBROUTINE SLOPELIMITER2()
+      SUBROUTINE SLOPELIMITER2(dg)
 
 !.....Use appropriate modules
 
@@ -423,6 +426,9 @@
       USE DG
 
       IMPLICIT NONE
+
+      type (dg_type) :: dg
+
 
 !.....Declare local variables
 
@@ -750,7 +756,7 @@
 !     
 !***********************************************************************
 
-      SUBROUTINE SLOPELIMITER3()
+      SUBROUTINE SLOPELIMITER3(dg)
 
 !.....Use appropriate modules
 
@@ -759,6 +765,7 @@
       USE DG
 
       IMPLICIT NONE
+      type (dg_type) :: dg
 
 !.....Declare local variables
 
@@ -1140,7 +1147,7 @@
       RETURN
       END SUBROUTINE
 
-      SUBROUTINE SLOPELIMITER3_2NBORS(L)
+      SUBROUTINE SLOPELIMITER3_2NBORS(dg,L)
 
 !.....Use appropriate modules
 
@@ -1149,6 +1156,8 @@
       USE DG
 
       IMPLICIT NONE
+
+      type (dg_type) :: dg
 
 !.....Declare local variables
 
@@ -1466,7 +1475,7 @@
       RETURN
       END SUBROUTINE
 
-      SUBROUTINE SLOPELIMITER3_1NBORS(L)
+      SUBROUTINE SLOPELIMITER3_1NBORS(dg,L)
 
 !.....Use appropriate modules
 
@@ -1475,6 +1484,8 @@
       USE DG
 
       IMPLICIT NONE
+
+      type (dg_type) :: dg
 
 !.....Declare local variables
 
@@ -1891,7 +1902,7 @@
 !     
 !***********************************************************************
 
-      SUBROUTINE SLOPELIMITER4() 
+      SUBROUTINE SLOPELIMITER4(dg) 
 
 !.....Use appropriate modules
 
@@ -1904,6 +1915,8 @@
 #endif
 
       IMPLICIT NONE
+
+      type (dg_type) :: dg
 
       Integer k,ll,ss,lll,ell,bb,maxneigh
 
@@ -2795,7 +2808,7 @@
 !     
 !***********************************************************************
 
-      SUBROUTINE SLOPELIMITER5(s)
+      SUBROUTINE SLOPELIMITER5(s,dg)
 
 !.....Use appropriate modules
 
@@ -2810,6 +2823,7 @@
       IMPLICIT NONE
 
       type (sizes_type) :: s
+      type (dg_type) :: dg
 
 !.....Declare local variables
 
@@ -3340,7 +3354,7 @@
 !     
 !***********************************************************************
 
-      SUBROUTINE SLOPELIMITER5(s)
+      SUBROUTINE SLOPELIMITER5(s,dg)
 
 !.....Use appropriate modules
 
@@ -3355,6 +3369,7 @@
       IMPLICIT NONE
       
       type (sizes_type) :: s
+      type (dg_type) :: dg
 
 !.....Declare local variables
 
@@ -3886,7 +3901,7 @@
 !     
 !***********************************************************************
 
-      SUBROUTINE SLOPELIMITER5()
+      SUBROUTINE SLOPELIMITER5(s,dg)
 
 !.....Use appropriate modules
 
@@ -3901,6 +3916,7 @@
       IMPLICIT NONE
 
       type (sizes_type) :: s
+      type (dg_type) :: dg
 
 !.....Declare local variables
 
@@ -5239,7 +5255,7 @@
 !     
 !***********************************************************************
 
-      SUBROUTINE SLOPELIMITER10()
+      SUBROUTINE SLOPELIMITER10(dg)
 
 !.....Use appropriate modules
 
@@ -5252,6 +5268,8 @@
 #endif
 
       IMPLICIT NONE
+
+      type (dg_type) :: dg
 
       Integer k,ll,ss,lll,ell,bb,maxneigh
 
@@ -6261,7 +6279,7 @@
 !     
 !******************************************************************************
 
-      SUBROUTINE SLOPELIMITER9()
+      SUBROUTINE SLOPELIMITER9(dg)
 
 !.....Use appropriate modules
 
@@ -6273,6 +6291,8 @@
 #endif
 
       IMPLICIT NONE
+      type (dg_type) :: dg
+
 
       Integer k,ll,ss,lll,ell,bb
 
@@ -7096,7 +7116,7 @@
 !     
 !***********************************************************************
 
-      SUBROUTINE SLOPELIMITER7()
+      SUBROUTINE SLOPELIMITER7(dg)
 
 !.....Use appropriate modules
 
@@ -7109,6 +7129,7 @@
 #endif
 
       IMPLICIT NONE
+      type (dg_type) :: dg
 
       Integer k,ll,ss,lll,ell,bb,MUSCL,ENO,Mixed_MUSCL,Mixed_ENO,b_index,i,j,mm,neigh_flag
 
@@ -7845,7 +7866,7 @@
 
 !.....Set limit values
       
-      CALL SLOPELIMITER5(s)
+      CALL SLOPELIMITER5(s,dg)
 
       do k=1,ne
 
@@ -7893,7 +7914,7 @@
 !     
 !***********************************************************************
 
-      SUBROUTINE SLOPELIMITER8()
+      SUBROUTINE SLOPELIMITER8(dg)
 
 !.....Use appropriate modules
 
@@ -7907,6 +7928,8 @@
 #endif
 
       IMPLICIT NONE
+      type (dg_type) :: dg
+
 
 !.....Declare local variables
 

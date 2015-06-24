@@ -24,6 +24,7 @@
       IMPLICIT NONE
 
       type (sizes_type) :: s
+      type (dg_type) :: dg
       
       INTEGER TESTFLAG,OUTITER,istop,i,ModetoNode
 !     sb-PDG1
@@ -39,7 +40,7 @@
          write(*,*) 'mnproc ',mnproc
       ENDIF
       CALL MAKE_DIRNAME(s)       ! Establish Working Directory Name
-      CALL READ_INPUT(s)         ! Establish sizes by reading fort.14 and fort.15
+      CALL READ_INPUT(s,dg)         ! Establish sizes by reading fort.14 and fort.15
 #else
       IMPLICIT NONE
      
@@ -51,7 +52,7 @@
       character*80 tecfile, tecfile_max
 
       CALL MAKE_DIRNAME(s)       ! Establish Working Directory Name
-      CALL READ_INPUT(s)         ! Establish sizes by reading fort.14 and fort.15
+      CALL READ_INPUT(s,dg)         ! Establish sizes by reading fort.14 and fort.15
 #endif         
 
       
@@ -172,8 +173,8 @@
 !     write(200+myproc,*) 'call prep_dg'
 !     write(200+myproc,*) 'back from prep_dg'
 
-      CALL PREP_DG(s)
-      CALL WRITE_RESULTS(s,0,.FALSE.)
+      CALL PREP_DG(s,dg)
+      CALL WRITE_RESULTS(s,dg,0,.FALSE.)
 
                                !cnd...for tecplot output
 !Casey 120813: Begin the OUT_TEC conditional.
@@ -311,7 +312,7 @@
 #endif
 
 !     sb...Write initial conditions
-      CALL WRITE_DG_IC()
+      CALL WRITE_DG_IC(dg)
 #ifdef CMPI
 !     istop=1
 !     if (istop.eq.1) then
@@ -325,7 +326,7 @@
 !$$$            if (myproc.eq.0) write(*,*) 'timestep ',itime_a
 !$$$c     write(200+myproc,*) 'timestep ',itime_a,myproc
 !$$$         endif
-         CALL DG_TIMESTEP(s,ITIME_A)
+         CALL DG_TIMESTEP(s,dg,ITIME_A)
 #ifdef SWAN
 !asey 090302: If it is time, then call the following subroutine
 !             to then call the SWAN time-stepping subroutine.

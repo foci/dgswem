@@ -14,7 +14,7 @@
 !     
 !***********************************************************************
 
-      SUBROUTINE WETDRY()
+      SUBROUTINE WETDRY(dg)
       
 !.....Use appropriate modules
       
@@ -23,6 +23,8 @@
       USE DG
       
       IMPLICIT NONE
+
+      type (dg_type) :: dg
 
 !.....Declare local variables
 

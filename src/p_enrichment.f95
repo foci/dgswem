@@ -5,7 +5,7 @@
 !     In concert, was born and evolved -- cem
 !     
 !***********************************************************************
-      subroutine p_enrichment(s,it,irkp)
+      subroutine p_enrichment(s,dg,it,irkp)
       
 !.....use appropriate modules
 
@@ -20,6 +20,7 @@
       implicit none
 
       type (sizes_type) :: s
+      type (dg_type) :: dg
 
 !.....declare local variables
 

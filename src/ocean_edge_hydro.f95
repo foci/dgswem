@@ -16,7 +16,7 @@
 !     01-10-2011 - cem - adapted for p_enrichment and multicomponent  
 !     
 !***********************************************************************
-      SUBROUTINE OCEAN_EDGE_HYDRO(s,IT)
+      SUBROUTINE OCEAN_EDGE_HYDRO(s,dg,IT)
 
 !.....Use appropriate modules
 
@@ -31,6 +31,7 @@
       IMPLICIT NONE
 
       type (sizes_type) :: s
+      type (dg_type) :: dg
 
 !.....Declare local variables
       
@@ -256,7 +257,7 @@
 
 !.....Compute the Roe flux
 
-            CALL NUMERICAL_FLUX(s,IT,dg%test_el)
+            CALL NUMERICAL_FLUX(s,dg,IT,dg%test_el)
 
 !.....Add LDG terms
             

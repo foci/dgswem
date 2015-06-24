@@ -15,7 +15,7 @@
 !     
 !***********************************************************************
 
-      SUBROUTINE ORTHOBASIS_AREA(P,L)
+      SUBROUTINE ORTHOBASIS_AREA(dg,P,L)
 
 !.....Use appropriate modules
 
@@ -23,6 +23,8 @@
       USE DG
 
       IMPLICIT NONE
+
+      type (dg_type) :: dg
 
 !.....Declare local variables
 

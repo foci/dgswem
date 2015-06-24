@@ -1,4 +1,4 @@
-      SUBROUTINE EBARRIER_EDGE_HYDRO(s,IT)
+      SUBROUTINE EBARRIER_EDGE_HYDRO(s,dg,IT)
       
 !.....Use appropriate modules
 
@@ -9,6 +9,7 @@
       IMPLICIT NONE
 
       type (sizes_type) :: s
+      type (dg_type) :: dg
 
 !.....Declare local variables
 
@@ -164,7 +165,7 @@
             
 !.........Compute numerical flux
             
-            CALL NUMERICAL_FLUX(s,IT)
+            CALL NUMERICAL_FLUX(s,dg,IT)
 
             DO K = 1,dg%DOFS(dg%EL)
 

@@ -15,7 +15,7 @@
 !     
 !***********************************************************************
 
-      SUBROUTINE ORTHOBASIS_EDGE(P,L)
+      SUBROUTINE ORTHOBASIS_EDGE(dg,P,L)
 
 !.....Use appropriate modules
 
@@ -23,6 +23,8 @@
       USE DG
 
       IMPLICIT NONE
+
+      type (dg_type) :: dg
 
       INTEGER Q, A, B, M, II, III,jj,i,j,P,L
       REAL(SZ) COEFF1,COEFF2,POLY1,POLY2,NUM,DEN,NUM1,DEN1,DEN2,DEN3,Z

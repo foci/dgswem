@@ -28,7 +28,7 @@
 !
 !***********************************************************************
 
-      SUBROUTINE CREATE_EDGE_DATA(s)
+      SUBROUTINE CREATE_EDGE_DATA(s,dg)
 
 !.....Use appropriate modules
 
@@ -40,6 +40,7 @@
 #endif
       IMPLICIT NONE
       type (sizes_type) :: s
+      type (dg_type) :: dg
       
 !.....Declare local variables
 

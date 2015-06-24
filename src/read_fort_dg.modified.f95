@@ -70,21 +70,25 @@
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!      
 
-      SUBROUTINE READ_FIXED_FORT_DG(s,dg)
+      SUBROUTINE READ_FIXED_FORT_DG(s)
       
       USE global, ONLY: dgswe,dg_to_cg,sedflag,reaction_rate,sed_equationX,sed_equationY, &
                         rhowat0,vertexslope
       USE sizes
-      USE dg   
+      USE dg, ONLY: padapt,pflag,gflag,diorism,pl,ph,px,slimit,plimit, &
+                    pflag2con1,pflag2con2,lebesgueP,fluxtype,dg%rk_stage,rk_order, &
+                    modal_ic,dghot,dghotspool,slopeflag,slope_weight,porosity, &
+                    sevdm,mnes,artdif,kappa,s0,uniform_dif,tune_by_hand, &
+                    sl2_m,sl2_nyu,sl3_md
+            
       
       IMPLICIT NONE
       type (sizes_type) :: s
-      type (dg_type) :: dg
 
       INTEGER :: i
       CHARACTER(256) :: LINE
       
-      CALL FORT_DG_SETUP()
+      CALL FORT_DG_SETUP()      
 
       OPEN(25,FILE=s%DIRNAME//'/'//'fort.dg',POSITION="rewind")  
       
@@ -94,63 +98,63 @@
       
       READ(25,*) DGSWE
       READ(25,*) dg%padapt,dg%pflag
-      READ(25,*) dg%gflag,dg%diorism
-      READ(25,*) dg%pl,dg%ph,dg%px
-      READ(25,*) dg%slimit
-      READ(25,*) dg%plimit
-      READ(25,*) dg%pflag2con1,dg%pflag2con2,dg%lebesgueP 
-      READ(25,*) dg%FLUXTYPE
-      READ(25,*) dg%RK_STAGE, dg%RK_ORDER
+      READ(25,*) gflag,diorism
+      READ(25,*) dg%pl,ph,px
+      READ(25,*) slimit
+      READ(25,*) plimit
+      READ(25,*) pflag2con1,pflag2con2,lebesgueP 
+      READ(25,*) DG%FLUXTYPE
+      READ(25,*) DG%RK_STAGE, DG%RK_ORDER
       READ(25,*) DG_TO_CG
-      READ(25,*) dg%MODAL_IC
-      READ(25,*) dg%DGHOT, dg%DGHOTSPOOL
+      READ(25,*) DG%MODAL_IC
+      READ(25,*) DG%DGHOT, DG%DGHOTSPOOL
       READ(25,"(A256)") LINE
-      READ(LINE,*) dg%SLOPEFLAG
-      IF(dg%SLOPEFLAG.EQ.2) THEN
-         READ(LINE,*) dg%SLOPEFLAG, dg%SL2_M, dg%SL2_NYU
+      READ(LINE,*) DG%SLOPEFLAG
+      IF(DG%SLOPEFLAG.EQ.2) THEN
+         READ(LINE,*) DG%SLOPEFLAG, SL2_M, SL2_NYU
       ENDIF
-      IF(dg%SLOPEFLAG.EQ.3) THEN
-         READ(LINE,*) dg%SLOPEFLAG, dg%SL2_M, dg%SL2_NYU, dg%SL3_MD
+      IF(DG%SLOPEFLAG.EQ.3) THEN
+         READ(LINE,*) DG%SLOPEFLAG, SL2_M, SL2_NYU, SL3_MD
       ENDIF
-      IF(dg%SLOPEFLAG.EQ.4) THEN
-         READ(LINE,*) dg%SLOPEFLAG,dg%slope_weight
+      IF(DG%SLOPEFLAG.EQ.4) THEN
+         READ(LINE,*) DG%SLOPEFLAG,slope_weight
          vertexslope = .True.
       ENDIF
-      IF(dg%SLOPEFLAG.EQ.5) THEN
-         READ(LINE,*) dg%SLOPEFLAG
+      IF(DG%SLOPEFLAG.EQ.5) THEN
+         READ(LINE,*) DG%SLOPEFLAG
          vertexslope = .True.
       ENDIF
-      IF(dg%SLOPEFLAG.EQ.6) THEN
-         READ(LINE,*) dg%SLOPEFLAG,dg%slope_weight
+      IF(DG%SLOPEFLAG.EQ.6) THEN
+         READ(LINE,*) DG%SLOPEFLAG,slope_weight
          vertexslope = .True.
       ENDIF
-      IF(dg%SLOPEFLAG.EQ.7) THEN
-         READ(LINE,*) dg%SLOPEFLAG,dg%slope_weight
+      IF(DG%SLOPEFLAG.EQ.7) THEN
+         READ(LINE,*) DG%SLOPEFLAG,slope_weight
          vertexslope = .True.
       ENDIF
-      IF(dg%SLOPEFLAG.EQ.8) THEN
-         READ(LINE,*) dg%SLOPEFLAG,dg%slope_weight
+      IF(DG%SLOPEFLAG.EQ.8) THEN
+         READ(LINE,*) DG%SLOPEFLAG,slope_weight
          vertexslope = .True.
       ENDIF
-      IF(dg%SLOPEFLAG.EQ.9) THEN
-         READ(LINE,*) dg%SLOPEFLAG,dg%slope_weight
+      IF(DG%SLOPEFLAG.EQ.9) THEN
+         READ(LINE,*) DG%SLOPEFLAG,slope_weight
          vertexslope = .True.
       ENDIF
-      IF(dg%SLOPEFLAG.EQ.10) THEN
-         READ(LINE,*) dg%SLOPEFLAG,dg%slope_weight
+      IF(DG%SLOPEFLAG.EQ.10) THEN
+         READ(LINE,*) DG%SLOPEFLAG,slope_weight
          vertexslope = .True.
       ENDIF
-      READ(25,*) SEDFLAG,dg%porosity,dg%SEVDM,s%layers
+      READ(25,*) SEDFLAG,porosity,SEVDM,s%layers
       READ(25,*) reaction_rate
-      READ(25,*) dg%MNES
-      READ(25,*) dg%artdif,dg%kappa,dg%s0,dg%uniform_dif,dg%tune_by_hand
+      READ(25,*) DG%MNES
+      READ(25,*) dg%artdif,kappa,s0,uniform_dif,dg%tune_by_hand
       READ(25,'(a)') sed_equationX
       READ(25,'(a)') sed_equationY
       
-      IF(dg%FLUXTYPE.NE.1.AND.dg%FLUXTYPE.NE.2.AND.dg%FLUXTYPE.NE.3.AND.dg%FLUXTYPE.NE.4) THEN
-         PRINT *, 'SPECIFIED dg%FLUXTYPE (=', dg%FLUXTYPE,') IS NOT ALLOWED.'
+      IF(DG%FLUXTYPE.NE.1.AND.DG%FLUXTYPE.NE.2.AND.DG%FLUXTYPE.NE.3.AND.DG%FLUXTYPE.NE.4) THEN
+         PRINT *, 'SPECIFIED FLUXTYPE (=', DG%FLUXTYPE,') IS NOT ALLOWED.'
          PRINT *, 'EXECUTION WILL BE TERMINATED.'
-         STOP 'SPECIFIED dg%FLUXTYPE IS NOT ALLOWED.'
+         STOP 'SPECIFIED FLUXTYPE IS NOT ALLOWED.'
       ENDIF     
       
       ! print inputs
@@ -177,17 +181,15 @@
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! 
  
-      SUBROUTINE READ_KEYWORD_FORT_DG(s,dg)
+      SUBROUTINE READ_KEYWORD_FORT_DG(s)
       
       USE sizes
       USE global, ONLY: nfover
-      use dg
 
       IMPLICIT NONE
       
       type (sizes_type) :: s
-      type (dg_type) :: dg      
-
+      
       INTEGER :: i,j,opt
       INTEGER :: read_stat
       INTEGER :: opt_read
@@ -199,7 +201,7 @@
       CHARACTER(100) :: test_val
       
       ! initialize the fortdg option structure
-      CALL FORT_DG_SETUP(dg)
+      CALL FORT_DG_SETUP()
       
       opt_read = 0
       comment = 0 
@@ -365,7 +367,7 @@
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!           
       
-      SUBROUTINE FORT_DG_SETUP(dg)
+      SUBROUTINE FORT_DG_SETUP()
       
       ! Subroutine that configures the fort.dg options
       !
@@ -400,12 +402,14 @@
       
       USE global, ONLY: dgswe,dg_to_cg,sedflag,reaction_rate,sed_equationX,sed_equationY
       USE sizes
-      USE dg
+      USE dg, ONLY: padapt,pflag,gflag,diorism,pl,ph,px,slimit,plimit, &
+                    pflag2con1,pflag2con2,lebesgueP,fluxtype,rk_stage,rk_order, &
+                    modal_ic,dghot,dghotspool,slopeflag,slope_weight,porosity, &
+                    sevdm,mnes,artdif,kappa,s0,uniform_dif,tune_by_hand
       
       IMPLICIT NONE        
 
       type (sizes_type) :: s
-      type (dg_type) :: dg
       
       INTEGER :: i
       INTEGER :: ncheck
@@ -442,8 +446,9 @@
       real(sz), target :: kappa_target
       real(sz), target :: s0_target
       real(sz), target :: uniform_dif_target
+            
 
-      
+
       ! initialize fortdg structure
       DO i = 1,maxopt
         NULLIFY(fortdg(i)%iptr)
@@ -501,6 +506,7 @@
 
       ! assign targets to the real variables
       s%layers = layers_target
+!      dgflag_target
       dg%dghot = dghot_target
       dg%dghotspool = dghotspool_target
       dg%mnes = mnes_target

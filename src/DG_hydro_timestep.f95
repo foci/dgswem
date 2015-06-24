@@ -21,7 +21,7 @@
 !     
 !***********************************************************************
 
-      SUBROUTINE DG_HYDRO_TIMESTEP(s,IT)
+      SUBROUTINE DG_HYDRO_TIMESTEP(s,dg,IT)
 
 !.....Use appropriate modules
       USE SIZES
@@ -43,6 +43,7 @@
 !.....Declare local variables
 
       type (sizes_type) :: s
+      type (dg_type) :: dg
 
       INTEGER IT,L,GED,NBOREL,NNBORS,NDRYNBORS,Istop,k,j,kk,i,mm
       INTEGER Detected,flagger,store
@@ -98,7 +99,7 @@
          
 !.......Obtain the meteorological forcing
 
-         IF (NWS.NE.0) CALL MET_FORCING(s,IT)
+         IF (NWS.NE.0) CALL MET_FORCING(s,dg,IT)
         
         IF(NRS.GE.1) THEN
           IF(TIME_A.GT.RSTIME2) THEN
@@ -142,43 +143,43 @@
  
 !.......Compute tidal potential terms
 
-         IF (NTIP.NE.0) CALL TIDAL_POTENTIAL()
+         IF (NTIP.NE.0) CALL TIDAL_POTENTIAL(dg)
 
 !.......Compute LDG auxiliary equations
          
-         IF (EVMSUM.NE.0.D0.or.dg%artdif.eq.1) CALL LDG_HYDRO(s,IT)
+         IF (EVMSUM.NE.0.D0.or.dg%artdif.eq.1) CALL LDG_HYDRO(s,dg,IT)
          
 !.......Compute elevation specified edges
 
-         IF (dg%NEEDS.GT.0)  CALL OCEAN_EDGE_HYDRO(s,IT)
+         IF (dg%NEEDS.GT.0)  CALL OCEAN_EDGE_HYDRO(s,dg,IT)
 
 !.......Compute no-normal flow edges
 
-         IF (dg%NLEDS.GT.0)  CALL LAND_EDGE_HYDRO(s,IT)
+         IF (dg%NLEDS.GT.0)  CALL LAND_EDGE_HYDRO(s,dg,IT)
 
 !.......Compute non-zero flow edges
 
-         IF (dg%NFEDS.GT.0)  CALL FLOW_EDGE_HYDRO(s,IT)
+         IF (dg%NFEDS.GT.0)  CALL FLOW_EDGE_HYDRO(s,dg,IT)
          
 !.......Compute radiation edges
 
-         IF (dg%NREDS.GT.0)  CALL RADIATION_EDGE_HYDRO(s,IT)
+         IF (dg%NREDS.GT.0)  CALL RADIATION_EDGE_HYDRO(s,dg,IT)
 
 !.......Compute internal barrier edges
 
-         IF (dg%NIBEDS.GT.0) CALL IBARRIER_EDGE_HYDRO(s,IT)
+         IF (dg%NIBEDS.GT.0) CALL IBARRIER_EDGE_HYDRO(s,dg,IT)
          
 !.......Compute external barrier edges
 
-         IF (dg%NIBEDS.GT.0) CALL EBARRIER_EDGE_HYDRO(s,IT)
+         IF (dg%NIBEDS.GT.0) CALL EBARRIER_EDGE_HYDRO(s,dg,IT)
          
 !.......Compute internal edges
 
-         CALL INTERNAL_EDGE_HYDRO(s,IT)
+         CALL INTERNAL_EDGE_HYDRO(s,dg,IT)
 
 !.......Compute elements to finish building the rhs
          
-         CALL RHS_DG_HYDRO(s)
+         CALL RHS_DG_HYDRO(s,dg)
 
 !.......SSP Runge-Kutta Time Scheme
 
@@ -267,47 +268,47 @@
          
 !.......Obtain the meteorological forcing
 
-         IF (NWS.NE.0) CALL MET_FORCING(s,IT)
+         IF (NWS.NE.0) CALL MET_FORCING(s,dg,IT)
          
 !.......Compute tidal potential terms
 
-         IF (NTIP.NE.0) CALL TIDAL_POTENTIAL()
+         IF (NTIP.NE.0) CALL TIDAL_POTENTIAL(dg)
 
 !.......Compute LDG auxiliary equations
          
-         IF (EVMSUM.NE.0.D0.or.dg%artdif.eq.1) CALL LDG_HYDRO(s,IT)
+         IF (EVMSUM.NE.0.D0.or.dg%artdif.eq.1) CALL LDG_HYDRO(s,dg,IT)
          
 !.......Compute elevation specified edges
 
-         IF (dg%NEEDS.GT.0)  CALL OCEAN_EDGE_HYDRO(s,IT)
+         IF (dg%NEEDS.GT.0)  CALL OCEAN_EDGE_HYDRO(s,dg,IT)
 
 !.......Compute no-normal flow edges
 
-         IF (dg%NLEDS.GT.0)  CALL LAND_EDGE_HYDRO(s,IT)
+         IF (dg%NLEDS.GT.0)  CALL LAND_EDGE_HYDRO(s,dg,IT)
 
 !.......Compute non-zero flow edges
 
-         IF (dg%NFEDS.GT.0)  CALL FLOW_EDGE_HYDRO(s,IT)
+         IF (dg%NFEDS.GT.0)  CALL FLOW_EDGE_HYDRO(s,dg,IT)
          
 !.......Compute radiation edges
 
-         IF (dg%NREDS.GT.0)  CALL RADIATION_EDGE_HYDRO(s,IT)
+         IF (dg%NREDS.GT.0)  CALL RADIATION_EDGE_HYDRO(s,dg,IT)
 
 !.......Compute internal barrier edges
 
-         IF (dg%NIBEDS.GT.0) CALL IBARRIER_EDGE_HYDRO(s,IT)
+         IF (dg%NIBEDS.GT.0) CALL IBARRIER_EDGE_HYDRO(s,dg,IT)
          
 !.......Compute external barrier edges
 
-         IF (dg%NIBEDS.GT.0) CALL EBARRIER_EDGE_HYDRO(s,IT)
+         IF (dg%NIBEDS.GT.0) CALL EBARRIER_EDGE_HYDRO(s,dg,IT)
          
 !.......Compute internal edges
 
-         CALL INTERNAL_EDGE_HYDRO(s,IT)
+         CALL INTERNAL_EDGE_HYDRO(s,dg,IT)
 
 !.......Compute elements to finish building the rhs
          
-         CALL RHS_DG_HYDRO(s)
+         CALL RHS_DG_HYDRO(s,dg)
 
 !.......RKC Time Scheme
 
@@ -454,16 +455,16 @@
 !.......Apply the slopelimiter if appropriate
 
 #ifdef SLOPEALL
-         CALL SLOPELIMITER(s)
+         CALL SLOPELIMITER(s,dg)
 #endif
 
 #ifdef SLOPE5
-         CALL SLOPELIMITER(s) 
+         CALL SLOPELIMITER(s,dg) 
 #endif
 
 #ifdef STBLZR
          if (.not.dg%stblzr) then
-            CALL SLOPELIMITER(s)
+            CALL SLOPELIMITER(s,dg)
             dg%stblzr = .true.
          endif
 #endif
@@ -472,7 +473,7 @@
 !.......Apply the wet-dry algorithm if appropriate
 
       IF (NOLIFA .GE. 2) THEN
-         CALL WETDRY()
+         CALL WETDRY(dg)
       ENDIF
 
 !$$$C.......Apply the slopelimiter again if auxiliary variable is being used
@@ -520,7 +521,7 @@
 
 #ifdef P_AD
          if (dg%irk+1.eq.2) then
-            CALL p_enrichment(s,it,0)
+            CALL p_enrichment(s,dg,it,0)
          endif
 #ifdef CMPI
 

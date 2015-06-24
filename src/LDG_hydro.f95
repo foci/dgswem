@@ -11,7 +11,7 @@
 !     
 !***********************************************************************
 
-      SUBROUTINE LDG_HYDRO(s,IT)
+      SUBROUTINE LDG_HYDRO(s,dg,IT)
 
 !.....Use appropriate modules
       
@@ -27,6 +27,7 @@
       IMPLICIT NONE
       
       type (sizes_type) :: s
+      type (dg_type) :: dg
 
 !.....Declare local variables
 
@@ -52,27 +53,27 @@
      
 !.....Compute elevation specified edges
 
-      IF (NEEDS.GT.0)  CALL OCEAN_EDGE_LDG_HYDRO(s)
+      IF (NEEDS.GT.0)  CALL OCEAN_EDGE_LDG_HYDRO(s,dg)
 
 !.....Compute no-normal flow edges
 
-      IF (NLEDS.GT.0)  CALL LAND_EDGE_LDG_HYDRO(s)
+      IF (NLEDS.GT.0)  CALL LAND_EDGE_LDG_HYDRO(s,dg)
 
 !.....Compute non-zero flow edges
 
-      IF (NFEDS.GT.0)  CALL FLOW_EDGE_LDG_HYDRO(s)
+      IF (NFEDS.GT.0)  CALL FLOW_EDGE_LDG_HYDRO(s,dg)
       
 !.....Compute radiation edges
 
-      IF (NREDS.GT.0)  CALL RADIATION_EDGE_LDG_HYDRO(s)
+      IF (NREDS.GT.0)  CALL RADIATION_EDGE_LDG_HYDRO(s,dg)
 
 !.....Compute internal edges
 
-      CALL INTERNAL_EDGE_LDG_HYDRO(s)
+      CALL INTERNAL_EDGE_LDG_HYDRO(s,dg)
 
 !.....Loop over interior elements
 
-      CALL RHS_LDG_HYDRO(s)
+      CALL RHS_LDG_HYDRO(s,dg)
 
       do L=1,NE
 
@@ -234,7 +235,7 @@
 !     01-10-2011 - cem - adapted for p_enrichment and multicomponent
 !     
 !***********************************************************************
-      SUBROUTINE OCEAN_EDGE_LDG_HYDRO(s)
+      SUBROUTINE OCEAN_EDGE_LDG_HYDRO(s,dg)
 
 !.....Use appropriate modules
 
@@ -245,6 +246,7 @@
       IMPLICIT NONE
 
       type (sizes_type) :: s
+      type (dg_type) :: dg
 
 !.....Declare local variables
 
@@ -390,7 +392,7 @@
 !     
 !***********************************************************************
 
-      SUBROUTINE LAND_EDGE_LDG_HYDRO(s)
+      SUBROUTINE LAND_EDGE_LDG_HYDRO(s,dg)
 
 !.....Use appropriate modules
 
@@ -400,6 +402,7 @@
       IMPLICIT NONE
 
       type (sizes_type) :: s
+      type (dg_type) :: dg
 
 !.....Declare local variables
 
@@ -547,7 +550,7 @@
 !     
 !***********************************************************************
 
-      SUBROUTINE FLOW_EDGE_LDG_HYDRO(s)
+      SUBROUTINE FLOW_EDGE_LDG_HYDRO(s,dg)
 
 !.....Use appropriate modules
 
@@ -558,6 +561,7 @@
       IMPLICIT NONE
 
       type (sizes_type) :: s
+      type (dg_type) :: dg
 
 !.....Declare local variables
 
@@ -722,7 +726,7 @@
 !     
 !***********************************************************************
 
-      SUBROUTINE RADIATION_EDGE_LDG_HYDRO(s)
+      SUBROUTINE RADIATION_EDGE_LDG_HYDRO(s,dg)
 
 !.....Use appropriate modules
 
@@ -733,6 +737,7 @@
       IMPLICIT NONE
 
       type (sizes_type) :: s
+      type (dg_type) :: dg
 
 !.....Declare local variables
 
@@ -840,7 +845,7 @@
 !     
 !***********************************************************************
 
-      SUBROUTINE INTERNAL_EDGE_LDG_HYDRO(s)
+      SUBROUTINE INTERNAL_EDGE_LDG_HYDRO(s,dg)
 
 !.....Use appropriate modules
       
@@ -851,6 +856,7 @@
       IMPLICIT NONE
 
       type (sizes_type) :: s
+      type (dg_type) :: dg
 
 !.....Declare local variables
 
@@ -1036,7 +1042,7 @@
 !     
 !***********************************************************************
 
-      SUBROUTINE EDGE_INT_LDG_HYDRO(s,K,EL,LED,GED,GP,iota_Avg,ZE_Avg,QX_Avg,&
+      SUBROUTINE EDGE_INT_LDG_HYDRO(s,dg,K,EL,LED,GED,GP,iota_Avg,ZE_Avg,QX_Avg,&
      QY_Avg,NX,NY,pa)
 
 !.....Use appropriate modules
@@ -1048,6 +1054,7 @@
       IMPLICIT NONE
       
       type (sizes_type) :: s
+      type (dg_type) :: dg
       
 !.....Declare local variables
 
@@ -1102,7 +1109,7 @@
 !***********************************************************************
 
       SUBROUTINE EDGE_INT_LDG_sediment&
-     (s,K,EL,LED,GED,GP,bed_avg,NX,NY,pa,ll)
+     (s,dg,K,EL,LED,GED,GP,bed_avg,NX,NY,pa,ll)
                                 ! <ezpp-noinst>
       
 !.....Use appropriate modules
@@ -1114,6 +1121,7 @@
       IMPLICIT NONE
       
       type (sizes_type) :: s
+      type (dg_type) :: dg
 
 !.....Declare local variables
 
@@ -1148,7 +1156,7 @@
 !     2012 - cem - added sediment layers
 !***********************************************************************
 
-      SUBROUTINE RHS_LDG_HYDRO(s)
+      SUBROUTINE RHS_LDG_HYDRO(s,dg)
       
 !.....Use appropriate modules
 
@@ -1159,6 +1167,7 @@
       IMPLICIT NONE
 
       type (sizes_type) :: s
+      type (dg_type) :: dg
       
 !.....Declare local variables
       INTEGER L,K,I,pa,ll,kk

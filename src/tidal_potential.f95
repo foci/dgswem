@@ -12,7 +12,7 @@
 !
 !***********************************************************************
 
-      SUBROUTINE TIDAL_POTENTIAL()
+      SUBROUTINE TIDAL_POTENTIAL(dg)
 
 !.....Use appropriate modules
 
@@ -20,6 +20,8 @@
       USE DG
       
       IMPLICIT NONE
+
+      type (dg_type) :: dg
 
       INTEGER j,i
       

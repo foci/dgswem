@@ -12,7 +12,7 @@
 !     
 !***********************************************************************
 
-      SUBROUTINE QUAD_PTS_EDGE(s,P,pad)
+      SUBROUTINE QUAD_PTS_EDGE(s,dg,P,pad)
 
 !.....Use appropriate modules
 
@@ -23,6 +23,7 @@
       IMPLICIT NONE
       
       type (sizes_type) :: s
+      type (dg_type) :: dg
 
 !.....Declare local variables
 

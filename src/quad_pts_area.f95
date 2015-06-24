@@ -17,7 +17,7 @@
 !     
 !***********************************************************************
 
-      SUBROUTINE QUAD_PTS_AREA(s,PQ,pad)
+      SUBROUTINE QUAD_PTS_AREA(s,dg,PQ,pad)
       
 !.....Use appropriate modules
 
@@ -28,6 +28,7 @@
       IMPLICIT NONE
 
       type (sizes_type) :: s
+      type (dg_type) :: dg
 
 !.....Declare local variables
 

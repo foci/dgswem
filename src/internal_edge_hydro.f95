@@ -21,7 +21,7 @@
 !     01-02-2007, sb, Modified for LDG
 !     C***********************************************************************
 
-      SUBROUTINE INTERNAL_EDGE_HYDRO(s,IT)
+      SUBROUTINE INTERNAL_EDGE_HYDRO(s,dg,IT)
 
 !.....Use appropriate modules
 
@@ -33,6 +33,7 @@
       IMPLICIT NONE
 
       type (sizes_type) :: s
+      type (dg_type) :: dg
 
 !.....Declare local variables
 
@@ -378,7 +379,7 @@
 
 !.....Compute the numerical flux
             
-            CALL NUMERICAL_FLUX(s,IT,dg%test_el)
+            CALL NUMERICAL_FLUX(s,dg,IT,dg%test_el)
 
 !......... dummy
             F_HAT_O  = F_HAT
@@ -490,7 +491,7 @@
 
                      dg%HB_IN = dg%HB_EX
                      dg%SFAC_IN = dg%SFAC_EX
-                     CALL NUMERICAL_FLUX(s,IT,dg%test_el)
+                     CALL NUMERICAL_FLUX(s,dg,IT,dg%test_el)
 
                      F_HAT_O  = F_HAT
                      G_HAT_EX = G_HAT
@@ -527,7 +528,7 @@
                      NLEQG = 0.D0
                      G_TMP = G
                      G = 0.D0
-                     CALL NUMERICAL_FLUX(s,IT,dg%test_el)
+                     CALL NUMERICAL_FLUX(s,dg,IT,dg%test_el)
                      NLEQG = NLEQG_TMP
                      G = G_TMP
                      G_HAT_IN = G_HAT
@@ -571,7 +572,7 @@
                      dg%bed_EX(:) = dg%bed_IN(:)
 #endif
 
-                     CALL NUMERICAL_FLUX(s,IT,dg%test_el)
+                     CALL NUMERICAL_FLUX(s,dg,IT,dg%test_el)
                      F_HAT_O  = F_HAT
 
 #ifdef TRACE
@@ -607,7 +608,7 @@
                      NLEQG = 0.D0
                      G_TMP = G
                      G = 0.D0
-                     CALL NUMERICAL_FLUX(s,IT,dg%test_el)
+                     CALL NUMERICAL_FLUX(s,dg,IT,dg%test_el)
                      NLEQG = NLEQG_TMP
                      G = G_TMP
                      G_HAT_EX = G_HAT
@@ -891,11 +892,11 @@
                NLEQG = 0.D0
                G_TMP = G
                G = 0.D0
-               CALL NUMERICAL_FLUX(s,IT,dg%test_el)
+               CALL NUMERICAL_FLUX(s,dg,IT,dg%test_el)
                NLEQG = NLEQG_TMP
                G = G_TMP
             ELSE
-               CALL NUMERICAL_FLUX(s,IT,dg%test_el)
+               CALL NUMERICAL_FLUX(s,dg,IT,dg%test_el)
             ENDIF
             F_HAT = 0.D0        ! Ensure zero mass flux
 
@@ -1112,11 +1113,11 @@
                NLEQG = 0.D0
                G_TMP = G
                G = 0.D0
-               CALL NUMERICAL_FLUX(s,IT,dg%test_el)
+               CALL NUMERICAL_FLUX(s,dg,IT,dg%test_el)
                NLEQG = NLEQG_TMP
                G = G_TMP
             ELSE
-               CALL NUMERICAL_FLUX(s,IT,dg%test_el)
+               CALL NUMERICAL_FLUX(s,dg,IT,dg%test_el)
             ENDIF
             F_HAT = 0.D0        ! Ensure zero mass flux
 

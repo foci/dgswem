@@ -21,7 +21,7 @@
 !     
 !***********************************************************************
 
-      SUBROUTINE PREP_DG(s)
+      SUBROUTINE PREP_DG(s,dg)
 
 !.....Use appropriate modules
       USE SIZES
@@ -36,7 +36,7 @@
       IMPLICIT NONE
       
       type (sizes_type) :: s
-      
+      type (dg_type) :: dg
 
 !.....Declare local variables
 
@@ -78,7 +78,7 @@
 
 !.....Obtain RK time scheme parameters
 
-      CALL RK_TIME()
+      CALL RK_TIME(dg)
       
 !.....Compute the degrees of freedom per element
 
@@ -166,7 +166,7 @@
          PRINT*, 'CREATING EDGE DATA...'
          PRINT*, ''
       ENDIF
-      CALL CREATE_EDGE_DATA(s)
+      CALL CREATE_EDGE_DATA(s,dg)
       IF(MYPROC_HERE.EQ.0) THEN
          print *, 'CREATING EDGE DATA DONE'
          print *, ''
@@ -448,13 +448,13 @@
             
 !.....Retrieve the normals to the edges
 
-      CALL CALC_NORMAL()
+      CALL CALC_NORMAL(dg)
 
 !.....Retrieve the area integral gauss quadrature points
       
       do j=1,dg%ph
          
-         CALL QUAD_PTS_AREA(s,2*j,j)
+         CALL QUAD_PTS_AREA(s,dg,2*j,j)
 
       enddo
 
@@ -462,7 +462,7 @@
       
       do j=1,dg%ph
 
-         CALL QUAD_PTS_EDGE(s,j,j)
+         CALL QUAD_PTS_EDGE(s,dg,j,j)
 
       enddo
 
@@ -471,7 +471,7 @@
 
       do j=1,dg%ph
 
-         CALL ORTHOBASIS_AREA(j,j)
+         CALL ORTHOBASIS_AREA(dg,j,j)
 
       enddo
 
@@ -479,7 +479,7 @@
 
       do j=1,dg%ph
 
-         CALL ORTHOBASIS_EDGE(j,j)
+         CALL ORTHOBASIS_EDGE(dg,j,j)
 
       enddo
 
@@ -1166,14 +1166,14 @@
       IF (NSTAE.GT.0) THEN      ! Elevation stations
          CALL ALLOC_STAE( NSTAE )
          DO I = 1,NSTAE
-            CALL STA_BASIS( XEL(I), YEL(I),  NNE(I), dg%PHI_STAE(:,I) )
+            CALL STA_BASIS(dg, XEL(I), YEL(I),  NNE(I), dg%PHI_STAE(:,I) )
          ENDDO
       ENDIF
       
       IF (NSTAV.GT.0) THEN      ! Velocity Stations
          CALL ALLOC_STAV( NSTAV )
          DO I = 1,NSTAV
-            CALL STA_BASIS( XEV(I), YEV(I),  NNV(I), dg%PHI_STAV(:,I) )
+            CALL STA_BASIS(dg, XEV(I), YEV(I),  NNV(I), dg%PHI_STAV(:,I) )
          ENDDO
       ENDIF
 
@@ -1184,7 +1184,7 @@
             print *, 'Slope limiting prep begins, "kshanti"'
          ENDIF
          CALL ALLOC_SLOPELIM(s)
-         CALL PREP_SLOPELIM(s)
+         CALL PREP_SLOPELIM(s,dg)
          IF(MYPROC_HERE.EQ.0)THEN
             print *, 'Finished'
          ENDIF
@@ -1209,12 +1209,14 @@
 !     
 !***********************************************************************
 
-      SUBROUTINE RK_TIME()
+      SUBROUTINE RK_TIME(dg)
 
       USE GLOBAL
       USE DG
 
       IMPLICIT NONE
+
+      type (dg_type) :: dg
 
       INTEGER L,i,j,k
       REAL(SZ) ARK, BRK, CASUM, MAX_BOA
