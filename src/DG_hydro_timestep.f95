@@ -71,7 +71,7 @@
 !.....Begin Runge-Kutta time stepper
 
       DO 100 irk = 1,dg_here%NRK
-         
+         dg_here%irk = irk
 !.......Compute the DG time and DG ramp
 
 #ifdef RKSSP
