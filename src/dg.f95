@@ -236,241 +236,241 @@
       
 !.....Set edge array sizes
 
-      SUBROUTINE ALLOC_EDGES0(s,dg)
+      SUBROUTINE ALLOC_EDGES0(s,dg_here)
         type (sizes_type) :: s
-        type (dg_type) :: dg
-      ALLOCATE ( dg%IBHT(3*s%MNE), dg%EBHT(3*s%MNE) )
-      ALLOCATE ( dg%EBCFSP(3*s%MNE), dg%IBCFSP(3*s%MNE), dg%IBCFSB(3*s%MNE) )
-      ALLOCATE ( dg%BACKNODES(2,3*s%MNE) )
+        type (dg_type) :: dg_here
+      ALLOCATE ( dg_here%IBHT(3*s%MNE), dg_here%EBHT(3*s%MNE) )
+      ALLOCATE ( dg_here%EBCFSP(3*s%MNE), dg_here%IBCFSP(3*s%MNE), dg_here%IBCFSB(3*s%MNE) )
+      ALLOCATE ( dg_here%BACKNODES(2,3*s%MNE) )
       RETURN
       END SUBROUTINE
 
-      SUBROUTINE ALLOC_EDGES1(dg)
-        type (dg_type) :: dg
-      ALLOCATE ( dg%NEDNO(2,dg%MNED), dg%NEDEL(2,dg%MNED), dg%NEDSD(2,dg%MNED) )
-      ALLOCATE ( dg%NIBSEGN(2,dg%MNED) )
-      ALLOCATE ( dg%NEBSEGN(dg%MNED) )
-      ALLOCATE ( dg%NIEDN(dg%MNED), dg%NLEDN(dg%MNED), dg%NEEDN(dg%MNED) )
-      ALLOCATE ( dg%NFEDN(dg%MNED),  dg%NREDN(dg%MNED), dg%NIBEDN(dg%MNED), dg%NEBEDN(dg%MNED) )
-      ALLOCATE ( dg%NCOUNT(dg%MNED) )
-      ALLOCATE ( dg%COSNX(dg%MNED), dg%SINNX(dg%MNED), dg%XLEN(dg%MNED) )
-      ALLOCATE ( dg%Q_HAT(dg%MNED) )
+      SUBROUTINE ALLOC_EDGES1(dg_here)
+        type (dg_type) :: dg_here
+      ALLOCATE ( dg_here%NEDNO(2,dg_here%MNED), dg_here%NEDEL(2,dg_here%MNED), dg_here%NEDSD(2,dg_here%MNED) )
+      ALLOCATE ( dg_here%NIBSEGN(2,dg_here%MNED) )
+      ALLOCATE ( dg_here%NEBSEGN(dg_here%MNED) )
+      ALLOCATE ( dg_here%NIEDN(dg_here%MNED), dg_here%NLEDN(dg_here%MNED), dg_here%NEEDN(dg_here%MNED) )
+      ALLOCATE ( dg_here%NFEDN(dg_here%MNED),  dg_here%NREDN(dg_here%MNED), dg_here%NIBEDN(dg_here%MNED), dg_here%NEBEDN(dg_here%MNED) )
+      ALLOCATE ( dg_here%NCOUNT(dg_here%MNED) )
+      ALLOCATE ( dg_here%COSNX(dg_here%MNED), dg_here%SINNX(dg_here%MNED), dg_here%XLEN(dg_here%MNED) )
+      ALLOCATE ( dg_here%Q_HAT(dg_here%MNED) )
       RETURN
       END SUBROUTINE
       
 !.....Set DG SWE array sizes
 
-      SUBROUTINE ALLOC_DG1(dg,MNBFR)
-        type (dg_type) :: dg
+      SUBROUTINE ALLOC_DG1(dg_here,MNBFR)
+        type (dg_type) :: dg_here
         integer :: MNBFR
-      ALLOCATE ( dg%EFA_DG(MNBFR,dg%NEEDS+2,2), dg%EMO_DG(MNBFR,dg%NEEDS+2,2) )
-      ALLOCATE ( dg%UFA_DG(MNBFR,dg%NEEDS+2,2), dg%UMO_DG(MNBFR,dg%NEEDS+2,2) )
-      ALLOCATE ( dg%VFA_DG(MNBFR,dg%NEEDS+2,2), dg%VMO_DG(MNBFR,dg%NEEDS+2,2) )
+      ALLOCATE ( dg_here%EFA_DG(MNBFR,dg_here%NEEDS+2,2), dg_here%EMO_DG(MNBFR,dg_here%NEEDS+2,2) )
+      ALLOCATE ( dg_here%UFA_DG(MNBFR,dg_here%NEEDS+2,2), dg_here%UMO_DG(MNBFR,dg_here%NEEDS+2,2) )
+      ALLOCATE ( dg_here%VFA_DG(MNBFR,dg_here%NEEDS+2,2), dg_here%VMO_DG(MNBFR,dg_here%NEEDS+2,2) )
       RETURN
       END SUBROUTINE
       
-      SUBROUTINE ALLOC_DG2(dg,MNFFR)
-        type (dg_type) :: dg
+      SUBROUTINE ALLOC_DG2(dg_here,MNFFR)
+        type (dg_type) :: dg_here
         integer :: MNFFR
-      ALLOCATE ( dg%QNAM_DG(MNFFR,dg%NFEDS,2), dg%QNPH_DG(MNFFR,dg%NFEDS,2) )
+      ALLOCATE ( dg_here%QNAM_DG(MNFFR,dg_here%NFEDS,2), dg_here%QNPH_DG(MNFFR,dg_here%NFEDS,2) )
       RETURN
       END SUBROUTINE
       
-      SUBROUTINE ALLOC_DG3(dg,MNP)
-        type (dg_type) :: dg
+      SUBROUTINE ALLOC_DG3(dg_here,MNP)
+        type (dg_type) :: dg_here
         integer :: MNP
-      ALLOCATE ( dg%QIB(MNP) )
+      ALLOCATE ( dg_here%QIB(MNP) )
       RETURN
       END SUBROUTINE
 
-      SUBROUTINE ALLOC_DG4(s,dg)
+      SUBROUTINE ALLOC_DG4(s,dg_here)
         type (sizes_type) :: s
-        type (dg_type) :: dg
+        type (dg_type) :: dg_here
 !sb-20070228 NRK+1-->NRK+2 --- XX(:,:,NRK+2) will be used by slope limiter
-      ALLOCATE ( dg%HB(dg%DOFH,S%MNE,dg%NRK+2),dg%e1(s%layers+5),dg%balance(s%layers+5) )
-      ALLOCATE ( dg%MANN(dg%DOFH,S%MNE) ) !,dg%arrayfix(dg%DOFH,S%MNE,dg%NRK+2) )
-      ALLOCATE ( dg%QY(dg%DOFH,S%MNE,dg%NRK+2), dg%QX(dg%DOFH,S%MNE,dg%NRK+2) )
-      ALLOCATE ( dg%ZE(dg%DOFH,S%MNE,dg%NRK+2) )
+      ALLOCATE ( dg_here%HB(dg_here%DOFH,S%MNE,dg_here%NRK+2),dg_here%e1(s%layers+5),dg_here%balance(s%layers+5) )
+      ALLOCATE ( dg_here%MANN(dg_here%DOFH,S%MNE) ) !,dg_here%arrayfix(dg_here%DOFH,S%MNE,dg_here%NRK+2) )
+      ALLOCATE ( dg_here%QY(dg_here%DOFH,S%MNE,dg_here%NRK+2), dg_here%QX(dg_here%DOFH,S%MNE,dg_here%NRK+2) )
+      ALLOCATE ( dg_here%ZE(dg_here%DOFH,S%MNE,dg_here%NRK+2) )
 #ifdef SEDLAY
-      ALLOCATE ( dg%bed(dg%DOFH,S%MNE,dg%NRK+2,s%layers) )
+      ALLOCATE ( dg_here%bed(dg_here%DOFH,S%MNE,dg_here%NRK+2,s%layers) )
 #endif
-      Allocate ( dg%iota(dg%DOFH,S%MNE,dg%NRK+2),dg%iota2(dg%DOFH,S%MNE,dg%NRK+2) ) 
-      Allocate ( dg%dynP(dg%DOFH,S%MNE,dg%NRK+2) ) 
-      Allocate ( dg%iotaa(dg%DOFH,S%MNE,dg%NRK+2),dg%iotaa2(dg%DOFH,S%MNE,dg%NRK+2) )
-      Allocate ( dg%iotaa3(dg%DOFH,S%MNE,dg%NRK+2) )
+      Allocate ( dg_here%iota(dg_here%DOFH,S%MNE,dg_here%NRK+2),dg_here%iota2(dg_here%DOFH,S%MNE,dg_here%NRK+2) ) 
+      Allocate ( dg_here%dynP(dg_here%DOFH,S%MNE,dg_here%NRK+2) ) 
+      Allocate ( dg_here%iotaa(dg_here%DOFH,S%MNE,dg_here%NRK+2),dg_here%iotaa2(dg_here%DOFH,S%MNE,dg_here%NRK+2) )
+      Allocate ( dg_here%iotaa3(dg_here%DOFH,S%MNE,dg_here%NRK+2) )
 !sb-20060711 For wet/dry
-      ALLOCATE ( dg%ZE_MAX(S%MNE),dg%ZE_MIN(S%MNE),dg%DPE_MIN(S%MNE) )
-      Allocate ( dg%iota_MAX(S%MNE),dg%iota_MIN(S%MNE),dg%iota2_MAX(S%MNE),dg%iota2_MIN(S%MNE) )
-      Allocate ( dg%dynP_MAX(S%MNE),dg%dynP_MIN(S%MNE) )
-      ALLOCATE ( dg%WATER_DEPTH(S%MNE,3), dg%WATER_DEPTH_OLD(S%MNE,3))
-      ALLOCATE ( dg%ADVECTQX(S%MNE), dg%ADVECTQY(S%MNE))
-      ALLOCATE ( dg%SOURCEQX(S%MNE),dg%SOURCEQY(S%MNE))
-      ALLOCATE ( dg%MARK(S%MNE))
+      ALLOCATE ( dg_here%ZE_MAX(S%MNE),dg_here%ZE_MIN(S%MNE),dg_here%DPE_MIN(S%MNE) )
+      Allocate ( dg_here%iota_MAX(S%MNE),dg_here%iota_MIN(S%MNE),dg_here%iota2_MAX(S%MNE),dg_here%iota2_MIN(S%MNE) )
+      Allocate ( dg_here%dynP_MAX(S%MNE),dg_here%dynP_MIN(S%MNE) )
+      ALLOCATE ( dg_here%WATER_DEPTH(S%MNE,3), dg_here%WATER_DEPTH_OLD(S%MNE,3))
+      ALLOCATE ( dg_here%ADVECTQX(S%MNE), dg_here%ADVECTQY(S%MNE))
+      ALLOCATE ( dg_here%SOURCEQX(S%MNE),dg_here%SOURCEQY(S%MNE))
+      ALLOCATE ( dg_here%MARK(S%MNE))
 !em-2012 for sediment
-      Allocate ( dg%bed_IN(s%layers),dg%bed_EX(s%layers),dg%bed_HAT(s%layers) )
+      Allocate ( dg_here%bed_IN(s%layers),dg_here%bed_EX(s%layers),dg_here%bed_HAT(s%layers) )
 
 !--
 !sb-20070101
-      ALLOCATE ( dg%LZ(dg%DOFH,2,2,S%MNE),dg%MZ(dg%DOFH,2,s%layers,S%MNE) )
-      Allocate ( dg%HZ(dg%DOFH,2,2,S%MNE),dg%TZ(dg%DOFH,2,2,S%MNE) )
+      ALLOCATE ( dg_here%LZ(dg_here%DOFH,2,2,S%MNE),dg_here%MZ(dg_here%DOFH,2,s%layers,S%MNE) )
+      Allocate ( dg_here%HZ(dg_here%DOFH,2,2,S%MNE),dg_here%TZ(dg_here%DOFH,2,2,S%MNE) )
 !--
-      ALLOCATE ( dg%RHS_QX(dg%DOFH,S%MNE,dg%NRK), dg%RHS_QY(dg%DOFH,S%MNE,dg%NRK) )
-      ALLOCATE ( dg%RHS_ZE(dg%DOFH,S%MNE,dg%NRK), dg%RHS_bed(dg%DOFH,S%MNE,dg%NRK,s%layers) )
-      Allocate ( dg%RHS_iota(dg%DOFH,S%MNE,dg%NRK),dg%RHS_iota2(dg%DOFH,S%MNE,dg%NRK) )
-      Allocate ( dg%RHS_dynP(dg%DOFH,S%MNE,dg%NRK) )
-      Allocate ( dg%RHS_bed_IN(dg%dofh,s%layers), dg%RHS_bed_EX(dg%dofh,s%layers) )
-      Allocate ( dg%bed_HAT_O(s%layers) )
-      ALLOCATE ( dg%DRDX(S%MNE), dg%DSDX(S%MNE), dg%DRDY(S%MNE), dg%DSDY(S%MNE) )
-      ALLOCATE ( dg%CORI_EL(S%MNE), dg%FRIC_EL(S%MNE) )
-      ALLOCATE ( dg%PHI(dg%DOFH), dg%DPHIDZ1(dg%DOFH), dg%DPHIDZ2(dg%DOFH) )
-      ALLOCATE ( dg%DOFS(S%MNE), dg%PCOUNT(S%MNE) )
-      ALLOCATE ( dg%PDG(S%MNP) )
+      ALLOCATE ( dg_here%RHS_QX(dg_here%DOFH,S%MNE,dg_here%NRK), dg_here%RHS_QY(dg_here%DOFH,S%MNE,dg_here%NRK) )
+      ALLOCATE ( dg_here%RHS_ZE(dg_here%DOFH,S%MNE,dg_here%NRK), dg_here%RHS_bed(dg_here%DOFH,S%MNE,dg_here%NRK,s%layers) )
+      Allocate ( dg_here%RHS_iota(dg_here%DOFH,S%MNE,dg_here%NRK),dg_here%RHS_iota2(dg_here%DOFH,S%MNE,dg_here%NRK) )
+      Allocate ( dg_here%RHS_dynP(dg_here%DOFH,S%MNE,dg_here%NRK) )
+      Allocate ( dg_here%RHS_bed_IN(dg_here%dofh,s%layers), dg_here%RHS_bed_EX(dg_here%dofh,s%layers) )
+      Allocate ( dg_here%bed_HAT_O(s%layers) )
+      ALLOCATE ( dg_here%DRDX(S%MNE), dg_here%DSDX(S%MNE), dg_here%DRDY(S%MNE), dg_here%DSDY(S%MNE) )
+      ALLOCATE ( dg_here%CORI_EL(S%MNE), dg_here%FRIC_EL(S%MNE) )
+      ALLOCATE ( dg_here%PHI(dg_here%DOFH), dg_here%DPHIDZ1(dg_here%DOFH), dg_here%DPHIDZ2(dg_here%DOFH) )
+      ALLOCATE ( dg_here%DOFS(S%MNE), dg_here%PCOUNT(S%MNE) )
+      ALLOCATE ( dg_here%PDG(S%MNP) )
       RETURN
       END SUBROUTINE
 
 !.....Set RK time scheme parameters array sizes
 
-      SUBROUTINE ALLOC_RK(dg)
-        type (dg_type) :: dg
-      ALLOCATE( dg%ATVD(dg%NRK,dg%NRK), dg%BTVD(dg%NRK,dg%NRK), dg%CTVD(dg%NRK,dg%NRK)  )
-      ALLOCATE( dg%DTVD(dg%NRK), dg%MAX_BOA_DT(dg%NRK) )
-      Allocate( dg%RKC_T(0:dg%nrk),dg%RKC_U(0:dg%nrk),dg%RKC_Tprime(0:dg%nrk) )
-      Allocate( dg%RKC_Tdprime(0:dg%nrk),dg%RKC_a(0:dg%nrk),dg%RKC_b(0:dg%nrk),dg%RKC_c(0:dg%nrk) ) 
-      Allocate( dg%RKC_mu(0:dg%nrk),dg%RKC_tildemu(0:dg%nrk),dg%RKC_nu(0:dg%nrk),dg%RKC_gamma(0:dg%nrk) )
+      SUBROUTINE ALLOC_RK(dg_here)
+        type (dg_type) :: dg_here
+      ALLOCATE( dg_here%ATVD(dg_here%NRK,dg_here%NRK), dg_here%BTVD(dg_here%NRK,dg_here%NRK), dg_here%CTVD(dg_here%NRK,dg_here%NRK)  )
+      ALLOCATE( dg_here%DTVD(dg_here%NRK), dg_here%MAX_BOA_DT(dg_here%NRK) )
+      Allocate( dg_here%RKC_T(0:dg_here%nrk),dg_here%RKC_U(0:dg_here%nrk),dg_here%RKC_Tprime(0:dg_here%nrk) )
+      Allocate( dg_here%RKC_Tdprime(0:dg_here%nrk),dg_here%RKC_a(0:dg_here%nrk),dg_here%RKC_b(0:dg_here%nrk),dg_here%RKC_c(0:dg_here%nrk) ) 
+      Allocate( dg_here%RKC_mu(0:dg_here%nrk),dg_here%RKC_tildemu(0:dg_here%nrk),dg_here%RKC_nu(0:dg_here%nrk),dg_here%RKC_gamma(0:dg_here%nrk) )
       RETURN
       END SUBROUTINE ALLOC_RK
 
 !.....Set sizes for arrays used in orthobasis
 
-      SUBROUTINE ALLOC_JACOBI(dg)
-        type (dg_type) :: dg
-      ALLOCATE ( dg%JACOBI(dg%ph+1,2*dg%ph+3,2,dg%NAGP(dg%ph)+1) )
-      ALLOCATE ( dg%DXPHI2(dg%ph+1,dg%ph+1,dg%NAGP(dg%ph)+1),dg%DYPHI2(dg%ph+1,dg%ph+1,dg%NAGP(dg%ph)+1) )
-      ALLOCATE ( dg%PHI2(dg%ph+1,dg%ph+1,dg%NAGP(dg%ph)+1) )
-      ALLOCATE ( dg%PHI_CORNER1(dg%ph+1,dg%ph+1,3,dg%ph) )
+      SUBROUTINE ALLOC_JACOBI(dg_here)
+        type (dg_type) :: dg_here
+      ALLOCATE ( dg_here%JACOBI(dg_here%ph+1,2*dg_here%ph+3,2,dg_here%NAGP(dg_here%ph)+1) )
+      ALLOCATE ( dg_here%DXPHI2(dg_here%ph+1,dg_here%ph+1,dg_here%NAGP(dg_here%ph)+1),dg_here%DYPHI2(dg_here%ph+1,dg_here%ph+1,dg_here%NAGP(dg_here%ph)+1) )
+      ALLOCATE ( dg_here%PHI2(dg_here%ph+1,dg_here%ph+1,dg_here%NAGP(dg_here%ph)+1) )
+      ALLOCATE ( dg_here%PHI_CORNER1(dg_here%ph+1,dg_here%ph+1,3,dg_here%ph) )
       RETURN
       END SUBROUTINE
       
 !.....Set sizes for arrays for area integrals
       
-      SUBROUTINE ALLOC_AREA_GAUSS(s,dg)
+      SUBROUTINE ALLOC_AREA_GAUSS(s,dg_here)
         type (sizes_type) :: s
-        type (dg_type) :: dg
-      ALLOCATE ( dg%XAGP(dg%NAGP(dg%ph),dg%ph),dg%YAGP(dg%NAGP(dg%ph),dg%ph),dg%WAGP(dg%NAGP(dg%ph),dg%ph) ) 
-      ALLOCATE ( dg%PHI_AREA(dg%DOFH,dg%NAGP(dg%ph)+1,dg%ph ) )
-      ALLOCATE ( dg%DSPHI(dg%DOFH,dg%NAGP(dg%ph)+1,dg%ph),dg%DRPHI(dg%DOFH,dg%NAGP(dg%ph)+1,dg%ph) )
-      ALLOCATE ( dg%PHI_CORNER(dg%DOFH,3,dg%ph),dg%PHI_MID(dg%DOFH,3,dg%ph) )
-      ALLOCATE ( dg%PHI_CENTER(dg%DOFH,dg%DOFH) )
-      ALLOCATE ( dg%PSI1(dg%NAGP(dg%ph),dg%ph),dg%PSI2(dg%NAGP(dg%ph),dg%ph),dg%PSI3(dg%NAGP(dg%ph),dg%ph) )
-      ALLOCATE ( dg%BATH(dg%NAGP(dg%ph),S%MNE,dg%ph),dg%DBATHDX(dg%NAGP(dg%ph),S%MNE,dg%ph) )
-      Allocate ( dg%DBATHDY(dg%NAGP(dg%ph),S%MNE,dg%ph) )
-      ALLOCATE ( dg%SFAC_ELEM(dg%NAGP(dg%ph),S%MNE,dg%ph) )
-      ALLOCATE ( dg%XFAC(dg%DOFH,dg%NAGP(dg%ph),S%MNE,dg%ph), dg%YFAC(dg%DOFH,dg%NAGP(dg%ph),S%MNE,dg%ph) )
-      ALLOCATE ( dg%SRFAC(dg%DOFH,dg%NAGP(dg%ph),S%MNE,dg%ph) )
+        type (dg_type) :: dg_here
+      ALLOCATE ( dg_here%XAGP(dg_here%NAGP(dg_here%ph),dg_here%ph),dg_here%YAGP(dg_here%NAGP(dg_here%ph),dg_here%ph),dg_here%WAGP(dg_here%NAGP(dg_here%ph),dg_here%ph) ) 
+      ALLOCATE ( dg_here%PHI_AREA(dg_here%DOFH,dg_here%NAGP(dg_here%ph)+1,dg_here%ph ) )
+      ALLOCATE ( dg_here%DSPHI(dg_here%DOFH,dg_here%NAGP(dg_here%ph)+1,dg_here%ph),dg_here%DRPHI(dg_here%DOFH,dg_here%NAGP(dg_here%ph)+1,dg_here%ph) )
+      ALLOCATE ( dg_here%PHI_CORNER(dg_here%DOFH,3,dg_here%ph),dg_here%PHI_MID(dg_here%DOFH,3,dg_here%ph) )
+      ALLOCATE ( dg_here%PHI_CENTER(dg_here%DOFH,dg_here%DOFH) )
+      ALLOCATE ( dg_here%PSI1(dg_here%NAGP(dg_here%ph),dg_here%ph),dg_here%PSI2(dg_here%NAGP(dg_here%ph),dg_here%ph),dg_here%PSI3(dg_here%NAGP(dg_here%ph),dg_here%ph) )
+      ALLOCATE ( dg_here%BATH(dg_here%NAGP(dg_here%ph),S%MNE,dg_here%ph),dg_here%DBATHDX(dg_here%NAGP(dg_here%ph),S%MNE,dg_here%ph) )
+      Allocate ( dg_here%DBATHDY(dg_here%NAGP(dg_here%ph),S%MNE,dg_here%ph) )
+      ALLOCATE ( dg_here%SFAC_ELEM(dg_here%NAGP(dg_here%ph),S%MNE,dg_here%ph) )
+      ALLOCATE ( dg_here%XFAC(dg_here%DOFH,dg_here%NAGP(dg_here%ph),S%MNE,dg_here%ph), dg_here%YFAC(dg_here%DOFH,dg_here%NAGP(dg_here%ph),S%MNE,dg_here%ph) )
+      ALLOCATE ( dg_here%SRFAC(dg_here%DOFH,dg_here%NAGP(dg_here%ph),S%MNE,dg_here%ph) )
       RETURN
       END SUBROUTINE
       
 !.....Set sizes for arrays for edge integrals
 
-      SUBROUTINE ALLOC_EDGE_GAUSS(s,dg)
+      SUBROUTINE ALLOC_EDGE_GAUSS(s,dg_here)
         type (sizes_type) :: s
-        type (dg_type) :: dg
-      ALLOCATE ( dg%XEGP(dg%NEGP(dg%ph),dg%ph), dg%WEGP(dg%NEGP(dg%ph),dg%ph) )
-      ALLOCATE ( dg%PHI_EDGE(dg%DOFH,dg%NEGP(dg%ph)+1,3,dg%ph) )
-      ALLOCATE ( dg%M_INV(dg%DOFH,dg%ph) )
-      ALLOCATE ( dg%BATHED(dg%NEGP(dg%ph),3,S%MNE,dg%ph),dg%SFACED(dg%NEGP(dg%ph),3,S%MNE,dg%ph) )
-      ALLOCATE ( dg%EDGEQ(dg%DOFH,dg%NEGP(dg%ph),3,dg%ph) )
+        type (dg_type) :: dg_here
+      ALLOCATE ( dg_here%XEGP(dg_here%NEGP(dg_here%ph),dg_here%ph), dg_here%WEGP(dg_here%NEGP(dg_here%ph),dg_here%ph) )
+      ALLOCATE ( dg_here%PHI_EDGE(dg_here%DOFH,dg_here%NEGP(dg_here%ph)+1,3,dg_here%ph) )
+      ALLOCATE ( dg_here%M_INV(dg_here%DOFH,dg_here%ph) )
+      ALLOCATE ( dg_here%BATHED(dg_here%NEGP(dg_here%ph),3,S%MNE,dg_here%ph),dg_here%SFACED(dg_here%NEGP(dg_here%ph),3,S%MNE,dg_here%ph) )
+      ALLOCATE ( dg_here%EDGEQ(dg_here%DOFH,dg_here%NEGP(dg_here%ph),3,dg_here%ph) )
       RETURN
       END SUBROUTINE
 
 !.....Set sizes for the arrays for the slope limiter
 !.....slopelim arrays
 
-      SUBROUTINE ALLOC_SLOPELIM(s,dg)
+      SUBROUTINE ALLOC_SLOPELIM(s,dg_here)
         type (sizes_type) :: s
-        type (dg_type) :: dg
-      ALLOCATE ( dg%XBC(S%MNE), dg%YBC(S%MNE) )
-      ALLOCATE ( dg%EL_NBORS(4,S%MNE) )
-      ALLOCATE ( dg%SL3(3,S%MNE) )
+        type (dg_type) :: dg_here
+      ALLOCATE ( dg_here%XBC(S%MNE), dg_here%YBC(S%MNE) )
+      ALLOCATE ( dg_here%EL_NBORS(4,S%MNE) )
+      ALLOCATE ( dg_here%SL3(3,S%MNE) )
 
-!.....These are defined in prep_slopelim.dg%F
+!.....These are defined in prep_slopelim.dg_here%F
 
-      Allocate ( dg%fact(0:dg%ph) ,dg%focal_neigh(S%MNE,3*S%MNEI),dg%focal_up(S%MNE),dg%bi(dg%dofh),dg%bj(dg%dofh) )
+      Allocate ( dg_here%fact(0:dg_here%ph) ,dg_here%focal_neigh(S%MNE,3*S%MNEI),dg_here%focal_up(S%MNE),dg_here%bi(dg_here%dofh),dg_here%bj(dg_here%dofh) )
 
-      Allocate ( dg%XBCb(S%MNE),dg%YBCb(S%MNE),dg%xi1(S%MNE,dg%NAGP(dg%ph)),dg%xi2(S%MNE,dg%NAGP(dg%ph)) )
-      Allocate ( dg%xtransform(S%MNE,dg%NAGP(dg%ph)),dg%ytransform(S%MNE,dg%NAGP(dg%ph)) )
-      Allocate ( dg%xi1BCb(S%MNE),dg%xi2BCb(S%MNE),dg%xi1vert(S%MNE,3) )
-      Allocate ( dg%xi2vert(S%MNE,3),dg%xtransformv(S%MNE,3),dg%ytransformv(S%MNE,3) )
-      Allocate ( dg%XBCv(S%MNE,S%MNE),dg%YBCv(S%MNE,S%MNE) )
-      Allocate ( dg%xi1BCv(S%MNE,S%MNE),dg%xi2BCv(S%MNE,S%MNE),dg%Area_integral(S%MNE,0:dg%ph,0:dg%ph) )
-      Allocate ( dg%f(S%MNE,dg%NAGP(dg%ph),0:dg%ph,0:dg%ph),dg%g0(S%MNE,dg%NAGP(dg%ph),0:dg%ph,0:dg%ph) )
-      Allocate ( dg%fv(S%MNE,3,0:dg%ph,0:dg%ph),dg%g0v(S%MNE,3,0:dg%ph,0:dg%ph) )
-      Allocate ( dg%varsigma0(S%MNE,dg%NAGP(dg%ph),0:dg%ph,0:dg%ph) ) 
-      Allocate ( dg%varsigma0v(S%MNE,3,0:dg%ph,0:dg%ph) )
-      Allocate ( dg%pmatrix(S%MNE,dg%dofh,dg%dofh), dg%var2sigmag(S%MNE,dg%NAGP(dg%ph),dg%dofh) )
-      Allocate ( dg%Nmatrix(S%MNE,dg%dofh,dg%dofh,dg%dofh),dg%NmatrixInv(S%MNE,dg%dofh,dg%dofh,dg%dofh) )
-      Allocate ( dg%deltx(S%MNE),dg%delty(S%MNE),dg%var2sigmav(S%MNE,3,dg%dofh))
+      Allocate ( dg_here%XBCb(S%MNE),dg_here%YBCb(S%MNE),dg_here%xi1(S%MNE,dg_here%NAGP(dg_here%ph)),dg_here%xi2(S%MNE,dg_here%NAGP(dg_here%ph)) )
+      Allocate ( dg_here%xtransform(S%MNE,dg_here%NAGP(dg_here%ph)),dg_here%ytransform(S%MNE,dg_here%NAGP(dg_here%ph)) )
+      Allocate ( dg_here%xi1BCb(S%MNE),dg_here%xi2BCb(S%MNE),dg_here%xi1vert(S%MNE,3) )
+      Allocate ( dg_here%xi2vert(S%MNE,3),dg_here%xtransformv(S%MNE,3),dg_here%ytransformv(S%MNE,3) )
+      Allocate ( dg_here%XBCv(S%MNE,S%MNE),dg_here%YBCv(S%MNE,S%MNE) )
+      Allocate ( dg_here%xi1BCv(S%MNE,S%MNE),dg_here%xi2BCv(S%MNE,S%MNE),dg_here%Area_integral(S%MNE,0:dg_here%ph,0:dg_here%ph) )
+      Allocate ( dg_here%f(S%MNE,dg_here%NAGP(dg_here%ph),0:dg_here%ph,0:dg_here%ph),dg_here%g0(S%MNE,dg_here%NAGP(dg_here%ph),0:dg_here%ph,0:dg_here%ph) )
+      Allocate ( dg_here%fv(S%MNE,3,0:dg_here%ph,0:dg_here%ph),dg_here%g0v(S%MNE,3,0:dg_here%ph,0:dg_here%ph) )
+      Allocate ( dg_here%varsigma0(S%MNE,dg_here%NAGP(dg_here%ph),0:dg_here%ph,0:dg_here%ph) ) 
+      Allocate ( dg_here%varsigma0v(S%MNE,3,0:dg_here%ph,0:dg_here%ph) )
+      Allocate ( dg_here%pmatrix(S%MNE,dg_here%dofh,dg_here%dofh), dg_here%var2sigmag(S%MNE,dg_here%NAGP(dg_here%ph),dg_here%dofh) )
+      Allocate ( dg_here%Nmatrix(S%MNE,dg_here%dofh,dg_here%dofh,dg_here%dofh),dg_here%NmatrixInv(S%MNE,dg_here%dofh,dg_here%dofh,dg_here%dofh) )
+      Allocate ( dg_here%deltx(S%MNE),dg_here%delty(S%MNE),dg_here%var2sigmav(S%MNE,3,dg_here%dofh))
 
-!.....These (below) are defined in slopelimiter.dg%F (slopelimiter4)
+!.....These (below) are defined in slopelimiter.dg_here%F (slopelimiter4)
       
-      Allocate ( dg%ZEmin(S%MNP,dg%dofh),dg%ZEmax(S%MNP,dg%dofh),dg%QXmin(S%MNP,dg%dofh) )
-      Allocate ( dg%QXmax(S%MNP,dg%dofh),dg%QYmin(S%MNP,dg%dofh),dg%QYmax(S%MNP,dg%dofh) )
-      Allocate ( dg%iotamin(S%MNP,dg%dofh),dg%iotamax(S%MNP,dg%dofh) )
-      Allocate ( dg%iota2min(S%MNP,dg%dofh),dg%iota2max(S%MNP,dg%dofh) )
+      Allocate ( dg_here%ZEmin(S%MNP,dg_here%dofh),dg_here%ZEmax(S%MNP,dg_here%dofh),dg_here%QXmin(S%MNP,dg_here%dofh) )
+      Allocate ( dg_here%QXmax(S%MNP,dg_here%dofh),dg_here%QYmin(S%MNP,dg_here%dofh),dg_here%QYmax(S%MNP,dg_here%dofh) )
+      Allocate ( dg_here%iotamin(S%MNP,dg_here%dofh),dg_here%iotamax(S%MNP,dg_here%dofh) )
+      Allocate ( dg_here%iota2min(S%MNP,dg_here%dofh),dg_here%iota2max(S%MNP,dg_here%dofh) )
 
 #ifdef SLOPEALL
-      Allocate ( dg%ZEtaylor(S%MNE,dg%dofh,1),dg%QXtaylor(S%MNE,dg%dofh,1) )
-      Allocate ( dg%iotataylor(S%MNE,dg%dofh,1),dg%iota2taylor(S%MNE,dg%dofh,1) 
-      Allocate ( dg%ZEtaylorvert(S%MNE,dg%dofh,3),dg%QXtaylorvert(S%MNE,dg%dofh,3) )
-      Allocate ( dg%QYtaylorvert(S%MNE,dg%dofh,3),dg%iotataylorvert(S%MNE,dg%dofh,3) )
-      Allocate ( dg%iota2taylorvert(S%MNE,dg%dofh,3), dg%QYtaylor(S%MNE,dg%dofh,1) )
-      Allocate ( dg%alphaZE0(S%MNE,dg%dofh,3),dg%alphaQX0(S%MNE,dg%dofh,3) )
-      Allocate ( dg%alphaQY0(S%MNE,dg%dofh,3),dg%alphaiota0(S%MNE,dg%dofh,3) )
-      Allocate ( dg%alphaiota20(S%MNE,dg%dofh,3) )
-      Allocate ( dg%alphaZE(S%MNE,dg%dofh),dg%alphaQX(S%MNE,dg%dofh),dg%alphaQY(S%MNE,dg%dofh) )
-      Allocate ( dg%alphaiota(S%MNE,dg%dofh),dg%alphaiota2(S%MNE,dg%dofh) )
-      Allocate ( dg%alphaZEm(S%MNE,dg%dofh),dg%alphaQXm(S%MNE,dg%dofh),dg%alphaQYm(S%MNE,dg%dofh) )
-      Allocate ( dg%alphaiotam(S%MNE,dg%dofh),dg%alphaiota2m(S%MNE,dg%dofh) )
-      Allocate ( dg%alphaZE_max(S%MNE,dg%dofh),dg%alphaQX_max(S%MNE,dg%dofh) )
-      Allocate ( dg%alphaQY_max(S%MNE,dg%dofh) )
-      Allocate ( dg%alphaiota_max(S%MNE,dg%dofh),dg%alphaiota2_max(S%MNE,dg%dofh) )
-      Allocate ( dg%limitZE(S%MNE,dg%dofh),dg%limitQX(S%MNE,dg%dofh),dg%limitQY(S%MNE,dg%dofh) )
-      Allocate ( dg%limitiota(S%MNE,dg%dofh),dg%limitiota2(S%MNE,dg%dofh) )
-      Allocate ( dg%ZEconst(S%MNE,dg%dofh),dg%QXconst(S%MNE,dg%dofh),dg%QYconst(S%MNE,dg%dofh) )
-      Allocate ( dg%iotaconst(S%MNE,dg%dofh),dg%iota2const(S%MNE,dg%dofh) )
+      Allocate ( dg_here%ZEtaylor(S%MNE,dg_here%dofh,1),dg_here%QXtaylor(S%MNE,dg_here%dofh,1) )
+      Allocate ( dg_here%iotataylor(S%MNE,dg_here%dofh,1),dg_here%iota2taylor(S%MNE,dg_here%dofh,1) 
+      Allocate ( dg_here%ZEtaylorvert(S%MNE,dg_here%dofh,3),dg_here%QXtaylorvert(S%MNE,dg_here%dofh,3) )
+      Allocate ( dg_here%QYtaylorvert(S%MNE,dg_here%dofh,3),dg_here%iotataylorvert(S%MNE,dg_here%dofh,3) )
+      Allocate ( dg_here%iota2taylorvert(S%MNE,dg_here%dofh,3), dg_here%QYtaylor(S%MNE,dg_here%dofh,1) )
+      Allocate ( dg_here%alphaZE0(S%MNE,dg_here%dofh,3),dg_here%alphaQX0(S%MNE,dg_here%dofh,3) )
+      Allocate ( dg_here%alphaQY0(S%MNE,dg_here%dofh,3),dg_here%alphaiota0(S%MNE,dg_here%dofh,3) )
+      Allocate ( dg_here%alphaiota20(S%MNE,dg_here%dofh,3) )
+      Allocate ( dg_here%alphaZE(S%MNE,dg_here%dofh),dg_here%alphaQX(S%MNE,dg_here%dofh),dg_here%alphaQY(S%MNE,dg_here%dofh) )
+      Allocate ( dg_here%alphaiota(S%MNE,dg_here%dofh),dg_here%alphaiota2(S%MNE,dg_here%dofh) )
+      Allocate ( dg_here%alphaZEm(S%MNE,dg_here%dofh),dg_here%alphaQXm(S%MNE,dg_here%dofh),dg_here%alphaQYm(S%MNE,dg_here%dofh) )
+      Allocate ( dg_here%alphaiotam(S%MNE,dg_here%dofh),dg_here%alphaiota2m(S%MNE,dg_here%dofh) )
+      Allocate ( dg_here%alphaZE_max(S%MNE,dg_here%dofh),dg_here%alphaQX_max(S%MNE,dg_here%dofh) )
+      Allocate ( dg_here%alphaQY_max(S%MNE,dg_here%dofh) )
+      Allocate ( dg_here%alphaiota_max(S%MNE,dg_here%dofh),dg_here%alphaiota2_max(S%MNE,dg_here%dofh) )
+      Allocate ( dg_here%limitZE(S%MNE,dg_here%dofh),dg_here%limitQX(S%MNE,dg_here%dofh),dg_here%limitQY(S%MNE,dg_here%dofh) )
+      Allocate ( dg_here%limitiota(S%MNE,dg_here%dofh),dg_here%limitiota2(S%MNE,dg_here%dofh) )
+      Allocate ( dg_here%ZEconst(S%MNE,dg_here%dofh),dg_here%QXconst(S%MNE,dg_here%dofh),dg_here%QYconst(S%MNE,dg_here%dofh) )
+      Allocate ( dg_here%iotaconst(S%MNE,dg_here%dofh),dg_here%iota2const(S%MNE,dg_here%dofh) )
 #endif
 
       RETURN
       END SUBROUTINE
 
 !sb...Set sizes for arrays for wetting and drying
-      SUBROUTINE ALLOC_DG_WETDRY(s,dg)
+      SUBROUTINE ALLOC_DG_WETDRY(s,dg_here)
         type (sizes_type) :: s
-        type (dg_type) :: dg
-      ALLOCATE ( dg%WDFLG(S%MNE), dg%DOFW(S%MNE) )
-      ALLOCATE ( dg%EL_UPDATED(S%MNE) )
-      ALLOCATE ( dg%WDFLG_TMP(S%MNE) )
-      ALLOCATE ( dg%LEDGE_NVEC(3,3,S%MNE) )
-      ALLOCATE ( dg%DP_VOL(S%MNE,dg%ph) )
-      ALLOCATE ( dg%PHI_INTEGRATED(dg%DOFH,dg%ph) )
-      ALLOCATE ( dg%PHI_CHECK(dg%DOFH,dg%NCHECK(dg%ph),dg%ph) )
-      ALLOCATE ( dg%DP_NODE(dg%NCHECK(dg%ph),S%MNE,dg%ph) )
-      ALLOCATE ( dg%PSI_CHECK(3,12*3) )
+        type (dg_type) :: dg_here
+      ALLOCATE ( dg_here%WDFLG(S%MNE), dg_here%DOFW(S%MNE) )
+      ALLOCATE ( dg_here%EL_UPDATED(S%MNE) )
+      ALLOCATE ( dg_here%WDFLG_TMP(S%MNE) )
+      ALLOCATE ( dg_here%LEDGE_NVEC(3,3,S%MNE) )
+      ALLOCATE ( dg_here%DP_VOL(S%MNE,dg_here%ph) )
+      ALLOCATE ( dg_here%PHI_INTEGRATED(dg_here%DOFH,dg_here%ph) )
+      ALLOCATE ( dg_here%PHI_CHECK(dg_here%DOFH,dg_here%NCHECK(dg_here%ph),dg_here%ph) )
+      ALLOCATE ( dg_here%DP_NODE(dg_here%NCHECK(dg_here%ph),S%MNE,dg_here%ph) )
+      ALLOCATE ( dg_here%PSI_CHECK(3,12*3) )
       RETURN
       END SUBROUTINE
       
 
-      SUBROUTINE ALLOC_STAE(dg,L)
-        type (dg_type) :: dg
+      SUBROUTINE ALLOC_STAE(dg_here,L)
+        type (dg_type) :: dg_here
         integer :: L
-      ALLOCATE ( dg%PHI_STAE(dg%DOFH,L) )
+      ALLOCATE ( dg_here%PHI_STAE(dg_here%DOFH,L) )
       RETURN
       END SUBROUTINE
       
-      SUBROUTINE ALLOC_STAV(dg,L)
-        type (dg_type) :: dg
+      SUBROUTINE ALLOC_STAV(dg_here,L)
+        type (dg_type) :: dg_here
         integer :: L
-      ALLOCATE ( dg%PHI_STAV(dg%DOFH,L) )
+      ALLOCATE ( dg_here%PHI_STAV(dg_here%DOFH,L) )
       RETURN
       END SUBROUTINE
       
