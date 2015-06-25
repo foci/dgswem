@@ -25,8 +25,8 @@
       Use SIZES
 !     
       USE NodalAttributes, ONLY: GeoidOffset, LoadGeoidOffset
-      use fparser
-      use fparser2
+!      use fparser
+!      use fparser2
 
       IMPLICIT NONE
 

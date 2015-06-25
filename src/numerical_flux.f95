@@ -58,8 +58,8 @@
       USE GLOBAL
       USE DG
       use sizes
-      use fparser
-      use fparser2
+!      use fparser
+!      use fparser2
 
       IMPLICIT NONE
 

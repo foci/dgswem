@@ -36,7 +36,7 @@ $(O_DIR):
 PREP_MSRC  =  presizes.f95 
 PGLO_MSRC  =  pre_global.f95  
 POST_MSRC  =  post_global.f95
-ADC_MSRC   =  sizes.f95 diff45_41.f95 global.f95 dg.f95 nodalattr.f95 fparser.f95 fparser2.f95 read_fort_dg.f95 make_dirname.f95
+ADC_MSRC   =  sizes.f95 global.f95 dg.f95 nodalattr.f95 read_fort_dg.f95 make_dirname.f95
 HARM_MSRC  =  harm.f95  
 WIND_MSRC  =  wind.f95  
 #Casey 121126: Add file for coupling to unstructured SWAN.
@@ -191,8 +191,6 @@ $(O_DIR)diffmerge.o   :  diffmerge.f95
 #  adcirc & padcirc modules
 
 $(O_DIR)sizes.o       			:  sizes.f95
-$(O_DIR)fparser.o	                :  fparser.f95 $(O_DIR)sizes.o
-$(O_DIR)fparser2.o	                :  fparser2.f95 $(O_DIR)sizes.o
 $(O_DIR)global.o      			:  global.f95  $(O_DIR)sizes.o
 $(O_DIR)messenger.o   			:  messenger.f95  $(ADC_MOBJ)
 $(O_DIR)messenger_elem.o		:  messenger_elem.f95  $(ADC_MOBJ)
@@ -200,7 +198,6 @@ $(O_DIR)messenger_elem.o		:  messenger_elem.f95  $(ADC_MOBJ)
 $(O_DIR)wind.o        			:  wind.f95
 $(O_DIR)itpackv.o     			:  itpackv.f95   $(ADC_MOBJ)
 $(O_DIR)dg.o          			:  dg.f95 sizes.f95 global.f95
-$(O_DIR)diff45_41.o   			:  diff45_41.f95
 $(O_DIR)nodalattr.o   			:  nodalattr.f95
 #Casey 121126: Added the next line.
 $(O_DIR)globalio.o                      :  globalio.f95 $(ADC_MOBJ)

@@ -24,8 +24,8 @@
       USE GLOBAL
       USE DG
       use SIZES
-      use fparser
-      use fparser2
+!      use fparser
+!      use fparser2
 
       IMPLICIT NONE
 
