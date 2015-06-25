@@ -23,43 +23,6 @@
 !...SET GLOBAL PARAMETER CONSTANTS
 !...
 
-#ifdef SWAN
-!asey 121128: Added variables for the output of global files from SWAN.
-      INTEGER,ALLOCATABLE,TARGET :: NODES_LG(:)
-      INTEGER,PARAMETER :: BUFSIZE_MAX = 131072
-      INTEGER :: float_type
-      INTEGER :: integerBuffer(BUFSIZE_MAX)
-      INTEGER :: integerResultBuffer(BUFSIZE_MAX)
-      INTEGER :: NP_G
-      REAL(SZ) :: buf(BUFSIZE_MAX)
-      REAL(SZ) :: resultBuf(BUFSIZE_MAX)
-      TYPE OutputDataDescript_t
-        CHARACTER(12) :: file_name
-        CHARACTER(20) :: field_name
-        INTEGER,POINTER :: iarray(:)
-        INTEGER,POINTER :: iarray_g(:)
-        INTEGER,POINTER :: imap(:)
-        INTEGER :: int_initial_value
-        INTEGER :: num_fd_records
-        INTEGER :: num_items_per_record
-        INTEGER :: num_records_this
-        INTEGER :: specifier
-        LOGICAL :: ConsiderWetDry
-        REAL(SZ),POINTER :: array(:)
-        REAL(SZ),POINTER :: array2(:)
-        REAL(SZ),POINTER :: array3(:)
-        REAL(SZ),POINTER :: array_g(:)
-        REAL(SZ),POINTER :: array2_g(:)
-        REAL(SZ),POINTER :: array3_g(:)
-        REAL(SZ),POINTER :: hotstart(:)
-        REAL(SZ),POINTER :: hotstart_g(:)
-        REAL(SZ) :: initial_value
-        real(SZ) :: alternate_value
-      ENDTYPE OutputDataDescript_t
-#endif
-
-      Logical vertexslope
-
 !.....PI and degrees to radians conversions
       REAL(8), PARAMETER  ::  PI=3.141592653589793D0
       REAL(8), PARAMETER  ::  DEG2RAD = PI/180.D0
@@ -68,23 +31,28 @@
 !.....parameters used in barrier overflow 
       REAL(SZ), PARAMETER ::  BARMIN=0.01D0
       REAL(SZ) DEPAVG,DEPMAX,DEPMIN
+
+      type global_type
+
+      Logical vertexslope
 !
 !.....Sediment Transport stuff added (Ethan Kubatko 8-1-2003)
 !
 !.....Declare variables used in sediment transport section
 !
-      INTEGER, TARGET :: SEDFLAG
+      INTEGER :: SEDFLAG
       INTEGER MAXEL, ELEM_ED, NBOR_ED, NBOR_EL,ITDG
       Integer tracer_flag, chem_flag
       INTEGER N1,N2,NO_NBORS,NBOR,SEDFLAG_W, OPEN_INDEX
-      INTEGER, TARGET :: DG_TO_CG
+      INTEGER :: DG_TO_CG
       INTEGER NSCREEN_INC
       
       INTEGER ScreenUnit
       
       REAL(SZ) AREA_SUM, CEN_SUM, NLEQ, LEQ, NLEQG
-      REAL(SZ), TARGET :: reaction_rate
-      Character*100, TARGET :: sed_equationX,sed_equationY
+
+      REAL(SZ) :: reaction_rate
+      Character*100 :: sed_equationX,sed_equationY
       
       REAL(SZ) FluxSettlingTime
       INTEGER  FluxSettlingIT
@@ -110,7 +78,7 @@
       
 !.....Declare variables for DG SW
 
-      INTEGER, TARGET :: DGSWE
+      INTEGER :: DGSWE
       INTEGER EL_IN, EL_EX, SD_IN, SD_EX, EDGE(3)
       INTEGER SIDE(2),TESTPROBLEM
       REAL(SZ) FX_IN,FY_IN,GX_IN,GY_IN,HX_IN,HY_IN     
@@ -260,13 +228,13 @@
       INTEGER NTSTEPS,ITMV
       REAL(SZ) DT,FMV
       REAL(8) TIMEBEG
-      COMMON /MEANSQ/ TIMEBEG,DT,FMV,NTSTEPS,ITMV
+!      COMMON /MEANSQ/ TIMEBEG,DT,FMV,NTSTEPS,ITMV
 !
       INTEGER NHARFR
-      COMMON /LSQFREQS/ NHARFR
+!      COMMON /LSQFREQS/ NHARFR
 !
       INTEGER NP,NOLICA,NOLIFA,NSCREEN,IHOT,ICS
-      COMMON /EXTMODE5/ NP,NOLICA,NOLIFA,NSCREEN,IHOT,ICS
+!      COMMON /EXTMODE5/ NP,NOLICA,NOLIFA,NSCREEN,IHOT,ICS
 
 !...
 !...DECLARE REAL(8) AND CHAR VARIABLES, EQUIVALENCES
@@ -412,7 +380,7 @@
       REAL(8)  RNP_GLOBAL
       REAL(8)  REFSEC   ! required to run in either 32-bit or 64-bit
       
-
+   end type global_type
 
 !-------------------end of data declarations----------------------------------C
 

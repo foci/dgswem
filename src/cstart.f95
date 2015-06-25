@@ -27,7 +27,7 @@
 #ifdef OWIWIND
       USE OWIWIND, ONLY : NWS12INIT, NWS12GET
 #endif
-      USE NodalAttributes, ONLY : STARTDRY, GeoidOffset, LoadGeoidOffset
+!      USE NodalAttributes, ONLY : STARTDRY, GeoidOffset, LoadGeoidOffset
       IMPLICIT NONE
 
       type (sizes_type) :: s
@@ -383,46 +383,46 @@
           IESTP=2
           ENDIF
 
-        IF(ABS(NOUTE).EQ.2) THEN
-          OPEN(61,FILE=S%DIRNAME//'/'//'fort.61',&
-          ACCESS='DIRECT',RECL=NBYTE)
-          IF(NBYTE.EQ.4) THEN
-            DO I=1,8
-              WRITE(61,REC=IESTP+I) RDES4(I)
-              ENDDO
-            IESTP=IESTP+8
-            DO I=1,6
-              WRITE(61,REC=IESTP+I) RID4(I)
-              ENDDO
-            IESTP=IESTP+6
-            DO I=1,6
-              WRITE(61,REC=IESTP+I) AID4(I)
-              ENDDO
-            IESTP=IESTP+6
-            ENDIF
-          IF(NBYTE.EQ.8) THEN
-            DO I=1,4
-              WRITE(61,REC=IESTP+I) RDES8(I)
-              ENDDO
-            IESTP=IESTP+4
-            DO I=1,3
-              WRITE(61,REC=IESTP+I) RID8(I)
-              ENDDO
-            IESTP=IESTP+3
-            DO I=1,3
-              WRITE(61,REC=IESTP+I) AID8(I)
-              ENDDO
-            IESTP=IESTP+3
-            ENDIF
-          WRITE(61,REC=IESTP+1) NTRSPE
-          WRITE(61,REC=IESTP+2) NSTAE
-          WRITE(61,REC=IESTP+3) DT*NSPOOLE
-          WRITE(61,REC=IESTP+4) NSPOOLE
-          WRITE(61,REC=IESTP+5) 1
-          IESTP=IESTP+5
-          CLOSE(61)                    ! DO THIS TO FLUSH THE WRITE BUFFER
-          OPEN(61,FILE=S%DIRNAME//'/'//'fort.61',&
-         ACCESS='DIRECT',RECL=NBYTE)
+          IF(ABS(NOUTE).EQ.2) THEN
+             OPEN(61,FILE=S%DIRNAME//'/'//'fort.61',&
+                  ACCESS='DIRECT',RECL=NBYTE)
+             IF(NBYTE.EQ.4) THEN
+                DO I=1,8
+                   WRITE(61,REC=IESTP+I) RDES4(I)
+                ENDDO
+                IESTP=IESTP+8
+                DO I=1,6
+                   WRITE(61,REC=IESTP+I) RID4(I)
+                ENDDO
+                IESTP=IESTP+6
+                DO I=1,6
+                   WRITE(61,REC=IESTP+I) AID4(I)
+                ENDDO
+                IESTP=IESTP+6
+             ENDIF
+             IF(NBYTE.EQ.8) THEN
+                DO I=1,4
+                   WRITE(61,REC=IESTP+I) RDES8(I)
+                ENDDO
+                IESTP=IESTP+4
+                DO I=1,3
+                   WRITE(61,REC=IESTP+I) RID8(I)
+                ENDDO
+                IESTP=IESTP+3
+                DO I=1,3
+                   WRITE(61,REC=IESTP+I) AID8(I)
+                ENDDO
+                IESTP=IESTP+3
+             ENDIF
+             WRITE(61,REC=IESTP+1) NTRSPE
+             WRITE(61,REC=IESTP+2) NSTAE
+             WRITE(61,REC=IESTP+3) DT*NSPOOLE
+             WRITE(61,REC=IESTP+4) NSPOOLE
+             WRITE(61,REC=IESTP+5) 1
+             IESTP=IESTP+5
+             CLOSE(61)                    ! DO THIS TO FLUSH THE WRITE BUFFER
+             OPEN(61,FILE=S%DIRNAME//'/'//'fort.61',&
+                  ACCESS='DIRECT',RECL=NBYTE)
           ENDIF
 
 !...

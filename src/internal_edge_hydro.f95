@@ -27,7 +27,7 @@
 
       USE GLOBAL
       USE DG
-      USE NodalAttributes, ONLY :  ESLM
+!      USE NodalAttributes, ONLY :  ESLM
       use sizes
 
       IMPLICIT NONE

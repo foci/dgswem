@@ -1,0 +1,46 @@
+# to do with full set over entire file
+calc_normal.f95
+create_edge_data.f95
+cstart.f95
+DG_hydro_timestep.f95
+ebarrier_edge_hydro.f95
+flow_edge_hydro.f95
+ibarrier_edge_hydro.f95
+internal_edge_hydro.f95
+met_forcing.f95
+ocean_edge_hydro.f95
+orthobasis_area.f95
+orthobasis_edge.f95
+p_enrichment.f95
+prep_DG.f95
+quad_pts_area.f95
+quad_pts_edge.f95
+radiation_edge_hydro.f95
+
+dgswem.f95 #only used in main program
+
+DG_timestep.f95 #contains two subroutines, both use a subset
+
+
+land_edge_hydro.f95   #only go til line 297
+
+LDG_hydro.f95 #has lots of subroutines
+
+
+nodalattr.f95 #is a module, look at this more closely
+
+
+numerical_flux.f95 # start with line 54
+
+prep_slopelim.f95 # end with line 525
+
+read_fort_dg.f95
+read_input.f95
+rhs_dg_hydro.f95
+slopelimiter.f95
+sta_basis.f95
+tidal_potential.f95
+wetdry.f95
+wind.f95
+write_output.f95
+write_results.f95

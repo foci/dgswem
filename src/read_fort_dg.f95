@@ -365,7 +365,7 @@
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!           
       
-      SUBROUTINE FORT_DG_SETUP(dg_here)
+      SUBROUTINE FORT_DG_SETUP(dg_here,global_here)
       
       ! Subroutine that configures the fort.dg options
       !
@@ -398,7 +398,7 @@
       !     versions of the code because the new options will be ignored
       
       
-      USE global, ONLY: dgswe,dg_to_cg,sedflag,reaction_rate,sed_equationX,sed_equationY
+      USE global
       USE sizes
       USE dg
       
@@ -406,7 +406,8 @@
 
       type (sizes_type) :: s
       type (dg_type) :: dg_here
-      
+      type (global_type) :: global_here
+
       INTEGER :: i
       INTEGER :: ncheck
 
@@ -443,6 +444,13 @@
       real(sz), target :: s0_target
       real(sz), target :: uniform_dif_target
 
+      ! from global
+      integer, target :: sedflag_target
+!      integer, target :: dg_to_cg_target
+      character*100, target :: sed_equationX_target
+      character*100, target :: sed_equationY_target
+      integer, target :: dgswe_target
+
       
       ! initialize fortdg structure
       DO i = 1,maxopt
@@ -459,7 +467,7 @@
       !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
       
       !    keywords                         target variables                      requirement                 default values
-      fortdg(1)%key = "dgswe";          fortdg(1)%iptr => dgswe;          fortdg(1)%required = .true.;      fortdg(1)%iptr = 1
+      fortdg(1)%key = "dgswe";          fortdg(1)%iptr => dgswe_target;          fortdg(1)%required = .true.;      fortdg(1)%iptr = 1
       fortdg(2)%key = "padapt";         fortdg(2)%iptr => padapt_target;          fortdg(2)%required = .true.;      fortdg(2)%iptr = 0
       fortdg(3)%key = "pflag";          fortdg(3)%iptr => pflag_target;           fortdg(3)%required = .true.;      fortdg(3)%iptr = 2
       fortdg(4)%key = "gflag";          fortdg(4)%iptr => gflag_target;           fortdg(4)%required = .true.;      fortdg(4)%iptr = 1
@@ -481,7 +489,7 @@
       fortdg(20)%key = "dghotspool";    fortdg(20)%iptr => dghotspool_target;     fortdg(20)%required = .true.;     fortdg(20)%iptr = 86400
       fortdg(21)%key = "slopeflag";     fortdg(21)%iptr => slopeflag_target;      fortdg(21)%required = .true.;     fortdg(21)%iptr = 5
       fortdg(22)%key = "weight";        fortdg(22)%rptr => slope_weight_target;   fortdg(22)%required = .true.;     fortdg(22)%rptr = 1
-      fortdg(23)%key = "sedflag";       fortdg(23)%iptr => sedflag;        fortdg(23)%required = .true.;     fortdg(23)%iptr = 0
+      fortdg(23)%key = "sedflag";       fortdg(23)%iptr => sedflag_target;        fortdg(23)%required = .true.;     fortdg(23)%iptr = 0
       fortdg(24)%key = "porosity";      fortdg(24)%rptr => porosity_target;       fortdg(24)%required = .true.;     fortdg(24)%rptr = 0.0001
       fortdg(25)%key = "sevdm";         fortdg(25)%rptr => sevdm_target;          fortdg(25)%required = .true.;     fortdg(25)%rptr = 0.00001
       fortdg(26)%key = "layers";        fortdg(26)%iptr => layers_target;         fortdg(26)%required = .false.;    fortdg(26)%iptr = 1
@@ -492,8 +500,8 @@
       fortdg(31)%key = "s0";            fortdg(31)%rptr => s0_target;             fortdg(31)%required = .true.;     fortdg(31)%rptr = 0.0;
       fortdg(32)%key = "uniform_dif";   fortdg(32)%rptr => uniform_dif_target;    fortdg(32)%required = .true.;     fortdg(32)%rptr = 2.5e-6;
       fortdg(33)%key = "tune_by_hand";  fortdg(33)%iptr => tune_by_hand_target;   fortdg(33)%required = .true.;     fortdg(33)%iptr = 0;
-      fortdg(34)%key = "sed_equationX"; fortdg(34)%cptr => sed_equationX;  fortdg(34)%required = .false.;    fortdg(34)%cptr = "(ZE_ROE+bed_ROE)**-1 *QX_ROE";
-      fortdg(35)%key = "sed_equationY"; fortdg(35)%cptr => sed_equationY;  fortdg(35)%required = .false.;    fortdg(35)%cptr = "(ZE_ROE+bed_ROE)**-1 *QY_ROE";
+      fortdg(34)%key = "sed_equationX"; fortdg(34)%cptr => sed_equationX_target;  fortdg(34)%required = .false.;    fortdg(34)%cptr = "(ZE_ROE+bed_ROE)**-1 *QX_ROE";
+      fortdg(35)%key = "sed_equationY"; fortdg(35)%cptr => sed_equationY_target;  fortdg(35)%required = .false.;    fortdg(35)%cptr = "(ZE_ROE+bed_ROE)**-1 *QY_ROE";
       
       !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
       ! End configuration
@@ -531,6 +539,10 @@
       dg_here%s0 = s0_target
       dg_here%uniform_dif = uniform_dif_target
 
+      global_here%sedflag = sedflag_target
+      global_here%sed_equationX=sed_equationX_target
+      global_here%sed_equationY=sed_equationY_target
+      global_here%dgswe=dgswe_target
       
       nopt = 0
       ncheck = 0
