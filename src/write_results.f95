@@ -11,7 +11,7 @@
 !     
 !***********************************************************************
 
-      SUBROUTINE WRITE_RESULTS(s,dg,IT,FORCE_WRITE)
+      SUBROUTINE WRITE_RESULTS(s,dg_here,IT,FORCE_WRITE)
 
 !.....Use appropriate modules
 
@@ -27,7 +27,7 @@
 #endif
       
       type (sizes_type) :: s
-      type (dg_type) :: dg
+      type (dg_type) :: dg_here
 
 !.....Declare local variables
 
@@ -60,65 +60,65 @@
             DO 333 J = 1,NO_NBORS
                NBOR_EL = ELETAB(I,1+J)
 
-               IF(dg%WDFLG(NBOR_EL).EQ.0) CYCLE ! DON'T COUNT DRY ELEMENTS  sb 02/26/07
+               IF(dg_here%WDFLG(NBOR_EL).EQ.0) CYCLE ! DON'T COUNT DRY ELEMENTS  sb 02/26/07
 
                DO K = 1,3
                   N1 = NM(NBOR_EL,K)
                   IF (N1.EQ.I) THEN
-                     ZE_DG(J) = dg%ZE(1,NBOR_EL,1)
-                     QX_DG(J) = dg%QX(1,NBOR_EL,1)
-                     QY_DG(J) = dg%QY(1,NBOR_EL,1)
-                     HB_DG(J) = dg%HB(1,NBOR_EL,1)
+                     ZE_DG(J) = dg_here%ZE(1,NBOR_EL,1)
+                     QX_DG(J) = dg_here%QX(1,NBOR_EL,1)
+                     QY_DG(J) = dg_here%QY(1,NBOR_EL,1)
+                     HB_DG(J) = dg_here%HB(1,NBOR_EL,1)
 
 #ifdef TRACE
-                     iota_DG(J) = dg%iota(1,NBOR_EL,1)
-                     iotaa_DG(J) = dg%iotaa(1,NBOR_EL,1)
+                     iota_DG(J) = dg_here%iota(1,NBOR_EL,1)
+                     iotaa_DG(J) = dg_here%iotaa(1,NBOR_EL,1)
 #endif
 
 #ifdef CHEM
-                     iota_DG(J) = dg%iota(1,NBOR_EL,1)
-                     iota2_DG(J) = dg%iota2(1,NBOR_EL,1)
+                     iota_DG(J) = dg_here%iota(1,NBOR_EL,1)
+                     iota2_DG(J) = dg_here%iota2(1,NBOR_EL,1)
 #endif
 
 #ifdef DYNP
-                     dynP_DG(J) = dg%dynP(1,NBOR_EL,1)
+                     dynP_DG(J) = dg_here%dynP(1,NBOR_EL,1)
 #endif
 
 #ifdef SED_LAY
                      HB_DG(J) = 0.d0
-                     bed_DG(J,:) = dg%bed(1,NBOR_EL,1,:)
+                     bed_DG(J,:) = dg_here%bed(1,NBOR_EL,1,:)
                      HB_DG(J) = sum(bed_DG(J,:))
 #endif
 
 
-                     DO KK = 2,dg%DOFH
-                        ZE_DG(J) = ZE_DG(J) + dg%PHI_CORNER(KK,K,dg%ph)*dg%ZE(KK,NBOR_EL,1)
-                        QX_DG(J) = QX_DG(J) + dg%PHI_CORNER(KK,K,dg%ph)*dg%QX(KK,NBOR_EL,1)
-                        QY_DG(J) = QY_DG(J) + dg%PHI_CORNER(KK,K,dg%ph)*dg%QY(KK,NBOR_EL,1)
+                     DO KK = 2,dg_here%DOFH
+                        ZE_DG(J) = ZE_DG(J) + dg_here%PHI_CORNER(KK,K,dg_here%ph)*dg_here%ZE(KK,NBOR_EL,1)
+                        QX_DG(J) = QX_DG(J) + dg_here%PHI_CORNER(KK,K,dg_here%ph)*dg_here%QX(KK,NBOR_EL,1)
+                        QY_DG(J) = QY_DG(J) + dg_here%PHI_CORNER(KK,K,dg_here%ph)*dg_here%QY(KK,NBOR_EL,1)
 
 #ifdef TRACE
-                        iota_DG(J) = iota_DG(J) + dg%PHI_CORNER(KK,K,dg%ph)*dg%iota(KK,NBOR_EL,1)
-                        iotaa_DG(J) = iotaa_DG(J) + dg%PHI_CORNER(KK,K,dg%ph)*dg%iotaa(KK,NBOR_EL,1)
+                        iota_DG(J) = iota_DG(J) + dg_here%PHI_CORNER(KK,K,dg_here%ph)*dg_here%iota(KK,NBOR_EL,1)
+                        iotaa_DG(J) = iotaa_DG(J) + dg_here%PHI_CORNER(KK,K,dg_here%ph)*dg_here%iotaa(KK,NBOR_EL,1)
 #endif
 
 #ifdef CHEM
-                        iota_DG(J) = iota_DG(J) + dg%PHI_CORNER(KK,K,dg%ph)*dg%iota(KK,NBOR_EL,1)
-                        iota2_DG(J) = iota2_DG(J) + dg%PHI_CORNER(KK,K,dg%ph)*dg%iota2(KK,NBOR_EL,1)
+                        iota_DG(J) = iota_DG(J) + dg_here%PHI_CORNER(KK,K,dg_here%ph)*dg_here%iota(KK,NBOR_EL,1)
+                        iota2_DG(J) = iota2_DG(J) + dg_here%PHI_CORNER(KK,K,dg_here%ph)*dg_here%iota2(KK,NBOR_EL,1)
 #endif
 
 #ifdef DYNP
-                        dynP_DG(J) = dynP_DG(J) + dg%PHI_CORNER(KK,K,dg%ph)*dg%dynP(KK,NBOR_EL,1)
+                        dynP_DG(J) = dynP_DG(J) + dg_here%PHI_CORNER(KK,K,dg_here%ph)*dg_here%dynP(KK,NBOR_EL,1)
 #endif
 
 #ifdef SED_LAY
                         do l=1,s%layers
-                           bed_DG(J,l) = bed_DG(J,l) + dg%PHI_CORNER(KK,K,dg%ph)*dg%bed(KK,NBOR_EL,1,l)
-                           HB_DG(J) = HB_DG(J) + dg%PHI_CORNER(KK,K,dg%ph)*dg%bed(KK,NBOR_EL,1,l)
-                           iotaa_DG(J) = dg%iotaa(1,NBOR_EL,1)
+                           bed_DG(J,l) = bed_DG(J,l) + dg_here%PHI_CORNER(KK,K,dg_here%ph)*dg_here%bed(KK,NBOR_EL,1,l)
+                           HB_DG(J) = HB_DG(J) + dg_here%PHI_CORNER(KK,K,dg_here%ph)*dg_here%bed(KK,NBOR_EL,1,l)
+                           iotaa_DG(J) = dg_here%iotaa(1,NBOR_EL,1)
                         enddo
 #else
 
-                        HB_DG(J) = HB_DG(J) + dg%PHI_CORNER(KK,K,dg%ph)*dg%HB(KK,NBOR_EL,1)
+                        HB_DG(J) = HB_DG(J) + dg_here%PHI_CORNER(KK,K,dg_here%ph)*dg_here%HB(KK,NBOR_EL,1)
 #endif
                         
                      ENDDO
@@ -140,7 +140,7 @@
             DO J = 1,NO_NBORS
                NBOR_EL = ELETAB(I,1+J)
 
-               IF(dg%WDFLG(NBOR_EL).EQ.0) CYCLE ! DON'T COUNT DRY ELEMENTS  sb 02/26/07
+               IF(dg_here%WDFLG(NBOR_EL).EQ.0) CYCLE ! DON'T COUNT DRY ELEMENTS  sb 02/26/07
 
                AREA = 0.5*AREAS(NBOR_EL)/AREA_SUM
                DEPTH = ZE_DG(J) + HB_DG(J)
@@ -179,53 +179,53 @@
 
          do j=1,ne
 
-            dg%pa = pdg_el(j)
+            dg_here%pa = pdg_el(j)
             
-            if (dg%pa.eq.0) then
+            if (dg_here%pa.eq.0) then
 
-               dg%pa = 1
+               dg_here%pa = 1
 
             endif
 
-            do I = 1,dg%NAGP(dg%pa)
+            do I = 1,dg_here%NAGP(dg_here%pa)
 
-               do k = 1,dg%dofs(j)
+               do k = 1,dg_here%dofs(j)
 
-                  eta2(j) = eta2(j)+ dg%WAGP(I,dg%pa) * dg%PHI_AREA(K,I,dg%pa) * dg%ZE(K,j,1) * 0.5D0 *AREAS(j)
-                  UU2(j)  = UU2(j) + dg%WAGP(I,dg%pa) * dg%PHI_AREA(K,I,dg%pa) * dg%QX(K,j,1) * 0.5D0 *AREAS(j)
-                  VV2(j)  = VV2(j) + dg%WAGP(I,dg%pa) * dg%PHI_AREA(K,I,dg%pa) * dg%QY(K,j,1) * 0.5D0 *AREAS(j)
+                  eta2(j) = eta2(j)+ dg_here%WAGP(I,dg_here%pa) * dg_here%PHI_AREA(K,I,dg_here%pa) * dg_here%ZE(K,j,1) * 0.5D0 *AREAS(j)
+                  UU2(j)  = UU2(j) + dg_here%WAGP(I,dg_here%pa) * dg_here%PHI_AREA(K,I,dg_here%pa) * dg_here%QX(K,j,1) * 0.5D0 *AREAS(j)
+                  VV2(j)  = VV2(j) + dg_here%WAGP(I,dg_here%pa) * dg_here%PHI_AREA(K,I,dg_here%pa) * dg_here%QY(K,j,1) * 0.5D0 *AREAS(j)
 
 
 #ifdef TRACE
-                  tracer(J)  = tracer(J)  +  dg%WAGP(I,dg%pa) * dg%PHI_AREA(K,I,dg%pa) * dg%iota(K,j,1)  * 0.5D0*AREAS(j)
-                  tracer2(J) = tracer2(J) +  dg%WAGP(I,dg%pa) * dg%PHI_AREA(K,I,dg%pa) * dg%iotaa(K,j,1) * 0.5D0*AREAS(j) 
+                  tracer(J)  = tracer(J)  +  dg_here%WAGP(I,dg_here%pa) * dg_here%PHI_AREA(K,I,dg_here%pa) * dg_here%iota(K,j,1)  * 0.5D0*AREAS(j)
+                  tracer2(J) = tracer2(J) +  dg_here%WAGP(I,dg_here%pa) * dg_here%PHI_AREA(K,I,dg_here%pa) * dg_here%iotaa(K,j,1) * 0.5D0*AREAS(j) 
 #endif
 
 #ifdef CHEM
-                  tracer(J)  = tracer(J)  +  dg%WAGP(I,dg%pa) * dg%PHI_AREA(K,I,dg%pa) * dg%iota(K,j,1) * 0.5D0*AREAS(j)
-                  tracer2(J) = tracer2(J) +  dg%WAGP(I,dg%pa) * dg%PHI_AREA(K,I,dg%pa) * dg%iota2(K,j,1) * 0.5D0*AREAS(j)
+                  tracer(J)  = tracer(J)  +  dg_here%WAGP(I,dg_here%pa) * dg_here%PHI_AREA(K,I,dg_here%pa) * dg_here%iota(K,j,1) * 0.5D0*AREAS(j)
+                  tracer2(J) = tracer2(J) +  dg_here%WAGP(I,dg_here%pa) * dg_here%PHI_AREA(K,I,dg_here%pa) * dg_here%iota2(K,j,1) * 0.5D0*AREAS(j)
 #endif
 
 #ifdef DYNP
-                  dyn_P(J)  = dyn_P(J)  +  dg%WAGP(I,dg%pa) * dg%PHI_AREA(K,I,dg%pa) * dg%dynP(K,j,1) * 0.5D0*AREAS(j)
+                  dyn_P(J)  = dyn_P(J)  +  dg_here%WAGP(I,dg_here%pa) * dg_here%PHI_AREA(K,I,dg_here%pa) * dg_here%dynP(K,j,1) * 0.5D0*AREAS(j)
 #endif
 
 #ifdef SED_LAY
                   do l=1,s%layers
 
-                     bed_int(J,l) = bed_int(J,l) + dg%WAGP(I,dg%pa) 
-&                    *dg%PHI_AREA(K,I,dg%pa)*dg%bed(K,J,1,l)*0.5D0*AREAS(j)
+                     bed_int(J,l) = bed_int(J,l) + dg_here%WAGP(I,dg_here%pa) 
+&                    *dg_here%PHI_AREA(K,I,dg_here%pa)*dg_here%bed(K,J,1,l)*0.5D0*AREAS(j)
 
-                     DPe(j)  = DPe(j) + dg%WAGP(I,dg%pa)*dg%PHI_AREA(K,I,dg%pa)*dg%bed(K,J,1,l) 
+                     DPe(j)  = DPe(j) + dg_here%WAGP(I,dg_here%pa)*dg_here%PHI_AREA(K,I,dg_here%pa)*dg_here%bed(K,J,1,l) 
 &                    * 0.5D0 *AREAS(j)
                      
                   enddo
 
-                  tracer2(J) = tracer2(J) +  dg%WAGP(I,dg%pa) * dg%PHI_AREA(K,I,dg%pa) * dg%iotaa2(K,j,1) * 0.5D0*AREAS(j)
+                  tracer2(J) = tracer2(J) +  dg_here%WAGP(I,dg_here%pa) * dg_here%PHI_AREA(K,I,dg_here%pa) * dg_here%iotaa2(K,j,1) * 0.5D0*AREAS(j)
 #else
 
-                  DPe(j)  = DPe(j) + dg%WAGP(I,dg%pa) * dg%PHI_AREA(K,I,dg%pa) * dg%HB(K,j,1) * 0.5D0 *AREAS(j)
-                  tracer2(J) = tracer2(J) +  dg%WAGP(I,dg%pa) * dg%PHI_AREA(K,I,dg%pa) * dg%iotaa2(K,j,1) * 0.5D0*AREAS(j)
+                  DPe(j)  = DPe(j) + dg_here%WAGP(I,dg_here%pa) * dg_here%PHI_AREA(K,I,dg_here%pa) * dg_here%HB(K,j,1) * 0.5D0 *AREAS(j)
+                  tracer2(J) = tracer2(J) +  dg_here%WAGP(I,dg_here%pa) * dg_here%PHI_AREA(K,I,dg_here%pa) * dg_here%iotaa2(K,j,1) * 0.5D0*AREAS(j)
 
 #endif
                   
@@ -268,17 +268,17 @@
       
       do j = 1,ne
          
-         DO I = 1,dg%NAGP(dg%pa)
+         DO I = 1,dg_here%NAGP(dg_here%pa)
             
             iota_error = 0.D0
             
-            do k = 1,dg%dofs(j)
+            do k = 1,dg_here%dofs(j)
                
-               iota_error = iota_error + (dg%iota(k,j,1)- dg%iotaa(k,j,1)) * dg%PHI_AREA(k,I,dg%pa) 
+               iota_error = iota_error + (dg_here%iota(k,j,1)- dg_here%iotaa(k,j,1)) * dg_here%PHI_AREA(k,I,dg_here%pa) 
                
             ENDDO
             
-            iota_int = iota_int + iota_error**2.D0 * dg%WAGP(I,dg%pa)*AREAS(J)
+            iota_int = iota_int + iota_error**2.D0 * dg_here%WAGP(I,dg_here%pa)*AREAS(J)
             
          ENDDO
          
@@ -631,8 +631,8 @@
 !.....Write DG.63 results
                      
                      DO J = 1,NE
-                        DO K = 1,dg%DOFS(J)
-                           WRITE(631,*) J, dg%ZE(K,J,1)
+                        DO K = 1,dg_here%DOFS(J)
+                           WRITE(631,*) J, dg_here%ZE(K,J,1)
                         ENDDO
                      ENDDO
                      
@@ -641,7 +641,7 @@
                      IF (NOLIFA.GE.2) THEN
                         WRITE(651,2120) TIME_A, IT
                         DO J = 1,NE
-                           WRITE(651,2455) J,dg%WDFLG(J) 
+                           WRITE(651,2455) J,dg_here%WDFLG(J) 
  2455                      FORMAT(2X,I8,2X,I2)
                         ENDDO
                      ENDIF
@@ -698,8 +698,8 @@
 !.....Write DG.64 results
 
                   DO J = 1,NE
-                     DO K = 1,dg%DOFS(J)
-                        WRITE(641,*) J, dg%QX(K,J,1), dg%QY(K,J,1)
+                     DO K = 1,dg_here%DOFS(J)
+                        WRITE(641,*) J, dg_here%QX(K,J,1), dg_here%QY(K,J,1)
                      ENDDO
                   ENDDO
                   
@@ -857,9 +857,9 @@
 !     EE2=ETA2(NM(NNE(I),2))
 !     EE3=ETA2(NM(NNE(I),3))
 !     ET00(I)=EE1*STAIE1(I)+EE2*STAIE2(I)+EE3*STAIE3(I)
-                     ET00(I) = dg%ZE(1,NNE(I),1)
-                     DO K = 2,dg%DOFH
-                        ET00(I) = ET00(I) + dg%ZE(K,NNE(I),1)*dg%PHI_STAE(K,I)
+                     ET00(I) = dg_here%ZE(1,NNE(I),1)
+                     DO K = 2,dg_here%DOFH
+                        ET00(I) = ET00(I) + dg_here%ZE(K,NNE(I),1)*dg_here%PHI_STAE(K,I)
                      ENDDO
                   ENDDO
                   CALL LSQUPDES(ET00,NSTAE)
@@ -881,13 +881,13 @@
                      !DP2     = DPE(nnv(i)) !DP(NM(NNV(I),2))
                      !DP3     = DPE(nnv(i)) !DP(NM(NNV(I),3))
                      !DP00    = DP1*STAIV1(I) + DP2*STAIV2(I) +DP3*STAIV3(I)
-                     ZE00    = dg%ZE(1,NNV(I),1)
-                     UU00(I) = dg%QX(1,NNV(I),1)
-                     VV00(I) = dg%QY(1,NNV(I),1)
-                     DO K = 2,dg%DOFH
-                        ZE00    = ZE00    + dg%ZE(K,NNV(I),1)*dg%PHI_STAV(K,I)
-                        UU00(I) = UU00(I) + dg%QX(K,NNV(I),1)*dg%PHI_STAV(K,I)
-                        VV00(I) = VV00(I) + dg%QY(K,NNV(I),1)*dg%PHI_STAV(K,I)
+                     ZE00    = dg_here%ZE(1,NNV(I),1)
+                     UU00(I) = dg_here%QX(1,NNV(I),1)
+                     VV00(I) = dg_here%QY(1,NNV(I),1)
+                     DO K = 2,dg_here%DOFH
+                        ZE00    = ZE00    + dg_here%ZE(K,NNV(I),1)*dg_here%PHI_STAV(K,I)
+                        UU00(I) = UU00(I) + dg_here%QX(K,NNV(I),1)*dg_here%PHI_STAV(K,I)
+                        VV00(I) = VV00(I) + dg_here%QY(K,NNV(I),1)*dg_here%PHI_STAV(K,I)
                      ENDDO
                      DEPTH   = ZE00 + DP1 !DP00
                      FH_NL   = 1.D0/(NLEQ*DEPTH + LEQ)
@@ -1078,13 +1078,13 @@
          END DO
 !     nd
          do i=1,ne
-            if (dg%wdflg(i).ne.0) then
-               if (abs(dg%ze(1,i,1)).gt.elmaxe) then
+            if (dg_here%wdflg(i).ne.0) then
+               if (abs(dg_here%ze(1,i,1)).gt.elmaxe) then
                   imaxze=i
-                  elmaxe=abs(dg%ze(1,i,1))
+                  elmaxe=abs(dg_here%ze(1,i,1))
                endif
-               if (sqrt(dg%qx(1,i,1)**2+dg%qy(1,i,1)**2).gt.qmaxe) then
-                  qmaxe=sqrt(dg%qx(1,i,1)**2+dg%qy(1,i,1)**2)
+               if (sqrt(dg_here%qx(1,i,1)**2+dg_here%qy(1,i,1)**2).gt.qmaxe) then
+                  qmaxe=sqrt(dg_here%qx(1,i,1)**2+dg_here%qy(1,i,1)**2)
                   imaxq=i
                endif
                
@@ -1123,9 +1123,9 @@
 !$$$  endif
 
 
-            if (dg%padapt.eq.1) then
+            if (dg_here%padapt.eq.1) then
 
-               do k=dg%pl,dg%ph
+               do k=dg_here%pl,dg_here%ph
                   Minp(k) = 0
                   do i = 1,ne
                      if (pdg_el(i).eq.k) then
@@ -1138,7 +1138,7 @@
              print*,'|                      |                        |'
              print*,'|  Polynomial order    |     # of Elements      |'
              print*,'|______________________|________________________|'
-              do k=dg%pl,dg%ph
+              do k=dg_here%pl,dg_here%ph
              print*,'|',k,'         |',Minp(k),'           |'
              print*,'|______________________|________________________|'
               enddo
@@ -1146,12 +1146,12 @@
                print*,'With',ne,'total elements'               
             endif
 
-!$$$  if (dg%slopeflag.eq.4.or.dg%slopeflag.ge.6) then
+!$$$  if (dg_here%slopeflag.eq.4.or.dg_here%slopeflag.ge.6) then
 !$$$  
 !$$$  print*,''
 !$$$  print*,'p-adaptive slope limiting "ACTIVE."'
 !$$$  print*,''
-!$$$  print*,dg%lim_count_roll,'elements of a total of'
+!$$$  print*,dg_here%lim_count_roll,'elements of a total of'
 !$$$  print*,ne,'elements were VERTEX LIMITED'
 !$$$  print*,''
 !$$$  
@@ -1205,9 +1205,9 @@
 !$$$  endif
 
 
-            if (dg%padapt.eq.1) then
+            if (dg_here%padapt.eq.1) then
                
-               do k=dg%pl,dg%ph
+               do k=dg_here%pl,dg_here%ph
                   Minp(k) = 0
                   do i = 1,ne
                      if (pdg_el(i).eq.k) then
@@ -1220,7 +1220,7 @@
              print*,'|                      |                        |'
              print*,'|  Polynomial order    |     # of Elements      |'
              print*,'|______________________|________________________|'
-               do k=dg%pl,dg%ph
+               do k=dg_here%pl,dg_here%ph
              print*,'|',k,'         |',Minp(k),'           |'
              print*,'|______________________|________________________|'
                enddo
@@ -1228,12 +1228,12 @@
                print*,'With',ne,'total elements'               
             endif
 
-!$$$  if (dg%slopeflag.eq.4.or.dg%slopeflag.ge.6) then
+!$$$  if (dg_here%slopeflag.eq.4.or.dg_here%slopeflag.ge.6) then
 !$$$  
 !$$$  print*,''
 !$$$  print*,'p-adaptive slope limiting "ACTIVE."'
 !$$$  print*,''
-!$$$  print*,dg%lim_count_roll,'elements of a total of'
+!$$$  print*,dg_here%lim_count_roll,'elements of a total of'
 !$$$  print*,ne,'elements were VERTEX LIMITED'
 !$$$  print*,''
 !$$$  
@@ -1259,7 +1259,7 @@
       
 !.....If applicable write out a DG hot start
 
-      IF ((dg%DGHOT.EQ.1).AND.(MOD(IT,dg%DGHOTSPOOL).EQ.0)) THEN
+      IF ((dg_here%DGHOT.EQ.1).AND.(MOD(IT,dg_here%DGHOTSPOOL).EQ.0)) THEN
          
          OPEN(263,FILE=S%DIRNAME//'/'//'Hot_start.263')
          OPEN(264,FILE=S%DIRNAME//'/'//'Hot_start.264')
@@ -1277,27 +1277,27 @@
          OPEN(290,FILE=S%DIRNAME//'/'//'Hot_start.290')
 #endif
 
-         WRITE(263,*) dg%PH
-         WRITE(264,*) dg%PH, dg%PH
+         WRITE(263,*) dg_here%PH
+         WRITE(264,*) dg_here%PH, dg_here%PH
          WRITE(214,*) IT
 
          DO J = 1,s%MNE
-            DO K = 1,dg%DOFH
-               WRITE(263,*) dg%ZE(K,J,1)
-               WRITE(264,*) dg%QX(K,J,1), dg%QY(K,J,1)
-               WRITE(214,*) dg%HB(K,J,1), dg%WDFLG(J)
+            DO K = 1,dg_here%DOFH
+               WRITE(263,*) dg_here%ZE(K,J,1)
+               WRITE(264,*) dg_here%QX(K,J,1), dg_here%QY(K,J,1)
+               WRITE(214,*) dg_here%HB(K,J,1), dg_here%WDFLG(J)
 #ifdef TRACE
-               WRITE(288,*) dg%iota(K,J,1)
+               WRITE(288,*) dg_here%iota(K,J,1)
 #endif
 #ifdef CHEM
-               WRITE(289,*) dg%iota(K,J,1),dg%iota2(K,J,1)
+               WRITE(289,*) dg_here%iota(K,J,1),dg_here%iota2(K,J,1)
 #endif
 #ifdef DYNP
-               WRITE(291,*) dg%dynP(K,J,1)
+               WRITE(291,*) dg_here%dynP(K,J,1)
 #endif
 #ifdef SED_LAY
                do ll=1,s%layers
-                  WRITE(290,*) dg%bed(K,J,1,ll)
+                  WRITE(290,*) dg_here%bed(K,J,1,ll)
                enddo
 #endif
             ENDDO
@@ -1323,9 +1323,9 @@
 !.....If end of run write out DG data
 
 !     IF (IT.EQ.NT) THEN
-!     dg%H_TRI = SQRT((X(1)-X(2))**2 + (Y(1)-Y(2))**2)
-!     WRITE(88,*) dg%H_TRI,P,0
-!     WRITE(89,*) dg%H_TRI,P,0
+!     dg_here%H_TRI = SQRT((X(1)-X(2))**2 + (Y(1)-Y(2))**2)
+!     WRITE(88,*) dg_here%H_TRI,P,0
+!     WRITE(89,*) dg_here%H_TRI,P,0
 !     IF (MYPROC == 0) THEN
 !     PRINT*,'T FINAL =',NT*DTDP
 !     PRINT*,'DT =',DTDP
@@ -1337,12 +1337,12 @@
 !     QX_DG(1) = 0.D0
 !     QY_DG(1) = 0.D0
 !     
-!     DO K=1,dg%DOF
-!     ZE_DG(1) = ZE_DG(1) + dg%PHI_CENTER(K)*dg%ZE(K,J,1)
-!     QX_DG(1) = QX_DG(1) + dg%PHI_CENTER(K)*dg%QX(K,J,1)
-!     QY_DG(1) = QY_DG(1) + dg%PHI_CENTER(K)*dg%QY(K,J,1)
+!     DO K=1,dg_here%DOF
+!     ZE_DG(1) = ZE_DG(1) + dg_here%PHI_CENTER(K)*dg_here%ZE(K,J,1)
+!     QX_DG(1) = QX_DG(1) + dg_here%PHI_CENTER(K)*dg_here%QX(K,J,1)
+!     QY_DG(1) = QY_DG(1) + dg_here%PHI_CENTER(K)*dg_here%QY(K,J,1)
 !     
-!     WRITE(88,*) dg%ZE(K,J,1),dg%QX(K,J,1),dg%QY(K,J,1)
+!     WRITE(88,*) dg_here%ZE(K,J,1),dg_here%QX(K,J,1),dg_here%QY(K,J,1)
 !     
 !     ENDDO
 !     
@@ -1366,22 +1366,22 @@
 !
 !***********************************************************************
 
-      SUBROUTINE WRITE_DG_IC(dg)
+      SUBROUTINE WRITE_DG_IC(dg_here)
 
       USE GLOBAL
       USE DG
 
-      type (dg_type) :: dg
+      type (dg_type) :: dg_here
 
 !.....DG.63.IC = Record of the initial surface elevation
 !      OPEN(632,FILE=S%DIRNAME//'/'//'DG.63.IC')
 !      WRITE(632,3220) RUNDES, RUNID, AGRID
-!      WRITE(632,3645) 1, dg%DOF, DTDP*NSPOOLGE, NSPOOLGE, 1
+!      WRITE(632,3645) 1, dg_here%DOF, DTDP*NSPOOLGE, NSPOOLGE, 1
 
 !      WRITE(632,2120) 0.0, 1
 !      DO J = 1,NE
-!        DO K = 1,dg%DOF
-!          WRITE(632,2453) J, dg%ZE(K,J,1)
+!        DO K = 1,dg_here%DOF
+!          WRITE(632,2453) J, dg_here%ZE(K,J,1)
 !        ENDDO
 !      ENDDO
       
@@ -1390,12 +1390,12 @@
 !.....DG.64.IC = Record of the initial discharge
 !      OPEN(642,FILE=S%DIRNAME//'/'//'DG.64.IC')
 !      WRITE(642,3220) RUNDES, RUNID, AGRID
-!      WRITE(642,3645) 1, dg%DOF, DTDP*NSPOOLGV, NSPOOLGV, 2
+!      WRITE(642,3645) 1, dg_here%DOF, DTDP*NSPOOLGV, NSPOOLGV, 2
 !
 !      WRITE(642,2120) 0.0, 1
 !      DO J = 1,NE
-!        DO K = 1,dg%DOF
-!          WRITE(642,2454) J, dg%QX(K,J,1), dg%QY(K,J,1)
+!        DO K = 1,dg_here%DOF
+!          WRITE(642,2454) J, dg_here%QX(K,J,1), dg_here%QY(K,J,1)
 !        ENDDO
 !      ENDDO
 !
@@ -1405,11 +1405,11 @@
 !      IF (NOLIFA.GE.2) THEN
 !        OPEN(652,FILE=S%DIRNAME//'/'//'DG.65.IC')
 !        WRITE(652,3220) RUNDES, RUNID, AGRID
-!        WRITE(652,3645) 1, dg%DOF, DTDP*NSPOOLGE, NSPOOLGE, 1
+!        WRITE(652,3645) 1, dg_here%DOF, DTDP*NSPOOLGE, NSPOOLGE, 1
 !
 !        WRITE(652,2120) 0.0, 1
 !       DO J = 1,NE
-!          WRITE(652,2455) J,dg%WDFLG(J)
+!          WRITE(652,2455) J,dg_here%WDFLG(J)
 !       ENDDO
 !
 !        CLOSE(652)

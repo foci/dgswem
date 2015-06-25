@@ -8,7 +8,7 @@
 !
 !***********************************************************************
 
-      SUBROUTINE STA_BASIS(dg, XSTA, YSTA, ELSTA, PHI_STA )
+      SUBROUTINE STA_BASIS(dg_here, XSTA, YSTA, ELSTA, PHI_STA )
 
       USE GLOBAL
       USE DG
@@ -16,10 +16,10 @@
 
       IMPLICIT NONE
 
-      type (dg_type) :: dg
+      type (dg_type) :: dg_here
 
       INTEGER ELSTA, NSTA
-      REAL(SZ) PHI_STA(dg%DOF)
+      REAL(SZ) PHI_STA(dg_here%DOF)
       REAL(SZ) XSTA, YSTA, AREA
       REAL(SZ) Z1, Z2
 
@@ -47,8 +47,8 @@
 
 !.....Compute the basis functions at that point and store
 
-      CALL ORTHOBASIS( Z1, Z2, PDG_EL(ELSTA), dg%DOF, dg%PHI, dg%DPHIDZ1, dg%DPHIDZ2 )
-      PHI_STA(:) = dg%PHI
+      CALL ORTHOBASIS( Z1, Z2, PDG_EL(ELSTA), dg_here%DOF, dg_here%PHI, dg_here%DPHIDZ1, dg_here%DPHIDZ2 )
+      PHI_STA(:) = dg_here%PHI
 
       RETURN
       END SUBROUTINE STA_BASIS

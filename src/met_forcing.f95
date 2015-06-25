@@ -7,7 +7,7 @@
 !
 !***********************************************************************
 
-      SUBROUTINE MET_FORCING(s,dg,IT)
+      SUBROUTINE MET_FORCING(s,dg_here,IT)
       
       USE GLOBAL
       USE DG
@@ -31,7 +31,7 @@
       IMPLICIT NONE
 
       type (sizes_type) :: s
-      type (dg_type) :: dg
+      type (dg_type) :: dg_here
       
       REAL(SZ) WindDragLimit
       INTEGER II, IT
@@ -39,7 +39,7 @@
 !.....Set the wind drag limit
 
       WindDragLimit = 0.002
-      RampMete = dg%rampdg
+      RampMete = dg_here%rampdg
 
 !asey 130710: Added this section.
       IF(WTIME1.LT.ITHS*DTDP)THEN
@@ -64,7 +64,7 @@
            
 !..........Apply the met ramp function
 
-!           RampMete = dg%RAMPDG
+!           RampMete = dg_here%RAMPDG
            
            WSX2(II)    = RampMete*WSX2(II)
            WSY2(II)    = RampMete*WSY2(II)
@@ -117,7 +117,7 @@
           
 !.........Apply mete ramp
 
-!          RampMete = dg%RAMPDG
+!          RampMete = dg_here%RAMPDG
           
           WSX2(II)    = RampMete*WINDX
           WSY2(II)    = RampMete*WINDY
@@ -184,7 +184,7 @@
            ENDIF
            
 !..........Apply met ramp
-!           RampMete = dg%RAMPDG
+!           RampMete = dg_here%RAMPDG
            WSX2(II)    = RampMete*0.001293D0*WDRAGCO*WINDX*WINDMAG
            WSY2(II)    = RampMete*0.001293D0*WDRAGCO*WINDY*WINDMAG
            WVNXOUT(II) = RampMete*WINDX
@@ -256,7 +256,7 @@
           ENDIF
             
 !.........Apply met ramp
-!           RampMete = dg%RAMPDG
+!           RampMete = dg_here%RAMPDG
           WSX2(II)    = RampMete*0.001293d0*WDRAGCO*WINDX*WINDMAG
           WSY2(II)    = RampMete*0.001293d0*WDRAGCO*WINDY*WINDMAG
           PR2(II)     = RampMete*(PRN1(II)+WTRATIO*(PRN2(II)- PRN1(II)))

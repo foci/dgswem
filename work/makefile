@@ -64,14 +64,14 @@ ADC_SRC    =  dgswem.f95 read_input.f95 cstart.f95 hstart.f95 radiation_edge_hyd
 	ibarrier_edge_hydro.f95 ebarrier_edge_hydro.f95  \
 	calc_normal.f95 create_edge_data.f95 \
 	DG_timestep.f95 DG_hydro_timestep.f95 \
-	edge_int_hydro.f95 flow_edge_hydro.f95 \
+	flow_edge_hydro.f95 \
 	internal_edge_hydro.f95 land_edge_hydro.f95 \
 	ocean_edge_hydro.f95  \
 	orthobasis_area.f95 orthobasis_edge.f95 p_enrichment.f95 prep_DG.f95 quad_pts_area.f95 \
 	quad_pts_edge.f95 radiation_edge_hydro.f95 read_input.f95 rhs_dg_hydro.f95 \
 	numerical_flux.f95 tidal_potential.f95 write_results.f95 \
-	slopelimiter.f95 prep_slopelim.f95 ocean_edge_hydro_post.f95 ocean_flow_edge_hydro.f95 \
-	wetdry.f95 LDG_hydro.f95 met_forcing.f95 sta_basis.f95 modal2nodal.f95 write_output.f95 make_dirname.f95
+	slopelimiter.f95 prep_slopelim.f95 \
+	wetdry.f95 LDG_hydro.f95 met_forcing.f95 sta_basis.f95 write_output.f95 make_dirname.f95
 #Casey 121126: Added modal2nodal.f95 and write_output.f95 to the previous line.
 
 METIS1_OBJ:= $(patsubst %.f95, $(O_DIR)%.o, $(METIS1_SRC) )
@@ -220,7 +220,6 @@ $(O_DIR)calc_normal.o         	:  calc_normal.f95 $(ADC_MOBJ)
 $(O_DIR)create_edge_data.o    	:  create_edge_data.f95 $(ADC_MOBJ)
 $(O_DIR)DG_timestep.o         	:  DG_timestep.f95 $(ADC_MOBJ)
 $(O_DIR)DG_hydro_timestep.o   	:  DG_hydro_timestep.f95 $(ADC_MOBJ)
-$(O_DIR)edge_int_hydro.o      	:  edge_int_hydro.f95 $(ADC_MOBJ)
 $(O_DIR)flow_edge_hydro.o     	:  flow_edge_hydro.f95 $(ADC_MOBJ)
 $(O_DIR)internal_edge_hydro.o 	:  internal_edge_hydro.f95 $(ADC_MOBJ)
 $(O_DIR)land_edge_hydro.o     	:  land_edge_hydro.f95 $(ADC_MOBJ)
@@ -243,13 +242,10 @@ $(O_DIR)pdg_debug.o                 :  pdg_debug.f95  $(ADC_MOBJ) $(MSG_MOBJ)
 $(O_DIR)ghost_internal_edge_hydro.o :  ghost_internal_edge_hydro.f95  $(ADC_MOBJ) $(MSG_MOBJ)
 $(O_DIR)slopelimiter.o              :  slopelimiter.f95  $(ADC_MOBJ)
 $(O_DIR)prep_slopelim.o             :  prep_slopelim.f95  $(ADC_MOBJ)
-$(O_DIR)ocean_edge_hydro_post.o     :  ocean_edge_hydro_post.f95 $(ADC_MOBJ)
-$(O_DIR)ocean_flow_edge_hydro.o     :  ocean_flow_edge_hydro.f95 $(ADC_MOBJ)
 $(O_DIR)wetdry.o                    :  wetdry.f95  $(ADC_MOBJ)
 $(O_DIR)LDG_hydro.o                 :  LDG_hydro.f95  $(ADC_MOBJ)
 $(O_DIR)met_forcing.o               :  met_forcing.f95  $(ADC_MOBJ)
 $(O_DIR)sta_basis.o                 :  sta_basis.f95  $(ADC_MOBJ)
-$(O_DIR)modal2nodal.o               :  modal2nodal.f95  $(ADC_MOBJ)
 $(O_DIR)write_output.o              :  write_output.f95
 #Casey 121126: Added the previous lines for modal2nodal.F and write_output.F.
 

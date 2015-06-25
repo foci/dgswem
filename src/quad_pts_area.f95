@@ -17,7 +17,7 @@
 !     
 !***********************************************************************
 
-      SUBROUTINE QUAD_PTS_AREA(s,dg,PQ,pad)
+      SUBROUTINE QUAD_PTS_AREA(s,dg_here,PQ,pad)
       
 !.....Use appropriate modules
 
@@ -28,7 +28,7 @@
       IMPLICIT NONE
 
       type (sizes_type) :: s
-      type (dg_type) :: dg
+      type (dg_type) :: dg_here
 
 !.....Declare local variables
 
@@ -48,7 +48,7 @@
       
       AREADG = 2.D0
       mm = 0.D0
-      phh = 2*dg%ph
+      phh = 2*dg_here%ph
 
       IF (PQ.EQ.0) PQ = 2
 
@@ -750,80 +750,80 @@
          
       ENDIF
       
-!.....Determine the size of dg%XAGP, dg%YAGP, and dg%WAGP
+!.....Determine the size of dg_here%XAGP, dg_here%YAGP, and dg_here%WAGP
 
       if (pad.eq.1.and.pq.eq.2) then
          
-         dg%NAGP(dg%ph) = 0
+         dg_here%NAGP(dg_here%ph) = 0
          DO I=1,nh
-            dg%NAGP(dg%ph) = dg%NAGP(dg%ph) + MMh(I)
+            dg_here%NAGP(dg_here%ph) = dg_here%NAGP(dg_here%ph) + MMh(I)
          ENDDO
          
-!.....Allocate dg%XaGP, dg%YaGP, and dg%WaGP
+!.....Allocate dg_here%XaGP, dg_here%YaGP, and dg_here%WaGP
 
-         CALL ALLOC_AREA_GAUSS(s,dg)
+         CALL ALLOC_AREA_GAUSS(s,dg_here)
 
       endif
 
-      dg%NAGP(pad) = 0
+      dg_here%NAGP(pad) = 0
       DO I=1,N
-         dg%NAGP(pad) = dg%NAGP(pad) + MM(I)
+         dg_here%NAGP(pad) = dg_here%NAGP(pad) + MM(I)
       ENDDO
 
 !.....Transform the Gauss points to master element coordinates
       
       K = 1
-      DO I=1,dg%NAGP(pad)
+      DO I=1,dg_here%NAGP(pad)
 
          IF (MM(I).EQ.1) THEN
             
-            dg%XAGP(K,pad) = (ADG(1) + BDG(1) + CDG(1))/3.D0
-            dg%YAGP(K,pad) = (ADG(2) + BDG(2) + CDG(2))/3.D0
-            dg%WAGP(K,pad) = AREADG*W1(I)
+            dg_here%XAGP(K,pad) = (ADG(1) + BDG(1) + CDG(1))/3.D0
+            dg_here%YAGP(K,pad) = (ADG(2) + BDG(2) + CDG(2))/3.D0
+            dg_here%WAGP(K,pad) = AREADG*W1(I)
             
             K = K + 1
             
          ELSEIF (MM(I).EQ.3) THEN
             
-            dg%XAGP(K,pad) = ADG(1)*Z1(I) + BDG(1)*Z2(I) + CDG(1)*Z3(I)
-            dg%YAGP(K,pad) = ADG(2)*Z1(I) + BDG(2)*Z2(I) + CDG(2)*Z3(I)
-            dg%WAGP(K,pad) = AREADG*W1(I)
+            dg_here%XAGP(K,pad) = ADG(1)*Z1(I) + BDG(1)*Z2(I) + CDG(1)*Z3(I)
+            dg_here%YAGP(K,pad) = ADG(2)*Z1(I) + BDG(2)*Z2(I) + CDG(2)*Z3(I)
+            dg_here%WAGP(K,pad) = AREADG*W1(I)
 
-            dg%XAGP(K+1,pad) = ADG(1)*Z2(I) + BDG(1)*Z3(I) + CDG(1)*Z1(I)
-            dg%YAGP(K+1,pad) = ADG(2)*Z2(I) + BDG(2)*Z3(I) + CDG(2)*Z1(I)
-            dg%WAGP(K+1,pad) = AREADG*W1(I)
+            dg_here%XAGP(K+1,pad) = ADG(1)*Z2(I) + BDG(1)*Z3(I) + CDG(1)*Z1(I)
+            dg_here%YAGP(K+1,pad) = ADG(2)*Z2(I) + BDG(2)*Z3(I) + CDG(2)*Z1(I)
+            dg_here%WAGP(K+1,pad) = AREADG*W1(I)
 
-            dg%XAGP(K+2,pad) = ADG(1)*Z3(I) + BDG(1)*Z1(I) + CDG(1)*Z2(I)
-            dg%YAGP(K+2,pad) = ADG(2)*Z3(I) + BDG(2)*Z1(I) + CDG(2)*Z2(I)
-            dg%WAGP(K+2,pad) = AREADG*W1(I)
+            dg_here%XAGP(K+2,pad) = ADG(1)*Z3(I) + BDG(1)*Z1(I) + CDG(1)*Z2(I)
+            dg_here%YAGP(K+2,pad) = ADG(2)*Z3(I) + BDG(2)*Z1(I) + CDG(2)*Z2(I)
+            dg_here%WAGP(K+2,pad) = AREADG*W1(I)
             
             K = K + 3
             
          ELSEIF (MM(I).EQ.6) THEN
             
-            dg%XAGP(K,pad) = ADG(1)*Z1(I) + BDG(1)*Z2(I) + CDG(1)*Z3(I)
-            dg%YAGP(K,pad) = ADG(2)*Z1(I) + BDG(2)*Z2(I) + CDG(2)*Z3(I)
-            dg%WAGP(K,pad) = AREADG*W1(I)
+            dg_here%XAGP(K,pad) = ADG(1)*Z1(I) + BDG(1)*Z2(I) + CDG(1)*Z3(I)
+            dg_here%YAGP(K,pad) = ADG(2)*Z1(I) + BDG(2)*Z2(I) + CDG(2)*Z3(I)
+            dg_here%WAGP(K,pad) = AREADG*W1(I)
 
-            dg%XAGP(K+1,pad) = ADG(1)*Z2(I) + BDG(1)*Z3(I) + CDG(1)*Z1(I)
-            dg%YAGP(K+1,pad) = ADG(2)*Z2(I) + BDG(2)*Z3(I) + CDG(2)*Z1(I)
-            dg%WAGP(K+1,pad) = AREADG*W1(I)
+            dg_here%XAGP(K+1,pad) = ADG(1)*Z2(I) + BDG(1)*Z3(I) + CDG(1)*Z1(I)
+            dg_here%YAGP(K+1,pad) = ADG(2)*Z2(I) + BDG(2)*Z3(I) + CDG(2)*Z1(I)
+            dg_here%WAGP(K+1,pad) = AREADG*W1(I)
 
-            dg%XAGP(K+2,pad) = ADG(1)*Z3(I) + BDG(1)*Z1(I) + CDG(1)*Z2(I)
-            dg%YAGP(K+2,pad) = ADG(2)*Z3(I) + BDG(2)*Z1(I) + CDG(2)*Z2(I)
-            dg%WAGP(K+2,pad) = AREADG*W1(I)
+            dg_here%XAGP(K+2,pad) = ADG(1)*Z3(I) + BDG(1)*Z1(I) + CDG(1)*Z2(I)
+            dg_here%YAGP(K+2,pad) = ADG(2)*Z3(I) + BDG(2)*Z1(I) + CDG(2)*Z2(I)
+            dg_here%WAGP(K+2,pad) = AREADG*W1(I)
 
-            dg%XAGP(K+3,pad) = ADG(1)*Z1(I) + BDG(1)*Z3(I) + CDG(1)*Z2(I)
-            dg%YAGP(K+3,pad) = ADG(2)*Z1(I) + BDG(2)*Z3(I) + CDG(2)*Z2(I)
-            dg%WAGP(K+3,pad) = AREADG*W1(I)
+            dg_here%XAGP(K+3,pad) = ADG(1)*Z1(I) + BDG(1)*Z3(I) + CDG(1)*Z2(I)
+            dg_here%YAGP(K+3,pad) = ADG(2)*Z1(I) + BDG(2)*Z3(I) + CDG(2)*Z2(I)
+            dg_here%WAGP(K+3,pad) = AREADG*W1(I)
 
-            dg%XAGP(K+4,pad) = ADG(1)*Z2(I) + BDG(1)*Z1(I) + CDG(1)*Z3(I)
-            dg%YAGP(K+4,pad) = ADG(2)*Z2(I) + BDG(2)*Z1(I) + CDG(2)*Z3(I)
-            dg%WAGP(K+4,pad) = AREADG*W1(I)
+            dg_here%XAGP(K+4,pad) = ADG(1)*Z2(I) + BDG(1)*Z1(I) + CDG(1)*Z3(I)
+            dg_here%YAGP(K+4,pad) = ADG(2)*Z2(I) + BDG(2)*Z1(I) + CDG(2)*Z3(I)
+            dg_here%WAGP(K+4,pad) = AREADG*W1(I)
 
-            dg%XAGP(K+5,pad) = ADG(1)*Z3(I) + BDG(1)*Z2(I) + CDG(1)*Z1(I)
-            dg%YAGP(K+5,pad) = ADG(2)*Z3(I) + BDG(2)*Z2(I) + CDG(2)*Z1(I)
-            dg%WAGP(K+5,pad) = AREADG*W1(I)
+            dg_here%XAGP(K+5,pad) = ADG(1)*Z3(I) + BDG(1)*Z2(I) + CDG(1)*Z1(I)
+            dg_here%YAGP(K+5,pad) = ADG(2)*Z3(I) + BDG(2)*Z2(I) + CDG(2)*Z1(I)
+            dg_here%WAGP(K+5,pad) = AREADG*W1(I)
 
             K = K + 6
             

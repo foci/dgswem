@@ -12,7 +12,7 @@
 !
 !***********************************************************************
 
-      SUBROUTINE TIDAL_POTENTIAL(dg)
+      SUBROUTINE TIDAL_POTENTIAL(dg_here)
 
 !.....Use appropriate modules
 
@@ -21,11 +21,11 @@
       
       IMPLICIT NONE
 
-      type (dg_type) :: dg
+      type (dg_type) :: dg_here
 
       INTEGER j,i
       
-      dg%TIMEH_DG = TIMEH - DTDP + dg%DTVD(dg%IRK)*DTDP
+      dg_here%TIMEH_DG = TIMEH - DTDP + dg_here%DTVD(dg_here%IRK)*DTDP
       
 !.....Loop over the nodes
 
@@ -42,11 +42,11 @@
           IF (PERT(J).EQ.0.) THEN
             NCYC = 0
           ELSE
-            NCYC = INT(dg%TIMEH_DG/PERT(J))
+            NCYC = INT(dg_here%TIMEH_DG/PERT(J))
           ENDIF
-          ARGT    = AMIGT(J)*(dg%TIMEH_DG - NCYC*PERT(J)) + FACET(J)
-          TPMUL   = dg%RAMPDG*ETRF(J)*TPK(J)*FFT(J)
-          SALTMUL = dg%RAMPDG*FFT(J)
+          ARGT    = AMIGT(J)*(dg_here%TIMEH_DG - NCYC*PERT(J)) + FACET(J)
+          TPMUL   = dg_here%RAMPDG*ETRF(J)*TPK(J)*FFT(J)
+          SALTMUL = dg_here%RAMPDG*FFT(J)
           NA      = NINT(0.00014/AMIGT(J))
         
 !.....Semi-diurnal species

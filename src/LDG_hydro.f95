@@ -11,7 +11,7 @@
 !     
 !***********************************************************************
 
-      SUBROUTINE LDG_HYDRO(s,dg,IT)
+      SUBROUTINE LDG_HYDRO(s,dg_here,IT)
 
 !.....Use appropriate modules
       
@@ -27,7 +27,7 @@
       IMPLICIT NONE
       
       type (sizes_type) :: s
-      type (dg_type) :: dg
+      type (dg_type) :: dg_here
 
 !.....Declare local variables
 
@@ -37,43 +37,43 @@
       REAL(SZ) DPAVG,lim_by
       Real(SZ),Allocatable :: tmp_mz(:,:,:,:)
 
-      Allocate ( tmp_mz(dofh,2,1,s%MNE) )
+      Allocate ( tmp_mz(dg_here%dofh,2,1,s%MNE) )
 
 !.....Initialize for viscosity/diffusion
 #ifdef WAVE_DIF
-      HZ = 0.D0
+      dg_here%HZ = 0.D0
 #endif 
-      LZ = 0.D0
+      dg_here%LZ = 0.D0
 #ifdef TRACE
-      TZ = 0.d0
+      dg_here%TZ = 0.d0
 #endif
 #ifdef SED_LAY
-      MZ = 0.d0
+      dg_here%MZ = 0.d0
 #endif
      
 !.....Compute elevation specified edges
 
-      IF (NEEDS.GT.0)  CALL OCEAN_EDGE_LDG_HYDRO(s,dg)
+      IF (dg_here%NEEDS.GT.0)  CALL OCEAN_EDGE_LDG_HYDRO(s,dg_here)
 
 !.....Compute no-normal flow edges
 
-      IF (NLEDS.GT.0)  CALL LAND_EDGE_LDG_HYDRO(s,dg)
+      IF (dg_here%NLEDS.GT.0)  CALL LAND_EDGE_LDG_HYDRO(s,dg_here)
 
 !.....Compute non-zero flow edges
 
-      IF (NFEDS.GT.0)  CALL FLOW_EDGE_LDG_HYDRO(s,dg)
+      IF (dg_here%NFEDS.GT.0)  CALL FLOW_EDGE_LDG_HYDRO(s,dg_here)
       
 !.....Compute radiation edges
 
-      IF (NREDS.GT.0)  CALL RADIATION_EDGE_LDG_HYDRO(s,dg)
+      IF (dg_here%NREDS.GT.0)  CALL RADIATION_EDGE_LDG_HYDRO(s,dg_here)
 
 !.....Compute internal edges
 
-      CALL INTERNAL_EDGE_LDG_HYDRO(s,dg)
+      CALL INTERNAL_EDGE_LDG_HYDRO(s,dg_here)
 
 !.....Loop over interior elements
 
-      CALL RHS_LDG_HYDRO(s,dg)
+      CALL RHS_LDG_HYDRO(s,dg_here)
 
       do L=1,NE
 
@@ -81,16 +81,16 @@
          N2 = NM(L,2)
          N3 = NM(L,3)
          if (EVMSUM.NE.0.D0) then
-            EVMAvg = (EVM(N1)+EVM(N2)+EVM(N3))/3.d0
+            dg_here%EVMAvg = (EVM(N1)+EVM(N2)+EVM(N3))/3.d0
          else
-            EVMAvg = 0.D0
+            dg_here%EVMAvg = 0.D0
          endif
 
-         bg_dif = 0.D0 
-         trc_dif = 0.D0 
+         dg_here%bg_dif = 0.D0 
+         dg_here%trc_dif = 0.D0 
           
 #ifdef SED_LAY
-         SEVDMAvg = SEVDM 
+         dg_here%SEVDMAvg = dg_here%SEVDM 
 #endif
  
 #ifdef ARTDIF
@@ -98,100 +98,100 @@
          lim_by = 1.D0
          
 #ifdef WAVE_DIF
-         if (entrop(1,L).gt.s0+kappa) then
+         if (entrop(1,L).gt.dg_here%s0+dg_here%kappa) then
             
-            HZ(:,:,:,L) = (bg_dif+e1(1)) *&
-           (abs(lim_by+balance(1)))**pa * HZ(:,:,:,L)
+            dg_here%HZ(:,:,:,L) = (dg_here%bg_dif+dg_here%e1(1)) *&
+           (abs(lim_by+dg_here%balance(1)))**dg_here%pa * dg_here%HZ(:,:,:,L)
 
          else
 
-            HZ(:,:,:,L) = bg_dif*HZ(:,:,:,L)
+            dg_here%HZ(:,:,:,L) = dg_here%bg_dif*dg_here%HZ(:,:,:,L)
 
          endif
 #endif
 
-         if (entrop(2,L).gt.s0+kappa) then
+         if (entrop(2,L).gt.dg_here%s0+dg_here%kappa) then
             
-            LZ(:,1,1,L) = (EVMAvg+e1(2) * &
-           (abs(lim_by+balance(2)))**pa)  * LZ(:,1,1,L)
-            LZ(:,1,2,L) = (EVMAvg+e1(2) *&
-           (abs(lim_by+balance(2)))**pa ) * LZ(:,1,2,L)
-            LZ(:,2,1,L) = (EVMAvg+e1(2) *&
-           (abs(lim_by+balance(2)))**pa ) * LZ(:,2,1,L)
+            dg_here%LZ(:,1,1,L) = (dg_here%EVMAvg+dg_here%e1(2) * &
+           (abs(lim_by+dg_here%balance(2)))**dg_here%pa)  * dg_here%LZ(:,1,1,L)
+            dg_here%LZ(:,1,2,L) = (dg_here%EVMAvg+dg_here%e1(2) *&
+           (abs(lim_by+dg_here%balance(2)))**dg_here%pa ) * dg_here%LZ(:,1,2,L)
+            dg_here%LZ(:,2,1,L) = (dg_here%EVMAvg+dg_here%e1(2) *&
+           (abs(lim_by+dg_here%balance(2)))**dg_here%pa ) * dg_here%LZ(:,2,1,L)
      
          else
 
-            LZ(:,1,:,L) = EVMAvg* LZ(:,1,:,L)
-            LZ(:,2,1,L) = EVMAvg* LZ(:,2,1,L)
+            dg_here%LZ(:,1,:,L) = dg_here%EVMAvg* dg_here%LZ(:,1,:,L)
+            dg_here%LZ(:,2,1,L) = dg_here%EVMAvg* dg_here%LZ(:,2,1,L)
             
          endif
 
-         if (entrop(3,L).gt.s0+kappa) then
+         if (entrop(3,L).gt.dg_here%s0+dg_here%kappa) then
             
-            LZ(:,2,2,L) = (EVMAvg+e1(3) * &
-           (abs(lim_by+balance(3)))**pa) * LZ(:,2,2,L)
+            dg_here%LZ(:,2,2,L) = (dg_here%EVMAvg+dg_here%e1(3) * &
+           (abs(lim_by+dg_here%balance(3)))**dg_here%pa) * dg_here%LZ(:,2,2,L)
 
-            if (entrop(2,L).le.s0+kappa) then
+            if (entrop(2,L).le.dg_here%s0+dg_here%kappa) then
                
-               LZ(:,2,1,L) = (EVMAvg+e1(3) *&
-              (abs(lim_by+balance(3)))**pa ) * LZ(:,2,1,L)
-               LZ(:,1,2,L) = (EVMAvg+e1(3) *&
-              (abs(lim_by+balance(3)))**pa ) * LZ(:,1,2,L)
+               dg_here%LZ(:,2,1,L) = (dg_here%EVMAvg+dg_here%e1(3) *&
+              (abs(lim_by+dg_here%balance(3)))**dg_here%pa ) * dg_here%LZ(:,2,1,L)
+               dg_here%LZ(:,1,2,L) = (dg_here%EVMAvg+dg_here%e1(3) *&
+              (abs(lim_by+dg_here%balance(3)))**dg_here%pa ) * dg_here%LZ(:,1,2,L)
                
             endif
             
          else
             
-            LZ(:,2,2,L) = EVMAvg* LZ(:,2,2,L)
+            dg_here%LZ(:,2,2,L) = dg_here%EVMAvg* dg_here%LZ(:,2,2,L)
             
-            if (entrop(2,L).le.s0+kappa) then
+            if (entrop(2,L).le.dg_here%s0+dg_here%kappa) then
                
-               LZ(:,1,2,L) = EVMAvg* LZ(:,1,2,L)
-               LZ(:,2,1,L) = EVMAvg* LZ(:,2,1,L)
+               dg_here%LZ(:,1,2,L) = dg_here%EVMAvg* dg_here%LZ(:,1,2,L)
+               dg_here%LZ(:,2,1,L) = dg_here%EVMAvg* dg_here%LZ(:,2,1,L)
                
             endif
             
          endif
 
 #ifdef TRACE
-         if (entrop(4,L).gt.s0+kappa) then
+         if (entrop(4,L).gt.dg_here%s0+dg_here%kappa) then
             
-            TZ(:,:,:,L) = (trc_dif+e1(4)) *&
-           (abs(lim_by+balance(4)))**pa * TZ(:,:,:,L)
+            dg_here%TZ(:,:,:,L) = (dg_here%trc_dif+dg_here%e1(4)) *&
+           (abs(lim_by+dg_here%balance(4)))**dg_here%pa * dg_here%TZ(:,:,:,L)
 
          else
 
-            TZ(:,:,:,L) = trc_dif*TZ(:,:,:,L)
+            dg_here%TZ(:,:,:,L) = dg_here%trc_dif*dg_here%TZ(:,:,:,L)
 
          endif
 #endif
 
 #ifdef SED_LAY
 
-         if (entrop(5,L).gt.s0+kappa) then
+         if (entrop(5,L).gt.dg_here%s0+dg_here%kappa) then
             
-            MZ(:,:,:,L) = (SEVDMAvg+e1(5)) *&
-           (abs(lim_by+balance(5)))**pa * MZ(:,:,:,L)
+            dg_here%MZ(:,:,:,L) = (dg_here%SEVDMAvg+dg_here%e1(5)) *&
+           (abs(lim_by+dg_here%balance(5)))**dg_here%pa * dg_here%MZ(:,:,:,L)
 
          else
 
-            MZ(:,:,:,L) = MZ(:,:,:,L)*SEVDMAvg
+            dg_here%MZ(:,:,:,L) = dg_here%MZ(:,:,:,L)*dg_here%SEVDMAvg
             
          endif
 #endif
          
 #else
 #ifdef WAVE_DIF
-         HZ(:,:,:,L) = bg_dif*HZ(:,:,:,L)
+         dg_here%HZ(:,:,:,L) = dg_here%bg_dif*dg_here%HZ(:,:,:,L)
 #endif
-         LZ(:,:,:,L) = EVMAvg*LZ(:,:,:,L)
+         dg_here%LZ(:,:,:,L) = dg_here%EVMAvg*dg_here%LZ(:,:,:,L)
                
 #ifdef TRACE
-         TZ(:,:,:,L) = trc_dif*TZ(:,:,:,L)
+         dg_here%TZ(:,:,:,L) = dg_here%trc_dif*dg_here%TZ(:,:,:,L)
 #endif
 
 #ifdef SED_LAY
-         MZ(:,:,:,L) = MZ(:,:,:,L)*SEVDMAvg
+         dg_here%MZ(:,:,:,L) = dg_here%MZ(:,:,:,L)*dg_here%SEVDMAvg
 #endif
 
 
@@ -202,17 +202,17 @@
 
 #ifdef CMPI
 #ifdef WAVE_DIF
-      CALL UPDATELZ_ELEM(HZ)
+      CALL UPDATELZ_ELEM(dg_here%HZ)
 #endif
-      CALL UPDATELZ_ELEM(LZ)
+      CALL UPDATELZ_ELEM(dg_here%LZ)
 #ifdef TRACE
-      CALL UPDATELZ_ELEM(TZ)
+      CALL UPDATELZ_ELEM(dg_here%TZ)
 #endif
 #ifdef SED_LAY
       do ll=1,layers
-         tmp_mz(:,:,1,:) = MZ(:,:,ll,:) 
+         tmp_mz(:,:,1,:) = dg_here%MZ(:,:,ll,:) 
          CALL UPDATEMZ_ELEM(tmp_mz)
-         MZ(:,:,ll,:) = tmp_mz(:,:,1,:)
+         dg_here%MZ(:,:,ll,:) = tmp_mz(:,:,1,:)
       enddo
 #endif
 #endif
@@ -235,7 +235,7 @@
 !     01-10-2011 - cem - adapted for p_enrichment and multicomponent
 !     
 !***********************************************************************
-      SUBROUTINE OCEAN_EDGE_LDG_HYDRO(s,dg)
+      SUBROUTINE OCEAN_EDGE_LDG_HYDRO(s,dg_here)
 
 !.....Use appropriate modules
 
@@ -246,7 +246,7 @@
       IMPLICIT NONE
 
       type (sizes_type) :: s
-      type (dg_type) :: dg
+      type (dg_type) :: dg_here
 
 !.....Declare local variables
 
@@ -254,116 +254,116 @@
       REAL(SZ) QX_AVG, QY_AVG,ZE_AVG,bed_AVG(s%layers)
       REAL(SZ) iota_AVG
 
-      DO 1000 L = 1, needs
+      DO 1000 L = 1, dg_here%needs
          
 !.....Retrieve the global and local edge number
 
-         GED = NEEDN(L)
-         LED = NEDSD(1,GED)
+         GED = dg_here%NEEDN(L)
+         LED = dg_here%NEDSD(1,GED)
 
 !.....Retrieve the elements which share the edge
 
-         EL_IN = NEDEL(1,GED)
+         EL_IN = dg_here%NEDEL(1,GED)
 
-         pa = PDG_EL(EL_IN)
+         dg_here%pa = PDG_EL(EL_IN)
 
 #ifdef P0
-         if (pa.eq.0) then
-            pa = 1
+         if (dg_here%pa.eq.0) then
+            dg_here%pa = 1
          endif
 #endif
          
 !.....Retrieve the components of the normal vector to the edge
          
-         NX = COSNX(GED)
-         NY = SINNX(GED)
+         dg_here%NX = dg_here%COSNX(GED)
+         dg_here%NY = dg_here%SINNX(GED)
          
 !.....Retrieve the nodes of the edge
          
-         N1 = NEDNO(1,GED)
-         N2 = NEDNO(2,GED)
+         N1 = dg_here%NEDNO(1,GED)
+         N2 = dg_here%NEDNO(2,GED)
          
-!.....Compute ZE, QX, QY, and HB at each edge Gauss quadrature point
+!.....Compute dg_here%ZE, dg_here%QX, dg_here%QY, and dg_here%HB at each edge Gauss quadrature point
 
-         DO I = 1,NEGP(pa)
+         DO I = 1,dg_here%NEGP(dg_here%pa)
 
 #ifdef WAVE_DIF
-            ZE_IN = 0.D0
-            ZE_EX = 0.D0
+            dg_here%ZE_IN = 0.D0
+            dg_here%ZE_EX = 0.D0
 #endif
-            QX_IN = 0.D0
-            QY_IN = 0.D0
+            dg_here%QX_IN = 0.D0
+            dg_here%QY_IN = 0.D0
 
-            QX_EX = 0.D0
-            QY_EX = 0.D0
+            dg_here%QX_EX = 0.D0
+            dg_here%QY_EX = 0.D0
 
 #ifdef TRACE
-            iota_IN = 0.D0
-            iota_EX = 0.D0
+            dg_here%iota_IN = 0.D0
+            dg_here%iota_EX = 0.D0
 #endif
 
             !deal with sediment
 #ifdef SED_LAY
              do ll=1,s%layers
-               bed_IN(ll) = 0.D0
-               bed_EX(ll) = 0.D0
+               dg_here%bed_IN(ll) = 0.D0
+               dg_here%bed_EX(ll) = 0.D0
             enddo
 #endif
            
 !.....Compute the solution at the interior state
 
-            DO K = 1,DOFS(EL_IN)
+            DO K = 1,dg_here%DOFS(EL_IN)
 #ifdef WAVE_DIF
-               ZE_IN = ZE_IN + ZE(K,EL_IN,IRK)*PHI_EDGE(K,I,LED,pa)
+               dg_here%ZE_IN = dg_here%ZE_IN + dg_here%ZE(K,EL_IN,dg_here%IRK)*dg_here%PHI_EDGE(K,I,LED,dg_here%pa)
 #endif
-               QX_IN = QX_IN + QX(K,EL_IN,IRK)*PHI_EDGE(K,I,LED,pa)
-               QY_IN = QY_IN + QY(K,EL_IN,IRK)*PHI_EDGE(K,I,LED,pa)
+               dg_here%QX_IN = dg_here%QX_IN + dg_here%QX(K,EL_IN,dg_here%IRK)*dg_here%PHI_EDGE(K,I,LED,dg_here%pa)
+               dg_here%QY_IN = dg_here%QY_IN + dg_here%QY(K,EL_IN,dg_here%IRK)*dg_here%PHI_EDGE(K,I,LED,dg_here%pa)
 #ifdef TRACE
-               iota_IN = iota_IN + iota(K,EL_IN,IRK)*PHI_EDGE(K,I,LED,pa)
+               dg_here%iota_IN = dg_here%iota_IN + dg_here%iota(K,EL_IN,dg_here%IRK)*dg_here%PHI_EDGE(K,I,LED,dg_here%pa)
 #endif
 #ifdef SED_LAY
                do ll=1,s%layers
-                  bed_IN(ll) = bed_IN(ll) &
-                 + bed(K,EL_IN,IRK,ll)*PHI_EDGE(K,I,LED,pa)
+                  dg_here%bed_IN(ll) = dg_here%bed_IN(ll) &
+                 + dg_here%bed(K,EL_IN,dg_here%IRK,ll)*dg_here%PHI_EDGE(K,I,LED,dg_here%pa)
                enddo
 #endif
             ENDDO
             
 !.....Set the exterior state flows equal to the interior state flows
 
-            QX_EX = QX_IN
-            QY_EX = QY_IN
+            dg_here%QX_EX = dg_here%QX_IN
+            dg_here%QY_EX = dg_here%QY_IN
 
 #ifdef SED_LAY
             do ll=1,s%layers
-               bed_EX(ll) = bed_IN(ll)
+               dg_here%bed_EX(ll) = dg_here%bed_IN(ll)
             enddo
 #endif
 
 !.....Take the average
 #ifdef WAVE_DIF
-            ZE_AVG = ZE_IN
+            ZE_AVG = dg_here%ZE_IN
 #endif
-            QX_AVG = 0.5D0*(QX_IN + QX_EX)*SFACED(I,LED,EL_IN,pa)
-            QY_AVG = 0.5D0*(QY_IN + QY_EX)
+            QX_AVG = 0.5D0*(dg_here%QX_IN + dg_here%QX_EX)*dg_here%SFACED(I,LED,EL_IN,dg_here%pa)
+            QY_AVG = 0.5D0*(dg_here%QY_IN + dg_here%QY_EX)
 #ifdef TRACE
-            iota_AVG = iota_IN
+            iota_AVG = dg_here%iota_IN
 #endif
 #ifdef SED_LAY
             do ll=1,s%layers
-               bed_AVG(ll) = 0.5D0*( bed_IN(ll) + bed_EX(ll) )
+               bed_AVG(ll) = 0.5D0*( dg_here%bed_IN(ll) + dg_here%bed_EX(ll) )
             enddo
 #endif
 
 !.....Compute the edge integral
             
-            DO K = 1,DOFS(EL_IN)
+            DO K = 1,dg_here%DOFS(EL_IN)
                CALL EDGE_INT_LDG_HYDRO&
-              (s,K,EL_IN,LED,GED,I,iota_AVG,ZE_AVG,QX_AVG,QY_AVG,NX,NY,pa)
+              (s,dg_here,K,EL_IN,LED,GED,I,iota_AVG,ZE_AVG,QX_AVG,QY_AVG,dg_here%NX,dg_here%NY,dg_here%pa)
 #ifdef SED_LAY
                do ll=1,s%layers
                   CALL EDGE_INT_LDG_sediment&
-                (K,EL_IN,LED,GED,I,bed_AVG(ll),NX,NY,pa,ll)
+                (K,EL_IN,LED,GED,I,bed_AVG(ll),dg_here%NX,dg_here%NY,dg_here%pa,ll)
                enddo
 #endif
             ENDDO
@@ -392,7 +392,7 @@
 !     
 !***********************************************************************
 
-      SUBROUTINE LAND_EDGE_LDG_HYDRO(s,dg)
+      SUBROUTINE LAND_EDGE_LDG_HYDRO(s,dg_here)
 
 !.....Use appropriate modules
 
@@ -402,7 +402,7 @@
       IMPLICIT NONE
 
       type (sizes_type) :: s
-      type (dg_type) :: dg
+      type (dg_type) :: dg_here
 
 !.....Declare local variables
 
@@ -411,66 +411,66 @@
       REAL(SZ) TX, TY, QX_AVG, QY_AVG, bed_AVG(s%layers)
       REAL(SZ) ZE_AVG,iota_AVG
       
-      DO 1000 L = 1,NLEDS
+      DO 1000 L = 1,dg_here%NLEDS
          
 !.....Retrieve the global and local edge number
          
-         GED = NLEDN(L)
-         LED = NEDSD(1,GED)
+         GED = dg_here%NLEDN(L)
+         LED = dg_here%NEDSD(1,GED)
          
 !.....Retrieve the elements which share the edge
          
-         EL_IN = NEDEL(1,GED)
+         EL_IN = dg_here%NEDEL(1,GED)
          
-         pa = PDG_EL(EL_IN)
+         dg_here%pa = PDG_EL(EL_IN)
          
 #ifdef P0
-         if (pa.eq.0) then
-            pa = 1
+         if (dg_here%pa.eq.0) then
+            dg_here%pa = 1
          endif
 #endif
 
 !.....Retrieve the components of the normal vector to the edge
          
-         NX = COSNX(GED)
-         NY = SINNX(GED)
+         dg_here%NX = dg_here%COSNX(GED)
+         dg_here%NY = dg_here%SINNX(GED)
          
 !.....Set the components for the tangential vector to the edge
          
-         TX = -NY
-         TY =  NX
+         TX = -dg_here%NY
+         TY =  dg_here%NX
 
-!.....Compute ZE, QX, QY, and HB at each Gauss point
+!.....Compute dg_here%ZE, dg_here%QX, dg_here%QY, and dg_here%HB at each Gauss point
 
-         DO I = 1,NEGP(pa)
+         DO I = 1,dg_here%NEGP(dg_here%pa)
 #ifdef WAVE_DIF
-            ZE_IN = 0.D0
+            dg_here%ZE_IN = 0.D0
 #endif
-            QX_IN = 0.D0
-            QY_IN = 0.D0
+            dg_here%QX_IN = 0.D0
+            dg_here%QY_IN = 0.D0
 #ifdef TRACE
-            iota_IN = 0.d0
+            dg_here%iota_IN = 0.d0
 #endif
 #ifdef SED_LAY
             do ll=1,s%layers
-               bed_IN(ll) = 0.D0
+               dg_here%bed_IN(ll) = 0.D0
             enddo
 #endif
 
 !.....Compute the solution at the interior state
 
-            DO K = 1,DOFS(EL_IN)
+            DO K = 1,dg_here%DOFS(EL_IN)
 #ifdef WAVE_DIF
-               ZE_IN = ZE_IN + ZE(K,EL_IN,IRK)*PHI_EDGE(K,I,LED,pa)
+               dg_here%ZE_IN = dg_here%ZE_IN + dg_here%ZE(K,EL_IN,dg_here%IRK)*dg_here%PHI_EDGE(K,I,LED,dg_here%pa)
 #endif
-               QX_IN = QX_IN + QX(K,EL_IN,IRK)*PHI_EDGE(K,I,LED,pa)
-               QY_IN = QY_IN + QY(K,EL_IN,IRK)*PHI_EDGE(K,I,LED,pa)
+               dg_here%QX_IN = dg_here%QX_IN + dg_here%QX(K,EL_IN,dg_here%IRK)*dg_here%PHI_EDGE(K,I,LED,dg_here%pa)
+               dg_here%QY_IN = dg_here%QY_IN + dg_here%QY(K,EL_IN,dg_here%IRK)*dg_here%PHI_EDGE(K,I,LED,dg_here%pa)
 #ifdef TRACE
-               iota_IN = iota_IN + iota(K,EL_IN,IRK)*PHI_EDGE(K,I,LED,pa)
+               dg_here%iota_IN = dg_here%iota_IN + dg_here%iota(K,EL_IN,dg_here%IRK)*dg_here%PHI_EDGE(K,I,LED,dg_here%pa)
 #endif
 #ifdef SED_LAY
                do ll=1,s%layers
-                  bed_IN(ll) = bed_IN(ll) + bed(K,EL_IN,IRK,ll)*PHI_EDGE(K,I,LED,pa)
+                  dg_here%bed_IN(ll) = dg_here%bed_IN(ll) + dg_here%bed(K,EL_IN,dg_here%IRK,ll)*dg_here%PHI_EDGE(K,I,LED,dg_here%pa)
                enddo
 #endif
 
@@ -478,8 +478,8 @@
             
 !.....Compute the velocity in the normal and tangental direction
             
-            Q_N_INT = QX_IN*NX + QY_IN*NY
-            Q_T_INT = QX_IN*TX + QY_IN*TY
+            Q_N_INT = dg_here%QX_IN*dg_here%NX + dg_here%QY_IN*dg_here%NY
+            Q_T_INT = dg_here%QX_IN*TX + dg_here%QY_IN*TY
 
 !.....Reflect the velocity in the normal direction
 
@@ -488,40 +488,40 @@
             
 !.....Compute the x and y components of the external state flow
 
-            QX_EX = ( TY*Q_N_EXT - NY*Q_T_EXT)/(NX*TY - NY*TX)
-            QY_EX = (-TX*Q_N_EXT + NX*Q_T_EXT)/(NX*TY - NY*TX)
+            dg_here%QX_EX = ( TY*Q_N_EXT - dg_here%NY*Q_T_EXT)/(dg_here%NX*TY - dg_here%NY*TX)
+            dg_here%QY_EX = (-TX*Q_N_EXT + dg_here%NX*Q_T_EXT)/(dg_here%NX*TY - dg_here%NY*TX)
 
 #ifdef SED_LAY
             do ll=1,s%layers !maybe this should be changed?
-               bed_EX(ll) =  bed_IN(ll)
+               dg_here%bed_EX(ll) =  dg_here%bed_IN(ll)
             enddo
 #endif            
 
 
 !.....Take the average
 #ifdef WAVE_DIF
-            ZE_AVG = ZE_IN
+            ZE_AVG = dg_here%ZE_IN
 #endif
-            QX_AVG = 0.5D0*(QX_IN + QX_EX)*SFACED(I,LED,EL_IN,pa)
-            QY_AVG = 0.5D0*(QY_IN + QY_EX)
+            QX_AVG = 0.5D0*(dg_here%QX_IN + dg_here%QX_EX)*dg_here%SFACED(I,LED,EL_IN,dg_here%pa)
+            QY_AVG = 0.5D0*(dg_here%QY_IN + dg_here%QY_EX)
 #ifdef TRACE
-            iota_AVG = iota_IN
+            iota_AVG = dg_here%iota_IN
 #endif
 #ifdef SED_LAY
             do ll=1,s%layers !take the Fronenius norm
-               bed_AVG(ll) = 0.5D0*( bed_IN(ll) + bed_EX(ll) )
+               bed_AVG(ll) = 0.5D0*( dg_here%bed_IN(ll) + dg_here%bed_EX(ll) )
             enddo
 #endif
 
 !.....Compute the edge integral
 
-            DO K = 1,DOFS(EL_IN)
+            DO K = 1,dg_here%DOFS(EL_IN)
                CALL EDGE_INT_LDG_HYDRO&
-              (s,K,EL_IN,LED,GED,I,iota_AVG,ZE_AVG,QX_AVG,QY_AVG,NX,NY,pa)
+              (s,dg_here,K,EL_IN,LED,GED,I,iota_AVG,ZE_AVG,QX_AVG,QY_AVG,dg_here%NX,dg_here%NY,dg_here%pa)
 #ifdef SED_LAY
                do ll=1,s%layers
                   CALL EDGE_INT_LDG_sediment&
-                 (K,EL_IN,LED,GED,I,bed_AVG(ll),NX,NY,pa,ll)
+                 (K,EL_IN,LED,GED,I,bed_AVG(ll),dg_here%NX,dg_here%NY,dg_here%pa,ll)
                enddo
 #endif
             ENDDO
@@ -550,7 +550,7 @@
 !     
 !***********************************************************************
 
-      SUBROUTINE FLOW_EDGE_LDG_HYDRO(s,dg)
+      SUBROUTINE FLOW_EDGE_LDG_HYDRO(s,dg_here)
 
 !.....Use appropriate modules
 
@@ -561,7 +561,7 @@
       IMPLICIT NONE
 
       type (sizes_type) :: s
-      type (dg_type) :: dg
+      type (dg_type) :: dg_here
 
 !.....Declare local variables
 
@@ -569,57 +569,57 @@
       REAL(SZ) TX, TY, QX_AVG, QY_AVG, bed_AVG(s%layers)
       REAL(SZ) iota_AVG,ZE_AVG
 
-      DO 1000 L = 1,NFEDS
+      DO 1000 L = 1,dg_here%NFEDS
          
 !.....Retrieve the global and local edge number
 
-         GED = NFEDN(L)
-         LED = NEDSD(1,GED)
+         GED = dg_here%NFEDN(L)
+         LED = dg_here%NEDSD(1,GED)
 
 !.....Retrieve the element to which the edge belongs
 
-         EL_IN = NEDEL(1,GED)
+         EL_IN = dg_here%NEDEL(1,GED)
 
-         PA = PDG_EL(EL_IN)
+         dg_here%PA = PDG_EL(EL_IN)
 
 #ifdef P0
-         if (pa.eq.0) then
-            pa = 1
+         if (dg_here%pa.eq.0) then
+            dg_here%pa = 1
          endif
 #endif
          
 !.....Retrieve the components of the normal vector to the edge
          
-         NX = COSNX(GED)
-         NY = SINNX(GED)
+         dg_here%NX = dg_here%COSNX(GED)
+         dg_here%NY = dg_here%SINNX(GED)
          
 !.....Set the components for the tangential vector to the edge
 
-         TX = -NY
-         TY =  NX
+         TX = -dg_here%NY
+         TY =  dg_here%NX
          
-!.....Compute ZE, QX, QY, and HB at each edge Gauss quadrature point
+!.....Compute dg_here%ZE, dg_here%QX, dg_here%QY, and dg_here%HB at each edge Gauss quadrature point
 
-         DO I = 1,NEGP(pa)
+         DO I = 1,dg_here%NEGP(dg_here%pa)
 
 #ifdef WAVE_DIF
-            ZE_IN = 0.D0
-            ZE_EX = 0.D0
+            dg_here%ZE_IN = 0.D0
+            dg_here%ZE_EX = 0.D0
 #endif
 
-            QX_IN = 0.D0
-            QY_IN = 0.D0
+            dg_here%QX_IN = 0.D0
+            dg_here%QY_IN = 0.D0
 
-            QX_EX = 0.D0
-            QY_EX = 0.D0
+            dg_here%QX_EX = 0.D0
+            dg_here%QY_EX = 0.D0
 #ifdef TRACE
-            iota_IN = 0.D0
-            iota_EX = 0.D0
+            dg_here%iota_IN = 0.D0
+            dg_here%iota_EX = 0.D0
 #endif
 #ifdef SED_LAY
              do ll=1,s%layers
-               bed_IN(ll) = 0.D0
-               bed_EX(ll) = 0.D0
+               dg_here%bed_IN(ll) = 0.D0
+               dg_here%bed_EX(ll) = 0.D0
             enddo
 #endif
             
@@ -631,20 +631,20 @@
                IF(FPER(JJ).EQ.0.D0) THEN
                   NCYC = 0.D0
                ELSE
-                  NCYC = INT(TIMEDG/FPER(JJ))
+                  NCYC = INT(dg_here%TIMEDG/FPER(JJ))
                ENDIF
 
-               ARGJ = FAMIG(JJ)*(TIMEDG - NCYC*FPER(JJ)) + FFACE(JJ)
+               ARGJ = FAMIG(JJ)*(dg_here%TIMEDG - NCYC*FPER(JJ)) + FFACE(JJ)
                RFF  = FFF(JJ)*RAMPExtFlux
                
-               QNAM_GP = 0.5D0*(QNAM_DG(JJ,L,1) + QNAM_DG(JJ,L,2))&
-              + 0.5D0*(QNAM_DG(JJ,L,2) - QNAM_DG(JJ,L,1))*XEGP(I,pa)
-               QNPH_GP = 0.5D0*(QNPH_DG(JJ,L,1) + QNPH_DG(JJ,L,2))&
-              + 0.5D0*(QNPH_DG(JJ,L,2) - QNPH_DG(JJ,L,1))*XEGP(I,pa)
+               dg_here%QNAM_GP = 0.5D0*(dg_here%QNAM_DG(JJ,L,1) + dg_here%QNAM_DG(JJ,L,2))&
+              + 0.5D0*(dg_here%QNAM_DG(JJ,L,2) - dg_here%QNAM_DG(JJ,L,1))*dg_here%XEGP(I,dg_here%pa)
+               dg_here%QNPH_GP = 0.5D0*(dg_here%QNPH_DG(JJ,L,1) + dg_here%QNPH_DG(JJ,L,2))&
+              + 0.5D0*(dg_here%QNPH_DG(JJ,L,2) - dg_here%QNPH_DG(JJ,L,1))*dg_here%XEGP(I,dg_here%pa)
                
-               ARG = ARGJ - QNPH_GP
+               ARG = ARGJ - dg_here%QNPH_GP
                
-               Q_N_EXT = Q_N_EXT + QNAM_GP*RFF*COS(ARG)
+               Q_N_EXT = Q_N_EXT + dg_here%QNAM_GP*RFF*COS(ARG)
                Q_T_EXT =  0.D0
 
 
@@ -652,53 +652,53 @@
             
 !.....Compute the solution at the interior state
 
-            DO K = 1,DOFS(EL_IN)
+            DO K = 1,dg_here%DOFS(EL_IN)
 
 #ifdef WAVE_DIF
-               ZE_IN = ZE_IN + ZE(K,EL_IN,IRK)*PHI_EDGE(K,I,LED,pa)
+               dg_here%ZE_IN = dg_here%ZE_IN + dg_here%ZE(K,EL_IN,dg_here%IRK)*dg_here%PHI_EDGE(K,I,LED,dg_here%pa)
 #endif
 
-               QX_IN = QX_IN + QX(K,EL_IN,IRK)*PHI_EDGE(K,I,LED,pa)
-               QY_IN = QY_IN + QY(K,EL_IN,IRK)*PHI_EDGE(K,I,LED,pa)
+               dg_here%QX_IN = dg_here%QX_IN + dg_here%QX(K,EL_IN,dg_here%IRK)*dg_here%PHI_EDGE(K,I,LED,dg_here%pa)
+               dg_here%QY_IN = dg_here%QY_IN + dg_here%QY(K,EL_IN,dg_here%IRK)*dg_here%PHI_EDGE(K,I,LED,dg_here%pa)
 
 #ifdef SED_LAY
                do ll=1,s%layers
-                  bed_in(ll) = bed_in(ll) + bed(K,EL_IN,IRK,ll)*PHI_EDGE(K,I,LED,pa)
-                  bed_ex(ll) = bed_ex(ll) + bed(K,EL_IN,IRK,ll)*PHI_EDGE(K,I,LED,pa)
+                  dg_here%bed_in(ll) = dg_here%bed_in(ll) + dg_here%bed(K,EL_IN,dg_here%IRK,ll)*dg_here%PHI_EDGE(K,I,LED,dg_here%pa)
+                  dg_here%bed_ex(ll) = dg_here%bed_ex(ll) + dg_here%bed(K,EL_IN,dg_here%IRK,ll)*dg_here%PHI_EDGE(K,I,LED,dg_here%pa)
                enddo
 #endif
             ENDDO
 
 
-               QX_EX = -( TY*Q_N_EXT - NY*Q_T_EXT)/(NX*TY - NY*TX)
-               QY_EX = -(-TX*Q_N_EXT + NX*Q_T_EXT)/(NX*TY - NY*TX)
+               dg_here%QX_EX = -( TY*Q_N_EXT - dg_here%NY*Q_T_EXT)/(dg_here%NX*TY - dg_here%NY*TX)
+               dg_here%QY_EX = -(-TX*Q_N_EXT + dg_here%NX*Q_T_EXT)/(dg_here%NX*TY - dg_here%NY*TX)
             
 !.....Take the average
 
 #ifdef WAVE_DIF
-               ZE_AVG = ZE_IN
+               ZE_AVG = dg_here%ZE_IN
 #endif
-               QX_AVG = 0.5*(QX_IN + QX_EX)*SFACED(I,LED,EL_IN,pa)
-               QY_AVG = 0.5*(QY_IN + QY_EX)
+               QX_AVG = 0.5*(dg_here%QX_IN + dg_here%QX_EX)*dg_here%SFACED(I,LED,EL_IN,dg_here%pa)
+               QY_AVG = 0.5*(dg_here%QY_IN + dg_here%QY_EX)
 #ifdef TRACE
-               iota_AVG = iota_IN
+               iota_AVG = dg_here%iota_IN
 #endif
 
 #ifdef SED_LAY
                do ll=1,s%layers
-                  bed_AVG(ll) = 0.5D0*( bed_IN(ll) + bed_EX(ll) )
+                  bed_AVG(ll) = 0.5D0*( dg_here%bed_IN(ll) + dg_here%bed_EX(ll) )
                enddo
 #endif
 
 !.....Compute the edge integral
 
-            DO K = 1,DOFS(EL_IN)
+            DO K = 1,dg_here%DOFS(EL_IN)
                CALL EDGE_INT_LDG_HYDRO&
-              (s,K,EL_IN,LED,GED,I,iota_AVG,ZE_AVG,QX_AVG,QY_AVG,NX,NY,pa)
+              (s,dg_here,K,EL_IN,LED,GED,I,iota_AVG,ZE_AVG,QX_AVG,QY_AVG,dg_here%NX,dg_here%NY,dg_here%pa)
 #ifdef SED_LAY
                do ll=1,s%layers
                   CALL EDGE_INT_LDG_sediment&
-                 (K,EL_IN,LED,GED,I,bed_AVG(ll),NX,NY,pa,ll)
+                 (K,EL_IN,LED,GED,I,bed_AVG(ll),dg_here%NX,dg_here%NY,dg_here%pa,ll)
                enddo
 #endif
             ENDDO
@@ -726,7 +726,7 @@
 !     
 !***********************************************************************
 
-      SUBROUTINE RADIATION_EDGE_LDG_HYDRO(s,dg)
+      SUBROUTINE RADIATION_EDGE_LDG_HYDRO(s,dg_here)
 
 !.....Use appropriate modules
 
@@ -737,88 +737,88 @@
       IMPLICIT NONE
 
       type (sizes_type) :: s
-      type (dg_type) :: dg
+      type (dg_type) :: dg_here
 
 !.....Declare local variables
 
       INTEGER L, LED, GED,k,i,ll
       REAL(SZ) TX, TY
 
-      DO 1000 L = 1,NREDS
+      DO 1000 L = 1,dg_here%NREDS
          
 !.....Retrieve the global and local edge number
 
-         GED = NREDN(L)
-         LED = NEDSD(1,GED)
+         GED = dg_here%NREDN(L)
+         LED = dg_here%NEDSD(1,GED)
 
 !.....Retrieve the elements which share the edge
 
-         EL_IN = NEDEL(1,GED)
+         EL_IN = dg_here%NEDEL(1,GED)
 
-         PA = PDG_EL(EL_IN)
+         dg_here%PA = PDG_EL(EL_IN)
 
 #ifdef P0
-         if (pa.eq.0) then
-            pa = 1
+         if (dg_here%pa.eq.0) then
+            dg_here%pa = 1
          endif
 #endif
 
 !.....Retrieve the components of the normal vector to the edge
          
-         NX = COSNX(GED)
-         NY = SINNX(GED)
+         dg_here%NX = dg_here%COSNX(GED)
+         dg_here%NY = dg_here%SINNX(GED)
 
-!.....Compute ZE, QX, QY, and HB at each Gauss point
+!.....Compute dg_here%ZE, dg_here%QX, dg_here%QY, and dg_here%HB at each Gauss point
 
-         DO I = 1,NEGP(pa)
+         DO I = 1,dg_here%NEGP(dg_here%pa)
             
 #ifdef WAVE_DIF
-            ZE_IN = 0.D0
+            dg_here%ZE_IN = 0.D0
 #endif
-            QX_IN = 0.D0
-            QY_IN = 0.D0
+            dg_here%QX_IN = 0.D0
+            dg_here%QY_IN = 0.D0
 #ifdef TRACE
-            iota_IN = 0.d0
+            dg_here%iota_IN = 0.d0
 #endif
 #ifdef SED_LAY
             do ll=1,s%layers
-               bed_IN(ll) = 0.D0
+               dg_here%bed_IN(ll) = 0.D0
             enddo
 #endif
 
 !.....Compute the solution at the interior state
 
-            DO K = 1,DOFS(EL_IN)
+            DO K = 1,dg_here%DOFS(EL_IN)
                
 #ifdef WAVE_DIF
-               ZE_IN = ZE_IN + ZE(K,EL_IN,IRK)*PHI_EDGE(K,I,LED,pa)
+               dg_here%ZE_IN = dg_here%ZE_IN + dg_here%ZE(K,EL_IN,dg_here%IRK)*dg_here%PHI_EDGE(K,I,LED,dg_here%pa)
 #endif
-               QX_IN = QX_IN + QX(K,EL_IN,IRK)*PHI_EDGE(K,I,LED,pa)
-               QY_IN = QY_IN + QY(K,EL_IN,IRK)*PHI_EDGE(K,I,LED,pa)
+               dg_here%QX_IN = dg_here%QX_IN + dg_here%QX(K,EL_IN,dg_here%IRK)*dg_here%PHI_EDGE(K,I,LED,dg_here%pa)
+               dg_here%QY_IN = dg_here%QY_IN + dg_here%QY(K,EL_IN,dg_here%IRK)*dg_here%PHI_EDGE(K,I,LED,dg_here%pa)
 #ifdef TRACE
-               iota_IN = iota_IN + iota(K,EL_IN,IRK)*PHI_EDGE(K,I,LED,pa)
+               dg_here%iota_IN = dg_here%iota_IN + dg_here%iota(K,EL_IN,dg_here%IRK)*dg_here%PHI_EDGE(K,I,LED,dg_here%pa)
 #endif
 
 #ifdef SED_LAY
                do ll=1,s%layers
-                  bed_in(ll) = bed_in(ll) + bed(K,EL_IN,IRK,ll)*PHI_EDGE(K,I,LED,pa)
+                  dg_here%bed_in(ll) = dg_here%bed_in(ll) + dg_here%bed(K,EL_IN,dg_here%IRK,ll)*dg_here%PHI_EDGE(K,I,LED,dg_here%pa)
                enddo
 #endif
         
 
             ENDDO
 
-            QX_IN = QX_IN*SFACED(I,LED,EL_IN,pa)
+            dg_here%QX_IN = dg_here%QX_IN*dg_here%SFACED(I,LED,EL_IN,dg_here%pa)
 
 !.....Compute the edge integral
            
-            DO K = 1,DOFS(EL_IN)
+            DO K = 1,dg_here%DOFS(EL_IN)
                CALL EDGE_INT_LDG_HYDRO&
-              (s,K,EL_IN,LED,GED,I,iota_IN,ZE_IN,QX_IN,QY_IN,NX,NY,pa)
+              (s,dg_here,K,EL_IN,LED,GED,I,dg_here%iota_IN,dg_here%ZE_IN,dg_here%QX_IN,dg_here%QY_IN,dg_here%NX,dg_here%NY,dg_here%pa)
 #ifdef SED_LAY
                do ll=1,s%layers
                   CALL EDGE_INT_LDG_sediment&
-                 (K,EL_IN,LED,GED,I,bed_IN(ll),NX,NY,pa,ll)
+                 (K,EL_IN,LED,GED,I,dg_here%bed_IN(ll),dg_here%NX,dg_here%NY,dg_here%pa,ll)
                enddo
 #endif
             ENDDO
@@ -845,7 +845,7 @@
 !     
 !***********************************************************************
 
-      SUBROUTINE INTERNAL_EDGE_LDG_HYDRO(s,dg)
+      SUBROUTINE INTERNAL_EDGE_LDG_HYDRO(s,dg_here)
 
 !.....Use appropriate modules
       
@@ -856,7 +856,7 @@
       IMPLICIT NONE
 
       type (sizes_type) :: s
-      type (dg_type) :: dg
+      type (dg_type) :: dg_here
 
 !.....Declare local variables
 
@@ -865,91 +865,91 @@
       real(sz) iota_AVG
 
 
-      DO 1000 L = 1,NIEDS
+      DO 1000 L = 1,dg_here%NIEDS
 
 !.....Retrieve the global and local edge number
 
-         GED = NIEDN(L)
-         LED_IN = NEDSD(1,GED)
-         LED_EX = NEDSD(2,GED)
+         GED = dg_here%NIEDN(L)
+         LED_IN = dg_here%NEDSD(1,GED)
+         LED_EX = dg_here%NEDSD(2,GED)
 
 !.....Retrieve the elements which share the edge
 
-         EL_IN = NEDEL(1,GED)
-         EL_EX = NEDEL(2,GED)
+         EL_IN = dg_here%NEDEL(1,GED)
+         EL_EX = dg_here%NEDEL(2,GED)
 
-         EL = EL_IN
+         dg_here%EL = EL_IN
 
-         IF (DOFS(EL_EX).LT.DOFS(EL_IN)) then
-            EL = EL_EX
+         IF (dg_here%DOFS(EL_EX).LT.dg_here%DOFS(EL_IN)) then
+            dg_here%EL = EL_EX
          endif
 
-         pa = PDG_EL(EL)
+         dg_here%pa = PDG_EL(dg_here%EL)
 
 #ifdef P0
-         if (pa.eq.0) then
-            pa = 1
+         if (dg_here%pa.eq.0) then
+            dg_here%pa = 1
          endif
 #endif
 
 !.....Retrieve the components of the normal vector to the edge
 
-         NX = COSNX(GED)
-         NY = SINNX(GED)
+         dg_here%NX = dg_here%COSNX(GED)
+         dg_here%NY = dg_here%SINNX(GED)
 
-!.....Compute ZE, QX, QY, and HB at each edge Gauss quadrature point
+!.....Compute dg_here%ZE, dg_here%QX, dg_here%QY, and dg_here%HB at each edge Gauss quadrature point
 
-         DO I = 1,NEGP(pa)
+         DO I = 1,dg_here%NEGP(dg_here%pa)
 
             GP_IN = I
-            GP_EX = NEGP(pa) - I + 1
+            GP_EX = dg_here%NEGP(dg_here%pa) - I + 1
             
 #ifdef WAVE_DIF
-            ZE_IN = 0.D0
+            dg_here%ZE_IN = 0.D0
 #endif
-            QX_IN = 0.D0
-            QY_IN = 0.D0
+            dg_here%QX_IN = 0.D0
+            dg_here%QY_IN = 0.D0
 #ifdef WAVE_DIF
-            ZE_EX = 0.D0
+            dg_here%ZE_EX = 0.D0
 #endif
-            QX_EX = 0.D0
-            QY_EX = 0.D0
+            dg_here%QX_EX = 0.D0
+            dg_here%QY_EX = 0.D0
 #ifdef TRACE
-            iota_IN = 0.D0
-            iota_EX = 0.D0
+            dg_here%iota_IN = 0.D0
+            dg_here%iota_EX = 0.D0
 #endif
 
 !deal with sediment
 #ifdef SED_LAY
             do ll=1,s%layers
-               bed_IN(ll) = 0.D0
-               bed_EX(ll) = 0.D0
+               dg_here%bed_IN(ll) = 0.D0
+               dg_here%bed_EX(ll) = 0.D0
             enddo
 #endif
 
-            DO K = 1,DOFS(EL)
+            DO K = 1,dg_here%DOFS(dg_here%EL)
 
 #ifdef WAVE_DIF
-               ZE_IN = ZE_IN + ZE(K,EL_IN,IRK)*PHI_EDGE(K,GP_IN,LED_IN,pa)
+               dg_here%ZE_IN = dg_here%ZE_IN + dg_here%ZE(K,EL_IN,dg_here%IRK)*dg_here%PHI_EDGE(K,GP_IN,LED_IN,dg_here%pa)
 #endif
-               QX_IN = QX_IN + QX(K,EL_IN,IRK)*PHI_EDGE(K,GP_IN,LED_IN,pa)
-               QY_IN = QY_IN + QY(K,EL_IN,IRK)*PHI_EDGE(K,GP_IN,LED_IN,pa)
+               dg_here%QX_IN = dg_here%QX_IN + dg_here%QX(K,EL_IN,dg_here%IRK)*dg_here%PHI_EDGE(K,GP_IN,LED_IN,dg_here%pa)
+               dg_here%QY_IN = dg_here%QY_IN + dg_here%QY(K,EL_IN,dg_here%IRK)*dg_here%PHI_EDGE(K,GP_IN,LED_IN,dg_here%pa)
 #ifdef WAVE_DIF
-               ZE_EX = ZE_EX + ZE(K,EL_EX,IRK)*PHI_EDGE(K,GP_EX,LED_EX,pa)
+               dg_here%ZE_EX = dg_here%ZE_EX + dg_here%ZE(K,EL_EX,dg_here%IRK)*dg_here%PHI_EDGE(K,GP_EX,LED_EX,dg_here%pa)
 #endif
-               QX_EX = QX_EX + QX(K,EL_EX,IRK)*PHI_EDGE(K,GP_EX,LED_EX,pa)
-               QY_EX = QY_EX + QY(K,EL_EX,IRK)*PHI_EDGE(K,GP_EX,LED_EX,pa)
+               dg_here%QX_EX = dg_here%QX_EX + dg_here%QX(K,EL_EX,dg_here%IRK)*dg_here%PHI_EDGE(K,GP_EX,LED_EX,dg_here%pa)
+               dg_here%QY_EX = dg_here%QY_EX + dg_here%QY(K,EL_EX,dg_here%IRK)*dg_here%PHI_EDGE(K,GP_EX,LED_EX,dg_here%pa)
 #ifdef TRACE
-               iota_IN = iota_IN + iota(K,EL_IN,IRK)*PHI_EDGE(K,GP_IN,LED_IN,pa)
-               iota_EX = iota_EX + iota(K,EL_EX,IRK)*PHI_EDGE(K,GP_EX,LED_EX,pa)
+               dg_here%iota_IN = dg_here%iota_IN + dg_here%iota(K,EL_IN,dg_here%IRK)*dg_here%PHI_EDGE(K,GP_IN,LED_IN,dg_here%pa)
+               dg_here%iota_EX = dg_here%iota_EX + dg_here%iota(K,EL_EX,dg_here%IRK)*dg_here%PHI_EDGE(K,GP_EX,LED_EX,dg_here%pa)
 #endif
 
 #ifdef SED_LAY
                do ll=1,s%layers
-                  bed_IN(ll) = bed_IN(ll) &
-                 + bed(K,EL_IN,IRK,ll)*PHI_EDGE(K,GP_IN,LED_IN,pa)
-                  bed_EX(ll) = bed_EX(ll) &
-                 + bed(K,EL_EX,IRK,ll)*PHI_EDGE(K,GP_EX,LED_EX,pa)
+                  dg_here%bed_IN(ll) = dg_here%bed_IN(ll) &
+                 + dg_here%bed(K,EL_IN,dg_here%IRK,ll)*dg_here%PHI_EDGE(K,GP_IN,LED_IN,dg_here%pa)
+                  dg_here%bed_EX(ll) = dg_here%bed_EX(ll) &
+                 + dg_here%bed(K,EL_EX,dg_here%IRK,ll)*dg_here%PHI_EDGE(K,GP_EX,LED_EX,dg_here%pa)
                enddo
 #endif
 
@@ -958,67 +958,67 @@
 !.....Take the average
 
 #ifdef WAVE_DIF
-            ZE_AVG = 0.5D0*(ZE_IN + ZE_EX)
+            ZE_AVG = 0.5D0*(dg_here%ZE_IN + dg_here%ZE_EX)
 #endif
 
-            QX_AVG = 0.5D0*(QX_IN*SFACED(GP_IN,LED_IN,EL_IN,pa) &
-           + QX_EX*SFACED(GP_EX,LED_EX,EL_EX,pa))
-            QY_AVG = 0.5D0*(QY_IN + QY_EX)
+            QX_AVG = 0.5D0*(dg_here%QX_IN*dg_here%SFACED(GP_IN,LED_IN,EL_IN,dg_here%pa) &
+           + dg_here%QX_EX*dg_here%SFACED(GP_EX,LED_EX,EL_EX,dg_here%pa))
+            QY_AVG = 0.5D0*(dg_here%QY_IN + dg_here%QY_EX)
 
 #ifdef TRACE
-            iota_AVG = 0.5D0*(iota_IN + iota_EX)
+            iota_AVG = 0.5D0*(dg_here%iota_IN + dg_here%iota_EX)
 #endif
 
 #ifdef SED_LAY
             do ll=1,s%layers
-               bed_AVG(ll) = 0.5*( bed_IN(ll) + bed_EX(ll) )
+               bed_AVG(ll) = 0.5*( dg_here%bed_IN(ll) + dg_here%bed_EX(ll) )
             enddo
 #endif
 
 !.....Compute the edge integral
 
-            DO K = 1,DOFS(EL)
+            DO K = 1,dg_here%DOFS(dg_here%EL)
 
-               W_IN = 2.0*M_INV(K,pa)/AREAS(EL_IN)*XLEN(GED)*&
-              PHI_EDGE(K,GP_IN,LED_IN,pa)*WEGP(GP_IN,pa)
-               W_EX = 2.0*M_INV(K,pa)/AREAS(EL_EX)*XLEN(GED)*&
-              PHI_EDGE(K,GP_EX,LED_EX,pa)*WEGP(GP_EX,pa)
+               W_IN = 2.0*dg_here%M_INV(K,dg_here%pa)/AREAS(EL_IN)*dg_here%XLEN(GED)*&
+              dg_here%PHI_EDGE(K,GP_IN,LED_IN,dg_here%pa)*dg_here%WEGP(GP_IN,dg_here%pa)
+               W_EX = 2.0*dg_here%M_INV(K,dg_here%pa)/AREAS(EL_EX)*dg_here%XLEN(GED)*&
+              dg_here%PHI_EDGE(K,GP_EX,LED_EX,dg_here%pa)*dg_here%WEGP(GP_EX,dg_here%pa)
                
 #ifdef WAVE_DIF
-               HZ(K,1,1,EL_IN) = HZ(K,1,1,EL_IN) - ZE_AVG*NX*W_IN
-               HZ(K,2,2,EL_IN) = HZ(K,2,2,EL_IN) - ZE_AVG*NY*W_IN
+               dg_here%HZ(K,1,1,EL_IN) = dg_here%HZ(K,1,1,EL_IN) - ZE_AVG*dg_here%NX*W_IN
+               dg_here%HZ(K,2,2,EL_IN) = dg_here%HZ(K,2,2,EL_IN) - ZE_AVG*dg_here%NY*W_IN
 #endif
-               LZ(K,1,1,EL_IN) = LZ(K,1,1,EL_IN) - QX_AVG*NX*W_IN
-               LZ(K,1,2,EL_IN) = LZ(K,1,2,EL_IN) - QX_AVG*NY*W_IN
-               LZ(K,2,1,EL_IN) = LZ(K,2,1,EL_IN) - QY_AVG*NX*W_IN
-               LZ(K,2,2,EL_IN) = LZ(K,2,2,EL_IN) - QY_AVG*NY*W_IN
+               dg_here%LZ(K,1,1,EL_IN) = dg_here%LZ(K,1,1,EL_IN) - QX_AVG*dg_here%NX*W_IN
+               dg_here%LZ(K,1,2,EL_IN) = dg_here%LZ(K,1,2,EL_IN) - QX_AVG*dg_here%NY*W_IN
+               dg_here%LZ(K,2,1,EL_IN) = dg_here%LZ(K,2,1,EL_IN) - QY_AVG*dg_here%NX*W_IN
+               dg_here%LZ(K,2,2,EL_IN) = dg_here%LZ(K,2,2,EL_IN) - QY_AVG*dg_here%NY*W_IN
                
 #ifdef WAVE_DIF
-               HZ(K,1,1,EL_EX) = HZ(K,1,1,EL_EX) + ZE_AVG*NX*W_EX
-               HZ(K,2,2,EL_EX) = HZ(K,2,2,EL_EX) + ZE_AVG*NY*W_EX
+               dg_here%HZ(K,1,1,EL_EX) = dg_here%HZ(K,1,1,EL_EX) + ZE_AVG*dg_here%NX*W_EX
+               dg_here%HZ(K,2,2,EL_EX) = dg_here%HZ(K,2,2,EL_EX) + ZE_AVG*dg_here%NY*W_EX
 #endif
-               LZ(K,1,1,EL_EX) = LZ(K,1,1,EL_EX) + QX_AVG*NX*W_EX
-               LZ(K,1,2,EL_EX) = LZ(K,1,2,EL_EX) + QX_AVG*NY*W_EX
-               LZ(K,2,1,EL_EX) = LZ(K,2,1,EL_EX) + QY_AVG*NX*W_EX
-               LZ(K,2,2,EL_EX) = LZ(K,2,2,EL_EX) + QY_AVG*NY*W_EX
+               dg_here%LZ(K,1,1,EL_EX) = dg_here%LZ(K,1,1,EL_EX) + QX_AVG*dg_here%NX*W_EX
+               dg_here%LZ(K,1,2,EL_EX) = dg_here%LZ(K,1,2,EL_EX) + QX_AVG*dg_here%NY*W_EX
+               dg_here%LZ(K,2,1,EL_EX) = dg_here%LZ(K,2,1,EL_EX) + QY_AVG*dg_here%NX*W_EX
+               dg_here%LZ(K,2,2,EL_EX) = dg_here%LZ(K,2,2,EL_EX) + QY_AVG*dg_here%NY*W_EX
 #ifdef TRACE
-               TZ(K,1,1,EL_IN) = TZ(K,1,1,EL_IN) - iota_AVG*NX*W_IN
-               TZ(K,2,2,EL_IN) = TZ(K,2,2,EL_IN) - iota_AVG*NY*W_IN
+               dg_here%TZ(K,1,1,EL_IN) = dg_here%TZ(K,1,1,EL_IN) - iota_AVG*dg_here%NX*W_IN
+               dg_here%TZ(K,2,2,EL_IN) = dg_here%TZ(K,2,2,EL_IN) - iota_AVG*dg_here%NY*W_IN
 
-               TZ(K,1,1,EL_EX) = TZ(K,1,1,EL_EX) + iota_AVG*NX*W_EX
-               TZ(K,2,2,EL_EX) = TZ(K,2,2,EL_EX) + iota_AVG*NY*W_EX
+               dg_here%TZ(K,1,1,EL_EX) = dg_here%TZ(K,1,1,EL_EX) + iota_AVG*dg_here%NX*W_EX
+               dg_here%TZ(K,2,2,EL_EX) = dg_here%TZ(K,2,2,EL_EX) + iota_AVG*dg_here%NY*W_EX
 #endif
 
 #ifdef SED_LAY
                do ll=1,s%layers
-                  MZ(K,1,ll,EL_IN) = MZ(K,1,ll,EL_IN) &
-                 - bed_AVG(ll)*NX*W_IN
-                  MZ(K,2,ll,EL_IN) = MZ(K,2,ll,EL_IN) &
-                 - bed_AVG(ll)*NY*W_IN
-                  MZ(K,1,ll,EL_EX) = MZ(K,1,ll,EL_EX) &
-                 + bed_AVG(ll)*NX*W_EX
-                  MZ(K,2,ll,EL_EX) = MZ(K,2,ll,EL_EX) &
-                 + bed_AVG(ll)*NY*W_EX
+                  dg_here%MZ(K,1,ll,EL_IN) = dg_here%MZ(K,1,ll,EL_IN) &
+                 - bed_AVG(ll)*dg_here%NX*W_IN
+                  dg_here%MZ(K,2,ll,EL_IN) = dg_here%MZ(K,2,ll,EL_IN) &
+                 - bed_AVG(ll)*dg_here%NY*W_IN
+                  dg_here%MZ(K,1,ll,EL_EX) = dg_here%MZ(K,1,ll,EL_EX) &
+                 + bed_AVG(ll)*dg_here%NX*W_EX
+                  dg_here%MZ(K,2,ll,EL_EX) = dg_here%MZ(K,2,ll,EL_EX) &
+                 + bed_AVG(ll)*dg_here%NY*W_EX
                enddo
 #endif
 
@@ -1042,7 +1042,7 @@
 !     
 !***********************************************************************
 
-      SUBROUTINE EDGE_INT_LDG_HYDRO(s,dg,K,EL,LED,GED,GP,iota_Avg,ZE_Avg,QX_Avg,&
+      SUBROUTINE EDGE_INT_LDG_HYDRO(s,dg_here,K,EL,LED,GED,GP,iota_Avg,ZE_Avg,QX_Avg,&
      QY_Avg,NX,NY,pa)
 
 !.....Use appropriate modules
@@ -1054,7 +1054,7 @@
       IMPLICIT NONE
       
       type (sizes_type) :: s
-      type (dg_type) :: dg
+      type (dg_type) :: dg_here
       
 !.....Declare local variables
 
@@ -1069,26 +1069,26 @@
 
 !.....Comput the edge integral
 
-      IMASS = M_INV(K,pa)/(0.5D0*AREA)
+      IMASS = dg_here%M_INV(K,pa)/(0.5D0*AREA)
 
 #ifdef WAVE_DIF
-      HZ(K,1,1,EL) = HZ(K,1,1,EL)&
-     - IMASS*XLEN(GED)*0.5*ZE_Avg*PHI_EDGE(K,GP,LED,pa)*NX*WEGP(GP,pa)
-      HZ(K,2,2,EL) = HZ(K,2,2,EL)&
-     - IMASS*XLEN(GED)*0.5*ZE_Avg*PHI_EDGE(K,GP,LED,pa)*NY*WEGP(GP,pa)
+      dg_here%HZ(K,1,1,EL) = dg_here%HZ(K,1,1,EL)&
+     - IMASS*dg_here%XLEN(GED)*0.5*ZE_Avg*dg_here%PHI_EDGE(K,GP,LED,pa)*NX*dg_here%WEGP(GP,pa)
+      dg_here%HZ(K,2,2,EL) = dg_here%HZ(K,2,2,EL)&
+     - IMASS*dg_here%XLEN(GED)*0.5*ZE_Avg*dg_here%PHI_EDGE(K,GP,LED,pa)*NY*dg_here%WEGP(GP,pa)
 #endif
-      LZ(K,1,1,EL) = LZ(K,1,1,EL)&
-     - IMASS*XLEN(GED)*0.5*QX_Avg*PHI_EDGE(K,GP,LED,pa)*NX*WEGP(GP,pa)
-      LZ(K,1,2,EL) = LZ(K,1,2,EL)&
-     - IMASS*XLEN(GED)*0.5*QX_Avg*PHI_EDGE(K,GP,LED,pa)*NY*WEGP(GP,pa)
-      LZ(K,2,1,EL) = LZ(K,2,1,EL)&
-     - IMASS*XLEN(GED)*0.5*QY_Avg*PHI_EDGE(K,GP,LED,pa)*NX*WEGP(GP,pa)
-      LZ(K,2,2,EL) = LZ(K,2,2,EL)&
-     - IMASS*XLEN(GED)*0.5*QY_Avg*PHI_EDGE(K,GP,LED,pa)*NY*WEGP(GP,pa)
+      dg_here%LZ(K,1,1,EL) = dg_here%LZ(K,1,1,EL)&
+     - IMASS*dg_here%XLEN(GED)*0.5*QX_Avg*dg_here%PHI_EDGE(K,GP,LED,pa)*NX*dg_here%WEGP(GP,pa)
+      dg_here%LZ(K,1,2,EL) = dg_here%LZ(K,1,2,EL)&
+     - IMASS*dg_here%XLEN(GED)*0.5*QX_Avg*dg_here%PHI_EDGE(K,GP,LED,pa)*NY*dg_here%WEGP(GP,pa)
+      dg_here%LZ(K,2,1,EL) = dg_here%LZ(K,2,1,EL)&
+     - IMASS*dg_here%XLEN(GED)*0.5*QY_Avg*dg_here%PHI_EDGE(K,GP,LED,pa)*NX*dg_here%WEGP(GP,pa)
+      dg_here%LZ(K,2,2,EL) = dg_here%LZ(K,2,2,EL)&
+     - IMASS*dg_here%XLEN(GED)*0.5*QY_Avg*dg_here%PHI_EDGE(K,GP,LED,pa)*NY*dg_here%WEGP(GP,pa)
 
 #ifdef TRACE
-      TZ(K,1,1,EL) = TZ(K,1,1,EL)&
-     - IMASS*XLEN(GED)*0.5D0*iota_Avg*PHI_EDGE(K,GP,LED,pa)*NX*WEGP(GP,pa)
+      dg_here%TZ(K,1,1,EL) = dg_here%TZ(K,1,1,EL)&
+     - IMASS*dg_here%XLEN(GED)*0.5D0*iota_Avg*dg_here%PHI_EDGE(K,GP,LED,pa)*NX*dg_here%WEGP(GP,pa)
       TZ(K,2,2,EL) = TZ(K,2,2,EL)&
      - IMASS*XLEN(GED)*0.5D0*iota_Avg*PHI_EDGE(K,GP,LED,pa)*NY*WEGP(GP,pa)
 
@@ -1109,7 +1109,7 @@
 !***********************************************************************
 
       SUBROUTINE EDGE_INT_LDG_sediment&
-     (s,dg,K,EL,LED,GED,GP,bed_avg,NX,NY,pa,ll)
+     (s,dg_here,K,EL,LED,GED,GP,bed_avg,NX,NY,pa,ll)
                                 ! <ezpp-noinst>
       
 !.....Use appropriate modules
@@ -1121,7 +1121,7 @@
       IMPLICIT NONE
       
       type (sizes_type) :: s
-      type (dg_type) :: dg
+      type (dg_type) :: dg_here
 
 !.....Declare local variables
 
@@ -1134,12 +1134,12 @@
 
 !.....Comput the edge integral
 
-      IMASS = M_INV(K,pa)/(0.5D0*AREA)
+      IMASS = dg_here%M_INV(K,pa)/(0.5D0*AREA)
 
-      MZ(K,1,ll,EL) = MZ(K,1,ll,EL)&
-     - IMASS*XLEN(GED)*0.5*bed_avg*PHI_EDGE(K,GP,LED,pa)*NX*WEGP(GP,pa)
-      MZ(K,2,ll,EL) = MZ(K,2,ll,EL)&
-     - IMASS*XLEN(GED)*0.5*bed_avg*PHI_EDGE(K,GP,LED,pa)*NY*WEGP(GP,pa)
+      DG_HERE%MZ(K,1,ll,EL) = DG_HERE%MZ(K,1,ll,EL)&
+     - IMASS*dg_here%XLEN(GED)*0.5*bed_avg*dg_here%PHI_EDGE(K,GP,LED,pa)*NX*dg_here%WEGP(GP,pa)
+      DG_HERE%MZ(K,2,ll,EL) = DG_HERE%MZ(K,2,ll,EL)&
+     - IMASS*dg_here%XLEN(GED)*0.5*bed_avg*dg_here%PHI_EDGE(K,GP,LED,pa)*NY*dg_here%WEGP(GP,pa)
       
       RETURN
       END SUBROUTINE
@@ -1149,14 +1149,14 @@
 !     SUBROUTINE RHS_LDG_HYDRO()
 !     
 !     This subroutine computes the area integrals for the LDG hydro and
-!     adds them into the LZ (+sediment diffusion)
+!     adds them into the dg_here%LZ (+sediment diffusion)
 !     
 !     Written by Shintaro Bunya (01-02-2007)
 !     01-10-2011 - cem - adapted for p_enrichment and multicomponent
 !     2012 - cem - added sediment layers
 !***********************************************************************
 
-      SUBROUTINE RHS_LDG_HYDRO(s,dg)
+      SUBROUTINE RHS_LDG_HYDRO(s,dg_here)
       
 !.....Use appropriate modules
 
@@ -1167,7 +1167,7 @@
       IMPLICIT NONE
 
       type (sizes_type) :: s
-      type (dg_type) :: dg
+      type (dg_type) :: dg_here
       
 !.....Declare local variables
       INTEGER L,K,I,pa,ll,kk
@@ -1195,38 +1195,38 @@
          N2 = NM(L,2)
          N3 = NM(L,3)
          
-!.....Compute dg%ZE, dg%QX, dg%QY, and HB at each area Gauss quadrature point
+!.....Compute dg_here%ZE, dg_here%QX, dg_here%QY, and HB at each area Gauss quadrature point
 
-         DO I = 1,dg%NAGP(pa)
+         DO I = 1,dg_here%NAGP(pa)
             
 #ifdef WAVE_DIF
-            dg%ZE_IN = 0.D0
+            dg_here%ZE_IN = 0.D0
 #endif
-            dg%QX_IN = 0.D0
-            dg%QY_IN = 0.D0
+            dg_here%QX_IN = 0.D0
+            dg_here%QY_IN = 0.D0
 #ifdef TRACE
-            dg%iota_IN = 0.D0
+            dg_here%iota_IN = 0.D0
 #endif
 
 #ifdef SED_LAY
             do ll=1,s%layers
-               dg%bed_IN(ll) = 0.D0
+               dg_here%bed_IN(ll) = 0.D0
             enddo
 #endif
             
-            DO K = 1,dg%DOFS(L)
+            DO K = 1,dg_here%DOFS(L)
 #ifdef WAVE_DIF
-               dg%ZE_IN = dg%ZE_IN + dg%ZE(K,L,dg%dg%IRK)*dg%PHI_AREA(K,I,pa)
+               dg_here%ZE_IN = dg_here%ZE_IN + dg_here%ZE(K,L,dg_here%IRK)*dg_here%PHI_AREA(K,I,pa)
 #endif
-               dg%QX_IN = dg%QX_IN + dg%QX(K,L,dg%dg%IRK)*dg%PHI_AREA(K,I,pa)
-               dg%QY_IN = dg%QY_IN + dg%QY(K,L,dg%dg%IRK)*dg%PHI_AREA(K,I,pa)
+               dg_here%QX_IN = dg_here%QX_IN + dg_here%QX(K,L,dg_here%IRK)*dg_here%PHI_AREA(K,I,pa)
+               dg_here%QY_IN = dg_here%QY_IN + dg_here%QY(K,L,dg_here%IRK)*dg_here%PHI_AREA(K,I,pa)
 #ifdef TRACE
-               dg%iota_IN = dg%iota_IN + dg%iota(K,L,dg%dg%IRK)*dg%PHI_AREA(K,I,pa)
+               dg_here%iota_IN = dg_here%iota_IN + dg_here%iota(K,L,dg_here%IRK)*dg_here%PHI_AREA(K,I,pa)
 #endif
 
 #ifdef SED_LAY
                do ll=1,s%layers
-                  dg%bed_IN(ll) = dg%bed_IN(ll) + dg%dg%bed(K,L,dg%dg%IRK,ll)*dg%PHI_AREA(K,I,pa)
+                  dg_here%bed_IN(ll) = dg_here%bed_IN(ll) + dg_here%bed(K,L,dg_here%IRK,ll)*dg_here%PHI_AREA(K,I,pa)
                enddo
 #endif
 
@@ -1234,58 +1234,58 @@
 
 !.....Build the rhs
                 
-            DO K = 1,dg%DOFS(L)
+            DO K = 1,dg_here%DOFS(L)
 #ifdef WAVE_DIF
-               dg%HZ(K,1,1,L) = dg%HZ(K,1,1,L)&
-                    + dg%M_INV(K,pa)*dg%ZE_IN*dg%SFAC_ELEM(I,L,pa)*& ! <--- dg%ZE/Mk
-                    ( dg%DRPHI(K,I,pa)*dg%DRDX(L) + dg%DSPHI(K,I,pa)*dg%DSDX(L) )*& ! <--- dphi/dx
-                    dg%WAGP(I,pa)  ! <--- weight
-               dg%HZ(K,2,2,L) = dg%HZ(K,2,2,L)&
-                    + dg%M_INV(K,pa)*dg%ZE_IN*& ! <--- dg%ZE/Mk
-                    ( dg%DRPHI(K,I,pa)*dg%DRDY(L) + dg%DSPHI(K,I,pa)*dg%DSDY(L) )*& ! <--- dphi/dy
-                    dg%WAGP(I,pa)  ! <--- weight
+               dg_here%HZ(K,1,1,L) = dg_here%HZ(K,1,1,L)&
+                    + dg_here%M_INV(K,pa)*dg_here%ZE_IN*dg_here%SFAC_ELEM(I,L,pa)*& ! <--- dg_here%ZE/Mk
+                    ( dg_here%DRPHI(K,I,pa)*dg_here%DRDX(L) + dg_here%DSPHI(K,I,pa)*dg_here%DSDX(L) )*& ! <--- dphi/dx
+                    dg_here%WAGP(I,pa)  ! <--- weight
+               dg_here%HZ(K,2,2,L) = dg_here%HZ(K,2,2,L)&
+                    + dg_here%M_INV(K,pa)*dg_here%ZE_IN*& ! <--- dg_here%ZE/Mk
+                    ( dg_here%DRPHI(K,I,pa)*dg_here%DRDY(L) + dg_here%DSPHI(K,I,pa)*dg_here%DSDY(L) )*& ! <--- dphi/dy
+                    dg_here%WAGP(I,pa)  ! <--- weight
 #endif
 
-               dg%LZ(K,1,1,L) = dg%LZ(K,1,1,L)&
-                   + dg%M_INV(K,pa)*dg%QX_IN*dg%SFAC_ELEM(I,L,pa)*& ! <--- dg%QX/Mk
-                   ( dg%DRPHI(K,I,pa)*dg%DRDX(L) + dg%DSPHI(K,I,pa)*dg%DSDX(L) )*& ! <--- dphi/dx
-                   dg%WAGP(I,pa)  ! <--- weight
+               dg_here%LZ(K,1,1,L) = dg_here%LZ(K,1,1,L)&
+                   + dg_here%M_INV(K,pa)*dg_here%QX_IN*dg_here%SFAC_ELEM(I,L,pa)*& ! <--- dg_here%QX/Mk
+                   ( dg_here%DRPHI(K,I,pa)*dg_here%DRDX(L) + dg_here%DSPHI(K,I,pa)*dg_here%DSDX(L) )*& ! <--- dphi/dx
+                   dg_here%WAGP(I,pa)  ! <--- weight
                
-               dg%LZ(K,1,2,L) = dg%LZ(K,1,2,L)&
-                    + dg%M_INV(K,pa)*dg%QX_IN*& ! <--- dg%QX/Mk
-                    ( dg%DRPHI(K,I,pa)*dg%DRDY(L) + dg%DSPHI(K,I,pa)*dg%DSDY(L) )*& ! <--- dphi/dy
-                    dg%WAGP(I,pa)  ! <--- weight
+               dg_here%LZ(K,1,2,L) = dg_here%LZ(K,1,2,L)&
+                    + dg_here%M_INV(K,pa)*dg_here%QX_IN*& ! <--- dg_here%QX/Mk
+                    ( dg_here%DRPHI(K,I,pa)*dg_here%DRDY(L) + dg_here%DSPHI(K,I,pa)*dg_here%DSDY(L) )*& ! <--- dphi/dy
+                    dg_here%WAGP(I,pa)  ! <--- weight
 
-               dg%LZ(K,2,1,L) = dg%LZ(K,2,1,L)&
-                    + dg%M_INV(K,pa)*dg%QY_IN*dg%SFAC_ELEM(I,L,pa)*& ! <--- dg%QY/Mk
-                    ( dg%DRPHI(K,I,pa)*dg%DRDX(L) + dg%DSPHI(K,I,pa)*dg%DSDX(L) )*& ! <--- dphi/dx
-                    dg%WAGP(I,pa)  ! <--- weight
+               dg_here%LZ(K,2,1,L) = dg_here%LZ(K,2,1,L)&
+                    + dg_here%M_INV(K,pa)*dg_here%QY_IN*dg_here%SFAC_ELEM(I,L,pa)*& ! <--- dg_here%QY/Mk
+                    ( dg_here%DRPHI(K,I,pa)*dg_here%DRDX(L) + dg_here%DSPHI(K,I,pa)*dg_here%DSDX(L) )*& ! <--- dphi/dx
+                    dg_here%WAGP(I,pa)  ! <--- weight
 
-               dg%LZ(K,2,2,L) = dg%LZ(K,2,2,L)&
-                    + dg%M_INV(K,pa)*dg%QY_IN*& ! <--- dg%QY/Mk
-                    ( dg%DRPHI(K,I,pa)*dg%DRDY(L) + dg%DSPHI(K,I,pa)*dg%DSDY(L) )*& ! <--- dphi/dy
-                    dg%WAGP(I,pa)  ! <--- weight
+               dg_here%LZ(K,2,2,L) = dg_here%LZ(K,2,2,L)&
+                    + dg_here%M_INV(K,pa)*dg_here%QY_IN*& ! <--- dg_here%QY/Mk
+                    ( dg_here%DRPHI(K,I,pa)*dg_here%DRDY(L) + dg_here%DSPHI(K,I,pa)*dg_here%DSDY(L) )*& ! <--- dphi/dy
+                    dg_here%WAGP(I,pa)  ! <--- weight
 #ifdef TRACE
-               dg%TZ(K,1,1,L) = dg%TZ(K,1,1,L)&
-                    + dg%M_INV(K,pa)*dg%iota_IN*dg%SFAC_ELEM(I,L,pa)*& ! <--- dg%iota*H/Mk
-                    ( dg%DRPHI(K,I,pa)*dg%DRDX(L) + dg%DSPHI(K,I,pa)*dg%DSDX(L) )*& ! <--- dphi/dx
-                    dg%WAGP(I,pa)  ! <--- weight
-               dg%TZ(K,2,2,L) = dg%TZ(K,2,2,L)&
-                    + dg%M_INV(K,pa)*dg%iota_IN*& ! <--- dg%iota*H/Mk
-                    ( dg%DRPHI(K,I,pa)*dg%DRDY(L) + dg%DSPHI(K,I,pa)*dg%DSDY(L) )*& ! <--- dphi/dy
-                    dg%WAGP(I,pa)  ! <--- weight
+               dg_here%TZ(K,1,1,L) = dg_here%TZ(K,1,1,L)&
+                    + dg_here%M_INV(K,pa)*dg_here%iota_IN*dg_here%SFAC_ELEM(I,L,pa)*& ! <--- dg_here%iota*H/Mk
+                    ( dg_here%DRPHI(K,I,pa)*dg_here%DRDX(L) + dg_here%DSPHI(K,I,pa)*dg_here%DSDX(L) )*& ! <--- dphi/dx
+                    dg_here%WAGP(I,pa)  ! <--- weight
+               dg_here%TZ(K,2,2,L) = dg_here%TZ(K,2,2,L)&
+                    + dg_here%M_INV(K,pa)*dg_here%iota_IN*& ! <--- dg_here%iota*H/Mk
+                    ( dg_here%DRPHI(K,I,pa)*dg_here%DRDY(L) + dg_here%DSPHI(K,I,pa)*dg_here%DSDY(L) )*& ! <--- dphi/dy
+                    dg_here%WAGP(I,pa)  ! <--- weight
 #endif
 
 #ifdef SED_LAY
                do ll=1,s%layers
-                  dg%MZ(K,1,ll,L) =  dg%MZ(K,1,ll,L)&
-                 + dg%M_INV(K,pa)*dg%bed_IN(ll)*dg%SFAC_ELEM(I,L,pa)* &
-                 ( dg%DRPHI(K,I,pa)*dg%DRDX(L) + dg%DSPHI(K,I,pa)*dg%DSDX(L) )* &
-                 dg%WAGP(I,pa) 
-                  dg%MZ(K,2,ll,L) =  dg%MZ(K,2,ll,L)&
-                 + dg%M_INV(K,pa)*dg%bed_IN(ll)* &
-                 ( dg%DRPHI(K,I,pa)*dg%DRDY(L) + dg%DSPHI(K,I,pa)*dg%DSDY(L) )* &
-                 dg%WAGP(I,pa) 
+                  dg_here%MZ(K,1,ll,L) =  dg_here%MZ(K,1,ll,L)&
+                 + dg_here%M_INV(K,pa)*dg_here%bed_IN(ll)*dg_here%SFAC_ELEM(I,L,pa)* &
+                 ( dg_here%DRPHI(K,I,pa)*dg_here%DRDX(L) + dg_here%DSPHI(K,I,pa)*dg_here%DSDX(L) )* &
+                 dg_here%WAGP(I,pa) 
+                  dg_here%MZ(K,2,ll,L) =  dg_here%MZ(K,2,ll,L)&
+                 + dg_here%M_INV(K,pa)*dg_here%bed_IN(ll)* &
+                 ( dg_here%DRPHI(K,I,pa)*dg_here%DRDY(L) + dg_here%DSPHI(K,I,pa)*dg_here%DSDY(L) )* &
+                 dg_here%WAGP(I,pa) 
                enddo
 #endif
 
@@ -1294,9 +1294,9 @@
 
 #ifdef ARTDIF
 
-         dg%slimit1 = -100.D0
-         dg%slimit2 = -100.D0
-         dg%slimit3 = -100.D0
+         dg_here%slimit1 = -100.D0
+         dg_here%slimit2 = -100.D0
+         dg_here%slimit3 = -100.D0
 
          entrop(:,L) = -100.D0
            
@@ -1311,60 +1311,60 @@
          qy_sensor2 = 0.d0
 
 #ifdef TRACE
-         dg%slimit4 = -100.D0 
+         dg_here%slimit4 = -100.D0 
          iota_sensor1 = 0.d0
          iota_sensor2 = 0.d0
 #endif
          
 #ifdef SED_LAY
-         dg%slimit5 = -100.D0
+         dg_here%slimit5 = -100.D0
          tbed_sensor1 = 0.d0
          tbed_sensor2 = 0.d0
 #endif
          
-         do I = 1,dg%NAGP(pa)
+         do I = 1,dg_here%NAGP(pa)
             
-            do kk = 2, dg%dofs(L)  !Compute the first sensor
+            do kk = 2, dg_here%dofs(L)  !Compute the first sensor
 #ifdef WAVE_DIF 
-               ze_sensor1 = ze_sensor1 + (dg%ze(kk,L,dg%dg%irk)* &
-              dg%phi_area(kk,I,pa))**2.D0 * dg%wagp(I,pa)
+               ze_sensor1 = ze_sensor1 + (dg_here%ze(kk,L,dg_here%irk)* &
+              dg_here%phi_area(kk,I,pa))**2.D0 * dg_here%wagp(I,pa)
 #endif
-               qx_sensor1 = qx_sensor1 + (dg%qx(kk,L,dg%dg%irk)* &
-              dg%phi_area(kk,I,pa))**2.D0 * dg%wagp(I,pa)
-               qy_sensor1 = qy_sensor1 + (dg%qy(kk,L,dg%dg%irk)* &
-              dg%phi_area(kk,I,pa))**2.D0 * dg%wagp(I,pa)
+               qx_sensor1 = qx_sensor1 + (dg_here%qx(kk,L,dg_here%irk)* &
+              dg_here%phi_area(kk,I,pa))**2.D0 * dg_here%wagp(I,pa)
+               qy_sensor1 = qy_sensor1 + (dg_here%qy(kk,L,dg_here%irk)* &
+              dg_here%phi_area(kk,I,pa))**2.D0 * dg_here%wagp(I,pa)
 #ifdef TRACE
-               iota_sensor1 = iota_sensor1 + (dg%iota(kk,L,dg%dg%irk)&
-              * dg%phi_area(kk,I,pa))**2.D0 * dg%wagp(I,pa)
+               iota_sensor1 = iota_sensor1 + (dg_here%iota(kk,L,dg_here%irk)&
+              * dg_here%phi_area(kk,I,pa))**2.D0 * dg_here%wagp(I,pa)
 #endif
                
 #ifdef SED_LAY       
                do ll=1,s%layers
-                  tbed_sensor1 = tbed_sensor1 + (dg%dg%bed(kk,L,dg%dg%irk,ll)* &
-                 dg%phi_area(kk,I,pa))**2.D0 * dg%wagp(I,pa)
+                  tbed_sensor1 = tbed_sensor1 + (dg_here%bed(kk,L,dg_here%irk,ll)* &
+                 dg_here%phi_area(kk,I,pa))**2.D0 * dg_here%wagp(I,pa)
                enddo
 #endif
 
             enddo
             
-            do kk = 1,dg%dofs(L) !Compute the second sensor
+            do kk = 1,dg_here%dofs(L) !Compute the second sensor
 #ifdef WAVE_DIF 
-               ze_sensor2 = ze_sensor2 + (dg%ze(kk,L,dg%dg%irk)* &
-              dg%phi_area(kk,I,pa))**2.D0 * dg%wagp(I,pa)
+               ze_sensor2 = ze_sensor2 + (dg_here%ze(kk,L,dg_here%irk)* &
+              dg_here%phi_area(kk,I,pa))**2.D0 * dg_here%wagp(I,pa)
 #endif
-               qx_sensor2 = qx_sensor2 + (dg%qx(kk,L,dg%dg%irk)* &
-              dg%phi_area(kk,I,pa))**2.D0 * dg%wagp(I,pa)
-               qy_sensor2 = qy_sensor2 + (dg%qy(kk,L,dg%dg%irk)* &
-              dg%phi_area(kk,I,pa))**2.D0 * dg%wagp(I,pa)
+               qx_sensor2 = qx_sensor2 + (dg_here%qx(kk,L,dg_here%irk)* &
+              dg_here%phi_area(kk,I,pa))**2.D0 * dg_here%wagp(I,pa)
+               qy_sensor2 = qy_sensor2 + (dg_here%qy(kk,L,dg_here%irk)* &
+              dg_here%phi_area(kk,I,pa))**2.D0 * dg_here%wagp(I,pa)
 #ifdef TRACE
-               iota_sensor2 = iota_sensor2 + (dg%iota(kk,L,dg%dg%irk)&
-              * dg%phi_area(kk,I,pa))**2.D0 * dg%wagp(I,pa)
+               iota_sensor2 = iota_sensor2 + (dg_here%iota(kk,L,dg_here%irk)&
+              * dg_here%phi_area(kk,I,pa))**2.D0 * dg_here%wagp(I,pa)
 #endif
                
 #ifdef SED_LAY       
                do ll=1,s%layers
-                  tbed_sensor2 = tbed_sensor2 + (dg%dg%bed(kk,L,dg%dg%irk,ll)*& !Adjust sensor for multilayers!&
-                 dg%phi_area(kk,I,pa))**2.D0 * dg%wagp(I,pa)
+                  tbed_sensor2 = tbed_sensor2 + (dg_here%bed(kk,L,dg_here%irk,ll)*& !Adjust sensor for multilayers!&
+                 dg_here%phi_area(kk,I,pa))**2.D0 * dg_here%wagp(I,pa)
                enddo
 #endif
 
@@ -1373,29 +1373,29 @@
          enddo
 #ifdef WAVE_DIF 
          if  (ze_sensor2.gt.1.0e-4.and.ze_sensor1.gt.1.0e-4 ) then
-            dg%slimit1 = log10( ze_sensor1/ze_sensor2 ) + dg%balance(1)
-            entrop(1,L) = dg%slimit1
+            dg_here%slimit1 = log10( ze_sensor1/ze_sensor2 ) + dg_here%balance(1)
+            entrop(1,L) = dg_here%slimit1
          endif
 #endif
          if (qx_sensor2.gt.1.0e-4.and.qx_sensor1.gt.1.0e-4 ) then
-            dg%slimit2 = log10( qx_sensor1/qx_sensor2 ) + dg%balance(2)
-            entrop(2,L) = dg%slimit2
+            dg_here%slimit2 = log10( qx_sensor1/qx_sensor2 ) + dg_here%balance(2)
+            entrop(2,L) = dg_here%slimit2
          endif
          if ( qy_sensor2.gt.1.0e-4.and.qy_sensor1.gt.1.0e-4 ) then
-            dg%slimit3 = log10( qy_sensor1/qy_sensor2 ) + dg%balance(3)
-            entrop(3,L) = dg%slimit3
+            dg_here%slimit3 = log10( qy_sensor1/qy_sensor2 ) + dg_here%balance(3)
+            entrop(3,L) = dg_here%slimit3
          endif
 #ifdef TRACE
           if ( iota_sensor2.gt.1.0e-4.and.iota_sensor1.gt.1.0e-4 ) then
-            dg%slimit4 = log10( iota_sensor1/iota_sensor2 ) + dg%balance(4)
-            entrop(4,L) = dg%slimit4
+            dg_here%slimit4 = log10( iota_sensor1/iota_sensor2 ) + dg_here%balance(4)
+            entrop(4,L) = dg_here%slimit4
           endif
 #endif
          
 #ifdef SED_LAY
          if ( tbed_sensor2.gt.1.0e-4.and.tbed_sensor1.gt.1.0e-4 ) then
-            dg%slimit5 = log10( tbed_sensor1/tbed_sensor2 ) + dg%balance(5)
-            entrop(5,L) = dg%slimit5 
+            dg_here%slimit5 = log10( tbed_sensor1/tbed_sensor2 ) + dg_here%balance(5)
+            entrop(5,L) = dg_here%slimit5 
         endif
 #endif
                   

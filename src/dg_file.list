@@ -2,120 +2,120 @@
 # and sed script commands to prepend the variables
 # in module dg with dg%
 
-#../scripts/sed_vars.bash calc_normal.f95 dg.list dg
+#../scripts/sed_vars.bash calc_normal.f95 dg.list dg_here
 # subroutine calc_normal is called by prep_DG.f95           DONE
 
-#../scripts/sed_vars.bash create_edge_data.f95 dg.list dg
+#../scripts/sed_vars.bash create_edge_data.f95 dg.list dg_here
 # subroutine create_edge_data is called by prep_DG.f95      DONE
 
-#../scripts/sed_vars.bash DG_hydro_timestep.f95 dg.list dg
+#../scripts/sed_vars.bash DG_hydro_timestep.f95 dg.list dg_here
 #subroutine DG_hydro_timestep is called by DG_timestep.f95  DONE
 
-../scripts/sed_vars.bash dgswem.f95 dg.list dg 1 416
+../scripts/sed_vars.bash dgswem.f95 dg.list dg_here 1 416
 #program DG_SWEM (ends on L416) uses module dg,
 #subroutines later in the file do NOT                       DONE
 
 #subroutine dg_timestep is called by dgswem.f95
 #subroutine scrutinize solution only uses a subset of the variables
 #so it needs it's own variable list                         DONE
-../scripts/sed_vars.bash DG_timestep.f95 scrutinize_solution_dg.list dg 65 284
+../scripts/sed_vars.bash DG_timestep.f95 scrutinize_solution_dg.list dg_here 65 284
 
-../scripts/sed_vars.bash ebarrier_edge_hydro.f95 dg.list dg 
+../scripts/sed_vars.bash ebarrier_edge_hydro.f95 dg.list dg_here 
 #sub is called by DG_hydro_timestep                         DONE
 
-../scripts/sed_vars.bash flow_edge_hydro.f95 dg.list dg 
+../scripts/sed_vars.bash flow_edge_hydro.f95 dg.list dg_here 
 #sub is called by DG_hydro_timestep                         DONE
 
-../scripts/sed_vars.bash ibarrier_edge_hydro.f95 dg.list dg 
+../scripts/sed_vars.bash ibarrier_edge_hydro.f95 dg.list dg_here 
 #sub is called by DG_hydro_timestep                         DONE
 
-../scripts/sed_vars.bash internal_edge_hydro.f95 dg.list dg 
+../scripts/sed_vars.bash internal_edge_hydro.f95 dg.list dg_here 
 #sub is called by DG_hydro_timestep                         DONE
 
-../scripts/sed_vars.bash land_edge_hydro.f95 dg.list dg 1 313
+../scripts/sed_vars.bash land_edge_hydro.f95 dg.list dg_here 1 313
 # land_edge_hydro is called by DG_hydro_timestep
 # land_edge_hydro_post is not called                        DONE
 
-../scripts/sed_vars.bash LDG_hydro.f95 dg.list dg 1 1024
+../scripts/sed_vars.bash LDG_hydro.f95 dg.list dg_here 1 1024
 # subroutines LDG_hydro, ocean_edge_ldg_hydro, land_edge_hydro_ldg,
 # flow_edge_ldg_hydro, radation_edge_ldg_hydro all use full dg module
-../scripts/sed_vars.bash LDG_hydro.f95 edge_int_ldg_hydro_dg.list dg 1039 1091
-../scripts/sed_vars.bash LDG_hydro.f95 edge_int_ldg_sediment_dg.list dg 1104 1137
-../scripts/sed_vars.bash LDG_hydro.f95 rhs_ldg_hydro_dg.list dg 1151 1402
+../scripts/sed_vars.bash LDG_hydro.f95 edge_int_ldg_hydro_dg.list dg_here 1039 1091
+../scripts/sed_vars.bash LDG_hydro.f95 edge_int_ldg_sediment_dg.list dg_here 1104 1137
+../scripts/sed_vars.bash LDG_hydro.f95 rhs_ldg_hydro_dg.list dg_here 1151 1402
 #                                                          DONE
 
 
-../scripts/sed_vars.bash met_forcing.f95 dg.list dg
+../scripts/sed_vars.bash met_forcing.f95 dg.list dg_here
 # called by DG_hydro_timestep                              DONE
 
-../scripts/sed_vars.bash numerical_flux.f95 dg.list dg 53 1894
+../scripts/sed_vars.bash numerical_flux.f95 dg.list dg_here 53 1894
 #all subs use full dg module except the first one
 # subroutine numerical_flux only uses one variable, FLUXTYPE, so 
 # i'll do this by hand                                               <- MANUAL
 #                                                         DONE
 
-../scripts/sed_vars.bash ocean_edge_hydro.f95 dg.list dg
+../scripts/sed_vars.bash ocean_edge_hydro.f95 dg.list dg_here
 # called by DG_hydro_timestep.f95                         DONE
 
-../scripts/sed_vars.bash orthobasis_area.f95 dg.list dg
+../scripts/sed_vars.bash orthobasis_area.f95 dg.list dg_here
 # called by prep_DG.f95                                   DONE
 
-../scripts/sed_vars.bash orthobasis_edge.f95 dg.list dg
+../scripts/sed_vars.bash orthobasis_edge.f95 dg.list dg_here
 # called by prep_DG.f95                                   DONE
 
-../scripts/sed_vars.bash p_enrichment.f95 dg.list dg
+../scripts/sed_vars.bash p_enrichment.f95 dg.list dg_here
 # called by DG_hydro_timestep.f95                         DONE
 
-../scripts/sed_vars.bash prep_DG.f95 dg.list dg
+../scripts/sed_vars.bash prep_DG.f95 dg.list dg_here
 # both subs use full dg module.
 # prep_dg is called by dgswem
 # rk_time is called by prep_dg                            DONE
 
-../scripts/sed_vars.bash prep_slopelim.f95 dg.list dg 1 524
+../scripts/sed_vars.bash prep_slopelim.f95 dg.list dg_here 1 524
 # only prep_slopelim uses dg                              DONE
 
-../scripts/sed_vars.bash quad_pts_area.f95 dg.list dg
-../scripts/sed_vars.bash quad_pts_edge.f95 dg.list dg
+../scripts/sed_vars.bash quad_pts_area.f95 dg.list dg_here
+../scripts/sed_vars.bash quad_pts_edge.f95 dg.list dg_here
 # both called by prep_DG.f95
 
-../scripts/sed_vars.bash radiation_edge_hydro.f95 dg.list dg
+../scripts/sed_vars.bash radiation_edge_hydro.f95 dg.list dg_here
 # called by DG_hydro_timestep.f95
 
 
 # read_fort_dg.f95 auto translate really did not go correctly.
-../scripts/sed_vars.bash read_fort_dg.f95 read_fixed_fort_dg_dg.list dg 73 179
+../scripts/sed_vars.bash read_fort_dg.f95 read_fixed_fort_dg_dg.list dg_here 73 179
 # read_fixed_fort_dg, called by read_input
-../scripts/sed_vars.bash read_fort_dg.f95 read_fixed_fort_dg_dg.list dg 73 179
+../scripts/sed_vars.bash read_fort_dg.f95 read_fixed_fort_dg_dg.list dg_here 73 179
 
-../scripts/sed_vars.bash read_fort_dg.f95 fort_dg_setup_dg.list dg 370 521
+../scripts/sed_vars.bash read_fort_dg.f95 fort_dg_setup_dg.list dg_here 370 521
 # fort_dg_setup, called by read_keyword_fort_dg
 
 
-../scripts/sed_vars.bash read_input.f95 dg.list dg
+../scripts/sed_vars.bash read_input.f95 dg.list dg_here
 # called by dgswem
 
-../scripts/sed_vars.bash rhs_dg_hydro.f95 dg.list dg
+../scripts/sed_vars.bash rhs_dg_hydro.f95 dg.list dg_here
 # called by DG_hydro_timestep
 
-../scripts/sed_vars.bash slopelimiter.f95 dg.list dg 77 1823
-../scripts/sed_vars.bash slopelimiter.f95 dg.list dg 1894 8740
+../scripts/sed_vars.bash slopelimiter.f95 dg.list dg_here 77 1823
+../scripts/sed_vars.bash slopelimiter.f95 dg.list dg_here 1894 8740
 # first sub only uses SLOPEFLAG, do this by hand                    <-- MANUAL
 # deleted some commented out subs, so this will mess up line numbers
 # if i use a fresh file
 
-../scripts/sed_vars.bash sta_basis.f95 dg.list dg 1 52
+../scripts/sed_vars.bash sta_basis.f95 dg.list dg_here 1 52
 # called by prep_DG.f95
 
 # do sta_location.f95 by hand                                       <-- MANUAL
 # this also doesn't seem to be called anywhere
 
-../scripts/sed_vars.bash tidal_potential.f95 dg.list dg
+../scripts/sed_vars.bash tidal_potential.f95 dg.list dg_here
 # called by DG_hydro_timestep
 
-../scripts/sed_vars.bash wetdry.f95 dg.list dg
+../scripts/sed_vars.bash wetdry.f95 dg.list dg_here
 # called by DG_hydro_timestep
 
-../scripts/sed_vars.bash write_results.f95 dg.list dg
+../scripts/sed_vars.bash write_results.f95 dg.list dg_here
 # write_results called by dgswem and DG_timestep
 # write_dg_ic called by dgswem
 
@@ -125,4 +125,4 @@
 # target :: bed, is this only used for sedlay?
 
 
-../scripts/sed_vars.bash dg.f95 dg.list dg 251 258
+../scripts/sed_vars.bash dg.f95 dg.list dg_here 251 258
