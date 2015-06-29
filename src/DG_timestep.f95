@@ -8,12 +8,12 @@
 !     
 !***********************************************************************
 
-      SUBROUTINE DG_TIMESTEP(s,dg_here,IT)
+      SUBROUTINE DG_TIMESTEP(s,dg_here,global_here,IT)
 
 !.....Use appropriate modules
       
       USE SIZES
-      USE GLOBAL, ONLY : SEDFLAG
+      USE GLOBAL
 
 #ifdef CMPI
       USE MESSENGER_ELEM
@@ -25,6 +25,7 @@
 
       type (sizes_type) :: s
       type (dg_type) :: dg_here
+      type (global_type) :: global_here
 
 !.....Declare local variables
 
@@ -48,7 +49,7 @@
 #endif
 #endif
 
-      CALL SCRUTINIZE_SOLUTION(s,dg_here,IT)
+      CALL SCRUTINIZE_SOLUTION(s,dg_here,global_here,IT)
 
       RETURN
       END SUBROUTINE
@@ -65,7 +66,7 @@
 !     
 !***********************************************************************
 
-      SUBROUTINE SCRUTINIZE_SOLUTION(s,dg_here,IT)
+      SUBROUTINE SCRUTINIZE_SOLUTION(s,dg_here,global_here,IT)
 
 !.....Use appropriate modules
       
@@ -75,13 +76,14 @@
 #else
       USE SIZES
 #endif
-      USE GLOBAL, ONLY : NE,NM,DP,X,Y,SLAM,SFEA,DEG2RAD,tracer_flag,chem_flag,pdg_el
+      USE GLOBAL
       USE DG
 
       IMPLICIT NONE
       
       type (sizes_type) :: s
       type (dg_type) :: dg_here
+      type (global_type) :: global_here
 
 !.....Declare local variables
 
@@ -286,5 +288,3 @@
 
       RETURN
       END SUBROUTINE
-
-

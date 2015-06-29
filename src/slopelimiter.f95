@@ -1832,38 +1832,40 @@
 !     Borrowed from ROE_FLUX() - 06 Feb 2008, S.B.
 !     
 !***********************************************************************
-      SUBROUTINE HYDRO_EIGEN_VALUES(H, U, V, NX, NY, EIGVAL, RI, LE)
+      SUBROUTINE HYDRO_EIGEN_VALUES(global_here, H, U, V, NX, NY, EIGVAL, RI, LE)
       USE SIZES, ONLY : SZ
-      USE GLOBAL, ONLY : IFNLCT, G
+      USE GLOBAL
 
       IMPLICIT NONE
+      
+      type (global_type) :: global_here
 
       REAL(SZ) H,U,V,NX,NY,C,DTM
       REAL(SZ) EIGVAL(3)        ! eigen values
       REAL(SZ) RI(3,3)          ! columns are the right eigen vectors
       REAL(SZ) LE(3,3)          ! columns are the left eigen vectors
 
-      C = SQRT(G*H)
+      C = SQRT(GLOBAL_HERE%G*H)
 
 !.....Evaluate the eigenvalues at the Roe averaged variables
 
-      EIGVAL(2) = (U*NX + V*NY)*IFNLCT
+      EIGVAL(2) = (U*NX + V*NY)*GLOBAL_HERE%IFNLCT
       EIGVAL(1) = EIGVAL(2) + C
       EIGVAL(3) = EIGVAL(2) - C
       
 !.....Evaluate right eigenvectors at Roe averaged variables
 
       RI(1,1) = 1.D0
-      RI(2,1) = U*IFNLCT + (IFNLCT*C + (1-IFNLCT)*G/C)*NX
-      RI(3,1) = V*IFNLCT + (IFNLCT*C + (1-IFNLCT)*G/C)*NY
+      RI(2,1) = U*GLOBAL_HERE%IFNLCT + (GLOBAL_HERE%IFNLCT*C + (1-GLOBAL_HERE%IFNLCT)*G/C)*NX
+      RI(3,1) = V*GLOBAL_HERE%IFNLCT + (GLOBAL_HERE%IFNLCT*C + (1-GLOBAL_HERE%IFNLCT)*G/C)*NY
 
       RI(1,2) = 0.D0
       RI(2,2) = -NY
       RI(3,2) =  NX
 
       RI(1,3) = 1.D0
-      RI(2,3) = U*IFNLCT - (IFNLCT*C + (1-IFNLCT)*G/C)*NX
-      RI(3,3) = V*IFNLCT - (IFNLCT*C + (1-IFNLCT)*G/C)*NY
+      RI(2,3) = U*GLOBAL_HERE%IFNLCT - (GLOBAL_HERE%IFNLCT*C + (1-GLOBAL_HERE%IFNLCT)*G/C)*NX
+      RI(3,3) = V*GLOBAL_HERE%IFNLCT - (GLOBAL_HERE%IFNLCT*C + (1-GLOBAL_HERE%IFNLCT)*G/C)*NY
 
 !.....Evaluate left eigenvectors at Roe averaged variables
 

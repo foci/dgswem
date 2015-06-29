@@ -74,7 +74,6 @@
 !-----------------------------------------------------------------------
       MODULE NodalAttributes
       USE SIZES
-      USE GLOBAL
 !
 !asey 101118: Allow SWAN to handle wave refraction as a nodal attribute.
 !             I've placed these changes outside the #ifdef SWAN flags

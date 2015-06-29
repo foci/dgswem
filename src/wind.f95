@@ -1,7 +1,6 @@
 
        MODULE WIND
        USE SIZES, ONLY : SZ
-       USE GLOBAL, ONLY : ScreenUnit
 #ifdef CMPI
 !      use messenger, only : msg_fini
 #endif

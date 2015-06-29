@@ -218,7 +218,7 @@
 #endif
 
       RETURN
-      END SUBROUTINE
+    END SUBROUTINE LDG_HYDRO
 
 !***********************************************************************
 !     
@@ -1042,19 +1042,20 @@
 !     
 !***********************************************************************
 
-      SUBROUTINE EDGE_INT_LDG_HYDRO(s,dg_here,K,EL,LED,GED,GP,iota_Avg,ZE_Avg,QX_Avg,&
+      SUBROUTINE EDGE_INT_LDG_HYDRO(s,dg_here,global_here,K,EL,LED,GED,GP,iota_Avg,ZE_Avg,QX_Avg,&
      QY_Avg,NX,NY,pa)
 
 !.....Use appropriate modules
 
       USE SIZES
-      USE GLOBAL,ONLY : AREAS,nm
+      USE GLOBAL
       USE DG
  
       IMPLICIT NONE
       
       type (sizes_type) :: s
       type (dg_type) :: dg_here
+      type (global_type) :: global_here
       
 !.....Declare local variables
 
@@ -1065,7 +1066,7 @@
       
 !.....Retrieve the element area
       
-      AREA = 0.5D0*AREAS(EL)
+      AREA = 0.5D0*global_here%AREAS(EL)
 
 !.....Comput the edge integral
 
@@ -1115,13 +1116,14 @@
 !.....Use appropriate modules
 
       USE SIZES
-      USE GLOBAL,ONLY : AREAS
+      USE GLOBAL
       USE DG
 
       IMPLICIT NONE
       
       type (sizes_type) :: s
       type (dg_type) :: dg_here
+      type (global_type) :: global_here
 
 !.....Declare local variables
 
@@ -1130,7 +1132,7 @@
       
 !.....Retrieve the element area
       
-      AREA = 0.5D0*AREAS(EL)
+      AREA = 0.5D0*global_here%AREAS(EL)
 
 !.....Comput the edge integral
 
@@ -1161,7 +1163,7 @@
 !.....Use appropriate modules
 
       USE SIZES
-      USE GLOBAL,ONLY : NE,NM,N1,N2,N3,pdg_el,entrop
+      USE GLOBAL
       USE DG
 
       IMPLICIT NONE
