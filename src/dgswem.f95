@@ -62,7 +62,7 @@
 !...  ******************* START PROGRAM SETUP SECTION ****************************
 !...  
 !     
-      IF (IHOT.EQ.0) THEN
+      IF (global_here%IHOT.EQ.0) THEN
          CALL COLDSTART(s)
       ELSE
 #ifdef HOTSTART
@@ -75,30 +75,30 @@
 
 
 !...  
-!...  DETERMINE THE NUMBER OF ACTIVE ELEMENTS (MJU) and total number of 
-!...  elements (NODELE) ATTACHED TO EACH NODE
+!...  DETERMINE THE NUMBER OF ACTIVE ELEMENTS (global_here%MJU) and total number of 
+!...  elements (global_here%NODELE) ATTACHED TO EACH NODE
 !...  
-      DO I=1,NP
-         MJU(I)=0
-         NODELE(I)=0
-         NODECODE(I)=NNODECODE(I)
+      DO I=1,global_here%NP
+         global_here%MJU(I)=0
+         global_here%NODELE(I)=0
+         global_here%NODECODE(I)=global_here%NNODECODE(I)
       END DO
 
-      DO IE=1,NE
-         NM1=NM(IE,1)
-         NM2=NM(IE,2)
-         NM3=NM(IE,3)
-         NCELE=NODECODE(NM1)*NODECODE(NM2)*NODECODE(NM3)
-         MJU(NM1)=MJU(NM1)+NCELE
-         MJU(NM2)=MJU(NM2)+NCELE
-         MJU(NM3)=MJU(NM3)+NCELE
-         NODELE(NM1)=NODELE(NM1)+1
-         NODELE(NM2)=NODELE(NM2)+1
-         NODELE(NM3)=NODELE(NM3)+1
+      DO global_here%IE=1,global_here%NE
+         global_here%NM1=global_here%NM(global_here%IE,1)
+         global_here%NM2=global_here%NM(global_here%IE,2)
+         global_here%NM3=global_here%NM(global_here%IE,3)
+         global_here%NCELE=global_here%NODECODE(global_here%NM1)*global_here%NODECODE(global_here%NM2)*global_here%NODECODE(global_here%NM3)
+         global_here%MJU(global_here%NM1)=global_here%MJU(global_here%NM1)+global_here%NCELE
+         global_here%MJU(global_here%NM2)=global_here%MJU(global_here%NM2)+global_here%NCELE
+         global_here%MJU(global_here%NM3)=global_here%MJU(global_here%NM3)+global_here%NCELE
+         global_here%NODELE(global_here%NM1)=global_here%NODELE(global_here%NM1)+1
+         global_here%NODELE(global_here%NM2)=global_here%NODELE(global_here%NM2)+1
+         global_here%NODELE(global_here%NM3)=global_here%NODELE(global_here%NM3)+1
       END DO
 
-      DO I=1,NP
-         IF(MJU(I).EQ.0) MJU(I)=1
+      DO I=1,global_here%NP
+         IF(global_here%MJU(I).EQ.0) global_here%MJU(I)=1
       END DO
       
       
@@ -123,50 +123,50 @@
          IFLINBF=0
          IFHYBF=1
       ENDIF
-      IF(NOLIFA.EQ.0) THEN
-         IFNLFA=0
+      IF(global_here%NOLIFA.EQ.0) THEN
+         global_here%IFNLFA=0
       ELSE
-         IFNLFA=1
+         global_here%IFNLFA=1
       ENDIF
-      IF(NOLICA.EQ.0) THEN
-         IFNLCT=0
-         NLEQ = 0.D0
-         LEQ = 1.D0
+      IF(global_here%NOLICA.EQ.0) THEN
+         global_here%IFNLCT=0
+         global_here%NLEQ = 0.D0
+         global_here%LEQ = 1.D0
       ELSE
-         IFNLCT=1
-         NLEQ = 1.D0
-         LEQ = 0.D0
+         global_here%IFNLCT=1
+         global_here%NLEQ = 1.D0
+         global_here%LEQ = 0.D0
       ENDIF
-      IF(NOLICAT.EQ.0) THEN
-         IFNLCAT=0
-         NLEQ = 0.D0
-         LEQ = 1.D0
+      IF(global_here%NOLICAT.EQ.0) THEN
+         global_here%IFNLCAT=0
+         global_here%NLEQ = 0.D0
+         global_here%LEQ = 1.D0
       ELSE
-         IFNLCAT=1
-         NLEQ = 1.D0
-         LEQ = 0.D0
+         global_here%IFNLCAT=1
+         global_here%NLEQ = 1.D0
+         global_here%LEQ = 0.D0
       ENDIF
-      NLEQG = NLEQ*G
-      dg_here%FG_L = LEQ*G
+      global_here%NLEQG = global_here%NLEQ*global_here%G
+      dg_here%FG_L = global_here%LEQ*global_here%G
 
-      IFWIND=1
-      IF(IM.EQ.1) IFWIND=0
+      global_here%IFWIND=1
+      IF(global_here%IM.EQ.1) global_here%IFWIND=0
  
 !...  CONSTANT COEFFICIENTS
 !jj   w - version m10
-!jj   w      TT0L=((1.0+0.5*DT*TAU0)/DT)/DT
-      GA00=G*A00
+!jj   w      global_here%TT0L=((1.0+0.5*global_here%DT*TAU0)/global_here%DT)/global_here%DT
+      global_here%GA00=global_here%G*global_here%A00
 !jj   w - version m10
-!jj   w      TT0R=((0.5*TAU0*DT-1.0)/DT)/DT
-      GC00=G*C00
-      TADVODT=IFNLCAT/DT
-      GB00A00=G*(B00+A00)
-      GFAO2=G*IFNLFA/2.D0
-      GO3=G/3.D0
-      DTO2=DT/2.D0
-      DT2=DT*2.D0
-      GDTO2=G*DT/2.D0
-      SADVDTO3=IFNLCT*DT/3.D0
+!jj   w      global_here%TT0R=((0.5*TAU0*global_here%DT-1.0)/global_here%DT)/global_here%DT
+      global_here%GC00=global_here%G*global_here%C00
+      global_here%TADVODT=global_here%IFNLCAT/global_here%DT
+      global_here%GB00A00=global_here%G*(global_here%B00+global_here%A00)
+      global_here%GFAO2=global_here%G*global_here%IFNLFA/2.D0
+      global_here%GO3=global_here%G/3.D0
+      global_here%DTO2=global_here%DT/2.D0
+      global_here%DT2=global_here%DT*2.D0
+      global_here%GDTO2=global_here%G*global_here%DT/2.D0
+      global_here%SADVDTO3=global_here%IFNLCT*global_here%DT/3.D0
 
       
 !*************************DG SWEM*******************************
@@ -206,80 +206,80 @@
 
       if (ModetoNode.eq.0) then
          write(777,*) 
-     $        'VARIABLES = "x", "y", "b", "dg_here%ze", "H", "u", "v", "|v|","|w|","p","dg_here%iota","dg_here%iota2","sum","diff"'
+     $        'VARIABLES = "global_here%x", "global_here%y", "b", "dg_here%ze", "H", "u", "v", "|v|","|w|","p","dg_here%iota","dg_here%iota2","sum","diff"'
          write(777,*) 'ZONE ZONETYPE=FETRIANGLE ',
-     $        'NODES=', np, 
-     $        ' ELEMENTS=', ne, 
-!     $     ' DATAPACKING=POINT ','SOLUTIONTIME=',time_a
+     $        'NODES=', global_here%np, 
+     $        ' ELEMENTS=', global_here%ne, 
+!     $     ' DATAPACKING=POINT ','SOLUTIONTIME=',global_here%time_a
      $        ' DATAPACKING=BLOCK ',' VARLOCATION=([3,4,5,6,7,8,10,11,12,13,14]=CELLCENTERED) ',
-     $        'SOLUTIONTIME=',time_a 
+     $        'SOLUTIONTIME=',global_here%time_a 
 
-!$$$  write(777,7777) x(i), y(i),  
-!$$$  $        dp(i), eta2(i), eta2(i)+dp(i),uu2(i),vv2(i),
-!$$$  $        sqrt(uu2(i)**2+vv2(i)**2),sqrt(wsx2(i)**2+wsy2(i)**2),
-!$$$  $        myproc,tracer(i),tracer2(i),abs(tracer(i)+tracer2(i)),
-!$$$  $        abs(tracer(i)-tracer2(i))
+!$$$  write(777,7777) global_here%x(i), global_here%y(i),  
+!$$$  $        global_here%dp(i), global_here%eta2(i), global_here%eta2(i)+global_here%dp(i),global_here%uu2(i),global_here%vv2(i),
+!$$$  $        sqrt(global_here%uu2(i)**2+global_here%vv2(i)**2),sqrt(global_here%wsx2(i)**2+global_here%wsy2(i)**2),
+!$$$  $        myproc,global_here%tracer(i),global_here%tracer2(i),abs(global_here%tracer(i)+global_here%tracer2(i)),
+!$$$  $        abs(global_here%tracer(i)-global_here%tracer2(i))
 !$$$  enddo
 
-         do i=1,np
-            write(777,7777)  x(i)
+         do i=1,global_here%np
+            write(777,7777)  global_here%x(i)
          enddo
-         do i=1,np
-            write(777,7777)  y(i)
+         do i=1,global_here%np
+            write(777,7777)  global_here%y(i)
          enddo
-         do i=1,ne
-            write(777,7777)  dpe(i)
+         do i=1,global_here%ne
+            write(777,7777)  global_here%dpe(i)
          enddo
-         do i=1,ne 
-            write(777,7777)  eta2(i)
+         do i=1,global_here%ne 
+            write(777,7777)  global_here%eta2(i)
          enddo
-         do i=1,ne 
-            write(777,7777)  eta2(i)+dpe(i)
+         do i=1,global_here%ne 
+            write(777,7777)  global_here%eta2(i)+global_here%dpe(i)
          enddo
-         do i=1,ne 
-            write(777,7777)  uu2(i)
+         do i=1,global_here%ne 
+            write(777,7777)  global_here%uu2(i)
          enddo
-         do i=1,ne 
-            write(777,7777)  vv2(i)
+         do i=1,global_here%ne 
+            write(777,7777)  global_here%vv2(i)
          enddo
-         do i=1,ne 
-            write(777,7777)  sqrt(uu2(i)**2+vv2(i)**2)
+         do i=1,global_here%ne 
+            write(777,7777)  sqrt(global_here%uu2(i)**2+global_here%vv2(i)**2)
          enddo
-         do i=1,np 
-            write(777,7777)  sqrt(wsx2(i)**2+wsy2(i)**2)
+         do i=1,global_here%np 
+            write(777,7777)  sqrt(global_here%wsx2(i)**2+global_here%wsy2(i)**2)
          enddo
-         do i=1,ne 
-            write(777,7777)  DBLE(pdg_el(i))
+         do i=1,global_here%ne 
+            write(777,7777)  DBLE(global_here%pdg_el(i))
          enddo
-         do i=1,ne 
-            write(777,7777)  tracer(i)
+         do i=1,global_here%ne 
+            write(777,7777)  global_here%tracer(i)
          enddo
-         do i=1,ne 
-            write(777,7777)  tracer2(i)
+         do i=1,global_here%ne 
+            write(777,7777)  global_here%tracer2(i)
          enddo
-         do i=1,ne 
-            write(777,7777)  abs(tracer(i)+tracer2(i))
+         do i=1,global_here%ne 
+            write(777,7777)  abs(global_here%tracer(i)+global_here%tracer2(i))
          enddo
-         do i=1,ne 
-            write(777,7777)  abs(tracer(i)-tracer2(i))    
+         do i=1,global_here%ne 
+            write(777,7777)  abs(global_here%tracer(i)-global_here%tracer2(i))    
          enddo
       else
          write(777,*) 
-     $'VARIABLES = "x", "y", "b", "dg_here%ze", "H", "u", "v", "|v|","|w|","PE"'
+     $'VARIABLES = "global_here%x", "global_here%y", "b", "dg_here%ze", "H", "u", "v", "|v|","|w|","PE"'
          write(777,*) 'ZONE ZONETYPE=FETRIANGLE ',
-     $        'NODES=', np, 
-     $        ' ELEMENTS=', ne, 
-     $        ' DATAPACKING=POINT ','SOLUTIONTIME=',time_a
-         do i=1,np
-            if (ics.eq.2) then
-               write(777,7777) slam(i)/deg2rad, sfea(i)/deg2rad,  
-     $              dp(i), eta2(i), eta2(i)+dp(i),uu2(i),vv2(i),
-     $              sqrt(uu2(i)**2+vv2(i)**2),sqrt(wsx2(i)**2+wsy2(i)**2),
+     $        'NODES=', global_here%np, 
+     $        ' ELEMENTS=', global_here%ne, 
+     $        ' DATAPACKING=POINT ','SOLUTIONTIME=',global_here%time_a
+         do i=1,global_here%np
+            if (global_here%ics.eq.2) then
+               write(777,7777) global_here%slam(i)/deg2rad, global_here%sfea(i)/deg2rad,  
+     $              global_here%dp(i), global_here%eta2(i), global_here%eta2(i)+global_here%dp(i),global_here%uu2(i),global_here%vv2(i),
+     $              sqrt(global_here%uu2(i)**2+global_here%vv2(i)**2),sqrt(global_here%wsx2(i)**2+global_here%wsy2(i)**2),
      $              myproc
             else
-               write(777,7777) x(i), y(i),
-     $              dp(i), eta2(i), eta2(i)+dp(i),uu2(i),vv2(i),
-     $              sqrt(uu2(i)**2+vv2(i)**2),sqrt(wsx2(i)**2+wsy2(i)**2),
+               write(777,7777) global_here%x(i), global_here%y(i),
+     $              global_here%dp(i), global_here%eta2(i), global_here%eta2(i)+global_here%dp(i),global_here%uu2(i),global_here%vv2(i),
+     $              sqrt(global_here%uu2(i)**2+global_here%vv2(i)**2),sqrt(global_here%wsx2(i)**2+global_here%wsy2(i)**2),
      $              myproc
             endif
          enddo
@@ -287,8 +287,8 @@
       endif
 
  7777    format(9f20.8,i10)
-         do i=1,ne
-            write(777,"(3i12)") nm(i,1), nm(i,2), nm(i,3)
+         do i=1,global_here%ne
+            write(777,"(3i12)") global_here%nm(i,1), global_here%nm(i,2), global_here%nm(i,3)
          enddo
 
 !Casey 120813: End the OUT_TEC conditional.
@@ -305,11 +305,11 @@
       WRITE(16,1112)
       WRITE(16,17931)
 #ifdef CMPI
-      IF (NSCREEN.EQ.1.AND.MYPROC.EQ.0) WRITE(6,1112)
-      IF (NSCREEN.EQ.1.AND.MYPROC.EQ.0) WRITE(6,17931)
+      IF (global_here%NSCREEN.EQ.1.AND.MYPROC.EQ.0) WRITE(6,1112)
+      IF (global_here%NSCREEN.EQ.1.AND.MYPROC.EQ.0) WRITE(6,17931)
 #else      
-      IF (NSCREEN.EQ.1) WRITE(6,1112)
-      IF (NSCREEN.EQ.1) WRITE(6,17931)
+      IF (global_here%NSCREEN.EQ.1) WRITE(6,1112)
+      IF (global_here%NSCREEN.EQ.1) WRITE(6,17931)
 #endif
 
 !     sb...Write initial conditions
@@ -322,22 +322,22 @@
 !     endif
 #endif
 !.....Begin time stepping
-      DO 200 ITIME_A = ITHS+1,NT
-!$$$         if (mod(itime_a,1000).eq.1) then
-!$$$            if (myproc.eq.0) write(*,*) 'timestep ',itime_a
-!$$$c     write(200+myproc,*) 'timestep ',itime_a,myproc
+      DO 200 global_here%ITIME_A = global_here%ITHS+1,global_here%NT
+!$$$         if (mod(global_here%itime_a,1000).eq.1) then
+!$$$            if (myproc.eq.0) write(*,*) 'timestep ',global_here%itime_a
+!$$$c     write(200+myproc,*) 'timestep ',global_here%itime_a,myproc
 !$$$         endif
-         CALL DG_TIMESTEP(s,dg_here,ITIME_A)
+         CALL DG_TIMESTEP(s,dg_here,global_here%ITIME_A)
 #ifdef SWAN
 !asey 090302: If it is time, then call the following subroutine
 !             to then call the SWAN time-stepping subroutine.
-         IF(MOD(ITIME_A,CouplingInterval).EQ.0)THEN
-           CALL PADCSWAN_RUN(ITIME_A)
+         IF(MOD(global_here%ITIME_A,CouplingInterval).EQ.0)THEN
+           CALL PADCSWAN_RUN(global_here%ITIME_A)
 !asey 121126: DEBUG.
 !          IF(ALLOCATED(PASS2SWAN))THEN
-!             DO I=1,NP
-!                DO J=1,PASS2SWAN(I)%NO_NBORS
-!                   PASS2SWAN(I)%ETA1(J) = PASS2SWAN(I)%ETA2(J)
+!             DO I=1,global_here%NP
+!                DO J=1,PASS2SWAN(I)%global_here%NO_NBORS
+!                   PASS2SWAN(I)%global_here%ETA1(J) = PASS2SWAN(I)%global_here%ETA2(J)
 !                ENDDO
 !             ENDDO
 !           ENDIF
@@ -353,29 +353,29 @@
 !...  ****************** TIME STEPPING LOOP ENDS HERE ********************
 !...  
 !...  
-!...  IF IHARIND=1 SOLVE THE HARMONIC ANALYSIS PROBLEM AND WRITE OUTPUT
+!...  IF global_here%IHARIND=1 SOLVE THE HARMONIC ANALYSIS PROBLEM AND WRITE OUTPUT
 !...  
 
 #ifdef HARM
-      IF ((IHARIND.EQ.1).AND.(ITIME_A.GT.ITHAS)) THEN
+      IF ((global_here%IHARIND.EQ.1).AND.(global_here%ITIME_A.GT.global_here%ITHAS)) THEN
 
 !...  LINES COMPUTE MEANS AND VARIANCES
 !...  FOR CHECKING THE HARMONIC ANALYSIS RESULTS.
 !...  ACCUMULATE VARIANCE AND MEAN OF RECORD AT NODES.
 !     
          if (CHARMV) then
-            IF (FMV.NE.0.) THEN
-               DO I=1,NP
-                  ELAV(I)   = ELAV(I)/NTSTEPS
-                  XVELAV(I) = XVELAV(I)/NTSTEPS
-                  YVELAV(I) = YVELAV(I)/NTSTEPS
-                  ELVA(I)   = ELVA(I)/NTSTEPS   - ELAV(I)*ELAV(I)
-                  XVELVA(I) = XVELVA(I)/NTSTEPS - XVELAV(I)*XVELAV(I)
-                  YVELVA(I) = YVELVA(I)/NTSTEPS - YVELAV(I)*YVELAV(I)
+            IF (global_here%FMV.global_here%NE.0.) THEN
+               DO I=1,global_here%NP
+                  global_here%ELAV(I)   = global_here%ELAV(I)/global_here%NTSTEPS
+                  global_here%XVELAV(I) = global_here%XVELAV(I)/global_here%NTSTEPS
+                  global_here%YVELAV(I) = global_here%YVELAV(I)/global_here%NTSTEPS
+                  global_here%ELVA(I)   = global_here%ELVA(I)/global_here%NTSTEPS   - global_here%ELAV(I)*global_here%ELAV(I)
+                  global_here%XVELVA(I) = global_here%XVELVA(I)/global_here%NTSTEPS - global_here%XVELAV(I)*global_here%XVELAV(I)
+                  global_here%YVELVA(I) = global_here%YVELVA(I)/global_here%NTSTEPS - global_here%YVELAV(I)*global_here%YVELAV(I)
                END DO
-               TIMEBEG=ITMV*DTDP + (STATIM-REFTIM)*86400.D0
+               global_here%TIMEBEG=global_here%ITMV*global_here%DTDP + (global_here%STATIM-global_here%REFTIM)*86400.D0
                OPEN(55,FILE=DIRNAME//'/'//'fort.55')
-               WRITE(55,*) NP
+               WRITE(55,*) global_here%NP
             ENDIF
          endif                  !  charmv
 !...  
@@ -385,13 +385,13 @@
 !...  
 !......Solve the harmonic analysis problem and write the output
 !...  
-         IF(NHAGE.EQ.1) CALL LSQSOLEG(NP,DIRNAME,LNAME,ELAV,ELVA)
+         IF(global_here%NHAGE.EQ.1) CALL LSQSOLEG(global_here%NP,DIRNAME,LNAME,global_here%ELAV,global_here%ELVA)
 !     
-         IF(NHAGV.EQ.1) CALL LSQSOLVG(NP,DIRNAME,LNAME,XVELAV,YVELAV,XVELVA,YVELVA)
+         IF(global_here%NHAGV.EQ.1) CALL LSQSOLVG(global_here%NP,DIRNAME,LNAME,global_here%XVELAV,global_here%YVELAV,global_here%XVELVA,global_here%YVELVA)
 !     
-         IF(NHASE.EQ.1) CALL LSQSOLES(NSTAE,DIRNAME,LNAME)
+         IF(global_here%NHASE.EQ.1) CALL LSQSOLES(global_here%NSTAE,DIRNAME,LNAME)
 !     
-         IF(NHASV.EQ.1) CALL LSQSOLVS(NSTAV,DIRNAME,LNAME)
+         IF(global_here%NHASV.EQ.1) CALL LSQSOLVS(global_here%NSTAV,DIRNAME,LNAME)
 !     
       ENDIF
 #endif      

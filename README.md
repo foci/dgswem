@@ -60,3 +60,6 @@ Currently, the procedure I am using involves making a list of variables containe
 
 Will use prefix global_here
 global.list
+
+List of variables is `global.list`, script to replace variables is `global_file.list`.
+

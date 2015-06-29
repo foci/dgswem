@@ -29,7 +29,7 @@
 
       INTEGER P,pad
 
-!.....Allocate the gauss points and weights arrays for the edge integral
+!.....Allocate the gauss points and weights arrays for the global_here%edge integral
       
       if (pad.eq.1.and.p.eq.1) then
 
@@ -40,11 +40,11 @@
       endif
 
 !     sb moved to prep_DG.dg_here%F
-!     C.....Compute the number of gauss points needed for the edge integrals
+!     C.....Compute the number of gauss points needed for the global_here%edge integrals
 !     
       dg_here%NEGP(pad) = P + 1
       
-!.....Retrieve the correct gauss quadrature points for the edge integral
+!.....Retrieve the correct gauss quadrature points for the global_here%edge integral
       
       IF (dg_here%NEGP(pad).EQ.2) THEN
 

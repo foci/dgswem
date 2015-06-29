@@ -4,7 +4,7 @@
 !     
 !     This subroutine does the following:
 !     
-!     1.  Calculates the values of the necessary variables at the edge
+!     1.  Calculates the values of the necessary variables at the global_here%edge
 !     gauss points for INTERNAL BARRIER edges
 !     2.  Calls the appropriate subroutine to compute the flux at
 !     these points.
@@ -49,8 +49,8 @@
       REAL(SZ) QB_T_INT, QF_T_INT, QB_T_EXT, QF_T_EXT
 
 !.....Loop over the internal barrier segments (note: an internal barrier
-!.....segment consists of two internal barrier edges -- a "front" edge &
-!.....a "back" edge.
+!.....segment consists of two internal barrier edges -- a "front" global_here%edge &
+!.....a "back" global_here%edge.
       dg_here%test_el = 0
       DO 1000 L = 1,dg_here%NIBSEG
          
@@ -73,7 +73,7 @@
             dg_here%EL = ELF
          endif
 
-         dg_here%pa = PDG_EL(dg_here%EL)
+         dg_here%pa = global_here%PDG_EL(dg_here%EL)
 
 #ifdef P0         
          if (dg_here%pa.eq.0) then
@@ -90,7 +90,7 @@
 
          dg_here%test_el = dg_here%test_el+1
 
-!.......Retrieve the components of the normal vector to the edge
+!.......Retrieve the components of the normal vector to the global_here%edge
 
          NXB = dg_here%COSNX(GEDB)
          NYB = dg_here%SINNX(GEDB)
@@ -98,7 +98,7 @@
          NXF = dg_here%COSNX(GEDF)
          NYF = dg_here%SINNX(GEDF)
          
-!.....Set the components for the tangential vector to the edge
+!.....Set the components for the tangential vector to the global_here%edge
 
          TXB = -NYB
          TYB =  NXB
@@ -222,8 +222,8 @@
             SUBSUPF = 2.D0*ABOVEF/3.D0
             SUBSUPB = 2.D0*ABOVEB/3.D0
 
-!.........Case 3: Overtopping of barrier with water higher on front side
-!     Flow from front to back side
+!.........Case 3: Overtopping of barrier with water higher on front global_here%side
+!     Flow from front to back global_here%side
 !     -------------------------------------------------------------
 
             IF ((ABOVEF.GT.ABOVEB).AND.(ABOVEF.GT.BARMIN)) THEN
@@ -235,22 +235,22 @@
 
                IF (ABOVEB.GT.SUBSUPF) THEN
                   QF_N_INT = dg_here%RAMPDG*dg_here%IBCFSB(L)*ABOVEB&
-                      *SQRT((2.D0*G*(ABOVEF-ABOVEB)))
+                      *SQRT((2.D0*global_here%G*(ABOVEF-ABOVEB)))
                   QF_T_INT = 0.D0
                   
 !...........Case 3b) Supercritical flow
 !     ---------------------------
 
                ELSE
-                  QF_N_INT = dg_here%RAMPDG*dg_here%IBCFSP(L)*SUBSUPF*SQRT(SUBSUPF*G)
+                  QF_N_INT = dg_here%RAMPDG*dg_here%IBCFSP(L)*SUBSUPF*SQRT(SUBSUPF*global_here%G)
                   QF_T_INT = 0.D0
                ENDIF
                GOTO 100
 
             ENDIF
             
-!.........Case 4: Overtopping of barrier with water higher on back side
-!     Flow from back to front side
+!.........Case 4: Overtopping of barrier with water higher on back global_here%side
+!     Flow from back to front global_here%side
 !     --------------------------------------------------------------
 
             IF ((ABOVEB.GT.ABOVEF).AND.(ABOVEB.GT.BARMIN)) THEN
@@ -262,14 +262,14 @@
 
                IF (ABOVEF.GT.SUBSUPB) THEN
                   QB_N_INT = dg_here%RAMPDG*dg_here%IBCFSB(L)*ABOVEF&
-                      *SQRT((2.D0*G*(ABOVEB-ABOVEF)))
+                      *SQRT((2.D0*global_here%G*(ABOVEB-ABOVEF)))
                   QB_T_INT = 0.D0
                   
 !...........Case 4b) Supercritical flow
 !     ---------------------------
                   
                ELSE
-                  QB_N_INT = dg_here%RAMPDG*dg_here%IBCFSP(L)*SUBSUPB*SQRT(SUBSUPB*G)
+                  QB_N_INT = dg_here%RAMPDG*dg_here%IBCFSP(L)*SUBSUPB*SQRT(SUBSUPB*global_here%G)
                   QB_T_INT = 0.D0
                ENDIF
                GOTO 100
@@ -279,7 +279,7 @@
 
             IF (WEIR_FLOW.LE.0) THEN
 
-!...........Compute the numerical flux for the back side edge
+!...........Compute the numerical flux for the back global_here%side global_here%edge
 
                dg_here%ZE_IN = ZEB
                dg_here%QX_IN = QXB
@@ -324,32 +324,32 @@
 
 !...........Reflect the velocity in the normal direction
 
-               Q_N_EXT = QB_N_INT
-               Q_T_EXT = QB_T_INT
+               global_here%Q_N_EXT = QB_N_INT
+               global_here%Q_T_EXT = QB_T_INT
 
-!...........Compute the x and y components of the external state flow
+!...........Compute the global_here%x and global_here%y components of the external state flow
 
-               dg_here%QX_EX = ( TYB*Q_N_EXT - NYB*Q_T_EXT)/(NXB*TYB - NYB*TXB)
-               dg_here%QY_EX = (-TXB*Q_N_EXT + NXB*Q_T_EXT)/(NXB*TYB - NYB*TXB)
+               dg_here%QX_EX = ( TYB*global_here%Q_N_EXT - NYB*global_here%Q_T_EXT)/(NXB*TYB - NYB*TXB)
+               dg_here%QY_EX = (-TXB*global_here%Q_N_EXT + NXB*global_here%Q_T_EXT)/(NXB*TYB - NYB*TXB)
 
 !...........Compute the numerical flux
                
                CALL NUMERICAL_FLUX(s,dg_here,IT)
-               FB_HAT = F_HAT
-               GB_HAT = G_HAT
-               HB_HAT = H_HAT
+               FB_HAT = global_here%F_HAT
+               GB_HAT = global_here%G_HAT
+               HB_HAT = global_here%H_HAT
 
 #ifdef TRACE
-               IB_HAT = I_HAT
+               IB_HAT = global_here%I_HAT
 #endif
 
 #ifdef CHEM
-               IB_HAT = I_HAT
-               JB_HAT = J_HAT
+               IB_HAT = global_here%I_HAT
+               JB_HAT = global_here%J_HAT
 #endif
 
 #ifdef DYNP
-               KB_HAT = K_HAT
+               KB_HAT = global_here%K_HAT
 #endif
 
                IF (WEIR_FLOW.LT.0) THEN
@@ -385,32 +385,32 @@
 #endif
 
                   IF (dg_here%WDFLG(ELF).EQ.0) THEN
-                     NLEQG_TMP = NLEQG
-                     NLEQG = 0.D0
-                     G_TMP = G
-                     G = 0.D0
+                     NLEQG_TMP = global_here%NLEQG
+                     global_here%NLEQG = 0.D0
+                     G_TMP = global_here%G
+                     global_here%G = 0.D0
                   ENDIF
                   call numerical_flux(s,dg_here,IT)
-                  FF_HAT = F_HAT
-                  GF_HAT = G_HAT
-                  HF_HAT = H_HAT
+                  FF_HAT = global_here%F_HAT
+                  GF_HAT = global_here%G_HAT
+                  HF_HAT = global_here%H_HAT
 
 #ifdef TRACE
-                  IF_HAT = I_HAT
+                  IF_HAT = global_here%I_HAT
 #endif
 
 #ifdef CHEM
-                  IF_HAT = I_HAT
-                  JF_HAT = J_HAT
+                  IF_HAT = global_here%I_HAT
+                  JF_HAT = global_here%J_HAT
 #endif
 
 #ifdef DYNP
-                  KF_HAT = K_HAT
+                  KF_HAT = global_here%K_HAT
 #endif
 
                   IF (dg_here%WDFLG(ELF).EQ.0) THEN
-                     NLEQG = NLEQG_TMP
-                     G = G_TMP
+                     global_here%NLEQG = NLEQG_TMP
+                     global_here%G = G_TMP
                   ENDIF
                   GOTO 200
                ENDIF
@@ -418,7 +418,7 @@
 
             IF (WEIR_FLOW.GE.0) THEN
                
-!...........Compute the numerical flux for the front side edge
+!...........Compute the numerical flux for the front global_here%side global_here%edge
 
                dg_here%ZE_IN = ZEF
                dg_here%QX_IN = QXF
@@ -453,30 +453,30 @@
                
 !...........Reflect the velocity in the normal direction
 
-               Q_N_EXT = QF_N_INT
-               Q_T_EXT = QF_T_INT
+               global_here%Q_N_EXT = QF_N_INT
+               global_here%Q_T_EXT = QF_T_INT
 
-!...........Compute the x and y components of the external state flow
+!...........Compute the global_here%x and global_here%y components of the external state flow
 
-               dg_here%QX_EX = ( TYF*Q_N_EXT - NYF*Q_T_EXT)/(NXF*TYF - NYF*TXF)
-               dg_here%QY_EX = (-TXF*Q_N_EXT + NXF*Q_T_EXT)/(NXF*TYF - NYF*TXF)
+               dg_here%QX_EX = ( TYF*global_here%Q_N_EXT - NYF*global_here%Q_T_EXT)/(NXF*TYF - NYF*TXF)
+               dg_here%QY_EX = (-TXF*global_here%Q_N_EXT + NXF*global_here%Q_T_EXT)/(NXF*TYF - NYF*TXF)
 
                call numerical_flux(s,dg_here,IT)
-               FF_HAT = F_HAT
-               GF_HAT = G_HAT
-               HF_HAT = H_HAT
+               FF_HAT = global_here%F_HAT
+               GF_HAT = global_here%G_HAT
+               HF_HAT = global_here%H_HAT
 
 #ifdef TRACE
-               IF_HAT = I_HAT
+               IF_HAT = global_here%I_HAT
 #endif
 
 #ifdef CHEM
-               IF_HAT = I_HAT
-               JF_HAT = J_HAT
+               IF_HAT = global_here%I_HAT
+               JF_HAT = global_here%J_HAT
 #endif
 
 #ifdef DYNP
-               KF_HAT = K_HAT
+               KF_HAT = global_here%K_HAT
 #endif
                
                IF (WEIR_FLOW.GT.0) THEN
@@ -510,33 +510,33 @@
                   dg_here%NX = NXB
                   dg_here%NY = NYB
                   IF (dg_here%WDFLG(ELB).EQ.0) THEN
-                     NLEQG_TMP = NLEQG
-                     NLEQG = 0.D0
-                     G_TMP = G
-                     G = 0.D0
+                     NLEQG_TMP = global_here%NLEQG
+                     global_here%NLEQG = 0.D0
+                     G_TMP = global_here%G
+                     global_here%G = 0.D0
                   ENDIF
                   call numerical_flux(s,dg_here,IT)
-                  FB_HAT = F_HAT
-                  GB_HAT = G_HAT
+                  FB_HAT = global_here%F_HAT
+                  GB_HAT = global_here%G_HAT
 
 #ifdef TRACE
-                  IB_HAT = I_HAT
+                  IB_HAT = global_here%I_HAT
 #endif
 
 #ifdef CHEM
-                  IB_HAT = I_HAT
-                  JB_HAT = J_HAT
+                  IB_HAT = global_here%I_HAT
+                  JB_HAT = global_here%J_HAT
 #endif
 
 #ifdef DYNP
-                  KB_HAT = K_HAT
+                  KB_HAT = global_here%K_HAT
 #endif
 
                   IF (dg_here%WDFLG(ELB).EQ.0) THEN
-                     NLEQG = NLEQG_TMP
-                     G = G_TMP
+                     global_here%NLEQG = NLEQG_TMP
+                     global_here%G = G_TMP
                   ENDIF
-                  HB_HAT = H_HAT
+                  HB_HAT = global_here%H_HAT
                   GOTO 200
                ENDIF
             ENDIF
@@ -545,9 +545,9 @@
 !     
             DO K = 1,dg_here%DOFS(dg_here%el)
 
-               WEGPB = 2.0*dg_here%M_INV(K,dg_here%pa)/AREAS(ELB)*dg_here%XLEN(GEDB)&
+               WEGPB = 2.0*dg_here%M_INV(K,dg_here%pa)/global_here%AREAS(ELB)*dg_here%XLEN(GEDB)&
                    *dg_here%PHI_EDGE(K,GPB,LEDB,dg_here%pa)*dg_here%WEGP(GPB,dg_here%pa)
-               WEGPF = 2.0*dg_here%M_INV(K,dg_here%pa)/AREAS(ELF)*dg_here%XLEN(GEDF)&
+               WEGPF = 2.0*dg_here%M_INV(K,dg_here%pa)/global_here%AREAS(ELF)*dg_here%XLEN(GEDF)&
                    *dg_here%PHI_EDGE(K,GPF,LEDF,dg_here%pa)*dg_here%WEGP(GPF,dg_here%pa)
 
                dg_here%RHS_ZE(K,ELB,dg_here%IRK) = dg_here%RHS_ZE(K,ELB,dg_here%IRK) - WEGPB*FB_HAT

@@ -48,8 +48,8 @@
 
       Allocate ( XBCbt(s%MNE),YBCbt(s%MNE) )
 
-      DTDPH = 1.D0/DTDP
-      DO 1000 L = 1, NE
+      DTDPH = 1.D0/global_here%DTDP
+      DO 1000 L = 1, global_here%NE
 !     nd
          dg_here%advectqx(l)=0.0
          dg_here%advectqx(l)=0.0
@@ -59,7 +59,7 @@
          
 !.......Adjust the p values for constants
          
-         dg_here%pa = PDG_EL(L)
+         dg_here%pa = global_here%PDG_EL(L)
 
 #ifdef P0
          if (dg_here%pa.eq.0) then
@@ -75,22 +75,22 @@
          
 !.......Retrieve the global node numbers for the element
 
-         N1 = NM(L,1)
-         N2 = NM(L,2)
-         N3 = NM(L,3)
+         global_here%N1 = global_here%NM(L,1)
+         global_here%N2 = global_here%NM(L,2)
+         global_here%N3 = global_here%NM(L,3)
 
 !.......Compute avaraged values
 !.......These will be used later when bottom friction is computed
 
          DEPTH_C = dg_here%HB(1,L,1) + dg_here%ZE(1,L,dg_here%IRK)
-         FH_NL_C = 1.D0/(NLEQ*DEPTH_C + LEQ)
+         FH_NL_C = 1.D0/(global_here%NLEQ*DEPTH_C + global_here%LEQ)
          UX_C = dg_here%QX(1,L,dg_here%IRK)*FH_NL_C
          UY_C = dg_here%QY(1,L,dg_here%IRK)*FH_NL_C
          UMAG_C = SQRT(UX_C*UX_C + UY_C*UY_C)
          
 !.......Compute derivatives of Lagrange basis functions at nodes
          
-         IF ((NWS.NE.0).OR.(NTIP.NE.0)) THEN
+         IF ((global_here%NWS.global_here%NE.0).OR.(global_here%NTIP.global_here%NE.0)) THEN
             DPSIDX(1) = dg_here%DRPSI(1)*dg_here%DRDX(L) + dg_here%DSPSI(1)*dg_here%DSDX(L)
             DPSIDX(2) = dg_here%DRPSI(2)*dg_here%DRDX(L) + dg_here%DSPSI(2)*dg_here%DSDX(L)
             DPSIDX(3) = dg_here%DRPSI(3)*dg_here%DRDX(L) + dg_here%DSPSI(3)*dg_here%DSDX(L)
@@ -230,53 +230,53 @@
  
 !.........Compute continuity fluxes
 
-            F1_NL = NLEQ + LEQ*dg_here%HB_IN
+            F1_NL = global_here%NLEQ + global_here%LEQ*dg_here%HB_IN
 
 #ifdef WAVE_DIF 
-            FX_IN = (dg_here%QX_IN+HZ_X)*F1_NL*SFACQUAD
+            global_here%FX_IN = (dg_here%QX_IN+HZ_X)*F1_NL*SFACQUAD
 #else
-            FX_IN = dg_here%QX_IN*F1_NL*SFACQUAD
+            global_here%FX_IN = dg_here%QX_IN*F1_NL*SFACQUAD
 #endif
 
 #ifdef WAVE_DIF 
-            FY_IN = (dg_here%QY_IN+HZ_Y)*F1_NL
+            global_here%FY_IN = (dg_here%QY_IN+HZ_Y)*F1_NL
 #else
-            FY_IN = dg_here%QY_IN*F1_NL
+            global_here%FY_IN = dg_here%QY_IN*F1_NL
 #endif
 !.........Compute momentum flux terms
 
-            FU_NL = NLEQ*dg_here%QX_IN
-            FV_NL = NLEQ*dg_here%QY_IN
-            FG_NL = NLEQG*dg_here%ZE_IN*dg_here%WDFLG(L)
-            FH_NL = 1.D0/(NLEQ*DEPTH + LEQ)
-            U_IN  = dg_here%QX_IN*FH_NL
-            V_IN  = dg_here%QY_IN*FH_NL
+            FU_NL = global_here%NLEQ*dg_here%QX_IN
+            FV_NL = global_here%NLEQ*dg_here%QY_IN
+            FG_NL = global_here%NLEQG*dg_here%ZE_IN*dg_here%WDFLG(L)
+            FH_NL = 1.D0/(global_here%NLEQ*DEPTH + global_here%LEQ)
+            global_here%U_IN  = dg_here%QX_IN*FH_NL
+            global_here%V_IN  = dg_here%QY_IN*FH_NL
 
-            HUU = FU_NL*U_IN
-            HVV = FV_NL*V_IN
-            HUV = FU_NL*V_IN
+            HUU = FU_NL*global_here%U_IN
+            HVV = FV_NL*global_here%V_IN
+            HUV = FU_NL*global_here%V_IN
             GH2 = FG_NL*(0.5D0*dg_here%ZE_IN + dg_here%HB_IN) + dg_here%FG_L*dg_here%ZE_IN
 #ifdef SED_LAY
             !Not well-balanced, be careful here!
             !GH2 =  0.D0
-            !GH2 =  0.5D0*G*(DEPTH**2)
-            !GH2 =  dg_here%WDFLG(L)*0.5D0*G*(DEPTH**2)
+            !GH2 =  0.5D0*global_here%G*(DEPTH**2)
+            !GH2 =  dg_here%WDFLG(L)*0.5D0*global_here%G*(DEPTH**2)
             !GH2 = FG_NL*(0.5D0*dg_here%ZE_IN + 2.D0*dg_here%HB_IN) + 0.5D0*dg_here%FG_L* (dg_here%ZE_IN**2 - DEPTH**2
 #endif
            
-!.........Compute x momentum fluxes
+!.........Compute global_here%x momentum fluxes
 
-            GX_IN = (HUU + GH2 + LZ_XX)*SFACQUAD
-            GY_IN = HUV + LZ_XY
+            global_here%GX_IN = (HUU + GH2 + LZ_XX)*SFACQUAD
+            global_here%GY_IN = HUV + LZ_XY
 
-            dg_here%advectqx(l)=dg_here%advectqx(l)+gx_in+gy_in
+            dg_here%advectqx(l)=dg_here%advectqx(l)+global_here%gx_in+global_here%gy_in
 
-!.........Compute y momentum fluxes
+!.........Compute global_here%y momentum fluxes
 
-            HX_IN = (HUV + LZ_YX)*SFACQUAD
-            HY_IN = HVV + GH2 + LZ_YY
+            global_here%HX_IN = (HUV + LZ_YX)*SFACQUAD
+            global_here%HY_IN = HVV + GH2 + LZ_YY
 
-            dg_here%advectqy(l)=dg_here%advectqy(l)+hx_in+hy_in
+            dg_here%advectqy(l)=dg_here%advectqy(l)+global_here%hx_in+global_here%hy_in
 
 !.........Compute the friction factor
             if (LoadManningsN) then
@@ -284,15 +284,15 @@
 !     do k=2,dg_here%dof
 !     MN_IN=MN_IN + dg_here%MANN(K,L)*dg_here%PHI_AREA(K,I)
 !     enddo
-               dg_here%fric_el(L)=G*&
-                   ((ManningsN(n1)+ManningsN(n2)+ManningsN(n3))/3.)**2&
+               dg_here%fric_el(L)=global_here%G*&
+                   ((ManningsN(global_here%n1)+ManningsN(global_here%n2)+ManningsN(global_here%n3))/3.)**2&
 !     $            MN_IN**2
                    /(DEPTH**(1.d0/3.d0))
                if (dg_here%fric_el(L).lt.CF) dg_here%fric_el(L)=CF
             endif
             TAU = dg_here%FRIC_EL(L)
 !     IF (IFLINBF.EQ.0) THEN
-!     dg_here%UMAG = SQRT( U_IN*U_IN + V_IN*V_IN )
+!     dg_here%UMAG = SQRT( global_here%U_IN*global_here%U_IN + global_here%V_IN*global_here%V_IN )
 !     TAU  = TAU*dg_here%UMAG*FH_NL
 !     IF (IFHYBF.EQ.1) TAU = TAU*
 !     &             (1.D0  + (HBREAK*FH_NL)**FTHETA)**(FGAMMA/FTHETA)
@@ -303,7 +303,7 @@
 !     small. S.B. 9-Feb-2008
 
             IF (IFLINBF.EQ.0) THEN
-               dg_here%UMAG = SQRT( U_IN*U_IN + V_IN*V_IN )
+               dg_here%UMAG = SQRT( global_here%U_IN*global_here%U_IN + global_here%V_IN*global_here%V_IN )
 !     cnd modified 4/23/10 to test friction 
 !     TAU  = TAU*UMAG_C*FH_NL_C
                TAU  = TAU*dg_here%UMAG*FH_NL
@@ -317,13 +317,13 @@
 !     TAU so the bottom friction force does not reverse the currents within
 !     half a time step.  S.B. 9-Feb-2008
 !     IF(TAU.GT.2.D0*DTDPH) PRINT *, "TAU = ", TAU, 2.D0*DTDPH,
-!     $           u_in,v_in,myproc,L
+!     $           global_here%u_in,global_here%v_in,myproc,L
 !     TAU = MIN(TAU, 2.D0*DTDPH)
                TAU = MIN(TAU, .9D0*DTDPH)
             ENDIF
 !     IF (dg_here%RAMPDG.LT.1.D0) TAU = MAX(TAU,0.001)
 
-!.........Compute the x momentum source/sink terms
+!.........Compute the global_here%x momentum source/sink terms
 
             dg_here%SOURCE_X = &
 
@@ -339,7 +339,7 @@
 
                 + dg_here%CORI_EL(L)*dg_here%QY_IN
 
-!.....Compute the y momentum source/sink terms
+!.....Compute the global_here%y momentum source/sink terms
 
             dg_here%SOURCE_Y =&
 
@@ -356,38 +356,38 @@
 
                 - dg_here%CORI_EL(L)*dg_here%QX_IN
             
-!.........4.) Wind and pressure forcing (in x and y)
+!.........4.) Wind and pressure forcing (in global_here%x and global_here%y)
 
-            IF (NWS.NE.0) THEN
+            IF (global_here%NWS.global_here%NE.0) THEN
                FW_NL = 1.D0/F1_NL
-               dg_here%SOURCE_X = dg_here%SOURCE_X + FW_NL*( WSX2(N1)*dg_here%PSI1(I,dg_here%pa)&
-                    + WSX2(N2)*dg_here%PSI2(I,dg_here%pa)  + WSX2(N3)*dg_here%PSI3(I,dg_here%pa) )&
-                    - G*SFACQUAD*DEPTH&
-                    *( PR2(N1)*DPSIDX(1)&
-                    + PR2(N2)*DPSIDX(2) + PR2(N3)*DPSIDX(3))
-               dg_here%SOURCE_Y = dg_here%SOURCE_Y + FW_NL*( WSY2(N1)*dg_here%PSI1(I,dg_here%pa)&
-                    + WSY2(N2)*dg_here%PSI2(I,dg_here%pa)  + WSY2(N3)*dg_here%PSI3(I,dg_here%pa) )&
-                    - G*DEPTH*( PR2(N1)*DPSIDY(1)&
-                    + PR2(N2)*DPSIDY(2) + PR2(N3)*DPSIDY(3))
+               dg_here%SOURCE_X = dg_here%SOURCE_X + FW_NL*( global_here%WSX2(global_here%N1)*dg_here%PSI1(I,dg_here%pa)&
+                    + global_here%WSX2(global_here%N2)*dg_here%PSI2(I,dg_here%pa)  + global_here%WSX2(global_here%N3)*dg_here%PSI3(I,dg_here%pa) )&
+                    - global_here%G*SFACQUAD*DEPTH&
+                    *( global_here%PR2(global_here%N1)*DPSIDX(1)&
+                    + global_here%PR2(global_here%N2)*DPSIDX(2) + global_here%PR2(global_here%N3)*DPSIDX(3))
+               dg_here%SOURCE_Y = dg_here%SOURCE_Y + FW_NL*( global_here%WSY2(global_here%N1)*dg_here%PSI1(I,dg_here%pa)&
+                    + global_here%WSY2(global_here%N2)*dg_here%PSI2(I,dg_here%pa)  + global_here%WSY2(global_here%N3)*dg_here%PSI3(I,dg_here%pa) )&
+                    - global_here%G*DEPTH*( global_here%PR2(global_here%N1)*DPSIDY(1)&
+                    + global_here%PR2(global_here%N2)*DPSIDY(2) + global_here%PR2(global_here%N3)*DPSIDY(3))
             ENDIF
 
 !     if (myproc.eq.1.and.l.eq.440.and.i.eq.1) then
 !     write(440,*) 'tau ',tau,dg_here%umag,dg_here%fric_el(l)
 !     endif
 
-!.........5) Tidal potential forcing (in x and y)
+!.........5) Tidal potential forcing (in global_here%x and global_here%y)
 
-            IF (NTIP.NE.0) THEN
-!$$$               dg_here%SOURCE_X = dg_here%SOURCE_X + dg_here%RAMPDG*G*DEPTH*dg_here%SFAC_ELEM(I,L,dg_here%pa)*
-!$$$     &              ( DPSIDX(1)*TIP2(N1)
-!$$$     &              + DPSIDX(2)*TIP2(N2) + DPSIDX(3)*TIP2(N3) )
+            IF (global_here%NTIP.global_here%NE.0) THEN
+!$$$               dg_here%SOURCE_X = dg_here%SOURCE_X + dg_here%RAMPDG*global_here%G*DEPTH*dg_here%SFAC_ELEM(I,L,dg_here%pa)*
+!$$$     &              ( DPSIDX(1)*global_here%TIP2(global_here%N1)
+!$$$     &              + DPSIDX(2)*global_here%TIP2(global_here%N2) + DPSIDX(3)*global_here%TIP2(global_here%N3) )
 
                dg_here%SOURCE_X = dg_here%SOURCE_X + &
-                    dg_here%RAMPDG*G*DEPTH*SFACQUAD*( DPSIDX(1)*TIP2(N1)&
-                    + DPSIDX(2)*TIP2(N2) + DPSIDX(3)*TIP2(N3) )
+                    dg_here%RAMPDG*global_here%G*DEPTH*SFACQUAD*( DPSIDX(1)*global_here%TIP2(global_here%N1)&
+                    + DPSIDX(2)*global_here%TIP2(global_here%N2) + DPSIDX(3)*global_here%TIP2(global_here%N3) )
                
-               dg_here%SOURCE_Y = dg_here%SOURCE_Y + dg_here%RAMPDG*G*DEPTH*( DPSIDY(1)*TIP2(N1)&
-                    + DPSIDY(2)*TIP2(N2) + DPSIDY(3)*TIP2(N3) )
+               dg_here%SOURCE_Y = dg_here%SOURCE_Y + dg_here%RAMPDG*global_here%G*DEPTH*( DPSIDY(1)*global_here%TIP2(global_here%N1)&
+                    + DPSIDY(2)*global_here%TIP2(global_here%N2) + DPSIDY(3)*global_here%TIP2(global_here%N3) )
             ENDIF
 
             dg_here%sourceqx(l)=dg_here%sourceqx(l)+dg_here%source_x
@@ -399,14 +399,14 @@
             MassAction1st = 0.D0
             MassAction2nd = 0.D0
 
-            MassMax(L) = 0.D0
+            global_here%MassMax(L) = 0.D0
             
-            rate = reaction_rate*1.D0/86400.D0
+            rate = global_here%reaction_rate*1.D0/86400.D0
 
             MassAction1st =  rate * (max(dg_here%iota2_IN,0.D0)*max(dg_here%iota_IN,0.D0))
             MassAction2nd =  rate * (max(dg_here%iota2_IN,0.D0)*max(dg_here%iota_IN,0.D0))
 
-            MassMax(L) = min(MassAction1st,MassAction2nd)
+            global_here%MassMax(L) = min(MassAction1st,MassAction2nd)
 
 !.........Build the rhs
 
@@ -422,12 +422,12 @@
             
             DO K = 2,dg_here%DOFS(L)
 
-               dg_here%RHS_ZE(K,L,dg_here%IRK) = dg_here%RHS_ZE(K,L,dg_here%IRK) + dg_here%XFAC(K,I,L,dg_here%pa)*FX_IN&
-              + dg_here%YFAC(K,I,L,dg_here%pa)*FY_IN 
-               dg_here%RHS_QX(K,L,dg_here%IRK) = dg_here%RHS_QX(K,L,dg_here%IRK) + dg_here%XFAC(K,I,L,dg_here%pa)*GX_IN&
-              + dg_here%YFAC(K,I,L,dg_here%pa)*GY_IN + dg_here%SRFAC(K,I,L,dg_here%pa)*dg_here%SOURCE_X
-               dg_here%RHS_QY(K,L,dg_here%IRK) = dg_here%RHS_QY(K,L,dg_here%IRK) + dg_here%XFAC(K,I,L,dg_here%pa)*HX_IN&
-              + dg_here%YFAC(K,I,L,dg_here%pa)*HY_IN + dg_here%SRFAC(K,I,L,dg_here%pa)*dg_here%SOURCE_Y
+               dg_here%RHS_ZE(K,L,dg_here%IRK) = dg_here%RHS_ZE(K,L,dg_here%IRK) + dg_here%XFAC(K,I,L,dg_here%pa)*global_here%FX_IN&
+              + dg_here%YFAC(K,I,L,dg_here%pa)*global_here%FY_IN 
+               dg_here%RHS_QX(K,L,dg_here%IRK) = dg_here%RHS_QX(K,L,dg_here%IRK) + dg_here%XFAC(K,I,L,dg_here%pa)*global_here%GX_IN&
+              + dg_here%YFAC(K,I,L,dg_here%pa)*global_here%GY_IN + dg_here%SRFAC(K,I,L,dg_here%pa)*dg_here%SOURCE_X
+               dg_here%RHS_QY(K,L,dg_here%IRK) = dg_here%RHS_QY(K,L,dg_here%IRK) + dg_here%XFAC(K,I,L,dg_here%pa)*global_here%HX_IN&
+              + dg_here%YFAC(K,I,L,dg_here%pa)*global_here%HY_IN + dg_here%SRFAC(K,I,L,dg_here%pa)*dg_here%SOURCE_Y
 
 #ifdef SED_LAY
 

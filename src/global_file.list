@@ -1,110 +1,112 @@
 #!/bin/bash
 
 prefix=global_here
-var_list=global.list
+varlist=global.list
+
+echo "prefix = \"$prefix\", varlist = \"$varlist\"";
 
 # ***** to do with full set over entire file ******
-source_file=calc_normal.f95
-../scripts/sed_vars.bash $sourcefile $var_list $prefix
+sourcefile=calc_normal.f95
+../scripts/sed_vars.bash $sourcefile $varlist $prefix
 
-source_file=create_edge_data.f95
-../scripts/sed_vars.bash $sourcefile $var_list $prefix
+sourcefile=create_edge_data.f95
+../scripts/sed_vars.bash $sourcefile $varlist $prefix
 
-source_file=cstart.f95
-../scripts/sed_vars.bash $sourcefile $var_list $prefix
+sourcefile=cstart.f95
+../scripts/sed_vars.bash $sourcefile $varlist $prefix
 
-source_file=DG_hydro_timestep.f95
-../scripts/sed_vars.bash $sourcefile $var_list $prefix
+sourcefile=DG_hydro_timestep.f95
+../scripts/sed_vars.bash $sourcefile $varlist $prefix
 
-source_file=ebarrier_edge_hydro.f95
-../scripts/sed_vars.bash $sourcefile $var_list $prefix
+sourcefile=ebarrier_edge_hydro.f95
+../scripts/sed_vars.bash $sourcefile $varlist $prefix
 
-source_file=flow_edge_hydro.f95
-../scripts/sed_vars.bash $sourcefile $var_list $prefix
+sourcefile=flow_edge_hydro.f95
+../scripts/sed_vars.bash $sourcefile $varlist $prefix
 
-source_file=ibarrier_edge_hydro.f95
-../scripts/sed_vars.bash $sourcefile $var_list $prefix
+sourcefile=ibarrier_edge_hydro.f95
+../scripts/sed_vars.bash $sourcefile $varlist $prefix
 
-source_file=internal_edge_hydro.f95
-../scripts/sed_vars.bash $sourcefile $var_list $prefix
+sourcefile=internal_edge_hydro.f95
+../scripts/sed_vars.bash $sourcefile $varlist $prefix
 
-source_file=met_forcing.f95
-../scripts/sed_vars.bash $sourcefile $var_list $prefix
+sourcefile=met_forcing.f95
+../scripts/sed_vars.bash $sourcefile $varlist $prefix
 
-source_file=ocean_edge_hydro.f95
-../scripts/sed_vars.bash $sourcefile $var_list $prefix
+sourcefile=ocean_edge_hydro.f95
+../scripts/sed_vars.bash $sourcefile $varlist $prefix
 
-source_file=orthobasis_area.f95
-../scripts/sed_vars.bash $sourcefile $var_list $prefix
+sourcefile=orthobasis_area.f95
+../scripts/sed_vars.bash $sourcefile $varlist $prefix
 
-source_file=orthobasis_edge.f95
-../scripts/sed_vars.bash $sourcefile $var_list $prefix
+sourcefile=orthobasis_edge.f95
+../scripts/sed_vars.bash $sourcefile $varlist $prefix
 
-source_file=p_enrichment.f95
-../scripts/sed_vars.bash $sourcefile $var_list $prefix
+sourcefile=p_enrichment.f95
+../scripts/sed_vars.bash $sourcefile $varlist $prefix
 
-source_file=prep_DG.f95
-../scripts/sed_vars.bash $sourcefile $var_list $prefix
+sourcefile=prep_DG.f95
+../scripts/sed_vars.bash $sourcefile $varlist $prefix
 
-source_file=quad_pts_area.f95
-../scripts/sed_vars.bash $sourcefile $var_list $prefix
+sourcefile=quad_pts_area.f95
+../scripts/sed_vars.bash $sourcefile $varlist $prefix
 
-source_file=quad_pts_edge.f95
-../scripts/sed_vars.bash $sourcefile $var_list $prefix
+sourcefile=quad_pts_edge.f95
+../scripts/sed_vars.bash $sourcefile $varlist $prefix
 
-source_file=radiation_edge_hydro.f95
-../scripts/sed_vars.bash $sourcefile $var_list $prefix
+sourcefile=radiation_edge_hydro.f95
+../scripts/sed_vars.bash $sourcefile $varlist $prefix
 
-source_file=read_input.f95
-../scripts/sed_vars.bash $sourcefile $var_list $prefix
+sourcefile=read_input.f95
+../scripts/sed_vars.bash $sourcefile $varlist $prefix
 
-source_file=rhs_dg_hydro.f95
-../scripts/sed_vars.bash $sourcefile $var_list $prefix
+sourcefile=rhs_dg_hydro.f95
+../scripts/sed_vars.bash $sourcefile $varlist $prefix
 
-source_file=tidal_potential.f95
-../scripts/sed_vars.bash $sourcefile $var_list $prefix
+sourcefile=tidal_potential.f95
+../scripts/sed_vars.bash $sourcefile $varlist $prefix
 
-source_file=wetdry.f95
-../scripts/sed_vars.bash $sourcefile $var_list $prefix
+sourcefile=wetdry.f95
+../scripts/sed_vars.bash $sourcefile $varlist $prefix
 
-source_file=write_results.f95
-../scripts/sed_vars.bash $sourcefile $var_list $prefix
+sourcefile=write_results.f95
+../scripts/sed_vars.bash $sourcefile $varlist $prefix
 
 
 # ****** partial files but full set of variables *****
 
-source_file=land_edge_hydro.f95   #only go til line 297
-../scripts/sed_vars.bash $sourcefile $var_list $prefix 1 297
+sourcefile=land_edge_hydro.f95   #only go til line 297
+../scripts/sed_vars.bash $sourcefile $varlist $prefix 1 297
 
-source_file=dgswem.f95 #only used in main program, ends at L418
-../scripts/sed_vars.bash $sourcefile $var_list $prefix 1 418
+sourcefile=dgswem.f95 #only used in main program, ends at L418
+../scripts/sed_vars.bash $sourcefile $varlist $prefix 1 418
 
-source_file=sta_basis.f95 # lines 1-54
-../scripts/sed_vars.bash $sourcefile $var_list $prefix 1 54
+sourcefile=sta_basis.f95 # lines 1-54
+../scripts/sed_vars.bash $sourcefile $varlist $prefix 1 54
 
-source_file=numerical_flux.f95 # start with line 54
-../scripts/sed_vars.bash $sourcefile $var_list $prefix 54 1899
+sourcefile=numerical_flux.f95 # start with line 54
+../scripts/sed_vars.bash $sourcefile $varlist $prefix 54 1899
 
-source_file=prep_slopelim.f95 # end with line 525
-../scripts/sed_vars.bash $sourcefile $var_list $prefix 1 525
+sourcefile=prep_slopelim.f95 # end with line 525
+../scripts/sed_vars.bash $sourcefile $varlist $prefix 1 525
 
 
 # ***** more complicated stuff *****
 
-source_file=DG_timestep.f95 #contains two subroutines, both use a subset
+sourcefile=DG_timestep.f95 #contains two subroutines, both use a subset
 # doing subroutine DG_TIMESTEP manually (only uses SEDFLAG)
-../scripts/sed_vars.bash $sourcefile scrutinize_solution.global.list 88 290
+../scripts/sed_vars.bash $sourcefile scrutinize_solution.global.list $prefix 88 290
 
-#source_file=read_fort_dg.f95 # did this mostly manually
+#sourcefile=read_fort_dg.f95 # did this mostly manually
 
 # 1-1823, 1905-8763, SUBROUTINE HYDRO_EIGEN_VALUES done manually
-source_file=slopelimiter.f95
-../scripts/sed_vars.bash $sourcefile $var_list $prefix 1 1823
-../scripts/sed_vars.bash $sourcefile $var_list $prefix 1905 8763
+sourcefile=slopelimiter.f95
+../scripts/sed_vars.bash $sourcefile $varlist $prefix 1 1823
+../scripts/sed_vars.bash $sourcefile $varlist $prefix 1905 8763
 
-source_file=LDG_hydro.f95
+sourcefile=LDG_hydro.f95
 #subroutines in lines 1-1030 all use full set
-../scripts/sed_vars.bash $sourcefile $var_list $prefix 1 1030
+../scripts/sed_vars.bash $sourcefile $varlist $prefix 1 1030
 # L1045 - 1147 done by hand
 # RHS_LDG_HYDRO uses subset, L1161 - 1409
 ../scripts/sed_vars.bash $sourcefile rhs_ldg_hydro.global.list $prefix 1161 1409
@@ -116,4 +118,4 @@ source_file=LDG_hydro.f95
 # attempting to remove USE GLOBAL, ONLY: SCREENUNIT from this module.
 # the module itself needs to be turned into a data type anyway
 
-source_file=nodalattr.f95 #is a module, no "use global" statements
+sourcefile=nodalattr.f95 #is a module, no "use global" statements

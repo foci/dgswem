@@ -51,25 +51,25 @@
          
 !.....Retrieve the nodal coordinates of the given element
 
-         N1 = NM(J,1)
-         N2 = NM(J,2)
-         N3 = NM(J,3)
+         global_here%N1 = global_here%NM(J,1)
+         global_here%N2 = global_here%NM(J,2)
+         global_here%N3 = global_here%NM(J,3)
 
 !.....Compute the barycenter coordinates of the element and store
 
-         dg_here%XBC(J) = 1.D0/3.D0*(X(N1) + X(N2) + X(N3))
-         dg_here%YBC(J) = 1.D0/3.D0*(Y(N1) + Y(N2) + Y(N3))
+         dg_here%XBC(J) = 1.D0/3.D0*(global_here%X(global_here%N1) + global_here%X(global_here%N2) + global_here%X(global_here%N3))
+         dg_here%YBC(J) = 1.D0/3.D0*(global_here%Y(global_here%N1) + global_here%Y(global_here%N2) + global_here%Y(global_here%N3))
 
-         X1 = dg_here%XBC(J)
-         Y1 = dg_here%YBC(J)
+         global_here%X1 = dg_here%XBC(J)
+         global_here%Y1 = dg_here%YBC(J)
          
 !.....Loop over the edges to fnd the neighboring elements
 
          DO I = 1,3
             
-!.....Retrieve the global edge number of the element for the given edge
+!.....Retrieve the global global_here%edge number of the element for the given global_here%edge
 
-            GED = NELED(I,J)
+            GED = global_here%NELED(I,J)
 
 !.....Retrieve the neighboring element number and store into an array
 
@@ -77,7 +77,7 @@
 
             IF (dg_here%EL_NBORS(I,J).EQ.J) dg_here%EL_NBORS(I,J) = dg_here%NEDEL(2,GED)
 
-!.....If the element has an edge that is on boundary go to next element
+!.....If the element has an global_here%edge that is on boundary go to next element
 !     sb-2007/07/27 commented out
 
 !     IF (dg_here%EL_NBORS(I,J).EQ.0) GOTO 111
@@ -96,25 +96,25 @@
             
 !.....Compute the barycenter coordinates of two neighboring elements
 
-            N1 = NM(dg_here%EL_NBORS(I,J),1)
-            N2 = NM(dg_here%EL_NBORS(I,J),2)
-            N3 = NM(dg_here%EL_NBORS(I,J),3)
+            global_here%N1 = global_here%NM(dg_here%EL_NBORS(I,J),1)
+            global_here%N2 = global_here%NM(dg_here%EL_NBORS(I,J),2)
+            global_here%N3 = global_here%NM(dg_here%EL_NBORS(I,J),3)
             
-            X2 = 1.D0/3.D0*(X(N1) + X(N2) + X(N3))
-            Y2 = 1.D0/3.D0*(Y(N1) + Y(N2) + Y(N3))
+            global_here%X2 = 1.D0/3.D0*(global_here%X(global_here%N1) + global_here%X(global_here%N2) + global_here%X(global_here%N3))
+            global_here%Y2 = 1.D0/3.D0*(global_here%Y(global_here%N1) + global_here%Y(global_here%N2) + global_here%Y(global_here%N3))
             
-            N1 = NM(dg_here%EL_NBORS(I+1,J),1)
-            N2 = NM(dg_here%EL_NBORS(I+1,J),2)
-            N3 = NM(dg_here%EL_NBORS(I+1,J),3)
+            global_here%N1 = global_here%NM(dg_here%EL_NBORS(I+1,J),1)
+            global_here%N2 = global_here%NM(dg_here%EL_NBORS(I+1,J),2)
+            global_here%N3 = global_here%NM(dg_here%EL_NBORS(I+1,J),3)
 
-            X3 = 1.D0/3.D0*(X(N1) + X(N2) + X(N3))
-            Y3 = 1.D0/3.D0*(Y(N1) + Y(N2) + Y(N3))
+            global_here%X3 = 1.D0/3.D0*(global_here%X(global_here%N1) + global_here%X(global_here%N2) + global_here%X(global_here%N3))
+            global_here%Y3 = 1.D0/3.D0*(global_here%Y(global_here%N1) + global_here%Y(global_here%N2) + global_here%Y(global_here%N3))
             
 !.....Compute the time independent planar constant
 
-            dg_here%SL3(I,J) = X1*(Y2 - Y3) + X2*(Y3 - Y1) + X3*(Y1 - Y2)
+            dg_here%SL3(I,J) = global_here%X1*(global_here%Y2 - global_here%Y3) + global_here%X2*(global_here%Y3 - global_here%Y1) + global_here%X3*(global_here%Y1 - global_here%Y2)
 
-            IF (dg_here%SL3(I,J).LE.0.AND.dg_here%SLOPEFLAG.NE.0) then
+            IF (dg_here%SL3(I,J).LE.0.AND.dg_here%SLOPEFLAG.global_here%NE.0) then
            WRITE(16,*) 'WARNING. dg_here%SL3(',I,',',J,') =',dg_here%SL3(I,J),' <= 0.',&
                    '    ELEMENT ',J,&
                    ' WILL NOT BE CONSIDERED IN SLOPE LIMITING.'
@@ -135,7 +135,7 @@
 
 !******************************************************************************
 !.....Vertex-based slope limiter (need the following stuff for integration)
-!.....and must fill array for all possible p (ie. dg_here%dofl:dg_here%dofh)
+!.....and must fill array for all possible p (global_here%ie. dg_here%dofl:dg_here%dofh)
 
       
 #ifdef SLOPEALL
@@ -177,25 +177,25 @@
 
             do k = 1,s%MNE
 
-!.....Set areas over the physical elements
+!.....Set global_here%areas over the physical elements
                
-               areau = 0.5D0*AREAS(k)
+               areau = 0.5D0*global_here%AREAS(k)
 
 !.....Retrieve the nodal coordinates (above) of the given element
 
-               N1 = NM(k,1)
-               N2 = NM(k,2)
-               N3 = NM(k,3)
+               global_here%N1 = global_here%NM(k,1)
+               global_here%N2 = global_here%NM(k,2)
+               global_here%N3 = global_here%NM(k,3)
 
-                                !areat = 0.5*(x(n2)*y(n3)-x(n3)*y(n2)+x(n3)*y(n1)-x(n1)*y(n3) + x(n1)*y(n2)-x(n2)*y(n1))
+                                !areat = 0.5*(global_here%x(global_here%n2)*global_here%y(global_here%n3)-global_here%x(global_here%n3)*global_here%y(global_here%n2)+global_here%x(global_here%n3)*global_here%y(global_here%n1)-global_here%x(global_here%n1)*global_here%y(global_here%n3) + global_here%x(global_here%n1)*global_here%y(global_here%n2)-global_here%x(global_here%n2)*global_here%y(global_here%n1))
                                 !areat = areau
 
 !.....Find cell conditioners
 
-               xmax = max( x(n1),x(n2),x(n3) )
-               xmin = min( x(n1),x(n2),x(n3) )
-               ymax = max( y(n1),y(n2),y(n3) )
-               ymin = min( y(n1),y(n2),y(n3) )
+               xmax = max( global_here%x(global_here%n1),global_here%x(global_here%n2),global_here%x(global_here%n3) )
+               xmin = min( global_here%x(global_here%n1),global_here%x(global_here%n2),global_here%x(global_here%n3) )
+               ymax = max( global_here%y(global_here%n1),global_here%y(global_here%n2),global_here%y(global_here%n3) )
+               ymin = min( global_here%y(global_here%n1),global_here%y(global_here%n2),global_here%y(global_here%n3) )
 
                if (ll.le.2) then
 
@@ -213,10 +213,10 @@
 
 !.....Compute the centroid coordinates of the base element in physical space
 
-               dg_here%XBCb(k) = ( x(n1) + x(n2) + x(n3) ) / 3.D0
-               dg_here%YBCb(k) = ( y(n1) + y(n2) + y(n3) ) / 3.D0
+               dg_here%XBCb(k) = ( global_here%x(global_here%n1) + global_here%x(global_here%n2) + global_here%x(global_here%n3) ) / 3.D0
+               dg_here%YBCb(k) = ( global_here%y(global_here%n1) + global_here%y(global_here%n2) + global_here%y(global_here%n3) ) / 3.D0
 
-!.....Transform quad points to physical space (for integration) xi --> x
+!.....Transform quad points to physical space (for integration) xi --> global_here%x
 
                do mm=1,dg_here%nagp(ll)
 
@@ -224,30 +224,30 @@
                   ell_2 =  0.5D0 * ( dg_here%xagp(mm,dg_here%ph) + 1.D0 )
                   ell_3 =  0.5D0 * ( dg_here%yagp(mm,dg_here%ph) + 1.D0 )
 
-                  dg_here%xtransform(k,mm) = x(n1)*ell_1 + x(n2)*ell_2 + x(n3)*ell_3
-                  dg_here%ytransform(k,mm) = y(n1)*ell_1 + y(n2)*ell_2 + y(n3)*ell_3
+                  dg_here%xtransform(k,mm) = global_here%x(global_here%n1)*ell_1 + global_here%x(global_here%n2)*ell_2 + global_here%x(global_here%n3)*ell_3
+                  dg_here%ytransform(k,mm) = global_here%y(global_here%n1)*ell_1 + global_here%y(global_here%n2)*ell_2 + global_here%y(global_here%n3)*ell_3
 
                enddo
 
 !.....Find centroid coordinates in the master element frame
 
-               dg_here%xi1BCb(k) =  ( (y(N3)-y(N1))*( dg_here%XBCb(k) -0.5D0 * &
-              (x(N2) + x(N3))) + (x(N1) - x(N3))*(dg_here%YBCb(k)&
-              - 0.5D0*(y(N2) + y(N3)) ) ) / areau
-               dg_here%xi2BCb(k) =  ( (y(N1)-y(N2))*( dg_here%XBCb(k) -0.5D0 * (x(N2) &
-              + x(N3))) + (x(N2) - x(N1))*(dg_here%YBCb(k)&
-              - 0.5D0*(y(N2) + y(N3)) ) ) / areau
+               dg_here%xi1BCb(k) =  ( (global_here%y(global_here%N3)-global_here%y(global_here%N1))*( dg_here%XBCb(k) -0.5D0 * &
+              (global_here%x(global_here%N2) + global_here%x(global_here%N3))) + (global_here%x(global_here%N1) - global_here%x(global_here%N3))*(dg_here%YBCb(k)&
+              - 0.5D0*(global_here%y(global_here%N2) + global_here%y(global_here%N3)) ) ) / areau
+               dg_here%xi2BCb(k) =  ( (global_here%y(global_here%N1)-global_here%y(global_here%N2))*( dg_here%XBCb(k) -0.5D0 * (global_here%x(global_here%N2) &
+              + global_here%x(global_here%N3))) + (global_here%x(global_here%N2) - global_here%x(global_here%N1))*(dg_here%YBCb(k)&
+              - 0.5D0*(global_here%y(global_here%N2) + global_here%y(global_here%N3)) ) ) / areau
 
 !.....Find vertices in the master element frame
 
                do lll=1,3
 
-                  dg_here%xi1vert(k,lll) =  ( (y(N3)-y(N1))*( x(nm(k,lll)) -0.5D0 * &
-                 (x(N2) + x(N3))) + (x(N1) - x(N3))* (y(nm(k,lll))&
-                 - 0.5D0*(y(N2) + y(N3)) ) ) / areau
-                  dg_here%xi2vert(k,lll) =  ( (y(N1)-y(N2))*( x(nm(k,lll)) -0.5D0 * &
-                 (x(N2) + x(N3))) + (x(N2) - x(N1))* (y(nm(k,lll))&
-                 - 0.5D0*(y(N2) + y(N3)) ) ) / areau
+                  dg_here%xi1vert(k,lll) =  ( (global_here%y(global_here%N3)-global_here%y(global_here%N1))*( global_here%x(global_here%nm(k,lll)) -0.5D0 * &
+                 (global_here%x(global_here%N2) + global_here%x(global_here%N3))) + (global_here%x(global_here%N1) - global_here%x(global_here%N3))* (global_here%y(global_here%nm(k,lll))&
+                 - 0.5D0*(global_here%y(global_here%N2) + global_here%y(global_here%N3)) ) ) / areau
+                  dg_here%xi2vert(k,lll) =  ( (global_here%y(global_here%N1)-global_here%y(global_here%N2))*( global_here%x(global_here%nm(k,lll)) -0.5D0 * &
+                 (global_here%x(global_here%N2) + global_here%x(global_here%N3))) + (global_here%x(global_here%N2) - global_here%x(global_here%N1))* (global_here%y(global_here%nm(k,lll))&
+                 - 0.5D0*(global_here%y(global_here%N2) + global_here%y(global_here%N3)) ) ) / areau
 
                enddo
 
@@ -259,30 +259,30 @@
 
                      do nin =1,3 !number of vertices
 
-                        if( NM(k,lll).eq.NM(mm,nin).and.k.ne.mm ) then !find common vertices of "nearby" elements
+                        if( global_here%NM(k,lll).eq.global_here%NM(mm,nin).and.k.global_here%ne.mm ) then !find common vertices of "nearby" elements
                            
 !.....Compute the centroids of all conterminous (of codimension 2) elements (by vertex) of base element k in physical space
 
-                           dg_here%XBCv(k,mm) = 1.D0/3.D0*( X(NM(mm,1)) + &
-                          X(NM(mm,2)) + X(NM(mm,3)) )
-                           dg_here%YBCv(k,mm) = 1.D0/3.D0*( Y(NM(mm,1)) + &
-                          Y(NM(mm,2)) + Y(NM(mm,3)) )
+                           dg_here%XBCv(k,mm) = 1.D0/3.D0*( global_here%X(global_here%NM(mm,1)) + &
+                          global_here%X(global_here%NM(mm,2)) + global_here%X(global_here%NM(mm,3)) )
+                           dg_here%YBCv(k,mm) = 1.D0/3.D0*( global_here%Y(global_here%NM(mm,1)) + &
+                          global_here%Y(global_here%NM(mm,2)) + global_here%Y(global_here%NM(mm,3)) )
 
                                 !Stored_neighbors(k,mm,lll) = k*mm*lll !store neighboring elements
 
 !.....Convert the centroid coordinates of all conterminous (of codimension 2) elements (by vertex) 
 !.....of base element k to the master element space
 
-                           dg_here%xi1BCv(k,mm) = ( (y(NM(mm,3))-y(NM(mm,1)))*&
+                           dg_here%xi1BCv(k,mm) = ( (global_here%y(global_here%NM(mm,3))-global_here%y(global_here%NM(mm,1)))*&
                           ( dg_here%XBCv(k,mm) &
-                          -0.5D0 * (x(Nm(mm,2)) + x(NM(mm,3)))) + &
-                          (x(NM(mm,1)) - x(NM(mm,3)))*(dg_here%YBCv(k,mm) &
-                          - 0.5D0*(y(NM(mm,2)) + y(NM(mm,3))) ) ) / areau
-                           dg_here%xi2BCv(k,mm) = ( (y(NM(mm,1))-y(NM(mm,2)))*&
+                          -0.5D0 * (global_here%x(global_here%Nm(mm,2)) + global_here%x(global_here%NM(mm,3)))) + &
+                          (global_here%x(global_here%NM(mm,1)) - global_here%x(global_here%NM(mm,3)))*(dg_here%YBCv(k,mm) &
+                          - 0.5D0*(global_here%y(global_here%NM(mm,2)) + global_here%y(global_here%NM(mm,3))) ) ) / areau
+                           dg_here%xi2BCv(k,mm) = ( (global_here%y(global_here%NM(mm,1))-global_here%y(global_here%NM(mm,2)))*&
                           ( dg_here%XBCv(k,mm) &
-                          -0.5D0 * (x(Nm(mm,2)) + x(NM(mm,3)))) + &
-                          (x(NM(mm,2)) - x(NM(mm,1)))*(dg_here%YBCv(k,mm)&
-                          - 0.5D0*(y(NM(mm,2)) + y(NM(mm,3))) ) ) / areau
+                          -0.5D0 * (global_here%x(global_here%Nm(mm,2)) + global_here%x(global_here%NM(mm,3)))) + &
+                          (global_here%x(global_here%NM(mm,2)) - global_here%x(global_here%NM(mm,1)))*(dg_here%YBCv(k,mm)&
+                          - 0.5D0*(global_here%y(global_here%NM(mm,2)) + global_here%y(global_here%NM(mm,3))) ) ) / areau
                            
                         endif
                      enddo
@@ -293,25 +293,25 @@
 
 
 !.....Now compute the derivatives of the Taylor basis with respect to the physical 
-!.....basis using the transformation rules from the paper (e.g. Leibniz and Faa' di Bruno formulas)
+!.....basis using the transformation rules from the paper (e.global_here%g. Leibniz and Faa' di Bruno formulas)
                
-               dxdxi1 = 0.5D0 * ( x(N2) - x(N1) )
-               dydxi1 = 0.5D0 * ( y(N2) - y(N1) )
-               dxdxi2 = 0.5D0 * ( x(N3) - x(N1) )
-               dydxi2 = 0.5D0 * ( y(N3) - y(N1) )
+               dxdxi1 = 0.5D0 * ( global_here%x(global_here%N2) - global_here%x(global_here%N1) )
+               dydxi1 = 0.5D0 * ( global_here%y(global_here%N2) - global_here%y(global_here%N1) )
+               dxdxi2 = 0.5D0 * ( global_here%x(global_here%N3) - global_here%x(global_here%N1) )
+               dydxi2 = 0.5D0 * ( global_here%y(global_here%N3) - global_here%y(global_here%N1) )
 
-               dxi1dx = ( y(N3) - y(N1) ) / areau
-               dxi2dx = ( y(N1) - y(N2) ) / areau
-               dxi1dy = ( x(N1) - x(N3) ) / areau 
-               dxi2dy = ( x(N2) - x(N1) ) / areau
+               dxi1dx = ( global_here%y(global_here%N3) - global_here%y(global_here%N1) ) / areau
+               dxi2dx = ( global_here%y(global_here%N1) - global_here%y(global_here%N2) ) / areau
+               dxi1dy = ( global_here%x(global_here%N1) - global_here%x(global_here%N3) ) / areau 
+               dxi2dy = ( global_here%x(global_here%N2) - global_here%x(global_here%N1) ) / areau
 
 !.....Write the generalized Taylor basis of order p in physical 
-!.....coordinates (x(dg_here%xi1,dg_here%xi2), y(dg_here%xi1,dg_here%xi2)) and integrate over elements
-!.....using the physical to master transformation, e.g. T^-1:x-->xi
+!.....coordinates (global_here%x(dg_here%xi1,dg_here%xi2), global_here%y(dg_here%xi1,dg_here%xi2)) and integrate over elements
+!.....using the physical to master transformation, e.global_here%g. T^-1:global_here%x-->xi
 
-               do i = 0,ll      !max polynomial degree in x
+               do i = 0,ll      !max polynomial degree in global_here%x
 
-                  do j = 0,ll   !max polynomial degree in y
+                  do j = 0,ll   !max polynomial degree in global_here%y
 
                      Call factorial(i,dg_here%fact(i))
                      Call factorial(j,dg_here%fact(j))
@@ -358,17 +358,17 @@
                         do mm = 1,dg_here%nagp(ll) !number of quad points
 
                            AreaV_integral(k,i,j,lll) = AreaV_integral(k,i,j,lll) + &
-                          ( (  x(nm(k,lll)) - dg_here%XBCb(k) )**i &
-                          * (  y(nm(k,lll)) - dg_here%YBCb(k) )**j * ( dg_here%wagp(mm,ll) ) )&
+                          ( (  global_here%x(global_here%nm(k,lll)) - dg_here%XBCb(k) )**i &
+                          * (  global_here%y(global_here%nm(k,lll)) - dg_here%YBCb(k) )**j * ( dg_here%wagp(mm,ll) ) )&
                           * abs( dxdxi1*dydxi2 - dxdxi2*dydxi1 )&
                           / ( dg_here%fact(i)*dg_here%fact(j)*dg_here%Deltx(k)**i * dg_here%Delty(k)**j )
 
                         enddo
 
-                        dg_here%fv(k,lll,i,j) = (  x(nm(k,lll)) - dg_here%XBCb(k) )**i / &
+                        dg_here%fv(k,lll,i,j) = (  global_here%x(global_here%nm(k,lll)) - dg_here%XBCb(k) )**i / &
                        ( dg_here%fact(i) * dg_here%Deltx(k)**i )
                         
-                        dg_here%g0v(k,lll,i,j) =  ( y(nm(k,lll)) - dg_here%YBCb(k) )**j / &
+                        dg_here%g0v(k,lll,i,j) =  ( global_here%y(global_here%nm(k,lll)) - dg_here%YBCb(k) )**j / &
                        ( dg_here%fact(j) * dg_here%Delty(k)**j )
                         
                         if (i.eq.0.and.j.eq.0) then
@@ -505,9 +505,9 @@
 
          do lll = 1,3
 
-            do ell = 1,nneigh_elem(nm(j,lll))
+            do ell = 1,global_here%nneigh_elem(global_here%nm(j,lll))
 
-               dg_here%focal_neigh(j,bmm) = neigh_elem(nm(j,lll), ell)  
+               dg_here%focal_neigh(j,bmm) = global_here%neigh_elem(global_here%nm(j,lll), ell)  
 
                dg_here%focal_up(j) = bmm
 

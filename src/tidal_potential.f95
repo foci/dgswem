@@ -25,52 +25,52 @@
 
       INTEGER j,i
       
-      dg_here%TIMEH_DG = TIMEH - DTDP + dg_here%DTVD(dg_here%IRK)*DTDP
+      dg_here%TIMEH_DG = global_here%TIMEH - global_here%DTDP + dg_here%DTVD(dg_here%IRK)*global_here%DTDP
       
 !.....Loop over the nodes
 
-      DO I = 1,NP
+      DO I = 1,global_here%NP
       
 !.....Initialize tidal potential terms
 
-        TIP2(I) = 0.D0
+        global_here%TIP2(I) = 0.D0
 
 !.....Loop over the tidal potential constituents
 
-        DO J = 1,NTIF
+        DO J = 1,global_here%NTIF
 
-          IF (PERT(J).EQ.0.) THEN
-            NCYC = 0
+          IF (global_here%PERT(J).EQ.0.) THEN
+            global_here%NCYC = 0
           ELSE
-            NCYC = INT(dg_here%TIMEH_DG/PERT(J))
+            global_here%NCYC = INT(dg_here%TIMEH_DG/global_here%PERT(J))
           ENDIF
-          ARGT    = AMIGT(J)*(dg_here%TIMEH_DG - NCYC*PERT(J)) + FACET(J)
-          TPMUL   = dg_here%RAMPDG*ETRF(J)*TPK(J)*FFT(J)
-          SALTMUL = dg_here%RAMPDG*FFT(J)
-          NA      = NINT(0.00014/AMIGT(J))
+          global_here%ARGT    = global_here%AMIGT(J)*(dg_here%TIMEH_DG - global_here%NCYC*global_here%PERT(J)) + global_here%FACET(J)
+          global_here%TPMUL   = dg_here%RAMPDG*global_here%ETRF(J)*global_here%TPK(J)*global_here%FFT(J)
+          global_here%SALTMUL = dg_here%RAMPDG*global_here%FFT(J)
+          global_here%NA      = NINT(0.00014/global_here%AMIGT(J))
         
 !.....Semi-diurnal species
 
-          IF (NA.EQ.1) THEN
+          IF (global_here%NA.EQ.1) THEN
 
-            ARGTP    = ARGT + 2.D0*SLAM(I)
-            ARGSALT  = ARGT - SALTPHA(J,I)
-            CCSFEA   = COS(SFEA(I))
-            CCSFEA   = CCSFEA*CCSFEA
-            TIP2(I) = TIP2(I) + TPMUL*CCSFEA*COS(ARGTP)&
-                             + SALTMUL*SALTAMP(J,I)*COS(ARGSALT)
+            global_here%ARGTP    = global_here%ARGT + 2.D0*global_here%SLAM(I)
+            global_here%ARGSALT  = global_here%ARGT - global_here%SALTPHA(J,I)
+            global_here%CCSFEA   = COS(global_here%SFEA(I))
+            global_here%CCSFEA   = global_here%CCSFEA*global_here%CCSFEA
+            global_here%TIP2(I) = global_here%TIP2(I) + global_here%TPMUL*global_here%CCSFEA*COS(global_here%ARGTP)&
+                             + global_here%SALTMUL*global_here%SALTAMP(J,I)*COS(global_here%ARGSALT)
 
           ENDIF
         
 !.....Diurnal species
         
-          IF (NA.EQ.2) THEN
+          IF (global_here%NA.EQ.2) THEN
 
-            ARGTP    = ARGT + SLAM(I)
-            ARGSALT  = ARGT - SALTPHA(J,I)
-            S2SFEA   = SIN(2.D0*SFEA(I))
-            TIP2(I) = TIP2(I) + TPMUL*S2SFEA*COS(ARGTP)&
-                             + SALTMUL*SALTAMP(J,I)*COS(ARGSALT)
+            global_here%ARGTP    = global_here%ARGT + global_here%SLAM(I)
+            global_here%ARGSALT  = global_here%ARGT - global_here%SALTPHA(J,I)
+            global_here%S2SFEA   = SIN(2.D0*global_here%SFEA(I))
+            global_here%TIP2(I) = global_here%TIP2(I) + global_here%TPMUL*global_here%S2SFEA*COS(global_here%ARGTP)&
+                             + global_here%SALTMUL*global_here%SALTAMP(J,I)*COS(global_here%ARGSALT)
      
           ENDIF
 

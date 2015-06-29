@@ -20,7 +20,7 @@
 
       DO 1000 L = 1,dg_here%NEBSEG
          
-!.......Obtain the global and local edge numbers
+!.......Obtain the global and local global_here%edge numbers
 
          GED = dg_here%NEBSEGN(L)
          LED = dg_here%NEDSD(1,GED)
@@ -28,7 +28,7 @@
 !.......Obtain the element
 
          dg_here%EL = dg_here%NEDEL(1,GED)
-         dg_here%PA = PDG_EL(EL_IN)
+         dg_here%PA = global_here%PDG_EL(global_here%EL_IN)
 
 #ifdef P0
          if (dg_here%pa.eq.0) then
@@ -38,12 +38,12 @@
          
          IF (dg_here%WDFLG(dg_here%EL).EQ.0) GOTO 1000
 
-!.....Retrieve the components of the normal vector to the edge
+!.....Retrieve the components of the normal vector to the global_here%edge
 
          dg_here%NX = dg_here%COSNX(GED)
          dg_here%NY = dg_here%SINNX(GED)
          
-!.....Set the components for the tangential vector to the edge
+!.....Set the components for the tangential vector to the global_here%edge
 
          TX = -dg_here%NY
          TY =  dg_here%NX
@@ -57,7 +57,7 @@
             dg_here%ZE_IN = dg_here%ZE(1,dg_here%EL,dg_here%IRK)
             dg_here%QX_IN = dg_here%QX(1,dg_here%EL,dg_here%IRK)
             dg_here%QY_IN = dg_here%QY(1,dg_here%EL,dg_here%IRK)
-            dg_here%HB_IN = dg_here%BATHED(I,LED,EL_IN,dg_here%pa)
+            dg_here%HB_IN = dg_here%BATHED(I,LED,global_here%EL_IN,dg_here%pa)
 
 #ifdef TRACE
             dg_here%iota_IN = dg_here%iota(1,dg_here%EL,dg_here%IRK)
@@ -78,7 +78,7 @@
                dg_here%HB(1,dg_here%EL,dg_here%irk) = dg_here%HB(1,dg_here%EL,dg_here%irk) + dg_here%bed(1,dg_here%EL,dg_here%irk,ll)
             enddo
             dg_here%bed_IN(:) = dg_here%bed(1,dg_here%EL,dg_here%irk,:)
-            dg_here%HB_IN = dg_here%HB(1,EL_IN,dg_here%irk)
+            dg_here%HB_IN = dg_here%HB(1,global_here%EL_IN,dg_here%irk)
 #endif
 
 
@@ -122,15 +122,15 @@
 !     ---------------------------------------------
             
             IF (ABOVE.LT.BARMIN) THEN
-               Q_N_EXT = -(dg_here%QX_IN*dg_here%NX + dg_here%QY_IN*dg_here%NY)
-               Q_T_EXT =   dg_here%QX_IN*TX + dg_here%QY_IN*TY
+               global_here%Q_N_EXT = -(dg_here%QX_IN*dg_here%NX + dg_here%QY_IN*dg_here%NY)
+               global_here%Q_T_EXT =   dg_here%QX_IN*TX + dg_here%QY_IN*TY
                
 !.........Case 2:  Water is above barrier
 !     ------------------------------------------------------------
                
             ELSE
-               Q_N_EXT = dg_here%RAMPDG*dg_here%EBCFSP(L)*SUBSUP*SQRT(SUBSUP*G)
-               Q_T_EXT = 0.D0
+               global_here%Q_N_EXT = dg_here%RAMPDG*dg_here%EBCFSP(L)*SUBSUP*SQRT(SUBSUP*global_here%G)
+               global_here%Q_T_EXT = 0.D0
             ENDIF
             
 !.....Set the exterior dg_here%bed and surface elevation equal to the interior
@@ -158,10 +158,10 @@
 
 #endif
 
-!.........Compute the x and y components of the external state flow
+!.........Compute the global_here%x and global_here%y components of the external state flow
 
-            dg_here%QX_EX = ( TY*Q_N_EXT - dg_here%NY*Q_T_EXT)/(dg_here%NX*TY - dg_here%NY*TX)
-            dg_here%QY_EX = (-TX*Q_N_EXT + dg_here%NX*Q_T_EXT)/(dg_here%NX*TY - dg_here%NY*TX)
+            dg_here%QX_EX = ( TY*global_here%Q_N_EXT - dg_here%NY*global_here%Q_T_EXT)/(dg_here%NX*TY - dg_here%NY*TX)
+            dg_here%QY_EX = (-TX*global_here%Q_N_EXT + dg_here%NX*global_here%Q_T_EXT)/(dg_here%NX*TY - dg_here%NY*TX)
             
 !.........Compute numerical flux
             
@@ -169,24 +169,24 @@
 
             DO K = 1,dg_here%DOFS(dg_here%EL)
 
-               W_IN = 2.0*dg_here%M_INV(K,dg_here%pa)/AREAS(dg_here%EL)*dg_here%XLEN(GED)&
+               W_IN = 2.0*dg_here%M_INV(K,dg_here%pa)/global_here%AREAS(dg_here%EL)*dg_here%XLEN(GED)&
               *dg_here%PHI_EDGE(K,I,LED,dg_here%pa)*dg_here%WEGP(I,dg_here%pa)
 
-               dg_here%RHS_ZE(K,dg_here%EL,dg_here%IRK) = dg_here%RHS_ZE(K,dg_here%EL,dg_here%IRK) - W_IN*F_HAT
-               dg_here%RHS_QX(K,dg_here%EL,dg_here%IRK) = dg_here%RHS_QX(K,dg_here%EL,dg_here%IRK) - W_IN*G_HAT
-               dg_here%RHS_QY(K,dg_here%EL,dg_here%IRK) = dg_here%RHS_QY(K,dg_here%EL,dg_here%IRK) - W_IN*H_HAT
+               dg_here%RHS_ZE(K,dg_here%EL,dg_here%IRK) = dg_here%RHS_ZE(K,dg_here%EL,dg_here%IRK) - W_IN*global_here%F_HAT
+               dg_here%RHS_QX(K,dg_here%EL,dg_here%IRK) = dg_here%RHS_QX(K,dg_here%EL,dg_here%IRK) - W_IN*global_here%G_HAT
+               dg_here%RHS_QY(K,dg_here%EL,dg_here%IRK) = dg_here%RHS_QY(K,dg_here%EL,dg_here%IRK) - W_IN*global_here%H_HAT
 
 #ifdef TRACE
-               dg_here%RHS_iota(K,dg_here%EL,dg_here%IRK) = dg_here%RHS_iota(K,dg_here%EL,dg_here%IRK) - W_IN*I_HAT
+               dg_here%RHS_iota(K,dg_here%EL,dg_here%IRK) = dg_here%RHS_iota(K,dg_here%EL,dg_here%IRK) - W_IN*global_here%I_HAT
 #endif
 
 #ifdef CHEM
-               dg_here%RHS_iota(K,dg_here%EL,dg_here%IRK) = dg_here%RHS_iota(K,dg_here%EL,dg_here%IRK) - W_IN*I_HAT
-               dg_here%RHS_iota2(K,dg_here%EL,dg_here%IRK) = dg_here%RHS_iota2(K,dg_here%EL,dg_here%IRK) - W_IN*J_HAT
+               dg_here%RHS_iota(K,dg_here%EL,dg_here%IRK) = dg_here%RHS_iota(K,dg_here%EL,dg_here%IRK) - W_IN*global_here%I_HAT
+               dg_here%RHS_iota2(K,dg_here%EL,dg_here%IRK) = dg_here%RHS_iota2(K,dg_here%EL,dg_here%IRK) - W_IN*global_here%J_HAT
 #endif
 
 #ifdef DYNP
-               dg_here%RHS_dynP(K,dg_here%EL,dg_here%IRK) = dg_here%RHS_dynP(K,dg_here%EL,dg_here%IRK) - W_IN*I_HAT
+               dg_here%RHS_dynP(K,dg_here%EL,dg_here%IRK) = dg_here%RHS_dynP(K,dg_here%EL,dg_here%IRK) - W_IN*global_here%I_HAT
 #endif
 
 #ifdef SED_LAY

@@ -16,7 +16,7 @@
 !     v10_sb5 - 10/05    - sb - wetting/drying algorithm is improved
 !     v10_sb5 - 10/05    - sb - Ethan's slope limiter is consolidated
 !     v21     - 11/11    - cem - major update/p_enrich/slope/rkc etc
-!     v22     -  6/12    - cem - major update/sediment/diffusion/fluxes
+!     global_here%v22     -  6/12    - cem - major update/sediment/diffusion/fluxes
 !     Moving to versioning control
 !     
 !***********************************************************************
@@ -58,97 +58,97 @@
 
 !.....Compute the current time
 
-      ITDT = IT*DTDP
-      TIME_A = ITDT + STATIM*86400.D0
-      TIMEH  = ITDT + (STATIM - REFTIM)*86400.D0
+      ITDT = IT*global_here%DTDP
+      global_here%TIME_A = ITDT + global_here%STATIM*86400.D0
+      global_here%TIMEH  = ITDT + (global_here%STATIM - global_here%REFTIM)*86400.D0
 
-!.....Update ETA1 (shintaro: do we need this?)
+!.....Update global_here%ETA1 (shintaro: do we need this?)
 
       DO I = 1,S%MNP
-         ETA1(I) = ETA2(I)
+         global_here%ETA1(I) = global_here%ETA2(I)
       ENDDO
 
 !.....Begin Runge-Kutta time stepper
 
       DO 100 irk = 1,dg_here%NRK
          dg_here%irk = irk
-!.......Compute the DG time and DG ramp
+!.......Compute the DG time and DG global_here%ramp
 
 #ifdef RKSSP
 
  
-         dg_here%TIMEDG = TIME_A - DTDP + dg_here%DTVD(irk)*DTDP
+         dg_here%TIMEDG = global_here%TIME_A - global_here%DTDP + dg_here%DTVD(irk)*global_here%DTDP
          dg_here%RAMPDG = 1.D0
-         RAMPExtFlux = 1.0d0
-         IF (NRAMP.GE.1) THEN
-            IF (NRAMP.EQ.1) THEN
-               dg_here%RAMPDG = TANH((2.D0*((IT-1) + dg_here%DTVD(irk))*DTDP/86400.D0)/DRAMP)
-               RAMPExtFlux = &
-                   TANH((2.D0*((IT-1) + dg_here%DTVD(irk))*DTDP/86400.D0)/DRAMPExtFlux)
+         global_here%RAMPExtFlux = 1.0d0
+         IF (global_here%NRAMP.GE.1) THEN
+            IF (global_here%NRAMP.EQ.1) THEN
+               dg_here%RAMPDG = TANH((2.D0*((IT-1) + dg_here%DTVD(irk))*global_here%DTDP/86400.D0)/global_here%DRAMP)
+               global_here%RAMPExtFlux = &
+                   TANH((2.D0*((IT-1) + dg_here%DTVD(irk))*global_here%DTDP/86400.D0)/global_here%DRAMPExtFlux)
             ENDIF
-            IF (NRAMP.EQ.2) THEN
-               dg_here%RAMPDG = TANH((2.D0*((IT-1) + dg_here%DTVD(irk))*DTDP/86400.D0)/DRAMP)
-               RAMPExtFlux = &
-                   TANH((2.D0*((IT-1) + dg_here%DTVD(irk))*DTDP/86400.D0)/DRAMPExtFlux)
+            IF (global_here%NRAMP.EQ.2) THEN
+               dg_here%RAMPDG = TANH((2.D0*((IT-1) + dg_here%DTVD(irk))*global_here%DTDP/86400.D0)/global_here%DRAMP)
+               global_here%RAMPExtFlux = &
+                   TANH((2.D0*((IT-1) + dg_here%DTVD(irk))*global_here%DTDP/86400.D0)/global_here%DRAMPExtFlux)
             ENDIF
-            IF (NRAMP.EQ.3) THEN
-               WRITE(*,*) 'NRAMP = 3 not supported '
+            IF (global_here%NRAMP.EQ.3) THEN
+               WRITE(*,*) 'global_here%NRAMP = 3 not supported '
                STOP
             ENDIF
          ENDIF
-         RAMP = dg_here%RAMPDG
+         global_here%RAMP = dg_here%RAMPDG
          
 !.......Obtain the meteorological forcing
 
-         IF (NWS.NE.0) CALL MET_FORCING(s,dg_here,IT)
+         IF (global_here%NWS.global_here%NE.0) CALL MET_FORCING(s,dg_here,IT)
         
-        IF(NRS.GE.1) THEN
-          IF(TIME_A.GT.RSTIME2) THEN
-            RSTIME1=RSTIME2
-            RSTIME2=RSTIME2+RSTIMINC
-           !DO I=1,NP
-           !  RSNX1(I)=RSNX2(I)
-           !  RSNY1(I)=RSNY2(I)
+        IF(global_here%NRS.GE.1) THEN
+          IF(global_here%TIME_A.GT.global_here%RSTIME2) THEN
+            global_here%RSTIME1=global_here%RSTIME2
+            global_here%RSTIME2=global_here%RSTIME2+global_here%RSTIMINC
+           !DO I=1,global_here%NP
+           !  global_here%RSNX1(I)=global_here%RSNX2(I)
+           !  global_here%RSNY1(I)=global_here%RSNY2(I)
            !END DO
 #ifdef SWAN
 !asey 090302: Added for coupling to SWAN.
-            IF((NRS.EQ.3).AND.(irk.EQ.1)) THEN
+            IF((global_here%NRS.EQ.3).AND.(irk.EQ.1)) THEN
               InterpoWeight = 1.0
               CALL ComputeWaveDrivenForces
 !asey 090707: We want to extrapolate forward in time.  Load the latest (current) forces
-!             into RSNX1/RSNY1, and then load the future forces into RSNX2/RSNY2.
-              DO I=1,NP
-                RSX = RSNX1(I)
-                RSY = RSNY1(I)
-                RSNX1(I) = RSNX2(I)
-                RSNY1(I) = RSNY2(I)
-                RSNX2(I) = RSNX2(I) + (RSNX2(I)-RSX)
-                RSNY2(I) = RSNY2(I) + (RSNY2(I)-RSY)
+!             into global_here%RSNX1/global_here%RSNY1, and then load the future forces into global_here%RSNX2/global_here%RSNY2.
+              DO I=1,global_here%NP
+                global_here%RSX = global_here%RSNX1(I)
+                global_here%RSY = global_here%RSNY1(I)
+                global_here%RSNX1(I) = global_here%RSNX2(I)
+                global_here%RSNY1(I) = global_here%RSNY2(I)
+                global_here%RSNX2(I) = global_here%RSNX2(I) + (global_here%RSNX2(I)-global_here%RSX)
+                global_here%RSNY2(I) = global_here%RSNY2(I) + (global_here%RSNY2(I)-global_here%RSY)
               ENDDO
             ENDIF
 #endif
           ENDIF
-          RStRatio=(TIME_A-RSTIME1)/RSTIMINC
-          DO I=1,NP
-            RSX = RampMete*(RSNX1(I) + RStRatio*(RSNX2(I)-RSNX1(I)))
-            RSY = RampMete*(RSNY1(I) + RStRatio*(RSNY2(I)-RSNY1(I)))
-            WSX2(I) = WSX2(I) + RSX
-            WSY2(I) = WSY2(I) + RSY
+          global_here%RStRatio=(global_here%TIME_A-global_here%RSTIME1)/global_here%RSTIMINC
+          DO I=1,global_here%NP
+            global_here%RSX = global_here%RampMete*(global_here%RSNX1(I) + global_here%RStRatio*(global_here%RSNX2(I)-global_here%RSNX1(I)))
+            global_here%RSY = global_here%RampMete*(global_here%RSNY1(I) + global_here%RStRatio*(global_here%RSNY2(I)-global_here%RSNY1(I)))
+            global_here%WSX2(I) = global_here%WSX2(I) + global_here%RSX
+            global_here%WSY2(I) = global_here%WSY2(I) + global_here%RSY
 #ifdef SWAN
 !asey 090302: Added these lines for output to the rads.64 file.
-            RSNXOUT(I) = RSX
-            RSNYOUT(I) = RSY
+            RSNXOUT(I) = global_here%RSX
+            RSNYOUT(I) = global_here%RSY
 #endif
          ENDDO
       ENDIF
  
 !.......Compute tidal potential terms
 
-         IF (NTIP.NE.0) CALL TIDAL_POTENTIAL(dg_here)
+         IF (global_here%NTIP.global_here%NE.0) CALL TIDAL_POTENTIAL(dg_here)
 
 !.......Compute LDG auxiliary equations
          
-         IF (EVMSUM.NE.0.D0.or.dg_here%artdif.eq.1) CALL LDG_HYDRO(s,dg_here,IT)
+         IF (global_here%EVMSUM.global_here%NE.0.D0.or.dg_here%artdif.eq.1) CALL LDG_HYDRO(s,dg_here,IT)
          
 !.......Compute elevation specified edges
 
@@ -186,8 +186,8 @@
 
          DO I = 1,irk
             ARK = dg_here%ATVD(irk,I)
-            BRK = dg_here%BTVD(irk,I)*DT
-            DO J = 1,NE
+            BRK = dg_here%BTVD(irk,I)*global_here%DT
+            DO J = 1,global_here%NE
                DO K = 1,dg_here%DOFS(J)
 
 #ifdef SED_LAY
@@ -212,7 +212,7 @@
                       + BRK*dg_here%RHS_QY(K,J,I)
 
 
-!.......Compute the transported tracer term if flagged
+!.......Compute the transported global_here%tracer term if flagged
 
 #ifdef TRACE
                   dg_here%iota(K,J,irk+1) = dg_here%iota(K,J,irk+1) + ARK*dg_here%iota(K,J,I)&
@@ -246,38 +246,38 @@
 
          print*,"Using RKC"
 
-         dg_here%TIMEDG = TIME_A - DTDP + dg_here%RKC_c(irk)*DTDP
+         dg_here%TIMEDG = global_here%TIME_A - global_here%DTDP + dg_here%RKC_c(irk)*global_here%DTDP
          dg_here%RAMPDG = 1.D0
-         RAMPExtFlux = 1.0d0
-         IF (NRAMP.GE.1) THEN
-            IF (NRAMP.EQ.1) THEN
-               dg_here%RAMPDG = TANH((2.D0*(IT + dg_here%RKC_c(irk))*DTDP/86400.D0)/DRAMP)
-               RAMPExtFlux = &
-                    TANH((2.D0*(IT + dg_here%RKC_c(irk))*DTDP/86400.D0)/DRAMPExtFlux)
+         global_here%RAMPExtFlux = 1.0d0
+         IF (global_here%NRAMP.GE.1) THEN
+            IF (global_here%NRAMP.EQ.1) THEN
+               dg_here%RAMPDG = TANH((2.D0*(IT + dg_here%RKC_c(irk))*global_here%DTDP/86400.D0)/global_here%DRAMP)
+               global_here%RAMPExtFlux = &
+                    TANH((2.D0*(IT + dg_here%RKC_c(irk))*global_here%DTDP/86400.D0)/global_here%DRAMPExtFlux)
             ENDIF
-            IF (NRAMP.EQ.2) THEN
-               dg_here%RAMPDG = TANH((2.D0*(IT + dg_here%RKC_c(irk))*DTDP/86400.D0)/DRAMP)
-               RAMPExtFlux = &
-                    TANH((2.D0*(IT + dg_here%RKC_c(irk))*DTDP/86400.D0)/DRAMPExtFlux)
+            IF (global_here%NRAMP.EQ.2) THEN
+               dg_here%RAMPDG = TANH((2.D0*(IT + dg_here%RKC_c(irk))*global_here%DTDP/86400.D0)/global_here%DRAMP)
+               global_here%RAMPExtFlux = &
+                    TANH((2.D0*(IT + dg_here%RKC_c(irk))*global_here%DTDP/86400.D0)/global_here%DRAMPExtFlux)
             ENDIF
-            IF (NRAMP.EQ.3) THEN
-               WRITE(*,*) 'NRAMP = 3 not supported '
+            IF (global_here%NRAMP.EQ.3) THEN
+               WRITE(*,*) 'global_here%NRAMP = 3 not supported '
                STOP
             ENDIF
          ENDIF
-         RAMP = dg_here%RAMPDG
+         global_here%RAMP = dg_here%RAMPDG
          
 !.......Obtain the meteorological forcing
 
-         IF (NWS.NE.0) CALL MET_FORCING(s,dg_here,IT)
+         IF (global_here%NWS.global_here%NE.0) CALL MET_FORCING(s,dg_here,IT)
          
 !.......Compute tidal potential terms
 
-         IF (NTIP.NE.0) CALL TIDAL_POTENTIAL(dg_here)
+         IF (global_here%NTIP.global_here%NE.0) CALL TIDAL_POTENTIAL(dg_here)
 
 !.......Compute LDG auxiliary equations
          
-         IF (EVMSUM.NE.0.D0.or.dg_here%artdif.eq.1) CALL LDG_HYDRO(s,dg_here,IT)
+         IF (global_here%EVMSUM.global_here%NE.0.D0.or.dg_here%artdif.eq.1) CALL LDG_HYDRO(s,dg_here,IT)
          
 !.......Compute elevation specified edges
 
@@ -315,9 +315,9 @@
 
          if (irk.eq.1) then
 
-            BRK = dg_here%RKC_tildemu(1)*dt
+            BRK = dg_here%RKC_tildemu(1)*global_here%dt
 
-            DO J = 1,NE
+            DO J = 1,global_here%NE
                DO K = 1,dg_here%DOFS(J)
 
 #ifdef SED_LAY
@@ -339,7 +339,7 @@
                   dg_here%QY(K,J,irk+1) = dg_here%QY(K,J,irk+1)  + dg_here%QY(K,J,1)&
                       + BRK*dg_here%RHS_QY(K,J,1)
                   
-!.......Compute the transported tracer term if flagged
+!.......Compute the transported global_here%tracer term if flagged
                   
 #ifdef TRACE
                   dg_here%iota(K,J,irk+1) = dg_here%iota(K,J,irk+1) + dg_here%iota(K,J,1)&
@@ -370,10 +370,10 @@
             CRK = dg_here%RKC_mu(irk)
             DRK = dg_here%RKC_nu(irk)
 
-            BRK = dg_here%RKC_tildemu(irk)*dt
-            ERK = dg_here%RKC_gamma(irk)*dt
+            BRK = dg_here%RKC_tildemu(irk)*global_here%dt
+            ERK = dg_here%RKC_gamma(irk)*global_here%dt
 
-             DO J = 1,NE
+             DO J = 1,global_here%NE
                DO K = 1,dg_here%DOFS(J)
 
 #ifdef SED_LAY
@@ -397,7 +397,7 @@
                        + DRK*dg_here%QY(K,J,irk-1) + BRK*dg_here%RHS_QY(K,J,irk) + ERK*dg_here%RHS_QY(K,J,1)
 
 
-!.......Compute the transported tracer term if flagged
+!.......Compute the transported global_here%tracer term if flagged
 
 #ifdef TRACE
                   dg_here%iota(K,J,irk+1) = dg_here%iota(K,J,irk+1) + ARK*dg_here%iota(K,J,1) + CRK*dg_here%iota(K,J,irk)&
@@ -473,13 +473,13 @@
 
 !.......Apply the wet-dry algorithm if appropriate
 
-      IF (NOLIFA .GE. 2) THEN
+      IF (global_here%NOLIFA .GE. 2) THEN
          CALL WETDRY(dg_here)
       ENDIF
 
 !$$$C.......Apply the slopelimiter again if auxiliary variable is being used
 !$$$
-!$$$         if (EVMSUM.NE.0.D0.or.dg_here%artdif.eq.1) then
+!$$$         if (global_here%EVMSUM.global_here%NE.0.D0.or.dg_here%artdif.eq.1) then
 !$$$#ifdef SLOPEALL
 !$$$            CALL SLOPELIMITER()
 !$$$#endif
@@ -493,7 +493,7 @@
 !.......drying is being used
 
 #ifdef CMPI
-         if (dg_here%SLOPEFLAG.NE.0.OR.NOLIFA.GE.2) THEN
+         if (dg_here%SLOPEFLAG.global_here%NE.0.OR.global_here%NOLIFA.GE.2) THEN
             CALL UPDATER_ELEM_MOD(dg_here%ZE,dg_here%QX,dg_here%QY,irk+1,3)
             
 #ifdef TRACE
@@ -557,26 +557,26 @@
 
 #ifdef FILTER 
       !Stabilization filtering 
-      DO J = 1,NE
+      DO J = 1,global_here%NE
          DO K = 2,dg_here%DOFS(J)
 
             alph = 10.D0
             s_dg = dg_here%RK_stage
 
             if (k.le.3) then
-               eta = 1.D0 / ( pdg_el(j)+1.D0 )
+               eta = 1.D0 / ( global_here%pdg_el(j)+1.D0 )
             elseif (k.gt.3.and.k.le.6) then
-               eta = 2.D0 / ( pdg_el(j)+1.D0 )
+               eta = 2.D0 / ( global_here%pdg_el(j)+1.D0 )
             elseif (k.gt.6.and.k.le.10) then
-               eta = 3.D0 / ( pdg_el(j)+1.D0 )
+               eta = 3.D0 / ( global_here%pdg_el(j)+1.D0 )
             elseif (k.gt.11.and.k.le.15) then
-               eta = 4.D0 / ( pdg_el(j)+1.D0 )
+               eta = 4.D0 / ( global_here%pdg_el(j)+1.D0 )
             elseif (k.gt.16.and.k.le.21) then
-               eta = 5.D0 / ( pdg_el(j)+1.D0 )       
+               eta = 5.D0 / ( global_here%pdg_el(j)+1.D0 )       
             elseif (k.gt.22.and.k.le.28) then
-               eta = 6.D0 / ( pdg_el(j)+1.D0 )   
+               eta = 6.D0 / ( global_here%pdg_el(j)+1.D0 )   
             elseif (k.gt.29.and.k.le.36) then
-               eta = 7.D0 / ( pdg_el(j)+1.D0 )               
+               eta = 7.D0 / ( global_here%pdg_el(j)+1.D0 )               
             endif
 
             seta = eta**s_dg
@@ -597,7 +597,7 @@
             dg_here%QY(K,J,dg_here%NRK+1) = sigma*dg_here%QY(K,J,dg_here%nrk+1)
 
 
-!.......Filter the transported tracer term if flagged
+!.......Filter the transported global_here%tracer term if flagged
 
 #ifdef TRACE
             dg_here%iota(K,J,dg_here%NRK+1) = sigma*dg_here%iota(K,J,dg_here%nrk+1)

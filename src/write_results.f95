@@ -52,134 +52,134 @@
 
          DO I = 1,S%MNP
 
-            NO_NBORS = EL_COUNT(I)
+            global_here%NO_NBORS = global_here%EL_COUNT(I)
 
-            AREA_SUM = 0
+            global_here%AREA_SUM = 0
             ANGLE_SUM = 0
-            CEN_SUM = 0
-            DO 333 J = 1,NO_NBORS
-               NBOR_EL = ELETAB(I,1+J)
+            global_here%CEN_SUM = 0
+            DO 333 J = 1,global_here%NO_NBORS
+               global_here%NBOR_EL = global_here%ELETAB(I,1+J)
 
-               IF(dg_here%WDFLG(NBOR_EL).EQ.0) CYCLE ! DON'T COUNT DRY ELEMENTS  sb 02/26/07
+               IF(dg_here%WDFLG(global_here%NBOR_EL).EQ.0) CYCLE ! DON'T COUNT DRY ELEMENTS  sb 02/26/07
 
                DO K = 1,3
-                  N1 = NM(NBOR_EL,K)
-                  IF (N1.EQ.I) THEN
-                     ZE_DG(J) = dg_here%ZE(1,NBOR_EL,1)
-                     QX_DG(J) = dg_here%QX(1,NBOR_EL,1)
-                     QY_DG(J) = dg_here%QY(1,NBOR_EL,1)
-                     HB_DG(J) = dg_here%HB(1,NBOR_EL,1)
+                  global_here%N1 = global_here%NM(global_here%NBOR_EL,K)
+                  IF (global_here%N1.EQ.I) THEN
+                     global_here%ZE_DG(J) = dg_here%ZE(1,global_here%NBOR_EL,1)
+                     global_here%QX_DG(J) = dg_here%QX(1,global_here%NBOR_EL,1)
+                     global_here%QY_DG(J) = dg_here%QY(1,global_here%NBOR_EL,1)
+                     global_here%HB_DG(J) = dg_here%HB(1,global_here%NBOR_EL,1)
 
 #ifdef TRACE
-                     iota_DG(J) = dg_here%iota(1,NBOR_EL,1)
-                     iotaa_DG(J) = dg_here%iotaa(1,NBOR_EL,1)
+                     global_here%iota_DG(J) = dg_here%iota(1,global_here%NBOR_EL,1)
+                     global_here%iotaa_DG(J) = dg_here%iotaa(1,global_here%NBOR_EL,1)
 #endif
 
 #ifdef CHEM
-                     iota_DG(J) = dg_here%iota(1,NBOR_EL,1)
-                     iota2_DG(J) = dg_here%iota2(1,NBOR_EL,1)
+                     global_here%iota_DG(J) = dg_here%iota(1,global_here%NBOR_EL,1)
+                     global_here%iota2_DG(J) = dg_here%iota2(1,global_here%NBOR_EL,1)
 #endif
 
 #ifdef DYNP
-                     dynP_DG(J) = dg_here%dynP(1,NBOR_EL,1)
+                     global_here%dynP_DG(J) = dg_here%dynP(1,global_here%NBOR_EL,1)
 #endif
 
 #ifdef SED_LAY
-                     HB_DG(J) = 0.d0
-                     bed_DG(J,:) = dg_here%bed(1,NBOR_EL,1,:)
-                     HB_DG(J) = sum(bed_DG(J,:))
+                     global_here%HB_DG(J) = 0.d0
+                     global_here%bed_DG(J,:) = dg_here%bed(1,global_here%NBOR_EL,1,:)
+                     global_here%HB_DG(J) = sum(global_here%bed_DG(J,:))
 #endif
 
 
                      DO KK = 2,dg_here%DOFH
-                        ZE_DG(J) = ZE_DG(J) + dg_here%PHI_CORNER(KK,K,dg_here%ph)*dg_here%ZE(KK,NBOR_EL,1)
-                        QX_DG(J) = QX_DG(J) + dg_here%PHI_CORNER(KK,K,dg_here%ph)*dg_here%QX(KK,NBOR_EL,1)
-                        QY_DG(J) = QY_DG(J) + dg_here%PHI_CORNER(KK,K,dg_here%ph)*dg_here%QY(KK,NBOR_EL,1)
+                        global_here%ZE_DG(J) = global_here%ZE_DG(J) + dg_here%PHI_CORNER(KK,K,dg_here%ph)*dg_here%ZE(KK,global_here%NBOR_EL,1)
+                        global_here%QX_DG(J) = global_here%QX_DG(J) + dg_here%PHI_CORNER(KK,K,dg_here%ph)*dg_here%QX(KK,global_here%NBOR_EL,1)
+                        global_here%QY_DG(J) = global_here%QY_DG(J) + dg_here%PHI_CORNER(KK,K,dg_here%ph)*dg_here%QY(KK,global_here%NBOR_EL,1)
 
 #ifdef TRACE
-                        iota_DG(J) = iota_DG(J) + dg_here%PHI_CORNER(KK,K,dg_here%ph)*dg_here%iota(KK,NBOR_EL,1)
-                        iotaa_DG(J) = iotaa_DG(J) + dg_here%PHI_CORNER(KK,K,dg_here%ph)*dg_here%iotaa(KK,NBOR_EL,1)
+                        global_here%iota_DG(J) = global_here%iota_DG(J) + dg_here%PHI_CORNER(KK,K,dg_here%ph)*dg_here%iota(KK,global_here%NBOR_EL,1)
+                        global_here%iotaa_DG(J) = global_here%iotaa_DG(J) + dg_here%PHI_CORNER(KK,K,dg_here%ph)*dg_here%iotaa(KK,global_here%NBOR_EL,1)
 #endif
 
 #ifdef CHEM
-                        iota_DG(J) = iota_DG(J) + dg_here%PHI_CORNER(KK,K,dg_here%ph)*dg_here%iota(KK,NBOR_EL,1)
-                        iota2_DG(J) = iota2_DG(J) + dg_here%PHI_CORNER(KK,K,dg_here%ph)*dg_here%iota2(KK,NBOR_EL,1)
+                        global_here%iota_DG(J) = global_here%iota_DG(J) + dg_here%PHI_CORNER(KK,K,dg_here%ph)*dg_here%iota(KK,global_here%NBOR_EL,1)
+                        global_here%iota2_DG(J) = global_here%iota2_DG(J) + dg_here%PHI_CORNER(KK,K,dg_here%ph)*dg_here%iota2(KK,global_here%NBOR_EL,1)
 #endif
 
 #ifdef DYNP
-                        dynP_DG(J) = dynP_DG(J) + dg_here%PHI_CORNER(KK,K,dg_here%ph)*dg_here%dynP(KK,NBOR_EL,1)
+                        global_here%dynP_DG(J) = global_here%dynP_DG(J) + dg_here%PHI_CORNER(KK,K,dg_here%ph)*dg_here%dynP(KK,global_here%NBOR_EL,1)
 #endif
 
 #ifdef SED_LAY
                         do l=1,s%layers
-                           bed_DG(J,l) = bed_DG(J,l) + dg_here%PHI_CORNER(KK,K,dg_here%ph)*dg_here%bed(KK,NBOR_EL,1,l)
-                           HB_DG(J) = HB_DG(J) + dg_here%PHI_CORNER(KK,K,dg_here%ph)*dg_here%bed(KK,NBOR_EL,1,l)
-                           iotaa_DG(J) = dg_here%iotaa(1,NBOR_EL,1)
+                           global_here%bed_DG(J,l) = global_here%bed_DG(J,l) + dg_here%PHI_CORNER(KK,K,dg_here%ph)*dg_here%bed(KK,global_here%NBOR_EL,1,l)
+                           global_here%HB_DG(J) = global_here%HB_DG(J) + dg_here%PHI_CORNER(KK,K,dg_here%ph)*dg_here%bed(KK,global_here%NBOR_EL,1,l)
+                           global_here%iotaa_DG(J) = dg_here%iotaa(1,global_here%NBOR_EL,1)
                         enddo
 #else
 
-                        HB_DG(J) = HB_DG(J) + dg_here%PHI_CORNER(KK,K,dg_here%ph)*dg_here%HB(KK,NBOR_EL,1)
+                        global_here%HB_DG(J) = global_here%HB_DG(J) + dg_here%PHI_CORNER(KK,K,dg_here%ph)*dg_here%HB(KK,global_here%NBOR_EL,1)
 #endif
                         
                      ENDDO
-                     AREA = 0.5*AREAS(NBOR_EL)
-                     AREA_SUM = AREA_SUM + AREA
+                     AREA = 0.5*global_here%AREAS(global_here%NBOR_EL)
+                     global_here%AREA_SUM = global_here%AREA_SUM + AREA
                      GOTO 333
                   ENDIF
                ENDDO
  333        CONTINUE
 
-            ETA2(I) = 0.D0
-            tracer(I) = 0.D0
-            tracer2(I) = 0.D0
-            UU2(I)  = 0.D0
-            VV2(I)  = 0.D0
+            global_here%ETA2(I) = 0.D0
+            global_here%tracer(I) = 0.D0
+            global_here%tracer2(I) = 0.D0
+            global_here%UU2(I)  = 0.D0
+            global_here%VV2(I)  = 0.D0
 
-            IF(SEDFLAG.GE.2) DP(I) = 0.D0
+            IF(global_here%SEDFLAG.GE.2) global_here%DP(I) = 0.D0
 
-            DO J = 1,NO_NBORS
-               NBOR_EL = ELETAB(I,1+J)
+            DO J = 1,global_here%NO_NBORS
+               global_here%NBOR_EL = global_here%ELETAB(I,1+J)
 
-               IF(dg_here%WDFLG(NBOR_EL).EQ.0) CYCLE ! DON'T COUNT DRY ELEMENTS  sb 02/26/07
+               IF(dg_here%WDFLG(global_here%NBOR_EL).EQ.0) CYCLE ! DON'T COUNT DRY ELEMENTS  sb 02/26/07
 
-               AREA = 0.5*AREAS(NBOR_EL)/AREA_SUM
-               DEPTH = ZE_DG(J) + HB_DG(J)
-               FH_NL = 1.D0/(NLEQ*DEPTH + LEQ)
-               ETA2(I) = ETA2(I) + AREA*ZE_DG(J)
+               AREA = 0.5*global_here%AREAS(global_here%NBOR_EL)/global_here%AREA_SUM
+               DEPTH = global_here%ZE_DG(J) + global_here%HB_DG(J)
+               FH_NL = 1.D0/(global_here%NLEQ*DEPTH + global_here%LEQ)
+               global_here%ETA2(I) = global_here%ETA2(I) + AREA*global_here%ZE_DG(J)
 
 #ifdef TRACE
-               tracer(I)  = tracer(I)  + AREA*iota_DG(J)*FH_NL
-               tracer2(I) = tracer2(I) + AREA*iotaa_DG(J)*FH_NL
+               global_here%tracer(I)  = global_here%tracer(I)  + AREA*global_here%iota_DG(J)*FH_NL
+               global_here%tracer2(I) = global_here%tracer2(I) + AREA*global_here%iotaa_DG(J)*FH_NL
 #endif
 
 #ifdef CHEM
-               tracer(I) = tracer(I) + AREA*iota_DG(J)*FH_NL
-               tracer2(I) = tracer2(I) + AREA*iota2_DG(J)*FH_NL
+               global_here%tracer(I) = global_here%tracer(I) + AREA*global_here%iota_DG(J)*FH_NL
+               global_here%tracer2(I) = global_here%tracer2(I) + AREA*global_here%iota2_DG(J)*FH_NL
 #endif 
 
 #ifdef DYNP
-               dyn_P(I) = dyn_P(I) + AREA*dynP_DG(J)*FH_NL
+               global_here%dyn_P(I) = global_here%dyn_P(I) + AREA*global_here%dynP_DG(J)*FH_NL
 #endif    
                
-               if (etamax(i).lt.eta2(i)) etamax(i)=eta2(i)
-               UU2(I)  = UU2(I)  + AREA*QX_DG(J)*FH_NL
-               VV2(I)  = VV2(I)  + AREA*QY_DG(J)*FH_NL
-               IF(SEDFLAG.GE.2) DP(I) = DP(I) + (AREA/AREA_SUM)*HB_DG(J)
+               if (global_here%etamax(i).lt.global_here%eta2(i)) global_here%etamax(i)=global_here%eta2(i)
+               global_here%UU2(I)  = global_here%UU2(I)  + AREA*global_here%QX_DG(J)*FH_NL
+               global_here%VV2(I)  = global_here%VV2(I)  + AREA*global_here%QY_DG(J)*FH_NL
+               IF(global_here%SEDFLAG.GE.2) global_here%DP(I) = global_here%DP(I) + (AREA/global_here%AREA_SUM)*global_here%HB_DG(J)
             ENDDO
          ENDDO
 
       else
 
-         ETA2 = 0.D0
-         tracer = 0.D0
-         tracer2 = 0.D0
-         UU2  = 0.D0
-         VV2  = 0.D0
-         DPe = 0.D0
+         global_here%ETA2 = 0.D0
+         global_here%tracer = 0.D0
+         global_here%tracer2 = 0.D0
+         global_here%UU2  = 0.D0
+         global_here%VV2  = 0.D0
+         global_here%DPe = 0.D0
 
-         do j=1,ne
+         do j=1,global_here%ne
 
-            dg_here%pa = pdg_el(j)
+            dg_here%pa = global_here%pdg_el(j)
             
             if (dg_here%pa.eq.0) then
 
@@ -191,41 +191,41 @@
 
                do k = 1,dg_here%dofs(j)
 
-                  eta2(j) = eta2(j)+ dg_here%WAGP(I,dg_here%pa) * dg_here%PHI_AREA(K,I,dg_here%pa) * dg_here%ZE(K,j,1) * 0.5D0 *AREAS(j)
-                  UU2(j)  = UU2(j) + dg_here%WAGP(I,dg_here%pa) * dg_here%PHI_AREA(K,I,dg_here%pa) * dg_here%QX(K,j,1) * 0.5D0 *AREAS(j)
-                  VV2(j)  = VV2(j) + dg_here%WAGP(I,dg_here%pa) * dg_here%PHI_AREA(K,I,dg_here%pa) * dg_here%QY(K,j,1) * 0.5D0 *AREAS(j)
+                  global_here%eta2(j) = global_here%eta2(j)+ dg_here%WAGP(I,dg_here%pa) * dg_here%PHI_AREA(K,I,dg_here%pa) * dg_here%ZE(K,j,1) * 0.5D0 *global_here%AREAS(j)
+                  global_here%UU2(j)  = global_here%UU2(j) + dg_here%WAGP(I,dg_here%pa) * dg_here%PHI_AREA(K,I,dg_here%pa) * dg_here%QX(K,j,1) * 0.5D0 *global_here%AREAS(j)
+                  global_here%VV2(j)  = global_here%VV2(j) + dg_here%WAGP(I,dg_here%pa) * dg_here%PHI_AREA(K,I,dg_here%pa) * dg_here%QY(K,j,1) * 0.5D0 *global_here%AREAS(j)
 
 
 #ifdef TRACE
-                  tracer(J)  = tracer(J)  +  dg_here%WAGP(I,dg_here%pa) * dg_here%PHI_AREA(K,I,dg_here%pa) * dg_here%iota(K,j,1)  * 0.5D0*AREAS(j)
-                  tracer2(J) = tracer2(J) +  dg_here%WAGP(I,dg_here%pa) * dg_here%PHI_AREA(K,I,dg_here%pa) * dg_here%iotaa(K,j,1) * 0.5D0*AREAS(j) 
+                  global_here%tracer(J)  = global_here%tracer(J)  +  dg_here%WAGP(I,dg_here%pa) * dg_here%PHI_AREA(K,I,dg_here%pa) * dg_here%iota(K,j,1)  * 0.5D0*global_here%AREAS(j)
+                  global_here%tracer2(J) = global_here%tracer2(J) +  dg_here%WAGP(I,dg_here%pa) * dg_here%PHI_AREA(K,I,dg_here%pa) * dg_here%iotaa(K,j,1) * 0.5D0*global_here%AREAS(j) 
 #endif
 
 #ifdef CHEM
-                  tracer(J)  = tracer(J)  +  dg_here%WAGP(I,dg_here%pa) * dg_here%PHI_AREA(K,I,dg_here%pa) * dg_here%iota(K,j,1) * 0.5D0*AREAS(j)
-                  tracer2(J) = tracer2(J) +  dg_here%WAGP(I,dg_here%pa) * dg_here%PHI_AREA(K,I,dg_here%pa) * dg_here%iota2(K,j,1) * 0.5D0*AREAS(j)
+                  global_here%tracer(J)  = global_here%tracer(J)  +  dg_here%WAGP(I,dg_here%pa) * dg_here%PHI_AREA(K,I,dg_here%pa) * dg_here%iota(K,j,1) * 0.5D0*global_here%AREAS(j)
+                  global_here%tracer2(J) = global_here%tracer2(J) +  dg_here%WAGP(I,dg_here%pa) * dg_here%PHI_AREA(K,I,dg_here%pa) * dg_here%iota2(K,j,1) * 0.5D0*global_here%AREAS(j)
 #endif
 
 #ifdef DYNP
-                  dyn_P(J)  = dyn_P(J)  +  dg_here%WAGP(I,dg_here%pa) * dg_here%PHI_AREA(K,I,dg_here%pa) * dg_here%dynP(K,j,1) * 0.5D0*AREAS(j)
+                  global_here%dyn_P(J)  = global_here%dyn_P(J)  +  dg_here%WAGP(I,dg_here%pa) * dg_here%PHI_AREA(K,I,dg_here%pa) * dg_here%dynP(K,j,1) * 0.5D0*global_here%AREAS(j)
 #endif
 
 #ifdef SED_LAY
                   do l=1,s%layers
 
-                     bed_int(J,l) = bed_int(J,l) + dg_here%WAGP(I,dg_here%pa) 
-&                    *dg_here%PHI_AREA(K,I,dg_here%pa)*dg_here%bed(K,J,1,l)*0.5D0*AREAS(j)
+                     global_here%bed_int(J,l) = global_here%bed_int(J,l) + dg_here%WAGP(I,dg_here%pa) 
+&                    *dg_here%PHI_AREA(K,I,dg_here%pa)*dg_here%bed(K,J,1,l)*0.5D0*global_here%AREAS(j)
 
-                     DPe(j)  = DPe(j) + dg_here%WAGP(I,dg_here%pa)*dg_here%PHI_AREA(K,I,dg_here%pa)*dg_here%bed(K,J,1,l) 
-&                    * 0.5D0 *AREAS(j)
+                     global_here%DPe(j)  = global_here%DPe(j) + dg_here%WAGP(I,dg_here%pa)*dg_here%PHI_AREA(K,I,dg_here%pa)*dg_here%bed(K,J,1,l) 
+&                    * 0.5D0 *global_here%AREAS(j)
                      
                   enddo
 
-                  tracer2(J) = tracer2(J) +  dg_here%WAGP(I,dg_here%pa) * dg_here%PHI_AREA(K,I,dg_here%pa) * dg_here%iotaa2(K,j,1) * 0.5D0*AREAS(j)
+                  global_here%tracer2(J) = global_here%tracer2(J) +  dg_here%WAGP(I,dg_here%pa) * dg_here%PHI_AREA(K,I,dg_here%pa) * dg_here%iotaa2(K,j,1) * 0.5D0*global_here%AREAS(j)
 #else
 
-                  DPe(j)  = DPe(j) + dg_here%WAGP(I,dg_here%pa) * dg_here%PHI_AREA(K,I,dg_here%pa) * dg_here%HB(K,j,1) * 0.5D0 *AREAS(j)
-                  tracer2(J) = tracer2(J) +  dg_here%WAGP(I,dg_here%pa) * dg_here%PHI_AREA(K,I,dg_here%pa) * dg_here%iotaa2(K,j,1) * 0.5D0*AREAS(j)
+                  global_here%DPe(j)  = global_here%DPe(j) + dg_here%WAGP(I,dg_here%pa) * dg_here%PHI_AREA(K,I,dg_here%pa) * dg_here%HB(K,j,1) * 0.5D0 *global_here%AREAS(j)
+                  global_here%tracer2(J) = global_here%tracer2(J) +  dg_here%WAGP(I,dg_here%pa) * dg_here%PHI_AREA(K,I,dg_here%pa) * dg_here%iotaa2(K,j,1) * 0.5D0*global_here%AREAS(j)
 
 #endif
                   
@@ -233,31 +233,31 @@
 
             enddo
 
-            DEPTH =  (eta2(j) + dpe(j)) 
-            FH_NL = 1.D0/(NLEQ*DEPTH + LEQ)
-            eta2(j) = eta2(j)/(AREAS(J))
-            UU2(j)  = UU2(j) *FH_NL
-            VV2(j)  = VV2(j) *FH_NL
-            dpe(j)  = dpe(j)/(AREAS(J))
+            DEPTH =  (global_here%eta2(j) + global_here%dpe(j)) 
+            FH_NL = 1.D0/(global_here%NLEQ*DEPTH + global_here%LEQ)
+            global_here%eta2(j) = global_here%eta2(j)/(global_here%AREAS(J))
+            global_here%UU2(j)  = global_here%UU2(j) *FH_NL
+            global_here%VV2(j)  = global_here%VV2(j) *FH_NL
+            global_here%dpe(j)  = global_here%dpe(j)/(global_here%AREAS(J))
 
 #ifdef SED_LAY
             do l=1,s%layers
-               bed_int(j,l) = bed_int(j,l)/(AREAS(J))
+               global_here%bed_int(j,l) = global_here%bed_int(j,l)/(global_here%AREAS(J))
             enddo
 #endif
 
 #ifdef TRACE            
-            tracer(J)  = tracer(J)  * FH_NL
-            tracer2(J) = tracer2(J) * FH_NL  
+            global_here%tracer(J)  = global_here%tracer(J)  * FH_NL
+            global_here%tracer2(J) = global_here%tracer2(J) * FH_NL  
 #endif
 
 #ifdef CHEM
-            tracer(J)  = tracer(J)  * FH_NL
-            tracer2(J) = tracer2(J) * FH_NL
+            global_here%tracer(J)  = global_here%tracer(J)  * FH_NL
+            global_here%tracer2(J) = global_here%tracer2(J) * FH_NL
 #endif
 
 #ifdef DYNP            
-            dyn_P(J)  = dyn_P(J)  * FH_NL
+            global_here%dyn_P(J)  = global_here%dyn_P(J)  * FH_NL
 #endif
             
          enddo
@@ -266,7 +266,7 @@
 
       iota_int = 0.D0
       
-      do j = 1,ne
+      do j = 1,global_here%ne
          
          DO I = 1,dg_here%NAGP(dg_here%pa)
             
@@ -278,261 +278,261 @@
                
             ENDDO
             
-            iota_int = iota_int + iota_error**2.D0 * dg_here%WAGP(I,dg_here%pa)*AREAS(J)
+            iota_int = iota_int + iota_error**2.D0 * dg_here%WAGP(I,dg_here%pa)*global_here%AREAS(J)
             
          ENDDO
          
       enddo
 
 !...  
-!...  OUTPUT ELEVATION RECORDING STATION INFORMATION IF NOUTE<>0 AND THE
+!...  OUTPUT ELEVATION RECORDING STATION INFORMATION IF global_here%NOUTE<>0 AND THE
 !.... TIME STEP FALLS WITHIN THE SPECIFIED WINDOW
 !...  CALCULATE ELEVATION SOLUTIONS AT STATIONS USING INTERPOLATION
 !...  
       
-      IF(NOUTE.NE.0) THEN
-         IF((IT.GT.NTCYSE).AND.(IT.LE.NTCYFE).OR.FORCE_WRITE) THEN
-            NSCOUE=NSCOUE+1
-            IF(NSCOUE.EQ.NSPOOLE.OR.FORCE_WRITE) THEN
-               DO I=1,NSTAE           
-                                !EE1=ETA2(NM(NNE(I),1))
-                                !EE2=ETA2(NM(NNE(I),2))
-                                !EE3=ETA2(NM(NNE(I),3))
+      IF(global_here%NOUTE.global_here%NE.0) THEN
+         IF((IT.GT.global_here%NTCYSE).AND.(IT.LE.global_here%NTCYFE).OR.FORCE_WRITE) THEN
+            global_here%NSCOUE=global_here%NSCOUE+1
+            IF(global_here%NSCOUE.EQ.global_here%NSPOOLE.OR.FORCE_WRITE) THEN
+               DO I=1,global_here%NSTAE           
+                                !global_here%EE1=global_here%ETA2(global_here%NM(global_here%NNE(I),1))
+                                !global_here%EE2=global_here%ETA2(global_here%NM(global_here%NNE(I),2))
+                                !global_here%EE3=global_here%ETA2(global_here%NM(global_here%NNE(I),3))
 
-                  ee1=eta2(nne(i))
+                  global_here%ee1=global_here%eta2(global_here%nne(i))
 
-                  NC1=NODECODE(NM(NNE(I),1))
-                  NC2=NODECODE(NM(NNE(I),2))
-                  NC3=NODECODE(NM(NNE(I),3))
-                  NCELE=NC1*NC2*NC3
-!     IF(NCELE.EQ.1) ET00(I)=EE1*STAIE1(I)+EE2*STAIE2(I)
-!     &                                              +EE3*STAIE3(I)
-                  if (ncele.eq.1) then
-                     ET00(I)=ee1
+                  global_here%NC1=global_here%NODECODE(global_here%NM(global_here%NNE(I),1))
+                  global_here%NC2=global_here%NODECODE(global_here%NM(global_here%NNE(I),2))
+                  global_here%NC3=global_here%NODECODE(global_here%NM(global_here%NNE(I),3))
+                  global_here%NCELE=global_here%NC1*global_here%NC2*global_here%NC3
+!     IF(global_here%NCELE.EQ.1) global_here%ET00(I)=global_here%EE1*global_here%STAIE1(I)+global_here%EE2*global_here%STAIE2(I)
+!     &                                              +global_here%EE3*global_here%STAIE3(I)
+                  if (global_here%ncele.eq.1) then
+                     global_here%ET00(I)=global_here%ee1
                   endif
-                  IF(NCELE.EQ.0) ET00(I)=-99999.
+                  IF(global_here%NCELE.EQ.0) global_here%ET00(I)=-99999.
                   
-                  ee1 = dpe(nne(i))
+                  global_here%ee1 = global_here%dpe(global_here%nne(i))
 
-                                !EE1=DP(NM(NNE(I),1))
-                                !EE2=DP(NM(NNE(I),2))
-                                !EE3=DP(NM(NNE(I),3))
-                  IF(NCELE.EQ.1) BT00(I)= ee1
+                                !global_here%EE1=global_here%DP(global_here%NM(global_here%NNE(I),1))
+                                !global_here%EE2=global_here%DP(global_here%NM(global_here%NNE(I),2))
+                                !global_here%EE3=global_here%DP(global_here%NM(global_here%NNE(I),3))
+                  IF(global_here%NCELE.EQ.1) global_here%BT00(I)= global_here%ee1
 
-                                !EE1*STAIE1(I)+EE2*STAIE2(I)
-                                !&                 +EE3*STAIE3(I)
-                  IF(NCELE.EQ.0) BT00(I)=-99999.
+                                !global_here%EE1*global_here%STAIE1(I)+global_here%EE2*global_here%STAIE2(I)
+                                !&                 +global_here%EE3*global_here%STAIE3(I)
+                  IF(global_here%NCELE.EQ.0) global_here%BT00(I)=-99999.
                END DO
-               IF(ABS(NOUTE).EQ.1) THEN
-                  WRITE(61,2120) time_A,IT
-                  WRITE(82,2120) time_A,IT
-                  DO I=1,NSTAE
-                     WRITE(61,2453) I,ET00(I)
-                     WRITE(82,2453) I,BT00(I)
+               IF(ABS(global_here%NOUTE).EQ.1) THEN
+                  WRITE(61,2120) global_here%time_A,IT
+                  WRITE(82,2120) global_here%time_A,IT
+                  DO I=1,global_here%NSTAE
+                     WRITE(61,2453) I,global_here%ET00(I)
+                     WRITE(82,2453) I,global_here%BT00(I)
                   END DO
-                  IESTP = IESTP+1+NSTAE
+                  global_here%IESTP = global_here%IESTP+1+global_here%NSTAE
                ENDIF
-               IF(ABS(NOUTE).EQ.2) THEN
-                  WRITE(61,REC=IESTP+1) time_A
-                  WRITE(61,REC=IESTP+2) IT
-                  WRITE(82,REC=IESTP+1) time_A
-                  WRITE(82,REC=IESTP+2) IT
-                  IESTP = IESTP + 2
-                  DO I=1,NSTAE
-                     WRITE(61,REC=IESTP+I) ET00(I)
-                     WRITE(82,REC=IESTP+I) BT00(I)
+               IF(ABS(global_here%NOUTE).EQ.2) THEN
+                  WRITE(61,REC=global_here%IESTP+1) global_here%time_A
+                  WRITE(61,REC=global_here%IESTP+2) IT
+                  WRITE(82,REC=global_here%IESTP+1) global_here%time_A
+                  WRITE(82,REC=global_here%IESTP+2) IT
+                  global_here%IESTP = global_here%IESTP + 2
+                  DO I=1,global_here%NSTAE
+                     WRITE(61,REC=global_here%IESTP+I) global_here%ET00(I)
+                     WRITE(82,REC=global_here%IESTP+I) global_here%BT00(I)
                   END DO
-                  IESTP = IESTP + NSTAE
+                  global_here%IESTP = global_here%IESTP + global_here%NSTAE
                ENDIF
-               NSCOUE=0
+               global_here%NSCOUE=0
             ENDIF
          ENDIF
-         IF(IT.EQ.NTCYFE) CLOSE(61)
-         IF(IT.EQ.NTCYFE) CLOSE(82)
+         IF(IT.EQ.global_here%NTCYFE) CLOSE(61)
+         IF(IT.EQ.global_here%NTCYFE) CLOSE(82)
       ENDIF
 
 !...  
-!...  OUTPUT VELOCITY RECORDING STATION TIME SERIES INFORMATION IF NOUTV<>0
+!...  OUTPUT VELOCITY RECORDING STATION TIME SERIES INFORMATION IF global_here%NOUTV<>0
 !.... AND THE TIME STEP FALLS WITHIN THE SPECIFIED WINDOW
 !...  CALCULATE VELOCITY SOLUTIONS AT STATIONS USING INTERPOLATION
 !...  
-      IF(NOUTV.NE.0) THEN
-         IF((IT.GT.NTCYSV).AND.(IT.LE.NTCYFV).OR.FORCE_WRITE) THEN
-            NSCOUV=NSCOUV+1
-            IF(NSCOUV.EQ.NSPOOLV.OR.FORCE_WRITE) THEN
-               DO I=1,NSTAV
-                  U11=UU2(nnv(I))
-                                !U22=UU2(NM(NNV(I),2))
-                                !U33=UU2(NM(NNV(I),3))
-                  V11=VV2(NNV(I))
-                                !V22=VV2(NM(NNV(I),2))
-                                !V33=VV2(NM(NNV(I),3))
-                  UU00(I)= u11  !U11*STAIV1(I)+U22*STAIV2(I)+U33*STAIV3(I)
-                  VV00(I)= v11  !V11*STAIV1(I)+V22*STAIV2(I)+V33*STAIV3(I)
+      IF(global_here%NOUTV.global_here%NE.0) THEN
+         IF((IT.GT.global_here%NTCYSV).AND.(IT.LE.global_here%NTCYFV).OR.FORCE_WRITE) THEN
+            global_here%NSCOUV=global_here%NSCOUV+1
+            IF(global_here%NSCOUV.EQ.global_here%NSPOOLV.OR.FORCE_WRITE) THEN
+               DO I=1,global_here%NSTAV
+                  global_here%U11=global_here%UU2(global_here%nnv(I))
+                                !global_here%U22=global_here%UU2(global_here%NM(global_here%NNV(I),2))
+                                !global_here%U33=global_here%UU2(global_here%NM(global_here%NNV(I),3))
+                  global_here%V11=global_here%VV2(global_here%NNV(I))
+                                !global_here%V22=global_here%VV2(global_here%NM(global_here%NNV(I),2))
+                                !global_here%V33=global_here%VV2(global_here%NM(global_here%NNV(I),3))
+                  global_here%UU00(I)= global_here%u11  !global_here%U11*global_here%STAIV1(I)+global_here%U22*global_here%STAIV2(I)+global_here%U33*global_here%STAIV3(I)
+                  global_here%VV00(I)= global_here%v11  !global_here%V11*global_here%STAIV1(I)+global_here%V22*global_here%STAIV2(I)+global_here%V33*global_here%STAIV3(I)
                END DO
-               IF(ABS(NOUTV).EQ.1) THEN
-                  WRITE(62,2120) time_A,IT
-                  DO I=1,NSTAV
-                     WRITE(62,2454) I,UU00(I),VV00(I)
+               IF(ABS(global_here%NOUTV).EQ.1) THEN
+                  WRITE(62,2120) global_here%time_A,IT
+                  DO I=1,global_here%NSTAV
+                     WRITE(62,2454) I,global_here%UU00(I),global_here%VV00(I)
                   END DO
-                  IVSTP = IVSTP+1+NSTAV
+                  global_here%IVSTP = global_here%IVSTP+1+global_here%NSTAV
                ENDIF
-               IF(ABS(NOUTV).EQ.2) THEN
-                  WRITE(62,REC=IVSTP+1) time_A
-                  WRITE(62,REC=IVSTP+2) IT
-                  IVSTP = IVSTP + 2
-                  DO I=1,NSTAV
-                     WRITE(62,REC=IVSTP+2*I-1) UU00(I)
-                     WRITE(62,REC=IVSTP+2*I) VV00(I)
+               IF(ABS(global_here%NOUTV).EQ.2) THEN
+                  WRITE(62,REC=global_here%IVSTP+1) global_here%time_A
+                  WRITE(62,REC=global_here%IVSTP+2) IT
+                  global_here%IVSTP = global_here%IVSTP + 2
+                  DO I=1,global_here%NSTAV
+                     WRITE(62,REC=global_here%IVSTP+2*I-1) global_here%UU00(I)
+                     WRITE(62,REC=global_here%IVSTP+2*I) global_here%VV00(I)
                   END DO
-                  IVSTP = IVSTP + 2*NSTAV
+                  global_here%IVSTP = global_here%IVSTP + 2*global_here%NSTAV
                ENDIF
-               NSCOUV=0
+               global_here%NSCOUV=0
             ENDIF
          ENDIF
-         IF(IT.EQ.NTCYFV) CLOSE(62)
+         IF(IT.EQ.global_here%NTCYFV) CLOSE(62)
       ENDIF
 
 !...  
-!...  OUTPUT CONCENTRATION RECORDING STATION INFORMATION IF NOUTC<>0 AND THE
+!...  OUTPUT CONCENTRATION RECORDING STATION INFORMATION IF global_here%NOUTC<>0 AND THE
 !.... TIME STEP FALLS WITHIN THE SPECIFIED WINDOW
 !...  CALCULATE CONCENTRATION SOLUTIONS AT STATIONS USING INTERPOLATION
 !...  
 
-      IF(NOUTC.NE.0) THEN
-         IF((IT.GT.NTCYSC).AND.(IT.LE.NTCYFC).OR.FORCE_WRITE) THEN
-            NSCOUC=NSCOUC+1
-            IF(NSCOUC.EQ.NSPOOLC.OR.FORCE_WRITE) THEN
-               DO I=1,NSTAC
-                  NM1=NM(NNC(I),1)
-                  NM2=NM(NNC(I),2)
-                  NM3=NM(NNC(I),3)
-                  HH2N1=dpe(nnc(i))+IFNLFA*ETA2(nnv(i))  !DP(NM1)+IFNLFA*ETA2(NM1)
-                  !HH2N2=  DP(NM2)+IFNLFA*ETA2(NM2)
-                  !HH2N3=  DP(NM3)+IFNLFA*ETA2(NM3)
-                  C1=CH1(NM1)/HH2N1
-                  C2=0.D0
-                  C3=0.D0
-                  !C2=CH1(NM2)/HH2N2
-                  !C3=CH1(NM3)/HH2N3
-                  NC1=NODECODE(NM1)
-                  NC2=NODECODE(NM2)
-                  NC3=NODECODE(NM3)
-                  NCELE=NC1*NC2*NC3
-                  IF(NCELE.EQ.1) CC00(I)=C1*STAIC1(I)+C2*STAIC2(I)&
-                       +C3*STAIC3(I)
-                  IF(NCELE.EQ.0) CC00(I)=-99999.
+      IF(global_here%NOUTC.global_here%NE.0) THEN
+         IF((IT.GT.global_here%NTCYSC).AND.(IT.LE.global_here%NTCYFC).OR.FORCE_WRITE) THEN
+            global_here%NSCOUC=global_here%NSCOUC+1
+            IF(global_here%NSCOUC.EQ.global_here%NSPOOLC.OR.FORCE_WRITE) THEN
+               DO I=1,global_here%NSTAC
+                  global_here%NM1=global_here%NM(global_here%NNC(I),1)
+                  global_here%NM2=global_here%NM(global_here%NNC(I),2)
+                  global_here%NM3=global_here%NM(global_here%NNC(I),3)
+                  global_here%HH2N1=global_here%dpe(global_here%nnc(i))+global_here%IFNLFA*global_here%ETA2(global_here%nnv(i))  !global_here%DP(global_here%NM1)+global_here%IFNLFA*global_here%ETA2(global_here%NM1)
+                  !global_here%HH2N2=  global_here%DP(global_here%NM2)+global_here%IFNLFA*global_here%ETA2(global_here%NM2)
+                  !global_here%HH2N3=  global_here%DP(global_here%NM3)+global_here%IFNLFA*global_here%ETA2(global_here%NM3)
+                  global_here%C1=global_here%CH1(global_here%NM1)/global_here%HH2N1
+                  global_here%C2=0.D0
+                  global_here%C3=0.D0
+                  !global_here%C2=global_here%CH1(global_here%NM2)/global_here%HH2N2
+                  !global_here%C3=global_here%CH1(global_here%NM3)/global_here%HH2N3
+                  global_here%NC1=global_here%NODECODE(global_here%NM1)
+                  global_here%NC2=global_here%NODECODE(global_here%NM2)
+                  global_here%NC3=global_here%NODECODE(global_here%NM3)
+                  global_here%NCELE=global_here%NC1*global_here%NC2*global_here%NC3
+                  IF(global_here%NCELE.EQ.1) global_here%CC00(I)=global_here%C1*global_here%STAIC1(I)+global_here%C2*global_here%STAIC2(I)&
+                       +global_here%C3*global_here%STAIC3(I)
+                  IF(global_here%NCELE.EQ.0) global_here%CC00(I)=-99999.
                END DO
-               IF(ABS(NOUTC).EQ.1) THEN
-                  WRITE(81,2120) time_A,IT
-                  DO I=1,NSTAC
-                     WRITE(81,2453) I,CC00(I)
+               IF(ABS(global_here%NOUTC).EQ.1) THEN
+                  WRITE(81,2120) global_here%time_A,IT
+                  DO I=1,global_here%NSTAC
+                     WRITE(81,2453) I,global_here%CC00(I)
                   END DO
-                  ICSTP = ICSTP+1+NSTAC
+                  global_here%ICSTP = global_here%ICSTP+1+global_here%NSTAC
                ENDIF
-               IF(ABS(NOUTC).EQ.2) THEN
-                  WRITE(81,REC=ICSTP+1) time_A
-                  WRITE(81,REC=ICSTP+2) IT
-                  ICSTP = ICSTP + 2
-                  DO I=1,NSTAC
-                     WRITE(81,REC=ICSTP+I) CC00(I)
+               IF(ABS(global_here%NOUTC).EQ.2) THEN
+                  WRITE(81,REC=global_here%ICSTP+1) global_here%time_A
+                  WRITE(81,REC=global_here%ICSTP+2) IT
+                  global_here%ICSTP = global_here%ICSTP + 2
+                  DO I=1,global_here%NSTAC
+                     WRITE(81,REC=global_here%ICSTP+I) global_here%CC00(I)
                   END DO
-                  ICSTP = ICSTP + NSTAC
+                  global_here%ICSTP = global_here%ICSTP + global_here%NSTAC
                ENDIF
-               NSCOUC=0
+               global_here%NSCOUC=0
             ENDIF
          ENDIF
-         IF(IT.EQ.NTCYFC) CLOSE(81)
+         IF(IT.EQ.global_here%NTCYFC) CLOSE(81)
       ENDIF
 
 !...  
-!...  OUTPUT METEOROLOGICAL RECORDING STATION INFORMATION IF NWS>0 AND THE
+!...  OUTPUT METEOROLOGICAL RECORDING STATION INFORMATION IF global_here%NWS>0 AND THE
 !.... TIME STEP FALLS WITHIN THE SPECIFIED WINDOW
 !...  CALCULATE METEOROLOGICAL SOLUTIONS AT STATIONS USING INTERPOLATION
 !...  
 
-      IF((NWS.NE.0).AND.(NOUTM.NE.0)) THEN
-         IF((IT.GT.NTCYSM).AND.(IT.LE.NTCYFM).OR.FORCE_WRITE) THEN
-            NSCOUM=NSCOUM+1
-            IF(NSCOUM.EQ.NSPOOLM.OR.FORCE_WRITE) THEN
-               DO I=1,NSTAM
-                  NM1=NM(NNM(I),1)
-                  NM2=NM(NNM(I),2)
-                  NM3=NM(NNM(I),3)
-                  U11=wvnxout(NM1)
-                  U22=wvnxout(NM2)
-                  U33=wvnxout(NM3)
-                  V11=wvnyout(NM1)
-                  V22=wvnyout(NM2)
-                  V33=wvnyout(NM3)
-                  P11=PR2(NM1)
-                  P22=PR2(NM2)
-                  P33=PR2(NM3)
-                  RMU00(I)=U11*STAIM1(I)+U22*STAIM2(I)+U33*STAIM3(I)
-                  RMV00(I)=V11*STAIM1(I)+V22*STAIM2(I)+V33*STAIM3(I)
-                  RMP00(I)=P11*STAIM1(I)+P22*STAIM2(I)+P33*STAIM3(I)
+      IF((global_here%NWS.global_here%NE.0).AND.(global_here%NOUTM.global_here%NE.0)) THEN
+         IF((IT.GT.global_here%NTCYSM).AND.(IT.LE.global_here%NTCYFM).OR.FORCE_WRITE) THEN
+            global_here%NSCOUM=global_here%NSCOUM+1
+            IF(global_here%NSCOUM.EQ.global_here%NSPOOLM.OR.FORCE_WRITE) THEN
+               DO I=1,global_here%NSTAM
+                  global_here%NM1=global_here%NM(global_here%NNM(I),1)
+                  global_here%NM2=global_here%NM(global_here%NNM(I),2)
+                  global_here%NM3=global_here%NM(global_here%NNM(I),3)
+                  global_here%U11=global_here%wvnxout(global_here%NM1)
+                  global_here%U22=global_here%wvnxout(global_here%NM2)
+                  global_here%U33=global_here%wvnxout(global_here%NM3)
+                  global_here%V11=global_here%wvnyout(global_here%NM1)
+                  global_here%V22=global_here%wvnyout(global_here%NM2)
+                  global_here%V33=global_here%wvnyout(global_here%NM3)
+                  global_here%P11=global_here%PR2(global_here%NM1)
+                  global_here%P22=global_here%PR2(global_here%NM2)
+                  global_here%P33=global_here%PR2(global_here%NM3)
+                  global_here%RMU00(I)=global_here%U11*global_here%STAIM1(I)+global_here%U22*global_here%STAIM2(I)+global_here%U33*global_here%STAIM3(I)
+                  global_here%RMV00(I)=global_here%V11*global_here%STAIM1(I)+global_here%V22*global_here%STAIM2(I)+global_here%V33*global_here%STAIM3(I)
+                  global_here%RMP00(I)=global_here%P11*global_here%STAIM1(I)+global_here%P22*global_here%STAIM2(I)+global_here%P33*global_here%STAIM3(I)
                END DO
-               IF(ABS(NOUTM).EQ.1) THEN
-                  WRITE(71,2120) time_A,IT
-                  WRITE(72,2120) time_A,IT
-                  DO I=1,NSTAM
-                     WRITE(71,2453) I,RMP00(I)
-                     WRITE(72,2454) I,RMU00(I),RMV00(I)
+               IF(ABS(global_here%NOUTM).EQ.1) THEN
+                  WRITE(71,2120) global_here%time_A,IT
+                  WRITE(72,2120) global_here%time_A,IT
+                  DO I=1,global_here%NSTAM
+                     WRITE(71,2453) I,global_here%RMP00(I)
+                     WRITE(72,2454) I,global_here%RMU00(I),global_here%RMV00(I)
                   END DO
-                  IPSTP=IPSTP+1+NSTAM
-                  IWSTP=IWSTP+1+NSTAM
+                  global_here%IPSTP=global_here%IPSTP+1+global_here%NSTAM
+                  global_here%IWSTP=global_here%IWSTP+1+global_here%NSTAM
                ENDIF
-               IF(ABS(NOUTM).EQ.2) THEN
-                  WRITE(71,REC=IPSTP+1) time_A
-                  WRITE(71,REC=IPSTP+2) IT
-                  WRITE(72,REC=IWSTP+1) time_A
-                  WRITE(72,REC=IWSTP+2) IT
-                  IPSTP=IPSTP+2
-                  IWSTP=IWSTP+2
-                  DO I=1,NSTAM
-                     WRITE(71,REC=IPSTP+I) RMP00(I)
-                     WRITE(72,REC=IWSTP+2*I-1) RMU00(I)
-                     WRITE(72,REC=IWSTP+2*I) RMV00(I)
+               IF(ABS(global_here%NOUTM).EQ.2) THEN
+                  WRITE(71,REC=global_here%IPSTP+1) global_here%time_A
+                  WRITE(71,REC=global_here%IPSTP+2) IT
+                  WRITE(72,REC=global_here%IWSTP+1) global_here%time_A
+                  WRITE(72,REC=global_here%IWSTP+2) IT
+                  global_here%IPSTP=global_here%IPSTP+2
+                  global_here%IWSTP=global_here%IWSTP+2
+                  DO I=1,global_here%NSTAM
+                     WRITE(71,REC=global_here%IPSTP+I) global_here%RMP00(I)
+                     WRITE(72,REC=global_here%IWSTP+2*I-1) global_here%RMU00(I)
+                     WRITE(72,REC=global_here%IWSTP+2*I) global_here%RMV00(I)
                   END DO
-                  IPSTP=IPSTP+NSTAM
-                  IWSTP=IWSTP+2*NSTAM
+                  global_here%IPSTP=global_here%IPSTP+global_here%NSTAM
+                  global_here%IWSTP=global_here%IWSTP+2*global_here%NSTAM
                ENDIF
-               NSCOUM=0
+               global_here%NSCOUM=0
             ENDIF
          ENDIF
-         IF(IT.EQ.NTCYFM) THEN
+         IF(IT.EQ.global_here%NTCYFM) THEN
             CLOSE(71)
             CLOSE(72)
          ENDIF
       ENDIF
 
-!.....Output the gloabl elevation data if NOUTGE ~= 0 and the
+!.....Output the gloabl elevation data if global_here%NOUTGE ~= 0 and the
 !.....time step falls within the specified window
 
-      IF (NOUTGE.NE.0) THEN
-         IF ((IT.GT.NTCYSGE).AND.(IT.LE.NTCYFGE).OR.FORCE_WRITE) THEN
-            NSCOUGE = NSCOUGE + 1
-            IF (NSCOUGE.EQ.NSPOOLGE.OR.FORCE_WRITE) THEN
-               IF (ABS(NOUTGE).EQ.1) THEN
-                  WRITE(63,2120) TIME_A, IT
-                  WRITE(88,2120) TIME_A, IT
-                  WRITE(89,2120) TIME_A, IT
-                  WRITE(4441,2120) TIME_A, IT
-                                !WRITE(895,21 20) TIME_A, IT
-                  WRITE(631,2120) TIME_A, IT
+      IF (global_here%NOUTGE.global_here%NE.0) THEN
+         IF ((IT.GT.global_here%NTCYSGE).AND.(IT.LE.global_here%NTCYFGE).OR.FORCE_WRITE) THEN
+            global_here%NSCOUGE = global_here%NSCOUGE + 1
+            IF (global_here%NSCOUGE.EQ.global_here%NSPOOLGE.OR.FORCE_WRITE) THEN
+               IF (ABS(global_here%NOUTGE).EQ.1) THEN
+                  WRITE(63,2120) global_here%TIME_A, IT
+                  WRITE(88,2120) global_here%TIME_A, IT
+                  WRITE(89,2120) global_here%TIME_A, IT
+                  WRITE(4441,2120) global_here%TIME_A, IT
+                                !WRITE(895,21 20) global_here%TIME_A, IT
+                  WRITE(631,2120) global_here%TIME_A, IT
  2120             FORMAT(2X,E20.10,5X,I10)
-                  DO I=1,NE
-                     IF (ABS(ETA2(I)).LE.(10.0**(-30))) ETA2(I) = 0.D0
-                     WRITE(63,2453) I,ETA2(I)
-                                !IF (NODECODE(I).EQ.0) WRITE(63,2453) I,-99999.
-                     IF (ABS(tracer(I)).LE.(10.0**(-30))) tracer(I) = 0.D0
-                     WRITE(88,2453) I,tracer(I)
-                                !IF (NODECODE(I).EQ.0) WRITE(88,2453) I,.
-                     IF (ABS(tracer2(I)).LE.(10.0**(-30))) tracer2(I) = 0.D0
-                     WRITE(89,2453) I,tracer2(I)
-                                !IF (NODECODE(I).EQ.0) WRITE(89,2453) I,0.\
-                     IF (ABS(dpe(I)).LE.(10.0**(-30))) dpe(I) = 0.D0
-                     write(4441,2453) I,dpe(I)
+                  DO I=1,global_here%NE
+                     IF (ABS(global_here%ETA2(I)).LE.(10.0**(-30))) global_here%ETA2(I) = 0.D0
+                     WRITE(63,2453) I,global_here%ETA2(I)
+                                !IF (global_here%NODECODE(I).EQ.0) WRITE(63,2453) I,-99999.
+                     IF (ABS(global_here%tracer(I)).LE.(10.0**(-30))) global_here%tracer(I) = 0.D0
+                     WRITE(88,2453) I,global_here%tracer(I)
+                                !IF (global_here%NODECODE(I).EQ.0) WRITE(88,2453) I,.
+                     IF (ABS(global_here%tracer2(I)).LE.(10.0**(-30))) global_here%tracer2(I) = 0.D0
+                     WRITE(89,2453) I,global_here%tracer2(I)
+                                !IF (global_here%NODECODE(I).EQ.0) WRITE(89,2453) I,0.\
+                     IF (ABS(global_here%dpe(I)).LE.(10.0**(-30))) global_here%dpe(I) = 0.D0
+                     write(4441,2453) I,global_here%dpe(I)
  2453                FORMAT(2X,I8,2X,E16.8E3)
                   ENDDO
  
@@ -540,7 +540,7 @@
 !     cmm modified 4/6/09
 !     cem...modified for cell-centered data, nodes give incorrect results for p>1
                   
-                  if (mod(it,NSPOOLGE).eq.0) then
+                  if (mod(it,global_here%NSPOOLGE).eq.0) then
 !Casey 120813: Begin the OUT_TEC conditional.
 
 #ifdef OUT_TEC
@@ -548,71 +548,71 @@
                      if (ModetoNode.eq.0) then
 
            write(777,*) 'ZONE ZONETYPE=FETRIANGLE ',
-     $     'NODES=', np, 
-     $     ' ELEMENTS=', ne, 
+     $     'NODES=', global_here%np, 
+     $     ' ELEMENTS=', global_here%ne, 
      $     ' DATAPACKING=BLOCK ',
-     $     'SOLUTIONTIME=',time_a,
+     $     'SOLUTIONTIME=',global_here%time_a,
      $     'VARLOCATION=([3,4,5,6,7,8,10,11,12,13,14]=CELLCENTERED)'
-                     do i=1,np
-                        write(777,7777)  x(i)
+                     do i=1,global_here%np
+                        write(777,7777)  global_here%x(i)
                      enddo
-                     do i=1,np
-                        write(777,7777)  y(i)
+                     do i=1,global_here%np
+                        write(777,7777)  global_here%y(i)
                      enddo
-                     do i=1,ne 
-                        write(777,7777)  dpe(i)
+                     do i=1,global_here%ne 
+                        write(777,7777)  global_here%dpe(i)
                      enddo
-                     do i=1,ne 
-                        write(777,7777)  eta2(i)
+                     do i=1,global_here%ne 
+                        write(777,7777)  global_here%eta2(i)
                      enddo
-                     do i=1,ne 
-                        write(777,7777)  eta2(i)+dpe(i)
+                     do i=1,global_here%ne 
+                        write(777,7777)  global_here%eta2(i)+global_here%dpe(i)
                      enddo
-                     do i=1,ne 
-                        write(777,7777)  uu2(i)
+                     do i=1,global_here%ne 
+                        write(777,7777)  global_here%uu2(i)
                      enddo
-                     do i=1,ne 
-                        write(777,7777)  vv2(i)
+                     do i=1,global_here%ne 
+                        write(777,7777)  global_here%vv2(i)
                      enddo
-                     do i=1,ne 
-                        write(777,7777)  sqrt(uu2(i)**2+vv2(i)**2)
+                     do i=1,global_here%ne 
+                        write(777,7777)  sqrt(global_here%uu2(i)**2+global_here%vv2(i)**2)
                      enddo
-                     do i=1,np 
-                        write(777,7777)  sqrt(wsx2(i)**2+wsy2(i)**2)
+                     do i=1,global_here%np 
+                        write(777,7777)  sqrt(global_here%wsx2(i)**2+global_here%wsy2(i)**2)
                      enddo
-                     do i=1,ne 
-                        write(777,7777)  entrop(4,i) !DBLE(pdg_el(i))
+                     do i=1,global_here%ne 
+                        write(777,7777)  global_here%entrop(4,i) !DBLE(global_here%pdg_el(i))
                      enddo
-                     do i=1,ne 
-                        write(777,7777)  tracer(i)
+                     do i=1,global_here%ne 
+                        write(777,7777)  global_here%tracer(i)
                      enddo
-                     do i=1,ne 
-                        write(777,7777)  tracer2(i)
+                     do i=1,global_here%ne 
+                        write(777,7777)  global_here%tracer2(i)
                      enddo
-                     do i=1,ne 
-                        write(777,7777)  abs(tracer(i)+tracer2(i))
+                     do i=1,global_here%ne 
+                        write(777,7777)  abs(global_here%tracer(i)+global_here%tracer2(i))
                      enddo
-                     do i=1,ne 
-                        write(777,7777)  abs(tracer(i)-tracer2(i))    
+                     do i=1,global_here%ne 
+                        write(777,7777)  abs(global_here%tracer(i)-global_here%tracer2(i))    
                      enddo
 
                   else
 
                  write(777,*) 'ZONE ZONETYPE=FETRIANGLE ',
-     $                'NODES=', np, 
-     $                ' ELEMENTS=', ne, 
-     $                ' DATAPACKING=POINT ','SOLUTIONTIME=',time_a
-                 do i=1,np
-                    if (ics.eq.2) then
-                       write(777,7777) slam(i)/deg2rad, sfea(i)/deg2rad, 
-!                 write(777,7777) x(i), y(i), 
-     $                   dp(i), eta2(i), eta2(i)+dp(i),uu2(i),vv2(i),
-     $           sqrt(uu2(i)**2+vv2(i)**2),sqrt(wsx2(i)**2+wsy2(i)**2),
+     $                'NODES=', global_here%np, 
+     $                ' ELEMENTS=', global_here%ne, 
+     $                ' DATAPACKING=POINT ','SOLUTIONTIME=',global_here%time_a
+                 do i=1,global_here%np
+                    if (global_here%ics.eq.2) then
+                       write(777,7777) global_here%slam(i)/deg2rad, global_here%sfea(i)/deg2rad, 
+!                 write(777,7777) global_here%x(i), global_here%y(i), 
+     $                   global_here%dp(i), global_here%eta2(i), global_here%eta2(i)+global_here%dp(i),global_here%uu2(i),global_here%vv2(i),
+     $           sqrt(global_here%uu2(i)**2+global_here%vv2(i)**2),sqrt(global_here%wsx2(i)**2+global_here%wsy2(i)**2),
      $                   myproc
                     else
-                       write(777,7777) x(i), y(i), 
-     $                   dp(i), eta2(i), eta2(i)+dp(i),uu2(i),vv2(i),
-     $           sqrt(uu2(i)**2+vv2(i)**2),sqrt(wsx2(i)**2+wsy2(i)**2),
+                       write(777,7777) global_here%x(i), global_here%y(i), 
+     $                   global_here%dp(i), global_here%eta2(i), global_here%eta2(i)+global_here%dp(i),global_here%uu2(i),global_here%vv2(i),
+     $           sqrt(global_here%uu2(i)**2+global_here%vv2(i)**2),sqrt(global_here%wsx2(i)**2+global_here%wsy2(i)**2),
      $                   myproc
                     endif
 
@@ -621,8 +621,8 @@
 
 
  7777         format(9f20.8,i10)
-              do i=1,ne
-                 write(777,"(3i12)") nm(i,1), nm(i,2), nm(i,3)
+              do i=1,global_here%ne
+                 write(777,"(3i12)") global_here%nm(i,1), global_here%nm(i,2), global_here%nm(i,3)
               enddo
 
 
@@ -630,7 +630,7 @@
 
 !.....Write DG.63 results
                      
-                     DO J = 1,NE
+                     DO J = 1,global_here%NE
                         DO K = 1,dg_here%DOFS(J)
                            WRITE(631,*) J, dg_here%ZE(K,J,1)
                         ENDDO
@@ -638,137 +638,137 @@
                      
 !.....Write DG.65 results, elemental statuses (wet/dry)
                      
-                     IF (NOLIFA.GE.2) THEN
-                        WRITE(651,2120) TIME_A, IT
-                        DO J = 1,NE
+                     IF (global_here%NOLIFA.GE.2) THEN
+                        WRITE(651,2120) global_here%TIME_A, IT
+                        DO J = 1,global_here%NE
                            WRITE(651,2455) J,dg_here%WDFLG(J) 
  2455                      FORMAT(2X,I8,2X,I2)
                         ENDDO
                      ENDIF
                      
-                     IGEP = IGEP + 1 + NP
+                     global_here%IGEP = global_here%IGEP + 1 + global_here%NP
                   ENDIF
-                  IF (ABS(NOUTGE).EQ.2) THEN
-                     WRITE(63,REC=IGEP+1) TIME_A
-                     WRITE(63,REC=IGEP+2) IT
-                     IGEP = IGEP + 2
-                     DO I = 1,NP
-                        WRITE(63,REC=IGEP+I)ETA2(I)
-                                !IF (NODECODE(I).EQ.0) WRITE(63,REC=IGEP+I) -99999.
+                  IF (ABS(global_here%NOUTGE).EQ.2) THEN
+                     WRITE(63,REC=global_here%IGEP+1) global_here%TIME_A
+                     WRITE(63,REC=global_here%IGEP+2) IT
+                     global_here%IGEP = global_here%IGEP + 2
+                     DO I = 1,global_here%NP
+                        WRITE(63,REC=global_here%IGEP+I)global_here%ETA2(I)
+                                !IF (global_here%NODECODE(I).EQ.0) WRITE(63,REC=global_here%IGEP+I) -99999.
                      ENDDO
-                     IF(SEDFLAG.GE.2) THEN
-                        WRITE(84,REC=IGEP+1) TIME_A
-                        WRITE(84,REC=IGEP+2) IT
-                        DO I = 1,NP
-                           WRITE(84,REC=IGEP+I) DP(I)
+                     IF(global_here%SEDFLAG.GE.2) THEN
+                        WRITE(84,REC=global_here%IGEP+1) global_here%TIME_A
+                        WRITE(84,REC=global_here%IGEP+2) IT
+                        DO I = 1,global_here%NP
+                           WRITE(84,REC=global_here%IGEP+I) global_here%DP(I)
                         ENDDO
                      ENDIF
-                     IGEP = IGEP + NP
+                     global_here%IGEP = global_here%IGEP + global_here%NP
                   ENDIF
-                  NSCOUGE = 0
+                  global_here%NSCOUGE = 0
                ENDIF
             ENDIF
-            IF (IT.EQ.NTCYFGE) CLOSE(63)
-            IF (IT.EQ.NTCYFGE) CLOSE(631)
-            IF (IT.EQ.NTCYFGE.AND.NOLIFA.GE.2) CLOSE(651)
-            IF (IT.EQ.NTCYFGE.AND.SEDFLAG.GE.1) CLOSE(84)
+            IF (IT.EQ.global_here%NTCYFGE) CLOSE(63)
+            IF (IT.EQ.global_here%NTCYFGE) CLOSE(631)
+            IF (IT.EQ.global_here%NTCYFGE.AND.global_here%NOLIFA.GE.2) CLOSE(651)
+            IF (IT.EQ.global_here%NTCYFGE.AND.global_here%SEDFLAG.GE.1) CLOSE(84)
 
          endif
       ENDIF
 
 !...  
-!...  OUTPUT GLOBAL VELOCITY DATA IF NOUTGV<>0 AND THE
+!...  OUTPUT GLOBAL VELOCITY DATA IF global_here%NOUTGV<>0 AND THE
 !.... TIME STEP FALLS WITHIN THE SPECIFIED WINDOW
 !...  
-      IF (NOUTGV.NE.0) THEN
-         IF ((IT.GT.NTCYSGV).AND.(IT.LE.NTCYFGV).OR.FORCE_WRITE) THEN
-            NSCOUGV=NSCOUGV+1
-            IF (NSCOUGV.EQ.NSPOOLGV.OR.FORCE_WRITE) THEN
-               IF(ABS(NOUTGV).EQ.1) THEN
-                  WRITE(64,2120) TIME_A,IT
-                  WRITE(641,2120) TIME_A,IT
-                  DO I = 1,NE
+      IF (global_here%NOUTGV.global_here%NE.0) THEN
+         IF ((IT.GT.global_here%NTCYSGV).AND.(IT.LE.global_here%NTCYFGV).OR.FORCE_WRITE) THEN
+            global_here%NSCOUGV=global_here%NSCOUGV+1
+            IF (global_here%NSCOUGV.EQ.global_here%NSPOOLGV.OR.FORCE_WRITE) THEN
+               IF(ABS(global_here%NOUTGV).EQ.1) THEN
+                  WRITE(64,2120) global_here%TIME_A,IT
+                  WRITE(641,2120) global_here%TIME_A,IT
+                  DO I = 1,global_here%NE
 !.....Had trouble writing out numbers with less than E-99 (EJK)
-                     IF (ABS(UU2(I)).LE.(10.0**(-30))) UU2(I) = 0.D0
-                     IF (ABS(VV2(I)).LE.(10.0**(-30))) VV2(I) = 0.D0
-                     WRITE(64,2454) I,UU2(I),VV2(I)
+                     IF (ABS(global_here%UU2(I)).LE.(10.0**(-30))) global_here%UU2(I) = 0.D0
+                     IF (ABS(global_here%VV2(I)).LE.(10.0**(-30))) global_here%VV2(I) = 0.D0
+                     WRITE(64,2454) I,global_here%UU2(I),global_here%VV2(I)
  2454                FORMAT(2X,I8,2(2X,E16.8E3))
                   ENDDO
                   
 !.....Write DG.64 results
 
-                  DO J = 1,NE
+                  DO J = 1,global_here%NE
                      DO K = 1,dg_here%DOFS(J)
                         WRITE(641,*) J, dg_here%QX(K,J,1), dg_here%QY(K,J,1)
                      ENDDO
                   ENDDO
                   
-                  IGVP = IGVP + 1 + NP
+                  global_here%IGVP = global_here%IGVP + 1 + global_here%NP
                ENDIF
-               IF (ABS(NOUTGV).EQ.2) THEN
-                  WRITE(64,REC=IGVP+1) time_A
-                  WRITE(64,REC=IGVP+2) IT
-                  IGVP = IGVP + 2
-                  DO I=1,NP
-                     WRITE(64,REC=IGVP+2*I-1) UU2(I)
-                     WRITE(64,REC=IGVP+2*I) VV2(I)
+               IF (ABS(global_here%NOUTGV).EQ.2) THEN
+                  WRITE(64,REC=global_here%IGVP+1) global_here%time_A
+                  WRITE(64,REC=global_here%IGVP+2) IT
+                  global_here%IGVP = global_here%IGVP + 2
+                  DO I=1,global_here%NP
+                     WRITE(64,REC=global_here%IGVP+2*I-1) global_here%UU2(I)
+                     WRITE(64,REC=global_here%IGVP+2*I) global_here%VV2(I)
                   ENDDO
-                  IGVP = IGVP + 2*NP
+                  global_here%IGVP = global_here%IGVP + 2*global_here%NP
                ENDIF
-               NSCOUGV=0
+               global_here%NSCOUGV=0
             ENDIF
          ENDIF
-         IF(IT.EQ.NTCYFGV) CLOSE(64)
-         IF(IT.EQ.NTCYFGV) CLOSE(641)
+         IF(IT.EQ.global_here%NTCYFGV) CLOSE(64)
+         IF(IT.EQ.global_here%NTCYFGV) CLOSE(641)
       ENDIF
 
 !...  
-!...  OUTPUT GLOBAL WIND STRESS and atmospheric pressure data IF NOUTGW<>0 AND THE
+!...  OUTPUT GLOBAL WIND STRESS and atmospheric pressure data IF global_here%NOUTGW<>0 AND THE
 !.... TIME STEP FALLS WITHIN THE SPECIFIED WINDOW
 !...  
-      IF((NWS.NE.0).AND.(NOUTGW.NE.0)) THEN
-         IF((IT.GT.NTCYSGW).AND.(IT.LE.NTCYFGW).OR.FORCE_WRITE) THEN
-            NSCOUGW=NSCOUGW+1
-            IF(NSCOUGW.EQ.NSPOOLGW.OR.FORCE_WRITE) THEN
-               IF(ABS(NOUTGW).EQ.1) THEN
-                  write(73,2120) time_A,it
-                  WRITE(74,2120) time_A,IT
-                  DO I=1,NP
-                     write(73,2453) i,pr2(i)
-                     WRITE(74,2454) i,wvnxout(i),wvnyout(i)
+      IF((global_here%NWS.global_here%NE.0).AND.(global_here%NOUTGW.global_here%NE.0)) THEN
+         IF((IT.GT.global_here%NTCYSGW).AND.(IT.LE.global_here%NTCYFGW).OR.FORCE_WRITE) THEN
+            global_here%NSCOUGW=global_here%NSCOUGW+1
+            IF(global_here%NSCOUGW.EQ.global_here%NSPOOLGW.OR.FORCE_WRITE) THEN
+               IF(ABS(global_here%NOUTGW).EQ.1) THEN
+                  write(73,2120) global_here%time_A,it
+                  WRITE(74,2120) global_here%time_A,IT
+                  DO I=1,global_here%NP
+                     write(73,2453) i,global_here%pr2(i)
+                     WRITE(74,2454) i,global_here%wvnxout(i),global_here%wvnyout(i)
                   ENDDO
-                  igpp = igpp+1+np
-                  IGWP = IGWP+1+NP
+                  global_here%igpp = global_here%igpp+1+global_here%np
+                  global_here%IGWP = global_here%IGWP+1+global_here%NP
                ENDIF
-               IF(ABS(NOUTGW).EQ.2) THEN
-                  WRITE(73,REC=igpp+1) time_A
-                  WRITE(73,REC=igpp+2) IT
-                  WRITE(74,REC=IGWP+1) time_A
-                  WRITE(74,REC=IGWP+2) IT
-                  igpp = igpp + 2
-                  IGWP = IGWP + 2
-                  DO I=1,NP
-                     write(73,rec=igpp+i) pr2(i)
-                     WRITE(74,REC=IGWP+2*I-1) wvnxout(i)
-                     WRITE(74,REC=IGWP+2*I) wvnyout(i)
+               IF(ABS(global_here%NOUTGW).EQ.2) THEN
+                  WRITE(73,REC=global_here%igpp+1) global_here%time_A
+                  WRITE(73,REC=global_here%igpp+2) IT
+                  WRITE(74,REC=global_here%IGWP+1) global_here%time_A
+                  WRITE(74,REC=global_here%IGWP+2) IT
+                  global_here%igpp = global_here%igpp + 2
+                  global_here%IGWP = global_here%IGWP + 2
+                  DO I=1,global_here%NP
+                     write(73,rec=global_here%igpp+i) global_here%pr2(i)
+                     WRITE(74,REC=global_here%IGWP+2*I-1) global_here%wvnxout(i)
+                     WRITE(74,REC=global_here%IGWP+2*I) global_here%wvnyout(i)
                   END DO
-                  igpp = igpp + np
-                  IGWP = IGWP + 2*NP
+                  global_here%igpp = global_here%igpp + global_here%np
+                  global_here%IGWP = global_here%IGWP + 2*global_here%NP
                ENDIF
-               NSCOUGW=0
+               global_here%NSCOUGW=0
             ENDIF
          ENDIF
-         IF(IT.EQ.NTCYFGW) then
+         IF(IT.EQ.global_here%NTCYFGW) then
             close(73)
             close(74)
          ENDIF
       endif
 
-      if (it.eq.nt) then
+      if (it.eq.global_here%nt) then
          open(963,FILE=S%DIRNAME//'/'//'maxele.63')
-         write(963,*) np
-         do i=1,np
-            write(963,9633) etamax(i)
+         write(963,*) global_here%np
+         do i=1,global_here%np
+            write(963,9633) global_here%etamax(i)
          enddo
  9633    format(f20.8)
          close(963)
@@ -776,18 +776,18 @@
          if (ModetoNode.eq.1) then
             write(778,*) 'TITLE = "dgswem output"'
             write(778,*) 
-     $           'VARIABLES = "x", "y", "maxeta"'
+     $           'VARIABLES = "global_here%x", "global_here%y", "maxeta"'
             write(778,*) 'ZONE ZONETYPE=FETRIANGLE ',
-     $           'NODES=', np, 
-     $           ' ELEMENTS=', ne, 
-     $           ' DATAPACKING=POINT ','SOLUTIONTIME=',time_a
-            do i=1,np
-               write(778,7778) slam(i)/deg2rad, sfea(i)/deg2rad, 
-     $              etamax(i)
+     $           'NODES=', global_here%np, 
+     $           ' ELEMENTS=', global_here%ne, 
+     $           ' DATAPACKING=POINT ','SOLUTIONTIME=',global_here%time_a
+            do i=1,global_here%np
+               write(778,7778) global_here%slam(i)/deg2rad, global_here%sfea(i)/deg2rad, 
+     $              global_here%etamax(i)
             enddo
  7778       format(3f20.8)
-            do i=1,ne
-               write(778,"(3i12)") nm(i,1), nm(i,2), nm(i,3)
+            do i=1,global_here%ne
+               write(778,"(3i12)") global_here%nm(i,1), global_here%nm(i,2), global_here%nm(i,3)
             enddo
             close(778)
          endif
@@ -795,43 +795,43 @@
       endif
 
 !...  
-!...  OUTPUT GLOBAL CONCENTRATION DATA IF NOUTGC<>0 AND THE
+!...  OUTPUT GLOBAL CONCENTRATION DATA IF global_here%NOUTGC<>0 AND THE
 !.... TIME STEP FALLS WITHIN THE SPECIFIED WINDOW
 !...  
-      IF(NOUTGC.NE.0) THEN
-         IF((IT.GT.NTCYSGC).AND.(IT.LE.NTCYFGC).OR.FORCE_WRITE) THEN
-            NSCOUGC=NSCOUGC+1
-            IF(NSCOUGC.EQ.NSPOOLGC.OR.FORCE_WRITE) THEN
-               IF(ABS(NOUTGC).EQ.1) THEN
-                  WRITE(83,2120) time_A,IT
-                  DO I=1,NP
-                     HH2=DP(I)+IFNLFA*ETA2(I)
-                     C1=CH1(I)/HH2
-                     IF(NODECODE(I).EQ.1) WRITE(83,2453) I,C1
-                     IF(NODECODE(I).EQ.0) WRITE(83,2453) I,-99999.
+      IF(global_here%NOUTGC.global_here%NE.0) THEN
+         IF((IT.GT.global_here%NTCYSGC).AND.(IT.LE.global_here%NTCYFGC).OR.FORCE_WRITE) THEN
+            global_here%NSCOUGC=global_here%NSCOUGC+1
+            IF(global_here%NSCOUGC.EQ.global_here%NSPOOLGC.OR.FORCE_WRITE) THEN
+               IF(ABS(global_here%NOUTGC).EQ.1) THEN
+                  WRITE(83,2120) global_here%time_A,IT
+                  DO I=1,global_here%NP
+                     global_here%HH2=global_here%DP(I)+global_here%IFNLFA*global_here%ETA2(I)
+                     global_here%C1=global_here%CH1(I)/global_here%HH2
+                     IF(global_here%NODECODE(I).EQ.1) WRITE(83,2453) I,global_here%C1
+                     IF(global_here%NODECODE(I).EQ.0) WRITE(83,2453) I,-99999.
                   ENDDO
-                  IGCP=IGCP+1+NP
+                  global_here%IGCP=global_here%IGCP+1+global_here%NP
                ENDIF
-               IF(ABS(NOUTGC).EQ.2) THEN
-                  WRITE(83,REC=IGEP+1) time_A
-                  WRITE(83,REC=IGEP+2) IT
-                  IGCP = IGCP + 2
-                  DO I=1,NP
-                     HH2=DP(I)+IFNLFA*ETA2(I)
-                     C1=CH1(I)/HH2
-                     IF(NODECODE(I).EQ.1) WRITE(83,REC=IGCP+I) C1
-                     IF(NODECODE(I).EQ.0) WRITE(83,REC=IGCP+I) -99999.
+               IF(ABS(global_here%NOUTGC).EQ.2) THEN
+                  WRITE(83,REC=global_here%IGEP+1) global_here%time_A
+                  WRITE(83,REC=global_here%IGEP+2) IT
+                  global_here%IGCP = global_here%IGCP + 2
+                  DO I=1,global_here%NP
+                     global_here%HH2=global_here%DP(I)+global_here%IFNLFA*global_here%ETA2(I)
+                     global_here%C1=global_here%CH1(I)/global_here%HH2
+                     IF(global_here%NODECODE(I).EQ.1) WRITE(83,REC=global_here%IGCP+I) global_here%C1
+                     IF(global_here%NODECODE(I).EQ.0) WRITE(83,REC=global_here%IGCP+I) -99999.
                   ENDDO
-                  IGCP=IGCP+NP
+                  global_here%IGCP=global_here%IGCP+global_here%NP
                ENDIF
-               NSCOUGC=0
+               global_here%NSCOUGC=0
             ENDIF
          ENDIF
-         IF(IT.EQ.NTCYFGC) CLOSE(83)
+         IF(IT.EQ.global_here%NTCYFGC) CLOSE(83)
       ENDIF
 
 !...  
-!...  IF IHARIND=1 AND THE TIME STEP FALLS WITHIN THE SPECIFIED WINDOW AND
+!...  IF global_here%IHARIND=1 AND THE TIME STEP FALLS WITHIN THE SPECIFIED WINDOW AND
 !...  ON THE SPECIFIED INCREMENT, USE MODEL RESULTS TO UPDATE HARMONIC
 !...  ANALYSIS MATRIX AND LOAD VECTORS.  NOTE: AN 8 BYTE RECORD SHOULD BE
 !...  USED THROUGHOUT THE HARMONIC ANALYSIS SUBROUTINES, EVEN ON 32 BIT
@@ -839,71 +839,71 @@
 !...  DOUBLE PRECISION.
 !...  
 #ifdef HARM
-      IF(IHARIND.EQ.1) THEN
-         IF((IT.GT.ITHAS).AND.(IT.LE.ITHAF)) THEN
-            IF(ICHA.EQ.NHAINC) ICHA=0
-            ICHA=ICHA+1
-            IF(ICHA.EQ.NHAINC) THEN
+      IF(global_here%IHARIND.EQ.1) THEN
+         IF((IT.GT.global_here%ITHAS).AND.(IT.LE.global_here%ITHAF)) THEN
+            IF(global_here%ICHA.EQ.global_here%NHAINC) global_here%ICHA=0
+            global_here%ICHA=global_here%ICHA+1
+            IF(global_here%ICHA.EQ.global_here%NHAINC) THEN
 !...  
 !.....UPDATE THE LHS MATRIX
 !...  
-               CALL LSQUPDLHS(timeh,IT)
+               CALL LSQUPDLHS(global_here%timeh,IT)
 !...  
 !.....IF DESIRED COMPUTE ELEVATION STATION INFORMATION AND UPDATE LOAD VECTOR
 !...  
-               IF(NHASE.EQ.1) THEN
-                  DO I=1,NSTAE
-!     EE1=ETA2(NM(NNE(I),1))
-!     EE2=ETA2(NM(NNE(I),2))
-!     EE3=ETA2(NM(NNE(I),3))
-!     ET00(I)=EE1*STAIE1(I)+EE2*STAIE2(I)+EE3*STAIE3(I)
-                     ET00(I) = dg_here%ZE(1,NNE(I),1)
+               IF(global_here%NHASE.EQ.1) THEN
+                  DO I=1,global_here%NSTAE
+!     global_here%EE1=global_here%ETA2(global_here%NM(global_here%NNE(I),1))
+!     global_here%EE2=global_here%ETA2(global_here%NM(global_here%NNE(I),2))
+!     global_here%EE3=global_here%ETA2(global_here%NM(global_here%NNE(I),3))
+!     global_here%ET00(I)=global_here%EE1*global_here%STAIE1(I)+global_here%EE2*global_here%STAIE2(I)+global_here%EE3*global_here%STAIE3(I)
+                     global_here%ET00(I) = dg_here%ZE(1,global_here%NNE(I),1)
                      DO K = 2,dg_here%DOFH
-                        ET00(I) = ET00(I) + dg_here%ZE(K,NNE(I),1)*dg_here%PHI_STAE(K,I)
+                        global_here%ET00(I) = global_here%ET00(I) + dg_here%ZE(K,global_here%NNE(I),1)*dg_here%PHI_STAE(K,I)
                      ENDDO
                   ENDDO
-                  CALL LSQUPDES(ET00,NSTAE)
+                  CALL LSQUPDES(global_here%ET00,global_here%NSTAE)
                ENDIF
 !...  
 !.....IF DESIRED COMPUTE VELOCITY STATION INFORMATION AND UPDATE LOAD VECTOR
 !...  
-               IF(NHASV.EQ.1) THEN
-                  DO I=1,NSTAV
-!     U11=UU2(NM(NNV(I),1))
-!     U22=UU2(NM(NNV(I),2))
-!     U33=UU2(NM(NNV(I),3))
-!     V11=VV2(NM(NNV(I),1))
-!     V22=VV2(NM(NNV(I),2))
-!     V33=VV2(NM(NNV(I),3))
-!     UU00(I)=U11*STAIV1(I)+U22*STAIV2(I)+U33*STAIV3(I)
-!     VV00(I)=V11*STAIV1(I)+V22*STAIV2(I)+V33*STAIV3(I)
-                     DP1     = DPE(nnv(i)) !DP(NM(NNV(I),1))
-                     !DP2     = DPE(nnv(i)) !DP(NM(NNV(I),2))
-                     !DP3     = DPE(nnv(i)) !DP(NM(NNV(I),3))
-                     !DP00    = DP1*STAIV1(I) + DP2*STAIV2(I) +DP3*STAIV3(I)
-                     ZE00    = dg_here%ZE(1,NNV(I),1)
-                     UU00(I) = dg_here%QX(1,NNV(I),1)
-                     VV00(I) = dg_here%QY(1,NNV(I),1)
+               IF(global_here%NHASV.EQ.1) THEN
+                  DO I=1,global_here%NSTAV
+!     global_here%U11=global_here%UU2(global_here%NM(global_here%NNV(I),1))
+!     global_here%U22=global_here%UU2(global_here%NM(global_here%NNV(I),2))
+!     global_here%U33=global_here%UU2(global_here%NM(global_here%NNV(I),3))
+!     global_here%V11=global_here%VV2(global_here%NM(global_here%NNV(I),1))
+!     global_here%V22=global_here%VV2(global_here%NM(global_here%NNV(I),2))
+!     global_here%V33=global_here%VV2(global_here%NM(global_here%NNV(I),3))
+!     global_here%UU00(I)=global_here%U11*global_here%STAIV1(I)+global_here%U22*global_here%STAIV2(I)+global_here%U33*global_here%STAIV3(I)
+!     global_here%VV00(I)=global_here%V11*global_here%STAIV1(I)+global_here%V22*global_here%STAIV2(I)+global_here%V33*global_here%STAIV3(I)
+                     DP1     = global_here%DPE(global_here%nnv(i)) !global_here%DP(global_here%NM(global_here%NNV(I),1))
+                     !DP2     = global_here%DPE(global_here%nnv(i)) !global_here%DP(global_here%NM(global_here%NNV(I),2))
+                     !DP3     = global_here%DPE(global_here%nnv(i)) !global_here%DP(global_here%NM(global_here%NNV(I),3))
+                     !DP00    = DP1*global_here%STAIV1(I) + DP2*global_here%STAIV2(I) +DP3*global_here%STAIV3(I)
+                     ZE00    = dg_here%ZE(1,global_here%NNV(I),1)
+                     global_here%UU00(I) = dg_here%QX(1,global_here%NNV(I),1)
+                     global_here%VV00(I) = dg_here%QY(1,global_here%NNV(I),1)
                      DO K = 2,dg_here%DOFH
-                        ZE00    = ZE00    + dg_here%ZE(K,NNV(I),1)*dg_here%PHI_STAV(K,I)
-                        UU00(I) = UU00(I) + dg_here%QX(K,NNV(I),1)*dg_here%PHI_STAV(K,I)
-                        VV00(I) = VV00(I) + dg_here%QY(K,NNV(I),1)*dg_here%PHI_STAV(K,I)
+                        ZE00    = ZE00    + dg_here%ZE(K,global_here%NNV(I),1)*dg_here%PHI_STAV(K,I)
+                        global_here%UU00(I) = global_here%UU00(I) + dg_here%QX(K,global_here%NNV(I),1)*dg_here%PHI_STAV(K,I)
+                        global_here%VV00(I) = global_here%VV00(I) + dg_here%QY(K,global_here%NNV(I),1)*dg_here%PHI_STAV(K,I)
                      ENDDO
                      DEPTH   = ZE00 + DP1 !DP00
-                     FH_NL   = 1.D0/(NLEQ*DEPTH + LEQ)
-                     UU00(I) = UU00(I)*FH_NL
-                     VV00(I) = VV00(I)*FH_NL
+                     FH_NL   = 1.D0/(global_here%NLEQ*DEPTH + global_here%LEQ)
+                     global_here%UU00(I) = global_here%UU00(I)*FH_NL
+                     global_here%VV00(I) = global_here%VV00(I)*FH_NL
                   ENDDO
-                  CALL LSQUPDVS(UU00,VV00,NSTAV)
+                  CALL LSQUPDVS(global_here%UU00,global_here%VV00,global_here%NSTAV)
                ENDIF
 !...  
 !.....IF DESIRED UPDATE GLOBAL ELEVATION LOAD VECTOR
 !...  
-               IF(NHAGE.EQ.1) CALL LSQUPDEG(ETA2,NP)
+               IF(global_here%NHAGE.EQ.1) CALL LSQUPDEG(global_here%ETA2,global_here%NP)
 !...  
 !.....IF DESIRED UPDATE GLOBAL VELOCITY LOAD VECTOR
 !...  
-               IF(NHAGV.EQ.1) CALL LSQUPDVG(UU2,VV2,NP)
+               IF(global_here%NHAGV.EQ.1) CALL LSQUPDVG(global_here%UU2,global_here%VV2,global_here%NP)
 
             ENDIF
          ENDIF
@@ -911,15 +911,15 @@
 !...  LINES TO COMPUTE MEANS AND VARIANCES
 
          if (CHARMV) then
-            IF(IT.GT.ITMV) THEN
-               NTSTEPS=NTSTEPS+1
-               DO I=1,NP
-                  ELAV(I)=ELAV(I)+ETA2(I)
-                  XVELAV(I)=XVELAV(I)+UU2(I)
-                  YVELAV(I)=YVELAV(I)+VV2(I)
-                  ELVA(I)=ELVA(I)+ETA2(I)*ETA2(I)
-                  XVELVA(I)=XVELVA(I)+UU2(I)*UU2(I)
-                  YVELVA(I)=YVELVA(I)+VV2(I)*VV2(I)
+            IF(IT.GT.global_here%ITMV) THEN
+               global_here%NTSTEPS=global_here%NTSTEPS+1
+               DO I=1,global_here%NP
+                  global_here%ELAV(I)=global_here%ELAV(I)+global_here%ETA2(I)
+                  global_here%XVELAV(I)=global_here%XVELAV(I)+global_here%UU2(I)
+                  global_here%YVELAV(I)=global_here%YVELAV(I)+global_here%VV2(I)
+                  global_here%ELVA(I)=global_here%ELVA(I)+global_here%ETA2(I)*global_here%ETA2(I)
+                  global_here%XVELVA(I)=global_here%XVELVA(I)+global_here%UU2(I)*global_here%UU2(I)
+                  global_here%YVELVA(I)=global_here%YVELVA(I)+global_here%VV2(I)*global_here%VV2(I)
                END DO
             ENDIF
          endif                  !   charmv
@@ -929,97 +929,97 @@
 #endif
 
 !...  
-!...  WRITE OUT HOT START INFORMATION IF NHSTAR=1 AND AT CORRECT TIME STEP
+!...  WRITE OUT HOT START INFORMATION IF global_here%NHSTAR=1 AND AT CORRECT TIME STEP
 !...  NOTE: THE HOT START FILES USE A RECORD LENGTH OF 8 ON BOTH 32 BIT
 !.... WORKSTATIONS AND THE 64 BIT CRAY.  THIS IS BECAUSE THE HARMONIC
 !.... ANALYSIS IS DONE IN DOUBLE PRECISION (64 BITS) ON WORKSTATIONS.
 !...  
 #ifdef HOTSTART
-      IF(NHSTAR.EQ.1) THEN
-         ITEST=(IT/NHSINC)*NHSINC  
-         IF(ITEST.EQ.IT) THEN
-            IF(IHSFIL.EQ.67) OPEN(67,FILE=S%DIRNAME//'/'//'fort.67',&
+      IF(global_here%NHSTAR.EQ.1) THEN
+         global_here%ITEST=(IT/global_here%NHSINC)*global_here%NHSINC  
+         IF(global_here%ITEST.EQ.IT) THEN
+            IF(global_here%IHSFIL.EQ.67) OPEN(67,FILE=S%DIRNAME//'/'//'fort.67',&
             ACCESS='DIRECT',RECL=8)
-            IF(IHSFIL.EQ.68) OPEN(68,FILE=S%DIRNAME//'/'//'fort.68',&
+            IF(global_here%IHSFIL.EQ.68) OPEN(68,FILE=S%DIRNAME//'/'//'fort.68',&
            ACCESS='DIRECT',RECL=8)
-            IHOTSTP=1
-            WRITE(IHSFIL,REC=IHOTSTP) IM
-            IHOTSTP=2
-            WRITE(IHSFIL,REC=IHOTSTP) TIME_A
-            IHOTSTP=3
-            WRITE(IHSFIL,REC=IHOTSTP) IT
-            DO I=1,NP
-               WRITE(IHSFIL,REC=IHOTSTP+1) ETA1(I)
-               WRITE(IHSFIL,REC=IHOTSTP+2) ETA2(I)
-               WRITE(IHSFIL,REC=IHOTSTP+3) UU2(I)
-               WRITE(IHSFIL,REC=IHOTSTP+4) VV2(I)
-               IHOTSTP = IHOTSTP + 4
-               IF(IM.EQ.10) THEN
-                  WRITE(IHSFIL,REC=IHOTSTP+1) CH1(I)
-                  IHOTSTP=IHOTSTP+1
+            global_here%IHOTSTP=1
+            WRITE(global_here%IHSFIL,REC=global_here%IHOTSTP) global_here%IM
+            global_here%IHOTSTP=2
+            WRITE(global_here%IHSFIL,REC=global_here%IHOTSTP) global_here%TIME_A
+            global_here%IHOTSTP=3
+            WRITE(global_here%IHSFIL,REC=global_here%IHOTSTP) IT
+            DO I=1,global_here%NP
+               WRITE(global_here%IHSFIL,REC=global_here%IHOTSTP+1) global_here%ETA1(I)
+               WRITE(global_here%IHSFIL,REC=global_here%IHOTSTP+2) global_here%ETA2(I)
+               WRITE(global_here%IHSFIL,REC=global_here%IHOTSTP+3) global_here%UU2(I)
+               WRITE(global_here%IHSFIL,REC=global_here%IHOTSTP+4) global_here%VV2(I)
+               global_here%IHOTSTP = global_here%IHOTSTP + 4
+               IF(global_here%IM.EQ.10) THEN
+                  WRITE(global_here%IHSFIL,REC=global_here%IHOTSTP+1) global_here%CH1(I)
+                  global_here%IHOTSTP=global_here%IHOTSTP+1
                ENDIF
-               WRITE(IHSFIL,REC=IHOTSTP+1) NODECODE(I)
-               IHOTSTP=IHOTSTP+1
+               WRITE(global_here%IHSFIL,REC=global_here%IHOTSTP+1) global_here%NODECODE(I)
+               global_here%IHOTSTP=global_here%IHOTSTP+1
             END DO
-            WRITE(IHSFIL,REC=IHOTSTP+1) IESTP
-            WRITE(IHSFIL,REC=IHOTSTP+2) NSCOUE
-            IHOTSTP=IHOTSTP+2
-            WRITE(IHSFIL,REC=IHOTSTP+1) IVSTP
-            WRITE(IHSFIL,REC=IHOTSTP+2) NSCOUV
-            IHOTSTP=IHOTSTP+2
-            WRITE(IHSFIL,REC=IHOTSTP+1) ICSTP
-            WRITE(IHSFIL,REC=IHOTSTP+2) NSCOUC
-            IHOTSTP=IHOTSTP+2
-            WRITE(IHSFIL,REC=IHOTSTP+1) IPSTP
-            WRITE(IHSFIL,REC=IHOTSTP+2) IWSTP
-            WRITE(IHSFIL,REC=IHOTSTP+2) NSCOUM
-            IHOTSTP=IHOTSTP+3
-            WRITE(IHSFIL,REC=IHOTSTP+1) IGEP
-            WRITE(IHSFIL,REC=IHOTSTP+2) NSCOUGE
-            IHOTSTP=IHOTSTP+2
-            WRITE(IHSFIL,REC=IHOTSTP+1) IGVP
-            WRITE(IHSFIL,REC=IHOTSTP+2) NSCOUGV
-            IHOTSTP=IHOTSTP+2
-            WRITE(IHSFIL,REC=IHOTSTP+1) IGCP
-            WRITE(IHSFIL,REC=IHOTSTP+2) NSCOUGC
-            IHOTSTP=IHOTSTP+2
-            WRITE(IHSFIL,REC=IHOTSTP+1) IGPP
-            WRITE(IHSFIL,REC=IHOTSTP+2) IGWP
-            WRITE(IHSFIL,REC=IHOTSTP+3) NSCOUGW
-            IHOTSTP=IHOTSTP+3
+            WRITE(global_here%IHSFIL,REC=global_here%IHOTSTP+1) global_here%IESTP
+            WRITE(global_here%IHSFIL,REC=global_here%IHOTSTP+2) global_here%NSCOUE
+            global_here%IHOTSTP=global_here%IHOTSTP+2
+            WRITE(global_here%IHSFIL,REC=global_here%IHOTSTP+1) global_here%IVSTP
+            WRITE(global_here%IHSFIL,REC=global_here%IHOTSTP+2) global_here%NSCOUV
+            global_here%IHOTSTP=global_here%IHOTSTP+2
+            WRITE(global_here%IHSFIL,REC=global_here%IHOTSTP+1) global_here%ICSTP
+            WRITE(global_here%IHSFIL,REC=global_here%IHOTSTP+2) global_here%NSCOUC
+            global_here%IHOTSTP=global_here%IHOTSTP+2
+            WRITE(global_here%IHSFIL,REC=global_here%IHOTSTP+1) global_here%IPSTP
+            WRITE(global_here%IHSFIL,REC=global_here%IHOTSTP+2) global_here%IWSTP
+            WRITE(global_here%IHSFIL,REC=global_here%IHOTSTP+2) global_here%NSCOUM
+            global_here%IHOTSTP=global_here%IHOTSTP+3
+            WRITE(global_here%IHSFIL,REC=global_here%IHOTSTP+1) global_here%IGEP
+            WRITE(global_here%IHSFIL,REC=global_here%IHOTSTP+2) global_here%NSCOUGE
+            global_here%IHOTSTP=global_here%IHOTSTP+2
+            WRITE(global_here%IHSFIL,REC=global_here%IHOTSTP+1) global_here%IGVP
+            WRITE(global_here%IHSFIL,REC=global_here%IHOTSTP+2) global_here%NSCOUGV
+            global_here%IHOTSTP=global_here%IHOTSTP+2
+            WRITE(global_here%IHSFIL,REC=global_here%IHOTSTP+1) global_here%IGCP
+            WRITE(global_here%IHSFIL,REC=global_here%IHOTSTP+2) global_here%NSCOUGC
+            global_here%IHOTSTP=global_here%IHOTSTP+2
+            WRITE(global_here%IHSFIL,REC=global_here%IHOTSTP+1) global_here%IGPP
+            WRITE(global_here%IHSFIL,REC=global_here%IHOTSTP+2) global_here%IGWP
+            WRITE(global_here%IHSFIL,REC=global_here%IHOTSTP+3) global_here%NSCOUGW
+            global_here%IHOTSTP=global_here%IHOTSTP+3
 !...  
 !...  IF APPROPRIATE ADD HARMONIC ANALYSIS INFORMATION TO HOT START FILE
 !...  
-            IF((IHARIND.EQ.1).AND.(IT.GT.ITHAS)) THEN
-               WRITE(IHSFIL,REC=IHOTSTP+1) ICHA
-               IHOTSTP = IHOTSTP + 1
-               CALL HAHOUT(NP,NSTAE,NSTAV,NHASE,NHASV,NHAGE,NHAGV,&
-              IHSFIL,IHOTSTP)
+            IF((global_here%IHARIND.EQ.1).AND.(IT.GT.global_here%ITHAS)) THEN
+               WRITE(global_here%IHSFIL,REC=global_here%IHOTSTP+1) global_here%ICHA
+               global_here%IHOTSTP = global_here%IHOTSTP + 1
+               CALL HAHOUT(global_here%NP,global_here%NSTAE,global_here%NSTAV,global_here%NHASE,global_here%NHASV,global_here%NHAGE,global_here%NHAGV,&
+              global_here%IHSFIL,global_here%IHOTSTP)
 !     
-               IF(NHASE.EQ.1) CALL HAHOUTES(NSTAE,IHSFIL,IHOTSTP)
-               IF(NHASV.EQ.1) CALL HAHOUTVS(NSTAV,IHSFIL,IHOTSTP)
-               IF(NHAGE.EQ.1) CALL HAHOUTEG(NP,IHSFIL,IHOTSTP)
-               IF(NHAGV.EQ.1) CALL HAHOUTVG(NP,IHSFIL,IHOTSTP)
+               IF(global_here%NHASE.EQ.1) CALL HAHOUTES(global_here%NSTAE,global_here%IHSFIL,global_here%IHOTSTP)
+               IF(global_here%NHASV.EQ.1) CALL HAHOUTVS(global_here%NSTAV,global_here%IHSFIL,global_here%IHOTSTP)
+               IF(global_here%NHAGE.EQ.1) CALL HAHOUTEG(global_here%NP,global_here%IHSFIL,global_here%IHOTSTP)
+               IF(global_here%NHAGV.EQ.1) CALL HAHOUTVG(global_here%NP,global_here%IHSFIL,global_here%IHOTSTP)
             ENDIF
 
             if( CHARMV) then
-               IF((IHARIND.EQ.1).AND.(IT.GT.ITMV)) THEN
-                  IHOTSTP=IHOTSTP+1
-                  WRITE(IHSFIL,REC=IHOTSTP) NTSTEPS
-                  IF(NHAGE.EQ.1) THEN
-                     DO I=1,NP
-                        WRITE(IHSFIL,REC=IHOTSTP+1) ELAV(I)
-                        WRITE(IHSFIL,REC=IHOTSTP+2) ELVA(I)
-                        IHOTSTP=IHOTSTP+2
+               IF((global_here%IHARIND.EQ.1).AND.(IT.GT.global_here%ITMV)) THEN
+                  global_here%IHOTSTP=global_here%IHOTSTP+1
+                  WRITE(global_here%IHSFIL,REC=global_here%IHOTSTP) global_here%NTSTEPS
+                  IF(global_here%NHAGE.EQ.1) THEN
+                     DO I=1,global_here%NP
+                        WRITE(global_here%IHSFIL,REC=global_here%IHOTSTP+1) global_here%ELAV(I)
+                        WRITE(global_here%IHSFIL,REC=global_here%IHOTSTP+2) global_here%ELVA(I)
+                        global_here%IHOTSTP=global_here%IHOTSTP+2
                      END DO
                   ENDIF
-                  IF(NHAGV.EQ.1) THEN
-                     DO I=1,NP
-                        WRITE(IHSFIL,REC=IHOTSTP+1) XVELAV(I)
-                        WRITE(IHSFIL,REC=IHOTSTP+2) YVELAV(I)
-                        WRITE(IHSFIL,REC=IHOTSTP+3) XVELVA(I)
-                        WRITE(IHSFIL,REC=IHOTSTP+4) YVELVA(I)
-                        IHOTSTP=IHOTSTP+4
+                  IF(global_here%NHAGV.EQ.1) THEN
+                     DO I=1,global_here%NP
+                        WRITE(global_here%IHSFIL,REC=global_here%IHOTSTP+1) global_here%XVELAV(I)
+                        WRITE(global_here%IHSFIL,REC=global_here%IHOTSTP+2) global_here%YVELAV(I)
+                        WRITE(global_here%IHSFIL,REC=global_here%IHOTSTP+3) global_here%XVELVA(I)
+                        WRITE(global_here%IHSFIL,REC=global_here%IHOTSTP+4) global_here%YVELVA(I)
+                        global_here%IHOTSTP=global_here%IHOTSTP+4
                      END DO
                   ENDIF
                ENDIF
@@ -1033,17 +1033,17 @@
 !...  
 !...  CLOSE THE HOT START OUTPUT FILE
 !...  
-            CLOSE(IHSFIL)
-            IF(NSCREEN.EQ.1.AND.MYPROC.EQ.0) THEN
-               WRITE(6,24541) IHSFIL,IT,TIME_A
+            CLOSE(global_here%IHSFIL)
+            IF(global_here%NSCREEN.EQ.1.AND.MYPROC.EQ.0) THEN
+               WRITE(6,24541) global_here%IHSFIL,IT,global_here%TIME_A
             ENDIF
-            WRITE(16,24541) IHSFIL,IT,TIME_A
+            WRITE(16,24541) global_here%IHSFIL,IT,global_here%TIME_A
 24541       FORMAT(1X,'HOT START OUTPUT WRITTEN TO UNIT ',I2,&
            ' AT TIME STEP = ',I9,' TIME = ',E15.8)
-            IF(IHSFIL.EQ.67) THEN
-               IHSFIL=68
+            IF(global_here%IHSFIL.EQ.67) THEN
+               global_here%IHSFIL=68
             ELSE
-               IHSFIL=67
+               global_here%IHSFIL=67
             ENDIF
          ENDIF
       ENDIF
@@ -1052,33 +1052,33 @@
 
 !...  FIND AND PRINT TO UNIT 6, THE MAXIMUM ELEVATION, THE MAXIMUM VELOCITY
 !.... AND THE NODE NUMBERS AT WHICH THEY OCCUR ON MYPROC=0
-!.... IF ELMAX EXCEEDS THRESHOLD, PRINT INFORMATION ON ALL PROCESSORS WHERE
+!.... IF global_here%ELMAX EXCEEDS THRESHOLD, PRINT INFORMATION ON ALL PROCESSORS WHERE
 !.... THIS OCCURS 
 !...  
-      IF(NSCREEN.EQ.1) THEN
-         ELMAX=0.0
-         VELMAX=0.0
-         KEMAX = 0
-         KVMAX = 0
+      IF(global_here%NSCREEN.EQ.1) THEN
+         global_here%ELMAX=0.0
+         global_here%VELMAX=0.0
+         global_here%KEMAX = 0
+         global_here%KVMAX = 0
 !     
          imaxze=0.0
          elmaxe=0.0
          qmaxe=0.0
          imaxq = 0.0
-         DO I=1,NP
-            IF((NODECODE(I).EQ.1).AND.(ABS(ETA2(I)).GT.ELMAX))THEN
-               ELMAX=ABS(ETA2(I))
-               KEMAX=I
+         DO I=1,global_here%NP
+            IF((global_here%NODECODE(I).EQ.1).AND.(ABS(global_here%ETA2(I)).GT.global_here%ELMAX))THEN
+               global_here%ELMAX=ABS(global_here%ETA2(I))
+               global_here%KEMAX=I
             ENDIF
-            VELABS=UU2(I)*UU2(I)+VV2(I)*VV2(I)
-            IF (VELABS.GT.VELMAX) THEN
-               VELMAX=VELABS
-               KVMAX=I
+            global_here%VELABS=global_here%UU2(I)*global_here%UU2(I)+global_here%VV2(I)*global_here%VV2(I)
+            IF (global_here%VELABS.GT.global_here%VELMAX) THEN
+               global_here%VELMAX=global_here%VELABS
+               global_here%KVMAX=I
             ENDIF
          END DO
 !     nd
-         do i=1,ne
-            if (dg_here%wdflg(i).ne.0) then
+         do i=1,global_here%ne
+            if (dg_here%wdflg(i).global_here%ne.0) then
                if (abs(dg_here%ze(1,i,1)).gt.elmaxe) then
                   imaxze=i
                   elmaxe=abs(dg_here%ze(1,i,1))
@@ -1091,34 +1091,34 @@
             endif
          enddo
          
-         VELMAX=VELMAX**0.5d0
+         global_here%VELMAX=global_here%VELMAX**0.5d0
          
 #ifdef CMPI
 !     sb
-!     IF(MYPROC.EQ.0.AND.ELMAX.LT.200.0.AND.KEMAX.GT.0) THEN
-         IF( (MYPROC.EQ.0).AND.(ELMAX.LT.200.0).AND.&
-        (MOD(IT,NSCREEN_INC).EQ.0) ) THEN
-            if (kemax.eq.0) then 
-               kemax = 1 
+!     IF(MYPROC.EQ.0.AND.global_here%ELMAX.LT.200.0.AND.global_here%KEMAX.GT.0) THEN
+         IF( (MYPROC.EQ.0).AND.(global_here%ELMAX.LT.200.0).AND.&
+        (MOD(IT,global_here%NSCREEN_INC).EQ.0) ) THEN
+            if (global_here%kemax.eq.0) then 
+               global_here%kemax = 1 
             endif
        print*,'________________________________',&
        '__________________________________________'
             print*,''
 
-         WRITE(6,1991) IT,NUMITR,ETA2(KEMAX),KEMAX,VELMAX,KVMAX,&
+         WRITE(6,1991) IT,global_here%NUMITR,global_here%ETA2(global_here%KEMAX),global_here%KEMAX,global_here%VELMAX,global_here%KVMAX,&
            MYPROC
  1991   FORMAT(1X,'TIME STEP =',I8,5X,'ITERATIONS =',I5,&
-           /,2X,'ELMAX = ', E11.4,' AT NODE',I7,&
+           /,2X,'global_here%ELMAX = ', E11.4,' AT NODE',I7,&
            2X,'SPEEDMAX = ',E11.4,' AT NODE',I7,&
            2X,'ON MYPRnOC = ',I4)
    !write(6,*) 'elmaxe, imaxze, qmaxe, imaxq ',elmaxe,imaxze,
                                 !$           qmaxe,imaxq
 
 
-!$$$  if (chem_flag.eq.1) then
+!$$$  if (global_here%chem_flag.eq.1) then
 !$$$  print*,'__________________________________________________________________________'
 !$$$  print*,'|                       |                                                |'
-!$$$  print*,'| Chemistry turned "ON" |',' Maximum mass action =',-minval(MassMax(:)),' |'
+!$$$  print*,'| Chemistry turned "ON" |',' Maximum mass action =',-minval(global_here%MassMax(:)),' |'
 !$$$  print*,'|_______________________|________________________________________________|'
 !$$$  endif
 
@@ -1127,8 +1127,8 @@
 
                do k=dg_here%pl,dg_here%ph
                   Minp(k) = 0
-                  do i = 1,ne
-                     if (pdg_el(i).eq.k) then
+                  do i = 1,global_here%ne
+                     if (global_here%pdg_el(i).eq.k) then
                         Minp(k) = Minp(k) + 1
                      endif
                   enddo
@@ -1143,7 +1143,7 @@
              print*,'|______________________|________________________|'
               enddo
                print*,''
-               print*,'With',ne,'total elements'               
+               print*,'With',global_here%ne,'total elements'               
             endif
 
 !$$$  if (dg_here%slopeflag.eq.4.or.dg_here%slopeflag.ge.6) then
@@ -1152,7 +1152,7 @@
 !$$$  print*,'p-adaptive slope limiting "ACTIVE."'
 !$$$  print*,''
 !$$$  print*,dg_here%lim_count_roll,'elements of a total of'
-!$$$  print*,ne,'elements were VERTEX LIMITED'
+!$$$  print*,global_here%ne,'elements were VERTEX LIMITED'
 !$$$  print*,''
 !$$$  
 !$$$  endif
@@ -1162,17 +1162,17 @@
 
          ENDIF
 !     sb
-!     IF(ELMAX.GT.200.0.AND.KEMAX.GT.0) THEN
-         IF(ELMAX.GT.200.0) THEN
-            if (kemax.eq.0) then 
-               kemax = 1 
+!     IF(global_here%ELMAX.GT.200.0.AND.global_here%KEMAX.GT.0) THEN
+         IF(global_here%ELMAX.GT.200.0) THEN
+            if (global_here%kemax.eq.0) then 
+               global_here%kemax = 1 
             endif
-            WRITE(6,1993) IT,NUMITR,ETA2(KEMAX),KEMAX,VELMAX,KVMAX,&
+            WRITE(6,1993) IT,global_here%NUMITR,global_here%ETA2(global_here%KEMAX),global_here%KEMAX,global_here%VELMAX,global_here%KVMAX,&
            MYPROC
-            WRITE(16,1993) IT,NUMITR,ETA2(KEMAX),KEMAX,VELMAX,KVMAX,&
+            WRITE(16,1993) IT,global_here%NUMITR,global_here%ETA2(global_here%KEMAX),global_here%KEMAX,global_here%VELMAX,global_here%KVMAX,&
            MYPROC
  1993       FORMAT(1X,'TIME STEP =',I8,6X,'ITERATIONS =',I5,&
-      /,2X,'ELMAX = ', E11.4,' AT NODE',I7,&
+      /,2X,'global_here%ELMAX = ', E11.4,' AT NODE',I7,&
       2X,'SPEEDMAX = ',E11.4,' AT NODE',I7,&
       2X,'ON MYPROC = ',I4,' !!! WARNING - HIGH ELEVATION !!!')
             STOP
@@ -1181,26 +1181,26 @@
 
 #else
 !     sb
-!     IF(ELMAX.LT.200.0.AND.KEMAX.GT.0) THEN
+!     IF(global_here%ELMAX.LT.200.0.AND.global_here%KEMAX.GT.0) THEN
 
-         IF(ELMAX.LT.200.0.and.(MOD(IT,NSCREEN_INC).EQ.0) ) THEN
-            if (kemax.eq.0) then 
-               kemax = 1 
+         IF(global_here%ELMAX.LT.200.0.and.(MOD(IT,global_here%NSCREEN_INC).EQ.0) ) THEN
+            if (global_here%kemax.eq.0) then 
+               global_here%kemax = 1 
             endif
             print*,'______________________________________',&
             '____________________________________'
             print*,''
-            WRITE(6,1992) IT,NUMITR,ETA2(KEMAX),KEMAX,VELMAX,KVMAX
+            WRITE(6,1992) IT,global_here%NUMITR,global_here%ETA2(global_here%KEMAX),global_here%KEMAX,global_here%VELMAX,global_here%KVMAX
  1992       FORMAT(1X,'TIME STEP =',I8,5X,'ITERATIONS =',I5,&
-           /,2X,'ELMAX = ', E11.4,' AT NODE',I7,&
+           /,2X,'global_here%ELMAX = ', E11.4,' AT NODE',I7,&
            2X,'SPEEDMAX = ',E11.4,' AT NODE',I7)
                                 !write(6,*) 'elmaxe, imaxze, qmaxe, imaxq ',elmaxe,imaxze,
                                 !$           qmaxe,imaxq
 
-!$$$  if (chem_flag.eq.1) then
+!$$$  if (global_here%chem_flag.eq.1) then
 !$$$  print*,'__________________________________________________________________________'
 !$$$  print*,'|                       |                                                |'
-!$$$  print*,'| Chemistry turned "ON" |',' Maximum mass action =',-minval(MassMax(:)),' |'
+!$$$  print*,'| Chemistry turned "ON" |',' Maximum mass action =',-minval(global_here%MassMax(:)),' |'
 !$$$  print*,'|_______________________|________________________________________________|'
 !$$$  endif
 
@@ -1209,8 +1209,8 @@
                
                do k=dg_here%pl,dg_here%ph
                   Minp(k) = 0
-                  do i = 1,ne
-                     if (pdg_el(i).eq.k) then
+                  do i = 1,global_here%ne
+                     if (global_here%pdg_el(i).eq.k) then
                         Minp(k) = Minp(k) + 1
                      endif
                   enddo
@@ -1225,7 +1225,7 @@
              print*,'|______________________|________________________|'
                enddo
                print*,''
-               print*,'With',ne,'total elements'               
+               print*,'With',global_here%ne,'total elements'               
             endif
 
 !$$$  if (dg_here%slopeflag.eq.4.or.dg_here%slopeflag.ge.6) then
@@ -1234,7 +1234,7 @@
 !$$$  print*,'p-adaptive slope limiting "ACTIVE."'
 !$$$  print*,''
 !$$$  print*,dg_here%lim_count_roll,'elements of a total of'
-!$$$  print*,ne,'elements were VERTEX LIMITED'
+!$$$  print*,global_here%ne,'elements were VERTEX LIMITED'
 !$$$  print*,''
 !$$$  
 !$$$  endif
@@ -1244,12 +1244,12 @@
 
          ENDIF
 !     sb
-!     IF(ELMAX.GT.200.0.AND.KEMAX.GT.0) THEN
-         IF(ELMAX.GT.200.0) THEN
-          WRITE(6,1994) IT,NUMITR,ETA2(KEMAX),KEMAX,VELMAX,KVMAX
-          WRITE(16,1994) IT,NUMITR,ETA2(KEMAX),KEMAX,VELMAX,KVMAX
+!     IF(global_here%ELMAX.GT.200.0.AND.global_here%KEMAX.GT.0) THEN
+         IF(global_here%ELMAX.GT.200.0) THEN
+          WRITE(6,1994) IT,global_here%NUMITR,global_here%ETA2(global_here%KEMAX),global_here%KEMAX,global_here%VELMAX,global_here%KVMAX
+          WRITE(16,1994) IT,global_here%NUMITR,global_here%ETA2(global_here%KEMAX),global_here%KEMAX,global_here%VELMAX,global_here%KVMAX
  1994       FORMAT(1X,'TIME STEP =',I8,6X,'ITERATIONS =',I5,&
-           /,2X,'ELMAX = ', E11.4,' AT NODE',I7,&
+           /,2X,'global_here%ELMAX = ', E11.4,' AT NODE',I7,&
            2X,'SPEEDMAX = ',E11.4,' AT NODE',I7,&
            2X,' !!! WARNING - HIGH ELEVATION !!!')
             STOP
@@ -1322,31 +1322,31 @@
 
 !.....If end of run write out DG data
 
-!     IF (IT.EQ.NT) THEN
-!     dg_here%H_TRI = SQRT((X(1)-X(2))**2 + (Y(1)-Y(2))**2)
+!     IF (IT.EQ.global_here%NT) THEN
+!     dg_here%H_TRI = SQRT((global_here%X(1)-global_here%X(2))**2 + (global_here%Y(1)-global_here%Y(2))**2)
 !     WRITE(88,*) dg_here%H_TRI,P,0
 !     WRITE(89,*) dg_here%H_TRI,P,0
 !     IF (MYPROC == 0) THEN
-!     PRINT*,'T FINAL =',NT*DTDP
-!     PRINT*,'DT =',DTDP
-!     PRINT*,'NT =',NT
+!     PRINT*,'T FINAL =',global_here%NT*global_here%DTDP
+!     PRINT*,'global_here%DT =',global_here%DTDP
+!     PRINT*,'global_here%NT =',global_here%NT
 !     ENDIF
 
 !     DO J=1,s%MNE
-!     ZE_DG(1) = 0.D0
-!     QX_DG(1) = 0.D0
-!     QY_DG(1) = 0.D0
+!     global_here%ZE_DG(1) = 0.D0
+!     global_here%QX_DG(1) = 0.D0
+!     global_here%QY_DG(1) = 0.D0
 !     
 !     DO K=1,dg_here%DOF
-!     ZE_DG(1) = ZE_DG(1) + dg_here%PHI_CENTER(K)*dg_here%ZE(K,J,1)
-!     QX_DG(1) = QX_DG(1) + dg_here%PHI_CENTER(K)*dg_here%QX(K,J,1)
-!     QY_DG(1) = QY_DG(1) + dg_here%PHI_CENTER(K)*dg_here%QY(K,J,1)
+!     global_here%ZE_DG(1) = global_here%ZE_DG(1) + dg_here%PHI_CENTER(K)*dg_here%ZE(K,J,1)
+!     global_here%QX_DG(1) = global_here%QX_DG(1) + dg_here%PHI_CENTER(K)*dg_here%QX(K,J,1)
+!     global_here%QY_DG(1) = global_here%QY_DG(1) + dg_here%PHI_CENTER(K)*dg_here%QY(K,J,1)
 !     
 !     WRITE(88,*) dg_here%ZE(K,J,1),dg_here%QX(K,J,1),dg_here%QY(K,J,1)
 !     
 !     ENDDO
 !     
-!     WRITE(89,*) ZE_DG(1),QX_DG(1),QY_DG(1)
+!     WRITE(89,*) global_here%ZE_DG(1),global_here%QX_DG(1),global_here%QY_DG(1)
 !     
 !     ENDDO
 !     ENDIF
@@ -1375,11 +1375,11 @@
 
 !.....DG.63.IC = Record of the initial surface elevation
 !      OPEN(632,FILE=S%DIRNAME//'/'//'DG.63.IC')
-!      WRITE(632,3220) RUNDES, RUNID, AGRID
-!      WRITE(632,3645) 1, dg_here%DOF, DTDP*NSPOOLGE, NSPOOLGE, 1
+!      WRITE(632,3220) global_here%RUNDES, global_here%RUNID, global_here%AGRID
+!      WRITE(632,3645) 1, dg_here%DOF, global_here%DTDP*global_here%NSPOOLGE, global_here%NSPOOLGE, 1
 
 !      WRITE(632,2120) 0.0, 1
-!      DO J = 1,NE
+!      DO J = 1,global_here%NE
 !        DO K = 1,dg_here%DOF
 !          WRITE(632,2453) J, dg_here%ZE(K,J,1)
 !        ENDDO
@@ -1389,11 +1389,11 @@
 
 !.....DG.64.IC = Record of the initial discharge
 !      OPEN(642,FILE=S%DIRNAME//'/'//'DG.64.IC')
-!      WRITE(642,3220) RUNDES, RUNID, AGRID
-!      WRITE(642,3645) 1, dg_here%DOF, DTDP*NSPOOLGV, NSPOOLGV, 2
+!      WRITE(642,3220) global_here%RUNDES, global_here%RUNID, global_here%AGRID
+!      WRITE(642,3645) 1, dg_here%DOF, global_here%DTDP*global_here%NSPOOLGV, global_here%NSPOOLGV, 2
 !
 !      WRITE(642,2120) 0.0, 1
-!      DO J = 1,NE
+!      DO J = 1,global_here%NE
 !        DO K = 1,dg_here%DOF
 !          WRITE(642,2454) J, dg_here%QX(K,J,1), dg_here%QY(K,J,1)
 !        ENDDO
@@ -1402,13 +1402,13 @@
 !      CLOSE(642)
 
 !.....DG.65.IC = Record of the initial wet/dry flags
-!      IF (NOLIFA.GE.2) THEN
+!      IF (global_here%NOLIFA.GE.2) THEN
 !        OPEN(652,FILE=S%DIRNAME//'/'//'DG.65.IC')
-!        WRITE(652,3220) RUNDES, RUNID, AGRID
-!        WRITE(652,3645) 1, dg_here%DOF, DTDP*NSPOOLGE, NSPOOLGE, 1
+!        WRITE(652,3220) global_here%RUNDES, global_here%RUNID, global_here%AGRID
+!        WRITE(652,3645) 1, dg_here%DOF, global_here%DTDP*global_here%NSPOOLGE, global_here%NSPOOLGE, 1
 !
 !        WRITE(652,2120) 0.0, 1
-!       DO J = 1,NE
+!       DO J = 1,global_here%NE
 !          WRITE(652,2455) J,dg_here%WDFLG(J)
 !       ENDDO
 !

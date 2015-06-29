@@ -2068,38 +2068,38 @@
 
       do ell=1,mnp
 
-         do ll=1,minval(dg_here%dofs(neigh_elem(ell,1:nneigh_elem(ell))))
+         do ll=1,minval(dg_here%dofs(global_here%neigh_elem(ell,1:global_here%nneigh_elem(ell))))
 
 !.....Find max and min values over polynomial coefficients
 
-            dg_here%ZEmax(ell,ll) = max(maxval( dg_here%ZEtaylor(NEIGH_ELEM(ell,1:nneigh_elem(ell)),ll,1) )
+            dg_here%ZEmax(ell,ll) = max(maxval( dg_here%ZEtaylor(global_here%NEIGH_ELEM(ell,1:global_here%nneigh_elem(ell)),ll,1) )
      &           , dg_here%ZEmax(ell,ll))
-            dg_here%QXmax(ell,ll) = max(maxval( dg_here%QXtaylor(NEIGH_ELEM(ell,1:nneigh_elem(ell)),ll,1) )
+            dg_here%QXmax(ell,ll) = max(maxval( dg_here%QXtaylor(global_here%NEIGH_ELEM(ell,1:global_here%nneigh_elem(ell)),ll,1) )
      &           , dg_here%QXmax(ell,ll))
-            dg_here%QYmax(ell,ll) = max(maxval( dg_here%QYtaylor(NEIGH_ELEM(ell,1:nneigh_elem(ell)),ll,1) )
+            dg_here%QYmax(ell,ll) = max(maxval( dg_here%QYtaylor(global_here%NEIGH_ELEM(ell,1:global_here%nneigh_elem(ell)),ll,1) )
      &           , dg_here%QYmax(ell,ll))
-            dg_here%ZEmin(ell,ll) = min(minval( dg_here%ZEtaylor(NEIGH_ELEM(ell,1:nneigh_elem(ell)),ll,1) )
+            dg_here%ZEmin(ell,ll) = min(minval( dg_here%ZEtaylor(global_here%NEIGH_ELEM(ell,1:global_here%nneigh_elem(ell)),ll,1) )
      &           , dg_here%ZEmin(ell,ll))
-            dg_here%QXmin(ell,ll) = min(minval( dg_here%QXtaylor(NEIGH_ELEM(ell,1:nneigh_elem(ell)),ll,1) )
+            dg_here%QXmin(ell,ll) = min(minval( dg_here%QXtaylor(global_here%NEIGH_ELEM(ell,1:global_here%nneigh_elem(ell)),ll,1) )
      &           , dg_here%QXmin(ell,ll))
-            dg_here%QYmin(ell,ll) = min(minval( dg_here%QYtaylor(NEIGH_ELEM(ell,1:nneigh_elem(ell)),ll,1) )
+            dg_here%QYmin(ell,ll) = min(minval( dg_here%QYtaylor(global_here%NEIGH_ELEM(ell,1:global_here%nneigh_elem(ell)),ll,1) )
      &           , dg_here%QYmin(ell,ll))
 
 #ifdef TRACE
-            dg_here%iotamax(ell,ll) = max(maxval( dg_here%iotataylor(NEIGH_ELEM(ell,1:nneigh_elem(ell)),ll,1) )
+            dg_here%iotamax(ell,ll) = max(maxval( dg_here%iotataylor(global_here%NEIGH_ELEM(ell,1:global_here%nneigh_elem(ell)),ll,1) )
      &           , dg_here%iotamax(ell,ll))
-            dg_here%iotamin(ell,ll) = min(minval( dg_here%iotataylor(NEIGH_ELEM(ell,1:nneigh_elem(ell)),ll,1) )
+            dg_here%iotamin(ell,ll) = min(minval( dg_here%iotataylor(global_here%NEIGH_ELEM(ell,1:global_here%nneigh_elem(ell)),ll,1) )
      &           , dg_here%iotamin(ell,ll))
 #endif
 
 #ifdef CHEM
-            dg_here%iotamax(ell,ll) = max(maxval( dg_here%iotataylor(NEIGH_ELEM(ell,1:nneigh_elem(ell)),ll,1) )
+            dg_here%iotamax(ell,ll) = max(maxval( dg_here%iotataylor(global_here%NEIGH_ELEM(ell,1:global_here%nneigh_elem(ell)),ll,1) )
      &           , dg_here%iotamax(ell,ll))
-            dg_here%iota2max(ell,ll) = max(maxval( dg_here%iota2taylor(NEIGH_ELEM(ell,1:nneigh_elem(ell)),ll,1) )
+            dg_here%iota2max(ell,ll) = max(maxval( dg_here%iota2taylor(global_here%NEIGH_ELEM(ell,1:global_here%nneigh_elem(ell)),ll,1) )
      &           , dg_here%iota2max(ell,ll))
-            dg_here%iotamin(ell,ll) = min(minval( dg_here%iotataylor(NEIGH_ELEM(ell,1:nneigh_elem(ell)),ll,1) )
+            dg_here%iotamin(ell,ll) = min(minval( dg_here%iotataylor(global_here%NEIGH_ELEM(ell,1:global_here%nneigh_elem(ell)),ll,1) )
      &           , dg_here%iotamin(ell,ll))
-            dg_here%iota2min(ell,ll) = min(minval( dg_here%iota2taylor(NEIGH_ELEM(ell,1:nneigh_elem(ell)),ll,1) )
+            dg_here%iota2min(ell,ll) = min(minval( dg_here%iota2taylor(global_here%NEIGH_ELEM(ell,1:global_here%nneigh_elem(ell)),ll,1) )
      &           , dg_here%iota2min(ell,ll))
 #endif
             
@@ -2247,20 +2247,20 @@
                
                do ll=1,dg_here%dofs(k)
 
-                  if (dg_here%ZEmin(nm(k,lll),ll).ne.dg_here%ZEmax(nm(k,lll),ll)) then
+                  if (dg_here%ZEmin(global_here%nm(k,lll),ll).global_here%ne.dg_here%ZEmax(global_here%nm(k,lll),ll)) then
 
                      if ( ( dg_here%ZEtaylorvert(k,ll,lll).gt.dg_here%ZEtaylor(k,ll,1) ).and.
      &                    ( abs(dg_here%ZEtaylorvert(k,ll,lll)-dg_here%ZEtaylor(k,ll,1)).gt.1.0E-15 ).and.
-     &                    ( dg_here%ZEmax(nm(k,lll),ll).ne.dg_here%ZEtaylor(k,ll,1) ) ) then  
+     &                    ( dg_here%ZEmax(global_here%nm(k,lll),ll).global_here%ne.dg_here%ZEtaylor(k,ll,1) ) ) then  
 
-                        dg_here%alphaZE0(k,ll,lll) = min(1.D0,  ( dg_here%ZEmax(nm(k,lll),ll)
+                        dg_here%alphaZE0(k,ll,lll) = min(1.D0,  ( dg_here%ZEmax(global_here%nm(k,lll),ll)
      &                       - dg_here%ZEtaylor(k,ll,1) )/ (dg_here%ZEtaylorvert(k,ll,lll) - dg_here%ZEtaylor(k,ll,1)))
 
                      elseif ( (dg_here%ZEtaylorvert(k,ll,lll).lt.dg_here%ZEtaylor(k,ll,1) )
      &                       .and.( abs(dg_here%ZEtaylorvert(k,ll,lll)-dg_here%ZEtaylor(k,ll,1)).gt.1.0E-15 ).and.
-     &                       ( dg_here%ZEmin(nm(k,lll),ll).ne.dg_here%ZEtaylor(k,ll,1) ) ) then 
+     &                       ( dg_here%ZEmin(global_here%nm(k,lll),ll).global_here%ne.dg_here%ZEtaylor(k,ll,1) ) ) then 
 
-                        dg_here%alphaZE0(k,ll,lll) = min( 1.D0,( dg_here%ZEmin(nm(k,lll),ll)
+                        dg_here%alphaZE0(k,ll,lll) = min( 1.D0,( dg_here%ZEmin(global_here%nm(k,lll),ll)
      &                       - dg_here%ZEtaylor(k,ll,1) )/( dg_here%ZEtaylorvert(k,ll,lll)-dg_here%ZEtaylor(k,ll,1)))
                         
                      elseif ( ( dg_here%ZEtaylorvert(k,ll,lll).eq.dg_here%ZEtaylor(k,ll,1) ).or.
@@ -2277,20 +2277,20 @@
                   endif
 
 #ifdef TRACE
-                  if (dg_here%iotamin(nm(k,lll),ll).ne.dg_here%iotamax(nm(k,lll),ll)) then
+                  if (dg_here%iotamin(global_here%nm(k,lll),ll).global_here%ne.dg_here%iotamax(global_here%nm(k,lll),ll)) then
 
                      if ( ( dg_here%iotataylorvert(k,ll,lll).gt.dg_here%iotataylor(k,ll,1) ).and.
      &                    ( abs(dg_here%iotataylorvert(k,ll,lll)-dg_here%iotataylor(k,ll,1)).gt.1.0E-15 ).and.
-     &                    ( dg_here%iotamax(nm(k,lll),ll).ne.dg_here%iotataylor(k,ll,1) ) ) then  
+     &                    ( dg_here%iotamax(global_here%nm(k,lll),ll).global_here%ne.dg_here%iotataylor(k,ll,1) ) ) then  
 
-                        dg_here%alphaiota0(k,ll,lll) = min(1.D0,  ( dg_here%iotamax(nm(k,lll),ll)
+                        dg_here%alphaiota0(k,ll,lll) = min(1.D0,  ( dg_here%iotamax(global_here%nm(k,lll),ll)
      &                       - dg_here%iotataylor(k,ll,1) )/ (dg_here%iotataylorvert(k,ll,lll) - dg_here%iotataylor(k,ll,1))) 
                         
                      elseif ( (dg_here%iotataylorvert(k,ll,lll).lt.dg_here%iotataylor(k,ll,1) )
      &                       .and.( abs(dg_here%iotataylorvert(k,ll,lll)-dg_here%iotataylor(k,ll,1)).gt.1.0E-15 ).and.
-     &                       ( dg_here%iotamin(nm(k,lll),ll).ne.dg_here%iotataylor(k,ll,1) ) ) then 
+     &                       ( dg_here%iotamin(global_here%nm(k,lll),ll).global_here%ne.dg_here%iotataylor(k,ll,1) ) ) then 
 
-                        dg_here%alphaiota0(k,ll,lll) = min( 1.D0,( dg_here%iotamin(nm(k,lll),ll)
+                        dg_here%alphaiota0(k,ll,lll) = min( 1.D0,( dg_here%iotamin(global_here%nm(k,lll),ll)
      &                       - dg_here%iotataylor(k,ll,1) )/( dg_here%iotataylorvert(k,ll,lll)-dg_here%iotataylor(k,ll,1)))
 
                      elseif ( ( dg_here%iotataylorvert(k,ll,lll).eq.dg_here%iotataylor(k,ll,1) ).or.
@@ -2308,20 +2308,20 @@
 #endif
                   
 #ifdef CHEM                 
-                  if (dg_here%iotamin(nm(k,lll),ll).ne.dg_here%iotamax(nm(k,lll),ll)) then
+                  if (dg_here%iotamin(global_here%nm(k,lll),ll).global_here%ne.dg_here%iotamax(global_here%nm(k,lll),ll)) then
 
                      if ( ( dg_here%iotataylorvert(k,ll,lll).gt.dg_here%iotataylor(k,ll,1) ).and.
      &                    ( abs(dg_here%iotataylorvert(k,ll,lll)-dg_here%iotataylor(k,ll,1)).gt.1.0E-15 ).and.
-     &                    ( dg_here%iotamax(nm(k,lll),ll).ne.dg_here%iotataylor(k,ll,1) ) ) then  
+     &                    ( dg_here%iotamax(global_here%nm(k,lll),ll).global_here%ne.dg_here%iotataylor(k,ll,1) ) ) then  
 
-                        dg_here%alphaiota0(k,ll,lll) = min(1.D0,  ( dg_here%iotamax(nm(k,lll),ll)
+                        dg_here%alphaiota0(k,ll,lll) = min(1.D0,  ( dg_here%iotamax(global_here%nm(k,lll),ll)
      &                       - dg_here%iotataylor(k,ll,1) )/ (dg_here%iotataylorvert(k,ll,lll) - dg_here%iotataylor(k,ll,1)))
 
                      elseif ( (dg_here%iotataylorvert(k,ll,lll).lt.dg_here%iotataylor(k,ll,1) )
      &                       .and.( abs(dg_here%iotataylorvert(k,ll,lll)-dg_here%iotataylor(k,ll,1)).gt.1.0E-15 ).and.
-     &                       ( dg_here%iotamin(nm(k,lll),ll).ne.dg_here%iotataylor(k,ll,1) ) ) then 
+     &                       ( dg_here%iotamin(global_here%nm(k,lll),ll).global_here%ne.dg_here%iotataylor(k,ll,1) ) ) then 
 
-                        dg_here%alphaiota0(k,ll,lll) = min( 1.D0,( dg_here%iotamin(nm(k,lll),ll)
+                        dg_here%alphaiota0(k,ll,lll) = min( 1.D0,( dg_here%iotamin(global_here%nm(k,lll),ll)
      &                       - dg_here%iotataylor(k,ll,1) )/( dg_here%iotataylorvert(k,ll,lll)-dg_here%iotataylor(k,ll,1)))
                         
                      elseif ( ( dg_here%iotataylorvert(k,ll,lll).eq.dg_here%iotataylor(k,ll,1) ).or.
@@ -2337,20 +2337,20 @@
 
                   endif
 
-                  if (dg_here%iota2min(nm(k,lll),ll).ne.dg_here%iota2max(nm(k,lll),ll)) then
+                  if (dg_here%iota2min(global_here%nm(k,lll),ll).global_here%ne.dg_here%iota2max(global_here%nm(k,lll),ll)) then
 
                      if ( ( dg_here%iota2taylorvert(k,ll,lll).gt.dg_here%iota2taylor(k,ll,1) ).and.
      &                    ( abs(dg_here%iota2taylorvert(k,ll,lll)-dg_here%iota2taylor(k,ll,1)).gt.1.0E-15 ).and.
-     &                    ( dg_here%iota2max(nm(k,lll),ll).ne.dg_here%iota2taylor(k,ll,1) ) ) then  
+     &                    ( dg_here%iota2max(global_here%nm(k,lll),ll).global_here%ne.dg_here%iota2taylor(k,ll,1) ) ) then  
 
-                        dg_here%alphaiota20(k,ll,lll) = min(1.D0,  ( dg_here%iota2max(nm(k,lll),ll)
+                        dg_here%alphaiota20(k,ll,lll) = min(1.D0,  ( dg_here%iota2max(global_here%nm(k,lll),ll)
      &                       - dg_here%iota2taylor(k,ll,1) )/ (dg_here%iota2taylorvert(k,ll,lll) - dg_here%iota2taylor(k,ll,1)))
 
                      elseif ( (dg_here%iota2taylorvert(k,ll,lll).lt.dg_here%iota2taylor(k,ll,1) )
      &                       .and.( abs(dg_here%iota2taylorvert(k,ll,lll)-dg_here%iota2taylor(k,ll,1)).gt.1.0E-15 ).and.
-     &                       ( dg_here%iota2min(nm(k,lll),ll).ne.dg_here%iota2taylor(k,ll,1) ) ) then 
+     &                       ( dg_here%iota2min(global_here%nm(k,lll),ll).global_here%ne.dg_here%iota2taylor(k,ll,1) ) ) then 
 
-                        dg_here%alphaiota20(k,ll,lll) = min( 1.D0,( dg_here%iota2min(nm(k,lll),ll)
+                        dg_here%alphaiota20(k,ll,lll) = min( 1.D0,( dg_here%iota2min(global_here%nm(k,lll),ll)
      &                       - dg_here%iota2taylor(k,ll,1) )/( dg_here%iota2taylorvert(k,ll,lll)-dg_here%iota2taylor(k,ll,1)))
                         
                      elseif ( ( dg_here%iota2taylorvert(k,ll,lll).eq.dg_here%iota2taylor(k,ll,1) ).or.
@@ -2367,20 +2367,20 @@
                   endif
 #endif                 
 
-                  if (dg_here%QXmin(nm(k,lll),ll).ne.dg_here%QXmax(nm(k,lll),ll)) then
+                  if (dg_here%QXmin(global_here%nm(k,lll),ll).global_here%ne.dg_here%QXmax(global_here%nm(k,lll),ll)) then
 
                      if ( ( dg_here%QXtaylorvert(k,ll,lll).gt.dg_here%QXtaylor(k,ll,1) ).and.
      &                    ( abs(dg_here%QXtaylorvert(k,ll,lll)-dg_here%QXtaylor(k,ll,1)).gt.1.0E-15 ).and.
-     &                    ( dg_here%QXmax(nm(k,lll),ll).ne.dg_here%QXtaylor(k,ll,1) ) ) then  
+     &                    ( dg_here%QXmax(global_here%nm(k,lll),ll).global_here%ne.dg_here%QXtaylor(k,ll,1) ) ) then  
 
-                        dg_here%alphaQX0(k,ll,lll) = min(1.D0,  ( dg_here%QXmax(nm(k,lll),ll)
+                        dg_here%alphaQX0(k,ll,lll) = min(1.D0,  ( dg_here%QXmax(global_here%nm(k,lll),ll)
      &                       - dg_here%QXtaylor(k,ll,1) )/ (dg_here%QXtaylorvert(k,ll,lll) - dg_here%QXtaylor(k,ll,1)))
 
                      elseif ( (dg_here%QXtaylorvert(k,ll,lll).lt.dg_here%QXtaylor(k,ll,1) )
      &                       .and.( abs(dg_here%QXtaylorvert(k,ll,lll)-dg_here%QXtaylor(k,ll,1)).gt.1.0E-15 ).and.
-     &                       ( dg_here%QXmin(nm(k,lll),ll).ne.dg_here%QXtaylor(k,ll,1) ) ) then 
+     &                       ( dg_here%QXmin(global_here%nm(k,lll),ll).global_here%ne.dg_here%QXtaylor(k,ll,1) ) ) then 
 
-                        dg_here%alphaQX0(k,ll,lll) = min( 1.D0,( dg_here%QXmin(nm(k,lll),ll)
+                        dg_here%alphaQX0(k,ll,lll) = min( 1.D0,( dg_here%QXmin(global_here%nm(k,lll),ll)
      &                       - dg_here%QXtaylor(k,ll,1) )/( dg_here%QXtaylorvert(k,ll,lll)-dg_here%QXtaylor(k,ll,1)))
                         
                      elseif ( ( dg_here%QXtaylorvert(k,ll,lll).eq.dg_here%QXtaylor(k,ll,1) ).or.
@@ -2397,20 +2397,20 @@
                   endif
 
 
-                  if (dg_here%QYmin(nm(k,lll),ll).ne.dg_here%QYmax(nm(k,lll),ll)) then
+                  if (dg_here%QYmin(global_here%nm(k,lll),ll).global_here%ne.dg_here%QYmax(global_here%nm(k,lll),ll)) then
 
                      if ( ( dg_here%QYtaylorvert(k,ll,lll).gt.dg_here%QYtaylor(k,ll,1) ).and.
      &                    ( abs(dg_here%QYtaylorvert(k,ll,lll)-dg_here%QYtaylor(k,ll,1)).gt.1.0E-15 ).and.
-     &                    ( dg_here%QYmax(nm(k,lll),ll).ne.dg_here%QYtaylor(k,ll,1) ) ) then  
+     &                    ( dg_here%QYmax(global_here%nm(k,lll),ll).global_here%ne.dg_here%QYtaylor(k,ll,1) ) ) then  
 
-                        dg_here%alphaQY0(k,ll,lll) = min(1.D0,  ( dg_here%QYmax(nm(k,lll),ll)
+                        dg_here%alphaQY0(k,ll,lll) = min(1.D0,  ( dg_here%QYmax(global_here%nm(k,lll),ll)
      &                       - dg_here%QYtaylor(k,ll,1) )/ (dg_here%QYtaylorvert(k,ll,lll) - dg_here%QYtaylor(k,ll,1)))
 
                      elseif ( (dg_here%QYtaylorvert(k,ll,lll).lt.dg_here%QYtaylor(k,ll,1) )
      &                       .and.( abs(dg_here%QYtaylorvert(k,ll,lll)-dg_here%QYtaylor(k,ll,1)).gt.1.0E-15 ).and.
-     &                       ( dg_here%QYmin(nm(k,lll),ll).ne.dg_here%QYtaylor(k,ll,1) ) ) then 
+     &                       ( dg_here%QYmin(global_here%nm(k,lll),ll).global_here%ne.dg_here%QYtaylor(k,ll,1) ) ) then 
 
-                        dg_here%alphaQY0(k,ll,lll) = min( 1.D0,( dg_here%QYmin(nm(k,lll),ll)
+                        dg_here%alphaQY0(k,ll,lll) = min( 1.D0,( dg_here%QYmin(global_here%nm(k,lll),ll)
      &                       - dg_here%QYtaylor(k,ll,1) )/( dg_here%QYtaylorvert(k,ll,lll)-dg_here%QYtaylor(k,ll,1)))                        
                         
                      elseif ( ( dg_here%QYtaylorvert(k,ll,lll).eq.dg_here%QYtaylor(k,ll,1) ).or.
@@ -2482,7 +2482,7 @@
 
       enddo
 
-!.... Choose smallest (minimum) alpha for derivative in x or y
+!.... Choose smallest (minimum) global_here%alpha for derivative in global_here%x or global_here%y
 
       dg_here%alphaZEm = 0.D0
       dg_here%alphaQXm = 0.D0
@@ -2501,7 +2501,7 @@
 
          if (dg_here%dofs(k).gt.1) then
             
-            do bb = 1,pdg_el(k)
+            do bb = 1,global_here%pdg_el(k)
 
                if( (bb+1)*(bb+2)/2.le.dg_here%dofs(k) ) then
 
@@ -2555,7 +2555,7 @@
 
          if (dg_here%dofs(k).gt.1) then
 
-            do bb =1,pdg_el(k)
+            do bb =1,global_here%pdg_el(k)
 
                if( (bb+1)*(bb+2)/2.le.dg_here%dofs(k)) then
 
@@ -2591,7 +2591,7 @@
       enddo
 
 !.....Limit on the Master element in the Taylor basis, via reconstruction 
-!.....of unconstrained solutions with alpha constraints
+!.....of unconstrained solutions with global_here%alpha constraints
 
 
       dg_here%limitZE = 0.D0
@@ -2634,7 +2634,7 @@
 
                elseif ( ll.ge.2 ) then
                   
-                  do bb=1,pdg_el(k)
+                  do bb=1,global_here%pdg_el(k)
 
                      if ( ll.le.( ( (bb+1)*(bb+2)) / 2.D0 ).and.(ll.gt.
      &                    (bb*(bb+1)/2.D0) ) ) then
@@ -2665,7 +2665,7 @@
 !$$$  if ( ( dg_here%alphaZE_max(k,(bb*(bb+1))/2 + 1).lt.1.D0.or.
 !$$$  &                       dg_here%alphaQX_max(k,(bb*(bb+1))/2 + 1).lt.1.D0.or.
 !$$$  &                       dg_here%alphaQY_max(k,(bb*(bb+1))/2 + 1).lt.1.D0 ).and.
-!$$$  &                       chem_flag.ne.1.and.tracer_flag.ne.1 ) then
+!$$$  &                       global_here%chem_flag.global_here%ne.1.and.global_here%tracer_flag.global_here%ne.1 ) then
 !$$$  
 !$$$  dg_here%lim_count = 1  
 !$$$  
@@ -2673,7 +2673,7 @@
 !$$$  &                          dg_here%alphaQX_max(k,(bb*(bb+1))/2 + 1).lt.1.D0.or.
 !$$$  &                          dg_here%alphaQY_max(k,(bb*(bb+1))/2 + 1).lt.1.D0.or.
 !$$$  &                          dg_here%alphaiota_max(k,(bb*(bb+1))/2 + 1).lt.1.D0 ).and.
-!$$$  &                          chem_flag.ne.1.and.tracer_flag.eq.1 ) then
+!$$$  &                          global_here%chem_flag.global_here%ne.1.and.global_here%tracer_flag.eq.1 ) then
 !$$$  
 !$$$  dg_here%lim_count = 1   
 !$$$  
@@ -2682,7 +2682,7 @@
 !$$$  &                          dg_here%alphaQY_max(k,(bb*(bb+1))/2 + 1).lt.1.D0.or.
 !$$$  &                          dg_here%alphaiota_max(k,(bb*(bb+1))/2 + 1).lt.1.D0.or.
 !$$$  &                          dg_here%alphaiota2_max(k,(bb*(bb+1))/2 + 1).lt.1.D0 ).and.
-!$$$  &                          chem_flag.eq.1 ) then
+!$$$  &                          global_here%chem_flag.eq.1 ) then
 !$$$  
 !$$$  dg_here%lim_count = 1 
 !$$$  
@@ -2843,18 +2843,18 @@
       Real(SZ), Allocatable, target :: bed_min1(:,:), bed_max1(:,:)
       Real(SZ), pointer:: arraymin(:),arraymax(:)
 
-      Allocate ( ZE_MIN1(NP),ZE_MAX1(NP),QX_MIN1(NP) )
-      Allocate ( QY_MIN1(NP),QY_MAX1(NP),QX_MAX1(NP) )
-      Allocate ( iota_MIN1(NP),iota_MAX1(NP) )
-      Allocate ( iota2_MIN1(NP),iota2_MAX1(NP) )
-      Allocate ( bed_MIN1(NP,s%layers),bed_MAX1(NP,s%layers) )
+      Allocate ( ZE_MIN1(global_here%NP),ZE_MAX1(global_here%NP),QX_MIN1(global_here%NP) )
+      Allocate ( QY_MIN1(global_here%NP),QY_MAX1(global_here%NP),QX_MAX1(global_here%NP) )
+      Allocate ( iota_MIN1(global_here%NP),iota_MAX1(global_here%NP) )
+      Allocate ( iota2_MIN1(global_here%NP),iota2_MAX1(global_here%NP) )
+      Allocate ( bed_MIN1(global_here%NP,s%layers),bed_MAX1(global_here%NP,s%layers) )
 
 !     FIND THE MAXIMUM AND MINIMUM OF EACH VARIABLE OVER ALL ELEMENTS 
 !     SHARING A NODE
 
       bound = 0.0D0
 
-      DO I = 1,NP
+      DO I = 1,global_here%NP
          ZE_MIN1(I)=99999.
          ZE_MAX1(I)=-99999.
          QX_MIN1(I)=99999.
@@ -2881,89 +2881,89 @@
          enddo
 #endif
 
-         NO_NBORS = EL_COUNT(I)
+         global_here%NO_NBORS = global_here%EL_COUNT(I)
 
-         DO J = 1,NO_NBORS
-            NBOR_EL = ELETAB(I,1+J)
+         DO J = 1,global_here%NO_NBORS
+            global_here%NBOR_EL = global_here%ELETAB(I,1+J)
 
-!     IF(dg_here%WDFLG(NBOR_EL).EQ.0) CYCLE ! DON'T COUNT DRY ELEMENTS  sb 02/26/07
+!     IF(dg_here%WDFLG(global_here%NBOR_EL).EQ.0) CYCLE ! DON'T COUNT DRY ELEMENTS  sb 02/26/07
 
-            ZE_DG(J) = dg_here%ZE(1,NBOR_EL,dg_here%IRK+1)
-            QX_DG(J) = dg_here%QX(1,NBOR_EL,dg_here%IRK+1)
-            QY_DG(J) = dg_here%QY(1,NBOR_EL,dg_here%IRK+1)
+            global_here%ZE_DG(J) = dg_here%ZE(1,global_here%NBOR_EL,dg_here%IRK+1)
+            global_here%QX_DG(J) = dg_here%QX(1,global_here%NBOR_EL,dg_here%IRK+1)
+            global_here%QY_DG(J) = dg_here%QY(1,global_here%NBOR_EL,dg_here%IRK+1)
 
 #ifdef TRACE
-            iota_DG(J) = dg_here%iota(1,NBOR_EL,dg_here%IRK+1)
+            global_here%iota_DG(J) = dg_here%iota(1,global_here%NBOR_EL,dg_here%IRK+1)
 #endif
 
 #ifdef CHEM
-            iota_DG(J) = dg_here%iota(1,NBOR_EL,dg_here%IRK+1)
-            iota2_DG(J) = dg_here%iota2(1,NBOR_EL,dg_here%IRK+1)
+            global_here%iota_DG(J) = dg_here%iota(1,global_here%NBOR_EL,dg_here%IRK+1)
+            global_here%iota2_DG(J) = dg_here%iota2(1,global_here%NBOR_EL,dg_here%IRK+1)
 #endif
 
 
 #ifdef SED_LAY
             do l=1,s%layers
-               bed_DG(J,l) = dg_here%bed(1,NBOR_EL,dg_here%IRK+1,l)
+               global_here%bed_DG(J,l) = dg_here%bed(1,global_here%NBOR_EL,dg_here%IRK+1,l)
             enddo
 #endif
 
 !     
-            IF (ZE_DG(J).LT.ZE_MIN1(I))THEN
-               ZE_MIN1(I)=ZE_DG(J)
+            IF (global_here%ZE_DG(J).LT.ZE_MIN1(I))THEN
+               ZE_MIN1(I)=global_here%ZE_DG(J)
             ENDIF
-            IF (ZE_DG(J).GT.ZE_MAX1(I)) THEN
-               ZE_MAX1(I)=ZE_DG(J)
+            IF (global_here%ZE_DG(J).GT.ZE_MAX1(I)) THEN
+               ZE_MAX1(I)=global_here%ZE_DG(J)
             ENDIF
-            IF (QX_DG(J).LT.QX_MIN1(I))THEN
-               QX_MIN1(I)=QX_DG(J)
+            IF (global_here%QX_DG(J).LT.QX_MIN1(I))THEN
+               QX_MIN1(I)=global_here%QX_DG(J)
             ENDIF
-            IF (QX_DG(J).GT.QX_MAX1(I)) THEN
-               QX_MAX1(I)=QX_DG(J)
+            IF (global_here%QX_DG(J).GT.QX_MAX1(I)) THEN
+               QX_MAX1(I)=global_here%QX_DG(J)
             ENDIF
-            IF (QY_DG(J).LT.QY_MIN1(I))THEN
-               QY_MIN1(I)=QY_DG(J)
+            IF (global_here%QY_DG(J).LT.QY_MIN1(I))THEN
+               QY_MIN1(I)=global_here%QY_DG(J)
             ENDIF
-            IF (QY_DG(J).GT.QY_MAX1(I)) THEN
-               QY_MAX1(I)=QY_DG(J)
+            IF (global_here%QY_DG(J).GT.QY_MAX1(I)) THEN
+               QY_MAX1(I)=global_here%QY_DG(J)
             ENDIF
 
 #ifdef TRACE
-            IF (iota_DG(J).LT.iota_MIN1(I))THEN
-               iota_MIN1(I)=iota_DG(J)
+            IF (global_here%iota_DG(J).LT.iota_MIN1(I))THEN
+               iota_MIN1(I)=global_here%iota_DG(J)
             ENDIF
 
-            IF (iota_DG(J).GT.iota_MAX1(I)) THEN
-               iota_MAX1(I)=iota_DG(J)
+            IF (global_here%iota_DG(J).GT.iota_MAX1(I)) THEN
+               iota_MAX1(I)=global_here%iota_DG(J)
             ENDIF
 #endif
 
 #ifdef CHEM
-            IF (iota_DG(J).LT.iota_MIN1(I))THEN
-               iota_MIN1(I)=iota_DG(J)
+            IF (global_here%iota_DG(J).LT.iota_MIN1(I))THEN
+               iota_MIN1(I)=global_here%iota_DG(J)
             ENDIF
 
-            IF (iota_DG(J).GT.iota_MAX1(I)) THEN
-               iota_MAX1(I)=iota_DG(J)
+            IF (global_here%iota_DG(J).GT.iota_MAX1(I)) THEN
+               iota_MAX1(I)=global_here%iota_DG(J)
             ENDIF
 
-            IF (iota2_DG(J).LT.iota2_MIN1(I))THEN
-               iota2_MIN1(I)=iota2_DG(J)
+            IF (global_here%iota2_DG(J).LT.iota2_MIN1(I))THEN
+               iota2_MIN1(I)=global_here%iota2_DG(J)
             ENDIF
 
-            IF (iota2_DG(J).GT.iota2_MAX1(I)) THEN
-               iota2_MAX1(I)=iota2_DG(J)
+            IF (global_here%iota2_DG(J).GT.iota2_MAX1(I)) THEN
+               iota2_MAX1(I)=global_here%iota2_DG(J)
             ENDIF
 #endif
 
 #ifdef SED_LAY
             do l=1,s%layers
-               IF (bed_DG(J,l).LT.bed_MIN1(I,l))THEN
-                  bed_MIN1(I,l)=bed_DG(J,l)
+               IF (global_here%bed_DG(J,l).LT.bed_MIN1(I,l))THEN
+                  bed_MIN1(I,l)=global_here%bed_DG(J,l)
                ENDIF
                
-               IF (bed_DG(J,l).GT.bed_MAX1(I,l)) THEN
-                  bed_MAX1(I,l)=bed_DG(J,l)
+               IF (global_here%bed_DG(J,l).GT.bed_MAX1(I,l)) THEN
+                  bed_MAX1(I,l)=global_here%bed_DG(J,l)
                ENDIF
             enddo
 #endif
@@ -2999,11 +2999,11 @@
 
       bb = 1
 
-      DO I=1,NE 
+      DO I=1,global_here%NE 
          !IF(dg_here%WDFLG(I).EQ.0) CYCLE ! DON'T COUNT DRY ELEMENTS  sb 02/26/07
-         N1=NM(I,1)
-         N2=NM(I,2)
-         N3=NM(I,3) 
+         global_here%N1=global_here%NM(I,1)
+         global_here%N2=global_here%NM(I,2)
+         global_here%N3=global_here%NM(I,3) 
          
          varnum = 3
 
@@ -3026,36 +3026,36 @@
                ZEC(1)=dg_here%ZE(1,I,dg_here%IRK+1)
                ZEC(2)=dg_here%ZE(2,I,dg_here%IRK+1)
                ZEC(3)=dg_here%ZE(3,I,dg_here%IRK+1)
-               ZEMAX1(1)=ZE_MAX1(N1)
-               ZEMIN1(1)=ZE_MIN1(N1)
-               ZEMAX1(2)=ZE_MAX1(N2)
-               ZEMIN1(2)=ZE_MIN1(N2)
-               ZEMAX1(3)=ZE_MAX1(N3)
-               ZEMIN1(3)=ZE_MIN1(N3)
+               ZEMAX1(1)=ZE_MAX1(global_here%N1)
+               ZEMIN1(1)=ZE_MIN1(global_here%N1)
+               ZEMAX1(2)=ZE_MAX1(global_here%N2)
+               ZEMIN1(2)=ZE_MIN1(global_here%N2)
+               ZEMAX1(3)=ZE_MAX1(global_here%N3)
+               ZEMIN1(3)=ZE_MIN1(global_here%N3)
             ENDIF
 
             IF (IVAR.EQ.2) THEN
                ZEC(1)=dg_here%QX(1,I,dg_here%IRK+1)
                ZEC(2)=dg_here%QX(2,I,dg_here%IRK+1)
                ZEC(3)=dg_here%QX(3,I,dg_here%IRK+1)
-               ZEMAX1(1)=QX_MAX1(N1)
-               ZEMIN1(1)=QX_MIN1(N1)
-               ZEMAX1(2)=QX_MAX1(N2)
-               ZEMIN1(2)=QX_MIN1(N2)
-               ZEMAX1(3)=QX_MAX1(N3)
-               ZEMIN1(3)=QX_MIN1(N3)
+               ZEMAX1(1)=QX_MAX1(global_here%N1)
+               ZEMIN1(1)=QX_MIN1(global_here%N1)
+               ZEMAX1(2)=QX_MAX1(global_here%N2)
+               ZEMIN1(2)=QX_MIN1(global_here%N2)
+               ZEMAX1(3)=QX_MAX1(global_here%N3)
+               ZEMIN1(3)=QX_MIN1(global_here%N3)
             ENDIF
 
             IF (IVAR.EQ.3) THEN
                ZEC(1)=dg_here%QY(1,I,dg_here%IRK+1)
                ZEC(2)=dg_here%QY(2,I,dg_here%IRK+1)
                ZEC(3)=dg_here%QY(3,I,dg_here%IRK+1)
-               ZEMAX1(1)=QY_MAX1(N1)
-               ZEMIN1(1)=QY_MIN1(N1)
-               ZEMAX1(2)=QY_MAX1(N2)
-               ZEMIN1(2)=QY_MIN1(N2)
-               ZEMAX1(3)=QY_MAX1(N3)
-               ZEMIN1(3)=QY_MIN1(N3)
+               ZEMAX1(1)=QY_MAX1(global_here%N1)
+               ZEMIN1(1)=QY_MIN1(global_here%N1)
+               ZEMAX1(2)=QY_MAX1(global_here%N2)
+               ZEMIN1(2)=QY_MIN1(global_here%N2)
+               ZEMAX1(3)=QY_MAX1(global_here%N3)
+               ZEMIN1(3)=QY_MIN1(global_here%N3)
             ENDIF
 
 #ifdef TRACE
@@ -3063,12 +3063,12 @@
                ZEC(1)=dg_here%iota(1,I,dg_here%IRK+1)
                ZEC(2)=dg_here%iota(2,I,dg_here%IRK+1)
                ZEC(3)=dg_here%iota(3,I,dg_here%IRK+1)
-               ZEMAX1(1)=iota_MAX1(N1)
-               ZEMIN1(1)=iota_MIN1(N1)
-               ZEMAX1(2)=iota_MAX1(N2)
-               ZEMIN1(2)=iota_MIN1(N2)
-               ZEMAX1(3)=iota_MAX1(N3)
-               ZEMIN1(3)=iota_MIN1(N3)
+               ZEMAX1(1)=iota_MAX1(global_here%N1)
+               ZEMIN1(1)=iota_MIN1(global_here%N1)
+               ZEMAX1(2)=iota_MAX1(global_here%N2)
+               ZEMIN1(2)=iota_MIN1(global_here%N2)
+               ZEMAX1(3)=iota_MAX1(global_here%N3)
+               ZEMIN1(3)=iota_MIN1(global_here%N3)
             ENDIF
 #endif
 
@@ -3077,24 +3077,24 @@
                ZEC(1)=dg_here%iota(1,I,dg_here%IRK+1)
                ZEC(2)=dg_here%iota(2,I,dg_here%IRK+1)
                ZEC(3)=dg_here%iota(3,I,dg_here%IRK+1)
-               ZEMAX1(1)=iota_MAX1(N1)
-               ZEMIN1(1)=iota_MIN1(N1)
-               ZEMAX1(2)=iota_MAX1(N2)
-               ZEMIN1(2)=iota_MIN1(N2)
-               ZEMAX1(3)=iota_MAX1(N3)
-               ZEMIN1(3)=iota_MIN1(N3)
+               ZEMAX1(1)=iota_MAX1(global_here%N1)
+               ZEMIN1(1)=iota_MIN1(global_here%N1)
+               ZEMAX1(2)=iota_MAX1(global_here%N2)
+               ZEMIN1(2)=iota_MIN1(global_here%N2)
+               ZEMAX1(3)=iota_MAX1(global_here%N3)
+               ZEMIN1(3)=iota_MIN1(global_here%N3)
             ENDIF
 
             IF (IVAR.EQ.5) THEN
                ZEC(1)=dg_here%iota2(1,I,dg_here%IRK+1)
                ZEC(2)=dg_here%iota2(2,I,dg_here%IRK+1)
                ZEC(3)=dg_here%iota2(3,I,dg_here%IRK+1)
-               ZEMAX1(1)=iota2_MAX1(N1)
-               ZEMIN1(1)=iota2_MIN1(N1)
-               ZEMAX1(2)=iota2_MAX1(N2)
-               ZEMIN1(2)=iota2_MIN1(N2)
-               ZEMAX1(3)=iota2_MAX1(N3)
-               ZEMIN1(3)=iota2_MIN1(N3)
+               ZEMAX1(1)=iota2_MAX1(global_here%N1)
+               ZEMIN1(1)=iota2_MIN1(global_here%N1)
+               ZEMAX1(2)=iota2_MAX1(global_here%N2)
+               ZEMIN1(2)=iota2_MIN1(global_here%N2)
+               ZEMAX1(3)=iota2_MAX1(global_here%N3)
+               ZEMIN1(3)=iota2_MIN1(global_here%N3)
             ENDIF
 #endif
 
@@ -3104,12 +3104,12 @@
                   ZEC(1)=dg_here%bed(1,I,dg_here%IRK+1,l)
                   ZEC(2)=dg_here%bed(2,I,dg_here%IRK+1,l)
                   ZEC(3)=dg_here%bed(3,I,dg_here%IRK+1,l)
-                  ZEMAX1(1)=bed_MAX1(N1,l)
-                  ZEMIN1(1)=bed_MIN1(N1,l)
-                  ZEMAX1(2)=bed_MAX1(N2,l)
-                  ZEMIN1(2)=bed_MIN1(N2,l)
-                  ZEMAX1(3)=bed_MAX1(N3,l)
-                  ZEMIN1(3)=bed_MIN1(N3,l)
+                  ZEMAX1(1)=bed_MAX1(global_here%N1,l)
+                  ZEMIN1(1)=bed_MIN1(global_here%N1,l)
+                  ZEMAX1(2)=bed_MAX1(global_here%N2,l)
+                  ZEMIN1(2)=bed_MIN1(global_here%N2,l)
+                  ZEMAX1(3)=bed_MAX1(global_here%N3,l)
+                  ZEMIN1(3)=bed_MIN1(global_here%N3,l)
                endif
             enddo
                
@@ -3189,7 +3189,7 @@
 !$$$                  dg_here%ZE(4:dg_here%dofs(i),i,dg_here%irk+1)=0.D0
 !$$$
 !$$$                  if (dg_here%padapt.eq.1) then
-!$$$                     pdg_el(i) = 1
+!$$$                     global_here%pdg_el(i) = 1
 !$$$                  endif 
 !$$$
 !$$$               endif
@@ -3209,7 +3209,7 @@
 !$$$                  dg_here%QX(4:dg_here%dofs(i),i,dg_here%irk+1)=0.D0
 !$$$
 !$$$                  if (dg_here%padapt.eq.1) then
-!$$$                     pdg_el(i) = 1
+!$$$                     global_here%pdg_el(i) = 1
 !$$$                  endif 
 !$$$
 !$$$               endif
@@ -3228,7 +3228,7 @@
 !$$$                  dg_here%QY(4:dg_here%dofs(i),i,dg_here%irk+1)=0.D0
 !$$$
 !$$$                  if (dg_here%padapt.eq.1) then
-!$$$                     pdg_el(i) = 1
+!$$$                     global_here%pdg_el(i) = 1
 !$$$                  endif 
 !$$$
 !$$$               endif
@@ -3250,7 +3250,7 @@
 !$$$                  dg_here%iota(4:dg_here%dofs(i),i,dg_here%irk+1)=0.D0
 !$$$
 !$$$                  if (dg_here%padapt.eq.1) then
-!$$$                     pdg_el(i) = 1
+!$$$                     global_here%pdg_el(i) = 1
 !$$$                  endif 
 !$$$
 !$$$               endif
@@ -3274,7 +3274,7 @@
 !$$$                  dg_here%iota(4:dg_here%dofs(i),i,dg_here%irk+1)=0.D0
 !$$$
 !$$$                  if (dg_here%padapt.eq.1) then
-!$$$                     pdg_el(i) = 1
+!$$$                     global_here%pdg_el(i) = 1
 !$$$                  endif 
 !$$$
 !$$$               endif
@@ -3295,7 +3295,7 @@
 !$$$                  dg_here%iota2(4:dg_here%dofs(i),i,dg_here%irk+1)=0.D0
 !$$$
 !$$$                  if (dg_here%padapt.eq.1) then
-!$$$                     pdg_el(i) = 1
+!$$$                     global_here%pdg_el(i) = 1
 !$$$                  endif 
 !$$$
 !$$$               endif
@@ -3321,7 +3321,7 @@
 !$$$                  dg_here%bed(4:dg_here%dofs(i),i,dg_here%irk+1,l)=0.D0
 !$$$
 !$$$                  if (dg_here%padapt.eq.1) then
-!$$$                     pdg_el(i) = 1
+!$$$                     global_here%pdg_el(i) = 1
 !$$$                  endif 
 !$$$
 !$$$               endif
@@ -3389,18 +3389,18 @@
       Real(SZ), Allocatable, target :: bed_min1(:,:), bed_max1(:,:)
       Real(SZ), pointer:: arraymin(:),arraymax(:)
 
-      Allocate ( ZE_MIN1(NP),ZE_MAX1(NP),QX_MIN1(NP) )
-      Allocate ( QY_MIN1(NP),QY_MAX1(NP),QX_MAX1(NP) )
-      Allocate ( iota_MIN1(NP),iota_MAX1(NP) )
-      Allocate ( iota2_MIN1(NP),iota2_MAX1(NP) )
-      Allocate ( bed_MIN1(NP,s%layers),bed_MAX1(NP,s%layers) )
+      Allocate ( ZE_MIN1(global_here%NP),ZE_MAX1(global_here%NP),QX_MIN1(global_here%NP) )
+      Allocate ( QY_MIN1(global_here%NP),QY_MAX1(global_here%NP),QX_MAX1(global_here%NP) )
+      Allocate ( iota_MIN1(global_here%NP),iota_MAX1(global_here%NP) )
+      Allocate ( iota2_MIN1(global_here%NP),iota2_MAX1(global_here%NP) )
+      Allocate ( bed_MIN1(global_here%NP,s%layers),bed_MAX1(global_here%NP,s%layers) )
 
 !     FIND THE MAXIMUM AND MINIMUM OF EACH VARIABLE OVER ALL ELEMENTS 
 !     SHARING A NODE
 
       bound = 0.0D0
 
-      DO I = 1,NP
+      DO I = 1,global_here%NP
          ZE_MIN1(I)=99999.
          ZE_MAX1(I)=-99999.
          QX_MIN1(I)=99999.
@@ -3427,89 +3427,89 @@
          enddo
 #endif
 
-         NO_NBORS = EL_COUNT(I)
+         global_here%NO_NBORS = global_here%EL_COUNT(I)
 
-         DO J = 1,NO_NBORS
-            NBOR_EL = ELETAB(I,1+J)
+         DO J = 1,global_here%NO_NBORS
+            global_here%NBOR_EL = global_here%ELETAB(I,1+J)
 
-!     IF(dg_here%WDFLG(NBOR_EL).EQ.0) CYCLE ! DON'T COUNT DRY ELEMENTS  sb 02/26/07
+!     IF(dg_here%WDFLG(global_here%NBOR_EL).EQ.0) CYCLE ! DON'T COUNT DRY ELEMENTS  sb 02/26/07
 
-            ZE_DG(J) = dg_here%ZE(1,NBOR_EL,dg_here%IRK+1)
-            QX_DG(J) = dg_here%QX(1,NBOR_EL,dg_here%IRK+1)
-            QY_DG(J) = dg_here%QY(1,NBOR_EL,dg_here%IRK+1)
+            global_here%ZE_DG(J) = dg_here%ZE(1,global_here%NBOR_EL,dg_here%IRK+1)
+            global_here%QX_DG(J) = dg_here%QX(1,global_here%NBOR_EL,dg_here%IRK+1)
+            global_here%QY_DG(J) = dg_here%QY(1,global_here%NBOR_EL,dg_here%IRK+1)
 
 #ifdef TRACE
-            iota_DG(J) = dg_here%iota(1,NBOR_EL,dg_here%IRK+1)
+            global_here%iota_DG(J) = dg_here%iota(1,global_here%NBOR_EL,dg_here%IRK+1)
 #endif
 
 #ifdef CHEM
-            iota_DG(J) = dg_here%iota(1,NBOR_EL,dg_here%IRK+1)
-            iota2_DG(J) = dg_here%iota2(1,NBOR_EL,dg_here%IRK+1)
+            global_here%iota_DG(J) = dg_here%iota(1,global_here%NBOR_EL,dg_here%IRK+1)
+            global_here%iota2_DG(J) = dg_here%iota2(1,global_here%NBOR_EL,dg_here%IRK+1)
 #endif
 
 
 #ifdef SED_LAY
             do l=1,s%layers
-               bed_DG(J,l) = dg_here%bed(1,NBOR_EL,dg_here%IRK+1,l)
+               global_here%bed_DG(J,l) = dg_here%bed(1,global_here%NBOR_EL,dg_here%IRK+1,l)
             enddo
 #endif
 
 !     
-            IF (ZE_DG(J).LT.ZE_MIN1(I))THEN
-               ZE_MIN1(I)=ZE_DG(J)
+            IF (global_here%ZE_DG(J).LT.ZE_MIN1(I))THEN
+               ZE_MIN1(I)=global_here%ZE_DG(J)
             ENDIF
-            IF (ZE_DG(J).GT.ZE_MAX1(I)) THEN
-               ZE_MAX1(I)=ZE_DG(J)
+            IF (global_here%ZE_DG(J).GT.ZE_MAX1(I)) THEN
+               ZE_MAX1(I)=global_here%ZE_DG(J)
             ENDIF
-            IF (QX_DG(J).LT.QX_MIN1(I))THEN
-               QX_MIN1(I)=QX_DG(J)
+            IF (global_here%QX_DG(J).LT.QX_MIN1(I))THEN
+               QX_MIN1(I)=global_here%QX_DG(J)
             ENDIF
-            IF (QX_DG(J).GT.QX_MAX1(I)) THEN
-               QX_MAX1(I)=QX_DG(J)
+            IF (global_here%QX_DG(J).GT.QX_MAX1(I)) THEN
+               QX_MAX1(I)=global_here%QX_DG(J)
             ENDIF
-            IF (QY_DG(J).LT.QY_MIN1(I))THEN
-               QY_MIN1(I)=QY_DG(J)
+            IF (global_here%QY_DG(J).LT.QY_MIN1(I))THEN
+               QY_MIN1(I)=global_here%QY_DG(J)
             ENDIF
-            IF (QY_DG(J).GT.QY_MAX1(I)) THEN
-               QY_MAX1(I)=QY_DG(J)
+            IF (global_here%QY_DG(J).GT.QY_MAX1(I)) THEN
+               QY_MAX1(I)=global_here%QY_DG(J)
             ENDIF
 
 #ifdef TRACE
-            IF (iota_DG(J).LT.iota_MIN1(I))THEN
-               iota_MIN1(I)=iota_DG(J)
+            IF (global_here%iota_DG(J).LT.iota_MIN1(I))THEN
+               iota_MIN1(I)=global_here%iota_DG(J)
             ENDIF
 
-            IF (iota_DG(J).GT.iota_MAX1(I)) THEN
-               iota_MAX1(I)=iota_DG(J)
+            IF (global_here%iota_DG(J).GT.iota_MAX1(I)) THEN
+               iota_MAX1(I)=global_here%iota_DG(J)
             ENDIF
 #endif
 
 #ifdef CHEM
-            IF (iota_DG(J).LT.iota_MIN1(I))THEN
-               iota_MIN1(I)=iota_DG(J)
+            IF (global_here%iota_DG(J).LT.iota_MIN1(I))THEN
+               iota_MIN1(I)=global_here%iota_DG(J)
             ENDIF
 
-            IF (iota_DG(J).GT.iota_MAX1(I)) THEN
-               iota_MAX1(I)=iota_DG(J)
+            IF (global_here%iota_DG(J).GT.iota_MAX1(I)) THEN
+               iota_MAX1(I)=global_here%iota_DG(J)
             ENDIF
 
-            IF (iota2_DG(J).LT.iota2_MIN1(I))THEN
-               iota2_MIN1(I)=iota2_DG(J)
+            IF (global_here%iota2_DG(J).LT.iota2_MIN1(I))THEN
+               iota2_MIN1(I)=global_here%iota2_DG(J)
             ENDIF
 
-            IF (iota2_DG(J).GT.iota2_MAX1(I)) THEN
-               iota2_MAX1(I)=iota2_DG(J)
+            IF (global_here%iota2_DG(J).GT.iota2_MAX1(I)) THEN
+               iota2_MAX1(I)=global_here%iota2_DG(J)
             ENDIF
 #endif
 
 #ifdef SED_LAY
             do l=1,s%layers
-               IF (bed_DG(J,l).LT.bed_MIN1(I,l))THEN
-                  bed_MIN1(I,l)=bed_DG(J,l)
+               IF (global_here%bed_DG(J,l).LT.bed_MIN1(I,l))THEN
+                  bed_MIN1(I,l)=global_here%bed_DG(J,l)
                ENDIF
                
-               IF (bed_DG(J,l).GT.bed_MAX1(I,l)) THEN
-                  bed_MAX1(I,l)=bed_DG(J,l)
+               IF (global_here%bed_DG(J,l).GT.bed_MAX1(I,l)) THEN
+                  bed_MAX1(I,l)=global_here%bed_DG(J,l)
                ENDIF
             enddo
 #endif
@@ -3545,11 +3545,11 @@
 
       bb = 1
 
-      DO I=1,NE 
+      DO I=1,global_here%NE 
          !IF(dg_here%WDFLG(I).EQ.0) CYCLE ! DON'T COUNT DRY ELEMENTS  sb 02/26/07
-         N1=NM(I,1)
-         N2=NM(I,2)
-         N3=NM(I,3) 
+         global_here%N1=global_here%NM(I,1)
+         global_here%N2=global_here%NM(I,2)
+         global_here%N3=global_here%NM(I,3) 
          
          varnum = 3
 
@@ -3572,36 +3572,36 @@
                ZEC(1)=dg_here%ZE(1,I,dg_here%IRK+1)
                ZEC(2)=dg_here%ZE(2,I,dg_here%IRK+1)
                ZEC(3)=dg_here%ZE(3,I,dg_here%IRK+1)
-               ZEMAX1(1)=ZE_MAX1(N1)
-               ZEMIN1(1)=ZE_MIN1(N1)
-               ZEMAX1(2)=ZE_MAX1(N2)
-               ZEMIN1(2)=ZE_MIN1(N2)
-               ZEMAX1(3)=ZE_MAX1(N3)
-               ZEMIN1(3)=ZE_MIN1(N3)
+               ZEMAX1(1)=ZE_MAX1(global_here%N1)
+               ZEMIN1(1)=ZE_MIN1(global_here%N1)
+               ZEMAX1(2)=ZE_MAX1(global_here%N2)
+               ZEMIN1(2)=ZE_MIN1(global_here%N2)
+               ZEMAX1(3)=ZE_MAX1(global_here%N3)
+               ZEMIN1(3)=ZE_MIN1(global_here%N3)
             ENDIF
 
             IF (IVAR.EQ.2) THEN
                ZEC(1)=dg_here%QX(1,I,dg_here%IRK+1)
                ZEC(2)=dg_here%QX(2,I,dg_here%IRK+1)
                ZEC(3)=dg_here%QX(3,I,dg_here%IRK+1)
-               ZEMAX1(1)=QX_MAX1(N1)
-               ZEMIN1(1)=QX_MIN1(N1)
-               ZEMAX1(2)=QX_MAX1(N2)
-               ZEMIN1(2)=QX_MIN1(N2)
-               ZEMAX1(3)=QX_MAX1(N3)
-               ZEMIN1(3)=QX_MIN1(N3)
+               ZEMAX1(1)=QX_MAX1(global_here%N1)
+               ZEMIN1(1)=QX_MIN1(global_here%N1)
+               ZEMAX1(2)=QX_MAX1(global_here%N2)
+               ZEMIN1(2)=QX_MIN1(global_here%N2)
+               ZEMAX1(3)=QX_MAX1(global_here%N3)
+               ZEMIN1(3)=QX_MIN1(global_here%N3)
             ENDIF
 
             IF (IVAR.EQ.3) THEN
                ZEC(1)=dg_here%QY(1,I,dg_here%IRK+1)
                ZEC(2)=dg_here%QY(2,I,dg_here%IRK+1)
                ZEC(3)=dg_here%QY(3,I,dg_here%IRK+1)
-               ZEMAX1(1)=QY_MAX1(N1)
-               ZEMIN1(1)=QY_MIN1(N1)
-               ZEMAX1(2)=QY_MAX1(N2)
-               ZEMIN1(2)=QY_MIN1(N2)
-               ZEMAX1(3)=QY_MAX1(N3)
-               ZEMIN1(3)=QY_MIN1(N3)
+               ZEMAX1(1)=QY_MAX1(global_here%N1)
+               ZEMIN1(1)=QY_MIN1(global_here%N1)
+               ZEMAX1(2)=QY_MAX1(global_here%N2)
+               ZEMIN1(2)=QY_MIN1(global_here%N2)
+               ZEMAX1(3)=QY_MAX1(global_here%N3)
+               ZEMIN1(3)=QY_MIN1(global_here%N3)
             ENDIF
 
 #ifdef TRACE
@@ -3609,12 +3609,12 @@
                ZEC(1)=dg_here%iota(1,I,dg_here%IRK+1)
                ZEC(2)=dg_here%iota(2,I,dg_here%IRK+1)
                ZEC(3)=dg_here%iota(3,I,dg_here%IRK+1)
-               ZEMAX1(1)=iota_MAX1(N1)
-               ZEMIN1(1)=iota_MIN1(N1)
-               ZEMAX1(2)=iota_MAX1(N2)
-               ZEMIN1(2)=iota_MIN1(N2)
-               ZEMAX1(3)=iota_MAX1(N3)
-               ZEMIN1(3)=iota_MIN1(N3)
+               ZEMAX1(1)=iota_MAX1(global_here%N1)
+               ZEMIN1(1)=iota_MIN1(global_here%N1)
+               ZEMAX1(2)=iota_MAX1(global_here%N2)
+               ZEMIN1(2)=iota_MIN1(global_here%N2)
+               ZEMAX1(3)=iota_MAX1(global_here%N3)
+               ZEMIN1(3)=iota_MIN1(global_here%N3)
             ENDIF
 #endif
 
@@ -3623,24 +3623,24 @@
                ZEC(1)=dg_here%iota(1,I,dg_here%IRK+1)
                ZEC(2)=dg_here%iota(2,I,dg_here%IRK+1)
                ZEC(3)=dg_here%iota(3,I,dg_here%IRK+1)
-               ZEMAX1(1)=iota_MAX1(N1)
-               ZEMIN1(1)=iota_MIN1(N1)
-               ZEMAX1(2)=iota_MAX1(N2)
-               ZEMIN1(2)=iota_MIN1(N2)
-               ZEMAX1(3)=iota_MAX1(N3)
-               ZEMIN1(3)=iota_MIN1(N3)
+               ZEMAX1(1)=iota_MAX1(global_here%N1)
+               ZEMIN1(1)=iota_MIN1(global_here%N1)
+               ZEMAX1(2)=iota_MAX1(global_here%N2)
+               ZEMIN1(2)=iota_MIN1(global_here%N2)
+               ZEMAX1(3)=iota_MAX1(global_here%N3)
+               ZEMIN1(3)=iota_MIN1(global_here%N3)
             ENDIF
 
             IF (IVAR.EQ.5) THEN
                ZEC(1)=dg_here%iota2(1,I,dg_here%IRK+1)
                ZEC(2)=dg_here%iota2(2,I,dg_here%IRK+1)
                ZEC(3)=dg_here%iota2(3,I,dg_here%IRK+1)
-               ZEMAX1(1)=iota2_MAX1(N1)
-               ZEMIN1(1)=iota2_MIN1(N1)
-               ZEMAX1(2)=iota2_MAX1(N2)
-               ZEMIN1(2)=iota2_MIN1(N2)
-               ZEMAX1(3)=iota2_MAX1(N3)
-               ZEMIN1(3)=iota2_MIN1(N3)
+               ZEMAX1(1)=iota2_MAX1(global_here%N1)
+               ZEMIN1(1)=iota2_MIN1(global_here%N1)
+               ZEMAX1(2)=iota2_MAX1(global_here%N2)
+               ZEMIN1(2)=iota2_MIN1(global_here%N2)
+               ZEMAX1(3)=iota2_MAX1(global_here%N3)
+               ZEMIN1(3)=iota2_MIN1(global_here%N3)
             ENDIF
 #endif
 
@@ -3650,12 +3650,12 @@
                   ZEC(1)=dg_here%bed(1,I,dg_here%IRK+1,l)
                   ZEC(2)=dg_here%bed(2,I,dg_here%IRK+1,l)
                   ZEC(3)=dg_here%bed(3,I,dg_here%IRK+1,l)
-                  ZEMAX1(1)=bed_MAX1(N1,l)
-                  ZEMIN1(1)=bed_MIN1(N1,l)
-                  ZEMAX1(2)=bed_MAX1(N2,l)
-                  ZEMIN1(2)=bed_MIN1(N2,l)
-                  ZEMAX1(3)=bed_MAX1(N3,l)
-                  ZEMIN1(3)=bed_MIN1(N3,l)
+                  ZEMAX1(1)=bed_MAX1(global_here%N1,l)
+                  ZEMIN1(1)=bed_MIN1(global_here%N1,l)
+                  ZEMAX1(2)=bed_MAX1(global_here%N2,l)
+                  ZEMIN1(2)=bed_MIN1(global_here%N2,l)
+                  ZEMAX1(3)=bed_MAX1(global_here%N3,l)
+                  ZEMIN1(3)=bed_MIN1(global_here%N3,l)
                endif
             enddo
                
@@ -3735,7 +3735,7 @@
 !$$$                  dg_here%ZE(4:dg_here%dofs(i),i,dg_here%irk+1)=0.D0
 !$$$
 !$$$                  if (dg_here%padapt.eq.1) then
-!$$$                     pdg_el(i) = 1
+!$$$                     global_here%pdg_el(i) = 1
 !$$$                  endif 
 !$$$
 !$$$               endif
@@ -3755,7 +3755,7 @@
 !$$$                  dg_here%QX(4:dg_here%dofs(i),i,dg_here%irk+1)=0.D0
 !$$$
 !$$$                  if (dg_here%padapt.eq.1) then
-!$$$                     pdg_el(i) = 1
+!$$$                     global_here%pdg_el(i) = 1
 !$$$                  endif 
 !$$$
 !$$$               endif
@@ -3774,7 +3774,7 @@
 !$$$                  dg_here%QY(4:dg_here%dofs(i),i,dg_here%irk+1)=0.D0
 !$$$
 !$$$                  if (dg_here%padapt.eq.1) then
-!$$$                     pdg_el(i) = 1
+!$$$                     global_here%pdg_el(i) = 1
 !$$$                  endif 
 !$$$
 !$$$               endif
@@ -3796,7 +3796,7 @@
 !$$$                  dg_here%iota(4:dg_here%dofs(i),i,dg_here%irk+1)=0.D0
 !$$$
 !$$$                  if (dg_here%padapt.eq.1) then
-!$$$                     pdg_el(i) = 1
+!$$$                     global_here%pdg_el(i) = 1
 !$$$                  endif 
 !$$$
 !$$$               endif
@@ -3820,7 +3820,7 @@
 !$$$                  dg_here%iota(4:dg_here%dofs(i),i,dg_here%irk+1)=0.D0
 !$$$
 !$$$                  if (dg_here%padapt.eq.1) then
-!$$$                     pdg_el(i) = 1
+!$$$                     global_here%pdg_el(i) = 1
 !$$$                  endif 
 !$$$
 !$$$               endif
@@ -3841,7 +3841,7 @@
 !$$$                  dg_here%iota2(4:dg_here%dofs(i),i,dg_here%irk+1)=0.D0
 !$$$
 !$$$                  if (dg_here%padapt.eq.1) then
-!$$$                     pdg_el(i) = 1
+!$$$                     global_here%pdg_el(i) = 1
 !$$$                  endif 
 !$$$
 !$$$               endif
@@ -3867,7 +3867,7 @@
 !$$$                  dg_here%bed(4:dg_here%dofs(i),i,dg_here%irk+1,l)=0.D0
 !$$$
 !$$$                  if (dg_here%padapt.eq.1) then
-!$$$                     pdg_el(i) = 1
+!$$$                     global_here%pdg_el(i) = 1
 !$$$                  endif 
 !$$$
 !$$$               endif
@@ -3936,18 +3936,18 @@
       Real(SZ), Allocatable, target :: bed_min1(:,:), bed_max1(:,:)
       Real(SZ), pointer:: arraymin(:),arraymax(:)
 
-      Allocate ( ZE_MIN1(NP),ZE_MAX1(NP),QX_MIN1(NP) )
-      Allocate ( QY_MIN1(NP),QY_MAX1(NP),QX_MAX1(NP) )
-      Allocate ( iota_MIN1(NP),iota_MAX1(NP) )
-      Allocate ( iota2_MIN1(NP),iota2_MAX1(NP) )
-      Allocate ( bed_MIN1(NP,s%layers),bed_MAX1(NP,s%layers) )
+      Allocate ( ZE_MIN1(global_here%NP),ZE_MAX1(global_here%NP),QX_MIN1(global_here%NP) )
+      Allocate ( QY_MIN1(global_here%NP),QY_MAX1(global_here%NP),QX_MAX1(global_here%NP) )
+      Allocate ( iota_MIN1(global_here%NP),iota_MAX1(global_here%NP) )
+      Allocate ( iota2_MIN1(global_here%NP),iota2_MAX1(global_here%NP) )
+      Allocate ( bed_MIN1(global_here%NP,s%layers),bed_MAX1(global_here%NP,s%layers) )
 
 !     FIND THE MAXIMUM AND MINIMUM OF EACH VARIABLE OVER ALL ELEMENTS 
 !     SHARING A NODE
 
       bound = 1.0E-5 
 
-      DO I = 1,NP
+      DO I = 1,global_here%NP
          ZE_MIN1(I)=99999.
          ZE_MAX1(I)=-99999.
          QX_MIN1(I)=99999.
@@ -3974,89 +3974,89 @@
          enddo
 #endif
 
-         NO_NBORS = EL_COUNT(I)
+         global_here%NO_NBORS = global_here%EL_COUNT(I)
 
-         DO J = 1,NO_NBORS
-            NBOR_EL = ELETAB(I,1+J)
+         DO J = 1,global_here%NO_NBORS
+            global_here%NBOR_EL = global_here%ELETAB(I,1+J)
 
-!     IF(dg_here%WDFLG(NBOR_EL).EQ.0) CYCLE ! DON'T COUNT DRY ELEMENTS  sb 02/26/07
+!     IF(dg_here%WDFLG(global_here%NBOR_EL).EQ.0) CYCLE ! DON'T COUNT DRY ELEMENTS  sb 02/26/07
 
-            ZE_DG(J) = dg_here%ZE(1,NBOR_EL,dg_here%IRK+1)
-            QX_DG(J) = dg_here%QX(1,NBOR_EL,dg_here%IRK+1)
-            QY_DG(J) = dg_here%QY(1,NBOR_EL,dg_here%IRK+1)
+            global_here%ZE_DG(J) = dg_here%ZE(1,global_here%NBOR_EL,dg_here%IRK+1)
+            global_here%QX_DG(J) = dg_here%QX(1,global_here%NBOR_EL,dg_here%IRK+1)
+            global_here%QY_DG(J) = dg_here%QY(1,global_here%NBOR_EL,dg_here%IRK+1)
 
 #ifdef TRACE
-            iota_DG(J) = dg_here%iota(1,NBOR_EL,dg_here%IRK+1)
+            global_here%iota_DG(J) = dg_here%iota(1,global_here%NBOR_EL,dg_here%IRK+1)
 #endif
 
 #ifdef CHEM
-            iota_DG(J) = dg_here%iota(1,NBOR_EL,dg_here%IRK+1)
-            iota2_DG(J) = dg_here%iota2(1,NBOR_EL,dg_here%IRK+1)
+            global_here%iota_DG(J) = dg_here%iota(1,global_here%NBOR_EL,dg_here%IRK+1)
+            global_here%iota2_DG(J) = dg_here%iota2(1,global_here%NBOR_EL,dg_here%IRK+1)
 #endif
 
 
 #ifdef SED_LAY
             do l=1,s%layers
-               bed_DG(J,l) = dg_here%bed(1,NBOR_EL,dg_here%IRK+1,l)
+               global_here%bed_DG(J,l) = dg_here%bed(1,global_here%NBOR_EL,dg_here%IRK+1,l)
             enddo
 #endif
 
 !     
-            IF (ZE_DG(J).LT.ZE_MIN1(I))THEN
-               ZE_MIN1(I)=ZE_DG(J)
+            IF (global_here%ZE_DG(J).LT.ZE_MIN1(I))THEN
+               ZE_MIN1(I)=global_here%ZE_DG(J)
             ENDIF
-            IF (ZE_DG(J).GT.ZE_MAX1(I)) THEN
-               ZE_MAX1(I)=ZE_DG(J)
+            IF (global_here%ZE_DG(J).GT.ZE_MAX1(I)) THEN
+               ZE_MAX1(I)=global_here%ZE_DG(J)
             ENDIF
-            IF (QX_DG(J).LT.QX_MIN1(I))THEN
-               QX_MIN1(I)=QX_DG(J)
+            IF (global_here%QX_DG(J).LT.QX_MIN1(I))THEN
+               QX_MIN1(I)=global_here%QX_DG(J)
             ENDIF
-            IF (QX_DG(J).GT.QX_MAX1(I)) THEN
-               QX_MAX1(I)=QX_DG(J)
+            IF (global_here%QX_DG(J).GT.QX_MAX1(I)) THEN
+               QX_MAX1(I)=global_here%QX_DG(J)
             ENDIF
-            IF (QY_DG(J).LT.QY_MIN1(I))THEN
-               QY_MIN1(I)=QY_DG(J)
+            IF (global_here%QY_DG(J).LT.QY_MIN1(I))THEN
+               QY_MIN1(I)=global_here%QY_DG(J)
             ENDIF
-            IF (QY_DG(J).GT.QY_MAX1(I)) THEN
-               QY_MAX1(I)=QY_DG(J)
+            IF (global_here%QY_DG(J).GT.QY_MAX1(I)) THEN
+               QY_MAX1(I)=global_here%QY_DG(J)
             ENDIF
 
 #ifdef TRACE
-            IF (iota_DG(J).LT.iota_MIN1(I))THEN
-               iota_MIN1(I)=iota_DG(J)
+            IF (global_here%iota_DG(J).LT.iota_MIN1(I))THEN
+               iota_MIN1(I)=global_here%iota_DG(J)
             ENDIF
 
-            IF (iota_DG(J).GT.iota_MAX1(I)) THEN
-               iota_MAX1(I)=iota_DG(J)
+            IF (global_here%iota_DG(J).GT.iota_MAX1(I)) THEN
+               iota_MAX1(I)=global_here%iota_DG(J)
             ENDIF
 #endif
 
 #ifdef CHEM
-            IF (iota_DG(J).LT.iota_MIN1(I))THEN
-               iota_MIN1(I)=iota_DG(J)
+            IF (global_here%iota_DG(J).LT.iota_MIN1(I))THEN
+               iota_MIN1(I)=global_here%iota_DG(J)
             ENDIF
 
-            IF (iota_DG(J).GT.iota_MAX1(I)) THEN
-               iota_MAX1(I)=iota_DG(J)
+            IF (global_here%iota_DG(J).GT.iota_MAX1(I)) THEN
+               iota_MAX1(I)=global_here%iota_DG(J)
             ENDIF
 
-            IF (iota2_DG(J).LT.iota2_MIN1(I))THEN
-               iota2_MIN1(I)=iota2_DG(J)
+            IF (global_here%iota2_DG(J).LT.iota2_MIN1(I))THEN
+               iota2_MIN1(I)=global_here%iota2_DG(J)
             ENDIF
 
-            IF (iota2_DG(J).GT.iota2_MAX1(I)) THEN
-               iota2_MAX1(I)=iota2_DG(J)
+            IF (global_here%iota2_DG(J).GT.iota2_MAX1(I)) THEN
+               iota2_MAX1(I)=global_here%iota2_DG(J)
             ENDIF
 #endif
 
 #ifdef SED_LAY
             do l=1,s%layers
-               IF (bed_DG(J,l).LT.bed_MIN1(I,l))THEN
-                  bed_MIN1(I,l)=bed_DG(J,l)
+               IF (global_here%bed_DG(J,l).LT.bed_MIN1(I,l))THEN
+                  bed_MIN1(I,l)=global_here%bed_DG(J,l)
                ENDIF
                
-               IF (bed_DG(J,l).GT.bed_MAX1(I,l)) THEN
-                  bed_MAX1(I,l)=bed_DG(J,l)
+               IF (global_here%bed_DG(J,l).GT.bed_MAX1(I,l)) THEN
+                  bed_MAX1(I,l)=global_here%bed_DG(J,l)
                ENDIF
             enddo
 #endif
@@ -4092,14 +4092,14 @@
 
       bb = 1
 
-      DO I=1,NE 
+      DO I=1,global_here%NE 
 
                                 !if (dg_here%dofs(i).eq.3) then
 
          !IF(dg_here%WDFLG(I).EQ.0) CYCLE ! DON'T COUNT DRY ELEMENTS  sb 02/26/07
-         N1=NM(I,1)
-         N2=NM(I,2)
-         N3=NM(I,3) 
+         global_here%N1=global_here%NM(I,1)
+         global_here%N2=global_here%NM(I,2)
+         global_here%N3=global_here%NM(I,3) 
 
          varnum = 3
 
@@ -4122,36 +4122,36 @@
                ZEC(1)=dg_here%ZE(1,I,dg_here%IRK+1)
                ZEC(2)=dg_here%ZE(2,I,dg_here%IRK+1)
                ZEC(3)=dg_here%ZE(3,I,dg_here%IRK+1)
-               ZEMAX1(1)=ZE_MAX1(N1)
-               ZEMIN1(1)=ZE_MIN1(N1)
-               ZEMAX1(2)=ZE_MAX1(N2)
-               ZEMIN1(2)=ZE_MIN1(N2)
-               ZEMAX1(3)=ZE_MAX1(N3)
-               ZEMIN1(3)=ZE_MIN1(N3)
+               ZEMAX1(1)=ZE_MAX1(global_here%N1)
+               ZEMIN1(1)=ZE_MIN1(global_here%N1)
+               ZEMAX1(2)=ZE_MAX1(global_here%N2)
+               ZEMIN1(2)=ZE_MIN1(global_here%N2)
+               ZEMAX1(3)=ZE_MAX1(global_here%N3)
+               ZEMIN1(3)=ZE_MIN1(global_here%N3)
             ENDIF
 
             IF (IVAR.EQ.2) THEN
                ZEC(1)=dg_here%QX(1,I,dg_here%IRK+1)
                ZEC(2)=dg_here%QX(2,I,dg_here%IRK+1)
                ZEC(3)=dg_here%QX(3,I,dg_here%IRK+1)
-               ZEMAX1(1)=QX_MAX1(N1)
-               ZEMIN1(1)=QX_MIN1(N1)
-               ZEMAX1(2)=QX_MAX1(N2)
-               ZEMIN1(2)=QX_MIN1(N2)
-               ZEMAX1(3)=QX_MAX1(N3)
-               ZEMIN1(3)=QX_MIN1(N3)
+               ZEMAX1(1)=QX_MAX1(global_here%N1)
+               ZEMIN1(1)=QX_MIN1(global_here%N1)
+               ZEMAX1(2)=QX_MAX1(global_here%N2)
+               ZEMIN1(2)=QX_MIN1(global_here%N2)
+               ZEMAX1(3)=QX_MAX1(global_here%N3)
+               ZEMIN1(3)=QX_MIN1(global_here%N3)
             ENDIF
 
             IF (IVAR.EQ.3) THEN
                ZEC(1)=dg_here%QY(1,I,dg_here%IRK+1)
                ZEC(2)=dg_here%QY(2,I,dg_here%IRK+1)
                ZEC(3)=dg_here%QY(3,I,dg_here%IRK+1)
-               ZEMAX1(1)=QY_MAX1(N1)
-               ZEMIN1(1)=QY_MIN1(N1)
-               ZEMAX1(2)=QY_MAX1(N2)
-               ZEMIN1(2)=QY_MIN1(N2)
-               ZEMAX1(3)=QY_MAX1(N3)
-               ZEMIN1(3)=QY_MIN1(N3)
+               ZEMAX1(1)=QY_MAX1(global_here%N1)
+               ZEMIN1(1)=QY_MIN1(global_here%N1)
+               ZEMAX1(2)=QY_MAX1(global_here%N2)
+               ZEMIN1(2)=QY_MIN1(global_here%N2)
+               ZEMAX1(3)=QY_MAX1(global_here%N3)
+               ZEMIN1(3)=QY_MIN1(global_here%N3)
             ENDIF
 
 #ifdef TRACE
@@ -4159,12 +4159,12 @@
                ZEC(1)=dg_here%iota(1,I,dg_here%IRK+1)
                ZEC(2)=dg_here%iota(2,I,dg_here%IRK+1)
                ZEC(3)=dg_here%iota(3,I,dg_here%IRK+1)
-               ZEMAX1(1)=iota_MAX1(N1)
-               ZEMIN1(1)=iota_MIN1(N1)
-               ZEMAX1(2)=iota_MAX1(N2)
-               ZEMIN1(2)=iota_MIN1(N2)
-               ZEMAX1(3)=iota_MAX1(N3)
-               ZEMIN1(3)=iota_MIN1(N3)
+               ZEMAX1(1)=iota_MAX1(global_here%N1)
+               ZEMIN1(1)=iota_MIN1(global_here%N1)
+               ZEMAX1(2)=iota_MAX1(global_here%N2)
+               ZEMIN1(2)=iota_MIN1(global_here%N2)
+               ZEMAX1(3)=iota_MAX1(global_here%N3)
+               ZEMIN1(3)=iota_MIN1(global_here%N3)
             ENDIF
 #endif
 
@@ -4173,24 +4173,24 @@
                ZEC(1)=dg_here%iota(1,I,dg_here%IRK+1)
                ZEC(2)=dg_here%iota(2,I,dg_here%IRK+1)
                ZEC(3)=dg_here%iota(3,I,dg_here%IRK+1)
-               ZEMAX1(1)=iota_MAX1(N1)
-               ZEMIN1(1)=iota_MIN1(N1)
-               ZEMAX1(2)=iota_MAX1(N2)
-               ZEMIN1(2)=iota_MIN1(N2)
-               ZEMAX1(3)=iota_MAX1(N3)
-               ZEMIN1(3)=iota_MIN1(N3)
+               ZEMAX1(1)=iota_MAX1(global_here%N1)
+               ZEMIN1(1)=iota_MIN1(global_here%N1)
+               ZEMAX1(2)=iota_MAX1(global_here%N2)
+               ZEMIN1(2)=iota_MIN1(global_here%N2)
+               ZEMAX1(3)=iota_MAX1(global_here%N3)
+               ZEMIN1(3)=iota_MIN1(global_here%N3)
             ENDIF
 
             IF (IVAR.EQ.5) THEN
                ZEC(1)=dg_here%iota2(1,I,dg_here%IRK+1)
                ZEC(2)=dg_here%iota2(2,I,dg_here%IRK+1)
                ZEC(3)=dg_here%iota2(3,I,dg_here%IRK+1)
-               ZEMAX1(1)=iota2_MAX1(N1)
-               ZEMIN1(1)=iota2_MIN1(N1)
-               ZEMAX1(2)=iota2_MAX1(N2)
-               ZEMIN1(2)=iota2_MIN1(N2)
-               ZEMAX1(3)=iota2_MAX1(N3)
-               ZEMIN1(3)=iota2_MIN1(N3)
+               ZEMAX1(1)=iota2_MAX1(global_here%N1)
+               ZEMIN1(1)=iota2_MIN1(global_here%N1)
+               ZEMAX1(2)=iota2_MAX1(global_here%N2)
+               ZEMIN1(2)=iota2_MIN1(global_here%N2)
+               ZEMAX1(3)=iota2_MAX1(global_here%N3)
+               ZEMIN1(3)=iota2_MIN1(global_here%N3)
             ENDIF
 #endif
 
@@ -4200,12 +4200,12 @@
                   ZEC(1)=dg_here%bed(1,I,dg_here%IRK+1,l)
                   ZEC(2)=dg_here%bed(2,I,dg_here%IRK+1,l)
                   ZEC(3)=dg_here%bed(3,I,dg_here%IRK+1,l)
-                  ZEMAX1(1)=bed_MAX1(N1,l)
-                  ZEMIN1(1)=bed_MIN1(N1,l)
-                  ZEMAX1(2)=bed_MAX1(N2,l)
-                  ZEMIN1(2)=bed_MIN1(N2,l)
-                  ZEMAX1(3)=bed_MAX1(N3,l)
-                  ZEMIN1(3)=bed_MIN1(N3,l)
+                  ZEMAX1(1)=bed_MAX1(global_here%N1,l)
+                  ZEMIN1(1)=bed_MIN1(global_here%N1,l)
+                  ZEMAX1(2)=bed_MAX1(global_here%N2,l)
+                  ZEMIN1(2)=bed_MIN1(global_here%N2,l)
+                  ZEMAX1(3)=bed_MAX1(global_here%N3,l)
+                  ZEMIN1(3)=bed_MIN1(global_here%N3,l)
                endif
             enddo
                
@@ -4285,7 +4285,7 @@
 !$$$                  dg_here%ZE(4:dg_here%dofs(i),i,dg_here%irk+1)=0.D0
 !$$$
 !$$$                  if (dg_here%padapt.eq.1) then
-!$$$                     pdg_el(i) = 1
+!$$$                     global_here%pdg_el(i) = 1
 !$$$                  endif 
 !$$$
 !$$$               endif
@@ -4305,7 +4305,7 @@
 !$$$                  dg_here%QX(4:dg_here%dofs(i),i,dg_here%irk+1)=0.D0
 !$$$
 !$$$                  if (dg_here%padapt.eq.1) then
-!$$$                     pdg_el(i) = 1
+!$$$                     global_here%pdg_el(i) = 1
 !$$$                  endif 
 !$$$
 !$$$               endif
@@ -4324,7 +4324,7 @@
 !$$$                  dg_here%QY(4:dg_here%dofs(i),i,dg_here%irk+1)=0.D0
 !$$$
 !$$$                  if (dg_here%padapt.eq.1) then
-!$$$                     pdg_el(i) = 1
+!$$$                     global_here%pdg_el(i) = 1
 !$$$                  endif 
 !$$$
 !$$$               endif
@@ -4346,7 +4346,7 @@
 !$$$                  dg_here%iota(4:dg_here%dofs(i),i,dg_here%irk+1)=0.D0
 !$$$
 !$$$                  if (dg_here%padapt.eq.1) then
-!$$$                     pdg_el(i) = 1
+!$$$                     global_here%pdg_el(i) = 1
 !$$$                  endif 
 !$$$
 !$$$               endif
@@ -4370,7 +4370,7 @@
 !$$$                  dg_here%iota(4:dg_here%dofs(i),i,dg_here%irk+1)=0.D0
 !$$$
 !$$$                  if (dg_here%padapt.eq.1) then
-!$$$                     pdg_el(i) = 1
+!$$$                     global_here%pdg_el(i) = 1
 !$$$                  endif 
 !$$$
 !$$$               endif
@@ -4391,7 +4391,7 @@
 !$$$                  dg_here%iota2(4:dg_here%dofs(i),i,dg_here%irk+1)=0.D0
 !$$$
 !$$$                  if (dg_here%padapt.eq.1) then
-!$$$                     pdg_el(i) = 1
+!$$$                     global_here%pdg_el(i) = 1
 !$$$                  endif 
 !$$$
 !$$$               endif
@@ -4417,7 +4417,7 @@
 !$$$                  dg_here%bed(4:dg_here%dofs(i),i,dg_here%irk+1,l)=0.D0
 !$$$
 !$$$                  if (dg_here%padapt.eq.1) then
-!$$$                     pdg_el(i) = 1
+!$$$                     global_here%pdg_el(i) = 1
 !$$$                  endif 
 !$$$
 !$$$               endif
@@ -4485,7 +4485,7 @@
       fd = dg_here%slope_weight         ! add weight for lower order pieces (fd<1 => stronger limiting)
       
 
-      DO k=1,NE
+      DO k=1,global_here%NE
 
          if (dg_here%dofs(k).gt.1) then
 
@@ -4533,7 +4533,7 @@
       dg_here%iota2taylor = 0.D0
 #endif
 
-      do k=1,ne
+      do k=1,global_here%ne
 
          if (dg_here%dofs(k).gt.1) then
 
@@ -4602,11 +4602,11 @@
 
 #endif
 
-      do k = 1,ne
+      do k = 1,global_here%ne
 
          do ll = 1,dg_here%dofs(k) 
 
-            do ell = 1,3        ! Number of edge neighbors for a triangle
+            do ell = 1,3        ! Number of global_here%edge neighbors for a triangle
 
 !.....Find max and min values over polynomial coefficients
                
@@ -4659,7 +4659,7 @@
       dg_here%iota2taylorvert = 0.D0
 #endif
 
-      do k=1,ne
+      do k=1,global_here%ne
 
          if (dg_here%dofs(k).gt.1) then
 
@@ -4749,7 +4749,7 @@
       dg_here%alphaiota20 = 0.D0
 #endif
 
-      do k = 1,ne
+      do k = 1,global_here%ne
 
          if (dg_here%dofs(k).gt.1) then
 
@@ -4902,7 +4902,7 @@
       dg_here%alphaiota2 = 0.D0
 #endif
 
-      do k=1,ne
+      do k=1,global_here%ne
 
          if (dg_here%dofs(k).gt.1) then
 
@@ -4931,7 +4931,7 @@
 
       enddo
 
-!.... Choose smallest (minimum) alpha for derivative in x or y
+!.... Choose smallest (minimum) global_here%alpha for derivative in global_here%x or global_here%y
 
       dg_here%alphaZEm = 0.D0
       dg_here%alphaQXm = 0.D0
@@ -4946,11 +4946,11 @@
       dg_here%alphaiota2m = 0.D0
 #endif
 
-      do k=1,ne
+      do k=1,global_here%ne
 
          if (dg_here%dofs(k).gt.1) then
             
-            do bb = 1,pdg_el(k)
+            do bb = 1,global_here%pdg_el(k)
 
                if( (bb+1)*(bb+2)/2.le.dg_here%dofs(k) ) then
 
@@ -5000,11 +5000,11 @@
       dg_here%alphaiota2_max = 0.D0
 #endif
 
-      do k=1,ne
+      do k=1,global_here%ne
 
          if (dg_here%dofs(k).gt.1) then
 
-            do bb =1,pdg_el(k)
+            do bb =1,global_here%pdg_el(k)
 
                if( (bb+1)*(bb+2)/2.le.dg_here%dofs(k)) then
 
@@ -5040,7 +5040,7 @@
       enddo
 
 !.....Limit on the Master element in the Taylor basis, via reconstruction 
-!.....of unconstrained solutions with alpha constraints
+!.....of unconstrained solutions with global_here%alpha constraints
 
       dg_here%limitZE = 0.D0
       dg_here%limitQX = 0.D0
@@ -5057,7 +5057,7 @@
       dg_here%limitiota2 = 0.D0
 #endif
 
-      do k=1,ne
+      do k=1,global_here%ne
 
          dg_here%lim_count = 0
 
@@ -5082,7 +5082,7 @@
 
                elseif ( ll.ge.2 ) then
                   
-                  do bb=1,pdg_el(k)
+                  do bb=1,global_here%pdg_el(k)
 
                      if ( ll.le.( ( (bb+1)*(bb+2)) / 2.D0 ).and.(ll.gt.
      &                    (bb*(bb+1)/2.D0) ) ) then
@@ -5112,7 +5112,7 @@
 !$$$  if ( ( dg_here%alphaZE_max(k,(bb*(bb+1))/2 + 1).lt.1.D0.or.
 !$$$  &                       dg_here%alphaQX_max(k,(bb*(bb+1))/2 + 1).lt.1.D0.or.
 !$$$  &                       dg_here%alphaQY_max(k,(bb*(bb+1))/2 + 1).lt.1.D0 ).and.
-!$$$  &                       chem_flag.ne.1.and.tracer_flag.ne.1 ) then
+!$$$  &                       global_here%chem_flag.global_here%ne.1.and.global_here%tracer_flag.global_here%ne.1 ) then
 !$$$  
 !$$$  dg_here%lim_count = 1  
 !$$$  
@@ -5120,7 +5120,7 @@
 !$$$  &                          dg_here%alphaQX_max(k,(bb*(bb+1))/2 + 1).lt.1.D0.or.
 !$$$  &                          dg_here%alphaQY_max(k,(bb*(bb+1))/2 + 1).lt.1.D0.or.
 !$$$  &                          dg_here%alphaiota_max(k,(bb*(bb+1))/2 + 1).lt.1.D0 ).and.
-!$$$  &                          chem_flag.ne.1.and.tracer_flag.eq.1 ) then
+!$$$  &                          global_here%chem_flag.global_here%ne.1.and.global_here%tracer_flag.eq.1 ) then
 !$$$  
 !$$$  dg_here%lim_count = 1   
 !$$$  
@@ -5129,7 +5129,7 @@
 !$$$  &                          dg_here%alphaQY_max(k,(bb*(bb+1))/2 + 1).lt.1.D0.or.
 !$$$  &                          dg_here%alphaiota_max(k,(bb*(bb+1))/2 + 1).lt.1.D0.or.
 !$$$  &                          dg_here%alphaiota2_max(k,(bb*(bb+1))/2 + 1).lt.1.D0 ).and.
-!$$$  &                          chem_flag.eq.1 ) then
+!$$$  &                          global_here%chem_flag.eq.1 ) then
 !$$$  
 !$$$  dg_here%lim_count = 1 
 !$$$  
@@ -5168,7 +5168,7 @@
       dg_here%iota2const =  0.D0
 #endif
 
-      do k=1,ne
+      do k=1,global_here%ne
 
          if (dg_here%dofs(k).gt.1) then
                                 !do lll=1,3
@@ -5211,7 +5211,7 @@
 
 !.....Set limit values
 
-      do k=1,ne
+      do k=1,global_here%ne
 
          if (dg_here%dofs(k).gt.1) then
 
@@ -5422,38 +5422,38 @@
 
       do ell=1,mnp
 
-         do ll=1,minval(dg_here%dofs(neigh_elem(ell,1:nneigh_elem(ell))))
+         do ll=1,minval(dg_here%dofs(global_here%neigh_elem(ell,1:global_here%nneigh_elem(ell))))
 
 !.....Find max and min values over polynomial coefficients
 
-            dg_here%ZEmax(ell,ll) = max(maxval( dg_here%ZEtaylor(NEIGH_ELEM(ell,1:nneigh_elem(ell)),ll,1) )
+            dg_here%ZEmax(ell,ll) = max(maxval( dg_here%ZEtaylor(global_here%NEIGH_ELEM(ell,1:global_here%nneigh_elem(ell)),ll,1) )
      &           , dg_here%ZEmax(ell,ll))
-            dg_here%QXmax(ell,ll) = max(maxval( dg_here%QXtaylor(NEIGH_ELEM(ell,1:nneigh_elem(ell)),ll,1) )
+            dg_here%QXmax(ell,ll) = max(maxval( dg_here%QXtaylor(global_here%NEIGH_ELEM(ell,1:global_here%nneigh_elem(ell)),ll,1) )
      &           , dg_here%QXmax(ell,ll))
-            dg_here%QYmax(ell,ll) = max(maxval( dg_here%QYtaylor(NEIGH_ELEM(ell,1:nneigh_elem(ell)),ll,1) )
+            dg_here%QYmax(ell,ll) = max(maxval( dg_here%QYtaylor(global_here%NEIGH_ELEM(ell,1:global_here%nneigh_elem(ell)),ll,1) )
      &           , dg_here%QYmax(ell,ll))
-            dg_here%ZEmin(ell,ll) = min(minval( dg_here%ZEtaylor(NEIGH_ELEM(ell,1:nneigh_elem(ell)),ll,1) )
+            dg_here%ZEmin(ell,ll) = min(minval( dg_here%ZEtaylor(global_here%NEIGH_ELEM(ell,1:global_here%nneigh_elem(ell)),ll,1) )
      &           , dg_here%ZEmin(ell,ll))
-            dg_here%QXmin(ell,ll) = min(minval( dg_here%QXtaylor(NEIGH_ELEM(ell,1:nneigh_elem(ell)),ll,1) )
+            dg_here%QXmin(ell,ll) = min(minval( dg_here%QXtaylor(global_here%NEIGH_ELEM(ell,1:global_here%nneigh_elem(ell)),ll,1) )
      &           , dg_here%QXmin(ell,ll))
-            dg_here%QYmin(ell,ll) = min(minval( dg_here%QYtaylor(NEIGH_ELEM(ell,1:nneigh_elem(ell)),ll,1) )
+            dg_here%QYmin(ell,ll) = min(minval( dg_here%QYtaylor(global_here%NEIGH_ELEM(ell,1:global_here%nneigh_elem(ell)),ll,1) )
      &           , dg_here%QYmin(ell,ll))
 
 #ifdef TRACE
-            dg_here%iotamax(ell,ll) = max(maxval( dg_here%iotataylor(NEIGH_ELEM(ell,1:nneigh_elem(ell)),ll,1) )
+            dg_here%iotamax(ell,ll) = max(maxval( dg_here%iotataylor(global_here%NEIGH_ELEM(ell,1:global_here%nneigh_elem(ell)),ll,1) )
      &           , dg_here%iotamax(ell,ll))
-            dg_here%iotamin(ell,ll) = min(minval( dg_here%iotataylor(NEIGH_ELEM(ell,1:nneigh_elem(ell)),ll,1) )
+            dg_here%iotamin(ell,ll) = min(minval( dg_here%iotataylor(global_here%NEIGH_ELEM(ell,1:global_here%nneigh_elem(ell)),ll,1) )
      &           , dg_here%iotamin(ell,ll))
 #endif
 
 #ifdef CHEM
-            dg_here%iotamax(ell,ll) = max(maxval( dg_here%iotataylor(NEIGH_ELEM(ell,1:nneigh_elem(ell)),ll,1) )
+            dg_here%iotamax(ell,ll) = max(maxval( dg_here%iotataylor(global_here%NEIGH_ELEM(ell,1:global_here%nneigh_elem(ell)),ll,1) )
      &           , dg_here%iotamax(ell,ll))
-            dg_here%iota2max(ell,ll) = max(maxval( dg_here%iota2taylor(NEIGH_ELEM(ell,1:nneigh_elem(ell)),ll,1) )
+            dg_here%iota2max(ell,ll) = max(maxval( dg_here%iota2taylor(global_here%NEIGH_ELEM(ell,1:global_here%nneigh_elem(ell)),ll,1) )
      &           , dg_here%iota2max(ell,ll))
-            dg_here%iotamin(ell,ll) = min(minval( dg_here%iotataylor(NEIGH_ELEM(ell,1:nneigh_elem(ell)),ll,1) )
+            dg_here%iotamin(ell,ll) = min(minval( dg_here%iotataylor(global_here%NEIGH_ELEM(ell,1:global_here%nneigh_elem(ell)),ll,1) )
      &           , dg_here%iotamin(ell,ll))
-            dg_here%iota2min(ell,ll) = min(minval( dg_here%iota2taylor(NEIGH_ELEM(ell,1:nneigh_elem(ell)),ll,1) )
+            dg_here%iota2min(ell,ll) = min(minval( dg_here%iota2taylor(global_here%NEIGH_ELEM(ell,1:global_here%nneigh_elem(ell)),ll,1) )
      &           , dg_here%iota2min(ell,ll))
 #endif
             
@@ -5600,40 +5600,40 @@
                
                do ll=1,dg_here%dofs(k)
 
-                  if (dg_here%ZEmin(nm(k,lll),ll).ne.dg_here%ZEmax(nm(k,lll),ll)) then
+                  if (dg_here%ZEmin(global_here%nm(k,lll),ll).global_here%ne.dg_here%ZEmax(global_here%nm(k,lll),ll)) then
 
                      if ( ( dg_here%ZEtaylorvert(k,ll,lll).gt.dg_here%ZEtaylor(k,ll,1) ).and.
      &                    ( abs(dg_here%ZEtaylorvert(k,ll,lll)-dg_here%ZEtaylor(k,ll,1)).gt.1.0E-15 ).and.
-     &                    ( dg_here%ZEmax(nm(k,lll),ll).ne.dg_here%ZEtaylor(k,ll,1) ) ) then  
+     &                    ( dg_here%ZEmax(global_here%nm(k,lll),ll).global_here%ne.dg_here%ZEtaylor(k,ll,1) ) ) then  
 
-                        dg_here%alphaZE0(k,ll,lll) = min(1.D0,  ( dg_here%ZEmax(nm(k,lll),ll)
+                        dg_here%alphaZE0(k,ll,lll) = min(1.D0,  ( dg_here%ZEmax(global_here%nm(k,lll),ll)
      &                       - dg_here%ZEtaylor(k,ll,1) )/ (dg_here%ZEtaylorvert(k,ll,lll) - dg_here%ZEtaylor(k,ll,1)))
 
                                 !adapted part
 
                      elseif ( ( dg_here%ZEtaylorvert(k,ll,lll).gt.dg_here%ZEtaylor(k,ll,1) ).and.
      &                       ( abs(dg_here%ZEtaylorvert(k,ll,lll)-dg_here%ZEtaylor(k,ll,1)).gt.1.0E-15 ).and.
-     &                       ( dg_here%ZEmax(nm(k,lll),ll).eq.dg_here%ZEtaylor(k,ll,1) ) ) then 
+     &                       ( dg_here%ZEmax(global_here%nm(k,lll),ll).eq.dg_here%ZEtaylor(k,ll,1) ) ) then 
 
-                        dg_here%alphaZE0(k,ll,lll) = min(fd, abs( ( dg_here%ZEmax(nm(k,lll),ll)
-     &                       - dg_here%ZEmin(nm(k,lll),ll) )/(dg_here%ZEtaylorvert(k,ll,lll) - dg_here%ZEmax(nm(k,lll),ll)) ) ) 
+                        dg_here%alphaZE0(k,ll,lll) = min(fd, abs( ( dg_here%ZEmax(global_here%nm(k,lll),ll)
+     &                       - dg_here%ZEmin(global_here%nm(k,lll),ll) )/(dg_here%ZEtaylorvert(k,ll,lll) - dg_here%ZEmax(global_here%nm(k,lll),ll)) ) ) 
                         
 
                      elseif ( (dg_here%ZEtaylorvert(k,ll,lll).lt.dg_here%ZEtaylor(k,ll,1) )
      &                       .and.( abs(dg_here%ZEtaylorvert(k,ll,lll)-dg_here%ZEtaylor(k,ll,1)).gt.1.0E-15 ).and.
-     &                       ( dg_here%ZEmin(nm(k,lll),ll).ne.dg_here%ZEtaylor(k,ll,1) ) ) then 
+     &                       ( dg_here%ZEmin(global_here%nm(k,lll),ll).global_here%ne.dg_here%ZEtaylor(k,ll,1) ) ) then 
 
-                        dg_here%alphaZE0(k,ll,lll) = min( 1.D0,( dg_here%ZEmin(nm(k,lll),ll)
+                        dg_here%alphaZE0(k,ll,lll) = min( 1.D0,( dg_here%ZEmin(global_here%nm(k,lll),ll)
      &                       - dg_here%ZEtaylor(k,ll,1) )/( dg_here%ZEtaylorvert(k,ll,lll)-dg_here%ZEtaylor(k,ll,1)))
 
                                 !adapted part
 
                      elseif ( (dg_here%ZEtaylorvert(k,ll,lll).lt.dg_here%ZEtaylor(k,ll,1) )
      &                       .and.( abs(dg_here%ZEtaylorvert(k,ll,lll)-dg_here%ZEtaylor(k,ll,1)).gt.1.0E-15 ).and.
-     &                       ( dg_here%ZEmin(nm(k,lll),ll).eq.dg_here%ZEtaylor(k,ll,1) ) ) then 
+     &                       ( dg_here%ZEmin(global_here%nm(k,lll),ll).eq.dg_here%ZEtaylor(k,ll,1) ) ) then 
 
-                        dg_here%alphaZE0(k,ll,lll) = min( fd,abs( ( dg_here%ZEmin(nm(k,lll),ll)
-     &                       - dg_here%ZEmax(nm(k,lll),ll) )/( dg_here%ZEtaylorvert(k,ll,lll)- dg_here%ZEmin(nm(k,lll),ll))) )
+                        dg_here%alphaZE0(k,ll,lll) = min( fd,abs( ( dg_here%ZEmin(global_here%nm(k,lll),ll)
+     &                       - dg_here%ZEmax(global_here%nm(k,lll),ll) )/( dg_here%ZEtaylorvert(k,ll,lll)- dg_here%ZEmin(global_here%nm(k,lll),ll))) )
                         
                         
                      elseif ( ( dg_here%ZEtaylorvert(k,ll,lll).eq.dg_here%ZEtaylor(k,ll,1) ).or.
@@ -5649,40 +5649,40 @@
 
                   endif
 #ifdef TRACE
-                  if (dg_here%iotamin(nm(k,lll),ll).ne.dg_here%iotamax(nm(k,lll),ll)) then
+                  if (dg_here%iotamin(global_here%nm(k,lll),ll).global_here%ne.dg_here%iotamax(global_here%nm(k,lll),ll)) then
 
                      if ( ( dg_here%iotataylorvert(k,ll,lll).gt.dg_here%iotataylor(k,ll,1) ).and.
      &                    ( abs(dg_here%iotataylorvert(k,ll,lll)-dg_here%iotataylor(k,ll,1)).gt.1.0E-15 ).and.
-     &                    ( dg_here%iotamax(nm(k,lll),ll).ne.dg_here%iotataylor(k,ll,1) ) ) then  
+     &                    ( dg_here%iotamax(global_here%nm(k,lll),ll).global_here%ne.dg_here%iotataylor(k,ll,1) ) ) then  
 
-                        dg_here%alphaiota0(k,ll,lll) = min(1.D0,  ( dg_here%iotamax(nm(k,lll),ll)
+                        dg_here%alphaiota0(k,ll,lll) = min(1.D0,  ( dg_here%iotamax(global_here%nm(k,lll),ll)
      &                       - dg_here%iotataylor(k,ll,1) )/ (dg_here%iotataylorvert(k,ll,lll) - dg_here%iotataylor(k,ll,1)))
 
                                 !adapted part
 
                      elseif ( ( dg_here%iotataylorvert(k,ll,lll).gt.dg_here%iotataylor(k,ll,1) ).and.
      &                       ( abs(dg_here%iotataylorvert(k,ll,lll)-dg_here%iotataylor(k,ll,1)).gt.1.0E-15 ).and.
-     &                       ( dg_here%iotamax(nm(k,lll),ll).eq.dg_here%iotataylor(k,ll,1) ) ) then 
+     &                       ( dg_here%iotamax(global_here%nm(k,lll),ll).eq.dg_here%iotataylor(k,ll,1) ) ) then 
 
-                        dg_here%alphaiota0(k,ll,lll) = min(fd, abs( ( dg_here%iotamax(nm(k,lll),ll)
-     &                       - dg_here%iotamin(nm(k,lll),ll) )/(dg_here%iotataylorvert(k,ll,lll) - dg_here%iotamax(nm(k,lll),ll)) ) ) 
+                        dg_here%alphaiota0(k,ll,lll) = min(fd, abs( ( dg_here%iotamax(global_here%nm(k,lll),ll)
+     &                       - dg_here%iotamin(global_here%nm(k,lll),ll) )/(dg_here%iotataylorvert(k,ll,lll) - dg_here%iotamax(global_here%nm(k,lll),ll)) ) ) 
                         
 
                      elseif ( (dg_here%iotataylorvert(k,ll,lll).lt.dg_here%iotataylor(k,ll,1) )
      &                       .and.( abs(dg_here%iotataylorvert(k,ll,lll)-dg_here%iotataylor(k,ll,1)).gt.1.0E-15 ).and.
-     &                       ( dg_here%iotamin(nm(k,lll),ll).ne.dg_here%iotataylor(k,ll,1) ) ) then 
+     &                       ( dg_here%iotamin(global_here%nm(k,lll),ll).global_here%ne.dg_here%iotataylor(k,ll,1) ) ) then 
 
-                        dg_here%alphaiota0(k,ll,lll) = min( 1.D0,( dg_here%iotamin(nm(k,lll),ll)
+                        dg_here%alphaiota0(k,ll,lll) = min( 1.D0,( dg_here%iotamin(global_here%nm(k,lll),ll)
      &                       - dg_here%iotataylor(k,ll,1) )/( dg_here%iotataylorvert(k,ll,lll)-dg_here%iotataylor(k,ll,1)))
 
                                 !adapted part
 
                      elseif ( (dg_here%iotataylorvert(k,ll,lll).lt.dg_here%iotataylor(k,ll,1) )
      &                       .and.( abs(dg_here%iotataylorvert(k,ll,lll)-dg_here%iotataylor(k,ll,1)).gt.1.0E-15 ).and.
-     &                       ( dg_here%iotamin(nm(k,lll),ll).eq.dg_here%iotataylor(k,ll,1) ) ) then 
+     &                       ( dg_here%iotamin(global_here%nm(k,lll),ll).eq.dg_here%iotataylor(k,ll,1) ) ) then 
 
-                        dg_here%alphaiota0(k,ll,lll) = min( fd,abs( ( dg_here%iotamin(nm(k,lll),ll)
-     &                       - dg_here%iotamax(nm(k,lll),ll) )/( dg_here%iotataylorvert(k,ll,lll)- dg_here%iotamin(nm(k,lll),ll))) )
+                        dg_here%alphaiota0(k,ll,lll) = min( fd,abs( ( dg_here%iotamin(global_here%nm(k,lll),ll)
+     &                       - dg_here%iotamax(global_here%nm(k,lll),ll) )/( dg_here%iotataylorvert(k,ll,lll)- dg_here%iotamin(global_here%nm(k,lll),ll))) )
                         
                         
                      elseif ( ( dg_here%iotataylorvert(k,ll,lll).eq.dg_here%iotataylor(k,ll,1) ).or.
@@ -5700,40 +5700,40 @@
 #endif
                   
 #ifdef CHEM
-                  if (dg_here%iotamin(nm(k,lll),ll).ne.dg_here%iotamax(nm(k,lll),ll)) then
+                  if (dg_here%iotamin(global_here%nm(k,lll),ll).global_here%ne.dg_here%iotamax(global_here%nm(k,lll),ll)) then
 
                      if ( ( dg_here%iotataylorvert(k,ll,lll).gt.dg_here%iotataylor(k,ll,1) ).and.
      &                    ( abs(dg_here%iotataylorvert(k,ll,lll)-dg_here%iotataylor(k,ll,1)).gt.1.0E-15 ).and.
-     &                    ( dg_here%iotamax(nm(k,lll),ll).ne.dg_here%iotataylor(k,ll,1) ) ) then  
+     &                    ( dg_here%iotamax(global_here%nm(k,lll),ll).global_here%ne.dg_here%iotataylor(k,ll,1) ) ) then  
 
-                        dg_here%alphaiota0(k,ll,lll) = min(1.D0,  ( dg_here%iotamax(nm(k,lll),ll)
+                        dg_here%alphaiota0(k,ll,lll) = min(1.D0,  ( dg_here%iotamax(global_here%nm(k,lll),ll)
      &                       - dg_here%iotataylor(k,ll,1) )/ (dg_here%iotataylorvert(k,ll,lll) - dg_here%iotataylor(k,ll,1)))
 
                                 !adapted part
 
                      elseif ( ( dg_here%iotataylorvert(k,ll,lll).gt.dg_here%iotataylor(k,ll,1) ).and.
      &                       ( abs(dg_here%iotataylorvert(k,ll,lll)-dg_here%iotataylor(k,ll,1)).gt.1.0E-15 ).and.
-     &                       ( dg_here%iotamax(nm(k,lll),ll).eq.dg_here%iotataylor(k,ll,1) ) ) then 
+     &                       ( dg_here%iotamax(global_here%nm(k,lll),ll).eq.dg_here%iotataylor(k,ll,1) ) ) then 
 
-                        dg_here%alphaiota0(k,ll,lll) = min(fd, abs( ( dg_here%iotamax(nm(k,lll),ll)
-     &                       - dg_here%iotamin(nm(k,lll),ll) )/(dg_here%iotataylorvert(k,ll,lll) - dg_here%iotamax(nm(k,lll),ll)) ) ) 
+                        dg_here%alphaiota0(k,ll,lll) = min(fd, abs( ( dg_here%iotamax(global_here%nm(k,lll),ll)
+     &                       - dg_here%iotamin(global_here%nm(k,lll),ll) )/(dg_here%iotataylorvert(k,ll,lll) - dg_here%iotamax(global_here%nm(k,lll),ll)) ) ) 
                         
 
                      elseif ( (dg_here%iotataylorvert(k,ll,lll).lt.dg_here%iotataylor(k,ll,1) )
      &                       .and.( abs(dg_here%iotataylorvert(k,ll,lll)-dg_here%iotataylor(k,ll,1)).gt.1.0E-15 ).and.
-     &                       ( dg_here%iotamin(nm(k,lll),ll).ne.dg_here%iotataylor(k,ll,1) ) ) then 
+     &                       ( dg_here%iotamin(global_here%nm(k,lll),ll).global_here%ne.dg_here%iotataylor(k,ll,1) ) ) then 
 
-                        dg_here%alphaiota0(k,ll,lll) = min( 1.D0,( dg_here%iotamin(nm(k,lll),ll)
+                        dg_here%alphaiota0(k,ll,lll) = min( 1.D0,( dg_here%iotamin(global_here%nm(k,lll),ll)
      &                       - dg_here%iotataylor(k,ll,1) )/( dg_here%iotataylorvert(k,ll,lll)-dg_here%iotataylor(k,ll,1)))
 
                                 !adapted part
 
                      elseif ( (dg_here%iotataylorvert(k,ll,lll).lt.dg_here%iotataylor(k,ll,1) )
      &                       .and.( abs(dg_here%iotataylorvert(k,ll,lll)-dg_here%iotataylor(k,ll,1)).gt.1.0E-15 ).and.
-     &                       ( dg_here%iotamin(nm(k,lll),ll).eq.dg_here%iotataylor(k,ll,1) ) ) then 
+     &                       ( dg_here%iotamin(global_here%nm(k,lll),ll).eq.dg_here%iotataylor(k,ll,1) ) ) then 
 
-                        dg_here%alphaiota0(k,ll,lll) = min( fd,abs( ( dg_here%iotamin(nm(k,lll),ll)
-     &                       - dg_here%iotamax(nm(k,lll),ll) )/( dg_here%iotataylorvert(k,ll,lll)- dg_here%iotamin(nm(k,lll),ll))) )
+                        dg_here%alphaiota0(k,ll,lll) = min( fd,abs( ( dg_here%iotamin(global_here%nm(k,lll),ll)
+     &                       - dg_here%iotamax(global_here%nm(k,lll),ll) )/( dg_here%iotataylorvert(k,ll,lll)- dg_here%iotamin(global_here%nm(k,lll),ll))) )
                         
                         
                      elseif ( ( dg_here%iotataylorvert(k,ll,lll).eq.dg_here%iotataylor(k,ll,1) ).or.
@@ -5749,40 +5749,40 @@
 
                   endif
 
-                  if (dg_here%iota2min(nm(k,lll),ll).ne.dg_here%iota2max(nm(k,lll),ll)) then
+                  if (dg_here%iota2min(global_here%nm(k,lll),ll).global_here%ne.dg_here%iota2max(global_here%nm(k,lll),ll)) then
 
                      if ( ( dg_here%iota2taylorvert(k,ll,lll).gt.dg_here%iota2taylor(k,ll,1) ).and.
      &                    ( abs(dg_here%iota2taylorvert(k,ll,lll)-dg_here%iota2taylor(k,ll,1)).gt.1.0E-15 ).and.
-     &                    ( dg_here%iota2max(nm(k,lll),ll).ne.dg_here%iota2taylor(k,ll,1) ) ) then  
+     &                    ( dg_here%iota2max(global_here%nm(k,lll),ll).global_here%ne.dg_here%iota2taylor(k,ll,1) ) ) then  
 
-                        dg_here%alphaiota20(k,ll,lll) = min(1.D0,  ( dg_here%iota2max(nm(k,lll),ll)
+                        dg_here%alphaiota20(k,ll,lll) = min(1.D0,  ( dg_here%iota2max(global_here%nm(k,lll),ll)
      &                       - dg_here%iota2taylor(k,ll,1) )/ (dg_here%iota2taylorvert(k,ll,lll) - dg_here%iota2taylor(k,ll,1)))
 
                                 !adapted part
 
                      elseif ( ( dg_here%iota2taylorvert(k,ll,lll).gt.dg_here%iota2taylor(k,ll,1) ).and.
      &                       ( abs(dg_here%iota2taylorvert(k,ll,lll)-dg_here%iota2taylor(k,ll,1)).gt.1.0E-15 ).and.
-     &                       ( dg_here%iota2max(nm(k,lll),ll).eq.dg_here%iota2taylor(k,ll,1) ) ) then 
+     &                       ( dg_here%iota2max(global_here%nm(k,lll),ll).eq.dg_here%iota2taylor(k,ll,1) ) ) then 
 
-                        dg_here%alphaiota20(k,ll,lll) = min(fd, abs( ( dg_here%iota2max(nm(k,lll),ll)
-     &                       - dg_here%iota2min(nm(k,lll),ll) )/(dg_here%iota2taylorvert(k,ll,lll) - dg_here%iota2max(nm(k,lll),ll)) ) ) 
+                        dg_here%alphaiota20(k,ll,lll) = min(fd, abs( ( dg_here%iota2max(global_here%nm(k,lll),ll)
+     &                       - dg_here%iota2min(global_here%nm(k,lll),ll) )/(dg_here%iota2taylorvert(k,ll,lll) - dg_here%iota2max(global_here%nm(k,lll),ll)) ) ) 
                         
 
                      elseif ( (dg_here%iota2taylorvert(k,ll,lll).lt.dg_here%iota2taylor(k,ll,1) )
      &                       .and.( abs(dg_here%iota2taylorvert(k,ll,lll)-dg_here%iota2taylor(k,ll,1)).gt.1.0E-15 ).and.
-     &                       ( dg_here%iota2min(nm(k,lll),ll).ne.dg_here%iota2taylor(k,ll,1) ) ) then 
+     &                       ( dg_here%iota2min(global_here%nm(k,lll),ll).global_here%ne.dg_here%iota2taylor(k,ll,1) ) ) then 
 
-                        dg_here%alphaiota20(k,ll,lll) = min( 1.D0,( dg_here%iota2min(nm(k,lll),ll)
+                        dg_here%alphaiota20(k,ll,lll) = min( 1.D0,( dg_here%iota2min(global_here%nm(k,lll),ll)
      &                       - dg_here%iota2taylor(k,ll,1) )/( dg_here%iota2taylorvert(k,ll,lll)-dg_here%iota2taylor(k,ll,1)))
 
                                 !adapted part
 
                      elseif ( (dg_here%iota2taylorvert(k,ll,lll).lt.dg_here%iota2taylor(k,ll,1) )
      &                       .and.( abs(dg_here%iota2taylorvert(k,ll,lll)-dg_here%iota2taylor(k,ll,1)).gt.1.0E-15 ).and.
-     &                       ( dg_here%iota2min(nm(k,lll),ll).eq.dg_here%iota2taylor(k,ll,1) ) ) then 
+     &                       ( dg_here%iota2min(global_here%nm(k,lll),ll).eq.dg_here%iota2taylor(k,ll,1) ) ) then 
 
-                        dg_here%alphaiota20(k,ll,lll) = min( fd,abs( ( dg_here%iota2min(nm(k,lll),ll)
-     &                       - dg_here%iota2max(nm(k,lll),ll) )/( dg_here%iota2taylorvert(k,ll,lll)- dg_here%iota2min(nm(k,lll),ll))) )
+                        dg_here%alphaiota20(k,ll,lll) = min( fd,abs( ( dg_here%iota2min(global_here%nm(k,lll),ll)
+     &                       - dg_here%iota2max(global_here%nm(k,lll),ll) )/( dg_here%iota2taylorvert(k,ll,lll)- dg_here%iota2min(global_here%nm(k,lll),ll))) )
                         
                         
                      elseif ( ( dg_here%iota2taylorvert(k,ll,lll).eq.dg_here%iota2taylor(k,ll,1) ).or.
@@ -5799,40 +5799,40 @@
                   endif
 #endif
 
-                  if (dg_here%QXmin(nm(k,lll),ll).ne.dg_here%QXmax(nm(k,lll),ll)) then
+                  if (dg_here%QXmin(global_here%nm(k,lll),ll).global_here%ne.dg_here%QXmax(global_here%nm(k,lll),ll)) then
 
                      if ( ( dg_here%QXtaylorvert(k,ll,lll).gt.dg_here%QXtaylor(k,ll,1) ).and.
      &                    ( abs(dg_here%QXtaylorvert(k,ll,lll)-dg_here%QXtaylor(k,ll,1)).gt.1.0E-15 ).and.
-     &                    ( dg_here%QXmax(nm(k,lll),ll).ne.dg_here%QXtaylor(k,ll,1) ) ) then  
+     &                    ( dg_here%QXmax(global_here%nm(k,lll),ll).global_here%ne.dg_here%QXtaylor(k,ll,1) ) ) then  
 
-                        dg_here%alphaQX0(k,ll,lll) = min(1.D0,  ( dg_here%QXmax(nm(k,lll),ll)
+                        dg_here%alphaQX0(k,ll,lll) = min(1.D0,  ( dg_here%QXmax(global_here%nm(k,lll),ll)
      &                       - dg_here%QXtaylor(k,ll,1) )/ (dg_here%QXtaylorvert(k,ll,lll) - dg_here%QXtaylor(k,ll,1)))
 
                                 !adapted part
 
                      elseif ( ( dg_here%QXtaylorvert(k,ll,lll).gt.dg_here%QXtaylor(k,ll,1) ).and.
      &                       ( abs(dg_here%QXtaylorvert(k,ll,lll)-dg_here%QXtaylor(k,ll,1)).gt.1.0E-15 ).and.
-     &                       ( dg_here%QXmax(nm(k,lll),ll).eq.dg_here%QXtaylor(k,ll,1) ) ) then 
+     &                       ( dg_here%QXmax(global_here%nm(k,lll),ll).eq.dg_here%QXtaylor(k,ll,1) ) ) then 
 
-                        dg_here%alphaQX0(k,ll,lll) = min(fd, abs( ( dg_here%QXmax(nm(k,lll),ll)
-     &                       - dg_here%QXmin(nm(k,lll),ll) )/(dg_here%QXtaylorvert(k,ll,lll) - dg_here%QXmax(nm(k,lll),ll)) ) ) 
+                        dg_here%alphaQX0(k,ll,lll) = min(fd, abs( ( dg_here%QXmax(global_here%nm(k,lll),ll)
+     &                       - dg_here%QXmin(global_here%nm(k,lll),ll) )/(dg_here%QXtaylorvert(k,ll,lll) - dg_here%QXmax(global_here%nm(k,lll),ll)) ) ) 
                         
 
                      elseif ( (dg_here%QXtaylorvert(k,ll,lll).lt.dg_here%QXtaylor(k,ll,1) )
      &                       .and.( abs(dg_here%QXtaylorvert(k,ll,lll)-dg_here%QXtaylor(k,ll,1)).gt.1.0E-15 ).and.
-     &                       ( dg_here%QXmin(nm(k,lll),ll).ne.dg_here%QXtaylor(k,ll,1) ) ) then 
+     &                       ( dg_here%QXmin(global_here%nm(k,lll),ll).global_here%ne.dg_here%QXtaylor(k,ll,1) ) ) then 
 
-                        dg_here%alphaQX0(k,ll,lll) = min( 1.D0,( dg_here%QXmin(nm(k,lll),ll)
+                        dg_here%alphaQX0(k,ll,lll) = min( 1.D0,( dg_here%QXmin(global_here%nm(k,lll),ll)
      &                       - dg_here%QXtaylor(k,ll,1) )/( dg_here%QXtaylorvert(k,ll,lll)-dg_here%QXtaylor(k,ll,1)))
 
                                 !adapted part
 
                      elseif ( (dg_here%QXtaylorvert(k,ll,lll).lt.dg_here%QXtaylor(k,ll,1) )
      &                       .and.( abs(dg_here%QXtaylorvert(k,ll,lll)-dg_here%QXtaylor(k,ll,1)).gt.1.0E-15 ).and.
-     &                       ( dg_here%QXmin(nm(k,lll),ll).eq.dg_here%QXtaylor(k,ll,1) ) ) then 
+     &                       ( dg_here%QXmin(global_here%nm(k,lll),ll).eq.dg_here%QXtaylor(k,ll,1) ) ) then 
 
-                        dg_here%alphaQX0(k,ll,lll) = min( fd,abs( ( dg_here%QXmin(nm(k,lll),ll)
-     &                       - dg_here%QXmax(nm(k,lll),ll) )/( dg_here%QXtaylorvert(k,ll,lll)- dg_here%QXmin(nm(k,lll),ll))) )
+                        dg_here%alphaQX0(k,ll,lll) = min( fd,abs( ( dg_here%QXmin(global_here%nm(k,lll),ll)
+     &                       - dg_here%QXmax(global_here%nm(k,lll),ll) )/( dg_here%QXtaylorvert(k,ll,lll)- dg_here%QXmin(global_here%nm(k,lll),ll))) )
                         
                         
                      elseif ( ( dg_here%QXtaylorvert(k,ll,lll).eq.dg_here%QXtaylor(k,ll,1) ).or.
@@ -5849,40 +5849,40 @@
                   endif
 
 
-                  if (dg_here%QYmin(nm(k,lll),ll).ne.dg_here%QYmax(nm(k,lll),ll)) then
+                  if (dg_here%QYmin(global_here%nm(k,lll),ll).global_here%ne.dg_here%QYmax(global_here%nm(k,lll),ll)) then
 
                      if ( ( dg_here%QYtaylorvert(k,ll,lll).gt.dg_here%QYtaylor(k,ll,1) ).and.
      &                    ( abs(dg_here%QYtaylorvert(k,ll,lll)-dg_here%QYtaylor(k,ll,1)).gt.1.0E-15 ).and.
-     &                    ( dg_here%QYmax(nm(k,lll),ll).ne.dg_here%QYtaylor(k,ll,1) ) ) then  
+     &                    ( dg_here%QYmax(global_here%nm(k,lll),ll).global_here%ne.dg_here%QYtaylor(k,ll,1) ) ) then  
 
-                        dg_here%alphaQY0(k,ll,lll) = min(1.D0,  ( dg_here%QYmax(nm(k,lll),ll)
+                        dg_here%alphaQY0(k,ll,lll) = min(1.D0,  ( dg_here%QYmax(global_here%nm(k,lll),ll)
      &                       - dg_here%QYtaylor(k,ll,1) )/ (dg_here%QYtaylorvert(k,ll,lll) - dg_here%QYtaylor(k,ll,1)))
 
                                 !adapted part
 
                      elseif ( ( dg_here%QYtaylorvert(k,ll,lll).gt.dg_here%QYtaylor(k,ll,1) ).and.
      &                       ( abs(dg_here%QYtaylorvert(k,ll,lll)-dg_here%QYtaylor(k,ll,1)).gt.1.0E-15 ).and.
-     &                       ( dg_here%QYmax(nm(k,lll),ll).eq.dg_here%QYtaylor(k,ll,1) ) ) then 
+     &                       ( dg_here%QYmax(global_here%nm(k,lll),ll).eq.dg_here%QYtaylor(k,ll,1) ) ) then 
 
-                        dg_here%alphaQY0(k,ll,lll) = min(fd, abs( ( dg_here%QYmax(nm(k,lll),ll)
-     &                       - dg_here%QYmin(nm(k,lll),ll) )/(dg_here%QYtaylorvert(k,ll,lll) - dg_here%QYmax(nm(k,lll),ll)) ) ) 
+                        dg_here%alphaQY0(k,ll,lll) = min(fd, abs( ( dg_here%QYmax(global_here%nm(k,lll),ll)
+     &                       - dg_here%QYmin(global_here%nm(k,lll),ll) )/(dg_here%QYtaylorvert(k,ll,lll) - dg_here%QYmax(global_here%nm(k,lll),ll)) ) ) 
                         
 
                      elseif ( (dg_here%QYtaylorvert(k,ll,lll).lt.dg_here%QYtaylor(k,ll,1) )
      &                       .and.( abs(dg_here%QYtaylorvert(k,ll,lll)-dg_here%QYtaylor(k,ll,1)).gt.1.0E-15 ).and.
-     &                       ( dg_here%QYmin(nm(k,lll),ll).ne.dg_here%QYtaylor(k,ll,1) ) ) then 
+     &                       ( dg_here%QYmin(global_here%nm(k,lll),ll).global_here%ne.dg_here%QYtaylor(k,ll,1) ) ) then 
 
-                        dg_here%alphaQY0(k,ll,lll) = min( 1.D0,( dg_here%QYmin(nm(k,lll),ll)
+                        dg_here%alphaQY0(k,ll,lll) = min( 1.D0,( dg_here%QYmin(global_here%nm(k,lll),ll)
      &                       - dg_here%QYtaylor(k,ll,1) )/( dg_here%QYtaylorvert(k,ll,lll)-dg_here%QYtaylor(k,ll,1)))
 
                                 !adapted part
 
                      elseif ( (dg_here%QYtaylorvert(k,ll,lll).lt.dg_here%QYtaylor(k,ll,1) )
      &                       .and.( abs(dg_here%QYtaylorvert(k,ll,lll)-dg_here%QYtaylor(k,ll,1)).gt.1.0E-15 ).and.
-     &                       ( dg_here%QYmin(nm(k,lll),ll).eq.dg_here%QYtaylor(k,ll,1) ) ) then 
+     &                       ( dg_here%QYmin(global_here%nm(k,lll),ll).eq.dg_here%QYtaylor(k,ll,1) ) ) then 
 
-                        dg_here%alphaQY0(k,ll,lll) = min( fd,abs( ( dg_here%QYmin(nm(k,lll),ll)
-     &                       - dg_here%QYmax(nm(k,lll),ll) )/( dg_here%QYtaylorvert(k,ll,lll)- dg_here%QYmin(nm(k,lll),ll))) )
+                        dg_here%alphaQY0(k,ll,lll) = min( fd,abs( ( dg_here%QYmin(global_here%nm(k,lll),ll)
+     &                       - dg_here%QYmax(global_here%nm(k,lll),ll) )/( dg_here%QYtaylorvert(k,ll,lll)- dg_here%QYmin(global_here%nm(k,lll),ll))) )
                         
                         
                      elseif ( ( dg_here%QYtaylorvert(k,ll,lll).eq.dg_here%QYtaylor(k,ll,1) ).or.
@@ -5954,7 +5954,7 @@
 
       enddo
 
-!.... Choose smallest (minimum) alpha for derivative in x or y
+!.... Choose smallest (minimum) global_here%alpha for derivative in global_here%x or global_here%y
 
       dg_here%alphaZEm = 0.D0
       dg_here%alphaQXm = 0.D0
@@ -5973,7 +5973,7 @@
 
          if (dg_here%dofs(k).gt.1) then
             
-            do bb = 1,pdg_el(k)
+            do bb = 1,global_here%pdg_el(k)
 
                if( (bb+1)*(bb+2)/2.le.dg_here%dofs(k) ) then
 
@@ -6027,7 +6027,7 @@
 
          if (dg_here%dofs(k).gt.1) then
 
-            do bb =1,pdg_el(k)
+            do bb =1,global_here%pdg_el(k)
 
                if( (bb+1)*(bb+2)/2.le.dg_here%dofs(k)) then
 
@@ -6063,7 +6063,7 @@
       enddo
 
 !.....Limit on the Master element in the Taylor basis, via reconstruction 
-!.....of unconstrained solutions with alpha constraints
+!.....of unconstrained solutions with global_here%alpha constraints
 
 
       dg_here%limitZE = 0.D0
@@ -6106,7 +6106,7 @@
 
                elseif ( ll.ge.2 ) then
                   
-                  do bb=1,pdg_el(k)
+                  do bb=1,global_here%pdg_el(k)
 
                      if ( ll.le.( ( (bb+1)*(bb+2)) / 2.D0 ).and.(ll.gt.
      &                    (bb*(bb+1)/2.D0) ) ) then
@@ -6137,7 +6137,7 @@
 !$$$  if ( ( dg_here%alphaZE_max(k,(bb*(bb+1))/2 + 1).lt.1.D0.or.
 !$$$  &                       dg_here%alphaQX_max(k,(bb*(bb+1))/2 + 1).lt.1.D0.or.
 !$$$  &                       dg_here%alphaQY_max(k,(bb*(bb+1))/2 + 1).lt.1.D0 ).and.
-!$$$  &                       chem_flag.ne.1.and.tracer_flag.ne.1 ) then
+!$$$  &                       global_here%chem_flag.global_here%ne.1.and.global_here%tracer_flag.global_here%ne.1 ) then
 !$$$  
 !$$$  dg_here%lim_count = 1  
 !$$$  
@@ -6145,7 +6145,7 @@
 !$$$  &                          dg_here%alphaQX_max(k,(bb*(bb+1))/2 + 1).lt.1.D0.or.
 !$$$  &                          dg_here%alphaQY_max(k,(bb*(bb+1))/2 + 1).lt.1.D0.or.
 !$$$  &                          dg_here%alphaiota_max(k,(bb*(bb+1))/2 + 1).lt.1.D0 ).and.
-!$$$  &                          chem_flag.ne.1.and.tracer_flag.eq.1 ) then
+!$$$  &                          global_here%chem_flag.global_here%ne.1.and.global_here%tracer_flag.eq.1 ) then
 !$$$  
 !$$$  dg_here%lim_count = 1   
 !$$$  
@@ -6154,7 +6154,7 @@
 !$$$  &                          dg_here%alphaQY_max(k,(bb*(bb+1))/2 + 1).lt.1.D0.or.
 !$$$  &                          dg_here%alphaiota_max(k,(bb*(bb+1))/2 + 1).lt.1.D0.or.
 !$$$  &                          dg_here%alphaiota2_max(k,(bb*(bb+1))/2 + 1).lt.1.D0 ).and.
-!$$$  &                          chem_flag.eq.1 ) then
+!$$$  &                          global_here%chem_flag.eq.1 ) then
 !$$$  
 !$$$  dg_here%lim_count = 1 
 !$$$  
@@ -6316,7 +6316,7 @@
       fd = dg_here%slope_weight         ! add weight for lower order pieces (fd<1 => stronger limiting)
       
 
-      DO k=1,NE
+      DO k=1,global_here%NE
 
          if (dg_here%dofs(k).gt.1) then
 
@@ -6364,7 +6364,7 @@
       dg_here%iota2taylor = 0.D0
 #endif
 
-      do k=1,ne
+      do k=1,global_here%ne
 
          if (dg_here%dofs(k).gt.1) then
 
@@ -6433,11 +6433,11 @@
 
 #endif
 
-      do k = 1,ne
+      do k = 1,global_here%ne
 
          do ll = 1,dg_here%dofs(k) 
 
-            do ell = 1,3        ! Number of edge neighbors for a triangle
+            do ell = 1,3        ! Number of global_here%edge neighbors for a triangle
 
 !.....Find max and min values over polynomial coefficients
                
@@ -6492,7 +6492,7 @@
       dg_here%iota2taylorvert = 0.D0
 #endif
 
-      do k=1,ne
+      do k=1,global_here%ne
 
          if (dg_here%dofs(k).gt.1) then
 
@@ -6583,7 +6583,7 @@
       dg_here%alphaiota20 = 0.D0
 #endif
 
-      do k = 1,ne
+      do k = 1,global_here%ne
 
          if (dg_here%dofs(k).gt.1) then
 
@@ -6611,7 +6611,7 @@
                   endif
 
 #ifdef TRACE
-                  if (iotaminel(k,ll).ne.iotamaxel(k,ll)) then
+                  if (iotaminel(k,ll).global_here%ne.iotamaxel(k,ll)) then
                      
                      if ( dg_here%iotataylorvert(k,ll,lll).gt.dg_here%iotataylor(k,ll,1).and.
      &                    abs((dg_here%iotataylorvert(k,ll,lll)-dg_here%iotataylor(k,ll,1))).gt.1.0E-15 ) then 
@@ -6762,7 +6762,7 @@
       dg_here%alphaiota2 = 0.D0
 #endif
 
-      do k=1,ne
+      do k=1,global_here%ne
 
          if (dg_here%dofs(k).gt.1) then
 
@@ -6791,7 +6791,7 @@
 
       enddo
 
-!.... Choose smallest (minimum) alpha for derivative in x or y
+!.... Choose smallest (minimum) global_here%alpha for derivative in global_here%x or global_here%y
 
       dg_here%alphaZEm = 0.D0
       dg_here%alphaQXm = 0.D0
@@ -6806,11 +6806,11 @@
       dg_here%alphaiota2m = 0.D0
 #endif
 
-      do k=1,ne
+      do k=1,global_here%ne
 
          if (dg_here%dofs(k).gt.1) then
             
-            do bb = 1,pdg_el(k)
+            do bb = 1,global_here%pdg_el(k)
 
                if( (bb+1)*(bb+2)/2.le.dg_here%dofs(k) ) then
 
@@ -6860,11 +6860,11 @@
       dg_here%alphaiota2_max = 0.D0
 #endif
 
-      do k=1,ne
+      do k=1,global_here%ne
 
          if (dg_here%dofs(k).gt.1) then
 
-            do bb =1,pdg_el(k)
+            do bb =1,global_here%pdg_el(k)
 
                if( (bb+1)*(bb+2)/2.le.dg_here%dofs(k)) then
 
@@ -6900,7 +6900,7 @@
       enddo
 
 !.....Limit on the Master element in the Taylor basis, via reconstruction 
-!.....of unconstrained solutions with alpha constraints
+!.....of unconstrained solutions with global_here%alpha constraints
 
 
       dg_here%limitZE = 0.D0
@@ -6918,7 +6918,7 @@
       dg_here%limitiota2 = 0.D0
 #endif
 
-      do k=1,ne
+      do k=1,global_here%ne
 
          dg_here%lim_count = 0
 
@@ -6943,7 +6943,7 @@
 
                elseif ( ll.ge.2 ) then
                   
-                  do bb=1,pdg_el(k)
+                  do bb=1,global_here%pdg_el(k)
 
                      if ( ll.le.( ( (bb+1)*(bb+2)) / 2.D0 ).and.(ll.gt.
      &                    (bb*(bb+1)/2.D0) ) ) then
@@ -6973,7 +6973,7 @@
 !$$$  if ( ( dg_here%alphaZE_max(k,(bb*(bb+1))/2 + 1).lt.1.D0.or.
 !$$$  &                       dg_here%alphaQX_max(k,(bb*(bb+1))/2 + 1).lt.1.D0.or.
 !$$$  &                       dg_here%alphaQY_max(k,(bb*(bb+1))/2 + 1).lt.1.D0 ).and.
-!$$$  &                       chem_flag.ne.1.and.tracer_flag.ne.1 ) then
+!$$$  &                       global_here%chem_flag.global_here%ne.1.and.global_here%tracer_flag.global_here%ne.1 ) then
 !$$$  
 !$$$  dg_here%lim_count = 1  
 !$$$  
@@ -6981,7 +6981,7 @@
 !$$$  &                          dg_here%alphaQX_max(k,(bb*(bb+1))/2 + 1).lt.1.D0.or.
 !$$$  &                          dg_here%alphaQY_max(k,(bb*(bb+1))/2 + 1).lt.1.D0.or.
 !$$$  &                          dg_here%alphaiota_max(k,(bb*(bb+1))/2 + 1).lt.1.D0 ).and.
-!$$$  &                          chem_flag.ne.1.and.tracer_flag.eq.1 ) then
+!$$$  &                          global_here%chem_flag.global_here%ne.1.and.global_here%tracer_flag.eq.1 ) then
 !$$$  
 !$$$  dg_here%lim_count = 1   
 !$$$  
@@ -6990,7 +6990,7 @@
 !$$$  &                          dg_here%alphaQY_max(k,(bb*(bb+1))/2 + 1).lt.1.D0.or.
 !$$$  &                          dg_here%alphaiota_max(k,(bb*(bb+1))/2 + 1).lt.1.D0.or.
 !$$$  &                          dg_here%alphaiota2_max(k,(bb*(bb+1))/2 + 1).lt.1.D0 ).and.
-!$$$  &                          chem_flag.eq.1 ) then
+!$$$  &                          global_here%chem_flag.eq.1 ) then
 !$$$  
 !$$$  dg_here%lim_count = 1 
 !$$$  
@@ -7029,7 +7029,7 @@
       dg_here%iota2const =  0.D0
 #endif
 
-      do k=1,ne
+      do k=1,global_here%ne
 
          if (dg_here%dofs(k).gt.1) then
                                 !do lll=1,3
@@ -7071,7 +7071,7 @@
 
 !.....Set limit values
 
-      do k=1,ne
+      do k=1,global_here%ne
 
          if (dg_here%dofs(k).gt.1) then
 
@@ -7172,7 +7172,7 @@
       Mixed_ENO = 0
       neigh_flag = 1
       
-      DO k=1,NE
+      DO k=1,global_here%NE
 
          if (dg_here%dofs(k).gt.1) then
 
@@ -7219,7 +7219,7 @@
       dg_here%iota2taylor = 0.D0
 #endif
 
-      do k=1,ne
+      do k=1,global_here%ne
 
          if (dg_here%dofs(k).gt.1) then
 
@@ -7287,7 +7287,7 @@
 #endif
 
 
-      do k=1,ne
+      do k=1,global_here%ne
 
          do ll = dg_here%dofs(k),3,-1
 
@@ -7314,9 +7314,9 @@
 
                                 ! Construct the coeffs in nonlinear reconstruction
 
-               do i = 0,pdg_el(k)
+               do i = 0,global_here%pdg_el(k)
 
-                  do j = 0,pdg_el(k)
+                  do j = 0,global_here%pdg_el(k)
 
                      b_index = (dg_here%bj(ll)+j) * (dg_here%bj(ll) + 1 + j) / 2 + ( dg_here%bj(ll)+j ) * ( dg_here%bi(ll)+i ) 
      &                    + ( dg_here%bi(ll) + i )*(dg_here%bi(ll) + 3 + i)/2 + 1
@@ -7327,58 +7327,58 @@
                         Call factorial(i,dg_here%fact(i))
                         Call factorial(j,dg_here%fact(j))
                         
-                        do mm = 1,dg_here%nagp(pdg_el(k))
+                        do mm = 1,dg_here%nagp(global_here%pdg_el(k))
 
                            ZEtaylor0(k,ll,1) =   ZEtaylor0(k,ll,1) + dg_here%ZEtaylor(k,b_index,1) * 
-     &                          (1.D0/dg_here%fact(i)*dg_here%fact(j))* ( ( dg_here%yagp(mm,pdg_el(k)) - dg_here%xi2BCb(k) )**i
-     &                          *( dg_here%xagp(mm,pdg_el(k)) - dg_here%xi1BCb(k) )**j  )  * dg_here%wagp(mm,pdg_el(k))
+     &                          (1.D0/dg_here%fact(i)*dg_here%fact(j))* ( ( dg_here%yagp(mm,global_here%pdg_el(k)) - dg_here%xi2BCb(k) )**i
+     &                          *( dg_here%xagp(mm,global_here%pdg_el(k)) - dg_here%xi1BCb(k) )**j  )  * dg_here%wagp(mm,global_here%pdg_el(k))
 
                            ZEtaylor0slope(k,ll,1) =  ZEtaylor0slope(k,ll,1) + dg_here%ZEtaylor(k,b_index,1) * 
-     &                          (1.D0/dg_here%fact(i)*dg_here%fact(j))* ( ( dg_here%yagp(mm,pdg_el(k)) - dg_here%xi2BCb(k) )**i
-     &                          *( dg_here%xagp(mm,pdg_el(k)) - dg_here%xi1BCb(k) )**j  )  * dg_here%wagp(mm,pdg_el(k))
+     &                          (1.D0/dg_here%fact(i)*dg_here%fact(j))* ( ( dg_here%yagp(mm,global_here%pdg_el(k)) - dg_here%xi2BCb(k) )**i
+     &                          *( dg_here%xagp(mm,global_here%pdg_el(k)) - dg_here%xi1BCb(k) )**j  )  * dg_here%wagp(mm,global_here%pdg_el(k))
 
                            QXtaylor0(k,ll,1) =   QXtaylor0(k,ll,1) + dg_here%QXtaylor(k,b_index,1) * 
-     &                          (1.D0/dg_here%fact(i)*dg_here%fact(j))* ( ( dg_here%yagp(mm,pdg_el(k)) - dg_here%xi2BCb(k) )**i
-     &                          *( dg_here%xagp(mm,pdg_el(k)) - dg_here%xi1BCb(k) )**j  )  * dg_here%wagp(mm,pdg_el(k))
+     &                          (1.D0/dg_here%fact(i)*dg_here%fact(j))* ( ( dg_here%yagp(mm,global_here%pdg_el(k)) - dg_here%xi2BCb(k) )**i
+     &                          *( dg_here%xagp(mm,global_here%pdg_el(k)) - dg_here%xi1BCb(k) )**j  )  * dg_here%wagp(mm,global_here%pdg_el(k))
 
                            QXtaylor0slope(k,ll,1) =  QXtaylor0slope(k,ll,1) + dg_here%QXtaylor(k,b_index,1) * 
-     &                          (1.D0/dg_here%fact(i)*dg_here%fact(j))* ( ( dg_here%yagp(mm,pdg_el(k)) - dg_here%xi2BCb(k) )**i
-     &                          *( dg_here%xagp(mm,pdg_el(k)) - dg_here%xi1BCb(k) )**j  )  * dg_here%wagp(mm,pdg_el(k))
+     &                          (1.D0/dg_here%fact(i)*dg_here%fact(j))* ( ( dg_here%yagp(mm,global_here%pdg_el(k)) - dg_here%xi2BCb(k) )**i
+     &                          *( dg_here%xagp(mm,global_here%pdg_el(k)) - dg_here%xi1BCb(k) )**j  )  * dg_here%wagp(mm,global_here%pdg_el(k))
 
                            QYtaylor0(k,ll,1) =   QYtaylor0(k,ll,1) + dg_here%QYtaylor(k,b_index,1) * 
-     &                          (1.D0/dg_here%fact(i)*dg_here%fact(j))* ( ( dg_here%yagp(mm,pdg_el(k)) - dg_here%xi2BCb(k) )**i
-     &                          *( dg_here%xagp(mm,pdg_el(k)) - dg_here%xi1BCb(k) )**j  )  * dg_here%wagp(mm,pdg_el(k))
+     &                          (1.D0/dg_here%fact(i)*dg_here%fact(j))* ( ( dg_here%yagp(mm,global_here%pdg_el(k)) - dg_here%xi2BCb(k) )**i
+     &                          *( dg_here%xagp(mm,global_here%pdg_el(k)) - dg_here%xi1BCb(k) )**j  )  * dg_here%wagp(mm,global_here%pdg_el(k))
 
                            QYtaylor0slope(k,ll,1) =  QYtaylor0slope(k,ll,1) + dg_here%QYtaylor(k,b_index,1) * 
-     &                          (1.D0/dg_here%fact(i)*dg_here%fact(j))* ( ( dg_here%yagp(mm,pdg_el(k)) - dg_here%xi2BCb(k) )**i
-     &                          *( dg_here%xagp(mm,pdg_el(k)) - dg_here%xi1BCb(k) )**j  )  * dg_here%wagp(mm,pdg_el(k))
+     &                          (1.D0/dg_here%fact(i)*dg_here%fact(j))* ( ( dg_here%yagp(mm,global_here%pdg_el(k)) - dg_here%xi2BCb(k) )**i
+     &                          *( dg_here%xagp(mm,global_here%pdg_el(k)) - dg_here%xi1BCb(k) )**j  )  * dg_here%wagp(mm,global_here%pdg_el(k))
 
 #ifdef TRACE
                            iotataylor0(k,ll,1) =   iotataylor0(k,ll,1) + dg_here%iotataylor(k,b_index,1) * 
-     &                          (1.D0/dg_here%fact(i)*dg_here%fact(j))* ( ( dg_here%yagp(mm,pdg_el(k)) - dg_here%xi2BCb(k) )**i
-     &                          *( dg_here%xagp(mm,pdg_el(k)) - dg_here%xi1BCb(k) )**j  )  * dg_here%wagp(mm,pdg_el(k))
+     &                          (1.D0/dg_here%fact(i)*dg_here%fact(j))* ( ( dg_here%yagp(mm,global_here%pdg_el(k)) - dg_here%xi2BCb(k) )**i
+     &                          *( dg_here%xagp(mm,global_here%pdg_el(k)) - dg_here%xi1BCb(k) )**j  )  * dg_here%wagp(mm,global_here%pdg_el(k))
 
                            iotataylor0slope(k,ll,1) =  iotataylor0slope(k,ll,1) + dg_here%iotataylor(k,b_index,1) * 
-     &                          (1.D0/dg_here%fact(i)*dg_here%fact(j))* ( ( dg_here%yagp(mm,pdg_el(k)) - dg_here%xi2BCb(k) )**i
-     &                          *( dg_here%xagp(mm,pdg_el(k)) - dg_here%xi1BCb(k) )**j  )  * dg_here%wagp(mm,pdg_el(k))
+     &                          (1.D0/dg_here%fact(i)*dg_here%fact(j))* ( ( dg_here%yagp(mm,global_here%pdg_el(k)) - dg_here%xi2BCb(k) )**i
+     &                          *( dg_here%xagp(mm,global_here%pdg_el(k)) - dg_here%xi1BCb(k) )**j  )  * dg_here%wagp(mm,global_here%pdg_el(k))
 #endif
 
 #ifdef CHEM
                            iotataylor0(k,ll,1) =   iotataylor0(k,ll,1) + dg_here%iotataylor(k,b_index,1) * 
-     &                          (1.D0/dg_here%fact(i)*dg_here%fact(j))* ( ( dg_here%yagp(mm,pdg_el(k)) - dg_here%xi2BCb(k) )**i
-     &                          *( dg_here%xagp(mm,pdg_el(k)) - dg_here%xi1BCb(k) )**j  )  * dg_here%wagp(mm,pdg_el(k))
+     &                          (1.D0/dg_here%fact(i)*dg_here%fact(j))* ( ( dg_here%yagp(mm,global_here%pdg_el(k)) - dg_here%xi2BCb(k) )**i
+     &                          *( dg_here%xagp(mm,global_here%pdg_el(k)) - dg_here%xi1BCb(k) )**j  )  * dg_here%wagp(mm,global_here%pdg_el(k))
 
                            iotataylor0slope(k,ll,1) =  iotataylor0slope(k,ll,1) + dg_here%iotataylor(k,b_index,1) * 
-     &                          (1.D0/dg_here%fact(i)*dg_here%fact(j))* ( ( dg_here%yagp(mm,pdg_el(k)) - dg_here%xi2BCb(k) )**i
-     &                          *( dg_here%xagp(mm,pdg_el(k)) - dg_here%xi1BCb(k) )**j  )  * dg_here%wagp(mm,pdg_el(k))
+     &                          (1.D0/dg_here%fact(i)*dg_here%fact(j))* ( ( dg_here%yagp(mm,global_here%pdg_el(k)) - dg_here%xi2BCb(k) )**i
+     &                          *( dg_here%xagp(mm,global_here%pdg_el(k)) - dg_here%xi1BCb(k) )**j  )  * dg_here%wagp(mm,global_here%pdg_el(k))
 
                            iota2taylor0(k,ll,1) =   iota2taylor0(k,ll,1) + dg_here%iota2taylor(k,b_index,1) * 
-     &                          (1.D0/dg_here%fact(i)*dg_here%fact(j))* ( ( dg_here%yagp(mm,pdg_el(k)) - dg_here%xi2BCb(k) )**i
-     &                          *( dg_here%xagp(mm,pdg_el(k)) - dg_here%xi1BCb(k) )**j  )  * dg_here%wagp(mm,pdg_el(k))
+     &                          (1.D0/dg_here%fact(i)*dg_here%fact(j))* ( ( dg_here%yagp(mm,global_here%pdg_el(k)) - dg_here%xi2BCb(k) )**i
+     &                          *( dg_here%xagp(mm,global_here%pdg_el(k)) - dg_here%xi1BCb(k) )**j  )  * dg_here%wagp(mm,global_here%pdg_el(k))
 
                            iota2taylor0slope(k,ll,1) =  iota2taylor0slope(k,ll,1) + dg_here%iota2taylor(k,b_index,1) * 
-     &                          (1.D0/dg_here%fact(i)*dg_here%fact(j))* ( ( dg_here%yagp(mm,pdg_el(k)) - dg_here%xi2BCb(k) )**i
-     &                          *( dg_here%xagp(mm,pdg_el(k)) - dg_here%xi1BCb(k) )**j  )  * dg_here%wagp(mm,pdg_el(k))
+     &                          (1.D0/dg_here%fact(i)*dg_here%fact(j))* ( ( dg_here%yagp(mm,global_here%pdg_el(k)) - dg_here%xi2BCb(k) )**i
+     &                          *( dg_here%xagp(mm,global_here%pdg_el(k)) - dg_here%xi1BCb(k) )**j  )  * dg_here%wagp(mm,global_here%pdg_el(k))
 #endif
 
                         enddo
@@ -7649,7 +7649,7 @@
                   endif
 #endif
 
-               elseif (neigh_flag.eq.2) then !edge neighbors
+               elseif (neigh_flag.eq.2) then !global_here%edge neighbors
 
                   if (MUSCL.eq.1) then !construct MUSCL minmod
 
@@ -7826,7 +7826,7 @@
       dg_here%iota2const =  0.D0
 #endif
 
-      do k=1,ne
+      do k=1,global_here%ne
 
          if (dg_here%dofs(k).gt.1) then
                                 !do lll=1,3
@@ -7870,7 +7870,7 @@
       
       CALL SLOPELIMITER5(s,dg_here)
 
-      do k=1,ne
+      do k=1,global_here%ne
 
          if (dg_here%dofs(k).gt.3) then
 
@@ -7944,17 +7944,17 @@
       Real(SZ), Allocatable :: temparray2(:,:,:),temparray3(:,:,:)
       Real(SZ), Allocatable :: temparray4(:,:,:),temparray5(:,:,:)
 
-      Allocate ( ZE_MIN1(NP),ZE_MAX1(NP),QX_MIN1(NP) )
-      Allocate ( QY_MIN1(NP),QY_MAX1(NP),QX_MAX1(NP) )
-      Allocate ( iota_MIN1(NP),iota_MAX1(NP) )
-      Allocate ( iota2_MIN1(NP),iota2_MAX1(NP), temparray1(MNE,dg_here%dofh,1) )
+      Allocate ( ZE_MIN1(global_here%NP),ZE_MAX1(global_here%NP),QX_MIN1(global_here%NP) )
+      Allocate ( QY_MIN1(global_here%NP),QY_MAX1(global_here%NP),QX_MAX1(global_here%NP) )
+      Allocate ( iota_MIN1(global_here%NP),iota_MAX1(global_here%NP) )
+      Allocate ( iota2_MIN1(global_here%NP),iota2_MAX1(global_here%NP), temparray1(MNE,dg_here%dofh,1) )
       Allocate (  temparray2(MNE,dg_here%dofh,1), temparray3(MNE,dg_here%dofh,1) )
       Allocate (  temparray4(MNE,dg_here%dofh,1), temparray5(MNE,dg_here%dofh,1) )
 
 !     FIND THE MAXIMUM AND MINIMUM OF EACH VARIABLE OVER ALL ELEMENTS 
 !     SHARING A NODE
 
-      do k=1,ne
+      do k=1,global_here%ne
 
          if (dg_here%dofs(k).gt.1) then
 
@@ -7999,7 +7999,7 @@
       dg_here%iota2taylor = 0.d0
 #endif
 
-      do k=1,ne
+      do k=1,global_here%ne
 
                                 !if (dg_here%dofs(k).gt.1) then
 
@@ -8092,7 +8092,7 @@
             if (ll+floor(  0.5D0 + sqrt(real(2*(ll))) +1).eq.
      &           ll+1+floor(  0.5D0 + sqrt(real(2*(ll+1))) )) then
 
-               do k = 1,ne
+               do k = 1,global_here%ne
 
                   if (dg_here%ZEtaylor(k,ll+floor( 0.5D0 + sqrt(real(2*ll))+1 ),1 ).gt.0.D0.and.
      &                 temparray1(k,ll+1+floor(  0.5D0 + sqrt(real(2*(ll+1)))),1).gt.0.D0 ) then
@@ -8108,7 +8108,7 @@
      &                    max(dg_here%ZEtaylor(k,ll+floor(  0.5D0 + sqrt(real(2*ll)) + 1),1),
      &                    temparray1(k,ll+1+floor(  0.5D0 + sqrt(real(2*(ll+1)))),1))
 
-                  elseif (temparray1(k,ll+1+floor(  0.5D0 + sqrt(real(2*(ll+1)))),1).ne.0.D0) then
+                  elseif (temparray1(k,ll+1+floor(  0.5D0 + sqrt(real(2*(ll+1)))),1).global_here%ne.0.D0) then
 
                      dg_here%ZEtaylor(k,ll+floor( 0.5D0 + sqrt(real(2*ll)) +1),1 ) = 0.D0
 
@@ -8128,7 +8128,7 @@
      &                    max(dg_here%QXtaylor(k,ll+floor(  0.5D0 + sqrt(real(2*ll)) + 1),1),
      &                    temparray2(k,ll+1+floor(  0.5D0 + sqrt(real(2*(ll+1)))),1))
 
-                  elseif (temparray2(k,ll+1+floor(  0.5D0 + sqrt(real(2*(ll+1)))),1).ne.0.D0) then
+                  elseif (temparray2(k,ll+1+floor(  0.5D0 + sqrt(real(2*(ll+1)))),1).global_here%ne.0.D0) then
 
                      dg_here%QXtaylor(k,ll+floor( 0.5D0 + sqrt(real(2*ll)) +1),1 ) = 0.D0
 
@@ -8148,7 +8148,7 @@
      &                    max(dg_here%QYtaylor(k,ll+floor(  0.5D0 + sqrt(real(2*ll)) + 1),1),
      &                    temparray3(k,ll+1+floor(  0.5D0 + sqrt(real(2*(ll+1)))),1))
 
-                  elseif (temparray3(k,ll+1+floor(  0.5D0 + sqrt(real(2*(ll+1)))),1).ne.0.D0) then
+                  elseif (temparray3(k,ll+1+floor(  0.5D0 + sqrt(real(2*(ll+1)))),1).global_here%ne.0.D0) then
 
                      dg_here%QYtaylor(k,ll+floor( 0.5D0 + sqrt(real(2*ll)) +1),1 ) = 0.D0
 
@@ -8169,7 +8169,7 @@
      &                    max(dg_here%iotataylor(k,ll+floor(  0.5D0 + sqrt(real(2*ll)) + 1),1),
      &                    temparray4(k,ll+1+floor(  0.5D0 + sqrt(real(2*(ll+1)))),1))
 
-                  elseif (temparray4(k,ll+1+floor(  0.5D0 + sqrt(real(2*(ll+1)))),1).ne.0.D0) then
+                  elseif (temparray4(k,ll+1+floor(  0.5D0 + sqrt(real(2*(ll+1)))),1).global_here%ne.0.D0) then
 
                      dg_here%iotataylor(k,ll+floor( 0.5D0 + sqrt(real(2*ll)) +1),1 ) = 0.D0
 
@@ -8191,7 +8191,7 @@
      &                    max(dg_here%iotataylor(k,ll+floor(  0.5D0 + sqrt(real(2*ll)) + 1),1),
      &                    temparray4(k,ll+1+floor(  0.5D0 + sqrt(real(2*(ll+1)))),1))
 
-                  elseif (temparray4(k,ll+1+floor(  0.5D0 + sqrt(real(2*(ll+1)))),1).ne.0.D0) then
+                  elseif (temparray4(k,ll+1+floor(  0.5D0 + sqrt(real(2*(ll+1)))),1).global_here%ne.0.D0) then
 
                      dg_here%iotataylor(k,ll+floor( 0.5D0 + sqrt(real(2*ll)) +1),1 ) = 0.D0
 
@@ -8211,7 +8211,7 @@
      &                    max(dg_here%iota2taylor(k,ll+floor(  0.5D0 + sqrt(real(2*ll)) + 1),1),
      &                    temparray5(k,ll+1+floor(  0.5D0 + sqrt(real(2*(ll+1)))),1))
 
-                  elseif (temparray5(k,ll+1+floor(  0.5D0 + sqrt(real(2*(ll+1)))),1).ne.0.D0) then
+                  elseif (temparray5(k,ll+1+floor(  0.5D0 + sqrt(real(2*(ll+1)))),1).global_here%ne.0.D0) then
 
                      dg_here%iota2taylor(k,ll+floor( 0.5D0 + sqrt(real(2*ll)) +1),1 ) = 0.D0
 
@@ -8255,7 +8255,7 @@
       dg_here%iota2const =  0.D0
 #endif
 
-      do k=1,ne
+      do k=1,global_here%ne
 
          if (dg_here%dofs(k).gt.1) then
                                 !do lll=1,3
@@ -8297,7 +8297,7 @@
 
 !.....Set limit values
 
-      do k=1,ne
+      do k=1,global_here%ne
 
          if (dg_here%dofs(k).gt.1) then
 
@@ -8373,10 +8373,10 @@
       Real(SZ), Allocatable :: iota2_MIN1(:),iota2_MAX1(:)
       Real(SZ), Allocatable :: Zhi(:,:),ZhiInv(:,:), A(:,:),tempa(:,:)
 
-      Allocate ( ZE_MIN1(NP),ZE_MAX1(NP),QX_MIN1(NP) )
-      Allocate ( QY_MIN1(NP),QY_MAX1(NP),QX_MAX1(NP) )
-      Allocate ( iota_MIN1(NP),iota_MAX1(NP) )
-      Allocate ( iota2_MIN1(NP),iota2_MAX1(NP), temp2(3,3) )
+      Allocate ( ZE_MIN1(global_here%NP),ZE_MAX1(global_here%NP),QX_MIN1(global_here%NP) )
+      Allocate ( QY_MIN1(global_here%NP),QY_MAX1(global_here%NP),QX_MAX1(global_here%NP) )
+      Allocate ( iota_MIN1(global_here%NP),iota_MAX1(global_here%NP) )
+      Allocate ( iota2_MIN1(global_here%NP),iota2_MAX1(global_here%NP), temp2(3,3) )
       Allocate ( Zhi(3,3),ZhiInv(3,3),A(3,3),tempa(3,3) )
 
 
@@ -8385,7 +8385,7 @@
 !     SHARING A NODE
 
 
-      DO I = 1,NP
+      DO I = 1,global_here%NP
          ZE_MIN1(I)=99999.
          ZE_MAX1(I)=-99999.
          QX_MIN1(I)=99999.
@@ -8405,72 +8405,72 @@
          iota2_MAX1(I)=-99999.
 #endif
 
-         NO_NBORS = EL_COUNT(I)
+         global_here%NO_NBORS = global_here%EL_COUNT(I)
 
-         DO J = 1,NO_NBORS
-            NBOR_EL = ELETAB(I,1+J)
+         DO J = 1,global_here%NO_NBORS
+            global_here%NBOR_EL = global_here%ELETAB(I,1+J)
 
-!     IF(dg_here%WDFLG(NBOR_EL).EQ.0) CYCLE ! DON'T COUNT DRY ELEMENTS  sb 02/26/07
+!     IF(dg_here%WDFLG(global_here%NBOR_EL).EQ.0) CYCLE ! DON'T COUNT DRY ELEMENTS  sb 02/26/07
 
-            ZE_DG(J) = ZEder(NBOR_EL,l1,1)
-            QX_DG(J) = QXder(NBOR_EL,l1,1)
-            QY_DG(J) = QYder(NBOR_EL,l1,1)
+            global_here%ZE_DG(J) = ZEder(global_here%NBOR_EL,l1,1)
+            global_here%QX_DG(J) = QXder(global_here%NBOR_EL,l1,1)
+            global_here%QY_DG(J) = QYder(global_here%NBOR_EL,l1,1)
 
 #ifdef TRACE
-            iota_DG(J) = iotader(NBOR_EL,l1,1)
+            global_here%iota_DG(J) = iotader(global_here%NBOR_EL,l1,1)
 #endif
 
 #ifdef CHEM
-            iota_DG(J) = iotader(NBOR_EL,l1,1)
-            iota2_DG(J) = iota2der(NBOR_EL,l1,1)
+            global_here%iota_DG(J) = iotader(global_here%NBOR_EL,l1,1)
+            global_here%iota2_DG(J) = iota2der(global_here%NBOR_EL,l1,1)
 #endif
 
 !     
-            IF (ZE_DG(J).LT.ZE_MIN1(I))THEN
-               ZE_MIN1(I)=ZE_DG(J)
+            IF (global_here%ZE_DG(J).LT.ZE_MIN1(I))THEN
+               ZE_MIN1(I)=global_here%ZE_DG(J)
             ENDIF
-            IF (ZE_DG(J).GT.ZE_MAX1(I)) THEN
-               ZE_MAX1(I)=ZE_DG(J)
+            IF (global_here%ZE_DG(J).GT.ZE_MAX1(I)) THEN
+               ZE_MAX1(I)=global_here%ZE_DG(J)
             ENDIF
-            IF (QX_DG(J).LT.QX_MIN1(I))THEN
-               QX_MIN1(I)=QX_DG(J)
+            IF (global_here%QX_DG(J).LT.QX_MIN1(I))THEN
+               QX_MIN1(I)=global_here%QX_DG(J)
             ENDIF
-            IF (QX_DG(J).GT.QX_MAX1(I)) THEN
-               QX_MAX1(I)=QX_DG(J)
+            IF (global_here%QX_DG(J).GT.QX_MAX1(I)) THEN
+               QX_MAX1(I)=global_here%QX_DG(J)
             ENDIF
-            IF (QY_DG(J).LT.QY_MIN1(I))THEN
-               QY_MIN1(I)=QY_DG(J)
+            IF (global_here%QY_DG(J).LT.QY_MIN1(I))THEN
+               QY_MIN1(I)=global_here%QY_DG(J)
             ENDIF
-            IF (QY_DG(J).GT.QY_MAX1(I)) THEN
-               QY_MAX1(I)=QY_DG(J)
+            IF (global_here%QY_DG(J).GT.QY_MAX1(I)) THEN
+               QY_MAX1(I)=global_here%QY_DG(J)
             ENDIF
 
 #ifdef TRACE
-            IF (iota_DG(J).LT.iota_MIN1(I))THEN
-               iota_MIN1(I)=iota_DG(J)
+            IF (global_here%iota_DG(J).LT.iota_MIN1(I))THEN
+               iota_MIN1(I)=global_here%iota_DG(J)
             ENDIF
 
-            IF (iota_DG(J).GT.iota_MAX1(I)) THEN
-               iota_MAX1(I)=iota_DG(J)
+            IF (global_here%iota_DG(J).GT.iota_MAX1(I)) THEN
+               iota_MAX1(I)=global_here%iota_DG(J)
             ENDIF
 #endif
 
 #ifdef CHEM
-            IF (iota_DG(J).LT.iota_MIN1(I))THEN
-               iota_MIN1(I)=iota_DG(J)
+            IF (global_here%iota_DG(J).LT.iota_MIN1(I))THEN
+               iota_MIN1(I)=global_here%iota_DG(J)
             ENDIF
 
 
-            IF (iota_DG(J).GT.iota_MAX1(I)) THEN
-               iota_MAX1(I)=iota_DG(J)
+            IF (global_here%iota_DG(J).GT.iota_MAX1(I)) THEN
+               iota_MAX1(I)=global_here%iota_DG(J)
             ENDIF
 
-            IF (iota2_DG(J).LT.iota2_MIN1(I))THEN
-               iota2_MIN1(I)=iota2_DG(J)
+            IF (global_here%iota2_DG(J).LT.iota2_MIN1(I))THEN
+               iota2_MIN1(I)=global_here%iota2_DG(J)
             ENDIF
 
-            IF (iota2_DG(J).GT.iota2_MAX1(I)) THEN
-               iota2_MAX1(I)=iota2_DG(J)
+            IF (global_here%iota2_DG(J).GT.iota2_MAX1(I)) THEN
+               iota2_MAX1(I)=global_here%iota2_DG(J)
             ENDIF
 #endif
 
@@ -8499,12 +8499,12 @@
       zecc = 0.D0
       zeve = 0.D0
 
-      DO I=1,NE 
+      DO I=1,global_here%NE 
 
          !IF(dg_here%WDFLG(I).EQ.0) CYCLE ! DON'T COUNT DRY ELEMENTS  sb 02/26/07
-         N1=NM(I,1)
-         N2=NM(I,2)
-         N3=NM(I,3)
+         global_here%N1=global_here%NM(I,1)
+         global_here%N2=global_here%NM(I,2)
+         global_here%N3=global_here%NM(I,3)
 
          varnum = 3
 
@@ -8523,60 +8523,60 @@
                ZEC(1)=ZEder(i,l1,1)
                ZEC(2)=ZEder(i,l2,1)
                ZEC(3)=ZEder(i,l3,1)
-               ZEMAX1(1)=ZE_MAX1(N1)
-               ZEMIN1(1)=ZE_MIN1(N1)
-               ZEMAX1(2)=ZE_MAX1(N2)
-               ZEMIN1(2)=ZE_MIN1(N2)
-               ZEMAX1(3)=ZE_MAX1(N3)
-               ZEMIN1(3)=ZE_MIN1(N3)
+               ZEMAX1(1)=ZE_MAX1(global_here%N1)
+               ZEMIN1(1)=ZE_MIN1(global_here%N1)
+               ZEMAX1(2)=ZE_MAX1(global_here%N2)
+               ZEMIN1(2)=ZE_MIN1(global_here%N2)
+               ZEMAX1(3)=ZE_MAX1(global_here%N3)
+               ZEMIN1(3)=ZE_MIN1(global_here%N3)
             ENDIF
 
             IF (IVAR.EQ.2) THEN
                ZEC(1)=QXder(i,l1,1)
                ZEC(2)=QXder(i,l2,1)
                ZEC(3)=QXder(i,l3,1)
-               ZEMAX1(1)=QX_MAX1(N1)
-               ZEMIN1(1)=QX_MIN1(N1)
-               ZEMAX1(2)=QX_MAX1(N2)
-               ZEMIN1(2)=QX_MIN1(N2)
-               ZEMAX1(3)=QX_MAX1(N3)
-               ZEMIN1(3)=QX_MIN1(N3)
+               ZEMAX1(1)=QX_MAX1(global_here%N1)
+               ZEMIN1(1)=QX_MIN1(global_here%N1)
+               ZEMAX1(2)=QX_MAX1(global_here%N2)
+               ZEMIN1(2)=QX_MIN1(global_here%N2)
+               ZEMAX1(3)=QX_MAX1(global_here%N3)
+               ZEMIN1(3)=QX_MIN1(global_here%N3)
             ENDIF
 
             IF (IVAR.EQ.3) THEN
                ZEC(1)=QYder(i,l1,1)
                ZEC(2)=QYder(i,l2,1)
                ZEC(3)=QYder(i,l3,1)
-               ZEMAX1(1)=QY_MAX1(N1)
-               ZEMIN1(1)=QY_MIN1(N1)
-               ZEMAX1(2)=QY_MAX1(N2)
-               ZEMIN1(2)=QY_MIN1(N2)
-               ZEMAX1(3)=QY_MAX1(N3)
-               ZEMIN1(3)=QY_MIN1(N3)
+               ZEMAX1(1)=QY_MAX1(global_here%N1)
+               ZEMIN1(1)=QY_MIN1(global_here%N1)
+               ZEMAX1(2)=QY_MAX1(global_here%N2)
+               ZEMIN1(2)=QY_MIN1(global_here%N2)
+               ZEMAX1(3)=QY_MAX1(global_here%N3)
+               ZEMIN1(3)=QY_MIN1(global_here%N3)
             ENDIF
 
             IF (IVAR.EQ.4) THEN
                ZEC(1)=iotader(i,l1,1)
                ZEC(2)=iotader(i,l2,1)
                ZEC(3)=iotader(i,l3,1)
-               ZEMAX1(1)=iota_MAX1(N1)
-               ZEMIN1(1)=iota_MIN1(N1)
-               ZEMAX1(2)=iota_MAX1(N2)
-               ZEMIN1(2)=iota_MIN1(N2)
-               ZEMAX1(3)=iota_MAX1(N3)
-               ZEMIN1(3)=iota_MIN1(N3)
+               ZEMAX1(1)=iota_MAX1(global_here%N1)
+               ZEMIN1(1)=iota_MIN1(global_here%N1)
+               ZEMAX1(2)=iota_MAX1(global_here%N2)
+               ZEMIN1(2)=iota_MIN1(global_here%N2)
+               ZEMAX1(3)=iota_MAX1(global_here%N3)
+               ZEMIN1(3)=iota_MIN1(global_here%N3)
             ENDIF
 
             IF (IVAR.EQ.5) THEN
                ZEC(1)=iota2der(i,l1,1)
                ZEC(2)=iota2der(i,l2,1)
                ZEC(3)=iota2der(i,l3,1)
-               ZEMAX1(1)=iota2_MAX1(N1)
-               ZEMIN1(1)=iota2_MIN1(N1)
-               ZEMAX1(2)=iota2_MAX1(N2)
-               ZEMIN1(2)=iota2_MIN1(N2)
-               ZEMAX1(3)=iota2_MAX1(N3)
-               ZEMIN1(3)=iota2_MIN1(N3)
+               ZEMAX1(1)=iota2_MAX1(global_here%N1)
+               ZEMIN1(1)=iota2_MIN1(global_here%N1)
+               ZEMAX1(2)=iota2_MAX1(global_here%N2)
+               ZEMIN1(2)=iota2_MIN1(global_here%N2)
+               ZEMAX1(3)=iota2_MAX1(global_here%N3)
+               ZEMIN1(3)=iota2_MIN1(global_here%N3)
             ENDIF
 
 

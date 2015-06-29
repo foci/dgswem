@@ -96,9 +96,9 @@
          mintbed_sensor = 100.d0
 #endif
          
-         do l = 1,ne
+         do l = 1,global_here%ne
             
-            dg_here%pa = pdg_el(l)
+            dg_here%pa = global_here%pdg_el(l)
             
 !..........................
 !.... type 1 p-enrichment |
@@ -129,20 +129,20 @@
             tbed_center = 0.d0
 #endif
             
-            n1 = nm(l,1)
-            n2 = nm(l,2)
-            n3 = nm(l,3)
+            global_here%n1 = global_here%nm(l,1)
+            global_here%n2 = global_here%nm(l,2)
+            global_here%n3 = global_here%nm(l,3)
             
-            x_center = 1.d0/3.d0*(x(n1) + x(n2) + x(n3))
-            y_center = 1.d0/3.d0*(y(n1) + y(n2) + y(n3))
+            x_center = 1.d0/3.d0*(global_here%x(global_here%n1) + global_here%x(global_here%n2) + global_here%x(global_here%n3))
+            y_center = 1.d0/3.d0*(global_here%y(global_here%n1) + global_here%y(global_here%n2) + global_here%y(global_here%n3))
             
-            x_mid(1) = 1.d0/2.d0*(x(n2) + x(n3))
-            x_mid(2) = 1.d0/2.d0*(x(n3) + x(n1))
-            x_mid(3) = 1.d0/2.d0*(x(n1) + x(n2))
+            x_mid(1) = 1.d0/2.d0*(global_here%x(global_here%n2) + global_here%x(global_here%n3))
+            x_mid(2) = 1.d0/2.d0*(global_here%x(global_here%n3) + global_here%x(global_here%n1))
+            x_mid(3) = 1.d0/2.d0*(global_here%x(global_here%n1) + global_here%x(global_here%n2))
             
-            y_mid(1) = 1.d0/2.d0*(y(n2) + y(n3))
-            y_mid(2) = 1.d0/2.d0*(y(n3) + y(n1))
-            y_mid(3) = 1.d0/2.d0*(y(n1) + y(n2))
+            y_mid(1) = 1.d0/2.d0*(global_here%y(global_here%n2) + global_here%y(global_here%n3))
+            y_mid(2) = 1.d0/2.d0*(global_here%y(global_here%n3) + global_here%y(global_here%n1))
+            y_mid(3) = 1.d0/2.d0*(global_here%y(global_here%n1) + global_here%y(global_here%n2))
             
             if (dg_here%pa.ge.1) then   ! since the dg_here%pa=0 case is vacuous
                
@@ -192,7 +192,7 @@
                tbed_mid = 0.d0
 #endif
                
-               dist = sqrt( (x_mid(i) - x_center)**2.d0 +&
+               global_here%dist = sqrt( (x_mid(i) - x_center)**2.d0 +&
               (y_mid(i) - y_center)**2.d0 )
                
                
@@ -221,21 +221,21 @@
                      
                   enddo
                   
-                  ze_sensor(l) = max(abs( (ze_mid - ze_center)/dist ),ze_sensor(l))
-                  qx_sensor(l) = max(abs( (qx_mid - qx_center)/dist ),qx_sensor(l))
-                  qy_sensor(l) = max(abs( (qy_mid - qy_center)/dist ),qy_sensor(l))
+                  ze_sensor(l) = max(abs( (ze_mid - ze_center)/global_here%dist ),ze_sensor(l))
+                  qx_sensor(l) = max(abs( (qx_mid - qx_center)/global_here%dist ),qx_sensor(l))
+                  qy_sensor(l) = max(abs( (qy_mid - qy_center)/global_here%dist ),qy_sensor(l))
                   
 #ifdef TRACE
-                  iota_sensor(l) = max(abs( (iota_mid - iota_center)/dist ),iota_sensor(l))
+                  iota_sensor(l) = max(abs( (iota_mid - iota_center)/global_here%dist ),iota_sensor(l))
 #endif
 
 #ifdef CHEM                  
-                  iota_sensor(l) = max(abs( (iota_mid - iota_center)/dist ),iota_sensor(l))
-                  iota2_sensor(l) = max(abs( (iota2_mid - iota2_center)/dist ),iota_sensor(l))
+                  iota_sensor(l) = max(abs( (iota_mid - iota_center)/global_here%dist ),iota_sensor(l))
+                  iota2_sensor(l) = max(abs( (iota2_mid - iota2_center)/global_here%dist ),iota_sensor(l))
 #endif
 
 #ifdef SED_LAY
-                  tbed_sensor(l) = max(abs( (tbed_mid - tbed_center)/dist ),tbed_sensor(l))
+                  tbed_sensor(l) = max(abs( (tbed_mid - tbed_center)/global_here%dist ),tbed_sensor(l))
 #endif
                   
                endif
@@ -259,10 +259,10 @@
                if ( ( (qy_sensor(l).ge.dg_here%slimit).or.&
               (qx_sensor(l).ge.dg_here%slimit).or.&
               (ze_sensor(l).ge.dg_here%slimit) ).and.&
-              (pdg_el(l).lt.dg_here%ph) ) then
+              (global_here%pdg_el(l).lt.dg_here%ph) ) then
                   
-                  pdg_el(l) = pdg_el(l) + 1 
-                  dg_here%dofs(l) = (pdg_el(l) +1 )*(pdg_el(l) +2 ) / 2
+                  global_here%pdg_el(l) = global_here%pdg_el(l) + 1 
+                  dg_here%dofs(l) = (global_here%pdg_el(l) +1 )*(global_here%pdg_el(l) +2 ) / 2
                   
                   dg_here%pcount(l) = it
                   
@@ -272,11 +272,11 @@
                elseif ( ((ze_sensor(l).lt.dg_here%slimit).and.&
                  (qx_sensor(l).lt.dg_here%slimit).and.&
                  (qy_sensor(l).lt.dg_here%slimit) ).and.&
-                 (pdg_el(l).gt.dg_here%pl).and.&
+                 (global_here%pdg_el(l).gt.dg_here%pl).and.&
                  ( (it-dg_here%pcount(l)).gt.dg_here%plimit ) ) then
                   
-                  pdg_el(l) = pdg_el(l) - 1
-                  dg_here%dofs(l) = (pdg_el(l) + 1 )*(pdg_el(l) + 2 ) / 2
+                  global_here%pdg_el(l) = global_here%pdg_el(l) - 1
+                  dg_here%dofs(l) = (global_here%pdg_el(l) + 1 )*(global_here%pdg_el(l) + 2 ) / 2
                   
                   dg_here%ze(dg_here%dofs(l)+1:dg_here%dofh,l,dg_here%irk+1) = 0.d0
                   dg_here%qx(dg_here%dofs(l)+1:dg_here%dofh,l,dg_here%irk+1) = 0.d0
@@ -285,10 +285,10 @@
                   dg_here%pcount(l) = it
                   
                   
-               elseif (pdg_el(l).eq.0.and.( (it-dg_here%pcount(l)).gt.dg_here%plimit ) ) then
+               elseif (global_here%pdg_el(l).eq.0.and.( (it-dg_here%pcount(l)).gt.dg_here%plimit ) ) then
                   
-                  pdg_el(l) = pdg_el(l) + 1 
-                  dg_here%dofs(l) = (pdg_el(l) + 1 )*(pdg_el(l) + 2 ) / 2
+                  global_here%pdg_el(l) = global_here%pdg_el(l) + 1 
+                  dg_here%dofs(l) = (global_here%pdg_el(l) + 1 )*(global_here%pdg_el(l) + 2 ) / 2
                   
                   dg_here%pcount(l) = it
                   
@@ -305,11 +305,11 @@
               (qx_sensor(l).ge.dg_here%slimit).or.&
               (ze_sensor(l).ge.dg_here%slimit).or.&
               ( iota_sensor(l).ge.dg_here%slimit) ).and.&
-              (pdg_el(l).lt.dg_here%ph).and.&
+              (global_here%pdg_el(l).lt.dg_here%ph).and.&
               ( (it-dg_here%pcount(l)).gt.dg_here%plimit ) ) then
                   
-                  pdg_el(l) = pdg_el(l) + 1 
-                  dg_here%dofs(l) = (pdg_el(l) +1 )*(pdg_el(l) +2 ) / 2
+                  global_here%pdg_el(l) = global_here%pdg_el(l) + 1 
+                  dg_here%dofs(l) = (global_here%pdg_el(l) +1 )*(global_here%pdg_el(l) +2 ) / 2
                   
                   dg_here%pcount(l) = it
                   
@@ -322,11 +322,11 @@
                  (qx_sensor(l).lt.dg_here%slimit).and.&
                  (qy_sensor(l).lt.dg_here%slimit).and.&
                  (iota_sensor(l).lt.dg_here%slimit) ).and.&
-                 (pdg_el(l).gt.dg_here%pl).and.&
+                 (global_here%pdg_el(l).gt.dg_here%pl).and.&
                  ( (it-dg_here%pcount(l)).gt.dg_here%plimit ) ) then
                   
-                  pdg_el(l) = pdg_el(l) - 1
-                  dg_here%dofs(l) = (pdg_el(l) + 1 )*(pdg_el(l) + 2 ) / 2
+                  global_here%pdg_el(l) = global_here%pdg_el(l) - 1
+                  dg_here%dofs(l) = (global_here%pdg_el(l) + 1 )*(global_here%pdg_el(l) + 2 ) / 2
                   
                   dg_here%ze(dg_here%dofs(l)+1:dg_here%dofh,l,dg_here%irk+1) = 0.d0
                   dg_here%iota(dg_here%dofs(l)+1:dg_here%dofh,l,dg_here%irk+1) = 0.d0
@@ -336,10 +336,10 @@
                   dg_here%pcount(l) = it
                   
                   
-               elseif (pdg_el(l).eq.0.and.( (it-dg_here%pcount(l)).gt.dg_here%plimit ) ) then
+               elseif (global_here%pdg_el(l).eq.0.and.( (it-dg_here%pcount(l)).gt.dg_here%plimit ) ) then
                   
-                  pdg_el(l) = pdg_el(l) + 1 
-                  dg_here%dofs(l) = (pdg_el(l) + 1 )*(pdg_el(l) + 2 ) / 2
+                  global_here%pdg_el(l) = global_here%pdg_el(l) + 1 
+                  dg_here%dofs(l) = (global_here%pdg_el(l) + 1 )*(global_here%pdg_el(l) + 2 ) / 2
                   
                   dg_here%pcount(l) = it
                   
@@ -357,10 +357,10 @@
               (ze_sensor(l).ge.dg_here%slimit).or.&
               (iota_sensor(l).ge.dg_here%slimit).or.&
               (iota2_sensor(l).ge.dg_here%slimit) ).and.&
-              (pdg_el(l).lt.dg_here%ph) ) then
+              (global_here%pdg_el(l).lt.dg_here%ph) ) then
                   
-                  pdg_el(l) = pdg_el(l) + 1 
-                  dg_here%dofs(l) = (pdg_el(l) +1 )*(pdg_el(l) +2 ) / 2
+                  global_here%pdg_el(l) = global_here%pdg_el(l) + 1 
+                  dg_here%dofs(l) = (global_here%pdg_el(l) +1 )*(global_here%pdg_el(l) +2 ) / 2
                   
                   dg_here%pcount(l) = it
                   
@@ -373,11 +373,11 @@
                  (qy_sensor(l).lt.dg_here%slimit).and.&
                  (iota_sensor(l).lt.dg_here%slimit).and.&
                  (iota2_sensor(l).lt.dg_here%slimit)).and.&
-                 (pdg_el(l).gt.dg_here%pl).and.&
+                 (global_here%pdg_el(l).gt.dg_here%pl).and.&
                  ( (it-dg_here%pcount(l)).gt.dg_here%plimit ) ) then
                   
-                  pdg_el(l) = pdg_el(l) - 1
-                  dg_here%dofs(l) = (pdg_el(l) + 1 )*(pdg_el(l) + 2 ) / 2
+                  global_here%pdg_el(l) = global_here%pdg_el(l) - 1
+                  dg_here%dofs(l) = (global_here%pdg_el(l) + 1 )*(global_here%pdg_el(l) + 2 ) / 2
                   
                   dg_here%ze(dg_here%dofs(l)+1:dg_here%dofh,l,dg_here%irk+1) = 0.d0
                   dg_here%iota(dg_here%dofs(l)+1:dg_here%dofh,l,dg_here%irk+1) = 0.d0
@@ -388,10 +388,10 @@
                   dg_here%pcount(l) = it
                   
                   
-               elseif (pdg_el(l).eq.0.and.( (it-dg_here%pcount(l)).gt.dg_here%plimit ) ) then
+               elseif (global_here%pdg_el(l).eq.0.and.( (it-dg_here%pcount(l)).gt.dg_here%plimit ) ) then
                   
-                  pdg_el(l) = pdg_el(l) + 1 
-                  dg_here%dofs(l) = (pdg_el(l) + 1 )*(pdg_el(l) + 2 ) / 2
+                  global_here%pdg_el(l) = global_here%pdg_el(l) + 1 
+                  dg_here%dofs(l) = (global_here%pdg_el(l) + 1 )*(global_here%pdg_el(l) + 2 ) / 2
                   
                   dg_here%pcount(l) = it
                   
@@ -408,11 +408,11 @@
               (qx_sensor(l).ge.dg_here%slimit).or.&
               (ze_sensor(l).ge.dg_here%slimit).or.&
               (tbed_sensor(l).ge.dg_here%slimit) ).and.&
-              (pdg_el(l).lt.dg_here%ph).and.&
+              (global_here%pdg_el(l).lt.dg_here%ph).and.&
               ( (it-dg_here%pcount(l)).gt.dg_here%plimit ) ) then
                   
-                  pdg_el(l) = pdg_el(l) + 1 
-                  dg_here%dofs(l) = (pdg_el(l) +1 )*(pdg_el(l) +2 ) / 2
+                  global_here%pdg_el(l) = global_here%pdg_el(l) + 1 
+                  dg_here%dofs(l) = (global_here%pdg_el(l) +1 )*(global_here%pdg_el(l) +2 ) / 2
                   
                   dg_here%pcount(l) = it
                   
@@ -425,11 +425,11 @@
                  (qx_sensor(l).lt.dg_here%slimit).and.&
                  (qy_sensor(l).lt.dg_here%slimit).and.&
                  (tbed_sensor(l).lt.dg_here%slimit) ).and.&
-                 (pdg_el(l).gt.dg_here%pl).and.&
+                 (global_here%pdg_el(l).gt.dg_here%pl).and.&
                  ( (it-dg_here%pcount(l)).gt.dg_here%plimit ) ) then
                   
-                  pdg_el(l) = pdg_el(l) - 1
-                  dg_here%dofs(l) = (pdg_el(l) + 1 )*(pdg_el(l) + 2 ) / 2
+                  global_here%pdg_el(l) = global_here%pdg_el(l) - 1
+                  dg_here%dofs(l) = (global_here%pdg_el(l) + 1 )*(global_here%pdg_el(l) + 2 ) / 2
                   
                   dg_here%ze(dg_here%dofs(l)+1:dg_here%dofh,l,dg_here%irk+1) = 0.d0
                   dg_here%iota(dg_here%dofs(l)+1:dg_here%dofh,l,dg_here%irk+1) = 0.d0
@@ -440,10 +440,10 @@
                   dg_here%pcount(l) = it
                   
                   
-               elseif (pdg_el(l).eq.0.and.( (it-dg_here%pcount(l)).gt.dg_here%plimit ) ) then
+               elseif (global_here%pdg_el(l).eq.0.and.( (it-dg_here%pcount(l)).gt.dg_here%plimit ) ) then
                   
-                  pdg_el(l) = pdg_el(l) + 1 
-                  dg_here%dofs(l) = (pdg_el(l) + 1 )*(pdg_el(l) + 2 ) / 2
+                  global_here%pdg_el(l) = global_here%pdg_el(l) + 1 
+                  dg_here%dofs(l) = (global_here%pdg_el(l) + 1 )*(global_here%pdg_el(l) + 2 ) / 2
                   
                   dg_here%pcount(l) = it
                   
@@ -474,7 +474,7 @@
             avg_tbedsen = 0.d0
 #endif
             
-            do l=1,ne
+            do l=1,global_here%ne
                
 #ifdef CMPI
 
@@ -482,21 +482,21 @@
                   
 #endif
 
-                  if (ze_sensor(l).ne.0.d0) then
+                  if (ze_sensor(l).global_here%ne.0.d0) then
 
                      minze_sensor = min(ze_sensor(l),minze_sensor)
                      maxze_sensor = max(ze_sensor(l),maxze_sensor)
                      
                   endif
 
-                  if (qx_sensor(l).ne.0.d0) then
+                  if (qx_sensor(l).global_here%ne.0.d0) then
 
                      minqx_sensor = min(qx_sensor(l),minqx_sensor)
                      maxqx_sensor = max(qx_sensor(l),maxqx_sensor)
 
                   endif
 
-                  if (qy_sensor(l).ne.0.d0) then
+                  if (qy_sensor(l).global_here%ne.0.d0) then
 
                      minqy_sensor = min(qy_sensor(l),minqy_sensor)
                      maxqy_sensor = max(qy_sensor(l),maxqy_sensor)
@@ -504,7 +504,7 @@
                   endif
 
 #ifdef TRACE
-                  if (iota_sensor(l).ne.0.d0) then
+                  if (iota_sensor(l).global_here%ne.0.d0) then
 
                      miniota_sensor = min(iota_sensor(l),miniota_sensor)
                      maxiota_sensor = max(iota_sensor(l),maxiota_sensor)
@@ -513,14 +513,14 @@
 #endif
 
 #ifdef CHEM
-                  if (iota_sensor(l).ne.0.d0) then
+                  if (iota_sensor(l).global_here%ne.0.d0) then
 
                      miniota_sensor = min(iota_sensor(l),miniota_sensor)
                      maxiota_sensor = max(iota_sensor(l),maxiota_sensor)
 
                   endif
 
-                  if (iota2_sensor(l).ne.0.d0) then
+                  if (iota2_sensor(l).global_here%ne.0.d0) then
                      
                      miniota2_sensor = min(iota2_sensor(l),miniota2_sensor)
                      maxiota2_sensor = max(iota2_sensor(l),maxiota2_sensor)
@@ -529,7 +529,7 @@
 #endif
 
 #ifdef SED_LAY
-                  if (tbed_sensor(l).ne.0.d0) then
+                  if (tbed_sensor(l).global_here%ne.0.d0) then
 
                      mintbed_sensor = min(tbed_sensor(l),mintbed_sensor)
                      maxtbed_sensor = max(tbed_sensor(l),maxtbed_sensor)
@@ -631,7 +631,7 @@
 #endif
 
             
-            do l = 1,ne
+            do l = 1,global_here%ne
                
                temp_ze = 0.d0  
                temp_qx = 0.d0
@@ -681,10 +681,10 @@
                if ( ( (qy_sensor(l).ge.qy_delta).or.&
               (qx_sensor(l).ge.qx_delta).or.&
               (ze_sensor(l).ge.ze_delta) ).and.&
-              (pdg_el(l).lt.dg_here%ph) ) then
+              (global_here%pdg_el(l).lt.dg_here%ph) ) then
                   
-                  pdg_el(l) = pdg_el(l) + 1 
-                  dg_here%dofs(l) = (pdg_el(l) +1 )*(pdg_el(l) +2 ) / 2
+                  global_here%pdg_el(l) = global_here%pdg_el(l) + 1 
+                  dg_here%dofs(l) = (global_here%pdg_el(l) +1 )*(global_here%pdg_el(l) +2 ) / 2
                   
                   dg_here%pcount(l) = it
                   
@@ -694,11 +694,11 @@
                elseif ( ((ze_sensor(l).lt.ze_delta).and.&
                  (qx_sensor(l).lt.qx_delta).and.&
                  (qy_sensor(l).lt.qy_delta) ).and.&
-                 (pdg_el(l).gt.dg_here%pl).and.&
+                 (global_here%pdg_el(l).gt.dg_here%pl).and.&
                  ( (it-dg_here%pcount(l)).gt.dg_here%plimit ) ) then
                   
-                  pdg_el(l) = pdg_el(l) - 1
-                  dg_here%dofs(l) = (pdg_el(l) + 1 )*(pdg_el(l) + 2 ) / 2
+                  global_here%pdg_el(l) = global_here%pdg_el(l) - 1
+                  dg_here%dofs(l) = (global_here%pdg_el(l) + 1 )*(global_here%pdg_el(l) + 2 ) / 2
                   
                   dg_here%ze(dg_here%dofs(l)+1:dg_here%dofh,l,dg_here%irk+1) = 0.d0
                   dg_here%qx(dg_here%dofs(l)+1:dg_here%dofh,l,dg_here%irk+1) = 0.d0
@@ -706,11 +706,11 @@
                   
                   dg_here%pcount(l) = it
                   
-               elseif (pdg_el(l).eq.0.and.&
+               elseif (global_here%pdg_el(l).eq.0.and.&
                  ( (it-dg_here%pcount(l)).gt.dg_here%plimit ) ) then
                   
-                  pdg_el(l) = pdg_el(l) + 1 
-                  dg_here%dofs(l) = (pdg_el(l) + 1 )*(pdg_el(l) + 2 ) / 2
+                  global_here%pdg_el(l) = global_here%pdg_el(l) + 1 
+                  dg_here%dofs(l) = (global_here%pdg_el(l) + 1 )*(global_here%pdg_el(l) + 2 ) / 2
                   
                   dg_here%pcount(l) = it
                   
@@ -727,11 +727,11 @@
               (temp_qx.ge.qx_delta).or.&
               (temp_ze.ge.ze_delta).or.&
               (temp_iota.ge.iota_delta)).and.&
-              (pdg_el(l).lt.dg_here%ph).and.&
+              (global_here%pdg_el(l).lt.dg_here%ph).and.&
               ( (it-dg_here%pcount(l)).gt.dg_here%plimit ) ) then
                   
-                  pdg_el(l) = pdg_el(l) + 1 
-                  dg_here%dofs(l) = (pdg_el(l) +1 )*(pdg_el(l) +2 ) / 2
+                  global_here%pdg_el(l) = global_here%pdg_el(l) + 1 
+                  dg_here%dofs(l) = (global_here%pdg_el(l) +1 )*(global_here%pdg_el(l) +2 ) / 2
                   
                   dg_here%pcount(l) = it
                   
@@ -742,11 +742,11 @@
                  (temp_qx.lt.qx_delta).and.&
                  (temp_qy.lt.qy_delta).and.&
                  (temp_iota.lt.iota_delta)).and.&
-                 (pdg_el(l).gt.dg_here%pl).and.&
+                 (global_here%pdg_el(l).gt.dg_here%pl).and.&
                  ( (it-dg_here%pcount(l)).gt.dg_here%plimit ) ) then
                   
-                  pdg_el(l) = pdg_el(l) - 1
-                  dg_here%dofs(l) = (pdg_el(l) + 1 )*(pdg_el(l) + 2 ) / 2
+                  global_here%pdg_el(l) = global_here%pdg_el(l) - 1
+                  dg_here%dofs(l) = (global_here%pdg_el(l) + 1 )*(global_here%pdg_el(l) + 2 ) / 2
                   
                   dg_here%ze(dg_here%dofs(l)+1:dg_here%dofh,l,dg_here%irk+1) = 0.d0
                   dg_here%qx(dg_here%dofs(l)+1:dg_here%dofh,l,dg_here%irk+1) = 0.d0
@@ -755,11 +755,11 @@
                   
                   dg_here%pcount(l) = it
                   
-               elseif (pdg_el(l).eq.0.and.&
+               elseif (global_here%pdg_el(l).eq.0.and.&
                  ( (it-dg_here%pcount(l)).gt.dg_here%plimit ) ) then
                   
-                  pdg_el(l) = pdg_el(l) + 1 
-                  dg_here%dofs(l) = (pdg_el(l) + 1 )*(pdg_el(l) + 2 ) / 2
+                  global_here%pdg_el(l) = global_here%pdg_el(l) + 1 
+                  dg_here%dofs(l) = (global_here%pdg_el(l) + 1 )*(global_here%pdg_el(l) + 2 ) / 2
                   
                   dg_here%pcount(l) = it
                   
@@ -776,10 +776,10 @@
               (ze_sensor(l).ge.ze_delta).or.&
               iota_sensor(l).ge.iota_delta.or.&
               iota2_sensor(l).ge.iota2_delta).and.&
-              (pdg_el(l).lt.dg_here%ph) ) then
+              (global_here%pdg_el(l).lt.dg_here%ph) ) then
                   
-                  pdg_el(l) = pdg_el(l) + 1 
-                  dg_here%dofs(l) = (pdg_el(l) +1 )*(pdg_el(l) +2 ) / 2
+                  global_here%pdg_el(l) = global_here%pdg_el(l) + 1 
+                  dg_here%dofs(l) = (global_here%pdg_el(l) +1 )*(global_here%pdg_el(l) +2 ) / 2
                   
                   dg_here%pcount(l) = it
                   
@@ -791,11 +791,11 @@
                  (qy_sensor(l).lt.qy_delta) ).and.&
                  (iota_sensor(l).lt.iota_delta).and.&
                  (iota2_sensor(l).lt.iota2_delta).and.&
-                 (pdg_el(l).gt.dg_here%pl).and.&
+                 (global_here%pdg_el(l).gt.dg_here%pl).and.&
                  ( (it-dg_here%pcount(l)).gt.dg_here%plimit ) ) then
                   
-                  pdg_el(l) = pdg_el(l) - 1
-                  dg_here%dofs(l) = (pdg_el(l) + 1 )*(pdg_el(l) + 2 ) / 2
+                  global_here%pdg_el(l) = global_here%pdg_el(l) - 1
+                  dg_here%dofs(l) = (global_here%pdg_el(l) + 1 )*(global_here%pdg_el(l) + 2 ) / 2
                   
                   dg_here%ze(dg_here%dofs(l)+1:dg_here%dofh,l,dg_here%irk+1) = 0.d0
                   dg_here%qx(dg_here%dofs(l)+1:dg_here%dofh,l,dg_here%irk+1) = 0.d0
@@ -805,11 +805,11 @@
                   
                   dg_here%pcount(l) = it
                   
-               elseif (pdg_el(l).eq.0.and.&
+               elseif (global_here%pdg_el(l).eq.0.and.&
                  ( (it-dg_here%pcount(l)).gt.dg_here%plimit ) ) then
                   
-                  pdg_el(l) = pdg_el(l) + 1 
-                  dg_here%dofs(l) = (pdg_el(l) + 1 )*(pdg_el(l) + 2 ) / 2
+                  global_here%pdg_el(l) = global_here%pdg_el(l) + 1 
+                  dg_here%dofs(l) = (global_here%pdg_el(l) + 1 )*(global_here%pdg_el(l) + 2 ) / 2
                   
                   dg_here%pcount(l) = it
                   
@@ -827,11 +827,11 @@
               (temp_qx.ge.qx_delta).or.&
               (temp_ze.ge.ze_delta).or.&
               (temp_tbed.ge.tbed_delta)).and.&
-              (pdg_el(l).lt.dg_here%ph).and.&
+              (global_here%pdg_el(l).lt.dg_here%ph).and.&
               ( (it-dg_here%pcount(l)).gt.dg_here%plimit ) ) then
                   
-                  pdg_el(l) = pdg_el(l) + 1 
-                  dg_here%dofs(l) = (pdg_el(l) +1 )*(pdg_el(l) +2 ) / 2
+                  global_here%pdg_el(l) = global_here%pdg_el(l) + 1 
+                  dg_here%dofs(l) = (global_here%pdg_el(l) +1 )*(global_here%pdg_el(l) +2 ) / 2
                   
                   dg_here%pcount(l) = it
                   
@@ -842,11 +842,11 @@
                  (temp_qx.lt.qx_delta).and.&
                  (temp_qy.lt.qy_delta).and.&
                  (temp_tbed.lt.tbed_delta)).and.&
-                 (pdg_el(l).gt.dg_here%pl).and.&
+                 (global_here%pdg_el(l).gt.dg_here%pl).and.&
                  ( (it-dg_here%pcount(l)).gt.dg_here%plimit ) ) then
                   
-                  pdg_el(l) = pdg_el(l) - 1
-                  dg_here%dofs(l) = (pdg_el(l) + 1 )*(pdg_el(l) + 2 ) / 2
+                  global_here%pdg_el(l) = global_here%pdg_el(l) - 1
+                  dg_here%dofs(l) = (global_here%pdg_el(l) + 1 )*(global_here%pdg_el(l) + 2 ) / 2
                   
                   dg_here%ze(dg_here%dofs(l)+1:dg_here%dofh,l,dg_here%irk+1) = 0.d0
                   dg_here%qx(dg_here%dofs(l)+1:dg_here%dofh,l,dg_here%irk+1) = 0.d0
@@ -856,11 +856,11 @@
                   
                   dg_here%pcount(l) = it
                   
-               elseif (pdg_el(l).eq.0.and.&
+               elseif (global_here%pdg_el(l).eq.0.and.&
                  ( (it-dg_here%pcount(l)).gt.dg_here%plimit ) ) then
                   
-                  pdg_el(l) = pdg_el(l) + 1 
-                  dg_here%dofs(l) = (pdg_el(l) + 1 )*(pdg_el(l) + 2 ) / 2
+                  global_here%pdg_el(l) = global_here%pdg_el(l) + 1 
+                  dg_here%dofs(l) = (global_here%pdg_el(l) + 1 )*(global_here%pdg_el(l) + 2 ) / 2
                   
                   dg_here%pcount(l) = it
                   
@@ -911,7 +911,7 @@
          lebesgue = dg_here%lebesguep
          roo = 1.d0/lebesgue      
 
-         do l=1,ne
+         do l=1,global_here%ne
 
             ze_sensor(l) = 0.d0             
             qx_sensor(l) = 0.d0
@@ -972,7 +972,7 @@
             slimit6 = 0.d0
 #endif
 
-            dg_here%pa = pdg_el(l)
+            dg_here%pa = global_here%pdg_el(l)
 
                                 !compute the first sensor type          
             if (dg_here%pa.eq.0) then
@@ -1070,7 +1070,7 @@
                   if  (ze_sensor2.gt.1.0e-12.and.ze_sensor1.gt.1.0e-12 ) then
                      
                      ze_sensor(l) = log10( ( (ze_sensor1 )**roo) / (ze_sensor2**roo) )
-                     dg_here%slimit1 = log10(kon*real(pdg_el(l))**(- lebesgue**2)) - kons
+                     dg_here%slimit1 = log10(kon*real(global_here%pdg_el(l))**(- lebesgue**2)) - kons
                      
                   else
                      
@@ -1082,7 +1082,7 @@
                   if (qx_sensor2.gt.1.0e-12.and.qx_sensor1.gt.1.0e-12 ) then
                      
                      qx_sensor(l) = log10( ( (qx_sensor1)**roo) / (qx_sensor2**roo) )
-                     dg_here%slimit2 = log10(kon*real(pdg_el(l))**(- lebesgue**2)) - kons
+                     dg_here%slimit2 = log10(kon*real(global_here%pdg_el(l))**(- lebesgue**2)) - kons
                      
                   else
                      
@@ -1094,7 +1094,7 @@
                   if ( qy_sensor2.gt.1.0e-12.and.qy_sensor1.gt.1.0e-12 ) then
                      
                      qy_sensor(l) = log10( ((qy_sensor1)**roo) / (qy_sensor2**roo) )
-                     dg_here%slimit3 = log10(kon*real(pdg_el(l))**(- lebesgue**2)) - kons
+                     dg_here%slimit3 = log10(kon*real(global_here%pdg_el(l))**(- lebesgue**2)) - kons
                      
                   else
                      
@@ -1107,7 +1107,7 @@
                   if ( iota_sensor2.gt.1.0e-12.and.iota_sensor1.gt.1.0e-12 ) then
                      
                      iota_sensor(l) = log10( ( (iota_sensor1)**roo) / (iota_sensor2**roo) )
-                     dg_here%slimit4 = log10(kon*real(pdg_el(l))**(- lebesgue**2)) - kons
+                     dg_here%slimit4 = log10(kon*real(global_here%pdg_el(l))**(- lebesgue**2)) - kons
                      
                   else
                      
@@ -1122,7 +1122,7 @@
                   if ( iota_sensor2.gt.1.0e-12.and.iota_sensor1.gt.1.0e-12) then
                      
                      iota_sensor(l) = log10( ( (iota_sensor1 )**roo) / (iota_sensor2**roo) )
-                     dg_here%slimit4 = log10(kon*real(pdg_el(l))**(- lebesgue**2)) - kons
+                     dg_here%slimit4 = log10(kon*real(global_here%pdg_el(l))**(- lebesgue**2)) - kons
                      
                   else
                      
@@ -1134,7 +1134,7 @@
                   if ( iota2_sensor2.gt.1.0e-12.and.iota2_sensor1.gt.1.0e-12 ) then
                      
                      iota2_sensor(l) = log10( ( (iota2_sensor1)**roo) / (iota2_sensor2**roo) )
-                     dg_here%slimit5 = log10(kon*real(pdg_el(l))**(- lebesgue**2)) - kons
+                     dg_here%slimit5 = log10(kon*real(global_here%pdg_el(l))**(- lebesgue**2)) - kons
                      
                   else
                      
@@ -1148,7 +1148,7 @@
                   if ( tbed_sensor2.gt.1.0e-12.and.tbed_sensor1.gt.1.0e-12 ) then
                      
                      tbed_sensor(l) = log10( ( (tbed_sensor1)**roo) / (tbed_sensor2**roo) )
-                     slimit6 = log10(kon*real(pdg_el(l))**(- lebesgue**2)) - kons
+                     slimit6 = log10(kon*real(global_here%pdg_el(l))**(- lebesgue**2)) - kons
                      
                   else
                      
@@ -1195,11 +1195,11 @@
                if ( ((ze_sensor(l).lt.dg_here%slimit1).and.&
               (qx_sensor(l).lt.dg_here%slimit2).and.&
               (qy_sensor(l).lt.dg_here%slimit3)).and.&
-              (pdg_el(l).lt.dg_here%ph).and.&
+              (global_here%pdg_el(l).lt.dg_here%ph).and.&
               (it-dg_here%pcount(l)).ge.dg_here%plimit )  then
                   
-                  pdg_el(l) = pdg_el(l) + 1
-                  dg_here%dofs(l) = (pdg_el(l) + 1 )*(pdg_el(l) +2 ) / 2
+                  global_here%pdg_el(l) = global_here%pdg_el(l) + 1
+                  dg_here%dofs(l) = (global_here%pdg_el(l) + 1 )*(global_here%pdg_el(l) +2 ) / 2
                   
                   dg_here%pcount(l) = it
                   
@@ -1209,11 +1209,11 @@
                elseif ( ((ze_sensor(l).ge.dg_here%slimit1).or.&
                  (qx_sensor(l).ge.dg_here%slimit2).or.&
                  (qy_sensor(l).ge.dg_here%slimit3)).and.&
-                 (pdg_el(l).gt.dg_here%pl) ) then !.and.
+                 (global_here%pdg_el(l).gt.dg_here%pl) ) then !.and.
                                 !&                    (it-dg_here%pcount(l)).ge.dg_here%plimit ) then
                   
-                  pdg_el(l) = pdg_el(l) - 1
-                  dg_here%dofs(l) = (pdg_el(l) + 1 )*(pdg_el(l) + 2 ) / 2
+                  global_here%pdg_el(l) = global_here%pdg_el(l) - 1
+                  dg_here%dofs(l) = (global_here%pdg_el(l) + 1 )*(global_here%pdg_el(l) + 2 ) / 2
                   
                   dg_here%ze(dg_here%dofs(l)+1:dg_here%dofh,l,irkp+1) = 0.d0
                   dg_here%qx(dg_here%dofs(l)+1:dg_here%dofh,l,irkp+1) = 0.d0
@@ -1233,11 +1233,11 @@
               (qx_sensor(l).lt.dg_here%slimit2).and.&
               (qy_sensor(l).lt.dg_here%slimit3).and.&
               (iota_sensor(l).lt.dg_here%slimit4)).and.&
-              (pdg_el(l).lt.dg_here%ph).and.&
+              (global_here%pdg_el(l).lt.dg_here%ph).and.&
               (it-dg_here%pcount(l)).ge.dg_here%plimit ) then
                   
-                  pdg_el(l) = pdg_el(l) + 1
-                  dg_here%dofs(l) = (pdg_el(l) + 1 )*(pdg_el(l) +2 ) / 2
+                  global_here%pdg_el(l) = global_here%pdg_el(l) + 1
+                  dg_here%dofs(l) = (global_here%pdg_el(l) + 1 )*(global_here%pdg_el(l) +2 ) / 2
                   
                   dg_here%pcount(l) = it
                   
@@ -1248,11 +1248,11 @@
                  (qx_sensor(l).ge.dg_here%slimit2).or.&
                  (qy_sensor(l).ge.dg_here%slimit3).or.&
                  (iota_sensor(l).ge.dg_here%slimit4)).and.&
-                 (pdg_el(l).gt.dg_here%pl) ) then !.and.
+                 (global_here%pdg_el(l).gt.dg_here%pl) ) then !.and.
                                 !&                    (it-dg_here%pcount(l)).ge.dg_here%plimit ) then
                   
-                  pdg_el(l) = pdg_el(l) - 1
-                  dg_here%dofs(l) = (pdg_el(l) + 1 )*(pdg_el(l) + 2 ) / 2
+                  global_here%pdg_el(l) = global_here%pdg_el(l) - 1
+                  dg_here%dofs(l) = (global_here%pdg_el(l) + 1 )*(global_here%pdg_el(l) + 2 ) / 2
                   
                   dg_here%ze(dg_here%dofs(l)+1:dg_here%dofh,l,irkp+1) = 0.d0
                   dg_here%iota(dg_here%dofs(l)+1:dg_here%dofh,l,irkp+1) = 0.d0
@@ -1275,11 +1275,11 @@
               (qy_sensor(l).lt.dg_here%slimit3).and.&
               (iota_sensor(l).lt.dg_here%slimit4).and.&
               (iota2_sensor(l).lt.dg_here%slimit5)).and. &
-              (pdg_el(l).lt.dg_here%ph).and. &
+              (global_here%pdg_el(l).lt.dg_here%ph).and. &
               (it-dg_here%pcount(l)).ge.dg_here%plimit) then
                   
-                  pdg_el(l) = pdg_el(l) + 1
-                  dg_here%dofs(l) = (pdg_el(l) + 1 )*(pdg_el(l) +2 ) / 2
+                  global_here%pdg_el(l) = global_here%pdg_el(l) + 1
+                  dg_here%dofs(l) = (global_here%pdg_el(l) + 1 )*(global_here%pdg_el(l) +2 ) / 2
                   
                   dg_here%pcount(l) = it
                   
@@ -1291,11 +1291,11 @@
                  (qy_sensor(l).ge.dg_here%slimit3).or.&
                  (iota_sensor(l).ge.dg_here%slimit4).or.&
                  (iota2_sensor(l).ge.dg_here%slimit5)).and.&
-                 (pdg_el(l).gt.dg_here%pl) ) then !.and.
+                 (global_here%pdg_el(l).gt.dg_here%pl) ) then !.and.
                                 !&                    (it-dg_here%pcount(l)).ge.dg_here%plimit ) then
                   
-                  pdg_el(l) = pdg_el(l) - 1
-                  dg_here%dofs(l) = (pdg_el(l) + 1 )*(pdg_el(l) + 2 ) / 2
+                  global_here%pdg_el(l) = global_here%pdg_el(l) - 1
+                  dg_here%dofs(l) = (global_here%pdg_el(l) + 1 )*(global_here%pdg_el(l) + 2 ) / 2
                   
                   dg_here%ze(dg_here%dofs(l)+1:dg_here%dofh,l,irkp+1) = 0.d0
                   dg_here%iota(dg_here%dofs(l)+1:dg_here%dofh,l,irkp+1) = 0.d0
@@ -1317,11 +1317,11 @@
               (qx_sensor(l).lt.dg_here%slimit2).and.&
               (qy_sensor(l).lt.dg_here%slimit3).and.&
               (tbed_sensor(l).lt.slimit6)).and.&
-              (pdg_el(l).lt.dg_here%ph).and.&
+              (global_here%pdg_el(l).lt.dg_here%ph).and.&
               (it-dg_here%pcount(l)).ge.dg_here%plimit ) then
                   
-                  pdg_el(l) = pdg_el(l) + 1
-                  dg_here%dofs(l) = (pdg_el(l) + 1 )*(pdg_el(l) +2 ) / 2
+                  global_here%pdg_el(l) = global_here%pdg_el(l) + 1
+                  dg_here%dofs(l) = (global_here%pdg_el(l) + 1 )*(global_here%pdg_el(l) +2 ) / 2
                   
                   dg_here%pcount(l) = it
                   
@@ -1332,11 +1332,11 @@
                  (qx_sensor(l).ge.dg_here%slimit2).or.&
                  (qy_sensor(l).ge.dg_here%slimit3).or.&
                  (tbed_sensor(l).ge.slimit6)).and.&
-                 (pdg_el(l).gt.dg_here%pl) ) then !.and.
+                 (global_here%pdg_el(l).gt.dg_here%pl) ) then !.and.
                                 !&                    (it-dg_here%pcount(l)).ge.dg_here%plimit ) then
                   
-                  pdg_el(l) = pdg_el(l) - 1
-                  dg_here%dofs(l) = (pdg_el(l) + 1 )*(pdg_el(l) + 2 ) / 2
+                  global_here%pdg_el(l) = global_here%pdg_el(l) - 1
+                  dg_here%dofs(l) = (global_here%pdg_el(l) + 1 )*(global_here%pdg_el(l) + 2 ) / 2
                   
                   dg_here%ze(dg_here%dofs(l)+1:dg_here%dofh,l,irkp+1) = 0.d0
                   dg_here%bed(dg_here%dofs(l)+1:dg_here%dofh,l,irkp+1,:) = 0.d0
@@ -1455,7 +1455,7 @@
             avg_tbedsen = 0.d0
 #endif
             
-            do l=1,ne
+            do l=1,global_here%ne
                
 #ifdef CMPI
 
@@ -1463,28 +1463,28 @@
                   
 #endif
 
-                  if (ze_sensor(l).ne.0.d0) then
+                  if (ze_sensor(l).global_here%ne.0.d0) then
 
                      minze_sensor = min(ze_sensor(l),minze_sensor)
                      maxze_sensor = max(ze_sensor(l),maxze_sensor)
                      
                   endif
 
-                  if (qx_sensor(l).ne.0.d0) then
+                  if (qx_sensor(l).global_here%ne.0.d0) then
 
                      minqx_sensor = min(qx_sensor(l),minqx_sensor)
                      maxqx_sensor = max(qx_sensor(l),maxqx_sensor)
 
                   endif
 
-                  if (qy_sensor(l).ne.0.d0) then
+                  if (qy_sensor(l).global_here%ne.0.d0) then
 
                      minqy_sensor = min(qy_sensor(l),minqy_sensor)
                      maxqy_sensor = max(qy_sensor(l),maxqy_sensor)
                      
                   endif
 #ifdef TRACE
-                  if (iota_sensor(l).ne.0.d0) then
+                  if (iota_sensor(l).global_here%ne.0.d0) then
 
                      miniota_sensor = min(iota_sensor(l),miniota_sensor)
                      maxiota_sensor = max(iota_sensor(l),maxiota_sensor)
@@ -1493,14 +1493,14 @@
 #endif
 
 #ifdef CHEM
-                  if (iota_sensor(l).ne.0.d0) then
+                  if (iota_sensor(l).global_here%ne.0.d0) then
 
                      miniota_sensor = min(iota_sensor(l),miniota_sensor)
                      maxiota_sensor = max(iota_sensor(l),maxiota_sensor)
 
                   endif
 
-                  if (iota2_sensor(l).ne.0.d0) then
+                  if (iota2_sensor(l).global_here%ne.0.d0) then
                      
                      miniota2_sensor = min(iota2_sensor(l),miniota2_sensor)
                      maxiota2_sensor = max(iota2_sensor(l),maxiota2_sensor)
@@ -1509,7 +1509,7 @@
 #endif
 
 #ifdef SED_LAY
-                  if (tbed_sensor(l).ne.0.d0) then
+                  if (tbed_sensor(l).global_here%ne.0.d0) then
 
                      mintbed_sensor = min(tbed_sensor(l),mintbed_sensor)
                      maxtbed_sensor = max(tbed_sensor(l),maxtbed_sensor)
@@ -1609,7 +1609,7 @@
             tbed_delta = ( dg_here%diorism / 100.d0 )* (abs(maxtbed_sensor - mintbed_sensor) )
 #endif
             
-            do l = 1,ne
+            do l = 1,global_here%ne
                
                temp_ze = 0.d0  
                temp_qx = 0.d0
@@ -1664,11 +1664,11 @@
                if ( ( (temp_qy.lt.qy_delta).and.&
               (temp_qx.lt.qx_delta).and.&
               (temp_ze.lt.ze_delta) ).and.&
-              (pdg_el(l).lt.dg_here%ph).and.&
+              (global_here%pdg_el(l).lt.dg_here%ph).and.&
               (it-dg_here%pcount(l)).ge.dg_here%plimit ) then
                   
-                  pdg_el(l) = pdg_el(l) + 1 
-                  dg_here%dofs(l) = (pdg_el(l) +1 )*(pdg_el(l) +2 ) / 2
+                  global_here%pdg_el(l) = global_here%pdg_el(l) + 1 
+                  dg_here%dofs(l) = (global_here%pdg_el(l) +1 )*(global_here%pdg_el(l) +2 ) / 2
                   
                   dg_here%pcount(l) = it
                   
@@ -1678,11 +1678,11 @@
                elseif ( ((temp_ze.ge.ze_delta).or.&
                  (temp_qx.ge.qx_delta).or.&
                  (temp_qy.ge.qy_delta) ).and.&
-                 (pdg_el(l).gt.dg_here%pl) ) then !.and.
+                 (global_here%pdg_el(l).gt.dg_here%pl) ) then !.and.
                                 !&                    (it-dg_here%pcount(l)).ge.dg_here%plimit ) then
                   
-                  pdg_el(l) = pdg_el(l) - 1
-                  dg_here%dofs(l) = (pdg_el(l) + 1 )*(pdg_el(l) + 2 ) / 2
+                  global_here%pdg_el(l) = global_here%pdg_el(l) - 1
+                  dg_here%dofs(l) = (global_here%pdg_el(l) + 1 )*(global_here%pdg_el(l) + 2 ) / 2
                   
                   dg_here%ze(dg_here%dofs(l)+1:dg_here%dofh,l,irkp+1) = 0.d0
                   dg_here%qx(dg_here%dofs(l)+1:dg_here%dofh,l,irkp+1) = 0.d0
@@ -1702,11 +1702,11 @@
               (temp_qx.lt.qx_delta).and.&
               (temp_ze.lt.ze_delta).and.&
               (temp_iota.lt.iota_delta)).and.&
-              (pdg_el(l).lt.dg_here%ph).and.&
+              (global_here%pdg_el(l).lt.dg_here%ph).and.&
               (it-dg_here%pcount(l)).ge.dg_here%plimit ) then
 
-                  pdg_el(l) = pdg_el(l) + 1 
-                  dg_here%dofs(l) = (pdg_el(l) +1 )*(pdg_el(l) +2 ) / 2
+                  global_here%pdg_el(l) = global_here%pdg_el(l) + 1 
+                  dg_here%dofs(l) = (global_here%pdg_el(l) +1 )*(global_here%pdg_el(l) +2 ) / 2
 
                   dg_here%pcount(l) = it
                   
@@ -1717,11 +1717,11 @@
                  (temp_qx.ge.qx_delta).or.&
                  (temp_qy.ge.qy_delta).or.&
                  (temp_iota.ge.iota_delta)).and.&
-                 (pdg_el(l).gt.dg_here%pl) ) then !.and.
+                 (global_here%pdg_el(l).gt.dg_here%pl) ) then !.and.
                                 !&                    (it-dg_here%pcount(l)).ge.dg_here%plimit) then
 
-                  pdg_el(l) = pdg_el(l) - 1
-                  dg_here%dofs(l) = (pdg_el(l) + 1 )*(pdg_el(l) + 2 ) / 2
+                  global_here%pdg_el(l) = global_here%pdg_el(l) - 1
+                  dg_here%dofs(l) = (global_here%pdg_el(l) + 1 )*(global_here%pdg_el(l) + 2 ) / 2
                   
                   dg_here%ze(dg_here%dofs(l)+1:dg_here%dofh,l,irkp+1) = 0.d0
                   dg_here%qx(dg_here%dofs(l)+1:dg_here%dofh,l,irkp+1) = 0.d0
@@ -1743,11 +1743,11 @@
               (temp_ze.lt.ze_delta).and.&
               (temp_iota.lt.iota_delta).and.&
               (temp_iota2.lt.iota2_delta)).and.&
-              (pdg_el(l).lt.dg_here%ph).and.&
+              (global_here%pdg_el(l).lt.dg_here%ph).and.&
               (it-dg_here%pcount(l)).ge.dg_here%plimit ) then
 
-                  pdg_el(l) = pdg_el(l) + 1 
-                  dg_here%dofs(l) = (pdg_el(l) +1 )*(pdg_el(l) +2 ) / 2
+                  global_here%pdg_el(l) = global_here%pdg_el(l) + 1 
+                  dg_here%dofs(l) = (global_here%pdg_el(l) +1 )*(global_here%pdg_el(l) +2 ) / 2
 
                   dg_here%pcount(l) = it
                   
@@ -1759,11 +1759,11 @@
                  (temp_qy.ge.qy_delta).or.&
                  (temp_iota.ge.iota_delta).or.&
                  (temp_iota2.ge.iota2_delta)).and.&
-                 (pdg_el(l).gt.dg_here%pl) ) then !.and.
+                 (global_here%pdg_el(l).gt.dg_here%pl) ) then !.and.
                                 !&                    (it-dg_here%pcount(l)).ge.dg_here%plimit) then
 
-                  pdg_el(l) = pdg_el(l) - 1
-                  dg_here%dofs(l) = (pdg_el(l) + 1 )*(pdg_el(l) + 2 ) / 2
+                  global_here%pdg_el(l) = global_here%pdg_el(l) - 1
+                  dg_here%dofs(l) = (global_here%pdg_el(l) + 1 )*(global_here%pdg_el(l) + 2 ) / 2
                   
                   dg_here%ze(dg_here%dofs(l)+1:dg_here%dofh,l,irkp+1) = 0.d0
                   dg_here%qx(dg_here%dofs(l)+1:dg_here%dofh,l,irkp+1) = 0.d0
@@ -1785,11 +1785,11 @@
               (temp_qx.lt.qx_delta).and.&
               (temp_ze.lt.ze_delta).and.&
               (temp_tbed.lt.tbed_delta)).and.&
-              (pdg_el(l).lt.dg_here%ph).and.&
+              (global_here%pdg_el(l).lt.dg_here%ph).and.&
               (it-dg_here%pcount(l)).ge.dg_here%plimit ) then
 
-                  pdg_el(l) = pdg_el(l) + 1 
-                  dg_here%dofs(l) = (pdg_el(l) +1 )*(pdg_el(l) +2 ) / 2
+                  global_here%pdg_el(l) = global_here%pdg_el(l) + 1 
+                  dg_here%dofs(l) = (global_here%pdg_el(l) +1 )*(global_here%pdg_el(l) +2 ) / 2
 
                   dg_here%pcount(l) = it
                   
@@ -1800,11 +1800,11 @@
                  (temp_qx.ge.qx_delta).or.&
                  (temp_qy.ge.qy_delta).or.&
                  (temp_tbed.ge.tbed_delta)).and.&
-                 (pdg_el(l).gt.dg_here%pl) ) then !.and.
+                 (global_here%pdg_el(l).gt.dg_here%pl) ) then !.and.
                                 !&                    (it-dg_here%pcount(l)).ge.dg_here%plimit) then
 
-                  pdg_el(l) = pdg_el(l) - 1
-                  dg_here%dofs(l) = (pdg_el(l) + 1 )*(pdg_el(l) + 2 ) / 2
+                  global_here%pdg_el(l) = global_here%pdg_el(l) - 1
+                  dg_here%dofs(l) = (global_here%pdg_el(l) + 1 )*(global_here%pdg_el(l) + 2 ) / 2
                   
                   dg_here%ze(dg_here%dofs(l)+1:dg_here%dofh,l,irkp+1) = 0.d0
                   dg_here%qx(dg_here%dofs(l)+1:dg_here%dofh,l,irkp+1) = 0.d0
@@ -1830,10 +1830,10 @@
 
          do j = 1,dg_here%nibseg
 
-            if ( pdg_el(dg_here%nedel(1,dg_here%nibsegn(1,j))).ne.pdg_el(dg_here%nedel(1,dg_here%nibsegn(2,j))) ) then
+            if ( global_here%pdg_el(dg_here%nedel(1,dg_here%nibsegn(1,j))).global_here%ne.global_here%pdg_el(dg_here%nedel(1,dg_here%nibsegn(2,j))) ) then
 
-               pdg_el(dg_here%nedel(1,dg_here%nibsegn(1,j))) = max(pdg_el(dg_here%nedel(1,dg_here%nibsegn(1,j))), pdg_el(dg_here%nedel(1,dg_here%nibsegn(2,j))) )
-               pdg_el(dg_here%nedel(2,dg_here%nibsegn(1,j))) = max(pdg_el(dg_here%nedel(1,dg_here%nibsegn(1,j))), pdg_el(dg_here%nedel(1,dg_here%nibsegn(2,j))) )
+               global_here%pdg_el(dg_here%nedel(1,dg_here%nibsegn(1,j))) = max(global_here%pdg_el(dg_here%nedel(1,dg_here%nibsegn(1,j))), global_here%pdg_el(dg_here%nedel(1,dg_here%nibsegn(2,j))) )
+               global_here%pdg_el(dg_here%nedel(2,dg_here%nibsegn(1,j))) = max(global_here%pdg_el(dg_here%nedel(1,dg_here%nibsegn(1,j))), global_here%pdg_el(dg_here%nedel(1,dg_here%nibsegn(2,j))) )
 
                dg_here%dofs(dg_here%nedel(1,dg_here%nibsegn(1,j))) = max(dg_here%dofs(dg_here%nedel(1,dg_here%nibsegn(1,j))), dg_here%dofs(dg_here%nedel(1,dg_here%nibsegn(2,j))) )
                dg_here%dofs(dg_here%nedel(2,dg_here%nibsegn(1,j))) = max(dg_here%dofs(dg_here%nedel(1,dg_here%nibsegn(1,j))), dg_here%dofs(dg_here%nedel(1,dg_here%nibsegn(2,j))) )

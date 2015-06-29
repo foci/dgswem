@@ -25,29 +25,29 @@
 
 !.....Retrieve element coordinates and area
 
-      X1 = X(NM(ELSTA,1))
-      X2 = X(NM(ELSTA,2))
-      X3 = X(NM(ELSTA,3))
+      global_here%X1 = global_here%X(global_here%NM(ELSTA,1))
+      global_here%X2 = global_here%X(global_here%NM(ELSTA,2))
+      global_here%X3 = global_here%X(global_here%NM(ELSTA,3))
 
-      Y1 = Y(NM(ELSTA,1))
-      Y2 = Y(NM(ELSTA,2))
-      Y3 = Y(NM(ELSTA,3))
+      global_here%Y1 = global_here%Y(global_here%NM(ELSTA,1))
+      global_here%Y2 = global_here%Y(global_here%NM(ELSTA,2))
+      global_here%Y3 = global_here%Y(global_here%NM(ELSTA,3))
 
-      AREA = 0.5D0*AREAS(ELSTA)
+      AREA = 0.5D0*global_here%AREAS(ELSTA)
       
 !.....Transform to local Z element coordinates
 
-      Z1 = -1.D0/(2.D0*AREA)*( XSTA*(2.D0*Y1 - 2.D0*Y3) +&
-                         YSTA*(2.D0*X3 - 2.D0*X1) +&
-                   X1*Y2 + X1*Y3 - X2*Y1 + X2*Y3 - X3*Y1 - X3*Y2 )
+      Z1 = -1.D0/(2.D0*AREA)*( XSTA*(2.D0*global_here%Y1 - 2.D0*global_here%Y3) +&
+                         YSTA*(2.D0*global_here%X3 - 2.D0*global_here%X1) +&
+                   global_here%X1*global_here%Y2 + global_here%X1*global_here%Y3 - global_here%X2*global_here%Y1 + global_here%X2*global_here%Y3 - global_here%X3*global_here%Y1 - global_here%X3*global_here%Y2 )
 
-      Z2 =  1.D0/(2.D0*AREA)*( XSTA*(2.D0*Y1 - 2.D0*Y2) +&
-                         YSTA*(2.D0*X2 - 2.D0*X1) +&
-                   X1*Y2 + X1*Y3 - X2*Y1 - X2*Y3 - X3*Y1 + X3*Y2 )
+      Z2 =  1.D0/(2.D0*AREA)*( XSTA*(2.D0*global_here%Y1 - 2.D0*global_here%Y2) +&
+                         YSTA*(2.D0*global_here%X2 - 2.D0*global_here%X1) +&
+                   global_here%X1*global_here%Y2 + global_here%X1*global_here%Y3 - global_here%X2*global_here%Y1 - global_here%X2*global_here%Y3 - global_here%X3*global_here%Y1 + global_here%X3*global_here%Y2 )
 
 !.....Compute the basis functions at that point and store
 
-      CALL ORTHOBASIS( Z1, Z2, PDG_EL(ELSTA), dg_here%DOF, dg_here%PHI, dg_here%DPHIDZ1, dg_here%DPHIDZ2 )
+      CALL ORTHOBASIS( Z1, Z2, global_here%PDG_EL(ELSTA), dg_here%DOF, dg_here%PHI, dg_here%DPHIDZ1, dg_here%DPHIDZ2 )
       PHI_STA(:) = dg_here%PHI
 
       RETURN

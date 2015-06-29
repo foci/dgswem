@@ -2,7 +2,7 @@
 !
 !     SUBROUTINE CALC_NORMAL( )
 !
-!     This subroutine calculates the unit normal vector for a given edge
+!     This subroutine calculates the unit normal vector for a given global_here%edge
 !
 !     Written by someone at UT
 !
@@ -29,24 +29,24 @@
 
       DO I = 1,dg_here%NEDGES
       
-!.....Retrieve the node numbers for the given edge
+!.....Retrieve the node numbers for the given global_here%edge
 
-        N1 = dg_here%NEDNO(1,I)
-        N2 = dg_here%NEDNO(2,I)
+        global_here%N1 = dg_here%NEDNO(1,I)
+        global_here%N2 = dg_here%NEDNO(2,I)
 
-!.....Compute an average SFAC to adjust normal for CPP coordinates
+!.....Compute an average global_here%SFAC to adjust normal for CPP coordinates
 
-        dg_here%SAV = (SFAC(N1) + SFAC(N2))/2.0
+        dg_here%SAV = (global_here%SFAC(global_here%N1) + global_here%SFAC(global_here%N2))/2.0
         
 !.....Compute the length of the given egde
         
-        dg_here%XLEN(I) = SQRT((Y(N2) - Y(N1))**2.D0                   + (X(N2) - X(N1))**2.D0)
+        dg_here%XLEN(I) = SQRT((global_here%Y(global_here%N2) - global_here%Y(global_here%N1))**2.D0                   + (global_here%X(global_here%N2) - global_here%X(global_here%N1))**2.D0)
      
 !.....Compute the components of the normal vector
 
-       !dg_here%COSNX(I) = dg_here%SAV*(Y(N2) - Y(N1))/dg_here%XLEN(I)
-       dg_here%COSNX(I) = (Y(N2) - Y(N1))/dg_here%XLEN(I)
-       dg_here%SINNX(I) = -(X(N2) - X(N1))/dg_here%XLEN(I)
+       !dg_here%COSNX(I) = dg_here%SAV*(global_here%Y(global_here%N2) - global_here%Y(global_here%N1))/dg_here%XLEN(I)
+       dg_here%COSNX(I) = (global_here%Y(global_here%N2) - global_here%Y(global_here%N1))/dg_here%XLEN(I)
+       dg_here%SINNX(I) = -(global_here%X(global_here%N2) - global_here%X(global_here%N1))/dg_here%XLEN(I)
       ENDDO
         
       RETURN

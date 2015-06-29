@@ -1181,9 +1181,9 @@
       real(sz) tbed_sensor1,tbed_sensor2
 #endif
 
-      DO L=1,NE
+      DO L=1,global_here%NE
 
-         pa = PDG_EL(L)
+         pa = global_here%PDG_EL(L)
 
 #ifdef P0
          if (pa.eq.0) then
@@ -1193,9 +1193,9 @@
          
 !.....Retrieve the global node numbers for the element
          
-         N1 = NM(L,1)
-         N2 = NM(L,2)
-         N3 = NM(L,3)
+         global_here%N1 = global_here%NM(L,1)
+         global_here%N2 = global_here%NM(L,2)
+         global_here%N3 = global_here%NM(L,3)
          
 !.....Compute dg_here%ZE, dg_here%QX, dg_here%QY, and HB at each area Gauss quadrature point
 
@@ -1300,7 +1300,7 @@
          dg_here%slimit2 = -100.D0
          dg_here%slimit3 = -100.D0
 
-         entrop(:,L) = -100.D0
+         global_here%entrop(:,L) = -100.D0
            
 #ifdef WAVE_DIF 
          ze_sensor1 = 0.d0
@@ -1376,28 +1376,28 @@
 #ifdef WAVE_DIF 
          if  (ze_sensor2.gt.1.0e-4.and.ze_sensor1.gt.1.0e-4 ) then
             dg_here%slimit1 = log10( ze_sensor1/ze_sensor2 ) + dg_here%balance(1)
-            entrop(1,L) = dg_here%slimit1
+            global_here%entrop(1,L) = dg_here%slimit1
          endif
 #endif
          if (qx_sensor2.gt.1.0e-4.and.qx_sensor1.gt.1.0e-4 ) then
             dg_here%slimit2 = log10( qx_sensor1/qx_sensor2 ) + dg_here%balance(2)
-            entrop(2,L) = dg_here%slimit2
+            global_here%entrop(2,L) = dg_here%slimit2
          endif
          if ( qy_sensor2.gt.1.0e-4.and.qy_sensor1.gt.1.0e-4 ) then
             dg_here%slimit3 = log10( qy_sensor1/qy_sensor2 ) + dg_here%balance(3)
-            entrop(3,L) = dg_here%slimit3
+            global_here%entrop(3,L) = dg_here%slimit3
          endif
 #ifdef TRACE
           if ( iota_sensor2.gt.1.0e-4.and.iota_sensor1.gt.1.0e-4 ) then
             dg_here%slimit4 = log10( iota_sensor1/iota_sensor2 ) + dg_here%balance(4)
-            entrop(4,L) = dg_here%slimit4
+            global_here%entrop(4,L) = dg_here%slimit4
           endif
 #endif
          
 #ifdef SED_LAY
          if ( tbed_sensor2.gt.1.0e-4.and.tbed_sensor1.gt.1.0e-4 ) then
             dg_here%slimit5 = log10( tbed_sensor1/tbed_sensor2 ) + dg_here%balance(5)
-            entrop(5,L) = dg_here%slimit5 
+            global_here%entrop(5,L) = dg_here%slimit5 
         endif
 #endif
                   

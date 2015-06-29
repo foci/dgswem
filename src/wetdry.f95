@@ -53,15 +53,15 @@
       REAL(SZ):: HS0, U_HAT(3), V_HAT(3)
 !.....Initialize node codes to dry
 
-      DO I = 1,NP
-         NODECODE(I) = 0
+      DO I = 1,global_here%NP
+         global_here%NODECODE(I) = 0
       ENDDO
       
 !.....Loop over the elements
 
-      DO 100 J = 1,NE
+      DO 100 J = 1,global_here%NE
 
-         dg_here%pa = pdg_el(j)
+         dg_here%pa = global_here%pdg_el(j)
          
 #ifdef P0
          if (dg_here%pa.eq.0) then
@@ -72,9 +72,9 @@
 !.......Retrieve vertex  numbers for element 
 !.......(the vertex numbers are the node #'s if p=1)
 
-         No1 = NM(J,1)
-         No2 = NM(J,2)
-         No3 = NM(J,3)
+         No1 = global_here%NM(J,1)
+         No2 = global_here%NM(J,2)
+         No3 = global_here%NM(J,3)
          
 !.......Compute value of dg_here%ZE and HT at each node, find HT max and min,
 !.......and count number of dry nodes
@@ -111,7 +111,7 @@
                HT_MAX = HT_NODE(I)
             ENDIF
             !Note, this can be greater than 3 for element J if p>1
-            IF (HT_NODE(I).LE.(H0+ZERO)) NDRYNODE = NDRYNODE + 1
+            IF (HT_NODE(I).LE.(global_here%H0+ZERO)) NDRYNODE = NDRYNODE + 1
          ENDDO
          
 !.......Set "average" bathymetry based on p
@@ -122,7 +122,7 @@
          DP_AVG = dg_here%C13*(dg_here%DP_NODE(1,J,dg_here%pa) + dg_here%DP_NODE(2,J,dg_here%pa) + dg_here%DP_NODE(3,J,dg_here%pa))
 
 #ifdef P0
-         IF (pdg_el(J).EQ.0) THEN
+         IF (global_here%pdg_el(J).EQ.0) THEN
             DP_AVG = 0.D0
             DP_AVG = dg_here%DPE_MIN(J)
          ENDIF
@@ -142,9 +142,9 @@
 !...........Make no adjustments and set element vertex codes to wet
 
                ELEMENT_CHECK = 0
-               NODECODE(No1) = 1
-               NODECODE(No2) = 1
-               NODECODE(No3) = 1
+               global_here%NODECODE(No1) = 1
+               global_here%NODECODE(No2) = 1
+               global_here%NODECODE(No3) = 1
                
 !.........Case 1B:  Element was previously dry
 !----------------------------------------------
@@ -171,7 +171,7 @@
 !.........Set surface elevation parallel to bathymetry such that total
 !.........water depth at all points = average water depth
             IF (dg_here%pa.EQ.0) THEN
-               HT_AVG = H0
+               HT_AVG = global_here%H0
             ELSEIF (dg_here%pa.EQ.1) THEN
                HT_AVG = dg_here%ZE(1,J,dg_here%IRK+1) + DP_AVG
             ELSE
@@ -179,8 +179,8 @@
                DO K = 1,dg_here%DOFS(J)
                   ZE_VOL = ZE_VOL + dg_here%ZE(K,J,dg_here%IRK+1)*dg_here%PHI_INTEGRATED(K,dg_here%pa)
                ENDDO
-               HT_VOL = dg_here%DP_VOL(J,dg_here%pa) + 0.25D0*AREAS(J)*ZE_VOL
-               HT_AVG = HT_VOL/(0.5D0*AREAS(J))
+               HT_VOL = dg_here%DP_VOL(J,dg_here%pa) + 0.25D0*global_here%AREAS(J)*ZE_VOL
+               HT_AVG = HT_VOL/(0.5D0*global_here%AREAS(J))
             ENDIF
             
             dg_here%ZE(:,J,dg_here%IRK+1) = 0.D0
@@ -221,13 +221,13 @@
 !
 
             !transported quantities should still be stable
-!$$$            if (tracer_flag.eq.1) then
+!$$$            if (global_here%tracer_flag.eq.1) then
 !$$$               
 !$$$               dg_here%iota(:,J,dg_here%irk+1) = 0.D0
 !$$$               
 !$$$            endif
 !$$$            
-!$$$            if (chem_flag.eq.1) then
+!$$$            if (global_here%chem_flag.eq.1) then
 !$$$               
 !$$$               dg_here%iota(:,J,dg_here%irk+1) = 0.D0
 !$$$               dg_here%iota2(:,j,dg_here%irk+1) = 0.D0
@@ -242,7 +242,7 @@
 
 !.........Set averages based on p
             IF (dg_here%pa.EQ.0) THEN
-               HT_AVG = H0
+               HT_AVG = global_here%H0
             ELSEIF (dg_here%pa.EQ.1) THEN
                HT_AVG = dg_here%ZE(1,J,dg_here%IRK+1) + DP_AVG
             ELSE
@@ -250,15 +250,15 @@
                DO K = 1,dg_here%DOFS(J)
                   ZE_VOL = ZE_VOL + dg_here%ZE(K,J,dg_here%IRK+1)*dg_here%PHI_INTEGRATED(K,dg_here%pa)
                ENDDO
-               HT_VOL = dg_here%DP_VOL(J,dg_here%pa) + 0.25D0*AREAS(J)*ZE_VOL
-               HT_AVG = HT_VOL/(0.5D0*AREAS(J))
+               HT_VOL = dg_here%DP_VOL(J,dg_here%pa) + 0.25D0*global_here%AREAS(J)*ZE_VOL
+               HT_AVG = HT_VOL/(0.5D0*global_here%AREAS(J))
             ENDIF
             
 !     --------------------------------------------------------------
-!.........Case 3A: Average water depth < H0
+!.........Case 3A: Average water depth < global_here%H0
 !     --------------------------------------------------------------
 
-            IF (HT_AVG.LE.(H0+ZERO)) THEN
+            IF (HT_AVG.LE.(global_here%H0+ZERO)) THEN
 
 !...........Set surface elevation parallel to bathymetry such that total
 !...........water depth at all points = average water depth
@@ -279,7 +279,7 @@
                dg_here%QY(:,J,dg_here%IRK+1) = 0.D0
 
 !     --------------------------------------------------------------
-!.........Case 3B: Aaverage water depth > H0
+!.........Case 3B: Aaverage water depth > global_here%H0
 !     --------------------------------------------------------------
                
             ELSE
@@ -322,8 +322,8 @@
 
 !...........Compute the factors needed for nodal/vertex ajustment
 
-               DH_HAT(L2H(1)) = MAX(H0, HT_NODE(L2H(1))) - HT_NODE(L2H(1))
-               DH_HAT(L2H(2)) = MAX(H0, HT_NODE(L2H(2))-0.5*DH_HAT(L2H(1)))&
+               DH_HAT(L2H(1)) = MAX(global_here%H0, HT_NODE(L2H(1))) - HT_NODE(L2H(1))
+               DH_HAT(L2H(2)) = MAX(global_here%H0, HT_NODE(L2H(2))-0.5*DH_HAT(L2H(1)))&
                     - HT_NODE(L2H(2))
                DH_HAT(L2H(3)) = - DH_HAT(L2H(1)) - DH_HAT(L2H(2))
 
@@ -346,7 +346,7 @@
                      QX_NODE(I) = QX_NODE(I) + dg_here%PHI_CORNER(K,I,dg_here%pa)*dg_here%QX(K,J,dg_here%IRK+1)
                      QY_NODE(I) = QY_NODE(I) + dg_here%PHI_CORNER(K,I,dg_here%pa)*dg_here%QY(K,J,dg_here%IRK+1)
                   ENDDO
-                  IF (HT_HAT(I).LE.(H0+1.D-10)) THEN
+                  IF (HT_HAT(I).LE.(global_here%H0+1.D-10)) THEN
                      NDRYNODE = NDRYNODE + 1
                      QX_SUMs = QX_SUMs + QX_NODE(I)
                      QY_SUMs = QY_SUMs + QY_NODE(I)
@@ -360,19 +360,19 @@
                   dg_here%QX(:,J,dg_here%IRK+1) = 0.D0
                   dg_here%QY(:,J,dg_here%IRK+1) = 0.D0
 
-!$$$  if (tracer_flag.eq.1) then
+!$$$  if (global_here%tracer_flag.eq.1) then
 !$$$  
 !$$$  dg_here%iota(:,J,dg_here%irk+1) = 0.D0
 !$$$  
 !$$$  endif
 !$$$
-!$$$  if (tracer_flag.eq.1) then
+!$$$  if (global_here%tracer_flag.eq.1) then
 !$$$  
 !$$$  dg_here%iota(:,J,dg_here%irk+1) = 0.D0
 !$$$  
 !$$$  endif
 !$$$  
-!$$$  if (chem_flag.eq.1) then
+!$$$  if (global_here%chem_flag.eq.1) then
 !$$$  
 !$$$  dg_here%iota(:,J,dg_here%irk+1) = 0.D0
 !$$$  dg_here%iota2(:,j,dg_here%irk+1) = 0.D0
@@ -386,7 +386,7 @@
                   QX_SUMs = QX_SUMs/(3.D0-REAL(NDRYNODE))
                   QY_SUMs = QY_SUMs/(3.D0-REAL(NDRYNODE))
                   DO I = 1,3
-                     IF(HT_HAT(I).LE.(H0+1.D-10)) THEN
+                     IF(HT_HAT(I).LE.(global_here%H0+1.D-10)) THEN
                         QX_HAT(I) = 0.D0
                         QY_HAT(I) = 0.D0
                      ELSE
@@ -427,13 +427,13 @@
 
 
 
-!.............Compute new linear modal dg_here%dofs for x-direction flux
+!.............Compute new linear modal dg_here%dofs for global_here%x-direction flux
 
                   dg_here%QX(1,J,dg_here%IRK+1) =  dg_here%C13*(QX_HAT(1) + QX_HAT(2) + QX_HAT(3))
                   dg_here%QX(2,J,dg_here%IRK+1) = -dg_here%C16*(QX_HAT(1) + QX_HAT(2))+dg_here%C13*QX_HAT(3)
                   dg_here%QX(3,J,dg_here%IRK+1) = -0.5D0*QX_HAT(1) + 0.5D0*QX_HAT(2)
 
-!.............Compute new linear modal dg_here%dofs for y-direction flux
+!.............Compute new linear modal dg_here%dofs for global_here%y-direction flux
 
                   dg_here%QY(1,J,dg_here%IRK+1) =  dg_here%C13*(QY_HAT(1) + QY_HAT(2) + QY_HAT(3))
                   dg_here%QY(2,J,dg_here%IRK+1) = -dg_here%C16*(QY_HAT(1) + QY_HAT(2))+dg_here%C13*QY_HAT(3)
@@ -492,9 +492,9 @@
 
                                 !if (dg_here%PADAPT.EQ.1) THEN
 #ifdef P_AD
-            if (pdg_el(j).gt.1) then
+            if (global_here%pdg_el(j).gt.1) then
 
-               pdg_el(j) = 1
+               global_here%pdg_el(j) = 1
                dg_here%dofs(J) = 3
 
             endif
@@ -516,15 +516,15 @@
          IF (ELEMENT_CHECK.EQ.1) THEN
 
 !Now test to see if the water column at the min vertex is wet
-            IF (MINVAL(ZE_HAT(:,dg_here%pa)+dg_here%DP_NODE(:,J,dg_here%pa)).GT.H0 ) THEN  ! cem fix
-!            IF (ZE_HAT(HT_MAX_I,dg_here%pa).GT.(-dg_here%DPE_MIN(J)+H0)) THEN     ! Shintaro's criteria 
+            IF (MINVAL(ZE_HAT(:,dg_here%pa)+dg_here%DP_NODE(:,J,dg_here%pa)).GT.global_here%H0 ) THEN  ! cem fix
+!            IF (ZE_HAT(HT_MAX_I,dg_here%pa).GT.(-dg_here%DPE_MIN(J)+global_here%H0)) THEN     ! Shintaro's criteria 
 
 !.........Make no adjustments and set element and node flags to wet
 
                dg_here%WDFLG(J) = 1
-               NODECODE(No1) = 1
-               NODECODE(No2) = 1
-               NODECODE(No3) = 1
+               global_here%NODECODE(No1) = 1
+               global_here%NODECODE(No2) = 1
+               global_here%NODECODE(No3) = 1
 
             ELSE
 

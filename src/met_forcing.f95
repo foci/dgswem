@@ -39,44 +39,44 @@
 !.....Set the wind drag limit
 
       WindDragLimit = 0.002
-      RampMete = dg_here%rampdg
+      global_here%RampMete = dg_here%rampdg
 
 !asey 130710: Added this section.
-      IF(WTIME1.LT.ITHS*DTDP)THEN
-         WTIME1 = ITHS*DTDP
-         WTIME2 = WTIME1 + WTIMINC
+      IF(global_here%WTIME1.LT.global_here%ITHS*global_here%DTDP)THEN
+         global_here%WTIME1 = global_here%ITHS*global_here%DTDP
+         global_here%WTIME2 = global_here%WTIME1 + global_here%WTIMINC
       ENDIF
 !-----------------------------------------------------------------------
 !
-!     NWS = 1
+!     global_here%NWS = 1
 !
 !     Wind stress and atmospheric pressure are read in at all grid nodes
 !     at every model time step from the fort.22 file.
 !
 !-----------------------------------------------------------------------
 
-      IF (NWS.EQ.1) THEN
-         DO II= 1,NP
+      IF (global_here%NWS.EQ.1) THEN
+         DO II= 1,global_here%NP
          
 !..........Read in the data
          
-           READ(22,*) NHG, WSX2(II), WSY2(II), PR2(II)
+           READ(22,*) global_here%NHG, global_here%WSX2(II), global_here%WSY2(II), global_here%PR2(II)
            
-!..........Apply the met ramp function
+!..........Apply the met global_here%ramp function
 
-!           RampMete = dg_here%RAMPDG
+!           global_here%RampMete = dg_here%RAMPDG
            
-           WSX2(II)    = RampMete*WSX2(II)
-           WSY2(II)    = RampMete*WSY2(II)
-           PR2(II)     = RampMete*PR2(II)
-           WVNXOUT(II) = WSX2(II)
-           WVNYOUT(II) = WSY2(II)
+           global_here%WSX2(II)    = global_here%RampMete*global_here%WSX2(II)
+           global_here%WSY2(II)    = global_here%RampMete*global_here%WSY2(II)
+           global_here%PR2(II)     = global_here%RampMete*global_here%PR2(II)
+           global_here%WVNXOUT(II) = global_here%WSX2(II)
+           global_here%WVNYOUT(II) = global_here%WSY2(II)
          ENDDO
       ENDIF
       
 !-----------------------------------------------------------------------
 !
-!     NWS = 2
+!     global_here%NWS = 2
 !
 !     Wind stress and atmospheric pressure are read in at all grid nodes
 !     at a time interval that does not equal the model time step.  In-
@@ -85,51 +85,51 @@
 !
 !-----------------------------------------------------------------------
 
-      IF (ABS(NWS).EQ.2) THEN
+      IF (ABS(global_here%NWS).EQ.2) THEN
       
 !.......Determine if the met file time increment is exceeded
       
-        IF (TIME_A.GT.WTIME2) THEN
-          WTIME1 = WTIME2
-          WTIME2 = WTIME2 + WTIMINC
-          DO II= 1,NP
+        IF (global_here%TIME_A.GT.global_here%WTIME2) THEN
+          global_here%WTIME1 = global_here%WTIME2
+          global_here%WTIME2 = global_here%WTIME2 + global_here%WTIMINC
+          DO II= 1,global_here%NP
           
 !...........Shift current data to old
           
-            WVNX1(II) = WVNX2(II)
-            WVNY1(II) = WVNY2(II)
-            PRN1(II)  = PRN2(II)
+            global_here%WVNX1(II) = global_here%WVNX2(II)
+            global_here%WVNY1(II) = global_here%WVNY2(II)
+            global_here%PRN1(II)  = global_here%PRN2(II)
             
 !...........Read in data
             
-            READ(22,*) NHG, WVNX2(II), WVNY2(II), PRN2(II)
+            READ(22,*) global_here%NHG, global_here%WVNX2(II), global_here%WVNY2(II), global_here%PRN2(II)
           ENDDO
           PRINT*,'READING IN WIND DATA SET AT TIMESTEP',IT
         ENDIF
         
-        WTRATIO = (TIME_A - WTIME1)/WTIMINC
-        DO II= 1,NP
+        global_here%WTRATIO = (global_here%TIME_A - global_here%WTIME1)/global_here%WTIMINC
+        DO II= 1,global_here%NP
         
 !.........Interpolate in time
         
-          WINDX      = WVNX1(II) + WTRATIO*(WVNX2(II) - WVNX1(II))
-          WINDY      = WVNY1(II) + WTRATIO*(WVNY2(II) - WVNY1(II))
+          global_here%WINDX      = global_here%WVNX1(II) + global_here%WTRATIO*(global_here%WVNX2(II) - global_here%WVNX1(II))
+          global_here%WINDY      = global_here%WVNY1(II) + global_here%WTRATIO*(global_here%WVNY2(II) - global_here%WVNY1(II))
           
-!.........Apply mete ramp
+!.........Apply mete global_here%ramp
 
-!          RampMete = dg_here%RAMPDG
+!          global_here%RampMete = dg_here%RAMPDG
           
-          WSX2(II)    = RampMete*WINDX
-          WSY2(II)    = RampMete*WINDY
-          PR2(II)     = RampMete*(PRN1(II)+WTRATIO*(PRN2(II)-PRN1(II)))
-          WVNXOUT(II) = WSX2(II)
-          WVNYOUT(II) = WSY2(II)
+          global_here%WSX2(II)    = global_here%RampMete*global_here%WINDX
+          global_here%WSY2(II)    = global_here%RampMete*global_here%WINDY
+          global_here%PR2(II)     = global_here%RampMete*(global_here%PRN1(II)+global_here%WTRATIO*(global_here%PRN2(II)-global_here%PRN1(II)))
+          global_here%WVNXOUT(II) = global_here%WSX2(II)
+          global_here%WVNYOUT(II) = global_here%WSY2(II)
         ENDDO
       ENDIF
       
 !-----------------------------------------------------------------------
 !
-!     NWS = 3
+!     global_here%NWS = 3
 !
 !     Wind velocity in US Navy Fleet Numeric format interpolated in
 !     space onto the ADCIRC grid and in time to synchronize the wind and
@@ -138,62 +138,62 @@
 !
 !-----------------------------------------------------------------------
 
-      IF (NWS.EQ.3) THEN
+      IF (global_here%NWS.EQ.3) THEN
       
 !.......Determine if the met file time increment is exceeded
 
-        IF (TIME_A.GT.WTIME2) THEN
-          WTIME1 = WTIME2
-          WTIME2 = WTIME2 + WTIMINC
+        IF (global_here%TIME_A.GT.global_here%WTIME2) THEN
+          global_here%WTIME1 = global_here%WTIME2
+          global_here%WTIME2 = global_here%WTIME2 + global_here%WTIMINC
           
 !.........Shift current data to old
           
-          DO II=1,NP
-            WVNX1(II) = WVNX2(II)
-            WVNY1(II) = WVNY2(II)
+          DO II=1,global_here%NP
+            global_here%WVNX1(II) = global_here%WVNX2(II)
+            global_here%WVNY1(II) = global_here%WVNY2(II)
           ENDDO
           
 !.........Obtain the meteorological forcing data
           
-          CALL NWS3GET(s, X, Y, SLAM, SFEA, WVNX2, WVNY2, IWTIME, IWYR,&
-                  WTIMED, NP, NWLON, NWLAT, WLATMAX, WLONMIN,&
-                  WLATINC, WLONINC, ICS, NSCREEN, ScreenUnit )
+          CALL NWS3GET(s, global_here%X, global_here%Y, global_here%SLAM, global_here%SFEA, global_here%WVNX2, global_here%WVNY2, global_here%IWTIME, global_here%IWYR,&
+                  global_here%WTIMED, global_here%NP, global_here%NWLON, global_here%NWLAT, global_here%WLATMAX, global_here%WLONMIN,&
+                  global_here%WLATINC, global_here%WLONINC, global_here%ICS, global_here%NSCREEN, global_here%ScreenUnit )
          ENDIF
 
-         WTRATIO = (TIME_A - WTIME1)/WTIMINC
-         DO II= 1,NP
+         global_here%WTRATIO = (global_here%TIME_A - global_here%WTIME1)/global_here%WTIMINC
+         DO II= 1,global_here%NP
          
 !..........Interpolate in time
          
-           WINDX   = WVNX1(II) + WTRATIO*(WVNX2(II) - WVNX1(II))
-           WINDY   = WVNY1(II) + WTRATIO*(WVNY2(II) - WVNY1(II))
+           global_here%WINDX   = global_here%WVNX1(II) + global_here%WTRATIO*(global_here%WVNX2(II) - global_here%WVNX1(II))
+           global_here%WINDY   = global_here%WVNY1(II) + global_here%WTRATIO*(global_here%WVNY2(II) - global_here%WVNY1(II))
            
 !..........Compute wind drag
            
-           WINDMAG = SQRT( WINDX*WINDX + WINDY*WINDY )
-           WDRAGCO = WindDrag( WINDMAG, WindDragLimit, "Garratt   ")
+           global_here%WINDMAG = SQRT( global_here%WINDX*global_here%WINDX + global_here%WINDY*global_here%WINDY )
+           global_here%WDRAGCO = WindDrag( global_here%WINDMAG, WindDragLimit, "Garratt   ")
            
 !..........Apply directional wind reductions
            
            IF (LoadDirEffRLen) THEN
-             CALL ApplyDirectionalWindReduction( II, WDRAGCO, WINDMAG,&
-                                          DP(II), ETA2(II), H0, G,&
-                                          WINDX, WINDY )
-             WINDMAG = SQRT( WINDX*WINDX + WINDY*WINDY )
-             WDRAGCO = WindDrag(WINDMAG, WindDragLimit, "Garratt   " )
+             CALL ApplyDirectionalWindReduction( II, global_here%WDRAGCO, global_here%WINDMAG,&
+                                          global_here%DP(II), global_here%ETA2(II), global_here%H0, global_here%G,&
+                                          global_here%WINDX, global_here%WINDY )
+             global_here%WINDMAG = SQRT( global_here%WINDX*global_here%WINDX + global_here%WINDY*global_here%WINDY )
+             global_here%WDRAGCO = WindDrag(global_here%WINDMAG, WindDragLimit, "Garratt   " )
            ENDIF
            
-!..........Apply met ramp
-!           RampMete = dg_here%RAMPDG
-           WSX2(II)    = RampMete*0.001293D0*WDRAGCO*WINDX*WINDMAG
-           WSY2(II)    = RampMete*0.001293D0*WDRAGCO*WINDY*WINDMAG
-           WVNXOUT(II) = RampMete*WINDX
-           WVNYOUT(II) = RampMete*WINDY
+!..........Apply met global_here%ramp
+!           global_here%RampMete = dg_here%RAMPDG
+           global_here%WSX2(II)    = global_here%RampMete*0.001293D0*global_here%WDRAGCO*global_here%WINDX*global_here%WINDMAG
+           global_here%WSY2(II)    = global_here%RampMete*0.001293D0*global_here%WDRAGCO*global_here%WINDY*global_here%WINDMAG
+           global_here%WVNXOUT(II) = global_here%RampMete*global_here%WINDX
+           global_here%WVNYOUT(II) = global_here%RampMete*global_here%WINDY
 #ifdef SWAN
 !asey 101118: Added these lines for coupling winds to SWAN.
            IF(COUPWIND)THEN
-             SWAN_WX2(II,2) = WINDX
-             SWAN_WY2(II,2) = WINDY
+             SWAN_WX2(II,2) = global_here%WINDX
+             SWAN_WY2(II,2) = global_here%WINDY
            ENDIF
 #endif
         ENDDO
@@ -201,7 +201,7 @@
       
 !-----------------------------------------------------------------------
 !
-!     NWS = 4
+!     global_here%NWS = 4
 !
 !     Wind velocity and atmospheric pressure are read in (PBL/JAG
 !     format) at selected ADCIRC grid nodes. Interpolation in time is
@@ -211,62 +211,62 @@
 !
 !-----------------------------------------------------------------------
 
-      IF (ABS(NWS).EQ.4) THEN
+      IF (ABS(global_here%NWS).EQ.4) THEN
       
 !.......Determine if the met file time increment is exceeded
       
-        IF (TIME_A.GT.WTIME2) THEN
-          WTIME1 = WTIME2
-          WTIME2 = WTIME2 + WTIMINC
+        IF (global_here%TIME_A.GT.global_here%WTIME2) THEN
+          global_here%WTIME1 = global_here%WTIME2
+          global_here%WTIME2 = global_here%WTIME2 + global_here%WTIMINC
 
 !.........Shift current data to old
           
-          DO II = 1,NP
-            WVNX1(II) = WVNX2(II)
-            WVNY1(II) = WVNY2(II)
-            PRN1(II)  = PRN2(II)
+          DO II = 1,global_here%NP
+            global_here%WVNX1(II) = global_here%WVNX2(II)
+            global_here%WVNY1(II) = global_here%WVNY2(II)
+            global_here%PRN1(II)  = global_here%PRN2(II)
           ENDDO
           
 !.........Obtain the meteorological forcing data
           
-          CALL NWS4GET( WVNX2, WVNY2, PRN2, NP, RHOWAT0, G )
+          CALL NWS4GET( global_here%WVNX2, global_here%WVNY2, global_here%PRN2, global_here%NP, global_here%RHOWAT0, global_here%G )
         ENDIF
 
-        WTRATIO = (TIME_A-WTIME1)/WTIMINC
-        DO II = 1,NP
+        global_here%WTRATIO = (global_here%TIME_A-global_here%WTIME1)/global_here%WTIMINC
+        DO II = 1,global_here%NP
          
 !.........Interpolate in time
          
-          WINDX = WVNX1(II) + WTRATIO*(WVNX2(II)-WVNX1(II))
-          WINDY = WVNY1(II) + WTRATIO*(WVNY2(II)-WVNY1(II))
+          global_here%WINDX = global_here%WVNX1(II) + global_here%WTRATIO*(global_here%WVNX2(II)-global_here%WVNX1(II))
+          global_here%WINDY = global_here%WVNY1(II) + global_here%WTRATIO*(global_here%WVNY2(II)-global_here%WVNY1(II))
             
 !.........Compute wind drag
             
-          WINDMAG = SQRT( WINDX*WINDX + WINDY*WINDY )
-          WDRAGCO = WindDrag( WINDMAG, WindDragLimit, "Garratt   " )
+          global_here%WINDMAG = SQRT( global_here%WINDX*global_here%WINDX + global_here%WINDY*global_here%WINDY )
+          global_here%WDRAGCO = WindDrag( global_here%WINDMAG, WindDragLimit, "Garratt   " )
            
 !.........Apply directional wind reductions
 
           IF (LoadDirEffRLen) THEN
-            CALL ApplyDirectionalWindReduction( II, WDRAGCO, WINDMAG,&
-                                          DP(II), ETA2(II), H0, G,&
-                                          WINDX, WINDY )
-            WINDMAG = SQRT(WINDX*WINDX+WINDY*WINDY)
-            WDRAGCO = WindDrag(WINDMAG, WindDragLimit, "Garratt   ")
+            CALL ApplyDirectionalWindReduction( II, global_here%WDRAGCO, global_here%WINDMAG,&
+                                          global_here%DP(II), global_here%ETA2(II), global_here%H0, global_here%G,&
+                                          global_here%WINDX, global_here%WINDY )
+            global_here%WINDMAG = SQRT(global_here%WINDX*global_here%WINDX+global_here%WINDY*global_here%WINDY)
+            global_here%WDRAGCO = WindDrag(global_here%WINDMAG, WindDragLimit, "Garratt   ")
           ENDIF
             
-!.........Apply met ramp
-!           RampMete = dg_here%RAMPDG
-          WSX2(II)    = RampMete*0.001293d0*WDRAGCO*WINDX*WINDMAG
-          WSY2(II)    = RampMete*0.001293d0*WDRAGCO*WINDY*WINDMAG
-          PR2(II)     = RampMete*(PRN1(II)+WTRATIO*(PRN2(II)- PRN1(II)))
-          WVNXOUT(II) = RampMete*WINDX
-          WVNYOUT(II) = RampMete*WINDY
+!.........Apply met global_here%ramp
+!           global_here%RampMete = dg_here%RAMPDG
+          global_here%WSX2(II)    = global_here%RampMete*0.001293d0*global_here%WDRAGCO*global_here%WINDX*global_here%WINDMAG
+          global_here%WSY2(II)    = global_here%RampMete*0.001293d0*global_here%WDRAGCO*global_here%WINDY*global_here%WINDMAG
+          global_here%PR2(II)     = global_here%RampMete*(global_here%PRN1(II)+global_here%WTRATIO*(global_here%PRN2(II)- global_here%PRN1(II)))
+          global_here%WVNXOUT(II) = global_here%RampMete*global_here%WINDX
+          global_here%WVNYOUT(II) = global_here%RampMete*global_here%WINDY
 #ifdef SWAN
 !asey 101118: Added these lines for coupling winds to SWAN.
           IF(COUPWIND)THEN
-            SWAN_WX2(II,2) = WINDX
-            SWAN_WY2(II,2) = WINDY
+            SWAN_WX2(II,2) = global_here%WINDX
+            SWAN_WY2(II,2) = global_here%WINDY
           ENDIF
 #endif
         ENDDO
@@ -274,7 +274,7 @@
       
 !-----------------------------------------------------------------------
 !
-!     NWS = 5
+!     global_here%NWS = 5
 !
 !     Wind velocity and atmospheric pressure are read in at all grid
 !     nodes. Interpolation in time is used to synchronize the wind and
@@ -283,62 +283,62 @@
 !
 !-----------------------------------------------------------------------
 
-      IF(ABS(NWS).EQ.5) THEN
+      IF(ABS(global_here%NWS).EQ.5) THEN
       
 !.......Determine if the met file time increment is exceeded
       
-        IF(TIME_A.GT.WTIME2) THEN
-          WTIME1 = WTIME2
-          WTIME2 = WTIME2 + WTIMINC
+        IF(global_here%TIME_A.GT.global_here%WTIME2) THEN
+          global_here%WTIME1 = global_here%WTIME2
+          global_here%WTIME2 = global_here%WTIME2 + global_here%WTIMINC
           
 !.........Shift current data to old
           
-          DO II = 1,NP
-            WVNX1(II) = WVNX2(II)
-            WVNY1(II) = WVNY2(II)
-            PRN1(II)  = PRN2(II)
+          DO II = 1,global_here%NP
+            global_here%WVNX1(II) = global_here%WVNX2(II)
+            global_here%WVNY1(II) = global_here%WVNY2(II)
+            global_here%PRN1(II)  = global_here%PRN2(II)
             
 !...........Read in the meteorological forcing data
             
-            READ(22,*) NHG, WVNX2(II), WVNY2(II), PRN2(II)
+            READ(22,*) global_here%NHG, global_here%WVNX2(II), global_here%WVNY2(II), global_here%PRN2(II)
           ENDDO
         ENDIF
         
-        WTRATIO = (TIME_A - WTIME1)/WTIMINC
-        DO II = 1,NP
+        global_here%WTRATIO = (global_here%TIME_A - global_here%WTIME1)/global_here%WTIMINC
+        DO II = 1,global_here%NP
         
 !.........Interpolate in time
         
-          WINDX   = WVNX1(II) + WTRATIO*(WVNX2(II) - WVNX1(II))
-          WINDY   = WVNY1(II) + WTRATIO*(WVNY2(II) - WVNY1(II))
+          global_here%WINDX   = global_here%WVNX1(II) + global_here%WTRATIO*(global_here%WVNX2(II) - global_here%WVNX1(II))
+          global_here%WINDY   = global_here%WVNY1(II) + global_here%WTRATIO*(global_here%WVNY2(II) - global_here%WVNY1(II))
           
 !.........Compute wind drag
           
-          WINDMAG = SQRT( WINDX*WINDX + WINDY*WINDY )
-          WDRAGCO = WindDrag( WINDMAG, WindDragLimit, "Garratt   " )
+          global_here%WINDMAG = SQRT( global_here%WINDX*global_here%WINDX + global_here%WINDY*global_here%WINDY )
+          global_here%WDRAGCO = WindDrag( global_here%WINDMAG, WindDragLimit, "Garratt   " )
           
 !.........Apply directional wind reductions
           
           IF (LoadDirEffRLen) THEN
-            CALL ApplyDirectionalWindReduction( II, WDRAGCO, WINDMAG,&
-                                          DP(II), ETA2(II), H0, G,&
-                                          WINDX, WINDY )
-            WINDMAG = SQRT( WINDX*WINDX + WINDY*WINDY )
-            WDRAGCO = WindDrag(WINDMAG, WindDragLimit, "Garratt   ")
+            CALL ApplyDirectionalWindReduction( II, global_here%WDRAGCO, global_here%WINDMAG,&
+                                          global_here%DP(II), global_here%ETA2(II), global_here%H0, global_here%G,&
+                                          global_here%WINDX, global_here%WINDY )
+            global_here%WINDMAG = SQRT( global_here%WINDX*global_here%WINDX + global_here%WINDY*global_here%WINDY )
+            global_here%WDRAGCO = WindDrag(global_here%WINDMAG, WindDragLimit, "Garratt   ")
           ENDIF
           
-!.........Apply met ramp
+!.........Apply met global_here%ramp
           
-          WSX2(II)    = RampMete*0.001293d0*WDRAGCO*WINDX*WINDMAG
-          WSY2(II)    = RampMete*0.001293d0*WDRAGCO*WINDY*WINDMAG
-          PR2(II)     = RampMete*(PRN1(II)+WTRATIO*(PRN2(II)-PRN1(II)))
-          WVNXOUT(II) = RampMete*WINDX
-          WVNYOUT(II) = RampMete*WINDY
+          global_here%WSX2(II)    = global_here%RampMete*0.001293d0*global_here%WDRAGCO*global_here%WINDX*global_here%WINDMAG
+          global_here%WSY2(II)    = global_here%RampMete*0.001293d0*global_here%WDRAGCO*global_here%WINDY*global_here%WINDMAG
+          global_here%PR2(II)     = global_here%RampMete*(global_here%PRN1(II)+global_here%WTRATIO*(global_here%PRN2(II)-global_here%PRN1(II)))
+          global_here%WVNXOUT(II) = global_here%RampMete*global_here%WINDX
+          global_here%WVNYOUT(II) = global_here%RampMete*global_here%WINDY
 #ifdef SWAN
 !asey 101118: Added these lines for coupling winds to SWAN.
           IF(COUPWIND)THEN
-            SWAN_WX2(II,2) = WINDX
-            SWAN_WY2(II,2) = WINDY
+            SWAN_WX2(II,2) = global_here%WINDX
+            SWAN_WY2(II,2) = global_here%WINDY
           ENDIF
 #endif
         ENDDO
@@ -346,7 +346,7 @@
       
 !-----------------------------------------------------------------------
 !
-!     NWS = 6
+!     global_here%NWS = 6
 !
 !     Wind velocity and atmospheric pressure are read in for a
 !     rectangular grid (either in Longitude, Latitude or Cartesian
@@ -358,65 +358,65 @@
 !
 !-----------------------------------------------------------------------
 
-      IF (NWS.EQ.6) THEN
+      IF (global_here%NWS.EQ.6) THEN
       
 !.......Determine if the met file time increment is exceeded
 
-        IF (TIME_A.GT.WTIME2) THEN
-          WTIME1 = WTIME2
-          WTIME2 = WTIME2 + WTIMINC
+        IF (global_here%TIME_A.GT.global_here%WTIME2) THEN
+          global_here%WTIME1 = global_here%WTIME2
+          global_here%WTIME2 = global_here%WTIME2 + global_here%WTIMINC
           
 !.........Shift current data to old
           
-          DO II= 1,NP
-            WVNX1(II) = WVNX2(II)
-            WVNY1(II) = WVNY2(II)
-            PRN1(II)  = PRN2(II)
+          DO II= 1,global_here%NP
+            global_here%WVNX1(II) = global_here%WVNX2(II)
+            global_here%WVNY1(II) = global_here%WVNY2(II)
+            global_here%PRN1(II)  = global_here%PRN2(II)
           ENDDO
-          NWSGGWI = NWSGGWI + 1
+          global_here%NWSGGWI = global_here%NWSGGWI + 1
           
 !.........Obtain meteorological forcing data
           
-          CALL NWS6GET( X, Y, SLAM, SFEA, WVNX2, WVNY2, PRN2, NP,&
-                  NWLON, NWLAT, WLATMAX, WLONMIN, WLATINC,&
-                  WLONINC, ICS, RHOWAT0, G )
+          CALL NWS6GET( global_here%X, global_here%Y, global_here%SLAM, global_here%SFEA, global_here%WVNX2, global_here%WVNY2, global_here%PRN2, global_here%NP,&
+                  global_here%NWLON, global_here%NWLAT, global_here%WLATMAX, global_here%WLONMIN, global_here%WLATINC,&
+                  global_here%WLONINC, global_here%ICS, global_here%RHOWAT0, global_here%G )
         ENDIF
         
-        WTRATIO=(TIME_A-WTIME1)/WTIMINC
-        DO II= 1,NP
+        global_here%WTRATIO=(global_here%TIME_A-global_here%WTIME1)/global_here%WTIMINC
+        DO II= 1,global_here%NP
         
 !.........Interpolate in time
         
-          WINDX = WVNX1(II) + WTRATIO*(WVNX2(II)-WVNX1(II))
-          WINDY = WVNY1(II) + WTRATIO*(WVNY2(II)-WVNY1(II))
+          global_here%WINDX = global_here%WVNX1(II) + global_here%WTRATIO*(global_here%WVNX2(II)-global_here%WVNX1(II))
+          global_here%WINDY = global_here%WVNY1(II) + global_here%WTRATIO*(global_here%WVNY2(II)-global_here%WVNY1(II))
           
 !.........Compute wind drag
           
-          WINDMAG = SQRT(WINDX*WINDX+WINDY*WINDY)
-          WDRAGCO = WindDrag( WINDMAG, WindDragLimit, "Garratt   " )
+          global_here%WINDMAG = SQRT(global_here%WINDX*global_here%WINDX+global_here%WINDY*global_here%WINDY)
+          global_here%WDRAGCO = WindDrag( global_here%WINDMAG, WindDragLimit, "Garratt   " )
           
 !.........Apply directional wind reductions
 
           IF (LoadDirEffRLen) THEN
-            CALL ApplyDirectionalWindReduction( II, WDRAGCO, WINDMAG,&
-                                          DP(II), ETA2(II), H0, G,&
-                                          WINDX, WINDY )
-            WINDMAG = SQRT(WINDX*WINDX+WINDY*WINDY)
-            WDRAGCO = WindDrag(WINDMAG, WindDragLimit, "Garratt   ")
+            CALL ApplyDirectionalWindReduction( II, global_here%WDRAGCO, global_here%WINDMAG,&
+                                          global_here%DP(II), global_here%ETA2(II), global_here%H0, global_here%G,&
+                                          global_here%WINDX, global_here%WINDY )
+            global_here%WINDMAG = SQRT(global_here%WINDX*global_here%WINDX+global_here%WINDY*global_here%WINDY)
+            global_here%WDRAGCO = WindDrag(global_here%WINDMAG, WindDragLimit, "Garratt   ")
           ENDIF
           
-!.........Apply met ramp
+!.........Apply met global_here%ramp
           
-          WSX2(II)    = RampMete*0.001293d0*WDRAGCO*WINDX*WINDMAG
-          WSY2(II)    = RampMete*0.001293d0*WDRAGCO*WINDY*WINDMAG
-          PR2(II)     = RampMete*(PRN1(II)+WTRATIO*(PRN2(II)-PRN1(II)))
-          WVNXOUT(II) = RampMete*WINDX
-          WVNYOUT(II) = RampMete*WINDY
+          global_here%WSX2(II)    = global_here%RampMete*0.001293d0*global_here%WDRAGCO*global_here%WINDX*global_here%WINDMAG
+          global_here%WSY2(II)    = global_here%RampMete*0.001293d0*global_here%WDRAGCO*global_here%WINDY*global_here%WINDMAG
+          global_here%PR2(II)     = global_here%RampMete*(global_here%PRN1(II)+global_here%WTRATIO*(global_here%PRN2(II)-global_here%PRN1(II)))
+          global_here%WVNXOUT(II) = global_here%RampMete*global_here%WINDX
+          global_here%WVNYOUT(II) = global_here%RampMete*global_here%WINDY
 #ifdef SWAN
 !asey 101118: Added these lines for coupling winds to SWAN.
           IF(COUPWIND)THEN
-            SWAN_WX2(II,2) = WINDX
-            SWAN_WY2(II,2) = WINDY
+            SWAN_WX2(II,2) = global_here%WINDX
+            SWAN_WY2(II,2) = global_here%WINDY
           ENDIF
 #endif
         ENDDO
@@ -424,7 +424,7 @@
       
 !-----------------------------------------------------------------------
 !
-!     NWS = 7
+!     global_here%NWS = 7
 !
 !     jgf46.01 New option to read in surface wind stress and atmospheric
 !     pressure for a rectangular grid (either in Longitude, Latitude or
@@ -435,94 +435,94 @@
 !
 !-----------------------------------------------------------------------
 
-      IF(ABS(NWS).EQ.7) THEN
+      IF(ABS(global_here%NWS).EQ.7) THEN
       
 !.......Determine if the met file time increment is exceeded
       
-        IF (TIME_A.GT.WTIME2) THEN
-          WTIME1 = WTIME2
-          WTIME2 = WTIME2 + WTIMINC
+        IF (global_here%TIME_A.GT.global_here%WTIME2) THEN
+          global_here%WTIME1 = global_here%WTIME2
+          global_here%WTIME2 = global_here%WTIME2 + global_here%WTIMINC
           
 !.........Shift current data to old
           
-          DO II= 1,NP
-            WVNX1(II) = WVNX2(II)
-            WVNY1(II) = WVNY2(II)
-            PRN1(II)  = PRN2(II)
+          DO II= 1,global_here%NP
+            global_here%WVNX1(II) = global_here%WVNX2(II)
+            global_here%WVNY1(II) = global_here%WVNY2(II)
+            global_here%PRN1(II)  = global_here%PRN2(II)
           ENDDO
           
 !.........Obtain the meteorological forcing data
           
-          CALL NWS7GET( X, Y, SLAM, SFEA, WVNX2, WVNY2, PRN2, NP, NWLON,&
-                  NWLAT, WLATMAX, WLONMIN, WLATINC, WLONINC, ICS,&
-                  RHOWAT0,G )
+          CALL NWS7GET( global_here%X, global_here%Y, global_here%SLAM, global_here%SFEA, global_here%WVNX2, global_here%WVNY2, global_here%PRN2, global_here%NP, global_here%NWLON,&
+                  global_here%NWLAT, global_here%WLATMAX, global_here%WLONMIN, global_here%WLATINC, global_here%WLONINC, global_here%ICS,&
+                  global_here%RHOWAT0,global_here%G )
         ENDIF
 
-        WTRATIO=(TIME_A-WTIME1)/WTIMINC
-        DO II= 1,NP
+        global_here%WTRATIO=(global_here%TIME_A-global_here%WTIME1)/global_here%WTIMINC
+        DO II= 1,global_here%NP
         
 !.........Interpolate in time
         
-          WINDX = WVNX1(II) + WTRATIO*(WVNX2(II) - WVNX1(II))
-          WINDY = WVNY1(II) + WTRATIO*(WVNY2(II) - WVNY1(II))
+          global_here%WINDX = global_here%WVNX1(II) + global_here%WTRATIO*(global_here%WVNX2(II) - global_here%WVNX1(II))
+          global_here%WINDY = global_here%WVNY1(II) + global_here%WTRATIO*(global_here%WVNY2(II) - global_here%WVNY1(II))
           
-!.........Apply met ramp
+!.........Apply met global_here%ramp
           
-          WSX2(II)    = RampMete*WINDX
-          WSY2(II)    = RampMete*WINDY
-          PR2(II)     = RampMete*(PRN1(II)+WTRATIO*(PRN2(II)-PRN1(II)))
-          WVNXOUT(II) = WSX2(II)
-          WVNYOUT(II) = WSY2(II)
+          global_here%WSX2(II)    = global_here%RampMete*global_here%WINDX
+          global_here%WSY2(II)    = global_here%RampMete*global_here%WINDY
+          global_here%PR2(II)     = global_here%RampMete*(global_here%PRN1(II)+global_here%WTRATIO*(global_here%PRN2(II)-global_here%PRN1(II)))
+          global_here%WVNXOUT(II) = global_here%WSX2(II)
+          global_here%WVNYOUT(II) = global_here%WSY2(II)
         ENDDO
       ENDIF
       
 !-----------------------------------------------------------------------
 !
-!     NWS = 8
+!     global_here%NWS = 8
 !
 !     jgf46.02 New option to read in hurricane locations and generate
 !     hurricane winds from the Holland Wind Model.
 !
 !-----------------------------------------------------------------------
 
-      IF (ABS(NWS).EQ.8) THEN
+      IF (ABS(global_here%NWS).EQ.8) THEN
       
 !.......Obtain the meteorological forcing data
-!         write(*,*) 'calling HollandGet ',time_a
+!         write(*,*) 'calling HollandGet ',global_here%time_a
 
-        CALL HollandGet(s, X, Y, SLAM, SFEA, WVNX2, WVNY2, PRN2, NP, ICS,&
-                   RHOWAT0, G, TIME_A, NSCREEN, ScreenUnit )
-        DO II= 1,NP
-          WINDX = WVNX2(II)
-          WINDY = WVNY2(II)
+        CALL HollandGet(s, global_here%X, global_here%Y, global_here%SLAM, global_here%SFEA, global_here%WVNX2, global_here%WVNY2, global_here%PRN2, global_here%NP, global_here%ICS,&
+                   global_here%RHOWAT0, global_here%G, global_here%TIME_A, global_here%NSCREEN, global_here%ScreenUnit )
+        DO II= 1,global_here%NP
+          global_here%WINDX = global_here%WVNX2(II)
+          global_here%WINDY = global_here%WVNY2(II)
           
 !.........Compute wind drag
           
-          WINDMAG = SQRT(WINDX*WINDX+WINDY*WINDY)
-          WDRAGCO = WindDrag( WINDMAG, WindDragLimit, "Garratt   " )
+          global_here%WINDMAG = SQRT(global_here%WINDX*global_here%WINDX+global_here%WINDY*global_here%WINDY)
+          global_here%WDRAGCO = WindDrag( global_here%WINDMAG, WindDragLimit, "Garratt   " )
           
 !.........Apply directional wind reductions
           
           IF (LoadDirEffRLen) THEN
-            CALL ApplyDirectionalWindReduction( II, WDRAGCO, WINDMAG,&
-                                          DP(II), ETA2(II), H0, G,&
-                                          WINDX, WINDY )
-            WINDMAG = SQRT(WINDX*WINDX + WINDY*WINDY)
-            WDRAGCO = WindDrag( WINDMAG, WindDragLimit, "Garratt   " )
+            CALL ApplyDirectionalWindReduction( II, global_here%WDRAGCO, global_here%WINDMAG,&
+                                          global_here%DP(II), global_here%ETA2(II), global_here%H0, global_here%G,&
+                                          global_here%WINDX, global_here%WINDY )
+            global_here%WINDMAG = SQRT(global_here%WINDX*global_here%WINDX + global_here%WINDY*global_here%WINDY)
+            global_here%WDRAGCO = WindDrag( global_here%WINDMAG, WindDragLimit, "Garratt   " )
           ENDIF
             
-!.........Apply met ramp
+!.........Apply met global_here%ramp
             
-          WSX2(II)    = RampMete*0.001293d0*WDRAGCO*WINDX*WINDMAG
-          WSY2(II)    = RampMete*0.001293d0*WDRAGCO*WINDY*WINDMAG
-          PR2(II)     = RampMete*PRN2(II)
-          WVNXOUT(II) = RampMete*WINDX
-          WVNYOUT(II) = RampMete*WINDY
+          global_here%WSX2(II)    = global_here%RampMete*0.001293d0*global_here%WDRAGCO*global_here%WINDX*global_here%WINDMAG
+          global_here%WSY2(II)    = global_here%RampMete*0.001293d0*global_here%WDRAGCO*global_here%WINDY*global_here%WINDMAG
+          global_here%PR2(II)     = global_here%RampMete*global_here%PRN2(II)
+          global_here%WVNXOUT(II) = global_here%RampMete*global_here%WINDX
+          global_here%WVNYOUT(II) = global_here%RampMete*global_here%WINDY
 #ifdef SWAN
 !asey 101118: Added these lines for coupling winds to SWAN.
           IF(COUPWIND)THEN
-            SWAN_WX2(II,2) = WINDX
-            SWAN_WY2(II,2) = WINDY
+            SWAN_WX2(II,2) = global_here%WINDX
+            SWAN_WY2(II,2) = global_here%WINDY
           ENDIF
 #endif
         ENDDO
@@ -530,49 +530,49 @@
       
 !-----------------------------------------------------------------------
 !
-!     NWS = 9
+!     global_here%NWS = 9
 !
 !     jgf46.16 Merged:
-!     cf & cm added nws = 9: asymmetric hurricane winds
+!     cf & cm added global_here%nws = 9: asymmetric hurricane winds
 !
 !-----------------------------------------------------------------------
 
-!      IF (NWS.EQ.9) THEN
+!      IF (global_here%NWS.EQ.9) THEN
       
 !.......Obtain meteorological forcing data
       
-!        CALL NWS9GET(SLAM,SFEA,WVNX2,WVNY2,PRN2,NP,TIME_A, ICS)
-!        DO II= 1,NP
-!          WINDX = WVNX2(II)
-!          WINDY = WVNY2(II)
+!        CALL NWS9GET(global_here%SLAM,global_here%SFEA,global_here%WVNX2,global_here%WVNY2,global_here%PRN2,global_here%NP,global_here%TIME_A, global_here%ICS)
+!        DO II= 1,global_here%NP
+!          global_here%WINDX = global_here%WVNX2(II)
+!          global_here%WINDY = global_here%WVNY2(II)
           
 !.........Compute wind drag
           
-!          WINDMAG = SQRT(WINDX*WINDX + WINDY*WINDY)
-!          WDRAGCO = WindDrag( WINDMAG, WindDragLimit, "Garratt   " )
+!          global_here%WINDMAG = SQRT(global_here%WINDX*global_here%WINDX + global_here%WINDY*global_here%WINDY)
+!          global_here%WDRAGCO = WindDrag( global_here%WINDMAG, WindDragLimit, "Garratt   " )
           
 !.........Apply directional wind reductions
           
 !          IF (LoadDirEffRLen) THEN
-!            CALL ApplyDirectionalWindReduction( II, WDRAGCO, WINDMAG,
-!     &                                          DP(II), ETA2(II), H0, G,
-!     &                                          WINDX, WINDY )
-!            WINDMAG = SQRT(WINDX*WINDX+WINDY*WINDY)
-!            WDRAGCO = WindDrag(WINDMAG, WindDragLimit, "Garratt   ")
+!            CALL ApplyDirectionalWindReduction( II, global_here%WDRAGCO, global_here%WINDMAG,
+!     &                                          global_here%DP(II), global_here%ETA2(II), global_here%H0, global_here%G,
+!     &                                          global_here%WINDX, global_here%WINDY )
+!            global_here%WINDMAG = SQRT(global_here%WINDX*global_here%WINDX+global_here%WINDY*global_here%WINDY)
+!            global_here%WDRAGCO = WindDrag(global_here%WINDMAG, WindDragLimit, "Garratt   ")
 !          ENDIF
           
-!.........Apply met ramp
+!.........Apply met global_here%ramp
 
-!          WSX2(II)    = RampMete*0.001293d0*WDRAGCO*WINDX*WINDMAG
-!          WSY2(II)    = RampMete*0.001293d0*WDRAGCO*WINDY*WINDMAG
-!          PR2(II)     = RampMete*PRN2(II)
-!          WVNXOUT(II) = RampMete*WINDX
-!          WVNYOUT(II) = RampMete*WINDY
+!          global_here%WSX2(II)    = global_here%RampMete*0.001293d0*global_here%WDRAGCO*global_here%WINDX*global_here%WINDMAG
+!          global_here%WSY2(II)    = global_here%RampMete*0.001293d0*global_here%WDRAGCO*global_here%WINDY*global_here%WINDMAG
+!          global_here%PR2(II)     = global_here%RampMete*global_here%PRN2(II)
+!          global_here%WVNXOUT(II) = global_here%RampMete*global_here%WINDX
+!          global_here%WVNYOUT(II) = global_here%RampMete*global_here%WINDY
 #ifdef SWAN
 !asey 101118: Added these lines for coupling winds to SWAN.
 !          IF(COUPWIND)THEN
-!            SWAN_WX2(II,2) = WINDX
-!            SWAN_WY2(II,2) = WINDY
+!            SWAN_WX2(II,2) = global_here%WINDX
+!            SWAN_WY2(II,2) = global_here%WINDY
 !          ENDIF
 #endif
 !         ENDDO
@@ -580,10 +580,10 @@
       
 !-----------------------------------------------------------------------
 !
-!     NWS = 10
+!     global_here%NWS = 10
 !
 !     Wind velocity (10 m) and atmospheric pressure are read in from a
-!     sequence of National Weather Service (NWS) Aviation (AVN) model
+!     sequence of National Weather Service (global_here%NWS) Aviation (AVN) model
 !     output files. Each AVN file is assumed to contain data on a
 !     Gaussian longitude, latitude grid at a single time. Consecutive
 !     files in the sequence are separated by N hours in time. Garratt's
@@ -591,64 +591,64 @@
 !
 !-----------------------------------------------------------------------
 
-      IF (NWS.EQ.10) THEN
+      IF (global_here%NWS.EQ.10) THEN
       
 !.......Determine if the met file time increment is exceeded
       
-        IF (TIME_A.GT.WTIME2) THEN
-          WTIME1 = WTIME2
-          WTIME2 = WTIME2 + WTIMINC
+        IF (global_here%TIME_A.GT.global_here%WTIME2) THEN
+          global_here%WTIME1 = global_here%WTIME2
+          global_here%WTIME2 = global_here%WTIME2 + global_here%WTIMINC
           
 !.........Shift current data to old
           
-          DO II= 1,NP
-            WVNX1(II) = WVNX2(II)
-            WVNY1(II) = WVNY2(II)
-            PRN1(II)  = PRN2(II)
+          DO II= 1,global_here%NP
+            global_here%WVNX1(II) = global_here%WVNX2(II)
+            global_here%WVNY1(II) = global_here%WVNY2(II)
+            global_here%PRN1(II)  = global_here%PRN2(II)
           ENDDO
-          NWSGGWI = NWSGGWI + 1
+          global_here%NWSGGWI = global_here%NWSGGWI + 1
           
 !.........Obtain meteorological forcing data
           
-          CALL NWS10GET(s, NWSGGWI, SLAM, SFEA, WVNX2, WVNY2, PRN2, NP,&
-                   RHOWAT0, G, NWLON, NWLAT, WTIMINC )
+          CALL NWS10GET(s, global_here%NWSGGWI, global_here%SLAM, global_here%SFEA, global_here%WVNX2, global_here%WVNY2, global_here%PRN2, global_here%NP,&
+                   global_here%RHOWAT0, global_here%G, global_here%NWLON, global_here%NWLAT, global_here%WTIMINC )
         ENDIF
         
-        WTRATIO = (TIME_A - WTIME1)/WTIMINC
-        DO II = 1,NP
+        global_here%WTRATIO = (global_here%TIME_A - global_here%WTIME1)/global_here%WTIMINC
+        DO II = 1,global_here%NP
         
 !.........Interpolate in time
         
-          WINDX = WVNX1(II) + WTRATIO*(WVNX2(II)-WVNX1(II))
-          WINDY = WVNY1(II) + WTRATIO*(WVNY2(II)-WVNY1(II))
+          global_here%WINDX = global_here%WVNX1(II) + global_here%WTRATIO*(global_here%WVNX2(II)-global_here%WVNX1(II))
+          global_here%WINDY = global_here%WVNY1(II) + global_here%WTRATIO*(global_here%WVNY2(II)-global_here%WVNY1(II))
            
 !.........Compute wind drag
            
-          WINDMAG = SQRT(WINDX*WINDX + WINDY*WINDY)
-          WDRAGCO = WindDrag( WINDMAG, WindDragLimit, "Garratt   " )
+          global_here%WINDMAG = SQRT(global_here%WINDX*global_here%WINDX + global_here%WINDY*global_here%WINDY)
+          global_here%WDRAGCO = WindDrag( global_here%WINDMAG, WindDragLimit, "Garratt   " )
 
 !.........Apply directional wind reductions
 
           IF (LoadDirEffRLen) THEN
-            CALL ApplyDirectionalWindReduction( II, WDRAGCO, WINDMAG,&
-                                          DP(II), ETA2(II), H0, G,&
-                                          WINDX, WINDY )
-            WINDMAG = SQRT(WINDX*WINDX + WINDY*WINDY)
-            WDRAGCO = WindDrag( WINDMAG, WindDragLimit, "Garratt   " )
+            CALL ApplyDirectionalWindReduction( II, global_here%WDRAGCO, global_here%WINDMAG,&
+                                          global_here%DP(II), global_here%ETA2(II), global_here%H0, global_here%G,&
+                                          global_here%WINDX, global_here%WINDY )
+            global_here%WINDMAG = SQRT(global_here%WINDX*global_here%WINDX + global_here%WINDY*global_here%WINDY)
+            global_here%WDRAGCO = WindDrag( global_here%WINDMAG, WindDragLimit, "Garratt   " )
           ENDIF
           
-!.........Apply met ramp
+!.........Apply met global_here%ramp
           
-          WSX2(II)    = RampMete*0.001293d0*WDRAGCO*WINDX*WINDMAG
-          WSY2(II)    = RampMete*0.001293d0*WDRAGCO*WINDY*WINDMAG
-          PR2(II)     = RampMete*(PRN1(II)+WTRATIO*(PRN2(II)-PRN1(II)))
-          WVNXOUT(II) = RampMete*WINDX
-          WVNYOUT(II) = RampMete*WINDY
+          global_here%WSX2(II)    = global_here%RampMete*0.001293d0*global_here%WDRAGCO*global_here%WINDX*global_here%WINDMAG
+          global_here%WSY2(II)    = global_here%RampMete*0.001293d0*global_here%WDRAGCO*global_here%WINDY*global_here%WINDMAG
+          global_here%PR2(II)     = global_here%RampMete*(global_here%PRN1(II)+global_here%WTRATIO*(global_here%PRN2(II)-global_here%PRN1(II)))
+          global_here%WVNXOUT(II) = global_here%RampMete*global_here%WINDX
+          global_here%WVNYOUT(II) = global_here%RampMete*global_here%WINDY
 #ifdef SWAN
 !asey 101118: Added these lines for coupling winds to SWAN.
           IF(COUPWIND)THEN
-            SWAN_WX2(II,2) = WINDX
-            SWAN_WY2(II,2) = WINDY
+            SWAN_WX2(II,2) = global_here%WINDX
+            SWAN_WY2(II,2) = global_here%WINDY
           ENDIF
 #endif
         ENDDO
@@ -656,81 +656,81 @@
       
 !-----------------------------------------------------------------------
 !
-!     NWS = 11
+!     global_here%NWS = 11
 !
 !     Wind velocity (10 m) and atmospheric pressure are read in from a
-!     sequence of stripped down (?) National Weather Service (NWS) ETA
+!     sequence of stripped down (?) National Weather Service (global_here%NWS) ETA
 !     29km model output files. Each ETA file is assumed to contain data
-!     on an E grid for a single day (8 data sets, one every 3 hours, be-
-!     ginning @ 03:00 and continuing through 24:00 of the given day).
+!     on an E grid for a single global_here%day (8 data sets, one every 3 hours, be-
+!     ginning @ 03:00 and continuing through 24:00 of the given global_here%day).
 !     The wind data is converted to an east-west, north-south coordinate
 !     system inside ADCIRC. Garratt's formula is used to compute wind
 !     stress from the wind velocity.
 !
 !-----------------------------------------------------------------------
 
-      IF(NWS.EQ.11) THEN
+      IF(global_here%NWS.EQ.11) THEN
 
 !.......Determine if the met file time increment is exceeded
 
-        IF (TIME_A.GT.WTIME2) THEN
-          WTIME1=WTIME2
-          WTIME2=WTIME2+WTIMINC
+        IF (global_here%TIME_A.GT.global_here%WTIME2) THEN
+          global_here%WTIME1=global_here%WTIME2
+          global_here%WTIME2=global_here%WTIME2+global_here%WTIMINC
            
 !........Shift current data to old
            
-          DO II = 1,NP
-            WVNX1(II) = WVNX2(II)
-            WVNY1(II) = WVNY2(II)
-            PRN1(II)  = PRN2(II)
+          DO II = 1,global_here%NP
+            global_here%WVNX1(II) = global_here%WVNX2(II)
+            global_here%WVNY1(II) = global_here%WVNY2(II)
+            global_here%PRN1(II)  = global_here%PRN2(II)
           ENDDO
-          IDSETFLG = IDSETFLG + 1
-          IF (IDSETFLG.GT.8) THEN
-            NWSEGWI = NWSEGWI + 1
-            IDSETFLG = 1
+          global_here%IDSETFLG = global_here%IDSETFLG + 1
+          IF (global_here%IDSETFLG.GT.8) THEN
+            global_here%NWSEGWI = global_here%NWSEGWI + 1
+            global_here%IDSETFLG = 1
           ENDIF
             
 !.........Obtain meteorological forcing data
             
-          CALL NWS11GET(s, NWSEGWI, IDSETFLG, SLAM, SFEA, WVNX2, WVNY2,&
-                   PRN2, NP, RHOWAT0, G )
+          CALL NWS11GET(s, global_here%NWSEGWI, global_here%IDSETFLG, global_here%SLAM, global_here%SFEA, global_here%WVNX2, global_here%WVNY2,&
+                   global_here%PRN2, global_here%NP, global_here%RHOWAT0, global_here%G )
         ENDIF
 
-        WTRATIO=(TIME_A-WTIME1)/WTIMINC
-        DO II = 1,NP
+        global_here%WTRATIO=(global_here%TIME_A-global_here%WTIME1)/global_here%WTIMINC
+        DO II = 1,global_here%NP
          
 !.........Interpolate in time
          
-          WINDX = WVNX1(II) + WTRATIO*(WVNX2(II)-WVNX1(II))
-          WINDY = WVNY1(II) + WTRATIO*(WVNY2(II)-WVNY1(II))
+          global_here%WINDX = global_here%WVNX1(II) + global_here%WTRATIO*(global_here%WVNX2(II)-global_here%WVNX1(II))
+          global_here%WINDY = global_here%WVNY1(II) + global_here%WTRATIO*(global_here%WVNY2(II)-global_here%WVNY1(II))
             
 !.........Compute wind drag
             
-          WINDMAG = SQRT(WINDX*WINDX+WINDY*WINDY)
-          WDRAGCO = WindDrag(WINDMAG, WindDragLimit, "Garratt   ")
+          global_here%WINDMAG = SQRT(global_here%WINDX*global_here%WINDX+global_here%WINDY*global_here%WINDY)
+          global_here%WDRAGCO = WindDrag(global_here%WINDMAG, WindDragLimit, "Garratt   ")
             
 !.........Apply directional wind reductions
 
           IF (LoadDirEffRLen) THEN
-            CALL ApplyDirectionalWindReduction( II, WDRAGCO, WINDMAG,&
-                                          DP(II), ETA2(II), H0, G,&
-                                          WINDX, WINDY )
-            WINDMAG = SQRT(WINDX*WINDX + WINDY*WINDY)
-            WDRAGCO = WindDrag( WINDMAG, WindDragLimit, "Garratt   " )
+            CALL ApplyDirectionalWindReduction( II, global_here%WDRAGCO, global_here%WINDMAG,&
+                                          global_here%DP(II), global_here%ETA2(II), global_here%H0, global_here%G,&
+                                          global_here%WINDX, global_here%WINDY )
+            global_here%WINDMAG = SQRT(global_here%WINDX*global_here%WINDX + global_here%WINDY*global_here%WINDY)
+            global_here%WDRAGCO = WindDrag( global_here%WINDMAG, WindDragLimit, "Garratt   " )
           ENDIF
             
-!.........Apply met ramp
+!.........Apply met global_here%ramp
             
-          WSX2(II)    = RampMete*0.001293d0*WDRAGCO*WINDX*WINDMAG
-          WSY2(II)    = RampMete*0.001293d0*WDRAGCO*WINDY*WINDMAG
-          PR2(II)     = RampMete*(PRN1(II)+WTRATIO*(PRN2(II)-PRN1(II)))
-          WVNXOUT(II) = RampMete*WINDX
-          WVNYOUT(II) = RampMete*WINDY
+          global_here%WSX2(II)    = global_here%RampMete*0.001293d0*global_here%WDRAGCO*global_here%WINDX*global_here%WINDMAG
+          global_here%WSY2(II)    = global_here%RampMete*0.001293d0*global_here%WDRAGCO*global_here%WINDY*global_here%WINDMAG
+          global_here%PR2(II)     = global_here%RampMete*(global_here%PRN1(II)+global_here%WTRATIO*(global_here%PRN2(II)-global_here%PRN1(II)))
+          global_here%WVNXOUT(II) = global_here%RampMete*global_here%WINDX
+          global_here%WVNYOUT(II) = global_here%RampMete*global_here%WINDY
 #ifdef SWAN
 !asey 101118: Added these lines for coupling winds to SWAN.
           IF(COUPWIND)THEN
-            SWAN_WX2(II,2) = WINDX
-            SWAN_WY2(II,2) = WINDY
+            SWAN_WX2(II,2) = global_here%WINDX
+            SWAN_WY2(II,2) = global_here%WINDY
           ENDIF
 #endif
         ENDDO
@@ -738,68 +738,68 @@
       
 !-----------------------------------------------------------------------
 !
-!     NWS = 12
+!     global_here%NWS = 12
 !
-!     sb46.28sb01 NWS=12 reads in raw OWI files 09/xx/2006
+!     sb46.28sb01 global_here%NWS=12 reads in raw OWI files 09/xx/2006
 !
 !-----------------------------------------------------------------------
 #ifdef OWIWIND
-      IF(ABS(NWS).EQ.12) THEN
+      IF(ABS(global_here%NWS).EQ.12) THEN
       
 !.......Determine if the met file time increment is exceeded
       
-        IF(TIME_A.GT.WTIME2) THEN
-          WTIME1=WTIME2
-          WTIME2=WTIME2+WTIMINC
+        IF(global_here%TIME_A.GT.global_here%WTIME2) THEN
+          global_here%WTIME1=global_here%WTIME2
+          global_here%WTIME2=global_here%WTIME2+global_here%WTIMINC
           
 !........Shift current data to old
 
-          DO II =1,NP
-            WVNX1(II) = WVNX2(II)
-            WVNY1(II) = WVNY2(II)
-            PRN1(II)  = PRN2(II)
+          DO II =1,global_here%NP
+            global_here%WVNX1(II) = global_here%WVNX2(II)
+            global_here%WVNY1(II) = global_here%WVNY2(II)
+            global_here%PRN1(II)  = global_here%PRN2(II)
           ENDDO
           
 !.........Obtain meteorological forcing data
           
-          CALL NWS12GET( WVNX2, WVNY2, PRN2, NP, RHOWAT0, G )
+          CALL NWS12GET( global_here%WVNX2, global_here%WVNY2, global_here%PRN2, global_here%NP, global_here%RHOWAT0, global_here%G )
         ENDIF
 
-        WTRATIO=(TIME_A - WTIME1)/WTIMINC
-        DO II = 1,NP
+        global_here%WTRATIO=(global_here%TIME_A - global_here%WTIME1)/global_here%WTIMINC
+        DO II = 1,global_here%NP
         
 !.........Interpolate in time
         
-          WINDX = WVNX1(II) + WTRATIO*(WVNX2(II)-WVNX1(II))
-          WINDY = WVNY1(II) + WTRATIO*(WVNY2(II)-WVNY1(II))
+          global_here%WINDX = global_here%WVNX1(II) + global_here%WTRATIO*(global_here%WVNX2(II)-global_here%WVNX1(II))
+          global_here%WINDY = global_here%WVNY1(II) + global_here%WTRATIO*(global_here%WVNY2(II)-global_here%WVNY1(II))
           
 !.........Compute wind drag
           
-          WINDMAG = SQRT(WINDX*WINDX + WINDY*WINDY)
-          WDRAGCO = WindDrag( WINDMAG, WindDragLimit, "Garratt   " )
+          global_here%WINDMAG = SQRT(global_here%WINDX*global_here%WINDX + global_here%WINDY*global_here%WINDY)
+          global_here%WDRAGCO = WindDrag( global_here%WINDMAG, WindDragLimit, "Garratt   " )
           
 !.........Apply directional wind reductions
           
           IF (LoadDirEffRLen) THEN
-            CALL ApplyDirectionalWindReduction( II, WDRAGCO, WINDMAG,&
-                                          DP(II), ETA2(II), H0, G,&
-                                          WINDX, WINDY )
-            WINDMAG = SQRT(WINDX*WINDX + WINDY*WINDY)
-            WDRAGCO = WindDrag(WINDMAG, WindDragLimit, "Garratt   ")
+            CALL ApplyDirectionalWindReduction( II, global_here%WDRAGCO, global_here%WINDMAG,&
+                                          global_here%DP(II), global_here%ETA2(II), global_here%H0, global_here%G,&
+                                          global_here%WINDX, global_here%WINDY )
+            global_here%WINDMAG = SQRT(global_here%WINDX*global_here%WINDX + global_here%WINDY*global_here%WINDY)
+            global_here%WDRAGCO = WindDrag(global_here%WINDMAG, WindDragLimit, "Garratt   ")
           ENDIF
           
-!.........Apply met ramp
+!.........Apply met global_here%ramp
           
-          WSX2(II)    = RampMete*0.001293d0*WDRAGCO*WINDX*WINDMAG
-          WSY2(II)    = RampMete*0.001293d0*WDRAGCO*WINDY*WINDMAG
-          PR2(II)     = RampMete*(PRN1(II)+WTRATIO*(PRN2(II)-PRN1(II)))
-          WVNXOUT(II) = RampMete*WINDX
-          WVNYOUT(II) = RampMete*WINDY
+          global_here%WSX2(II)    = global_here%RampMete*0.001293d0*global_here%WDRAGCO*global_here%WINDX*global_here%WINDMAG
+          global_here%WSY2(II)    = global_here%RampMete*0.001293d0*global_here%WDRAGCO*global_here%WINDY*global_here%WINDMAG
+          global_here%PR2(II)     = global_here%RampMete*(global_here%PRN1(II)+global_here%WTRATIO*(global_here%PRN2(II)-global_here%PRN1(II)))
+          global_here%WVNXOUT(II) = global_here%RampMete*global_here%WINDX
+          global_here%WVNYOUT(II) = global_here%RampMete*global_here%WINDY
 #ifdef SWAN
 !asey 101118: Added these lines for coupling winds to SWAN.
           IF(COUPWIND)THEN
-            SWAN_WX2(II,2) = WINDX/WindMultiplier
-            SWAN_WY2(II,2) = WINDY/WindMultiplier
+            SWAN_WX2(II,2) = global_here%WINDX/WindMultiplier
+            SWAN_WY2(II,2) = global_here%WINDY/WindMultiplier
           ENDIF
 #endif
         ENDDO

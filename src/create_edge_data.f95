@@ -3,7 +3,7 @@
 !     SUBROUTINE  CREATE_EDGE_DATA.dg%F
 !
 !     This program takes the original ADCIRC data sets given in files
-!     'fort.14' and 'fort.15' and generates edge based data structures
+!     'fort.14' and 'fort.15' and generates global_here%edge based data structures
 !
 !     Written by: Srinivas Chippada
 !
@@ -18,12 +18,12 @@
 !     Bug fix
 !     made by Shintaro Bunya, Aug 26, 2005 
 !
-!     Modifications to skip an edge on a barriar overlapping on 
-!     the external boundary.  Boundary edge creation in a group 
-!     used to be aborted when such an edge is found.
+!     Modifications to skip an global_here%edge on a barriar overlapping on 
+!     the external boundary.  Boundary global_here%edge creation in a group 
+!     used to be aborted when such an global_here%edge is found.
 !     made by Shintaro Bunya, Sep  1, 2005 
 !
-!     Speed up in generating edge pairs
+!     Speed up in generating global_here%edge pairs
 !     made by Shintaro Bunya, Feb 26, 2006
 !
 !***********************************************************************
@@ -58,19 +58,19 @@
 
       dg_here%MNED = 3*s%MNE
 
-!.....Allocate the edge data arrays
+!.....Allocate the global_here%edge data arrays
 
       CALL ALLOC_EDGES1(dg_here)
 
-!.....Generate the edge connectivity
+!.....Generate the global_here%edge connectivity
 
       DO J = 1,S%MNE
-        EDFLG(1,J) = 0
-        EDFLG(2,J) = 0
-        EDFLG(3,J) = 0
-        NELED(1,J) = 0
-        NELED(2,J) = 0
-        NELED(3,J) = 0
+        global_here%EDFLG(1,J) = 0
+        global_here%EDFLG(2,J) = 0
+        global_here%EDFLG(3,J) = 0
+        global_here%NELED(1,J) = 0
+        global_here%NELED(2,J) = 0
+        global_here%NELED(3,J) = 0
       ENDDO
 
 
@@ -80,47 +80,47 @@
       dg_here%NEDGES = 0
 #ifdef CMPI
       IF(MYPROC.EQ.0) THEN
-         PRINT *,'CREATING EDGE PAIRS...'
+         PRINT *,'CREATING global_here%EDGE PAIRS...'
       ENDIF
 #else
-      PRINT *,'CREATING EDGE PAIRS...'
+      PRINT *,'CREATING global_here%EDGE PAIRS...'
 #endif
 
-      DO 30 IEL = 1,NE
-        N1 = NM(IEL,1)
-        N2 = NM(IEL,2)
-        N3 = NM(IEL,3)
-        LED(1,1) = N2
-        LED(2,1) = N3
-        LED(1,2) = N3
-        LED(2,2) = N1
-        LED(1,3) = N1
-        LED(2,3) = N2
+      DO 30 IEL = 1,global_here%NE
+        global_here%N1 = global_here%NM(IEL,1)
+        global_here%N2 = global_here%NM(IEL,2)
+        global_here%N3 = global_here%NM(IEL,3)
+        LED(1,1) = global_here%N2
+        LED(2,1) = global_here%N3
+        LED(1,2) = global_here%N3
+        LED(2,2) = global_here%N1
+        LED(1,3) = global_here%N1
+        LED(2,3) = global_here%N2
 
         DO 10 IED = 1,3
-          IF(EDFLG(IED,IEL).EQ.1) GOTO 10
+          IF(global_here%EDFLG(IED,IEL).EQ.1) GOTO 10
            
           I1 = LED(1,IED)
           I2 = LED(2,IED)
 
           dg_here%NEDGES = dg_here%NEDGES + 1
           ED_ID = dg_here%NEDGES
-          NELED(IED,IEL) = ED_ID
+          global_here%NELED(IED,IEL) = ED_ID
           dg_here%NEDNO(1,ED_ID) = I1
           dg_here%NEDNO(2,ED_ID) = I2
           dg_here%NEDEL(1,ED_ID) = IEL
-          EDFLG(IED,IEL) = 1
+          global_here%EDFLG(IED,IEL) = 1
 
-          DO 15 JJEL = 1,NNDEL(I1)
-            JEL = NDEL(I1,JJEL)
+          DO 15 JJEL = 1,global_here%NNDEL(I1)
+            JEL = global_here%NDEL(I1,JJEL)
             IF(JEL.EQ.IEL) GOTO 15
             DO JED = 1,3
-              dg_here%J1 = NM(JEL,MOD(JED+0,3)+1)
-              dg_here%J2 = NM(JEL,MOD(JED+1,3)+1)
+              dg_here%J1 = global_here%NM(JEL,MOD(JED+0,3)+1)
+              dg_here%J2 = global_here%NM(JEL,MOD(JED+1,3)+1)
               IF ( ((dg_here%J1.EQ.I1).AND.(dg_here%J2.EQ.I2)).OR.&
              ((dg_here%J1.EQ.I2).AND.(dg_here%J2.EQ.I1)) ) THEN
 
-                IF(EDFLG(JED,JEL).EQ.1) THEN
+                IF(global_here%EDFLG(JED,JEL).EQ.1) THEN
                   PRINT *,'POSSIBLE DUPLICATE ELEMENT'
 #ifdef CMPI
                   PRINT *,'MYPROC=',MYPROC
@@ -133,9 +133,9 @@
                   STOP
                 ENDIF
            
-                NELED(JED,JEL) = ED_ID
+                global_here%NELED(JED,JEL) = ED_ID
                 dg_here%NEDEL(2,ED_ID) = JEL
-                EDFLG(JED,JEL) = 1
+                global_here%EDFLG(JED,JEL) = 1
                 GOTO 10
               ENDIF
             ENDDO
@@ -143,7 +143,7 @@
  10     CONTINUE
  30   CONTINUE
 
-      DEALLOCATE(EDFLG)
+      DEALLOCATE(global_here%EDFLG)
 
 #ifdef CMPI
       IF(MYPROC.EQ.0) THEN
@@ -155,7 +155,7 @@
          PRINT *,''
 #endif
 
-!.....Print out the edge-to-node and edge-to-element connectivity
+!.....Print out the global_here%edge-to-node and global_here%edge-to-element connectivity
 
       WRITE(17,*)dg_here%NEDGES
       DO IED = 1,dg_here%NEDGES
@@ -163,10 +163,10 @@
              dg_here%NEDEL(2,IED)
       ENDDO
         
-!.....Print out the element-to-edge connectivity
+!.....Print out the element-to-global_here%edge connectivity
 
-      DO IEL = 1,NE
-        WRITE(17,*)IEL, NELED(1,IEL), NELED(2,IEL), NELED(3,IEL)
+      DO IEL = 1,global_here%NE
+        WRITE(17,*)IEL, global_here%NELED(1,IEL), global_here%NELED(2,IEL), global_here%NELED(3,IEL)
       ENDDO
 
 !.....An index to keep track of the edges
@@ -175,27 +175,27 @@
         dg_here%NCOUNT(I) = -1
       ENDDO
       
-!.....Zero out internal edge counter and array
+!.....Zero out internal global_here%edge counter and array
 
       dg_here%NIEDS = 0
       dg_here%NIEDN = 0
       
-!.....Zero out land (no-normal flow) edge counter and array
+!.....Zero out land (no-normal flow) global_here%edge counter and array
 
       dg_here%NLEDS = 0
       dg_here%NLEDN = 0
       
-!.....Zero out elevation specified open edge counter and array
+!.....Zero out elevation specified open global_here%edge counter and array
 
       dg_here%NEEDS = 0
       dg_here%NEEDN = 0
       
-!.....Zero out flow specified open edge counter and array
+!.....Zero out flow specified open global_here%edge counter and array
 
       dg_here%NFEDS = 0
       dg_here%NFEDN = 0
       
-!.....Zero out the radiation edge counter and array
+!.....Zero out the radiation global_here%edge counter and array
 
       dg_here%NREDS = 0
       dg_here%NREDN = 0
@@ -216,44 +216,44 @@
 !.....Find node pairs that are not edges of elements (eg. an internal
 !.....barrier against a land boundary)
 
-      NOT_AN_EDGE = 0
-      WEIR_BUDDY_NODE = 0
-      DO 10130 II = 1,NVEL
-        IF( (LBCODEI(II).EQ.4).OR.(LBCODEI(II).EQ.24).OR.&
-      (LBCODEI(II).EQ.5).OR.(LBCODEI(II).EQ.25) ) THEN
-          dg_here%J1 = NBV(II)      ! GLOBAL NODE NUMBER ON BACK SIDE OF BARRIER
-          dg_here%J2 = IBCONN(II)   ! GLOBAL NODE NUMBER ON FRONT SIDE OF BARRIER
-          DO K = 1,NBOU
-            IF ( (SEGTYPE(K).EQ.4 ).OR.(SEGTYPE(K).EQ.24) ) THEN
-              IF (WEIR_BUDDY_NODE(dg_here%J1,1).EQ.0) THEN
-                WEIR_BUDDY_NODE(dg_here%J1,1) = dg_here%J2
+      global_here%NOT_AN_EDGE = 0
+      global_here%WEIR_BUDDY_NODE = 0
+      DO 10130 II = 1,global_here%NVEL
+        IF( (global_here%LBCODEI(II).EQ.4).OR.(global_here%LBCODEI(II).EQ.24).OR.&
+      (global_here%LBCODEI(II).EQ.5).OR.(global_here%LBCODEI(II).EQ.25) ) THEN
+          dg_here%J1 = global_here%NBV(II)      ! GLOBAL NODE NUMBER ON BACK global_here%SIDE OF BARRIER
+          dg_here%J2 = global_here%IBCONN(II)   ! GLOBAL NODE NUMBER ON FRONT global_here%SIDE OF BARRIER
+          DO K = 1,global_here%NBOU
+            IF ( (global_here%SEGTYPE(K).EQ.4 ).OR.(global_here%SEGTYPE(K).EQ.24) ) THEN
+              IF (global_here%WEIR_BUDDY_NODE(dg_here%J1,1).EQ.0) THEN
+                global_here%WEIR_BUDDY_NODE(dg_here%J1,1) = dg_here%J2
               ELSE
-                WEIR_BUDDY_NODE(dg_here%J1,2) = dg_here%J2
+                global_here%WEIR_BUDDY_NODE(dg_here%J1,2) = dg_here%J2
               ENDIF
             ENDIF
-            IF ( (SEGTYPE(K).EQ.0 ).OR.(SEGTYPE(K).EQ.3 ).OR.&
-           (SEGTYPE(K).EQ.2 ).OR.(SEGTYPE(K).EQ.12).OR.&
-           (SEGTYPE(K).EQ.13).OR.(SEGTYPE(K).EQ.20).OR.&
-           (SEGTYPE(K).EQ.22).OR.(SEGTYPE(K).EQ.23) ) THEN
-              DO IED = 1,NVELL(K)-1
-                N1 = NBVV(K,IED)
-                N2 = NBVV(K,IED+1)
-                IF ((N1.EQ.dg_here%J1).OR.(N1.EQ.dg_here%J2)) THEN
-                  IF ((N2.EQ.dg_here%J1).OR.(N2.EQ.dg_here%J2)) THEN
-                    NOT_AN_EDGE(N1) = 1
-                    NOT_AN_EDGE(N2) = 1
+            IF ( (global_here%SEGTYPE(K).EQ.0 ).OR.(global_here%SEGTYPE(K).EQ.3 ).OR.&
+           (global_here%SEGTYPE(K).EQ.2 ).OR.(global_here%SEGTYPE(K).EQ.12).OR.&
+           (global_here%SEGTYPE(K).EQ.13).OR.(global_here%SEGTYPE(K).EQ.20).OR.&
+           (global_here%SEGTYPE(K).EQ.22).OR.(global_here%SEGTYPE(K).EQ.23) ) THEN
+              DO IED = 1,global_here%NVELL(K)-1
+                global_here%N1 = global_here%NBVV(K,IED)
+                global_here%N2 = global_here%NBVV(K,IED+1)
+                IF ((global_here%N1.EQ.dg_here%J1).OR.(global_here%N1.EQ.dg_here%J2)) THEN
+                  IF ((global_here%N2.EQ.dg_here%J1).OR.(global_here%N2.EQ.dg_here%J2)) THEN
+                    global_here%NOT_AN_EDGE(global_here%N1) = 1
+                    global_here%NOT_AN_EDGE(global_here%N2) = 1
                   ENDIF
                 ENDIF
               ENDDO
-            ELSEIF ( (SEGTYPE(K).EQ.1 ).OR.(SEGTYPE(K).EQ.11).OR.&
-               (SEGTYPE(K).EQ.21) ) THEN
-              DO IED = 1,NVELL(K)-1
-                N1 = NBVV(K,IED)
-                N2 = NBVV(K,IED+1)
-                IF ((N1.EQ.dg_here%J1).OR.(N1.EQ.dg_here%J2)) THEN
-                  IF ((N2.EQ.dg_here%J1).OR.(N2.EQ.dg_here%J2)) THEN
-                    NOT_AN_EDGE(N1) = 1
-                    NOT_AN_EDGE(N2) = 1
+            ELSEIF ( (global_here%SEGTYPE(K).EQ.1 ).OR.(global_here%SEGTYPE(K).EQ.11).OR.&
+               (global_here%SEGTYPE(K).EQ.21) ) THEN
+              DO IED = 1,global_here%NVELL(K)-1
+                global_here%N1 = global_here%NBVV(K,IED)
+                global_here%N2 = global_here%NBVV(K,IED+1)
+                IF ((global_here%N1.EQ.dg_here%J1).OR.(global_here%N1.EQ.dg_here%J2)) THEN
+                  IF ((global_here%N2.EQ.dg_here%J1).OR.(global_here%N2.EQ.dg_here%J2)) THEN
+                    global_here%NOT_AN_EDGE(global_here%N1) = 1
+                    global_here%NOT_AN_EDGE(global_here%N2) = 1
                   ENDIF
                 ENDIF
               ENDDO
@@ -267,7 +267,7 @@
       DO I = 1,dg_here%NEDGES
         IEL1 = dg_here%NEDEL(1,I)
         IEL2 = dg_here%NEDEL(2,I)
-        IF((IEL1.NE.0).AND.(IEL2.NE.0))THEN
+        IF((IEL1.global_here%NE.0).AND.(IEL2.global_here%NE.0))THEN
           dg_here%NIEDS = dg_here%NIEDS + 1
           dg_here%NIEDN(dg_here%NIEDS) = I
           dg_here%NCOUNT(I) = 0
@@ -276,16 +276,16 @@
 
 !.....Find elevation specified boundary edges
 
-      DO 10131 K = 1,NOPE
-        DO IED = 1,NVDLL(K)-1
-          N1 = NBDV(K,IED)
-          N2 = NBDV(K,IED+1)
+      DO 10131 K = 1,global_here%NOPE
+        DO IED = 1,global_here%NVDLL(K)-1
+          global_here%N1 = global_here%NBDV(K,IED)
+          global_here%N2 = global_here%NBDV(K,IED+1)
           IERROR = 0
           DO JED = 1,dg_here%NEDGES
             dg_here%J1 = dg_here%NEDNO(1,JED)
             dg_here%J2 = dg_here%NEDNO(2,JED)
-            IF ( (dg_here%J1.EQ.N1).OR.(dg_here%J1.EQ.N2) ) THEN
-              IF ( (dg_here%J2.EQ.N1).OR.(dg_here%J2.EQ.N2) ) THEN
+            IF ( (dg_here%J1.EQ.global_here%N1).OR.(dg_here%J1.EQ.global_here%N2) ) THEN
+              IF ( (dg_here%J2.EQ.global_here%N1).OR.(dg_here%J2.EQ.global_here%N2) ) THEN
                 dg_here%NEEDS = dg_here%NEEDS + 1
                 dg_here%NEEDN(dg_here%NEEDS) = JED
                 dg_here%NCOUNT(JED) = 4
@@ -310,69 +310,69 @@
 
 !.....Find flux specified boundary edges
 
-      JNMM = 0
-      ONE_OR_TWO = 1
-      DO 10132 K = 1,NBOU
+      global_here%JNMM = 0
+      global_here%ONE_OR_TWO = 1
+      DO 10132 K = 1,global_here%NBOU
 !sb-
-        DO 10133 IED = 1,NVELL(K)-1
+        DO 10133 IED = 1,global_here%NVELL(K)-1
 !--
-          N1 = NBVV(K,IED)
-          N2 = NBVV(K,IED+1)
+          global_here%N1 = global_here%NBVV(K,IED)
+          global_here%N2 = global_here%NBVV(K,IED+1)
 
           IERROR = 0
           DO JED = 1,dg_here%NEDGES
             dg_here%J1 = dg_here%NEDNO(1,JED)
             dg_here%J2 = dg_here%NEDNO(2,JED)
-            IF ((NOT_AN_EDGE(N1).EQ.1).AND.(NOT_AN_EDGE(N2).EQ.1)) THEN
-!              PRINT*,'NODES ',N1,' AND ',N2,' MAKE UP A BOUNDARY',
-!     &                  'SEGMENT THAT IS NOT AN EDGE TO AN ELEMENT; ',
+            IF ((global_here%NOT_AN_EDGE(global_here%N1).EQ.1).AND.(global_here%NOT_AN_EDGE(global_here%N2).EQ.1)) THEN
+!              PRINT*,'NODES ',global_here%N1,' AND ',global_here%N2,' MAKE UP A BOUNDARY',
+!     &                  'SEGMENT THAT IS NOT AN global_here%EDGE TO AN ELEMENT; ',
 !sb-
-!     &                  'THIS EDGE IS SKIPPED'
+!     &                  'THIS global_here%EDGE IS SKIPPED'
               GOTO 10133
 !--
             ENDIF
-            IF ( (N1.EQ.dg_here%J1).OR.(N1.EQ.dg_here%J2) ) THEN
-              IF ( (N2.EQ.dg_here%J1).OR.(N2.EQ.dg_here%J2) ) THEN
+            IF ( (global_here%N1.EQ.dg_here%J1).OR.(global_here%N1.EQ.dg_here%J2) ) THEN
+              IF ( (global_here%N2.EQ.dg_here%J1).OR.(global_here%N2.EQ.dg_here%J2) ) THEN
 
                 IERROR = 1
                 dg_here%NCOUNT(JED) = 1
 
 !.....Determine the different boundary types
 
-                IF ( (SEGTYPE(K).EQ.0 ).OR.(SEGTYPE(K).EQ.10).OR.&
-               (SEGTYPE(K).EQ.20) ) THEN
+                IF ( (global_here%SEGTYPE(K).EQ.0 ).OR.(global_here%SEGTYPE(K).EQ.10).OR.&
+               (global_here%SEGTYPE(K).EQ.20) ) THEN
                   dg_here%NLEDS = dg_here%NLEDS + 1
                   dg_here%NLEDN(dg_here%NLEDS) = JED
                 ENDIF
 
-                IF ( (SEGTYPE(K).EQ.1 ).OR.(SEGTYPE(K).EQ.11).OR.&
-               (SEGTYPE(K).EQ.21) ) THEN
+                IF ( (global_here%SEGTYPE(K).EQ.1 ).OR.(global_here%SEGTYPE(K).EQ.11).OR.&
+               (global_here%SEGTYPE(K).EQ.21) ) THEN
                   dg_here%NLEDS = dg_here%NLEDS + 1
                   dg_here%NLEDN(dg_here%NLEDS) = JED
                 ENDIF
 
-                IF ( (SEGTYPE(K).EQ.2 ).OR.(SEGTYPE(K).EQ.12).OR.&
-               (SEGTYPE(K).EQ.22) ) THEN
+                IF ( (global_here%SEGTYPE(K).EQ.2 ).OR.(global_here%SEGTYPE(K).EQ.12).OR.&
+               (global_here%SEGTYPE(K).EQ.22) ) THEN
                   dg_here%NFEDS = dg_here%NFEDS + 1
                   dg_here%NFEDN(dg_here%NFEDS) = JED
                 ENDIF
                 
-                IF ( (SEGTYPE(K).EQ.3 ).OR.(SEGTYPE(K).EQ.13).OR.&
-               (SEGTYPE(K).EQ.23) ) THEN
+                IF ( (global_here%SEGTYPE(K).EQ.3 ).OR.(global_here%SEGTYPE(K).EQ.13).OR.&
+               (global_here%SEGTYPE(K).EQ.23) ) THEN
                   dg_here%NEBSEG = dg_here%NEBSEG + 1
                   dg_here%NEBEDS = dg_here%NEBEDS + 1
                   dg_here%NEBEDN(dg_here%NEBEDS) = JED
                   dg_here%NEBSEGN(dg_here%NEBSEG) = JED
                 ENDIF
                 
-                IF ( (SEGTYPE(K).EQ.4 ).OR.(SEGTYPE(K).EQ.14).OR.&
-               (SEGTYPE(K).EQ.24) ) THEN
+                IF ( (global_here%SEGTYPE(K).EQ.4 ).OR.(global_here%SEGTYPE(K).EQ.14).OR.&
+               (global_here%SEGTYPE(K).EQ.24) ) THEN
                   dg_here%NIBSEG = dg_here%NIBSEG + 1
                   dg_here%NIBEDS = dg_here%NIBEDS + 1
                   dg_here%NIBEDN(dg_here%NIBEDS) = JED
                   dg_here%NIBSEGN(1,dg_here%NIBSEG) = JED
 
-!.....Find the edge on the opposite side of the barrier
+!.....Find the global_here%edge on the opposite global_here%side of the barrier
 
                   NN1 = dg_here%BACKNODES(1,dg_here%NIBSEG)
                   NN2 = dg_here%BACKNODES(2,dg_here%NIBSEG)
@@ -388,8 +388,8 @@
                         dg_here%NIBEDN(dg_here%NIBEDS) = JJED
                         dg_here%NIBSEGN(2,dg_here%NIBSEG) = JJED
                         dg_here%NCOUNT(JJED) = 1
-                        ONE_OR_TWO(N1) = 2
-                        ONE_OR_TWO(N2) = 2
+                        global_here%ONE_OR_TWO(global_here%N1) = 2
+                        global_here%ONE_OR_TWO(global_here%N2) = 2
                       ENDIF
                     ENDIF
                   ENDDO
@@ -399,7 +399,7 @@
 !                  endif
                 ENDIF
                 
-                IF ( (SEGTYPE(K).EQ.30) ) THEN
+                IF ( (global_here%SEGTYPE(K).EQ.30) ) THEN
                   dg_here%NREDS = dg_here%NREDS + 1
                   dg_here%NREDN(dg_here%NREDS) = JED
                 ENDIF
@@ -412,13 +412,13 @@
 !sb-PDG1
 #ifdef CMPI 
           IF(IERROR.EQ.0) THEN
-            WRITE(16,*) 'NODE PAIR (',N1,',',N2,') IS NOT AN EDGE.'
+            WRITE(16,*) 'NODE PAIR (',global_here%N1,',',global_here%N2,') IS NOT AN global_here%EDGE.'
             WRITE(16,*) 'ERROR IN PROCESSING LAND SEGMENT'
             WRITE(16,*) ''
           ENDIF
 #else
            IF(IERROR.EQ.0) then
-             WRITE(*,*) 'NODE PAIR (',N1,',',N2,') IS NOT AN EDGE.'
+             WRITE(*,*) 'NODE PAIR (',global_here%N1,',',global_here%N2,') IS NOT AN global_here%EDGE.'
              WRITE(*,*) ''
              WRITE(*,*) 'ERROR IN PROCESSING LAND SEGMENT'
              WRITE(*,*) ''
@@ -429,26 +429,26 @@
 10133   CONTINUE
 10132 CONTINUE
 
-!.....Check the order of the nodes assigned to an edge - important in
+!.....Check the order of the nodes assigned to an global_here%edge - important in
 !.....the calculation of the unit normal
 
       DO I = 1,dg_here%NEDGES
-        N1 = dg_here%NEDNO(1,I)
-        N2 = dg_here%NEDNO(2,I)
+        global_here%N1 = dg_here%NEDNO(1,I)
+        global_here%N2 = dg_here%NEDNO(2,I)
         IEL = dg_here%NEDEL(1,I)
-        IF((N1.EQ.NM(IEL,2)).AND.(N2.EQ.NM(IEL,1))) THEN
-          WRITE(6,*)'THE ORDER OF NODES ASSIGNED IS WRONG FOR EDGE',I
-          WRITE(16,*)'THE ORDER OF NODES ASSIGNED IS WRONG FOR EDGE',I
+        IF((global_here%N1.EQ.global_here%NM(IEL,2)).AND.(global_here%N2.EQ.global_here%NM(IEL,1))) THEN
+          WRITE(6,*)'THE ORDER OF NODES ASSIGNED IS WRONG FOR global_here%EDGE',I
+          WRITE(16,*)'THE ORDER OF NODES ASSIGNED IS WRONG FOR global_here%EDGE',I
           STOP
         ENDIF
-        IF((N1.EQ.NM(IEL,3)).AND.(N2.EQ.NM(IEL,2)))THEN
-          WRITE(6,*)'THE ORDER OF NODES ASSIGNED IS WRONG FOR EDGE',I
-          WRITE(16,*)'THE ORDER OF NODES ASSIGNED IS WRONG FOR EDGE',I
+        IF((global_here%N1.EQ.global_here%NM(IEL,3)).AND.(global_here%N2.EQ.global_here%NM(IEL,2)))THEN
+          WRITE(6,*)'THE ORDER OF NODES ASSIGNED IS WRONG FOR global_here%EDGE',I
+          WRITE(16,*)'THE ORDER OF NODES ASSIGNED IS WRONG FOR global_here%EDGE',I
           STOP
         ENDIF
-        IF((N1.EQ.NM(IEL,1)).AND.(N2.EQ.NM(IEL,3)))THEN
-          WRITE(6,*)'THE ORDER OF NODES ASSIGNED IS WRONG FOR EDGE',I
-          WRITE(16,*)'THE ORDER OF NODES ASSIGNED IS WRONG FOR EDGE',I
+        IF((global_here%N1.EQ.global_here%NM(IEL,1)).AND.(global_here%N2.EQ.global_here%NM(IEL,3)))THEN
+          WRITE(6,*)'THE ORDER OF NODES ASSIGNED IS WRONG FOR global_here%EDGE',I
+          WRITE(16,*)'THE ORDER OF NODES ASSIGNED IS WRONG FOR global_here%EDGE',I
           STOP
         ENDIF
       ENDDO
@@ -509,19 +509,19 @@
 
       DO I = 1,dg_here%NEDGES
         IF (dg_here%NCOUNT(I).LT.0) THEN
-          N1 = dg_here%NEDNO(1,I)
-          N2 = dg_here%NEDNO(2,I)
+          global_here%N1 = dg_here%NEDNO(1,I)
+          global_here%N2 = dg_here%NEDNO(2,I)
 !sb-PDG1
 #ifdef CMPI
 !          WRITE(6,*)' '
-!          WRITE(6,*)'EDGE ',I,' IS MADE UP OF NODES ',N1,' AND ',N2
-!          WRITE(6,*)'EDGE ',I, ' IS NEITHER AN INTERNAL NOR A BOUNDARY',
+!          WRITE(6,*)'global_here%EDGE ',I,' IS MADE UP OF NODES ',global_here%N1,' AND ',global_here%N2
+!          WRITE(6,*)'global_here%EDGE ',I, ' IS NEITHER AN INTERNAL NOR A BOUNDARY',
 !     &       'MAKE SURE IF THIS IS DUE TO THE DOMAIN DECOMPOSITION'
 #else
           WRITE(16,*)' '
-          WRITE(16,*)'EDGE',I,',MADE UP OF NODES',N1,'AND',N2,', IS NOT'
-          WRITE(16,*)'AN INTERNAL(NON-BOUNDARY) EDGE OR A BOUNDARY EDGE'
-          WRITE(16,*)'ASSUMING EDGE',I,'IS A NO-NORMAL FLOW EDGE !!!'
+          WRITE(16,*)'global_here%EDGE',I,',MADE UP OF NODES',global_here%N1,'AND',global_here%N2,', IS NOT'
+          WRITE(16,*)'AN INTERNAL(NON-BOUNDARY) global_here%EDGE OR A BOUNDARY global_here%EDGE'
+          WRITE(16,*)'ASSUMING global_here%EDGE',I,'IS A NO-NORMAL FLOW global_here%EDGE !!!'
 !          STOP
 #endif
 !--
@@ -530,7 +530,7 @@
         ENDIF
       ENDDO
       
-!.....Add internal barrier edges to land edge table for wet-dry
+!.....Add internal barrier edges to land global_here%edge table for wet-dry
 !.....post-processing
 
       DO I = 1,dg_here%NIBEDS
@@ -553,7 +553,7 @@
         ENDDO
       ENDIF
       
-!.....Print out elevation specified edge info.
+!.....Print out elevation specified global_here%edge info.
 
       WRITE(17,*) dg_here%NEEDS,'       ! NUMBER OF ELEVATION SPECIFIED EDGES'
       IF (dg_here%NEEDS.GT.0) THEN
@@ -571,7 +571,7 @@
         ENDDO
       ENDIF
       
-!.....Print out external barrier edge info.
+!.....Print out external barrier global_here%edge info.
 
       WRITE(17,*) dg_here%NEBEDS,'       ! NUMBER OF EXTERNAL BARRIER EDGES'
       IF (dg_here%NEEDS.GT.0) THEN
@@ -580,13 +580,13 @@
         ENDDO
       ENDIF
       
-!.....Print out internal barrier edge info.
+!.....Print out internal barrier global_here%edge info.
 
       WRITE(17,*) dg_here%NIBEDS,'       ! NUMBER OF INTERNAL BARRIER EDGES'
       IF (dg_here%NIBEDS.GT.0) THEN
         DO I = 1,dg_here%NIBEDS
           WRITE(17,*) I, dg_here%NIBEDN(I),dg_here%nedno(1,dg_here%nibedn(i)),          dg_here%nedno(2,dg_here%nibedn(i))
-!          PRINT*,'INTERNAL BARRIER EDGE =',I
+!          PRINT*,'INTERNAL BARRIER global_here%EDGE =',I
 !          PRINT*,'IS MADE UP OF NODES',dg_here%NEDNO(1,dg_here%NIBEDN(I)),'AND',
 !     &                                 dg_here%NEDNO(2,dg_here%NIBEDN(I))
         ENDDO
@@ -601,18 +601,18 @@
         ENDDO
       ENDIF
       
-!.....Construct global edge to local edge (1,2, or 3) table
+!.....Construct global global_here%edge to local global_here%edge (1,2, or 3) table
 
       dg_here%NEDSD(:,:) = 0.D0
       DO I = 1,dg_here%MNED
         DO K = 1,2
-          IF (dg_here%NEDEL(K,I).NE.0) THEN
-            N1 = NELED(1,dg_here%NEDEL(K,I))
-            N2 = NELED(2,dg_here%NEDEL(K,I))
-            N3 = NELED(3,dg_here%NEDEL(K,I))
-            IF (N1.EQ.I) dg_here%NEDSD(K,I) = 1
-            IF (N2.EQ.I) dg_here%NEDSD(K,I) = 2
-            IF (N3.EQ.I) dg_here%NEDSD(K,I) = 3
+          IF (dg_here%NEDEL(K,I).global_here%NE.0) THEN
+            global_here%N1 = global_here%NELED(1,dg_here%NEDEL(K,I))
+            global_here%N2 = global_here%NELED(2,dg_here%NEDEL(K,I))
+            global_here%N3 = global_here%NELED(3,dg_here%NEDEL(K,I))
+            IF (global_here%N1.EQ.I) dg_here%NEDSD(K,I) = 1
+            IF (global_here%N2.EQ.I) dg_here%NEDSD(K,I) = 2
+            IF (global_here%N3.EQ.I) dg_here%NEDSD(K,I) = 3
           ENDIF
         ENDDO
       ENDDO

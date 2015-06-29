@@ -65,13 +65,13 @@
 !     in the fort.80 file
 !     
       OPEN(80,FILE='fort.80')
-      READ(80,'(A)') CDUM80     !Skip RUNDES
-      READ(80,'(A)') CDUM80     !Skip RUNID
-      READ(80,'(A)') CDUM80     !Skip AGRID
+      READ(80,'(A)') CDUM80     !Skip global_here%RUNDES
+      READ(80,'(A)') CDUM80     !Skip global_here%RUNID
+      READ(80,'(A)') CDUM80     !Skip global_here%AGRID
       READ(80,*) IDUM80         !Skip NELG & NNODG
       READ(80,*) IDUM80         !Read in NPROC
       CLOSE(80)
-      IF(IDUM80.NE.s%MNPROC) THEN
+      IF(IDUM80.global_here%NE.s%MNPROC) THEN
          IF(s%MYPROC.EQ.0) THEN
             WRITE(*,'(A)') '*** ERROR IN PARALLEL SETUP!'
             WRITE(*,'(2A,I4,A)') '*** Number of CPUS for submitted job ',&
@@ -86,13 +86,13 @@
 #endif
 !--   
 
-      ScreenUnit = 6
+      global_here%ScreenUnit = 6
 
 !.....Initialize all runtime option logicals to false
 
       s%C2DDI  = .FALSE.
       s%C3D    = .FALSE.
-      vertexslope = .False.
+      global_here%vertexslope = .False.
       s%C3DDSS = .FALSE.
       s%C3DVS  = .FALSE.
       s%CLUMP  = .FALSE.
@@ -204,90 +204,90 @@
       LINE2 = ADJUSTL(LINE)
       
       IF (LINE2(1:1) .EQ. "1") THEN
-        CALL read_fixed_fort_dg(s,dg_here)   ! first line of old fort.dg is a 1 for the dgswe option
+        CALL read_fixed_fort_dg(s,dg_here)   ! first line of old fort.dg is a 1 for the global_here%dgswe option
       ELSE
         CALL read_keyword_fort_dg(s,dg_here) ! otherwise assume keyword format
       ENDIF     
       
-      RHOWAT0 = 1000.D0
+      global_here%RHOWAT0 = 1000.D0
                   
       
 !.....Input from unit 15 and output to unit 16 rundescription and run ID
 
-      READ(15,'(A32)') RUNDES
-      READ(15,'(A24)') RUNID
-      WRITE(16,1) RUNDES
+      READ(15,'(A32)') global_here%RUNDES
+      READ(15,'(A24)') global_here%RUNID
+      WRITE(16,1) global_here%RUNDES
  1    FORMAT(//,1X,'RUN DESCRIPTION : ',A32)
-      WRITE(16,209) RUNID
+      WRITE(16,209) global_here%RUNID
  209  FORMAT(/,1X,'RUN IDENTIFICATION : ',A24)
 
-!.....Read and process NFOVER - nonfatal error override otion
+!.....Read and process global_here%NFOVER - nonfatal error override otion
 
-      READ(15,*) NFOVER
+      READ(15,*) global_here%NFOVER
       WRITE(16,1112)
       WRITE(16,1250)
  1250 FORMAT(//,1X,'GENERAL RUN INFORMATION',/)
-      IF(NFOVER.EQ.1) THEN
-         WRITE(16,1951) NFOVER
- 1951    FORMAT(5X,'NFOVER = ',I2,&
+      IF(global_here%NFOVER.EQ.1) THEN
+         WRITE(16,1951) global_here%NFOVER
+ 1951    FORMAT(5X,'global_here%NFOVER = ',I2,&
         /,9X,'IF NON-FATAL ERRORS ARE DETECTED, THEY WILL BE ',&
         'CORRECTED AND EXECUTION CONTINUED')
       ELSE
-         WRITE(16,1952) NFOVER
- 1952    FORMAT(/,5X,'NFOVER = ',I3,&
+         WRITE(16,1952) global_here%NFOVER
+ 1952    FORMAT(/,5X,'global_here%NFOVER = ',I3,&
         /,9X,'NON-FATAL ERRORS WILL STOP EXECUTION ',/)
       ENDIF
 
-!.....Read and process NABOUT - abbreviated unit 16 output option
+!.....Read and process global_here%NABOUT - abbreviated unit 16 output option
 
-      READ(15,*) NABOUT
-      IF (NABOUT.EQ.1) THEN
-         WRITE(16,3501) NABOUT
- 3501    FORMAT(5X,'NABOUT = ',I2,&
+      READ(15,*) global_here%NABOUT
+      IF (global_here%NABOUT.EQ.1) THEN
+         WRITE(16,3501) global_here%NABOUT
+ 3501    FORMAT(5X,'global_here%NABOUT = ',I2,&
         /,9X,'ABREVIATED OUTPUT WILL BE PROVIDED TO UNIT 16',&
         /,9X,'UNIT 14, 21, 22 INPUT DATA WILL NOT BE ECHO PRINTED',/)
       ELSE
-         WRITE(16,3502) NABOUT
- 3502    FORMAT(/,5X,'NABOUT = ',I3,&
+         WRITE(16,3502) global_here%NABOUT
+ 3502    FORMAT(/,5X,'global_here%NABOUT = ',I3,&
         /,9X,'DETAILED OUTPUT WILL BE PROVIDED TO UNIT 16',&
         /,9X,'UNIT 14, 15, 21, 22 INPUT DATA WILL BE ECHO PRINTED',/)
       ENDIF
 
-!.....Read and process NSCREEN - screen ouput option
+!.....Read and process global_here%NSCREEN - screen ouput option
 
-      READ(15,*) NSCREEN
-      NSCREEN_INC = NSCREEN
-      IF (NSCREEN.NE.0) NSCREEN = 1
-      IF(NSCREEN.EQ.1.AND.s%MYPROC.EQ.0) THEN
-         WRITE(16,3561) NSCREEN
- 3561    FORMAT(5X,'NSCREEN = ',I2,&
+      READ(15,*) global_here%NSCREEN
+      global_here%NSCREEN_INC = global_here%NSCREEN
+      IF (global_here%NSCREEN.global_here%NE.0) global_here%NSCREEN = 1
+      IF(global_here%NSCREEN.EQ.1.AND.s%MYPROC.EQ.0) THEN
+         WRITE(16,3561) global_here%NSCREEN
+ 3561    FORMAT(5X,'global_here%NSCREEN = ',I2,&
         /,9X,'SCREEN OUTPUT WILL BE PROVIDED TO UNIT 6',/)
       ELSE
-         WRITE(16,3562) NSCREEN
- 3562    FORMAT(/,5X,'NSCREEN = ',I3,&
+         WRITE(16,3562) global_here%NSCREEN
+ 3562    FORMAT(/,5X,'global_here%NSCREEN = ',I3,&
         /,9X,'SCREEN OUTPUT WILL NOT BE PROVIDED TO UNIT 6',/)
       ENDIF
       
-!.....Read and process IHOT - hot start option
+!.....Read and process global_here%IHOT - hot start option
 
-      READ(15,*) IHOT
-      IF ((IHOT.NE.0).AND.(IHOT.NE.67).AND.(IHOT.NE.68)) THEN
-         IF ((NSCREEN.EQ.1).AND.(s%MYPROC.EQ.0)) THEN
+      READ(15,*) global_here%IHOT
+      IF ((global_here%IHOT.global_here%NE.0).AND.(global_here%IHOT.global_here%NE.67).AND.(global_here%IHOT.global_here%NE.68)) THEN
+         IF ((global_here%NSCREEN.EQ.1).AND.(s%MYPROC.EQ.0)) THEN
             WRITE(6,9972)
-            WRITE(6,*) 'IHOT =',IHOT
+            WRITE(6,*) 'global_here%IHOT =',global_here%IHOT
             WRITE(6,9732)
             WRITE(6,9973)
          ENDIF
          WRITE(16,9972)
-         WRITE(16,*) 'IHOT =',IHOT
+         WRITE(16,*) 'global_here%IHOT =',global_here%IHOT
          WRITE(16,9732)
          WRITE(16,9973)       
- 9732    FORMAT(/,1X,'Your selection of IHOT (a UNIT 15 input ',&
+ 9732    FORMAT(/,1X,'Your selection of global_here%IHOT (a UNIT 15 input ',&
         'parameter) is not an allowable value')
          STOP
       ENDIF
-      IF (IHOT.NE.0) THEN
-         WRITE(16,9733) IHOT
+      IF (global_here%IHOT.global_here%NE.0) THEN
+         WRITE(16,9733) global_here%IHOT
  9733    FORMAT(/,5X,'dgswem will be hot started using information ',&
         'on UNIT ',I2)
       ELSE
@@ -296,64 +296,64 @@
       ENDIF
 #ifdef SWAN
 !asey 100205: Enable hot-start file generation by SWAN.
-      SwanHotStartUnit = IHOT
+      SwanHotStartUnit = global_here%IHOT
 #endif     
 
 
-!.....Read and process ICS - cartesian/spherical coordinate option
+!.....Read and process global_here%ICS - cartesian/spherical coordinate option
 
-      READ(15,*) ICS
-      IF ((ICS.NE.1).AND.(ICS.NE.2)) THEN
-         IF ((NSCREEN.EQ.1).AND.(s%MYPROC.EQ.0)) THEN
+      READ(15,*) global_here%ICS
+      IF ((global_here%ICS.global_here%NE.1).AND.(global_here%ICS.global_here%NE.2)) THEN
+         IF ((global_here%NSCREEN.EQ.1).AND.(s%MYPROC.EQ.0)) THEN
             WRITE(6,9972)
-            WRITE(6,*) 'ICS =',ICS
+            WRITE(6,*) 'global_here%ICS =',global_here%ICS
             WRITE(6,9735)
             WRITE(6,9973)
          ENDIF
          WRITE(16,9972)
-         WRITE(16,*) 'ICS =',ICS
+         WRITE(16,*) 'global_here%ICS =',global_here%ICS
          WRITE(16,9735)
          WRITE(16,9973)
- 9735    FORMAT(/,1X,'Your selection of ICS (a UNIT 15 input ',&
+ 9735    FORMAT(/,1X,'Your selection of global_here%ICS (a UNIT 15 input ',&
         'parameter) is not an allowable value')
          STOP
       ENDIF
-      IF (ICS.EQ.1) THEN
-         WRITE(16,9736) ICS
- 9736    FORMAT(/,5X,'ICS = ',I2,&
+      IF (global_here%ICS.EQ.1) THEN
+         WRITE(16,9736) global_here%ICS
+ 9736    FORMAT(/,5X,'global_here%ICS = ',I2,&
         /,9X,'Governing equations are in Cartesian coordinates')
       ELSE
-         WRITE(16,9737) ICS
- 9737    FORMAT(/,5X,'ICS = ',I2,&
+         WRITE(16,9737) global_here%ICS
+ 9737    FORMAT(/,5X,'global_here%ICS = ',I2,&
         /,9X,'Governing equations are in Spherical coordinates',&
         /,9X,'mapped using a CPP projection')
       ENDIF
 
-!.....Read and process IM - 2D/3D model option
+!.....Read and process global_here%IM - 2D/3D model option
 
-      READ(15,*) IM
-      IF (IM.EQ.0) THEN
+      READ(15,*) global_here%IM
+      IF (global_here%IM.EQ.0) THEN
          s%C2DDI = .TRUE.
-      ELSEIF (IM.EQ.1) THEN
+      ELSEIF (global_here%IM.EQ.1) THEN
          s%C3D  = .TRUE.
          s%C3DVS  = .TRUE.
-      ELSEIF (IM.EQ.2) THEN
+      ELSEIF (global_here%IM.EQ.2) THEN
          s%C3D  = .TRUE.
          s%C3DDSS = .TRUE.
-      ELSEIF (IM.EQ.10) THEN
+      ELSEIF (global_here%IM.EQ.10) THEN
          s%C2DDI = .TRUE.
       ELSE
-         IF ((NSCREEN.EQ.1).AND.(s%MYPROC.EQ.0)) THEN
+         IF ((global_here%NSCREEN.EQ.1).AND.(s%MYPROC.EQ.0)) THEN
             WRITE(6,9972)
-            WRITE(6,*) 'IM =',IM
+            WRITE(6,*) 'global_here%IM =',global_here%IM
             WRITE(6,9721)
             WRITE(6,9973)
          ENDIF
          WRITE(16,9972)
-         WRITE(16,*) 'IM =',IM
+         WRITE(16,*) 'global_here%IM =',global_here%IM
          WRITE(16,9721)
          WRITE(16,9973)
- 9721    FORMAT(/,1X,'Your selection of IM (a UNIT 15 input ',&
+ 9721    FORMAT(/,1X,'Your selection of global_here%IM (a UNIT 15 input ',&
         'parameter) is not an allowable value')
          STOP
       ENDIF
@@ -362,7 +362,7 @@
 
       READ(15,*) NOLIBF
       IF ((NOLIBF.LT.0).OR.(NOLIBF.GT.2)) THEN
-         IF ((NSCREEN.EQ.1).AND.(s%MYPROC.EQ.0)) THEN
+         IF ((global_here%NSCREEN.EQ.1).AND.(s%MYPROC.EQ.0)) THEN
             WRITE(6,9972)
             WRITE(6,*) 'NOLIBF =',NOLIBF
             WRITE(6,9722)
@@ -388,365 +388,365 @@
      /,9X,'AND A FRICTION FACTOR THAT INCREASES AS THE DEPTH ',&
      'DECREASES IN SHALLOW WATER')
 
-!.....Read and process NOLIFA - nonlinear finite amplitude option
+!.....Read and process global_here%NOLIFA - nonlinear finite amplitude option
 
-      READ(15,*) NOLIFA
-      IF ((NOLIFA.LT.0).OR.(NOLIFA.GT.3)) THEN
-         IF ((NSCREEN.EQ.1).AND.(s%MYPROC.EQ.0)) THEN
+      READ(15,*) global_here%NOLIFA
+      IF ((global_here%NOLIFA.LT.0).OR.(global_here%NOLIFA.GT.3)) THEN
+         IF ((global_here%NSCREEN.EQ.1).AND.(s%MYPROC.EQ.0)) THEN
             WRITE(6,9972)
-            WRITE(6,*) 'NOLIFA =',NOLIFA
+            WRITE(6,*) 'global_here%NOLIFA =',global_here%NOLIFA
             WRITE(6,9723)
             WRITE(6,9973)
          ENDIF
          WRITE(16,9972)
-         WRITE(16,*) 'NOLIFA =',NOLIFA
+         WRITE(16,*) 'global_here%NOLIFA =',global_here%NOLIFA
          WRITE(16,9723)
          WRITE(16,9973)
- 9723    FORMAT(/,1X,'Your selection of NOLIFA (a UNIT 15 input ',&
+ 9723    FORMAT(/,1X,'Your selection of global_here%NOLIFA (a UNIT 15 input ',&
         'parameter) is not an allowable value')
          STOP
       ENDIF
-      WRITE(16,9846) NOLIFA
- 9846 FORMAT(/,5X,'NOLIFA = ',I3)
-      IF (NOLIFA.EQ.0) WRITE(16,2053)
+      WRITE(16,9846) global_here%NOLIFA
+ 9846 FORMAT(/,5X,'global_here%NOLIFA = ',I3)
+      IF (global_here%NOLIFA.EQ.0) WRITE(16,2053)
  2053 FORMAT(9X,'THE MODEL WILL NOT USE FINITE AMPLITUDE TERMS OR ',&
      'WETTING AND DRYING')
-      IF (NOLIFA.EQ.1) WRITE(16,2054)
+      IF (global_here%NOLIFA.EQ.1) WRITE(16,2054)
  2054 FORMAT(9X,'THE MODEL WILL USE FINITE AMPLITUDE TERMS BUT NO ',&
      'WETTING AND DRYING')
-      IF (NOLIFA.EQ.2) WRITE(16,2049)
+      IF (global_here%NOLIFA.EQ.2) WRITE(16,2049)
  2049 FORMAT(9X,'THE MODEL WILL USE FINITE AMPLITUDE TERMS AND ',&
      'WETTING AND DRYING')
-      IF (NOLIFA.EQ.3) WRITE(16,2048)
+      IF (global_here%NOLIFA.EQ.3) WRITE(16,2048)
  2048 FORMAT(9X,'THE MODEL WILL USE FINITE AMPLITUDE TERMS AND ',&
      'WETTING AND DRYING',/,10X,&
      'AND INCLUDES THE ABILITY TO INITIALIZE ',&
-     'NODES WITH DEPTHS GREATER THAN H0 AS DRY')         
-      NSTARTDRY = 0
-      IF (NOLIFA.EQ.3) THEN
-         NOLIFA = 2
-         NSTARTDRY = 1
+     'NODES WITH DEPTHS GREATER THAN global_here%H0 AS DRY')         
+      global_here%NSTARTDRY = 0
+      IF (global_here%NOLIFA.EQ.3) THEN
+         global_here%NOLIFA = 2
+         global_here%NSTARTDRY = 1
       ENDIF
 
-!.....Read and process NOLICA - advective term spatial gradinet
+!.....Read and process global_here%NOLICA - advective term spatial gradinet
 
-      READ(15,*) NOLICA
-      IF ((NOLICA.LT.0).OR.(NOLICA.GT.1)) THEN
-         IF ((NSCREEN.EQ.1).AND.(s%MYPROC.EQ.0)) THEN
+      READ(15,*) global_here%NOLICA
+      IF ((global_here%NOLICA.LT.0).OR.(global_here%NOLICA.GT.1)) THEN
+         IF ((global_here%NSCREEN.EQ.1).AND.(s%MYPROC.EQ.0)) THEN
             WRITE(6,9972)
-            WRITE(6,*) 'NOLICA =',NOLICA
+            WRITE(6,*) 'global_here%NOLICA =',global_here%NOLICA
             WRITE(6,9724)
             WRITE(6,9973)
          ENDIF
          WRITE(16,9972)
-         WRITE(16,*) 'NOLICA =',NOLICA
+         WRITE(16,*) 'global_here%NOLICA =',global_here%NOLICA
          WRITE(16,9724)
          WRITE(16,9973)
- 9724    FORMAT(/,1X,'Your selection of NOLICA (a UNIT 15 input ',&
+ 9724    FORMAT(/,1X,'Your selection of global_here%NOLICA (a UNIT 15 input ',&
         'parameter) is not an allowable value')
          STOP
       ENDIF
-      WRITE(16,9847) NOLICA
- 9847 FORMAT(/,5X,'NOLICA = ',I3)
-      IF (NOLICA.EQ.0) WRITE(16,2055)
+      WRITE(16,9847) global_here%NOLICA
+ 9847 FORMAT(/,5X,'global_here%NOLICA = ',I3)
+      IF (global_here%NOLICA.EQ.0) WRITE(16,2055)
  2055 FORMAT(9X,'THE MODEL WILL NOT USE SPATIAL DERIVATIVE ',&
      'COMPONENTS OF THE ADVECTIVE TERMS')
-      IF (NOLICA.EQ.1) WRITE(16,2056)
+      IF (global_here%NOLICA.EQ.1) WRITE(16,2056)
  2056 FORMAT(9X,'THE MODEL WILL USE SPATIAL DERIVATIVE ',&
      'COMPONENTS OF THE ADVECTIVE TERMS')
 
-!.....Read and process NOLICAT - GWCE advective term time derivative
+!.....Read and process global_here%NOLICAT - GWCE advective term time derivative
 
-      READ(15,*) NOLICAT
-      IF ((NOLICAT.LT.0).OR.(NOLICAT.GT.1)) THEN
-         IF ((NSCREEN.EQ.1).AND.(s%MYPROC.EQ.0)) THEN
+      READ(15,*) global_here%NOLICAT
+      IF ((global_here%NOLICAT.LT.0).OR.(global_here%NOLICAT.GT.1)) THEN
+         IF ((global_here%NSCREEN.EQ.1).AND.(s%MYPROC.EQ.0)) THEN
             WRITE(6,9972)
-            WRITE(6,*) 'NOLICAT =',NOLICAT
+            WRITE(6,*) 'global_here%NOLICAT =',global_here%NOLICAT
             WRITE(6,9725)
             WRITE(6,9973)
          ENDIF
          WRITE(16,9972)
-         WRITE(16,*) 'NOLICAT =',NOLICAT
+         WRITE(16,*) 'global_here%NOLICAT =',global_here%NOLICAT
          WRITE(16,9725)
          WRITE(16,9973)
- 9725    FORMAT(/,1X,'Your selection of NOLICAT (a UNIT 15 input ',&
+ 9725    FORMAT(/,1X,'Your selection of global_here%NOLICAT (a UNIT 15 input ',&
         'parameter) is not an allowable value')
          STOP
       ENDIF
-      IF ((NOLIFA.GE.1).AND.(NOLICAT.EQ.0)) THEN
-         IF ((NSCREEN.EQ.1).AND.(s%MYPROC.EQ.0)) THEN
+      IF ((global_here%NOLIFA.GE.1).AND.(global_here%NOLICAT.EQ.0)) THEN
+         IF ((global_here%NSCREEN.EQ.1).AND.(s%MYPROC.EQ.0)) THEN
             WRITE(6,9972)
-            WRITE(6,*) 'NOLICAT =',NOLICAT
+            WRITE(6,*) 'global_here%NOLICAT =',global_here%NOLICAT
             WRITE(6,9726)
-            IF (NFOVER.EQ.1) THEN
+            IF (global_here%NFOVER.EQ.1) THEN
                WRITE(6,9974)
             ELSE
                WRITE(6,9973)
             ENDIF
          ENDIF
          WRITE(16,9972)
-         WRITE(16,*) 'NOLICAT =',NOLICAT
+         WRITE(16,*) 'global_here%NOLICAT =',global_here%NOLICAT
          WRITE(16,9726)
          WRITE(16,9974)
- 9726    FORMAT(/,1X,'Your selection of NOLICAT (a UNIT 15 input ',&
+ 9726    FORMAT(/,1X,'Your selection of global_here%NOLICAT (a UNIT 15 input ',&
         'parameter) is inconsistent with your ',&
-        /,1X,'selection of NOLIFA and may lead to mass ',&
+        /,1X,'selection of global_here%NOLIFA and may lead to mass ',&
         'dg_here%balance problems')
-         IF (NFOVER.EQ.1) THEN
+         IF (global_here%NFOVER.EQ.1) THEN
             WRITE(6,9974)
          ELSE
             WRITE(6,9973)
             STOP
          ENDIF
       ENDIF
-      IF ((NOLIFA.EQ.0).AND.(NOLICAT.EQ.1)) THEN
-         IF ((NSCREEN.EQ.1).AND.(s%MYPROC.EQ.0)) THEN
+      IF ((global_here%NOLIFA.EQ.0).AND.(global_here%NOLICAT.EQ.1)) THEN
+         IF ((global_here%NSCREEN.EQ.1).AND.(s%MYPROC.EQ.0)) THEN
             WRITE(6,9972)
-            WRITE(6,*) 'NOLICAT =',NOLICAT
+            WRITE(6,*) 'global_here%NOLICAT =',global_here%NOLICAT
             WRITE(6,9726)
-            IF (NFOVER.EQ.1) THEN
+            IF (global_here%NFOVER.EQ.1) THEN
                WRITE(6,9974)
             ELSE
                WRITE(6,9973)
             ENDIF
          ENDIF
          WRITE(16,9972)
-         WRITE(16,*) 'NOLICAT =',NOLICAT
+         WRITE(16,*) 'global_here%NOLICAT =',global_here%NOLICAT
          WRITE(16,9726)
          WRITE(16,9974)
-         IF (NFOVER.EQ.1) THEN
+         IF (global_here%NFOVER.EQ.1) THEN
             WRITE(6,9974)
          ELSE
             WRITE(6,9973)
             STOP
          ENDIF
       ENDIF
-      IF (NOLICA.NE.NOLICAT) THEN
-         IF ((NSCREEN.EQ.1).AND.(s%MYPROC.EQ.0)) THEN
+      IF (global_here%NOLICA.global_here%NE.global_here%NOLICAT) THEN
+         IF ((global_here%NSCREEN.EQ.1).AND.(s%MYPROC.EQ.0)) THEN
             WRITE(6,9972)
-            WRITE(6,*) 'NOLICAT =',NOLICAT
+            WRITE(6,*) 'global_here%NOLICAT =',global_here%NOLICAT
             WRITE(6,9727)
-            IF (NFOVER.EQ.1) THEN
+            IF (global_here%NFOVER.EQ.1) THEN
                WRITE(6,9974)
             ELSE
                WRITE(6,9973)
             ENDIF
          ENDIF
          WRITE(16,9972)
-         WRITE(16,*) 'NOLICAT =',NOLICAT
+         WRITE(16,*) 'global_here%NOLICAT =',global_here%NOLICAT
          WRITE(16,9727)
          WRITE(16,9974)
- 9727    FORMAT(/,1X,'Your selection of NOLICAT (a UNIT 15 input ',&
+ 9727    FORMAT(/,1X,'Your selection of global_here%NOLICAT (a UNIT 15 input ',&
         'parameter) is inconsistent with your ',&
-        /,1X,'selection of NOLICA and may lead to mass ',&
+        /,1X,'selection of global_here%NOLICA and may lead to mass ',&
         'dg_here%balance problems')
-         IF (NFOVER.EQ.1) THEN
+         IF (global_here%NFOVER.EQ.1) THEN
             WRITE(6,9974)
          ELSE
             WRITE(6,9973)
             STOP
          ENDIF
       ENDIF
-      WRITE(16,9848) NOLICAT
- 9848 FORMAT(/,5X,'NOLICAT = ',I3)
-      IF (NOLICAT.EQ.0) WRITE(16,2057)
+      WRITE(16,9848) global_here%NOLICAT
+ 9848 FORMAT(/,5X,'global_here%NOLICAT = ',I3)
+      IF (global_here%NOLICAT.EQ.0) WRITE(16,2057)
  2057 FORMAT(9X,'THE MODEL WILL NOT USE TIME DERIVATIVE COMPONENTS ',&
      /,9X,'OF THE ADVECTIVE TERMS IN THE GWCE')
-      IF (NOLICAT.EQ.1) WRITE(16,2058)
+      IF (global_here%NOLICAT.EQ.1) WRITE(16,2058)
  2058 FORMAT(9X,'THE MODEL WILL USE TIME DERIVATIVE COMPONENTS ',&
      /,9X,'OF THE ADVECTIVE TERMS IN THE GWCE')
 
 !.....Read and process NWP - spatially varying bottom friction
 
       READ(15,*) NWP
-      CALL ReadNodalAttr(s, NSCREEN, ScreenUnit, s%MYPROC, NABOUT) ! Ek added call to nodalatt
+      CALL ReadNodalAttr(s, global_here%NSCREEN, global_here%ScreenUnit, s%MYPROC, global_here%NABOUT) ! Ek added call to nodalatt
 
-!.....Read and process NCOR - spatially varying Coriolis parameter
+!.....Read and process global_here%NCOR - spatially varying Coriolis parameter
 
-      READ(15,*) NCOR
-      IF ((NCOR.NE.0).AND.(NCOR.NE.1)) THEN
-         IF ((NSCREEN.EQ.1).AND.(s%MYPROC.EQ.0)) THEN
+      READ(15,*) global_here%NCOR
+      IF ((global_here%NCOR.global_here%NE.0).AND.(global_here%NCOR.global_here%NE.1)) THEN
+         IF ((global_here%NSCREEN.EQ.1).AND.(s%MYPROC.EQ.0)) THEN
             WRITE(6,9972)
-            WRITE(6,*) 'NCOR =',NCOR
+            WRITE(6,*) 'global_here%NCOR =',global_here%NCOR
             WRITE(6,9729)
             WRITE(6,9973)
          ENDIF
          WRITE(16,9972)
-         WRITE(16,*) 'NCOR =',NCOR
+         WRITE(16,*) 'global_here%NCOR =',global_here%NCOR
          WRITE(16,9729)
          WRITE(16,9973)
- 9729    FORMAT(/,1X,'Your selection of NCOR (a UNIT 15 input ',&
+ 9729    FORMAT(/,1X,'Your selection of global_here%NCOR (a UNIT 15 input ',&
         'parameter) is not an allowable value')
          STOP
       ENDIF
-      IF ((ICS.EQ.1).AND.(NCOR.EQ.1)) THEN
-         IF ((NSCREEN.EQ.1).AND.(s%MYPROC.EQ.0)) THEN
+      IF ((global_here%ICS.EQ.1).AND.(global_here%NCOR.EQ.1)) THEN
+         IF ((global_here%NSCREEN.EQ.1).AND.(s%MYPROC.EQ.0)) THEN
             WRITE(6,9972)
-            WRITE(6,*) 'NCOR =',NCOR
+            WRITE(6,*) 'global_here%NCOR =',global_here%NCOR
             WRITE(6,9730)
             WRITE(6,9973)
          ENDIF
          WRITE(16,9972)
-         WRITE(16,*) 'NCOR =',NCOR
+         WRITE(16,*) 'global_here%NCOR =',global_here%NCOR
          WRITE(16,9730)
          WRITE(16,9973)
- 9730    FORMAT(/,1X,'Your selection of NCOR (a UNIT 15 input ',&
+ 9730    FORMAT(/,1X,'Your selection of global_here%NCOR (a UNIT 15 input ',&
         'parameter) is inconsistent with your ',&
         /,1X,'selection of coordinate systems.  Spatially ',&
         'variable Coriolis should be used only with ',&
         /,1X,'Spherical coordinates')
          STOP
       ENDIF
-      IF (NCOR.EQ.0) THEN
-         WRITE(16,233) NCOR
- 233     FORMAT(/,5X,'NCOR = ',I2,&
+      IF (global_here%NCOR.EQ.0) THEN
+         WRITE(16,233) global_here%NCOR
+ 233     FORMAT(/,5X,'global_here%NCOR = ',I2,&
         /,9X,'A CONSTANT VALUE OF THE CORIOLIS PARAMETER WILL BE ',&
         /,9X,'USED THROUGHOUT THE DOMAIN')
       ELSE
-         WRITE(16,234) NCOR
- 234     FORMAT(/,5X,'NCOR = ',I2,&
+         WRITE(16,234) global_here%NCOR
+ 234     FORMAT(/,5X,'global_here%NCOR = ',I2,&
         /,9X,'SPATIALLY VARYING CORIOLIS VALUES WILL BE COMPUTED ',&
         'FROM INPUT LATITUDES')
       ENDIF
 
-!.....Read and process NTIP - tidal potential forcing
+!.....Read and process global_here%NTIP - tidal potential forcing
 
-      READ(15,*) NTIP
-      IF ((NTIP.LT.0).OR.(NTIP.GT.2)) THEN
-         IF ((NSCREEN.EQ.1).AND.(s%MYPROC.EQ.0)) THEN
+      READ(15,*) global_here%NTIP
+      IF ((global_here%NTIP.LT.0).OR.(global_here%NTIP.GT.2)) THEN
+         IF ((global_here%NSCREEN.EQ.1).AND.(s%MYPROC.EQ.0)) THEN
             WRITE(6,9972)
-            WRITE(6,*) 'NTIP =',NTIP
+            WRITE(6,*) 'global_here%NTIP =',global_here%NTIP
             WRITE(6,9710)
             WRITE(6,9973)
          ENDIF
          WRITE(16,9972)
-         WRITE(16,*) 'NTIP =',NTIP
+         WRITE(16,*) 'global_here%NTIP =',global_here%NTIP
          WRITE(16,9710)
          WRITE(16,9973)
- 9710    FORMAT(/,1X,'Your selection of NTIP (a UNIT 15 input ',&
+ 9710    FORMAT(/,1X,'Your selection of global_here%NTIP (a UNIT 15 input ',&
         'parameter) is not an allowable value')
          STOP
       ENDIF
 
-      IF ((ICS.EQ.1).AND.(NTIP.GE.1)) THEN
-         IF ((NSCREEN.EQ.1).AND.(s%MYPROC.EQ.0)) THEN
+      IF ((global_here%ICS.EQ.1).AND.(global_here%NTIP.GE.1)) THEN
+         IF ((global_here%NSCREEN.EQ.1).AND.(s%MYPROC.EQ.0)) THEN
             WRITE(6,9972)
-            WRITE(6,*) 'NTIP =',NTIP
+            WRITE(6,*) 'global_here%NTIP =',global_here%NTIP
             WRITE(6,9711)
             WRITE(6,9973)
          ENDIF
          WRITE(16,9972)
-         WRITE(16,*) 'NTIP =',NTIP
+         WRITE(16,*) 'global_here%NTIP =',global_here%NTIP
          WRITE(16,9711)
          WRITE(16,9973)
- 9711    FORMAT(/,1X,'Your selection of NTIP (a UNIT 15 input ',&
+ 9711    FORMAT(/,1X,'Your selection of global_here%NTIP (a UNIT 15 input ',&
         'parameter) is inconsistent with your ',&
         /,1X,'selection of coordinate systems.  Tidal',&
         'potential forcing should be used only with ',&
         /,1X,'Spherical coordinates')
          STOP
       ENDIF
-      IF (NTIP.NE.0) s%CTIP = .TRUE.
-      IF (NTIP.EQ.0) THEN
-         WRITE(16,235) NTIP
- 235    FORMAT(/,5X,'NTIP = ',I2,&
+      IF (global_here%NTIP.global_here%NE.0) s%CTIP = .TRUE.
+      IF (global_here%NTIP.EQ.0) THEN
+         WRITE(16,235) global_here%NTIP
+ 235    FORMAT(/,5X,'global_here%NTIP = ',I2,&
     /,9X,'TIDAL POTENTIAL FORCING IS NOT USED IN THE COMPUTATION')
       ENDIF
-      IF (NTIP.GE.1) THEN
-        WRITE(16,236) NTIP
- 236     FORMAT(/,5X,'NTIP = ',I2,&
+      IF (global_here%NTIP.GE.1) THEN
+        WRITE(16,236) global_here%NTIP
+ 236     FORMAT(/,5X,'global_here%NTIP = ',I2,&
         /,9X,'TIDAL POTENTIAL FORCING IS USED IN THE COMPUTATION ',&
         'BASED ON INPUT LONGITUDES/LATITUDES')
       ENDIF
-      IF (NTIP.EQ.2) THEN
+      IF (global_here%NTIP.EQ.2) THEN
          WRITE(16,239)
  239     FORMAT(9X,'SELF ATTRACTION/LOAD TIDE FORCING IS ALSO USED ',&
         'IN THE COMPUTATION')
       ENDIF
 
-!.....Read and process NWS - wind and pressure forcing & wave rad stress
+!.....Read and process global_here%NWS - wind and pressure forcing & wave rad stress
 
-      READ(15,*) NWS
-      IF ( (NWS.NE.0)  .AND.(NWS.NE.1)       .AND.(ABS(NWS).NE.2)  .AND.&
-     (NWS.NE.3)  .AND.(ABS(NWS).NE.4)  .AND.(ABS(NWS).NE.5)  .AND.&
-     (NWS.NE.6)  .AND.(NWS.NE.10)      .AND.(NWS.NE.11)      .AND.&
-     (ABS(NWS).NE.12 ).AND.&
-     (NWS.NE.100).AND.(NWS.NE.101)     .AND.(ABS(NWS).NE.102).AND.&
-     (NWS.NE.103).AND.(ABS(NWS).NE.104).AND.(ABS(NWS).NE.105).AND.&
-     (NWS.NE.106).AND.(NWS.NE.110)     .AND.(NWS.NE.111)     .AND.&
-     (NWS.NE.200).AND.(NWS.NE.201)     .AND.(ABS(NWS).NE.202).AND.&
-     (NWS.NE.203).AND.(ABS(NWS).NE.204).AND.(ABS(NWS).NE.205).AND.&
-     (NWS.NE.8).AND.&
-     (NWS.NE.206).AND.(NWS.NE.210)     .AND.(NWS.NE.211) .AND.&
+      READ(15,*) global_here%NWS
+      IF ( (global_here%NWS.global_here%NE.0)  .AND.(global_here%NWS.global_here%NE.1)       .AND.(ABS(global_here%NWS).global_here%NE.2)  .AND.&
+     (global_here%NWS.global_here%NE.3)  .AND.(ABS(global_here%NWS).global_here%NE.4)  .AND.(ABS(global_here%NWS).global_here%NE.5)  .AND.&
+     (global_here%NWS.global_here%NE.6)  .AND.(global_here%NWS.global_here%NE.10)      .AND.(global_here%NWS.global_here%NE.11)      .AND.&
+     (ABS(global_here%NWS).global_here%NE.12 ).AND.&
+     (global_here%NWS.global_here%NE.100).AND.(global_here%NWS.global_here%NE.101)     .AND.(ABS(global_here%NWS).global_here%NE.102).AND.&
+     (global_here%NWS.global_here%NE.103).AND.(ABS(global_here%NWS).global_here%NE.104).AND.(ABS(global_here%NWS).global_here%NE.105).AND.&
+     (global_here%NWS.global_here%NE.106).AND.(global_here%NWS.global_here%NE.110)     .AND.(global_here%NWS.global_here%NE.111)     .AND.&
+     (global_here%NWS.global_here%NE.200).AND.(global_here%NWS.global_here%NE.201)     .AND.(ABS(global_here%NWS).global_here%NE.202).AND.&
+     (global_here%NWS.global_here%NE.203).AND.(ABS(global_here%NWS).global_here%NE.204).AND.(ABS(global_here%NWS).global_here%NE.205).AND.&
+     (global_here%NWS.global_here%NE.8).AND.&
+     (global_here%NWS.global_here%NE.206).AND.(global_here%NWS.global_here%NE.210)     .AND.(global_here%NWS.global_here%NE.211) .AND.&
 !asey 101118: Added the following cases for coupling to unstructured SWAN.
-   (ABS(NWS).NE.300).AND.(ABS(NWS).NE.303).AND.(ABS(NWS).NE.304).AND.&
-   (ABS(NWS).NE.305).AND.(ABS(NWS).NE.306).AND.(ABS(NWS).NE.308).AND.&
-   (ABS(NWS).NE.309).AND.(ABS(NWS).NE.310).AND.(ABS(NWS).NE.311).AND.&
-   (ABS(NWS).NE.312)) THEN
-         IF ((NSCREEN.EQ.1).AND.(s%MYPROC.EQ.0)) THEN
+   (ABS(global_here%NWS).global_here%NE.300).AND.(ABS(global_here%NWS).global_here%NE.303).AND.(ABS(global_here%NWS).global_here%NE.304).AND.&
+   (ABS(global_here%NWS).global_here%NE.305).AND.(ABS(global_here%NWS).global_here%NE.306).AND.(ABS(global_here%NWS).global_here%NE.308).AND.&
+   (ABS(global_here%NWS).global_here%NE.309).AND.(ABS(global_here%NWS).global_here%NE.310).AND.(ABS(global_here%NWS).global_here%NE.311).AND.&
+   (ABS(global_here%NWS).global_here%NE.312)) THEN
+         IF ((global_here%NSCREEN.EQ.1).AND.(s%MYPROC.EQ.0)) THEN
             WRITE(6,9972)
-            WRITE(6,*) 'NWS =',NWS
+            WRITE(6,*) 'global_here%NWS =',global_here%NWS
             WRITE(6,9712)
             WRITE(6,9973)
          ENDIF
          WRITE(16,9972)
-         WRITE(16,*) 'NWS =',NWS
+         WRITE(16,*) 'global_here%NWS =',global_here%NWS
          WRITE(16,9712)
          WRITE(16,9973)
- 9712    FORMAT(/,1X,'Your selection of NWS (a UNIT 15 input ',&
+ 9712    FORMAT(/,1X,'Your selection of global_here%NWS (a UNIT 15 input ',&
         'parameter) is not an allowable value')
          STOP
       ENDIF
 
-!.....Set wave radiation stress flag and adjust NWS accordingly
+!.....Set wave radiation stress flag and adjust global_here%NWS accordingly
 !asey 101118: Had to make some changes in this section.
-      NRS = 0
-      FRW = 0
-      IF (ABS(NWS/100).EQ.1) THEN
-        NRS=1
-        NWS = (ABS(NWS) - 100)*(NWS/ABS(NWS))
+      global_here%NRS = 0
+      global_here%FRW = 0
+      IF (ABS(global_here%NWS/100).EQ.1) THEN
+        global_here%NRS=1
+        global_here%NWS = (ABS(global_here%NWS) - 100)*(global_here%NWS/ABS(global_here%NWS))
       ENDIF
-      IF (ABS(NWS/100).EQ.2) THEN
-        NRS = 1
-        FRW = 1
-        NWS = (ABS(NWS) - 200)*(NWS/ABS(NWS))
+      IF (ABS(global_here%NWS/100).EQ.2) THEN
+        global_here%NRS = 1
+        global_here%FRW = 1
+        global_here%NWS = (ABS(global_here%NWS) - 200)*(global_here%NWS/ABS(global_here%NWS))
       ENDIF
 #ifdef SWAN
 !asey 101118: Added the option for coupling directly to SWAN.
-      IF(ABS(NWS/100).EQ.3) THEN
-        NRS = 3
-        NWS = (ABS(NWS) - 300)*(NWS/ABS(NWS))
+      IF(ABS(global_here%NWS/100).EQ.3) THEN
+        global_here%NRS = 3
+        global_here%NWS = (ABS(global_here%NWS) - 300)*(global_here%NWS/ABS(global_here%NWS))
       ENDIF
 #endif
 
-      IF (NWS.EQ.0) THEN
-         WRITE(16,237) NWS
- 237     FORMAT(/,5X,'NWS = ',I2,&
+      IF (global_here%NWS.EQ.0) THEN
+         WRITE(16,237) global_here%NWS
+ 237     FORMAT(/,5X,'global_here%NWS = ',I2,&
     /,9X,'WIND STRESS OR SURFACE PRESSURE ARE NOT USED TO FORCE',&
          'THE COMPUTATION')
       ENDIF
-      IF (NWS.EQ.1) THEN
-        WRITE(16,238) NWS
- 238    FORMAT(/,5X,'NWS = ',I2,&
+      IF (global_here%NWS.EQ.1) THEN
+        WRITE(16,238) global_here%NWS
+ 238    FORMAT(/,5X,'global_here%NWS = ',I2,&
     /,9X,'WIND STRESS AND SURFACE PRESSURE ARE USED TO FORCE',&
     /,9X,' THE COMPUTATION',&
     /,9X,'VALUES ARE READ AT ADCIRC GRID NODES FROM UNIT 22',&
     /,9X,' EVERY MODEL TIME STEP')
       ENDIF
-      IF (NWS.EQ.2) THEN
-        WRITE(16,2381) NWS
- 2381   FORMAT(/,5X,'NWS = ',I2,&
+      IF (global_here%NWS.EQ.2) THEN
+        WRITE(16,2381) global_here%NWS
+ 2381   FORMAT(/,5X,'global_here%NWS = ',I2,&
     /,9X,'WIND STRESS AND SURFACE PRESSURE ARE USED TO FORCE',&
     /,9X,' THE COMPUTATION',&
     /,9X,'VALUES ARE READ AT ADCIRC GRID NODES FROM UNIT 22',&
-    /,9X,'THE UNIT 22 FILE BEGINS AT TIME=STATIM.',&
+    /,9X,'THE UNIT 22 FILE BEGINS AT TIME=global_here%STATIM.',&
     /,9X,'INTERPOLATION IN TIME IS DONE TO SYNC THE WIND DATA ',&
     /,9X,'WITH THE MODEL TIME STEP.')
       ENDIF
 
-      IF (NWS.EQ.-2) THEN
-        WRITE(16,2380) NWS
- 2380   FORMAT(/,5X,'NWS = ',I2,&
+      IF (global_here%NWS.EQ.-2) THEN
+        WRITE(16,2380) global_here%NWS
+ 2380   FORMAT(/,5X,'global_here%NWS = ',I2,&
     /,9X,'WIND STRESS AND SURFACE PRESSURE ARE USED TO FORCE',&
     /,9X,' THE COMPUTATION',&
     /,9X,'VALUES ARE READ AT ADCIRC GRID NODES FROM UNIT 22',&
@@ -755,9 +755,9 @@
        /,9X,'WITH THE MODEL TIME STEP.')
       ENDIF
 
-      IF (NWS.EQ.3) THEN
-         WRITE(16,2382) NWS
- 2382    FORMAT(/,5X,'NWS = ',I2,&
+      IF (global_here%NWS.EQ.3) THEN
+         WRITE(16,2382) global_here%NWS
+ 2382    FORMAT(/,5X,'global_here%NWS = ',I2,&
     /,9X,'WIND STRESS ONLY IS USED TO FORCE THE COMPUTATION.',&
     /,9X,'WIND SPEEDS AND DIRECTIONS ARE READ FROM A FLEET ',&
     /,9X,'NUMERIC FORMAT FILE AT UNIT 22 AND INTERPOLATED TO',&
@@ -767,22 +767,22 @@
     /,9X,'WIND SPEEDS ARE CONVERTED TO STRESS USING THE GARRET ',&
         'DRAG LAW.')
       ENDIF
-      IF (NWS.EQ.4) THEN
-         WRITE(16,2383) NWS
- 2383    FORMAT(/,5X,'NWS = ',I2,&
+      IF (global_here%NWS.EQ.4) THEN
+         WRITE(16,2383) global_here%NWS
+ 2383    FORMAT(/,5X,'global_here%NWS = ',I2,&
     /,9X,'WIND STRESS AND SURFACE PRESSURE ARE USED TO FORCE',&
     /,9X,' THE COMPUTATION',&
     /,9X,'WIND VELOCITY AND PRESSURE VALUES ARE READ AT SELECTED',&
     /,9X,'ADCIRC GRID NODES FROM A PBL FILE AT UNIT 22.',&
     /,9X,'INTERPOLATION IN TIME IS DONE TO SYNC THE WIND DATA ',&
     /,9X,'WITH THE MODEL TIME STEP.',&
-    /,9X,'THE UNIT 22 FILE BEGINS AT TIME=STATIM.',&
+    /,9X,'THE UNIT 22 FILE BEGINS AT TIME=global_here%STATIM.',&
     /,9X,'WIND SPEEDS ARE CONVERTED TO STRESS USING THE GARRET ',&
         'DRAG LAW.')
       ENDIF
-      IF (NWS.EQ.-4) THEN
-         WRITE(16,2388) NWS
- 2388    FORMAT(/,5X,'NWS = ',I2,&
+      IF (global_here%NWS.EQ.-4) THEN
+         WRITE(16,2388) global_here%NWS
+ 2388    FORMAT(/,5X,'global_here%NWS = ',I2,&
     /,9X,'WIND STRESS AND SURFACE PRESSURE ARE USED TO FORCE',&
     /,9X,' THE COMPUTATION',&
     /,9X,'WIND VELOCITY AND PRESSURE VALUES ARE READ AT SELECTED',&
@@ -793,22 +793,22 @@
     /,9X,'WIND SPEEDS ARE CONVERTED TO STRESS USING THE GARRET ',&
         'DRAG LAW.')
       ENDIF
-      IF (NWS.EQ.5) THEN
-         WRITE(16,2384) NWS
- 2384    FORMAT(/,5X,'NWS = ',I2,&
+      IF (global_here%NWS.EQ.5) THEN
+         WRITE(16,2384) global_here%NWS
+ 2384    FORMAT(/,5X,'global_here%NWS = ',I2,&
     /,9X,'WIND STRESS AND SURFACE PRESSURE ARE USED TO FORCE',&
     /,9X,' THE COMPUTATION',&
     /,9X,'WIND VELOCITY AND PRESSURE VALUES ARE READ AT ADCIRC ',&
     /,9X,'GRID NODES FROM UNIT 22',&
     /,9X,'INTERPOLATION IN TIME IS DONE TO SYNC THE WIND DATA ',&
     /,9X,'WITH THE MODEL TIME STEP.',&
-    /,9X,'THE UNIT 22 FILE BEGINS AT TIME=STATIM.',&
+    /,9X,'THE UNIT 22 FILE BEGINS AT TIME=global_here%STATIM.',&
      /,9X,'WIND SPEEDS ARE CONVERTED TO STRESS USING THE GARRET ',&
      'DRAG LAW.')
       ENDIF
-      IF (NWS.EQ.-5) THEN
-         WRITE(16,2389) NWS
- 2389    FORMAT(/,5X,'NWS = ',I2,&
+      IF (global_here%NWS.EQ.-5) THEN
+         WRITE(16,2389) global_here%NWS
+ 2389    FORMAT(/,5X,'global_here%NWS = ',I2,&
     /,9X,'WIND STRESS AND SURFACE PRESSURE ARE USED TO FORCE',&
     /,9X,' THE COMPUTATION',&
     /,9X,'WIND VELOCITY AND PRESSURE VALUES ARE READ AT ADCIRC ',&
@@ -819,9 +819,9 @@
     /,9X,'WIND SPEEDS ARE CONVERTED TO STRESS USING THE GARRET ',&
         'DRAG LAW.')
       ENDIF
-      IF (NWS.EQ.6) THEN
-         WRITE(16,2385) NWS
- 2385    FORMAT(/,5X,'NWS = ',I2,&
+      IF (global_here%NWS.EQ.6) THEN
+         WRITE(16,2385) global_here%NWS
+ 2385    FORMAT(/,5X,'global_here%NWS = ',I2,&
     /,9X,'WIND STRESS AND SURFACE PRESSURE ARE USED TO FORCE',&
     /,9X,' THE COMPUTATION',&
     /,9X,'WIND VELOCITY AND PRESSURE VALUES ARE READ FROM A ',&
@@ -832,9 +832,9 @@
     /,9X,'WIND SPEEDS ARE CONVERTED TO STRESS USING THE GARRET ',&
         'DRAG LAW.')
       ENDIF
-      IF (NWS.EQ.10) THEN
-         WRITE(16,2386) NWS
- 2386    FORMAT(/,5X,'NWS = ',I2,&
+      IF (global_here%NWS.EQ.10) THEN
+         WRITE(16,2386) global_here%NWS
+ 2386    FORMAT(/,5X,'global_here%NWS = ',I2,&
     /,9X,'WIND STRESS AND SURFACE PRESSURE ARE USED TO FORCE',&
     /,9X,' THE COMPUTATION',&
     /,9X,'WIND VELOCITY AND PRESSURE VALUES ARE READ EVERY N',&
@@ -846,9 +846,9 @@
     /,9X,'WIND SPEEDS ARE CONVERTED TO STRESS USING THE GARRET ',&
         'DRAG LAW.')
       ENDIF
-      IF (NWS.EQ.11) THEN
-         WRITE(16,2387) NWS
- 2387    FORMAT(/,5X,'NWS = ',I2,&
+      IF (global_here%NWS.EQ.11) THEN
+         WRITE(16,2387) global_here%NWS
+ 2387    FORMAT(/,5X,'global_here%NWS = ',I2,&
     /,9X,'WIND STRESS AND SURFACE PRESSURE ARE USED TO FORCE',&
     /,9X,' THE COMPUTATION',&
     /,9X,'WIND VELOCITY AND PRESSURE VALUES ARE READ EVERY 3 ',&
@@ -859,18 +859,18 @@
     /,9X,'WIND SPEEDS ARE CONVERTED TO STRESS USING THE GARRET ',&
         'DRAG LAW.')
       ENDIF
-      IF (NRS.EQ.0) THEN
-         WRITE(16,2390) NRS
- 2390    FORMAT(/,5X,'NRS = ',I2,&
+      IF (global_here%NRS.EQ.0) THEN
+         WRITE(16,2390) global_here%NRS
+ 2390    FORMAT(/,5X,'global_here%NRS = ',I2,&
         /,9X,'WAVE RADIATION STRESS IS NOT USED TO FORCE THE ',&
         'COMPUTATION')
       ENDIF
       
-!.....ek added for NWS=-12,12
+!.....ek added for global_here%NWS=-12,12
 
-      IF(NWS.EQ.12) THEN
-         WRITE(16,12384) NWS
-12384    FORMAT(/,5X,'NWS = ',I2,&
+      IF(global_here%NWS.EQ.12) THEN
+         WRITE(16,12384) global_here%NWS
+12384    FORMAT(/,5X,'global_here%NWS = ',I2,&
     /,9X,'WIND STRESS AND SURFACE PRESSURE ARE USED TO FORCE',&
     /,9X,' THE COMPUTATION',&
     /,9X,'WIND VELOCITY AND PRESSURE VALUES ARE READ FROM RAW ',&
@@ -878,13 +878,13 @@
     /,9X,'META DATA IS READ FROM UNIT 220.',&
     /,9X,'INTERPOLATION IN TIME IS DONE TO SYNC THE WIND DATA ',&
     /,9X,'WITH THE MODEL TIME STEP.',&
-    /,9X,'THE UNIT 22 FILE BEGINS AT TIME=STATIM.',&
+    /,9X,'THE UNIT 22 FILE BEGINS AT TIME=global_here%STATIM.',&
     /,9X,'WIND SPEEDS ARE CONVERTED TO STRESS USING THE GARRET ',&
         'DRAG LAW.')
       ENDIF
-      IF(NWS.EQ.-12) THEN
-         WRITE(16,12389) NWS
-12389    FORMAT(/,5X,'NWS = ',I3,&
+      IF(global_here%NWS.EQ.-12) THEN
+         WRITE(16,12389) global_here%NWS
+12389    FORMAT(/,5X,'global_here%NWS = ',I3,&
     /,9X,'WIND STRESS AND SURFACE PRESSURE ARE USED TO FORCE',&
     /,9X,' THE COMPUTATION',&
     /,9X,'WIND VELOCITY AND PRESSURE VALUES ARE READ FROM RAW ',&
@@ -896,9 +896,9 @@
     /,9X,'WIND SPEEDS ARE CONVERTED TO STRESS USING THE GARRET ',&
         'DRAG LAW.')
       ENDIF
-      IF (NRS.EQ.1) THEN
-         WRITE(16,2391) NRS
- 2391    FORMAT(/,5X,'NRS = ',I2,&
+      IF (global_here%NRS.EQ.1) THEN
+         WRITE(16,2391) global_here%NRS
+ 2391    FORMAT(/,5X,'global_here%NRS = ',I2,&
     /,9X,'WAVE RADIATION STRESS IS USED TO FORCE THE COMPUTATION',&
     /,9X,'STRESSES ARE READ AT SELECTED ADCIRC GRID NODES FROM A',&
     /,9X,'PBL TYPE FILE AT UNIT 23.  INTERPOLATION IN TIME IS ',&
@@ -909,65 +909,65 @@
       ENDIF
 #ifdef SWAN
 !asey 101118: Added the following lines.
-      IF(NRS.EQ.3) THEN
-         WRITE(16,2393) NRS
- 2393    FORMAT(/,5X,'NRS = ',I2,&
+      IF(global_here%NRS.EQ.3) THEN
+         WRITE(16,2393) global_here%NRS
+ 2393    FORMAT(/,5X,'global_here%NRS = ',I2,&
     /,9X,'WAVES WILL BE COUPLED TO SWAN!')
       ENDIF
 #endif
 
-!.....Read and process NRAMP - whether a ramp function will be used
+!.....Read and process global_here%NRAMP - whether a global_here%ramp function will be used
 
-      READ(15,*) NRAMP
-      IF ((NRAMP.NE.0).AND.(NRAMP.GT.7)) THEN
-         IF ((NSCREEN.EQ.1).AND.(s%MYPROC.EQ.0)) THEN
+      READ(15,*) global_here%NRAMP
+      IF ((global_here%NRAMP.global_here%NE.0).AND.(global_here%NRAMP.GT.7)) THEN
+         IF ((global_here%NSCREEN.EQ.1).AND.(s%MYPROC.EQ.0)) THEN
             WRITE(6,9972)
-            WRITE(6,*) 'NRAMP =',NRAMP
+            WRITE(6,*) 'global_here%NRAMP =',global_here%NRAMP
             WRITE(6,9713)
             WRITE(6,9973)
          ENDIF
          WRITE(16,9972)
-         WRITE(16,*) 'NRAMP =',NRAMP
+         WRITE(16,*) 'global_here%NRAMP =',global_here%NRAMP
          WRITE(16,9713)
          WRITE(16,9973)
- 9713    FORMAT(/,1X,'Your selection of NRAMP (a UNIT 15 input ',&
+ 9713    FORMAT(/,1X,'Your selection of global_here%NRAMP (a UNIT 15 input ',&
         'parameter) is not an allowable value')
          STOP
       ENDIF
-      IF (NRAMP.EQ.0) THEN
-         WRITE(16,240) NRAMP
- 240     FORMAT(/,5X,'NRAMP = ',I2,&
-   /,9X,'NO RAMP FUNCTION IS USED IN THE COMPUTATION')
+      IF (global_here%NRAMP.EQ.0) THEN
+         WRITE(16,240) global_here%NRAMP
+ 240     FORMAT(/,5X,'global_here%NRAMP = ',I2,&
+   /,9X,'NO global_here%RAMP FUNCTION IS USED IN THE COMPUTATION')
       ELSE
-         WRITE(16,241) NRAMP
- 241     FORMAT(/,5X,'NRAMP = ',I2,&
-   /,9X,'A HYPERBOLIC TANGENT RAMP IS APPLIED TO THE FORCING ',&
+         WRITE(16,241) global_here%NRAMP
+ 241     FORMAT(/,5X,'global_here%NRAMP = ',I2,&
+   /,9X,'A HYPERBOLIC TANGENT global_here%RAMP IS APPLIED TO THE FORCING ',&
         'FUNCTIONS')
       ENDIF
 
-!.....Read and process G - gravity
+!.....Read and process global_here%G - gravity
 !...  
-      READ(15,*) G
-      G2ROOT = SQRT(G/2.0d0)
-      IF ((ICS.EQ.2).AND.(abs(G-9.81).gt.0.01)) THEN
-         IF ((NSCREEN.EQ.1).AND.(s%MYPROC.EQ.0)) THEN
+      READ(15,*) global_here%G
+      global_here%G2ROOT = SQRT(global_here%G/2.0d0)
+      IF ((global_here%ICS.EQ.2).AND.(abs(global_here%G-9.81).gt.0.01)) THEN
+         IF ((global_here%NSCREEN.EQ.1).AND.(s%MYPROC.EQ.0)) THEN
             WRITE(6,9972)
-            WRITE(6,*) 'G =',G
+            WRITE(6,*) 'global_here%G =',global_here%G
             WRITE(6,9714)
             WRITE(6,9973)
          ENDIF
          WRITE(16,9972)
-         WRITE(16,*) 'G =',G
+         WRITE(16,*) 'global_here%G =',global_here%G
          WRITE(16,9714)
          WRITE(16,9973)
  9714    FORMAT(/,1X,'Your specification of the gravitational ',&
-        'constant, G, (a UNIT 15 input) is not ',&
+        'constant, global_here%G, (a UNIT 15 input) is not ',&
         /,1X,'consistant with the use of spherical coordinates.',&
-        '  G must be in units of m/s^2')
+        '  global_here%G must be in units of m/s^2')
          STOP
       ENDIF
-      WRITE(16,5) G
-    5 FORMAT(///,5X,'GRAVITATIONAL CONSTANT G =',F10.5,/)
+      WRITE(16,5) global_here%G
+    5 FORMAT(///,5X,'GRAVITATIONAL CONSTANT global_here%G =',F10.5,/)
 
 !.....Read and process TAU0 - weighting coefficient in the GWCE
 
@@ -995,194 +995,194 @@
       WRITE(16,245)
  245  FORMAT(//,1X,'TIME INTEGRATION INFORMATION',//)
 
-!.....Read and process DT - model time step
+!.....Read and process global_here%DT - model time step
 
-      READ(15,*) DTDP
-      DT = DTDP
-      WRITE(16,9) DTDP
+      READ(15,*) global_here%DTDP
+      global_here%DT = global_here%DTDP
+      WRITE(16,9) global_here%DTDP
     9 FORMAT(5X,'TIME STEP =',F12.6,5X,'SECONDS',/)
 
-!.....Read and process STATIM - simulation starting time
+!.....Read and process global_here%STATIM - simulation starting time
 
-      READ(15,*) STATIM
-      WRITE(16,1113) STATIM
+      READ(15,*) global_here%STATIM
+      WRITE(16,1113) global_here%STATIM
  1113 FORMAT(5X,'STARTING TIME FOR SIMULATION = ',F14.6,' DAYS',/)
 
-!.....Read anf process REFTIM - harmonic reference time
+!.....Read anf process global_here%REFTIM - harmonic reference time
 
-      READ(15,*) REFTIM
-      WRITE(16,1115) REFTIM
+      READ(15,*) global_here%REFTIM
+      WRITE(16,1115) global_here%REFTIM
  1115 FORMAT(5X,'Harmonic REFERENCE TIME = ',F14.6,' DAYS',/)
 
 !.....Read in and process additional timing information for wind.
-!asey 101118: Changed NRS.EQ.1 to NRS.GE.1 throughout this section.
-      IF ((NWS.EQ.0).AND.(NRS.GE.1)) READ(15,*) RSTIMINC
-      IF ((NWS.EQ.1).AND.(NRS.GE.1)) READ(15,*) RSTIMINC
-      IF (ABS(NWS).EQ.2) THEN
-         IF (NRS.EQ.0) READ(15,*) WTIMINC
-         IF (NRS.GE.1) READ(15,*) WTIMINC,RSTIMINC
+!asey 101118: Changed global_here%NRS.EQ.1 to global_here%NRS.GE.1 throughout this section.
+      IF ((global_here%NWS.EQ.0).AND.(global_here%NRS.GE.1)) READ(15,*) global_here%RSTIMINC
+      IF ((global_here%NWS.EQ.1).AND.(global_here%NRS.GE.1)) READ(15,*) global_here%RSTIMINC
+      IF (ABS(global_here%NWS).EQ.2) THEN
+         IF (global_here%NRS.EQ.0) READ(15,*) global_here%WTIMINC
+         IF (global_here%NRS.GE.1) READ(15,*) global_here%WTIMINC,global_here%RSTIMINC
       ENDIF
-      IF (NWS.EQ.3) THEN
-         READ(15,*) IREFYR,IREFMO,IREFDAY,IREFHR,IREFMIN,REFSEC
-         WRITE(16,1116) IREFMO,IREFDAY,IREFYR,IREFHR,IREFMIN,REFSEC
+      IF (global_here%NWS.EQ.3) THEN
+         READ(15,*) global_here%IREFYR,global_here%IREFMO,global_here%IREFDAY,global_here%IREFHR,global_here%IREFMIN,global_here%REFSEC
+         WRITE(16,1116) global_here%IREFMO,global_here%IREFDAY,global_here%IREFYR,global_here%IREFHR,global_here%IREFMIN,global_here%REFSEC
  1116    FORMAT(5X,'WIND REFERENCE TIME FOR SIMULATION = ',&
         I2,'/',I2,'/',I2,'  ',I2,':',I2,':',f7.4,/)
-         CALL TIMECONV(IREFYR,IREFMO,IREFDAY,IREFHR,IREFMIN,REFSEC,&
-        WREFTIM, S%MYPROC, NScreen, ScreenUnit )
-         IF (NRS.EQ.0) READ(15,*) NWLAT,NWLON,WLATMAX,WLONMIN,WLATINC,&
-        WLONINC,WTIMINC
-         IF (NRS.GE.1) READ(15,*) NWLAT,NWLON,WLATMAX,WLONMIN,WLATINC,&
-        WLONINC,WTIMINC,RSTIMINC
+         CALL TIMECONV(global_here%IREFYR,global_here%IREFMO,global_here%IREFDAY,global_here%IREFHR,global_here%IREFMIN,global_here%REFSEC,&
+        global_here%WREFTIM, S%MYPROC, global_here%NScreen, global_here%ScreenUnit )
+         IF (global_here%NRS.EQ.0) READ(15,*) global_here%NWLAT,global_here%NWLON,global_here%WLATMAX,global_here%WLONMIN,global_here%WLATINC,&
+        global_here%WLONINC,global_here%WTIMINC
+         IF (global_here%NRS.GE.1) READ(15,*) global_here%NWLAT,global_here%NWLON,global_here%WLATMAX,global_here%WLONMIN,global_here%WLATINC,&
+        global_here%WLONINC,global_here%WTIMINC,global_here%RSTIMINC
       ENDIF
-      IF (ABS(NWS).EQ.4) THEN
-         IF (NRS.EQ.0) READ(15,*) WTIMINC
-         IF (NRS.GE.1) READ(15,*) WTIMINC,RSTIMINC
+      IF (ABS(global_here%NWS).EQ.4) THEN
+         IF (global_here%NRS.EQ.0) READ(15,*) global_here%WTIMINC
+         IF (global_here%NRS.GE.1) READ(15,*) global_here%WTIMINC,global_here%RSTIMINC
       ENDIF
 
-      IF (ABS(NWS).EQ.5) THEN
-         IF (NRS.EQ.0) READ(15,*) WTIMINC
-         IF (NRS.GE.1) READ(15,*) WTIMINC,RSTIMINC
+      IF (ABS(global_here%NWS).EQ.5) THEN
+         IF (global_here%NRS.EQ.0) READ(15,*) global_here%WTIMINC
+         IF (global_here%NRS.GE.1) READ(15,*) global_here%WTIMINC,global_here%RSTIMINC
       ENDIF
-      IF (NWS.EQ.6) THEN
-         IF (NRS.EQ.0) READ(15,*) NWLAT,NWLON,WLATMAX,WLONMIN,WLATINC,&
-        WLONINC,WTIMINC
-         IF (NRS.GE.1) READ(15,*) NWLAT,NWLON,WLATMAX,WLONMIN,WLATINC,&
-        WLONINC,WTIMINC,RSTIMINC
+      IF (global_here%NWS.EQ.6) THEN
+         IF (global_here%NRS.EQ.0) READ(15,*) global_here%NWLAT,global_here%NWLON,global_here%WLATMAX,global_here%WLONMIN,global_here%WLATINC,&
+        global_here%WLONINC,global_here%WTIMINC
+         IF (global_here%NRS.GE.1) READ(15,*) global_here%NWLAT,global_here%NWLON,global_here%WLATMAX,global_here%WLONMIN,global_here%WLATINC,&
+        global_here%WLONINC,global_here%WTIMINC,global_here%RSTIMINC
       ENDIF
-      IF(ABS(NWS).EQ.8) THEN
-         IF(NRS.EQ.0) THEN
-            READ(15,*) IREFYR,IREFMO,IREFDAY,IREFHR,StormNumber,BLAdj
-         ELSEIF (NRS.GE.1) THEN
-            READ(15,*) IREFYR,IREFMO,IREFDAY,IREFHR,StormNumber,BLAdj,&
-           RSTIMINC
-            WRITE(16,6111) IREFMO,IREFDAY,IREFYR,IREFHR
+      IF(ABS(global_here%NWS).EQ.8) THEN
+         IF(global_here%NRS.EQ.0) THEN
+            READ(15,*) global_here%IREFYR,global_here%IREFMO,global_here%IREFDAY,global_here%IREFHR,StormNumber,BLAdj
+         ELSEIF (global_here%NRS.GE.1) THEN
+            READ(15,*) global_here%IREFYR,global_here%IREFMO,global_here%IREFDAY,global_here%IREFHR,StormNumber,BLAdj,&
+           global_here%RSTIMINC
+            WRITE(16,6111) global_here%IREFMO,global_here%IREFDAY,global_here%IREFYR,global_here%IREFHR
  6111       FORMAT(5X,'WIND REFERENCE TIME FOR SIMULATION = ',&
            I2,'/',I2,'/',I2,'  ',I2,'H',/)
          ENDIF
-         CALL TIMECONV(IREFYR,IREFMO,IREFDAY,IREFHR,0,0.0d0,&
-        WindRefTime, S%MYPROC, NScreen, ScreenUnit)
+         CALL TIMECONV(global_here%IREFYR,global_here%IREFMO,global_here%IREFDAY,global_here%IREFHR,0,0.0d0,&
+        WindRefTime, S%MYPROC, global_here%NScreen, global_here%ScreenUnit)
       ENDIF
 
-      IF (NWS.EQ.10) THEN
-         NWLAT=190
-         NWLON=384
-         IF (NRS.EQ.0) READ(15,*) WTIMINC
-         IF (NRS.GE.1) READ(15,*) WTIMINC,RSTIMINC
+      IF (global_here%NWS.EQ.10) THEN
+         global_here%NWLAT=190
+         global_here%NWLON=384
+         IF (global_here%NRS.EQ.0) READ(15,*) global_here%WTIMINC
+         IF (global_here%NRS.GE.1) READ(15,*) global_here%WTIMINC,global_here%RSTIMINC
       ENDIF
-      IF (NWS.EQ.11) THEN
-         NWLAT=271
-         NWLON=181
-         WTIMINC=10800.
-         IF (NRS.GE.1) READ(15,*) RSTIMINC
+      IF (global_here%NWS.EQ.11) THEN
+         global_here%NWLAT=271
+         global_here%NWLON=181
+         global_here%WTIMINC=10800.
+         IF (global_here%NRS.GE.1) READ(15,*) global_here%RSTIMINC
       ENDIF
-      IF (NWS.EQ.11) THEN
-         NWLAT=271
-         NWLON=181
-         WTIMINC=10800.
-         IF (NRS.GE.1) READ(15,*) RSTIMINC
+      IF (global_here%NWS.EQ.11) THEN
+         global_here%NWLAT=271
+         global_here%NWLON=181
+         global_here%WTIMINC=10800.
+         IF (global_here%NRS.GE.1) READ(15,*) global_here%RSTIMINC
       ENDIF
-!.....ek added NWS=12 (OWI format) from version 46
+!.....ek added global_here%NWS=12 (OWI format) from version 46
 
-      IF(ABS(NWS).EQ.12) THEN
-         IF(NRS.EQ.0) READ(15,*) WTIMINC
-         IF(NRS.GE.1) READ(15,*) WTIMINC,RSTIMINC ! sb46.28sb03
+      IF(ABS(global_here%NWS).EQ.12) THEN
+         IF(global_here%NRS.EQ.0) READ(15,*) global_here%WTIMINC
+         IF(global_here%NRS.GE.1) READ(15,*) global_here%WTIMINC,global_here%RSTIMINC ! sb46.28sb03
       ENDIF
 
-      IF (NWS.NE.0) WRITE(16,1117) WTIMINC
+      IF (global_here%NWS.global_here%NE.0) WRITE(16,1117) global_here%WTIMINC
  1117 FORMAT(5X,'WIND TIME INCREMENT (SEC) = ',F10.2,/)
-      IF (NRS.NE.0) WRITE(16,1118) RSTIMINC
+      IF (global_here%NRS.global_here%NE.0) WRITE(16,1118) global_here%RSTIMINC
  1118 FORMAT(5X,'RADIATION STRESS TIME INCREMENT (SEC) = ',F10.2,/)
 
-!.....Read and process RNDAY - simulation duration i days
+!.....Read and process global_here%RNDAY - simulation duration i days
 
-      READ(15,*) RNDAY
-      WRITE(16,10) RNDAY
+      READ(15,*) global_here%RNDAY
+      WRITE(16,10) global_here%RNDAY
  10   FORMAT(5X,'TOTAL LENGTH OF NUMERICAL SIMULATION =',F12.4,&
      5X,'DAYS',/)
 
-!.....Compute total number of time steps NT
+!.....Compute total number of time steps global_here%NT
 
-      NT = INT(RNDAY*(86400.D0/DTDP) + 0.5D0)
-      WRITE(16,1920) NT
+      global_here%NT = INT(global_here%RNDAY*(86400.D0/global_here%DTDP) + 0.5D0)
+      WRITE(16,1920) global_here%NT
  1920 FORMAT(5X,'NUMBER OF TIME STEPS  =',I8,/)
 
-!.....Read and process effective length of hyperbolic tangent ramp
+!.....Read and process effective length of hyperbolic tangent global_here%ramp
 
 !...  
-!...  READ AND PROCESS EFFECTIVE LENGTH OF THE HYPERBOLIC TANGENT RAMP(S)
+!...  READ AND PROCESS EFFECTIVE LENGTH OF THE HYPERBOLIC TANGENT global_here%RAMP(S)
 !...  IN DAYS
 !...  
-!     jgf46.08 Add fine-grained ramp functions.
-!     jgf46.21 Add FluxSettlingTime for IBTYPE=52 to accomodate
+!     jgf46.08 Add fine-grained global_here%ramp functions.
+!     jgf46.21 Add global_here%FluxSettlingTime for global_here%IBTYPE=52 to accomodate
 !     MS river during Katrina, split ramps for flux b.c.s into internal
 !     and external.
-      FluxSettlingTime = 0.0d0
-      DRamp = 1.0d0
-      SELECT CASE(NRamp)
+      global_here%FluxSettlingTime = 0.0d0
+      global_here%DRamp = 1.0d0
+      SELECT CASE(global_here%NRamp)
 !     ---------
-      CASE(0,1)                 ! Either no ramp, or same ramp for all forcings
+      CASE(0,1)                 ! Either no global_here%ramp, or same global_here%ramp for all forcings
 !     ---------
-         READ(15,*) DRamp
-         DRampIntFlux = DRamp
-         DRampExtFlux = DRamp
-         DRampElev    = DRamp
-         DRampTip     = DRamp
-         DRampMete    = DRamp
-         DRampWRad    = DRamp
+         READ(15,*) global_here%DRamp
+         global_here%DRampIntFlux = global_here%DRamp
+         global_here%DRampExtFlux = global_here%DRamp
+         global_here%DRampElev    = global_here%DRamp
+         global_here%DRampTip     = global_here%DRamp
+         global_here%DRampMete    = global_here%DRamp
+         global_here%DRampWRad    = global_here%DRamp
 !     -------
-      CASE(2)                   ! Ramp for external flux boundary conditions.
+      CASE(2)                   ! global_here%Ramp for external flux boundary conditions.
 !     -------
-         READ(15,*) DRamp,DRampExtFlux,FluxSettlingTime
-         DRampIntFlux = DRamp
-         DRampElev    = DRamp
-         DRampTip     = DRamp
-         DRampMete    = DRamp
-         DRampWRad    = DRamp
+         READ(15,*) global_here%DRamp,global_here%DRampExtFlux,global_here%FluxSettlingTime
+         global_here%DRampIntFlux = global_here%DRamp
+         global_here%DRampElev    = global_here%DRamp
+         global_here%DRampTip     = global_here%DRamp
+         global_here%DRampMete    = global_here%DRamp
+         global_here%DRampWRad    = global_here%DRamp
 !     -------
-      CASE(3)                   ! Ramp for internal flux boundary conditions.
+      CASE(3)                   ! global_here%Ramp for internal flux boundary conditions.
 !     -------
-         READ(15,*) DRamp,DRampExtFlux,FluxSettlingTime,DRampIntFlux
-         DRampElev = DRamp
-         DRampTip  = DRamp
-         DRampMete = DRamp
-         DRampWRad = DRamp
+         READ(15,*) global_here%DRamp,global_here%DRampExtFlux,global_here%FluxSettlingTime,global_here%DRampIntFlux
+         global_here%DRampElev = global_here%DRamp
+         global_here%DRampTip  = global_here%DRamp
+         global_here%DRampMete = global_here%DRamp
+         global_here%DRampWRad = global_here%DRamp
 !     -------
-      CASE(4)                   ! Ramp for surface elevation specified boundary conditions.
+      CASE(4)                   ! global_here%Ramp for surface elevation specified boundary conditions.
 !     -------
-         READ(15,*) DRamp,DRampExtFlux,FluxSettlingTime,DRampIntFlux,&
-        DRampElev
-         DRampTip  = DRamp
-         DRampMete = DRamp
-         DRampWRad = DRamp
+         READ(15,*) global_here%DRamp,global_here%DRampExtFlux,global_here%FluxSettlingTime,global_here%DRampIntFlux,&
+        global_here%DRampElev
+         global_here%DRampTip  = global_here%DRamp
+         global_here%DRampMete = global_here%DRamp
+         global_here%DRampWRad = global_here%DRamp
 !     -------
-      CASE(5)                   ! Ramp for tidal potential
+      CASE(5)                   ! global_here%Ramp for tidal potential
 !     -------
-         READ(15,*) DRamp,DRampExtFlux,FluxSettlingTime,DRampIntFlux,&
-        DRampElev,DRampTip
-         DRampMete = DRamp
-         DRampWRad = DRamp
+         READ(15,*) global_here%DRamp,global_here%DRampExtFlux,global_here%FluxSettlingTime,global_here%DRampIntFlux,&
+        global_here%DRampElev,global_here%DRampTip
+         global_here%DRampMete = global_here%DRamp
+         global_here%DRampWRad = global_here%DRamp
 !     -------
-      CASE(6)                   ! Ramp for wind and atmospheric pressure
+      CASE(6)                   ! global_here%Ramp for wind and atmospheric pressure
 !     -------
-         READ(15,*) DRamp,DRampExtFlux,FluxSettlingTime,DRampIntFlux,&
-        DRampElev,DRampTip,DRampMete
-         DRampWRad = DRamp
+         READ(15,*) global_here%DRamp,global_here%DRampExtFlux,global_here%FluxSettlingTime,global_here%DRampIntFlux,&
+        global_here%DRampElev,global_here%DRampTip,global_here%DRampMete
+         global_here%DRampWRad = global_here%DRamp
 !     -------
-      CASE(7)                   ! Ramp for wave radiation stress
+      CASE(7)                   ! global_here%Ramp for wave radiation stress
 !     -------
-         READ(15,*) DRamp,DRampExtFlux,FluxSettlingTime,DRampIntFlux,&
-        DRampElev,DRampTip,DRampMete,DRampWRad
+         READ(15,*) global_here%DRamp,global_here%DRampExtFlux,global_here%FluxSettlingTime,global_here%DRampIntFlux,&
+        global_here%DRampElev,global_here%DRampTip,global_here%DRampMete,global_here%DRampWRad
 !     ------------
       CASE DEFAULT              ! fall-through
 !     ------------
-         IF(NSCREEN.NE.0.AND.s%MYPROC.EQ.0) THEN
-            WRITE(ScreenUnit,9972)
-            WRITE(ScreenUnit,*) 'NRAMP =',NRAMP
-            WRITE(ScreenUnit,9713)
-            WRITE(ScreenUnit,9973)
+         IF(global_here%NSCREEN.global_here%NE.0.AND.s%MYPROC.EQ.0) THEN
+            WRITE(global_here%ScreenUnit,9972)
+            WRITE(global_here%ScreenUnit,*) 'global_here%NRAMP =',global_here%NRAMP
+            WRITE(global_here%ScreenUnit,9713)
+            WRITE(global_here%ScreenUnit,9973)
          ENDIF
          WRITE(16,9972)
-         WRITE(16,*) 'NRAMP =',NRAMP
+         WRITE(16,*) 'global_here%NRAMP =',global_here%NRAMP
          WRITE(16,9713)
          WRITE(16,9973)
 #ifdef CMPI
@@ -1193,50 +1193,50 @@
 
 !.....Compute the total number of timesteps the ramping function is used
  
-      IRAMPING = INT(DRAMP*(86400.D0/DTDP) + 0.5D0)
+      global_here%IRAMPING = INT(global_here%DRAMP*(86400.D0/global_here%DTDP) + 0.5D0)
 
 !.....Read GWCE time weighting factors
 
-      READ(15,*) A00,B00,C00
+      READ(15,*) global_here%A00,global_here%B00,global_here%C00
       WRITE(16,14)
  14   FORMAT(//,5X,'TIME WEIGHTING FACTORS IN THE WAVE EQUATION :'/)
-      WRITE(16,15) A00,B00,C00
+      WRITE(16,15) global_here%A00,global_here%B00,global_here%C00
  15   FORMAT(9X,'AT TIME LEVEL K+1 : ',F8.5,&
      /,9X,'AT TIME LEVEL K   : ',F8.5,&
      /,9X,'AT TIME LEVEL K-1 : ',F8.5,/)
 
 !.....Read minimum depth or wet/dry parameters from unit 15
 
-      IF (NOLIFA.NE.2) THEN
-         READ(15,*) H0
-         WRITE(16,16) H0
+      IF (global_here%NOLIFA.global_here%NE.2) THEN
+         READ(15,*) global_here%H0
+         WRITE(16,16) global_here%H0
  16      FORMAT(//,5X,'THE BATHYMETRIC DEPTH AT ALL NODES WILL BE ',&
-        'INCREASED TO H0= ',F12.4,' IF NECESSARY'/)
+        'INCREASED TO global_here%H0= ',F12.4,' IF NECESSARY'/)
       ENDIF
-      IF (NOLIFA.EQ.2) THEN
-         READ(15,*) H0,NODEDRYMIN,NODEWETMIN,VELMIN
-         WRITE(16,17) H0,NODEWETMIN,VELMIN,NODEDRYMIN
- 17      FORMAT(//,5X,'DRYING WILL OCCUR WHEN THE WATER DEPTH < H0',&
-        /,5X,'H0 = ',E16.8,&
-        /,5X,'AND NODEREP > NODEWETMIN = ',I6,' TIME STEPS',&
-        /,5X,'NODEREP = NUMBER OF TIME STEPS SINCE A NODE ',&
+      IF (global_here%NOLIFA.EQ.2) THEN
+         READ(15,*) global_here%H0,global_here%NODEDRYMIN,global_here%NODEWETMIN,global_here%VELMIN
+         WRITE(16,17) global_here%H0,global_here%NODEWETMIN,global_here%VELMIN,global_here%NODEDRYMIN
+ 17      FORMAT(//,5X,'DRYING WILL OCCUR WHEN THE WATER DEPTH < global_here%H0',&
+        /,5X,'global_here%H0 = ',E16.8,&
+        /,5X,'AND global_here%NODEREP > global_here%NODEWETMIN = ',I6,' TIME STEPS',&
+        /,5X,'global_here%NODEREP = NUMBER OF TIME STEPS SINCE A NODE ',&
         'CHANGED STATE (EITHER WETTED OR DRIED)',&
         //,5X,'WETTING WILL OCCUR WHEN THERE IS A FAVORABLE ',&
         'PRESSURE GRADIENT THAT',&
         /,5X,'WOULD DRIVE A STEADY VELOCITY TOWARDS A DRY NODE',&
-        /,5X,'THAT IS GREATER THAN VELMIN = ',F10.5,&
-        /,5X,'AND NODEREP > NODEDRYMIN = ',I6,' TIME STEPS',/)
+        /,5X,'THAT IS GREATER THAN global_here%VELMIN = ',F10.5,&
+        /,5X,'AND global_here%NODEREP > global_here%NODEDRYMIN = ',I6,' TIME STEPS',/)
       ENDIF
 
 !.....Read grid information from units 14 and 15
 
-      READ(14,'(A24)') AGRID
-      READ(14,*) NE,NP
-      s%MNP = NP
-      s%MNE = NE
-      READ(15,*) SLAM0,SFEA0
-      SLAM0 = SLAM0*DEG2RAD
-      SFEA0 = SFEA0*DEG2RAD
+      READ(14,'(A24)') global_here%AGRID
+      READ(14,*) global_here%NE,global_here%NP
+      s%MNP = global_here%NP
+      s%MNE = global_here%NE
+      READ(15,*) global_here%SLAM0,global_here%SFEA0
+      global_here%SLAM0 = global_here%SLAM0*DEG2RAD
+      global_here%SFEA0 = global_here%SFEA0*DEG2RAD
       WRITE(16,1112)
       WRITE(16,246)
  246  FORMAT(//,1X,'GRID INFORMATION',//)
@@ -1245,105 +1245,105 @@
 
       CALL ALLOC_MAIN1(s)
 
-!.....If ICS = 1 input nodal coordinates and bathymetry from unit 14
-!.....If either NTIP or NCOR = 1 compute the inverse CPP projection
+!.....If global_here%ICS = 1 input nodal coordinates and bathymetry from unit 14
+!.....If either global_here%NTIP or global_here%NCOR = 1 compute the inverse CPP projection
 
-      IF (ICS.EQ.1) THEN
-         DO I = 1,NP
-            READ(14,*) JKI,X(JKI),Y(JKI),DP(JKI)
-            IF(JKI.NE.I) THEN
-               IF ((NSCREEN.EQ.1).AND.(s%MYPROC.EQ.0)) WRITE(6,99801)
+      IF (global_here%ICS.EQ.1) THEN
+         DO I = 1,global_here%NP
+            READ(14,*) global_here%JKI,global_here%X(global_here%JKI),global_here%Y(global_here%JKI),global_here%DP(global_here%JKI)
+            IF(global_here%JKI.global_here%NE.I) THEN
+               IF ((global_here%NSCREEN.EQ.1).AND.(s%MYPROC.EQ.0)) WRITE(6,99801)
                WRITE(16,99801)
 99801          FORMAT(////,1X,'!!!!!!!!!!  WARNING - NONFATAL ',&
               'INPUT ERROR  !!!!!!!!!',&
               //,1X,'YOUR NODE NUMBERING IS NOT SEQUENTIAL ',&
               'CHECK YOUR UNIT 14 INPUT FILE CAREFULLY',//)
             ENDIF
-!     IF ((NTIP.GE.1).OR.(NCOR.EQ.1))
-            CALL INVCP(X(JKI),Y(JKI),SLAM(JKI),SFEA(JKI),SLAM0,SFEA0)
+!     IF ((global_here%NTIP.GE.1).OR.(global_here%NCOR.EQ.1))
+            CALL INVCP(global_here%X(global_here%JKI),global_here%Y(global_here%JKI),global_here%SLAM(global_here%JKI),global_here%SFEA(global_here%JKI),global_here%SLAM0,global_here%SFEA0)
 !     ENDIF
          ENDDO
       ENDIF
       
-!.....If ICS = 2 input nodal coordinates and bathymetry from unit 14
+!.....If global_here%ICS = 2 input nodal coordinates and bathymetry from unit 14
 !.....and compute CPP projection
 
-      IF (ICS.EQ.2) THEN
-         DO I = 1,NP
-            READ(14,*) JKI,SLAM(JKI),SFEA(JKI),DP(JKI)
-            IF (JKI.NE.I) THEN
-               IF ((NSCREEN.EQ.1).AND.(s%MYPROC.EQ.0)) WRITE(6,99801)
+      IF (global_here%ICS.EQ.2) THEN
+         DO I = 1,global_here%NP
+            READ(14,*) global_here%JKI,global_here%SLAM(global_here%JKI),global_here%SFEA(global_here%JKI),global_here%DP(global_here%JKI)
+            IF (global_here%JKI.global_here%NE.I) THEN
+               IF ((global_here%NSCREEN.EQ.1).AND.(s%MYPROC.EQ.0)) WRITE(6,99801)
                WRITE(16,99801)
             ENDIF
-            SLAM(JKI) = DEG2RAD*SLAM(JKI)
-            SFEA(JKI) = DEG2RAD*SFEA(JKI)
-            CALL CPP(X(JKI),Y(JKI),SLAM(JKI),SFEA(JKI),SLAM0,SFEA0)
+            global_here%SLAM(global_here%JKI) = DEG2RAD*global_here%SLAM(global_here%JKI)
+            global_here%SFEA(global_here%JKI) = DEG2RAD*global_here%SFEA(global_here%JKI)
+            CALL CPP(global_here%X(global_here%JKI),global_here%Y(global_here%JKI),global_here%SLAM(global_here%JKI),global_here%SFEA(global_here%JKI),global_here%SLAM0,global_here%SFEA0)
          ENDDO
       ENDIF
 
-!.....If ICS = 1 set the SFAC equal to unity
+!.....If global_here%ICS = 1 set the global_here%SFAC equal to unity
 
-      IF(ICS.EQ.1) THEN
-         DO I=1,NP
-            SFAC(I)=1.0d0
+      IF(global_here%ICS.EQ.1) THEN
+         DO I=1,global_here%NP
+            global_here%SFAC(I)=1.0d0
          ENDDO
       ENDIF
       
-!.....If ICS = 2 compute SFAC to adjust equations to CPP coordinates
+!.....If global_here%ICS = 2 compute global_here%SFAC to adjust equations to CPP coordinates
 
-      IF (ICS.EQ.2) THEN
-         DO I = 1,NP
-            SFAC(I) = COS(SFEA0)/COS(SFEA(I))
+      IF (global_here%ICS.EQ.2) THEN
+         DO I = 1,global_here%NP
+            global_here%SFAC(I) = COS(global_here%SFEA0)/COS(global_here%SFEA(I))
          ENDDO
       ENDIF
 
 !.....If wetting and drying will not be used make sure all bathymetric
-!.....depths are > or = to H0
+!.....depths are > or = to global_here%H0
 
-      IF ((NOLIFA.EQ.0).OR.(NOLIFA.EQ.1)) THEN
-         DO I = 1,NP
-            IF (DP(I).LT.H0) DP(I)=H0
+      IF ((global_here%NOLIFA.EQ.0).OR.(global_here%NOLIFA.EQ.1)) THEN
+         DO I = 1,global_here%NP
+            IF (global_here%DP(I).LT.global_here%H0) global_here%DP(I)=global_here%H0
          ENDDO
       ENDIF
 
 !.....Read the global connectivity table from unit 14, compute element
-!.....areas, check that sufficient accuracy is provided by the code to
+!.....global_here%areas, check that sufficient accuracy is provided by the code to
 !.....handle the input grid, check to make sure correct convention has
 !.....been used for inputting the connectivity table
 
-      DO I = 1, NP
-         NNEIGH(I) = 0
+      DO I = 1, global_here%NP
+         global_here%NNEIGH(I) = 0
       ENDDO
 
-      DO I = 1,NE
-         READ(14,*) JKI,NHY,NM(JKI,1),NM(JKI,2),NM(JKI,3)
-         NNEIGH(NM(JKI,1)) = NNEIGH(NM(JKI,1)) + 1
-         NNEIGH(NM(JKI,2)) = NNEIGH(NM(JKI,2)) + 1
-         NNEIGH(NM(JKI,3)) = NNEIGH(NM(JKI,3)) + 1
-         IF (JKI.NE.I) THEN
-            IF ((NSCREEN.EQ.1).AND.(s%MYPROC.EQ.0)) WRITE(6,99802)
+      DO I = 1,global_here%NE
+         READ(14,*) global_here%JKI,global_here%NHY,global_here%NM(global_here%JKI,1),global_here%NM(global_here%JKI,2),global_here%NM(global_here%JKI,3)
+         global_here%NNEIGH(global_here%NM(global_here%JKI,1)) = global_here%NNEIGH(global_here%NM(global_here%JKI,1)) + 1
+         global_here%NNEIGH(global_here%NM(global_here%JKI,2)) = global_here%NNEIGH(global_here%NM(global_here%JKI,2)) + 1
+         global_here%NNEIGH(global_here%NM(global_here%JKI,3)) = global_here%NNEIGH(global_here%NM(global_here%JKI,3)) + 1
+         IF (global_here%JKI.global_here%NE.I) THEN
+            IF ((global_here%NSCREEN.EQ.1).AND.(s%MYPROC.EQ.0)) WRITE(6,99802)
             WRITE(16,99802)
 99802       FORMAT(////,1X,'!!!!!!!!!!  WARNING - NONFATAL ',&
            'INPUT ERROR  !!!!!!!!!',&
            //,1X,'YOUR ELEMENT NUMBERING IS NOT SEQUENTIAL ',&
            /,1X,'CHECK YOUR UNIT 14 INPUT FILE CAREFULLY',//)
          ENDIF
-         X1 = X(NM(JKI,1))
-         X2 = X(NM(JKI,2))
-         X3 = X(NM(JKI,3))
-         Y1 = Y(NM(JKI,1))
-         Y2 = Y(NM(JKI,2))
-         Y3 = Y(NM(JKI,3))
-         AVGXY = (ABS(X1)+ABS(X2)+ABS(X3)+ABS(Y1)+ABS(Y2)+ABS(Y3))/6.D0
-         DIF1R = AVGXY/(((X2-X1)**2+(Y2-Y1)**2)**0.5d0)
-         DIF2R = AVGXY/(((X3-X2)**2+(Y3-Y2)**2)**0.5d0)
-         DIF3R = AVGXY/(((X3-X1)**2+(Y3-Y1)**2)**0.5d0)
-         DIF1R = LOG10(DIF1R)
-         DIF2R = LOG10(DIF2R)
-         DIF3R = LOG10(DIF3R)
-         IF((DIF1R.GT.NPREC).OR.(DIF2R.GT.NPREC).OR.(DIF3R.GT.NPREC))THEN
-            IF ((NSCREEN.EQ.1).AND.(s%MYPROC.EQ.0)) WRITE(6,9898) JKI
-            WRITE(16,9898) JKI
+         global_here%X1 = global_here%X(global_here%NM(global_here%JKI,1))
+         global_here%X2 = global_here%X(global_here%NM(global_here%JKI,2))
+         global_here%X3 = global_here%X(global_here%NM(global_here%JKI,3))
+         global_here%Y1 = global_here%Y(global_here%NM(global_here%JKI,1))
+         global_here%Y2 = global_here%Y(global_here%NM(global_here%JKI,2))
+         global_here%Y3 = global_here%Y(global_here%NM(global_here%JKI,3))
+         global_here%AVGXY = (ABS(global_here%X1)+ABS(global_here%X2)+ABS(global_here%X3)+ABS(global_here%Y1)+ABS(global_here%Y2)+ABS(global_here%Y3))/6.D0
+         global_here%DIF1R = global_here%AVGXY/(((global_here%X2-global_here%X1)**2+(global_here%Y2-global_here%Y1)**2)**0.5d0)
+         global_here%DIF2R = global_here%AVGXY/(((global_here%X3-global_here%X2)**2+(global_here%Y3-global_here%Y2)**2)**0.5d0)
+         global_here%DIF3R = global_here%AVGXY/(((global_here%X3-global_here%X1)**2+(global_here%Y3-global_here%Y1)**2)**0.5d0)
+         global_here%DIF1R = LOG10(global_here%DIF1R)
+         global_here%DIF2R = LOG10(global_here%DIF2R)
+         global_here%DIF3R = LOG10(global_here%DIF3R)
+         IF((global_here%DIF1R.GT.NPREC).OR.(global_here%DIF2R.GT.NPREC).OR.(global_here%DIF3R.GT.NPREC))THEN
+            IF ((global_here%NSCREEN.EQ.1).AND.(s%MYPROC.EQ.0)) WRITE(6,9898) global_here%JKI
+            WRITE(16,9898) global_here%JKI
  9898       FORMAT(////,1X,'!!!!!!!!!!  WARNING  !!!!!!!!!',&
            //,1X,'IF THE GRID COORDINATES HAVE 32 BITS ',&
            '(APPROX 7 DIGITS) OF PRECISION',&
@@ -1354,10 +1354,10 @@
          
 !.....NOTE: This is 2 times the actual element area (why?)
 
-         AREAS(JKI) = (X1 - X3)*(Y2 - Y3) + (X3 - X2)*(Y1 - Y3)
-         IF (AREAS(JKI).LT.0.0) THEN
-            IF((NSCREEN.EQ.1).AND.(s%MYPROC.EQ.0)) WRITE(6,9899) JKI
-            WRITE(16,9899) JKI
+         global_here%AREAS(global_here%JKI) = (global_here%X1 - global_here%X3)*(global_here%Y2 - global_here%Y3) + (global_here%X3 - global_here%X2)*(global_here%Y1 - global_here%Y3)
+         IF (global_here%AREAS(global_here%JKI).LT.0.0) THEN
+            IF((global_here%NSCREEN.EQ.1).AND.(s%MYPROC.EQ.0)) WRITE(6,9899) global_here%JKI
+            WRITE(16,9899) global_here%JKI
  9899       FORMAT(////,1X,'!!!!!!!!!!  WARNING - FATAL ERROR !!!!!!!!!',&
            //,1X,'THE CONNECTIVITY FOR ELEMENT ',I6,&
            '  HAS BEEN INCORRECTLY SPECIFIED ',&
@@ -1370,35 +1370,35 @@
 
 !.....If baroclinic 2D run, read in initial density field
 
-!     IF (IM.EQ.100) THEN
+!     IF (global_here%IM.EQ.100) THEN
 !     OPEN(11,FILE=DIRNAME//'/'//'fort.11')
 !     READ(11,*)
 !     READ(11,*)
-!     READ(11,*) NP2
-!     IF (NP2.NE.NP) THEN
-!     IF ((NSCREEN.EQ.1).AND.(MYPROC.EQ.0)) WRITE(6,9943)
+!     READ(11,*) global_here%NP2
+!     IF (global_here%NP2.global_here%NE.global_here%NP) THEN
+!     IF ((global_here%NSCREEN.EQ.1).AND.(MYPROC.EQ.0)) WRITE(6,9943)
 !     WRITE(16,9943)
 !99   43     FORMAT(////,' !!!!!!!!!!  WARNING - FATAL ERROR !!!!!!!!!',
-!     &              //,' THE NUMBER OF NODES (NP2) IN THE BAROCLINIC',
+!     &              //,' THE NUMBER OF NODES (global_here%NP2) IN THE BAROCLINIC',
 !     &                 ' INITIAL CONDITION FILE (UNIT 11) ',
-!     &               /,' MUST EQUAL THE NUMBER OF NODES (NP) IN ',
+!     &               /,' MUST EQUAL THE NUMBER OF NODES (global_here%NP) IN ',
 !     &                 'THE ADCIRC GRID FILE (UNIT 14)'
 !     &              //,' !!!!! EXECUTION WILL NOW BE TERMINATED !!!!!')
 !     STOP
 !     ENDIF
 !     
-!     DO I = 1,NP
-!     READ(11,*) JKI,DASIGT(JKI),DATEMP(JKI),DASAL(JKI)
+!     DO I = 1,global_here%NP
+!     READ(11,*) global_here%JKI,DASIGT(global_here%JKI),DATEMP(global_here%JKI),DASAL(global_here%JKI)
 !     ENDDO
 !     CLOSE(11)
 !     ENDIF
 
-!.....Process startdry info from unit 12 (if NOLIFA = 3 -> NSTARTDRY = 1
+!.....Process startdry info from unit 12 (if global_here%NOLIFA = 3 -> global_here%NSTARTDRY = 1
 !.....STARTDRY now set in nodal attributes
 
-      IF ((NSTARTDRY.EQ.1).AND.(NWP.EQ.0)) THEN
+      IF ((global_here%NSTARTDRY.EQ.1).AND.(NWP.EQ.0)) THEN
          
-         ALLOCATE(STARTDRY(NP))
+         ALLOCATE(STARTDRY(global_here%NP))
 
 !.....Open unit 12 file
 
@@ -1406,16 +1406,16 @@
 
 !.....Read startdry info from unit 12
 
-         READ(12,'(A24)') AGRID2
-         READ(12,*) NE2,NP2
+         READ(12,'(A24)') global_here%AGRID2
+         READ(12,*) global_here%NE2,global_here%NP2
 
-!.....Check that NE2 and NP2 mathe with grid file
+!.....Check that global_here%NE2 and global_here%NP2 mathe with grid file
 
-         IF ((NE2.NE.NE).OR.(NP2.NE.NP)) THEN
-            IF ((NSCREEN.EQ.1).AND.(s%MYPROC.EQ.0)) WRITE(6,9900)
+         IF ((global_here%NE2.global_here%NE.global_here%NE).OR.(global_here%NP2.global_here%NE.global_here%NP)) THEN
+            IF ((global_here%NSCREEN.EQ.1).AND.(s%MYPROC.EQ.0)) WRITE(6,9900)
             WRITE(16,9900)
  9900       FORMAT(////,1X,'!!!!!!!!!!  FATAL ERROR  !!!!!!!!!',&
-           //,1X,'THE PARAMETER NE2 AND NP2 MUST MATCH NE AND NP ',&
+           //,1X,'THE PARAMETER global_here%NE2 AND global_here%NP2 MUST MATCH global_here%NE AND global_here%NP ',&
            /,1X,'USER MUST CHECK FORT.12 INPUT FILE ',&
            //,1X,'!!!!!! EXECUTION WILL NOW BE TERMINATED !!!!!!',//)
             STOP
@@ -1423,17 +1423,17 @@
 
 !.....Read in startdry code values
 
-         DO I = 1,NP
-            READ(12,*) JKI,DUM1,DUM2,STARTDRY(JKI)
-            IF (dg_here%MODAL_IC.NE.3) THEN
-               IF (STARTDRY(JKI).EQ.-88888) THEN
-                  STARTDRY(JKI) = 1
+         DO I = 1,global_here%NP
+            READ(12,*) global_here%JKI,global_here%DUM1,global_here%DUM2,STARTDRY(global_here%JKI)
+            IF (dg_here%MODAL_IC.global_here%NE.3) THEN
+               IF (STARTDRY(global_here%JKI).EQ.-88888) THEN
+                  STARTDRY(global_here%JKI) = 1
                ELSE
-                  STARTDRY(JKI) = 0
+                  STARTDRY(global_here%JKI) = 0
                ENDIF
             ENDIF
-            IF (JKI.NE.I) THEN
-               IF ((NSCREEN.EQ.1).AND.(s%MYPROC.EQ.0)) WRITE(6,99805)
+            IF (global_here%JKI.global_here%NE.I) THEN
+               IF ((global_here%NSCREEN.EQ.1).AND.(s%MYPROC.EQ.0)) WRITE(6,99805)
                WRITE(16,99805)
 99805          FORMAT(////,1X,'!!!!!!!!!!  WARNING - NONFATAL ',&
               'INPUT ERROR  !!!!!!!!!',&
@@ -1454,10 +1454,10 @@
 !.....Reset tau0var values based on input values of startdry and
 !.....automatic selection of tau0 on a processor
 
-!     DO I = 1,NP
+!     DO I = 1,global_here%NP
 !     IF (TAU0.LT.0.D0) THEN
-!     IF (DP(I).LE.10.D0) TAU0VAR(I) = 0.02D0
-!     IF (DP(I).GT.10.D0) TAU0VAR(I) = 0.005D0
+!     IF (global_here%DP(I).LE.10.D0) TAU0VAR(I) = 0.02D0
+!     IF (global_here%DP(I).GT.10.D0) TAU0VAR(I) = 0.005D0
 !     IF (STARTDRY(I).EQ.-77777) TAU0VAR(I) = 0.02D0
 !     IF (STARTDRY(I).EQ.-88888) TAU0VAR(I) = 0.02D0
 !     WRITE(16,248) MYPROC,I,TAU0VAR(I)
@@ -1468,51 +1468,51 @@
 !     ENDIF
 !     ENDDO
 
-!.....Output to unit 16 grid information including AGRID, NE, NP, H0,
+!.....Output to unit 16 grid information including global_here%AGRID, global_here%NE, global_here%NP, global_here%H0,
 !.....and nodal coordinates and bathymetry
 
-      WRITE(16,2039) AGRID
+      WRITE(16,2039) global_here%AGRID
  2039 FORMAT(/,5X,'GRID IDENTIFICATION : ',A24,/)
-      IF(NSTARTDRY.EQ.1) WRITE(16,2038) AGRID2
+      IF(global_here%NSTARTDRY.EQ.1) WRITE(16,2038) global_here%AGRID2
  2038 FORMAT(5X,'STARTDRY FILE IDENTIFICATION : ',A24,/)
-      WRITE(16,3) NP
+      WRITE(16,3) global_here%NP
     3 FORMAT(5X,'TOTAL NUMBER OF NODES =',I6,/)
-      WRITE(16,4) NE
+      WRITE(16,4) global_here%NE
     4 FORMAT(5X,'TOTAL NUMBER OF ELEMENTS =',I6,/)
-      IF(ICS.EQ.2) WRITE(16,13) SLAM0*RAD2DEG,SFEA0*RAD2DEG
+      IF(global_here%ICS.EQ.2) WRITE(16,13) global_here%SLAM0*RAD2DEG,global_here%SFEA0*RAD2DEG
  13   FORMAT(5X,'LONGITUDE ABOUT WHICH CPP PROJECTION IS CENTERED',&
-     '  SLAM0 = ',F9.4,' DEGREES',&
+     '  global_here%SLAM0 = ',F9.4,' DEGREES',&
      /,5X,'LATITUDE  ABOUT WHICH CPP PROJECTION IS CENTERED',&
-     '  SFEA0 = ',F9.4,' DEGREES',/)
-      IF (NSTARTDRY.EQ.0) THEN
-         IF (NABOUT.NE.1) THEN
+     '  global_here%SFEA0 = ',F9.4,' DEGREES',/)
+      IF (global_here%NSTARTDRY.EQ.0) THEN
+         IF (global_here%NABOUT.global_here%NE.1) THEN
             WRITE(16,24)
  24         FORMAT(/,1X,'NODAL COORDINATES AND BATHYMETRY :')
-            IF (ICS.EQ.1) THEN
-               IF ((NTIP.EQ.0).AND.(NCOR.EQ.0)) THEN
+            IF (global_here%ICS.EQ.1) THEN
+               IF ((global_here%NTIP.EQ.0).AND.(global_here%NCOR.EQ.0)) THEN
                   WRITE(16,25)
- 25               FORMAT(/,10X,'NODE NO.',10X,'X',20X,'Y',15X,'DP',/)
-                  DO I = 1,NP
-                     WRITE (16,2008) I,X(I),Y(I),DP(I)
+ 25               FORMAT(/,10X,'NODE NO.',10X,'global_here%X',20X,'global_here%Y',15X,'global_here%DP',/)
+                  DO I = 1,global_here%NP
+                     WRITE (16,2008) I,global_here%X(I),global_here%Y(I),global_here%DP(I)
  2008                FORMAT(5X,I6,2(2X,F20.2),2X,F12.2)
                   ENDDO
                ELSE
                   WRITE(16,9195)
- 9195             FORMAT(/,1X,'   NODE ',7X,'X',14X,'Y',9X,&
-                 'LAMBDA(DEG)',6X,'FEA(DEG)',9X,'DP',/)
-                  DO I = 1,NP
-                     WRITE (16,9197) I,X(I),Y(I),SLAM(I)*RAD2DEG,&
-                    SFEA(I)*RAD2DEG,DP(I)
+ 9195             FORMAT(/,1X,'   NODE ',7X,'global_here%X',14X,'global_here%Y',9X,&
+                 'LAMBDA(DEG)',6X,'FEA(DEG)',9X,'global_here%DP',/)
+                  DO I = 1,global_here%NP
+                     WRITE (16,9197) I,global_here%X(I),global_here%Y(I),global_here%SLAM(I)*RAD2DEG,&
+                    global_here%SFEA(I)*RAD2DEG,global_here%DP(I)
  9197                FORMAT(1X,I6,2(1X,F14.1),1X,2(1X,E15.7),1X,F8.2)
                   ENDDO
                ENDIF
             ELSE
                WRITE(16,9225)
  9225          FORMAT(/,1X,'   NODE ',2X,'LAMBDA(DEG)',5X,'FEA(DEG)',11X,&
-              'XCP',14X,'YCP',11X,'DP',/)
-               DO I = 1,NP
-                  WRITE (16,9228) I,SLAM(I)*RAD2DEG,SFEA(I)*RAD2DEG,&
-                 X(I),Y(I),DP(I)
+              'XCP',14X,'YCP',11X,'global_here%DP',/)
+               DO I = 1,global_here%NP
+                  WRITE (16,9228) I,global_here%SLAM(I)*RAD2DEG,global_here%SFEA(I)*RAD2DEG,&
+                 global_here%X(I),global_here%Y(I),global_here%DP(I)
  9228             FORMAT(1X,I6,2(1X,F14.8),2(1X,F15.1),1X,F10.2)
                ENDDO
             ENDIF
@@ -1523,51 +1523,51 @@
            /,6X,'UNIT 14 INPUT FILE')
          ENDIF
       ELSE
-         IF (NABOUT.NE.1) THEN
+         IF (global_here%NABOUT.global_here%NE.1) THEN
             WRITE(16,24)
-            IF (ICS.EQ.1) THEN
-               IF ((NTIP.EQ.0).AND.(NCOR.EQ.0)) THEN
+            IF (global_here%ICS.EQ.1) THEN
+               IF ((global_here%NTIP.EQ.0).AND.(global_here%NCOR.EQ.0)) THEN
                   WRITE(16,3527)
- 3527             FORMAT(/,10X,'NODE NO.',10X,'X',20X,'Y',15X,'DP',&
+ 3527             FORMAT(/,10X,'NODE NO.',10X,'global_here%X',20X,'global_here%Y',15X,'global_here%DP',&
                  5X,'STARTDRY',/)
-                  DO I = 1,NP
+                  DO I = 1,global_here%NP
                      IF (STARTDRY(I).EQ.-88888.D0) THEN
-                        WRITE (16,3529) I,X(I),Y(I),DP(I),STARTDRY(I)
+                        WRITE (16,3529) I,global_here%X(I),global_here%Y(I),global_here%DP(I),STARTDRY(I)
  3529                   FORMAT(5X,I6,2(2X,F20.2),2X,F12.2,2X,F12.0)
                      ELSE
-                        WRITE (16,2008) I,X(I),Y(I),DP(I)
+                        WRITE (16,2008) I,global_here%X(I),global_here%Y(I),global_here%DP(I)
                      ENDIF
                   ENDDO
                ELSE
                   WRITE(16,3530)
- 3530             FORMAT(/,1X,'   NODE ',7X,'X',14X,'Y',9X,&
-                 'LAMBDA(DEG)',6X,'FEA(DEG)',9X,'DP',&
+ 3530             FORMAT(/,1X,'   NODE ',7X,'global_here%X',14X,'global_here%Y',9X,&
+                 'LAMBDA(DEG)',6X,'FEA(DEG)',9X,'global_here%DP',&
                  5X,'STARTDRY',/)
-                  DO I = 1,NP
+                  DO I = 1,global_here%NP
                      IF (STARTDRY(I).EQ.-88888.D0) THEN
-                        WRITE (16,3531) I,X(I),Y(I),SLAM(I)*RAD2DEG,&
-                       SFEA(I)*RAD2DEG,DP(I),STARTDRY(I)
+                        WRITE (16,3531) I,global_here%X(I),global_here%Y(I),global_here%SLAM(I)*RAD2DEG,&
+                       global_here%SFEA(I)*RAD2DEG,global_here%DP(I),STARTDRY(I)
  3531                   FORMAT(1X,I6,2(1X,F14.1),1X,2(1X,E15.7),1X,F8.2,&
                        1X,F10.0)
                      ELSE
-                        WRITE (16,9197) I,X(I),Y(I),SLAM(I)*RAD2DEG,&
-                       SFEA(I)*RAD2DEG,DP(I)
+                        WRITE (16,9197) I,global_here%X(I),global_here%Y(I),global_here%SLAM(I)*RAD2DEG,&
+                       global_here%SFEA(I)*RAD2DEG,global_here%DP(I)
                      ENDIF
                   ENDDO
                ENDIF
             ELSE
                WRITE(16,3535)
  3535          FORMAT(/,1X,'   NODE ',2X,'LAMBDA(DEG)',5X,'FEA(DEG)',11X,&
-              'XCP',14X,'YCP',11X,'DP',&
+              'XCP',14X,'YCP',11X,'global_here%DP',&
               5X,'STARTDRY',/)
-               DO I = 1,NP
+               DO I = 1,global_here%NP
                   IF (STARTDRY(I).EQ.-88888.D0) THEN
-                     WRITE (16,3537) I,SLAM(I)*RAD2DEG,SFEA(I)*RAD2DEG,&
-                    X(I),Y(I),DP(I),STARTDRY(I)
+                     WRITE (16,3537) I,global_here%SLAM(I)*RAD2DEG,global_here%SFEA(I)*RAD2DEG,&
+                    global_here%X(I),global_here%Y(I),global_here%DP(I),STARTDRY(I)
  3537                FORMAT(1X,I6,2(1X,F14.8),2(1X,F15.1),1X,F10.2,2X,F10.0)
                   ELSE
-                     WRITE (16,9228) I,SLAM(I)*RAD2DEG,SFEA(I)*RAD2DEG,&
-                    X(I),Y(I),DP(I)
+                     WRITE (16,9228) I,global_here%SLAM(I)*RAD2DEG,global_here%SFEA(I)*RAD2DEG,&
+                    global_here%X(I),global_here%Y(I),global_here%DP(I)
                   ENDIF
                ENDDO
             ENDIF
@@ -1582,13 +1582,13 @@
 !.....Output to unit 16 the global connectivity table (node numbers for
 !.....elements
 
-      IF (NABOUT.NE.1) THEN
+      IF (global_here%NABOUT.global_here%NE.1) THEN
          WRITE(16,26)
  26      FORMAT(//,5X,'GLOBAL NODE NUMBERS FOR EACH ELEMENT :')
          WRITE(16,27)
- 27      FORMAT(/,9X,'ELEMENT',8X,'N1',9X,'N2',10X,'N3',/)
-         DO I = 1,NE
-            WRITE(16,2009) I,NM(I,1),NM(I,2),NM(I,3)
+ 27      FORMAT(/,9X,'ELEMENT',8X,'global_here%N1',9X,'global_here%N2',10X,'global_here%N3',/)
+         DO I = 1,global_here%NE
+            WRITE(16,2009) I,global_here%NM(I,1),global_here%NM(I,2),global_here%NM(I,3)
  2009       FORMAT(8X,4(I7,4X))
          ENDDO
       ELSE
@@ -1622,8 +1622,8 @@
       IF(NOLIBF.EQ.2) READ(15,*) CF,HBREAK,FTHETA,FGAMMA
 
       IF (NWP.EQ.0) THEN
-         ALLOCATE(FRIC(NP))
-         DO I=1,NP
+         ALLOCATE(FRIC(global_here%NP))
+         DO I=1,global_here%NP
             FRIC(I)=CF
          END DO
          IF(NOLIBF.EQ.2) THEN
@@ -1639,8 +1639,8 @@
          IF(NOLIBF.EQ.0) THEN
             WRITE(16,106) TAU
  106        FORMAT(5X,'LINEAR BOTTOM FRICTION TAU =',F12.8,5X,'1/sec'/)
-            IF(TAU.NE.TAU0) THEN !CHECK TAU VALUE AGAINST TAU0
-               IF(NSCREEN.EQ.1.AND.s%MYPROC.EQ.0) WRITE(6,9951)
+            IF(TAU.global_here%NE.TAU0) THEN !CHECK TAU VALUE AGAINST TAU0
+               IF(global_here%NSCREEN.EQ.1.AND.s%MYPROC.EQ.0) WRITE(6,9951)
                WRITE(16,9951)
  9951          FORMAT(////,1X,'!!!!!!!!!!  WARNING - NONFATAL ',&
               'INPUT ERROR  !!!!!!!!!',&
@@ -1653,11 +1653,11 @@
 
 !     IF(NWP.EQ.1) THEN
 !     OPEN(21,FILE=DIRNAME//'/'//'fort.21')
-!     READ(21,'(A20)') AFRIC
-!     DO I=1,NP
-!     READ(21,*) NHG,FRIC(NHG)
-!     IF(NHG.NE.I) THEN
-!     IF(NSCREEN.EQ.1.AND.MYPROC.EQ.0) WRITE(6,99803)
+!     READ(21,'(A20)') global_here%AFRIC
+!     DO I=1,global_here%NP
+!     READ(21,*) global_here%NHG,FRIC(global_here%NHG)
+!     IF(global_here%NHG.global_here%NE.I) THEN
+!     IF(global_here%NSCREEN.EQ.1.AND.MYPROC.EQ.0) WRITE(6,99803)
 !     WRITE(16,99803)
 !99   803       FORMAT(////,1X,'!!!!!!!!!!  WARNING - FATAL ',
 !     &                     'INPUT ERROR  !!!!!!!!!',
@@ -1667,12 +1667,12 @@
 !     STOP
 !     ENDIF
 !     END DO
-!     WRITE(16,3601) AFRIC
+!     WRITE(16,3601) global_here%AFRIC
 !     3601   FORMAT(/,5X,'FRICTION FILE IDENTIFICATN : ',A20,/)
-!     IF(NABOUT.NE.1) THEN
+!     IF(global_here%NABOUT.global_here%NE.1) THEN
 !     WRITE(16,2080)
 !     2080     FORMAT(/,10X,'NODE',5X,'BOTTOM FRICTION FRIC',5X,/)
-!     DO I=1,NP
+!     DO I=1,global_here%NP
 !     WRITE(16,2087) I,FRIC(I)
 !     2087       FORMAT(7X,I6,6X,E15.10)
 !     END DO
@@ -1685,27 +1685,27 @@
 
 !     IF(NWP.EQ.2) THEN
 !     CALL ALLOC_MAIN13()   !allocate bridge piling arrays
-!     DO I=1,NP
-!     NBNNUM(I)=0
-!     BK(I)=0.d0
-!     BALPHA(I)=0.d0
-!     BDELX(I)=1.d0
+!     DO I=1,global_here%NP
+!     global_here%NBNNUM(I)=0
+!     global_here%BK(I)=0.d0
+!     global_here%BALPHA(I)=0.d0
+!     global_here%BDELX(I)=1.d0
 !     ENDDO
 !     OPEN(21,FILE=DIRNAME//'/'//'fort.21')
-!     READ(21,'(A20)') AFRIC
-!     READ(21,*) NBPNODES
-!     DO I=1,NBPNODES
-!     READ(21,*) NBNNUM(I),BK(I),BALPHA(I),BDELX(I),POAN
-!     BDELX(I)=4.d0*BDELX(I)/POAN
+!     READ(21,'(A20)') global_here%AFRIC
+!     READ(21,*) global_here%NBPNODES
+!     DO I=1,global_here%NBPNODES
+!     READ(21,*) global_here%NBNNUM(I),global_here%BK(I),global_here%BALPHA(I),global_here%BDELX(I),global_here%POAN
+!     global_here%BDELX(I)=4.d0*global_here%BDELX(I)/global_here%POAN
 !     ENDDO
-!     WRITE(16,3602) AFRIC
+!     WRITE(16,3602) global_here%AFRIC
 !     3602   FORMAT(/,5X,'BRIDGE PIER FRICTION FILE IDENTIFICATN : ',A20,/)
-!     IF(NABOUT.NE.1) THEN
+!     IF(global_here%NABOUT.global_here%NE.1) THEN
 !     WRITE(16,2081)
 !     2081     FORMAT(/,10X,'NODE',3X,'PIER SHAPE FACTOR',3X,
-!     &                 'CONSTRICTION FRACTION',3X,'EFFECTIVE DELX'/)
-!     DO I=1,NBPNODES
-!     WRITE(16,2082) NBNNUM(I),BK(I),BALPHA(I),BDELX(I)
+!     &                 'CONSTRICTION FRACTION',3X,'EFFECTIVE global_here%DELX'/)
+!     DO I=1,global_here%NBPNODES
+!     WRITE(16,2082) global_here%NBNNUM(I),global_here%BK(I),global_here%BALPHA(I),global_here%BDELX(I)
 !     2082       FORMAT(5X,I8,10X,F7.3,12X,F7.3,13X,F9.3)
 !     END DO
 !     ELSE
@@ -1720,9 +1720,9 @@
 !...  
 
 
-      IF (IM.EQ.10) THEN
+      IF (global_here%IM.EQ.10) THEN
          READ(15,*) ESLM,ESLC
-         DO I=1,NP
+         DO I=1,global_here%NP
             EVM(I)=ESLM
             EVC(I)=ESLC
          END DO
@@ -1732,8 +1732,8 @@
       ELSE
          READ(15,*) ESLM
          IF (NWP.EQ.0) THEN
-            ALLOCATE(EVM(NP))
-            DO I=1,NP
+            ALLOCATE(EVM(global_here%NP))
+            DO I=1,global_here%NP
                EVM(I)=ESLM
             END DO
             WRITE(16,11) ESLM
@@ -1743,10 +1743,10 @@
 
 
 !...  02/19/2007 s.b.
-      EVMSUM = 0.D0
+      global_here%EVMSUM = 0.D0
       IF (NWP.EQ.0) THEN
-         DO I=1,NP
-            EVMSUM = EVMSUM + ABS(EVM(I))
+         DO I=1,global_here%NP
+            global_here%EVMSUM = global_here%EVMSUM + ABS(EVM(I))
          ENDDO
       ENDIF
       
@@ -1755,7 +1755,7 @@
 !     in from unit 14 file.
 
       IF (NWP.GT.0)&
-     CALL InitNodalAttr(DP, NP, G, NScreen, ScreenUnit,S%MYPROC,NAbOut)
+     CALL InitNodalAttr(global_here%DP, global_here%NP, global_here%G, global_here%NScreen, global_here%ScreenUnit,S%MYPROC,global_here%NAbOut)
       
 
 
@@ -1767,31 +1767,31 @@
       WRITE(16,2090)
  2090 FORMAT(//,1X,'CORIOLIS INFORMATION ',//)
 
-      READ(15,*) CORI
-      IF(NCOR.EQ.0) THEN
-         DO I=1,NP
-            CORIF(I)=CORI
+      READ(15,*) global_here%CORI
+      IF(global_here%NCOR.EQ.0) THEN
+         DO I=1,global_here%NP
+            global_here%CORIF(I)=global_here%CORI
          END DO
       ENDIF
-      IF(NCOR.EQ.1) THEN
-         DO I=1,NP
-            CORIF(I)=2.0d0*7.29212d-5*SIN(SFEA(I))
+      IF(global_here%NCOR.EQ.1) THEN
+         DO I=1,global_here%NP
+            global_here%CORIF(I)=2.0d0*7.29212d-5*SIN(global_here%SFEA(I))
          END DO
       ENDIF
 
-      IF(NCOR.EQ.0) THEN
-         WRITE(16,12) CORI
+      IF(global_here%NCOR.EQ.0) THEN
+         WRITE(16,12) global_here%CORI
  12      FORMAT(5X,'CONSTANT CORIOLIS COEFFICIENT =',E15.8,5X,'1/SEC',/)
       ENDIF
-      IF(NCOR.EQ.1) THEN
+      IF(global_here%NCOR.EQ.1) THEN
          WRITE(16,3604)
  3604    FORMAT(/,5X,'LATITUDES ARE USED TO COMPUTE VARIABLE CORIOLIS',&
         /,7X,'AND ARE BASED ON INPUT NODAL COORDINATES',/)
-         IF(NABOUT.NE.1) THEN
+         IF(global_here%NABOUT.global_here%NE.1) THEN
             WRITE(16,2092)
- 2092       FORMAT(/,10X,' NODE ',5X,'NODAL CORIOLIS CORIF',/)
-            DO I=1,NP
-               WRITE(16,2096) I,CORIF(I)
+ 2092       FORMAT(/,10X,' NODE ',5X,'NODAL CORIOLIS global_here%CORIF',/)
+            DO I=1,global_here%NP
+               WRITE(16,2096) I,global_here%CORIF(I)
  2096          FORMAT(7X,I6,10X,E16.9)
             END DO
          ENDIF
@@ -1801,9 +1801,9 @@
 !...  READ AND PROCESS INFORMATION ABOUT THE TIDAL POTENTIAL CONSTITUENTS
 !...  
 
-      READ(15,*) NTIF
-      s%MNTIF = ntif
-      if (ntif .eq. 0) s%MNTIF = 1
+      READ(15,*) global_here%NTIF
+      s%MNTIF = global_here%ntif
+      if (global_here%ntif .eq. 0) s%MNTIF = 1
 
 !.... allocate tidal potential arrays
 
@@ -1812,34 +1812,34 @@
 !.... READ TIDAL POTENTIAL AMPLITUDE, FREQUENCIES, NODAL FACTORS,
 !.... EQUILIBRIUM ARGUMENTS AND ALPHANUMERIC LABEL
 !.... 
-      DO I=1,NTIF
-         READ(15,'(A5)')  TIPOTAG(I)
-         READ(15,*)  TPK(I),AMIGT(I),ETRF(I),FFT(I),FACET(I)
-         IF(AMIGT(I).EQ.0.) THEN
-            PERT(I)=0.
+      DO I=1,global_here%NTIF
+         READ(15,'(A5)')  global_here%TIPOTAG(I)
+         READ(15,*)  global_here%TPK(I),global_here%AMIGT(I),global_here%ETRF(I),global_here%FFT(I),global_here%FACET(I)
+         IF(global_here%AMIGT(I).EQ.0.) THEN
+            global_here%PERT(I)=0.
          ELSE
-            PERT(I)=2.D0*PI/AMIGT(I)
+            global_here%PERT(I)=2.D0*PI/global_here%AMIGT(I)
          ENDIF
       END DO
 
 !...  LINES TO USE EARTH LOAD/SELF-ATTRACTION PART OF TIDAL POTENTIAL FORCING
 
       CALL ALLOC_MAIN4b(s)
-      IF(NTIP.EQ.2) THEN
+      IF(global_here%NTIP.EQ.2) THEN
          OPEN(24,FILE='fort.24')
-         DO I=1,NTIF
+         DO I=1,global_here%NTIF
             READ(24,9930)
  9930       FORMAT(///)
-            DO J=1,NP
-               READ(24,*) JJ,SALTAMP(I,JJ),SALTPHA(I,JJ)
-               SALTPHA(I,JJ)=SALTPHA(I,JJ)*DEG2RAD
+            DO J=1,global_here%NP
+               READ(24,*) JJ,global_here%SALTAMP(I,JJ),global_here%SALTPHA(I,JJ)
+               global_here%SALTPHA(I,JJ)=global_here%SALTPHA(I,JJ)*DEG2RAD
             END DO
          END DO
       ELSE
-         DO I=1,NTIF
-            DO J=1,NP
-               SALTAMP(I,J)=0.d0
-               SALTPHA(I,J)=0.d0
+         DO I=1,global_here%NTIF
+            DO J=1,global_here%NP
+               global_here%SALTAMP(I,J)=0.d0
+               global_here%SALTPHA(I,J)=0.d0
             END DO
          END DO
          CLOSE(24)
@@ -1847,51 +1847,51 @@
 
 !...  
 !...  OUTPUT TO UNIT 16 INFORMATION ABOUT TIDAL POTENTIAL FORCING
-!.... OUTPUT WILL VARY DEPENDING ON VALUES OF NTIP,NTIF AND NCOR
+!.... OUTPUT WILL VARY DEPENDING ON VALUES OF global_here%NTIP,global_here%NTIF AND global_here%NCOR
 !...  
       WRITE(16,1112)
       WRITE(16,2102)
  2102 FORMAT(//,1X,'TIDAL POTENTIAL FORCING INFORMATION ',//)
-      WRITE(16,22) NTIF
+      WRITE(16,22) global_here%NTIF
  22   FORMAT(/,1X,'TIDAL POTENTIAL IS FORCED FOR ',I5,&
      ' CONSTITUENT(S) ')
-      IF(NTIF.GT.0) WRITE(16,23)
+      IF(global_here%NTIF.GT.0) WRITE(16,23)
  23   FORMAT(/,1X,'AMPLITUDE',4X,'FREQUENCY',5X,&
-     '    ETRF      ','NODAL FACTOR',2X,&
-     'EQU.ARG(DEG)',1X,'CONSTITUENT',/)
-      DO I=1,NTIF
-         WRITE(16,2107) TPK(I),AMIGT(I),ETRF(I),FFT(I),FACET(I),&
-        TIPOTAG(I)
+     '    global_here%ETRF      ','NODAL FACTOR',2X,&
+     'EQU.global_here%ARG(DEG)',1X,'CONSTITUENT',/)
+      DO I=1,global_here%NTIF
+         WRITE(16,2107) global_here%TPK(I),global_here%AMIGT(I),global_here%ETRF(I),global_here%FFT(I),global_here%FACET(I),&
+        global_here%TIPOTAG(I)
  2107    FORMAT(1X,F10.7,1X,F15.12,2X,F10.7,5X,F10.7,1X,F10.3,7X,A5)
       END DO
 !...  
-!...  CONVERT FACET(I) VALUES FROM DEGREES TO RADIANS
+!...  CONVERT global_here%FACET(I) VALUES FROM DEGREES TO RADIANS
 !...  
-      DO I=1,NTIF
-         FACET(I)=FACET(I)*DEG2RAD
+      DO I=1,global_here%NTIF
+         global_here%FACET(I)=global_here%FACET(I)*DEG2RAD
       END DO
 !...  
-!...  CHECK CONSISTENCY OF INPUT PARAMETERS NTIF AND NTIP
+!...  CHECK CONSISTENCY OF INPUT PARAMETERS global_here%NTIF AND global_here%NTIP
 !...  
-      IF(((NTIP.EQ.0).AND.(NTIF.NE.0)).OR.((NTIP.NE.0).AND.&
-     (NTIF.EQ.0))) THEN
-         IF(NSCREEN.EQ.1.AND.s%MYPROC.EQ.0) WRITE(6,9961)
+      IF(((global_here%NTIP.EQ.0).AND.(global_here%NTIF.global_here%NE.0)).OR.((global_here%NTIP.global_here%NE.0).AND.&
+     (global_here%NTIF.EQ.0))) THEN
+         IF(global_here%NSCREEN.EQ.1.AND.s%MYPROC.EQ.0) WRITE(6,9961)
          WRITE(16,9961)
  9961    FORMAT(////,1X,'!!!!!!!!!!  WARNING - NONFATAL ',&
         'INPUT ERROR  !!!!!!!!!',&
-        //,1X,'YOUR SELECTION OF NTIF AND NTIP (UNIT 15 INPUT ',&
+        //,1X,'YOUR SELECTION OF global_here%NTIF AND global_here%NTIP (UNIT 15 INPUT ',&
         'PARAMETERS) IS INCONSISTENT',&
         /,1X,'PLEASE CHECK THESE VALUES')
-         IF(NFOVER.EQ.1) THEN
-            IF(NSCREEN.EQ.1.AND.s%MYPROC.EQ.0) WRITE(6,9987)
+         IF(global_here%NFOVER.EQ.1) THEN
+            IF(global_here%NSCREEN.EQ.1.AND.s%MYPROC.EQ.0) WRITE(6,9987)
             WRITE(16,9987)
  9987       FORMAT(/,1X,'PROGRAM WILL OVERRIDE THE SPECIFIED ',&
            'INPUT AND NEGLECT TIDAL POTENTIAL TERMS',&
-           /,1X,' AND/OR RESET NTIP = 0',&
+           /,1X,' AND/OR RESET global_here%NTIP = 0',&
            //,1X,'!!!!!! EXECUTION WILL CONTINUE !!!!!!',//)
-            NTIP=0
+            global_here%NTIP=0
          ELSE
-            IF(NSCREEN.EQ.1.AND.s%MYPROC.EQ.0) WRITE(6,9973)
+            IF(global_here%NSCREEN.EQ.1.AND.s%MYPROC.EQ.0) WRITE(6,9973)
             WRITE(16,9973)
             STOP
          ENDIF
@@ -1900,11 +1900,11 @@
 !...  
 !...  PRINT OUT LAT/LON VALUES TO BE USED IN COMPUTING TIDAL POTENTIAL
 !.... IF NOT ALREADY DONE SO IN CORIOLIS SECTION AND TIDAL POTENTIAL
-!.... IS ACTIVATED WITH NTIP=1
+!.... IS ACTIVATED WITH global_here%NTIP=1
 !...  
 
-      IF(NTIP.GE.1) THEN
-         IF(ICS.EQ.1) THEN
+      IF(global_here%NTIP.GE.1) THEN
+         IF(global_here%ICS.EQ.1) THEN
             WRITE(16,3605)
  3605       FORMAT(/,5X,'LONGITUDES AND LATITUDES ARE USED TO',&
            ' COMPUTE THE TIDAL POTENTIAL FUNCTION',&
@@ -1920,13 +1920,13 @@
 
 !...  
 !...  INPUT FROM UNIT 15 THE TIDAL FORCING FREQUENCIES ON THE ELEVATION
-!.... SPECIFIED BOUNDARIES: INCLUDING NBFR, FREQUENCIES, NODAL FACTORS,
+!.... SPECIFIED BOUNDARIES: INCLUDING global_here%NBFR, FREQUENCIES, NODAL FACTORS,
 !.... EQUILIBRIUM ARGUMENTS AND AN ELEVATION BOUNDARY CONDITION
 !.... ALPHANUMERIC DESCRIPTOR
 !...  
- 1893 READ(15,*) NBFR
-      s%MNBFR = NBFR
-      IF (NBFR.EQ.0) s%MNBFR = 1
+ 1893 READ(15,*) global_here%NBFR
+      s%MNBFR = global_here%NBFR
+      IF (global_here%NBFR.EQ.0) s%MNBFR = 1
 
 !     - Allocate arrays dimensioned by MNBFR
 
@@ -1936,22 +1936,22 @@
       WRITE(16,2106)
  2106 FORMAT(//,1X,'ELEVATION SPECIFIED BOUNDARY FORCING INFORMATION '&
      ,//)
-      WRITE(16,20) NBFR
+      WRITE(16,20) global_here%NBFR
  20   FORMAT(/,5X,'NUMBER OF PERIODIC, ELEVATION SPECIFIED ',&
      'CONSTITUENTS =',I5)
-      IF(NBFR.GE.1) WRITE(16,21)
+      IF(global_here%NBFR.GE.1) WRITE(16,21)
  21   FORMAT(/,7X,'CONSTITUENT #',4X,'FREQUENCY',4X,'NODAL FACTOR',&
-     3X,'EQU.ARG (DEG)',2X,'CONSTITUENT',/)
-      DO I=1,NBFR
-         READ(15,'(A5)') BOUNTAG(I)
-         READ(15,*) AMIG(I),FF(I),FACE(I)
-         WRITE(16,1850) I,AMIG(I),FF(I),FACE(I),BOUNTAG(I)
+     3X,'EQU.global_here%ARG (DEG)',2X,'CONSTITUENT',/)
+      DO I=1,global_here%NBFR
+         READ(15,'(A5)') global_here%BOUNTAG(I)
+         READ(15,*) global_here%AMIG(I),global_here%FF(I),global_here%FACE(I)
+         WRITE(16,1850) I,global_here%AMIG(I),global_here%FF(I),global_here%FACE(I),global_here%BOUNTAG(I)
  1850    FORMAT(12X,I2,6X,F16.12,2X,F10.7,2X,F10.3,10X,A5)
-         FACE(I)=FACE(I)*DEG2RAD
-         IF(AMIG(I).EQ.0.) THEN
-            PER(I)=0.
+         global_here%FACE(I)=global_here%FACE(I)*DEG2RAD
+         IF(global_here%AMIG(I).EQ.0.) THEN
+            global_here%PER(I)=0.
          ELSE
-            PER(I)=2.D0*PI/AMIG(I)
+            global_here%PER(I)=2.D0*PI/global_here%AMIG(I)
          ENDIF
       ENDDO
 !...  
@@ -1960,70 +1960,70 @@
 !...  
 !...  INPUT THE TOTAL NUMBER OF ELEVATION BOUNDARY SEGMENTS
 !...  
-      READ(14,*) NOPE
+      READ(14,*) global_here%NOPE
 
-      WRITE(16,1852) NOPE
+      WRITE(16,1852) global_here%NOPE
  1852 FORMAT(///,5X,'TOTAL NUMBER OF ELEVATION BOUNDARY FORCING',&
      ' SEGMENTS ',' = ',I5)
 !...  
 !...  INPUT THE TOTAL NUMBER OF ELEVATION BOUNDARY NODES
 !...  
-      READ(14,*) NETA
-      WRITE(16,1854) NETA
+      READ(14,*) global_here%NETA
+      WRITE(16,1854) global_here%NETA
  1854 FORMAT(/,5X,'TOTAL NUMBER OF ELEVATION SPECIFIED BOUNDARY NODES ='&
      ,I6)
 
-!     allocate arrays dimensioned by NOPE and NETA
-      s%MNOPE = NOPE
-      IF (NOPE.EQ.0) s%MNOPE = 1
-      s%MNETA = NETA
-      IF (NETA.EQ.0) s%MNETA = 1
+!     allocate arrays dimensioned by global_here%NOPE and global_here%NETA
+      s%MNOPE = global_here%NOPE
+      IF (global_here%NOPE.EQ.0) s%MNOPE = 1
+      s%MNETA = global_here%NETA
+      IF (global_here%NETA.EQ.0) s%MNETA = 1
 
       call alloc_main2(s)     
 !...  
 !...  INPUT THE NODE NUMBERS ON EACH ELEVATION BOUNDARY FORCING SEGMENT
 !...  
       s%MNEI=0
-      JNMM=0
-      DO K=1,NOPE
-         READ(14,*) NVDLL(K)
-         WRITE(16,281) K,NVDLL(K)
+      global_here%JNMM=0
+      DO K=1,global_here%NOPE
+         READ(14,*) global_here%NVDLL(K)
+         WRITE(16,281) K,global_here%NVDLL(K)
  281     FORMAT(//,5X,'TOTAL NUMBER OF NODES ON ELEVATION SPECIFIED ',&
         'BOUNDARY SEGMENT ',2X,I2,2X,'=',1X,I5,/)
-         DO I=1,NVDLL(K)
-            READ(14,*) NBDV(K,I)
-            WRITE(16,1855) NBDV(K,I)
+         DO I=1,global_here%NVDLL(K)
+            READ(14,*) global_here%NBDV(K,I)
+            WRITE(16,1855) global_here%NBDV(K,I)
  1855       FORMAT(7X,I7)
-            IF (NNEIGH(NBDV(K,I)).NE.0) THEN
-               NNEIGH(NBDV(K,I))=NNEIGH(NBDV(K,I))+1
-               IF (NNEIGH(NBDV(K,I)).GT.s%MNEI) s%MNEI=NNEIGH(NBDV(K,I))
-               NNEIGH(NBDV(K,I)) = 0
+            IF (global_here%NNEIGH(global_here%NBDV(K,I)).global_here%NE.0) THEN
+               global_here%NNEIGH(global_here%NBDV(K,I))=global_here%NNEIGH(global_here%NBDV(K,I))+1
+               IF (global_here%NNEIGH(global_here%NBDV(K,I)).GT.s%MNEI) s%MNEI=global_here%NNEIGH(global_here%NBDV(K,I))
+               global_here%NNEIGH(global_here%NBDV(K,I)) = 0
             ENDIF
 
-            NBD(JNMM+I)=NBDV(K,I)
+            global_here%NBD(global_here%JNMM+I)=global_here%NBDV(K,I)
          ENDDO
-         JNMM=JNMM+NVDLL(K)
+         global_here%JNMM=global_here%JNMM+global_here%NVDLL(K)
       ENDDO
 !...  
-!...  CHECK TO MAKE SURE THAT JNMM EQUALS NETA
+!...  CHECK TO MAKE SURE THAT global_here%JNMM EQUALS global_here%NETA
 !...  
-      IF(NETA.NE.JNMM) THEN
-         IF(NSCREEN.EQ.1.AND.s%MYPROC.EQ.0) WRITE(6,9945)
+      IF(global_here%NETA.global_here%NE.global_here%JNMM) THEN
+         IF(global_here%NSCREEN.EQ.1.AND.s%MYPROC.EQ.0) WRITE(6,9945)
          WRITE(16,9945)
  9945    FORMAT(////,1X,'!!!!!!!!!!  WARNING - NONFATAL INPUT ERROR ',&
         '!!!!!!!!!',&
-        //,1X,'THE INPUT PARAMETER NETA FROM UNIT 14 DOES NOT MATCH ',&
+        //,1X,'THE INPUT PARAMETER global_here%NETA FROM UNIT 14 DOES NOT MATCH ',&
         'THE TOTAL NUMBER OF BOUNDARY NODES',&
         /,1X,' FROM ALL THE SPECIFIED SEGMENTS COMBINED')
-         IF(NFOVER.EQ.1) THEN
-            IF(NSCREEN.EQ.1.AND.s%MYPROC.EQ.0) WRITE(6,9989)
+         IF(global_here%NFOVER.EQ.1) THEN
+            IF(global_here%NSCREEN.EQ.1.AND.s%MYPROC.EQ.0) WRITE(6,9989)
             WRITE(16,9989)
  9989       FORMAT(/,1X,'THE PROGRAM WILL NOW CORRECT THIS ERROR',&
            /,1X,'PLEASE CHECK YOUR INPUT CAREFULLY !!!',&
            //,1X,'!!!!!! EXECUTION WILL CONTINUE !!!!!!',//)
-            NETA=JNMM
+            global_here%NETA=global_here%JNMM
          ELSE
-            IF(NSCREEN.EQ.1.AND.s%MYPROC.EQ.0) WRITE(6,9973)
+            IF(global_here%NSCREEN.EQ.1.AND.s%MYPROC.EQ.0) WRITE(6,9973)
             WRITE(16,9973)
             STOP
          ENDIF
@@ -2031,7 +2031,7 @@
 !...  
 !...  SET UP TO READ IN TIME SERIES ELEVATION SPECIFIED BOUNDARY CONDITIONS IF APPROPRIATE
 !...  
-      IF((NBFR.EQ.0).AND.(NOPE.GT.0)) THEN
+      IF((global_here%NBFR.EQ.0).AND.(global_here%NOPE.GT.0)) THEN
          WRITE(16,1871)
  1871    FORMAT(/,5X,'TIME SERIES ELEVATION SPECIFIED VALUES WILL BE ',&
         'READ FROM UNIT 19',&
@@ -2044,28 +2044,28 @@
 !...  OF THE ELEVATION FORCING FREQUENCIES FROM UNIT 15 AND OUTPUT TO UNIT 16
 !...  
 
-      DO I=1,NBFR
-         WRITE(16,29) I,BOUNTAG(I)
+      DO I=1,global_here%NBFR
+         WRITE(16,29) I,global_here%BOUNTAG(I)
  29      FORMAT(////,5X,'ELEVATION BOUNDARY TIDAL FORCING FOR',&
         ' CONSTITUENT NUMBER',I4,1X,'DESIGNATED : ',A5)
-         READ(15,'(A10)') ALPHA
-         WRITE(16,31) ALPHA
+         READ(15,'(A10)') global_here%ALPHA
+         WRITE(16,31) global_here%ALPHA
  31      FORMAT(9X,'VERIFICATION OF CONSTITUENT : ',A10,/)
          WRITE(16,30)
  30      FORMAT(14X,'NODE',11X,'AMPL.',9X,'PHASE(DEG)',/)
-         DO J=1,NETA
-            READ(15,*) EMO(I,J),EFA(I,J)
-            WRITE(16,1870) NBD(J),EMO(I,J),EFA(I,J)
+         DO J=1,global_here%NETA
+            READ(15,*) global_here%EMO(I,J),global_here%EFA(I,J)
+            WRITE(16,1870) global_here%NBD(J),global_here%EMO(I,J),global_here%EFA(I,J)
  1870       FORMAT(10X,I8,4X,F14.5,4X,F12.3)
-            EFA(I,J) = EFA(I,J)*DEG2RAD
+            global_here%EFA(I,J) = global_here%EFA(I,J)*DEG2RAD
          ENDDO
-!     DO J=1,NETA
-!     READ(15,*) UMO(I,J),UFA(I,J)
-!     UFA(I,J) = UFA(I,J)*DEG2RAD
+!     DO J=1,global_here%NETA
+!     READ(15,*) global_here%UMO(I,J),global_here%UFA(I,J)
+!     global_here%UFA(I,J) = global_here%UFA(I,J)*DEG2RAD
 !     ENDDO
-!     DO J=1,NETA
-!     READ(15,*) VMO(I,J),VFA(I,J)
-!     VFA(I,J) = VFA(I,J)*DEG2RAD
+!     DO J=1,global_here%NETA
+!     READ(15,*) global_here%VMO(I,J),global_here%VFA(I,J)
+!     global_here%VFA(I,J) = global_here%VFA(I,J)*DEG2RAD
 !     ENDDO
       ENDDO
 
@@ -2073,22 +2073,22 @@
 !.....WILL BE ZEROED IN THE TANGENTIAL DIRECTIONS WHEN NORMAL FLOW IS AN
 !.....ESSENTIAL B.C.
 
-      READ(15,*) ANGINN
+      READ(15,*) global_here%ANGINN
       WRITE(16,1112)
-      WRITE(16,7654) ANGINN
- 7654 FORMAT(//,5X,'ANGINN = ',F8.2,' DEGREES',&
+      WRITE(16,7654) global_here%ANGINN
+ 7654 FORMAT(//,5X,'global_here%ANGINN = ',F8.2,' DEGREES',&
      /,5X,'ALL FLOW BOUNDARY NODES WITH NORMAL FLOW AS AN ',&
      'ESSENTIAL B.C. AND ',&
-     /,9X,'INNER ANGLES LESS THAN ANGINN WILL HAVE BOTH NORMAL ',&
+     /,9X,'INNER ANGLES LESS THAN global_here%ANGINN WILL HAVE BOTH NORMAL ',&
      /,9X,'AND TANGENTIAL VELOCITY COMPONENTS ZEROED',/)
-      COSTSET=COS(ANGINN*DEG2RAD)
+      global_here%COSTSET=COS(global_here%ANGINN*DEG2RAD)
 
 !...  
 !...  INPUT FLOW BOUNDARY INFORMATION FROM UNIT 14 AND OUTPUT TO UNIT 16
 !...  
 
-!.....INTERIOR NODES, LBCODE=-1, COS=0, SIN=1
-!.....BOUNDARY NODES, LBCODE=LBCODEI=IBTYPE,
+!.....INTERIOR NODES, global_here%LBCODE=-1, COS=0, SIN=1
+!.....BOUNDARY NODES, global_here%LBCODE=global_here%LBCODEI=global_here%IBTYPE,
 !.....COS & SIN DETERMINED FROM NORMAL DIRECTION IN ALL CASES, ALTHOUGH THIS
 !.......INFORMATION IS ONLY USED WHEN NORMAL FLOW IS AN ESSENTIAL B.C. AND
 !.......FREE TANGENTIAL SLIP IS ALLOWED.
@@ -2098,20 +2098,20 @@
       WRITE(16,1112)
       WRITE(16,1878)
  1878 FORMAT(//,1X,'FLOW BOUNDARY INFORMATION ',/)
-      READ(14,*) NBOU
+      READ(14,*) global_here%NBOU
 
-      WRITE(16,1879) NBOU
+      WRITE(16,1879) global_here%NBOU
  1879 FORMAT(//,5X,'THE TOTAL NUMBER OF FLOW BOUNDARY SEGMENTS = ',I5)
 
 !.....INPUT THE TOTAL NUMBER OF FLOW BOUNDARY NODES
 
-      READ(14,*) NVEL
-      WRITE(16,1881) NVEL
+      READ(14,*) global_here%NVEL
+      WRITE(16,1881) global_here%NVEL
  1881 FORMAT(/,5X,'THE TOTAL NUMBER OF FLOW BOUNDARY NODES = ',I5)
 
-      s%MNBOU = NBOU
-      IF (NBOU.EQ.0) s%MNBOU = 1
-      s%MNVEL = NVEL*2            !Cvjp  -  11/28/99 -  upper bound guess for MNVEL
+      s%MNBOU = global_here%NBOU
+      IF (global_here%NBOU.EQ.0) s%MNBOU = 1
+      s%MNVEL = global_here%NVEL*2            !Cvjp  -  11/28/99 -  upper bound guess for MNVEL
 
 !.....Allocate space for nonperiodic zero and nonzero normal flow boundary arrays
 !.....including barriers
@@ -2120,34 +2120,34 @@
 !.....INPUT THE NUMBER OF NODES IN THE NEXT FLOW BOUNDARY SEGMENT
 !.....AND THE BOUNDARY TYPE
 
-      JGW=0
-      JME=0
-      NFLUXF=0
-      NFLUXB=0
-      NFLUXIB=0
-      NFLUXIBP=0
-      NVELEXT=0
+      global_here%JGW=0
+      global_here%JME=0
+      global_here%NFLUXF=0
+      global_here%NFLUXB=0
+      global_here%NFLUXIB=0
+      global_here%NFLUXIBP=0
+      global_here%NVELEXT=0
       dg_here%NIBSEG = 0
       dg_here%NEBSEG = 0
       
       CALL ALLOC_EDGES0(s,dg_here)
 
-      DO K=1,NBOU
-         READ(14,*) NVELL(K),IBTYPE
-!     jcf dg - added variable SEGTYPE to record boundary segment IBTYPE
-         SEGTYPE(K) = IBTYPE
-!.......CHECK THAT IBTYPE PARAMETER HAS BEEN SET PROPERLY
-         IF(    (IBTYPE.NE.0).AND.(IBTYPE.NE.10).AND.(IBTYPE.NE.20)&
-        .AND.(IBTYPE.NE.1).AND.(IBTYPE.NE.11).AND.(IBTYPE.NE.21)&
-        .AND.(IBTYPE.NE.2).AND.(IBTYPE.NE.12).AND.(IBTYPE.NE.22)&
-        .AND.(IBTYPE.NE.3).AND.(IBTYPE.NE.13).AND.(IBTYPE.NE.23)&
+      DO K=1,global_here%NBOU
+         READ(14,*) global_here%NVELL(K),global_here%IBTYPE
+!     jcf dg - added variable global_here%SEGTYPE to record boundary segment global_here%IBTYPE
+         global_here%SEGTYPE(K) = global_here%IBTYPE
+!.......CHECK THAT global_here%IBTYPE PARAMETER HAS BEEN SET PROPERLY
+         IF(    (global_here%IBTYPE.global_here%NE.0).AND.(global_here%IBTYPE.global_here%NE.10).AND.(global_here%IBTYPE.global_here%NE.20)&
+        .AND.(global_here%IBTYPE.global_here%NE.1).AND.(global_here%IBTYPE.global_here%NE.11).AND.(global_here%IBTYPE.global_here%NE.21)&
+        .AND.(global_here%IBTYPE.global_here%NE.2).AND.(global_here%IBTYPE.global_here%NE.12).AND.(global_here%IBTYPE.global_here%NE.22)&
+        .AND.(global_here%IBTYPE.global_here%NE.3).AND.(global_here%IBTYPE.global_here%NE.13).AND.(global_here%IBTYPE.global_here%NE.23)&
 !jj   wm001 - following 2 lines modified 
-        .AND.(IBTYPE.NE.4).AND.(IBTYPE.NE.24)&
-        .AND.(IBTYPE.NE.5).AND.(IBTYPE.NE.25).AND.(IBTYPE.NE.30)) THEN
-         IF(NSCREEN.EQ.1.AND.s%MYPROC.EQ.0) WRITE(6,9985) K
+        .AND.(global_here%IBTYPE.global_here%NE.4).AND.(global_here%IBTYPE.global_here%NE.24)&
+        .AND.(global_here%IBTYPE.global_here%NE.5).AND.(global_here%IBTYPE.global_here%NE.25).AND.(global_here%IBTYPE.global_here%NE.30)) THEN
+         IF(global_here%NSCREEN.EQ.1.AND.s%MYPROC.EQ.0) WRITE(6,9985) K
          WRITE(16,9985) K
  9985    FORMAT(////,1X,'!!!!!!!!!!  WARNING - FATAL ERROR !!!!!!!!!',&
-        //,1X,'THE FLOW BOUNDARY TYPE PARAMETER IBTYPE ',&
+        //,1X,'THE FLOW BOUNDARY TYPE PARAMETER global_here%IBTYPE ',&
         'HAS NOT BEEN CORRECTLY SET FOR ',&
         /,1X,'FLOW BOUNDARY SEGMENT NO. ',I8,&
         /,1X,'USER MUST CORRECT UNIT 14 INPUT FILE',&
@@ -2155,39 +2155,39 @@
          STOP
       ENDIF
 !.......WRITE OUT INFORMATION TO UNIT 16
-      IF((IBTYPE.EQ.4).OR.(IBTYPE.EQ.24)) THEN
-         WRITE(16,28) K,NVELL(K),K,2*NVELL(K)
+      IF((global_here%IBTYPE.EQ.4).OR.(global_here%IBTYPE.EQ.24)) THEN
+         WRITE(16,28) K,global_here%NVELL(K),K,2*global_here%NVELL(K)
  28      FORMAT(///,5X,'TOTAL NUMBER OF PAIRS FOR FLOW BOUNDARY',&
         ' SEGMENT',2X,I2,2X,'=',2X,I5,/,&
         5X,'TOTAL NUMBER OF NODES FOR FLOW BOUNDARY',&
         ' SEGMENT',2X,I2,2X,'=',2X,I5)
       ELSE
-         WRITE(16,128) K,NVELL(K)
+         WRITE(16,128) K,global_here%NVELL(K)
  128     FORMAT(///,5X,'TOTAL NUMBER OF NODES FOR FLOW BOUNDARY',&
         ' SEGMENT',2X,I2,2X,'=',2X,I5)
       ENDIF
 !.......CONTINUE PROCESSING FLOW BOUNDARY INFORMATION
-      IF(IBTYPE.EQ.0) THEN
+      IF(global_here%IBTYPE.EQ.0) THEN
          WRITE(16,2340)
  2340    FORMAT(5X,'THIS SEGMENT IS AN EXTERNAL BOUNDARY WITH:',/,&
         7X,'NO NORMAL FLOW AS AN ESSENTIAL B.C.',/,&
         7X,'AND FREE TANGENTIAL SLIP',/)
       ENDIF
-      IF(IBTYPE.EQ.1) THEN
+      IF(global_here%IBTYPE.EQ.1) THEN
          WRITE(16,2341)
  2341    FORMAT(5X,'THIS SEGMENT IS AN INTERNAL BOUNDARY WITH:',/,&
         7X,'NO NORMAL FLOW AS AN ESSENTIAL B.C.',/,&
         7X,'AND FREE TANGENTIAL SLIP',/)
       ENDIF
-      IF(IBTYPE.EQ.2) THEN
-         NFLUXF=1
+      IF(global_here%IBTYPE.EQ.2) THEN
+         global_here%NFLUXF=1
          WRITE(16,2342)
  2342    FORMAT(5X,'THIS SEGMENT IS AN EXTERNAL BOUNDARY WITH:',/,&
         7X,'SPECIFIED NORMAL FLOW AS AN ESSENTIAL B.C.',/,&
         7X,'AND FREE TANGENTIAL SLIP',/)
       ENDIF
-      IF(IBTYPE.EQ.3) THEN
-         NFLUXB=1
+      IF(global_here%IBTYPE.EQ.3) THEN
+         global_here%NFLUXB=1
          WRITE(16,2344)
  2344    FORMAT(5X,'THIS SEGMENT IS AN EXTERNAL BOUNDARY WITH:',/,&
         7X,'A BARRIER WHICH ALLOWS FREE SURFACE',&
@@ -2196,65 +2196,65 @@
         ' OVERTOPPED',/,&
         7X,'AND FREE TANGENTIAL SLIP',/)
       ENDIF
-      IF(IBTYPE.EQ.4) THEN
-         NFLUXIB=1
+      IF(global_here%IBTYPE.EQ.4) THEN
+         global_here%NFLUXIB=1
          WRITE(16,2345)
  2345    FORMAT(5X,'THIS SEGMENT IS AN INTERNAL BARRIER BOUNDARY:',/,&
-        7X,'WITH CROSS BARRIER FLOW TREATED AS AN ESSENTIAL ',&
+        7X,'WITH global_here%CROSS BARRIER FLOW TREATED AS AN ESSENTIAL ',&
         ' NORMAL FLOW BOUNDARY CONDITION',/,&
-        7X,'WHICH LEAVES/ENTERS THE DOMAIN ON ONE SIDE OF ',&
+        7X,'WHICH LEAVES/ENTERS THE DOMAIN ON ONE global_here%SIDE OF ',&
         ' THE BARRIER AND ENTERS/LEAVES THE DOMAIN ON THE ',/,&
-        7X,'CORRESPONDING OPPOSITE SIDE OF THE BARRIER ',/,&
+        7X,'CORRESPONDING OPPOSITE global_here%SIDE OF THE BARRIER ',/,&
         7X,'FLOW RATE AND DIRECTION ARE BASED ON BARRIER ',&
         ' HEIGHT, SURFACE WATER ELEVATION',/,&
         7X,'ON BOTH SIDES OF THE BARRIER, BARRIER COEFFICIENT',&
         ' AND THE APPROPRIATE BARRIER FLOW FORMULA',/,&
         7X,'FREE TANGENTIAL SLIP IS ALLOWED',/)
       ENDIF
-      IF(IBTYPE.EQ.5) THEN
-         NFLUXIB=1
-         NFLUXIBP=1
+      IF(global_here%IBTYPE.EQ.5) THEN
+         global_here%NFLUXIB=1
+         global_here%NFLUXIBP=1
          WRITE(16,2347)
  2347    FORMAT(5X,'THIS SEGMENT IS AN INTERNAL BARRIER BOUNDARY:',/,&
-        7X,'WITH ADDITIONAL CROSS BARRIER PIPES ',&
+        7X,'WITH ADDITIONAL global_here%CROSS BARRIER PIPES ',&
         'LOCATED UNDER THE CROWN ',/,&
-        7X,'CROSS BARRIER FLOW IS TREATED AS AN ESSENTIAL',&
+        7X,'global_here%CROSS BARRIER FLOW IS TREATED AS AN ESSENTIAL',&
         ' NORMAL FLOW BOUNDARY CONDITION',/,&
-        7X,'WHICH LEAVES/ENTERS THE DOMAIN ON ONE SIDE OF ',&
+        7X,'WHICH LEAVES/ENTERS THE DOMAIN ON ONE global_here%SIDE OF ',&
         ' THE BARRIER AND ENTERS/LEAVES THE DOMAIN ON THE ',/,&
-        7X,'CORRESPONDING OPPOSITE SIDE OF THE BARRIER ',/,&
+        7X,'CORRESPONDING OPPOSITE global_here%SIDE OF THE BARRIER ',/,&
         7X,'FLOW RATE AND DIRECTION ARE BASED ON BARRIER ',&
         ' HEIGHT, SURFACE WATER ELEVATION',/,&
         7X,'ON BOTH SIDES OF THE BARRIER, BARRIER COEFFICIENT',&
         ' AND THE APPROPRIATE BARRIER FLOW FORMULA',/,&
-        7X,'IN ADDITION CROSS BARRIER PIPE FLOW RATE AND ',&
+        7X,'IN ADDITION global_here%CROSS BARRIER PIPE FLOW RATE AND ',&
         ' DIRECTION ARE BASED ON PIPE CROWN HEIGHT, ',/,&
         7X,'SURFACE WATER ELEVATION ON BOTH SIDES OF THE ',&
         'BARRIER, PIPE FRICTION COEFFICIENT, PIPE DIAMETER',/,&
         7X,' AND THE APPROPRIATE PIPE FLOW FORMULA',/,&
         7X,'FREE TANGENTIAL SLIP IS ALLOWED',/)
       ENDIF
-      IF(IBTYPE.EQ.10) THEN
+      IF(global_here%IBTYPE.EQ.10) THEN
          WRITE(16,2350)
  2350    FORMAT(5X,'THIS SEGMENT IS AN EXTERNAL BOUNDARY WITH:',/,&
         7X,'NO NORMAL FLOW AS AN ESSENTIAL B.C.',/,&
         7X,'AND NO TANGENTIAL SLIP',/)
       ENDIF
-      IF(IBTYPE.EQ.11) THEN
+      IF(global_here%IBTYPE.EQ.11) THEN
          WRITE(16,2351)
  2351    FORMAT(5X,'THIS SEGMENT IS AN INTERNAL BOUNDARY WITH:',/,&
         7X,'NO NORMAL FLOW AS AN ESSENTIAL B.C.',/,&
         7X,'AND NO TANGENTIAL SLIP',/)
       ENDIF
-      IF(IBTYPE.EQ.12) THEN
-         NFLUXF=1
+      IF(global_here%IBTYPE.EQ.12) THEN
+         global_here%NFLUXF=1
          WRITE(16,2352)
  2352    FORMAT(5X,'THIS SEGMENT IS AN EXTERNAL BOUNDARY WITH:',/,&
         7X,'SPECIFIED NORMAL FLOW AS AN ESSENTIAL B.C.',/,&
         7X,'AND NO TANGENTIAL SLIP',/)
       ENDIF
-      IF(IBTYPE.EQ.13) THEN
-         NFLUXB=1
+      IF(global_here%IBTYPE.EQ.13) THEN
+         global_here%NFLUXB=1
          WRITE(16,2354)
  2354    FORMAT(5X,'THIS SEGMENT IS AN EXTERNAL BOUNDARY WITH:',/,&
         7X,'A BARRIER WHICH ALLOWS FREE SURFACE',&
@@ -2263,27 +2263,27 @@
         ' OVERTOPPED',/,&
         7X,'AND NO TANGENTIAL SLIP',/)
       ENDIF
-      IF(IBTYPE.EQ.20) THEN
+      IF(global_here%IBTYPE.EQ.20) THEN
          WRITE(16,2360)
  2360    FORMAT(5X,'THIS SEGMENT IS AN EXTERNAL BOUNDARY WITH:',/,&
         7X,'NO NORMAL FLOW AS A NATURAL B.C.',/,&
         7X,'AND FREE TANGENTIAL SLIP',/)
       ENDIF
-      IF(IBTYPE.EQ.21) THEN
+      IF(global_here%IBTYPE.EQ.21) THEN
          WRITE(16,2361)
  2361    FORMAT(5X,'THIS SEGMENT IS AN INTERNAL BOUNDARY WITH:',/,&
         7X,'NO NORMAL FLOW AS A NATURAL B.C.',/,&
         7X,'AND FREE TANGENTIAL SLIP',/)
       ENDIF
-      IF(IBTYPE.EQ.22) THEN
-         NFLUXF=1
+      IF(global_here%IBTYPE.EQ.22) THEN
+         global_here%NFLUXF=1
          WRITE(16,2362)
  2362    FORMAT(5X,'THIS SEGMENT IS A EXTERNAL BOUNDARY WITH:',/,&
         7X,'SPECIFIED NORMAL FLOW AS A NATURAL B.C.',/,&
         7X,'AND FREE TANGENTIAL SLIP',/)
       ENDIF
-      IF(IBTYPE.EQ.23) THEN
-         NFLUXB=1
+      IF(global_here%IBTYPE.EQ.23) THEN
+         global_here%NFLUXB=1
          WRITE(16,2356)
  2356    FORMAT(5X,'THIS SEGMENT IS AN EXTERNAL BOUNDARY WITH:',/,&
         7X,'A BARRIER WHICH ALLOWS FREE SURFACE',&
@@ -2293,46 +2293,46 @@
         7X,' IMPLEMENTED AS A NATURAL BOUNDARY CONDITION'&
         ,7X,'FREE TANGENTIAL SLIP IS ALSO ALLOWED',/)
       ENDIF
-      IF(IBTYPE.EQ.24) THEN
-         NFLUXIB=1
+      IF(global_here%IBTYPE.EQ.24) THEN
+         global_here%NFLUXIB=1
          WRITE(16,2357)
  2357    FORMAT(5X,'THIS SEGMENT IS AN INTERNAL BARRIER BOUNDARY:',/,&
-        7X,'WITH CROSS BARRIER FLOW TREATED AS A NATURAL ',&
+        7X,'WITH global_here%CROSS BARRIER FLOW TREATED AS A NATURAL ',&
         ' NORMAL FLOW BOUNDARY CONDITION',/,&
-        7X,'WHICH LEAVES/ENTERS THE DOMAIN ON ONE SIDE OF ',&
+        7X,'WHICH LEAVES/ENTERS THE DOMAIN ON ONE global_here%SIDE OF ',&
         ' THE BARRIER AND ENTERS/LEAVES THE DOMAIN ON THE ',/,&
-        7X,'CORRESPONDING OPPOSITE SIDE OF THE BARRIER ',/,&
+        7X,'CORRESPONDING OPPOSITE global_here%SIDE OF THE BARRIER ',/,&
         7X,'FLOW RATE AND DIRECTION ARE BASED ON BARRIER ',&
         ' HEIGHT, SURFACE WATER ELEVATION',/,&
         7X,'ON BOTH SIDES OF THE BARRIER, BARRIER COEFFICIENT',&
         ' AND THE APPROPRIATE BARRIER FLOW FORMULA',/,&
         7X,'FREE TANGENTIAL SLIP IS ALLOWED',/)
       ENDIF
-      IF(IBTYPE.EQ.25) THEN
-         NFLUXIB=1
-         NFLUXIBP=1
+      IF(global_here%IBTYPE.EQ.25) THEN
+         global_here%NFLUXIB=1
+         global_here%NFLUXIBP=1
          WRITE(16,2359)
  2359    FORMAT(5X,'THIS SEGMENT IS AN INTERNAL BARRIER BOUNDARY:',/,&
-        7X,'WITH ADDITIONAL CROSS BARRIER PIPES ',&
+        7X,'WITH ADDITIONAL global_here%CROSS BARRIER PIPES ',&
         'LOCATED UNDER THE CROWN ',/,&
-        7X,'CROSS BARRIER FLOW IS TREATED AS A NATURAL',&
+        7X,'global_here%CROSS BARRIER FLOW IS TREATED AS A NATURAL',&
         ' NORMAL FLOW BOUNDARY CONDITION',/,&
-        7X,'WHICH LEAVES/ENTERS THE DOMAIN ON ONE SIDE OF ',&
+        7X,'WHICH LEAVES/ENTERS THE DOMAIN ON ONE global_here%SIDE OF ',&
         ' THE BARRIER AND ENTERS/LEAVES THE DOMAIN ON THE ',/,&
-        7X,'CORRESPONDING OPPOSITE SIDE OF THE BARRIER ',/,&
+        7X,'CORRESPONDING OPPOSITE global_here%SIDE OF THE BARRIER ',/,&
         7X,'FLOW RATE AND DIRECTION ARE BASED ON BARRIER ',&
         ' HEIGHT, SURFACE WATER ELEVATION',/,&
         7X,'ON BOTH SIDES OF THE BARRIER, BARRIER COEFFICIENT',&
         ' AND THE APPROPRIATE BARRIER FLOW FORMULA',/,&
-        7X,'IN ADDITION CROSS BARRIER PIPE FLOW RATE AND ',&
+        7X,'IN ADDITION global_here%CROSS BARRIER PIPE FLOW RATE AND ',&
         ' DIRECTION ARE BASED ON PIPE CROWN HEIGHT, ',/,&
         7X,'SURFACE WATER ELEVATION ON BOTH SIDES OF THE ',&
         'BARRIER, PIPE FRICTION COEFFICIENT, PIPE DIAMETER',/,&
         7X,' AND THE APPROPRIATE PIPE FLOW FORMULA',/,&
         7X,'FREE TANGENTIAL SLIP IS ALLOWED',/)
       ENDIF
-      IF(IBTYPE.EQ.30) THEN
-         NFLUXRBC=1
+      IF(global_here%IBTYPE.EQ.30) THEN
+         global_here%NFLUXRBC=1
          WRITE(16,2355)
  2355    FORMAT(5X,'THIS SEGMENT IS AN OUTWARD RADIATING BOUNDARY:',/,&
         7X,'NORMAL FLUX IS A NATURAL B.C. IN GWCE',/,&
@@ -2343,139 +2343,139 @@
 
 !.....INPUT INFORMATION FOR VARIOUS TYPES OF FLOW BOUNDARY SEGMENTS
 !.......INPUT THE STANDARD NODE NUMBERS FOR THE Kth FLOW BOUNDARY SEGMENT
-      IF((IBTYPE.NE.3).AND.(IBTYPE.NE.13).AND.(IBTYPE.NE.23).AND.&
-     (IBTYPE.NE.4).AND.(IBTYPE.NE.24).AND.&
-     (IBTYPE.NE.5).AND.(IBTYPE.NE.25)) THEN
-         DO I=1,NVELL(K)
-            READ(14,*) NBVV(K,I)
+      IF((global_here%IBTYPE.global_here%NE.3).AND.(global_here%IBTYPE.global_here%NE.13).AND.(global_here%IBTYPE.global_here%NE.23).AND.&
+     (global_here%IBTYPE.global_here%NE.4).AND.(global_here%IBTYPE.global_here%NE.24).AND.&
+     (global_here%IBTYPE.global_here%NE.5).AND.(global_here%IBTYPE.global_here%NE.25)) THEN
+         DO I=1,global_here%NVELL(K)
+            READ(14,*) global_here%NBVV(K,I)
          END DO
-         NPRBI=1
-         NPIPE=0
+         global_here%NPRBI=1
+         global_here%NPIPE=0
       ENDIF
 !.......INPUT THE NODE NUMBERS FOR THE Kth EXTERNAL BARRIER BOUNDARY SEGMENT
 !........ALSO INPUT THE ELEVATION OF THE EXTERNAL BARRIER NODES ABOVE
 !........THE GEOID AND THE COEFFICIENT OF FREE SURFACE SUPERCRITICAL
 !........FLOW ALONG WITH EACH EXTERNAL BARRIER BOUNDARY NODE FROM UNIT 14
-      IF((IBTYPE.EQ.3).OR.(IBTYPE.EQ.13).OR.(IBTYPE.EQ.23)) THEN
-         DO I=1,NVELL(K)
-            READ(14,*) NBVV(K,I),BARLANHTR(I),BARLANCFSPR(I)
+      IF((global_here%IBTYPE.EQ.3).OR.(global_here%IBTYPE.EQ.13).OR.(global_here%IBTYPE.EQ.23)) THEN
+         DO I=1,global_here%NVELL(K)
+            READ(14,*) global_here%NBVV(K,I),global_here%BARLANHTR(I),global_here%BARLANCFSPR(I)
          ENDDO
-         NPRBI=1
-         NPIPE=0
+         global_here%NPRBI=1
+         global_here%NPIPE=0
       ENDIF
 !.......INPUT THE NODE NUMBERS FOR THE Kth INTERNAL BARRIER BOUNDARY SEGMENT
 !........ALSO INPUT CONNECTION NODE NUMBER AND ELEVATION OF THE INTERNAL BARRIER
 !........NODES ABOVE THE GEOID AND THE COEFFICIENTS OF FREE SURFACE SUPERCRITICAL
 !........AND SUBCRITICAL FLOW ALONG WITH EACH INTERNAL BARRIER BOUNDARY NODE FROM
 !........UNIT 14
-      IF((IBTYPE.EQ.4).OR.(IBTYPE.EQ.24)) THEN
-         DO I=1,NVELL(K)
-            READ(14,*) NBVV(K,I), IBCONNR(I), BARINHTR(I), BARINCFSBR(I)&
-           , BARINCFSPR(I)
+      IF((global_here%IBTYPE.EQ.4).OR.(global_here%IBTYPE.EQ.24)) THEN
+         DO I=1,global_here%NVELL(K)
+            READ(14,*) global_here%NBVV(K,I), global_here%IBCONNR(I), global_here%BARINHTR(I), global_here%BARINCFSBR(I)&
+           , global_here%BARINCFSPR(I)
          ENDDO
-         NPRBI=2
-         NPIPE=0
+         global_here%NPRBI=2
+         global_here%NPIPE=0
       ENDIF
 !.......INPUT THE NODE NUMBERS FOR THE Kth INTERNAL BARRIER BOUNDARY SEGMENT WITH
-!........CROSS BARRIER PIPES; ALSO INPUT CONNECTION NODE NUMBER AND ELEVATION OF THE 
+!........global_here%CROSS BARRIER PIPES; ALSO INPUT CONNECTION NODE NUMBER AND ELEVATION OF THE 
 !.......INTERNAL BARRIER NODES ABOVE THE GEOID AND THE COEFFICIENTS OF FREE SURFACE 
 !.......SUPERCRITICAL AND SUBCRITICAL FLOW ALONG WITH EACH INTERNAL BARRIER BOUNDARY
-!.......NODE FROM UNIT 14; IN ADDITION INPUT THE CROSS BARRIER PIPE HEIGHT, CROSS
-!.......BARRIER PIPE COEFFICIENT AND CROSS BARRIER PIPE DIAMETER
-      IF((IBTYPE.EQ.5).OR.(IBTYPE.EQ.25)) THEN
-         DO I=1,NVELL(K)
-            READ(14,*) NBVV(K,I),IBCONNR(I),BARINHTR(I),BARINCFSBR(I),&
-           BARINCFSPR(I),PIPEHTR(I),PIPECOEFR(I),&
-           PIPEDIAMR(I)
+!.......NODE FROM UNIT 14; IN ADDITION INPUT THE global_here%CROSS BARRIER PIPE HEIGHT, global_here%CROSS
+!.......BARRIER PIPE COEFFICIENT AND global_here%CROSS BARRIER PIPE DIAMETER
+      IF((global_here%IBTYPE.EQ.5).OR.(global_here%IBTYPE.EQ.25)) THEN
+         DO I=1,global_here%NVELL(K)
+            READ(14,*) global_here%NBVV(K,I),global_here%IBCONNR(I),global_here%BARINHTR(I),global_here%BARINCFSBR(I),&
+           global_here%BARINCFSPR(I),global_here%PIPEHTR(I),global_here%PIPECOEFR(I),&
+           global_here%PIPEDIAMR(I)
          END DO
-         NPRBI=2
-         NPIPE=1
+         global_here%NPRBI=2
+         global_here%NPIPE=1
       ENDIF
 
 !.....PROCESS INFORMATION FOR VARIOUS TYPES OF FLOW BOUNDARY SEGMENTS
 
-      DO IPRBI=1,NPRBI
+      DO global_here%IPRBI=1,global_here%NPRBI
 
 !.........LOAD PAIRED NODES INTO PRIMARY PROCESSING VECTORS AND RESET
-!..........CONNECTING NODES FOR BACK FACE
+!..........CONNECTING NODES FOR BACK global_here%FACE
 !..........THUS BACK/CONNECTING NODES ARE BEING LOADED AS PRIMARY NODES
 !..........AND FRONT NODES ARE RELOADED AS CONNECTING NODES
 !..........NOTE THAT THE CLOCKWISE ORIENTATION OF ISLAND TYPE BOUNDARIES
 !..........IS BEING MAINTAINED WHEN BACK NODES ARE RELOADED AS PRIMARY NODES
 !..........ADDITIONAL INTERNAL BARRIER BOUNDARY INFORMATION IS ALSO RESET
-         IF(IPRBI.EQ.2) THEN
-            DO I=1,NVELL(K)
-               NTRAN1(I)=NBVV(K,I)
-               NTRAN2(I)=IBCONNR(I)
-               BTRAN3(I)=BARINHTR(I)
-               BTRAN4(I)=BARINCFSBR(I)
-               BTRAN5(I)=BARINCFSPR(I)
-               IF(NPIPE.EQ.1) THEN
-                  BTRAN6(I)=PIPEHTR(I)
-                  BTRAN7(I)=PIPECOEFR(I)
-                  BTRAN8(I)=PIPEDIAMR(I)
+         IF(global_here%IPRBI.EQ.2) THEN
+            DO I=1,global_here%NVELL(K)
+               global_here%NTRAN1(I)=global_here%NBVV(K,I)
+               global_here%NTRAN2(I)=global_here%IBCONNR(I)
+               global_here%BTRAN3(I)=global_here%BARINHTR(I)
+               global_here%BTRAN4(I)=global_here%BARINCFSBR(I)
+               global_here%BTRAN5(I)=global_here%BARINCFSPR(I)
+               IF(global_here%NPIPE.EQ.1) THEN
+                  global_here%BTRAN6(I)=global_here%PIPEHTR(I)
+                  global_here%BTRAN7(I)=global_here%PIPECOEFR(I)
+                  global_here%BTRAN8(I)=global_here%PIPEDIAMR(I)
                ENDIF
             END DO
-            DO I=1,NVELL(K)
-               NBVV(K,I)=NTRAN2(NVELL(K)+1-I)
-               IBCONNR(I)=NTRAN1(NVELL(K)+1-I)
-               BARINHTR(I)=BTRAN3(NVELL(K)+1-I)
-               BARINCFSBR(I)=BTRAN4(NVELL(K)+1-I)
-               BARINCFSPR(I)=BTRAN5(NVELL(K)+1-I)
-               IF(NPIPE.EQ.1) THEN
-                  PIPEHTR(I)=BTRAN6(NVELL(K)+1-I)
-                  PIPECOEFR(I)=BTRAN7(NVELL(K)+1-I)
-                  PIPEDIAMR(I)=BTRAN8(NVELL(K)+1-I)
+            DO I=1,global_here%NVELL(K)
+               global_here%NBVV(K,I)=global_here%NTRAN2(global_here%NVELL(K)+1-I)
+               global_here%IBCONNR(I)=global_here%NTRAN1(global_here%NVELL(K)+1-I)
+               global_here%BARINHTR(I)=global_here%BTRAN3(global_here%NVELL(K)+1-I)
+               global_here%BARINCFSBR(I)=global_here%BTRAN4(global_here%NVELL(K)+1-I)
+               global_here%BARINCFSPR(I)=global_here%BTRAN5(global_here%NVELL(K)+1-I)
+               IF(global_here%NPIPE.EQ.1) THEN
+                  global_here%PIPEHTR(I)=global_here%BTRAN6(global_here%NVELL(K)+1-I)
+                  global_here%PIPECOEFR(I)=global_here%BTRAN7(global_here%NVELL(K)+1-I)
+                  global_here%PIPEDIAMR(I)=global_here%BTRAN8(global_here%NVELL(K)+1-I)
                ENDIF
             ENDDO
          ENDIF
 
 !.........WRITE OUT ADDITIONAL HEADER FOR INTERNAL BARRIER BOUNDARIES
 
-         IF((IBTYPE.EQ.4).OR.(IBTYPE.EQ.24)) THEN
-            IF(IPRBI.EQ.1) THEN
+         IF((global_here%IBTYPE.EQ.4).OR.(global_here%IBTYPE.EQ.24)) THEN
+            IF(global_here%IPRBI.EQ.1) THEN
                WRITE(16,1842)
- 1842          FORMAT(/,5X,'FRONT FACE OF INTERNAL BARRIER BOUNDARY',/)
+ 1842          FORMAT(/,5X,'FRONT global_here%FACE OF INTERNAL BARRIER BOUNDARY',/)
             ELSE
                WRITE(16,1843)
- 1843          FORMAT(/,5X,'BACK FACE OF INTERNAL BARRIER BOUNDARY',/)
+ 1843          FORMAT(/,5X,'BACK global_here%FACE OF INTERNAL BARRIER BOUNDARY',/)
             ENDIF
          ENDIF
 
 !.........WRITE OUT ADDITIONAL HEADER FOR INTERNAL BARRIER BOUNDARIES 
-!..........WITH CROSS BARRIER PIPES
+!..........WITH global_here%CROSS BARRIER PIPES
 
-         IF((IBTYPE.EQ.5).OR.(IBTYPE.EQ.25)) THEN
-            IF(IPRBI.EQ.1) THEN
+         IF((global_here%IBTYPE.EQ.5).OR.(global_here%IBTYPE.EQ.25)) THEN
+            IF(global_here%IPRBI.EQ.1) THEN
                WRITE(16,1844)
- 1844          FORMAT(/,5X,'FRONT FACE OF INTERNAL BARRIER BOUNDARY',&
-              ' WITH CROSS BARRIER PIPES',/)
+ 1844          FORMAT(/,5X,'FRONT global_here%FACE OF INTERNAL BARRIER BOUNDARY',&
+              ' WITH global_here%CROSS BARRIER PIPES',/)
             ELSE
                WRITE(16,1845)
- 1845          FORMAT(/,5X,'BACK FACE OF INTERNAL BARRIER BOUNDARY',&
-              ' WITH CROSS BARRIER PIPES',/)
+ 1845          FORMAT(/,5X,'BACK global_here%FACE OF INTERNAL BARRIER BOUNDARY',&
+              ' WITH global_here%CROSS BARRIER PIPES',/)
             ENDIF
          ENDIF
 
 !.........WRITE OUT GENERAL HEADER FOR BOUNDARY INFORMATION
 
          WRITE(16,1841)
- 1841    FORMAT('    JGW    JME    ME2GW   NODE #  BNDRY CODE   INNER',&
+ 1841    FORMAT('    global_here%JGW    global_here%JME    global_here%ME2GW   NODE #  BNDRY CODE   INNER',&
         ' ANGLE',7X,'COS',13X,'SIN',9X,'0.667*BNDRY LEN',/)
 
 !.........COMPLETE THE BOUNDARY ARRAY FOR THE Kth FLOW BOUNDARY SEGMENT
 
-         NBVV(K,0)=NBVV(K,1)    !UNCLOSED EXTERNAL
-         IF((IBTYPE.EQ.1).OR.(IBTYPE.EQ.11).OR.(IBTYPE.EQ.21)) THEN
-            IF(NBVV(K,NVELL(K)).NE.NBVV(K,1)) THEN !CLOSE AN UNCLOSED INTERNAL
-               NVELL(K)=NVELL(K)+1
-               NBVV(K,NVELL(K))=NBVV(K,1)
+         global_here%NBVV(K,0)=global_here%NBVV(K,1)    !UNCLOSED EXTERNAL
+         IF((global_here%IBTYPE.EQ.1).OR.(global_here%IBTYPE.EQ.11).OR.(global_here%IBTYPE.EQ.21)) THEN
+            IF(global_here%NBVV(K,global_here%NVELL(K)).global_here%NE.global_here%NBVV(K,1)) THEN !CLOSE AN UNCLOSED INTERNAL
+               global_here%NVELL(K)=global_here%NVELL(K)+1
+               global_here%NBVV(K,global_here%NVELL(K))=global_here%NBVV(K,1)
             ENDIF
          ENDIF
-         IF(NBVV(K,NVELL(K)).EQ.NBVV(K,1)) THEN !CLOSED EXTERNAL OR INTERNAL
-            NBVV(K,0)=NBVV(K,NVELL(K)-1)
+         IF(global_here%NBVV(K,global_here%NVELL(K)).EQ.global_here%NBVV(K,1)) THEN !CLOSED EXTERNAL OR INTERNAL
+            global_here%NBVV(K,0)=global_here%NBVV(K,global_here%NVELL(K)-1)
          ENDIF
-         NBVV(K,NVELL(K)+1)=NBVV(K,NVELL(K))
+         global_here%NBVV(K,global_here%NVELL(K)+1)=global_here%NBVV(K,global_here%NVELL(K))
 
 !.........PUT BOUNDARY INFORMATION INTO 2 TYPES OF ARRAYS, ONE FOR THE GWCE B.C.
 !..........AND ONE FOR THE MOMENTUM EQUATION B.C.
@@ -2484,7 +2484,7 @@
 !..........MEET AND AT THE BEGINNING AND END OF CLOSED EXTERNAL BOUNDARIES AND
 !.........ISLANDS.
 !..........THE MOMENTUM EQUATION ARRAYS ARE KEYED TO THE GWCE ARRAYS VIA THE
-!..........ARRAY ME2GW WHICH INDICATES THE LOCATION IN THE GWCE ARRAYS THAT
+!..........ARRAY global_here%ME2GW WHICH INDICATES THE LOCATION IN THE GWCE ARRAYS THAT
 !..........THE APPROPRIATE M.E. VALUE LIES.
 !..........THE M.E. ARRAYS DO NOT REPEAT NODES THAT ARE DUPLICATED IN THE
 !..........UNIT 14 FILE, I.E., WHEN SPECIFIED NORMAL FLOW AND NO NORMAL FLOW
@@ -2492,7 +2492,7 @@
 !..........PRECEDENT.  ALSO THE BEGINNING AND ENDING NODES OF CLOSED EXTERNAL
 !..........AND ISLAND BOUNDARIES ARE NOT REPEATED.
 
-         DO I=1,NVELL(K)
+         DO I=1,global_here%NVELL(K)
 
 !.........SET UP THE GWCE BOUNDARY ARRAYS WHICH CONSIST OF
 !..........BOUNDARY NODE NUMBERS
@@ -2500,90 +2500,90 @@
 !..........0.66667*LENGTH OF EACH BOUNDARY SEGMENT.  NOTE, THE LENGTH OF THE LAST
 !..........BOUNDARY SEGMENT ON EACH BOUNDARY SHOULD BE ZERO
 
-            JGW=JGW+1
-            IF((IBTYPE.EQ.0).OR.(IBTYPE.EQ.10).OR.(IBTYPE.EQ.20).OR.&
-           (IBTYPE.EQ.2).OR.(IBTYPE.EQ.12).OR.(IBTYPE.EQ.22).OR.&
-           (IBTYPE.EQ.3).OR.(IBTYPE.EQ.13).OR.(IBTYPE.EQ.23).OR.&
-           (IBTYPE.EQ.30)) THEN
-               NVELEXT=NVELEXT+1
+            global_here%JGW=global_here%JGW+1
+            IF((global_here%IBTYPE.EQ.0).OR.(global_here%IBTYPE.EQ.10).OR.(global_here%IBTYPE.EQ.20).OR.&
+           (global_here%IBTYPE.EQ.2).OR.(global_here%IBTYPE.EQ.12).OR.(global_here%IBTYPE.EQ.22).OR.&
+           (global_here%IBTYPE.EQ.3).OR.(global_here%IBTYPE.EQ.13).OR.(global_here%IBTYPE.EQ.23).OR.&
+           (global_here%IBTYPE.EQ.30)) THEN
+               global_here%NVELEXT=global_here%NVELEXT+1
             ENDIF
-            NBV(JGW)=NBVV(K,I)
-            NBVI=NBVV(K,I)
-            NBVJ=NBVV(K,I+1)
-            DELX=X(NBVJ)-X(NBVI)
-            DELY=Y(NBVJ)-Y(NBVI)
-            BNDLEN2O3(JGW)=2.D0*(SQRT(DELX*DELX+DELY*DELY))/3.D0
+            global_here%NBV(global_here%JGW)=global_here%NBVV(K,I)
+            global_here%NBVI=global_here%NBVV(K,I)
+            global_here%NBVJ=global_here%NBVV(K,I+1)
+            global_here%DELX=global_here%X(global_here%NBVJ)-global_here%X(global_here%NBVI)
+            global_here%DELY=global_here%Y(global_here%NBVJ)-global_here%Y(global_here%NBVI)
+            global_here%BNDLEN2O3(global_here%JGW)=2.D0*(SQRT(global_here%DELX*global_here%DELX+global_here%DELY*global_here%DELY))/3.D0
 
 !...........COMPUTE THE INCLUDED ANGLE AND TEST TO DETERMINE WHETHER TO ZERO
 !............TANGENTIAL VELOCITIES
-!...........NOTE:.IMPLEMENTATION FOR ICS=2 REQUIRES COMPUTING ALL COORDINATES IN
+!...........NOTE:.IMPLEMENTATION FOR global_here%ICS=2 REQUIRES COMPUTING ALL COORDINATES IN
 !............A LOCALIZED SYSTEM (I.E. THE TRANSFORMATION IS CENTERED AT X0,Y0)
 
-            IF(ICS.EQ.1) THEN
-               XL0=X(NBVV(K,I))
-               XL1=X(NBVV(K,I-1))
-               XL2=X(NBVV(K,I+1))
-               YL0=Y(NBVV(K,I))
-               YL1=Y(NBVV(K,I-1))
-               YL2=Y(NBVV(K,I+1))
+            IF(global_here%ICS.EQ.1) THEN
+               global_here%XL0=global_here%X(global_here%NBVV(K,I))
+               global_here%XL1=global_here%X(global_here%NBVV(K,I-1))
+               global_here%XL2=global_here%X(global_here%NBVV(K,I+1))
+               global_here%YL0=global_here%Y(global_here%NBVV(K,I))
+               global_here%YL1=global_here%Y(global_here%NBVV(K,I-1))
+               global_here%YL2=global_here%Y(global_here%NBVV(K,I+1))
             ELSE
-               CALL CPP(XL0,YL0,SLAM(NBVV(K,I)),SFEA(NBVV(K,I)),&
-              SLAM(NBVV(K,I)),SFEA(NBVV(K,I)))
-               CALL CPP(XL1,YL1,SLAM(NBVV(K,I-1)),SFEA(NBVV(K,I-1)),&
-              SLAM(NBVV(K,I)),SFEA(NBVV(K,I)))
-               CALL CPP(XL2,YL2,SLAM(NBVV(K,I+1)),SFEA(NBVV(K,I+1)),&
-              SLAM(NBVV(K,I)),SFEA(NBVV(K,I)))
+               CALL CPP(global_here%XL0,global_here%YL0,global_here%SLAM(global_here%NBVV(K,I)),global_here%SFEA(global_here%NBVV(K,I)),&
+              global_here%SLAM(global_here%NBVV(K,I)),global_here%SFEA(global_here%NBVV(K,I)))
+               CALL CPP(global_here%XL1,global_here%YL1,global_here%SLAM(global_here%NBVV(K,I-1)),global_here%SFEA(global_here%NBVV(K,I-1)),&
+              global_here%SLAM(global_here%NBVV(K,I)),global_here%SFEA(global_here%NBVV(K,I)))
+               CALL CPP(global_here%XL2,global_here%YL2,global_here%SLAM(global_here%NBVV(K,I+1)),global_here%SFEA(global_here%NBVV(K,I+1)),&
+              global_here%SLAM(global_here%NBVV(K,I)),global_here%SFEA(global_here%NBVV(K,I)))
             ENDIF
 
 !...........NOTE: INTERIOR ANGLE AT ENDS OF BOUNDARIES MUST BE EQUAL, EITHER:
 !............A FICTICIOUSLY LARGE VALUE IF THE BOUNDARY IS NOT CLOSED OR
 !............A TRUE VALUE IF THE BOUNDARY IS CLOSED
 
-            THETA=0.
-            IF((I.EQ.1).AND.(NBVV(K,I).EQ.NBVV(K,I-1))) THEN
-               THETA1=-9999999.d0
-               THETA=THETA1
-               COSTHETA1=COSTSET
-               COSTHETA=COSTHETA1
-               CROSS1=0.d0
-               CROSS=CROSS1
+            global_here%THETA=0.
+            IF((I.EQ.1).AND.(global_here%NBVV(K,I).EQ.global_here%NBVV(K,I-1))) THEN
+               global_here%THETA1=-9999999.d0
+               global_here%THETA=global_here%THETA1
+               global_here%COSTHETA1=global_here%COSTSET
+               global_here%COSTHETA=global_here%COSTHETA1
+               global_here%CROSS1=0.d0
+               global_here%CROSS=global_here%CROSS1
             ENDIF
-            IF(I.EQ.NVELL(K)) THEN
-               THETA=THETA1
-               COSTHETA=COSTHETA1
-               CROSS=CROSS1
+            IF(I.EQ.global_here%NVELL(K)) THEN
+               global_here%THETA=global_here%THETA1
+               global_here%COSTHETA=global_here%COSTHETA1
+               global_here%CROSS=global_here%CROSS1
             ENDIF
-            IF(THETA.EQ.0.) THEN
-               VL1X=XL1-XL0
-               VL1Y=YL1-YL0
-               VL2X=XL2-XL0
-               VL2Y=YL2-YL0
-               DOTVEC=VL1X*VL2X+VL1Y*VL2Y
-               VECNORM=(SQRT(VL1X**2+VL1Y**2))*(SQRT(VL2X**2+VL2Y**2))
-               COSTHETA=DOTVEC/VECNORM
-               IF(COSTHETA.GT.1.0d0) COSTHETA=1.0d0
-               IF(COSTHETA.LT.-1.0d0) COSTHETA=-1.0d0
-               THETA=RAD2DEG*ACOS(COSTHETA)
-               CROSS=-VL1X*VL2Y+VL2X*VL1Y
-               IF(CROSS.LT.0) THETA=360.d0-THETA
+            IF(global_here%THETA.EQ.0.) THEN
+               global_here%VL1X=global_here%XL1-global_here%XL0
+               global_here%VL1Y=global_here%YL1-global_here%YL0
+               global_here%VL2X=global_here%XL2-global_here%XL0
+               global_here%VL2Y=global_here%YL2-global_here%YL0
+               global_here%DOTVEC=global_here%VL1X*global_here%VL2X+global_here%VL1Y*global_here%VL2Y
+               global_here%VECNORM=(SQRT(global_here%VL1X**2+global_here%VL1Y**2))*(SQRT(global_here%VL2X**2+global_here%VL2Y**2))
+               global_here%COSTHETA=global_here%DOTVEC/global_here%VECNORM
+               IF(global_here%COSTHETA.GT.1.0d0) global_here%COSTHETA=1.0d0
+               IF(global_here%COSTHETA.LT.-1.0d0) global_here%COSTHETA=-1.0d0
+               global_here%THETA=RAD2DEG*ACOS(global_here%COSTHETA)
+               global_here%CROSS=-global_here%VL1X*global_here%VL2Y+global_here%VL2X*global_here%VL1Y
+               IF(global_here%CROSS.LT.0) global_here%THETA=360.d0-global_here%THETA
                IF(I.EQ.1) THEN
-                  THETA1=THETA
-                  COSTHETA1=COSTHETA
-                  CROSS1=CROSS
+                  global_here%THETA1=global_here%THETA
+                  global_here%COSTHETA1=global_here%COSTHETA
+                  global_here%CROSS1=global_here%CROSS
                ENDIF
             ENDIF
 
 !...........CHECK WHETHER ANGLE IS LESS THAN MINIMUM ANGLE, IF SO CHANGE THE
 !............BOUNDARY CODE TO ZERO TANGENTIAL VELOCITIES
 
-            LBCODEI(JGW)=IBTYPE
-            IF((COSTHETA.GT.COSTSET).AND.(CROSS.GT.0.0)) THEN
-               IF(IBTYPE.EQ.0) LBCODEI(JGW)=10
-               IF(IBTYPE.EQ.1) LBCODEI(JGW)=11
-               IF(IBTYPE.EQ.2) LBCODEI(JGW)=12
-               IF(IBTYPE.EQ.3) LBCODEI(JGW)=13
-               IF((IBTYPE.GE.0).AND.(IBTYPE.LE.3)) THEN
-                  WRITE(16,1856) NBVV(K,I),THETA
+            global_here%LBCODEI(global_here%JGW)=global_here%IBTYPE
+            IF((global_here%COSTHETA.GT.global_here%COSTSET).AND.(global_here%CROSS.GT.0.0)) THEN
+               IF(global_here%IBTYPE.EQ.0) global_here%LBCODEI(global_here%JGW)=10
+               IF(global_here%IBTYPE.EQ.1) global_here%LBCODEI(global_here%JGW)=11
+               IF(global_here%IBTYPE.EQ.2) global_here%LBCODEI(global_here%JGW)=12
+               IF(global_here%IBTYPE.EQ.3) global_here%LBCODEI(global_here%JGW)=13
+               IF((global_here%IBTYPE.GE.0).AND.(global_here%IBTYPE.LE.3)) THEN
+                  WRITE(16,1856) global_here%NBVV(K,I),global_here%THETA
  1856             FORMAT(2X,I7,4X,'THE INNER ANGLE = ',F8.2,1X,&
                  'TANGENTIAL SLIP WILL BE ZEROED')
                ENDIF
@@ -2591,98 +2591,98 @@
 
 !...........COMPUTE COS AND SIN OF OUTWARD NORMAL REGARDLESS OF BOUNDARY TYPE
 
-            X1=X(NBVV(K,I-1))
-            X2=X(NBVV(K,I+1))
-            Y1=Y(NBVV(K,I-1))
-            Y2=Y(NBVV(K,I+1))
-            XL=SQRT((X1-X2)**2+(Y1-Y2)**2)
-            CSII(JGW)=SFAC(NBVV(K,I))*(Y2-Y1)/XL
-            SIII(JGW)=(X1-X2)/XL
+            global_here%X1=global_here%X(global_here%NBVV(K,I-1))
+            global_here%X2=global_here%X(global_here%NBVV(K,I+1))
+            global_here%Y1=global_here%Y(global_here%NBVV(K,I-1))
+            global_here%Y2=global_here%Y(global_here%NBVV(K,I+1))
+            global_here%XL=SQRT((global_here%X1-global_here%X2)**2+(global_here%Y1-global_here%Y2)**2)
+            global_here%CSII(global_here%JGW)=global_here%SFAC(global_here%NBVV(K,I))*(global_here%Y2-global_here%Y1)/global_here%XL
+            global_here%SIII(global_here%JGW)=(global_here%X1-global_here%X2)/global_here%XL
 
 !...........SET UP THE MOMENTUM EQUATION BOUNDARY ARRAY WHICH CONSISTS OF
 !............A KEY TO THE GWCE BOUNDARY CONDITION ARRAY
 
             IF(I.EQ.1) THEN     !DEAL WITH FIRST NODE IN L.B. SEG
-               IF(JGW.EQ.1) THEN !VERY FIRST L.B. SEG
-                  JME=JME+1     !M.E. USES IT
-                  ME2GW(JME)=JGW
+               IF(global_here%JGW.EQ.1) THEN !VERY FIRST L.B. SEG
+                  global_here%JME=global_here%JME+1     !M.E. USES IT
+                  global_here%ME2GW(global_here%JME)=global_here%JGW
                ENDIF
-               IF(JGW.NE.1) THEN
-                  IF(NBV(JGW).NE.NBV(JGW-1)) THEN !L.B. SEGS DON'T OVERLAP
-                     JME=JME+1  !M.E. USES IT
-                     ME2GW(JME)=JGW
+               IF(global_here%JGW.global_here%NE.1) THEN
+                  IF(global_here%NBV(global_here%JGW).global_here%NE.global_here%NBV(global_here%JGW-1)) THEN !L.B. SEGS DON'T OVERLAP
+                     global_here%JME=global_here%JME+1  !M.E. USES IT
+                     global_here%ME2GW(global_here%JME)=global_here%JGW
                   ENDIF
-                  IF(NBV(JGW).EQ.NBV(JGW-1)) THEN !L.B. SEGS OVERLAP
-                     IF((LBCODEI(JGW).EQ.2) .OR. &! M.E. USES IT ONLY&
-                    (LBCODEI(JGW).EQ.12).OR. &! IF IT IS&
-                    (LBCODEI(JGW).EQ.22).OR. &! SPECIFIED FLOW,&
-                    (LBCODEI(JGW).EQ.3) .OR. &! AN OVERFLOW BARRIER&
-                    (LBCODEI(JGW).EQ.13).OR. &! OR A RADIATION&
-                    (LBCODEI(JGW).EQ.23).OR. &! BOUNDARY&
-                    (LBCODEI(JGW).EQ.30)) ME2GW(JME)=JGW
+                  IF(global_here%NBV(global_here%JGW).EQ.global_here%NBV(global_here%JGW-1)) THEN !L.B. SEGS OVERLAP
+                     IF((global_here%LBCODEI(global_here%JGW).EQ.2) .OR. &! M.E. USES IT ONLY&
+                    (global_here%LBCODEI(global_here%JGW).EQ.12).OR. &! IF IT IS&
+                    (global_here%LBCODEI(global_here%JGW).EQ.22).OR. &! SPECIFIED FLOW,&
+                    (global_here%LBCODEI(global_here%JGW).EQ.3) .OR. &! AN OVERFLOW BARRIER&
+                    (global_here%LBCODEI(global_here%JGW).EQ.13).OR. &! OR A RADIATION&
+                    (global_here%LBCODEI(global_here%JGW).EQ.23).OR. &! BOUNDARY&
+                    (global_here%LBCODEI(global_here%JGW).EQ.30)) global_here%ME2GW(global_here%JME)=global_here%JGW
                   ENDIF                                                                
                ENDIF
             ENDIF
-            IF((I.GT.1).AND.(I.LT.NVELL(K))) THEN !IF NOT FIRST OR
-               JME=JME+1        !LAST NODE
-               ME2GW(JME)=JGW   !M.E. USES IT
+            IF((I.GT.1).AND.(I.LT.global_here%NVELL(K))) THEN !IF NOT FIRST OR
+               global_here%JME=global_here%JME+1        !LAST NODE
+               global_here%ME2GW(global_here%JME)=global_here%JGW   !M.E. USES IT
             ENDIF
-            IF(I.EQ.NVELL(K)) THEN !DEAL WITH LAST NODE ON BOUNDARY
-               IF((NBV(JGW).NE.NBVV(K,1)).AND.& !IF UNCLOSED BOUNDARY&
-              (NBV(JGW).NE.NBV(1))) THEN !M.E. USES IT
-                  JME=JME+1
-                  ME2GW(JME)=JGW
+            IF(I.EQ.global_here%NVELL(K)) THEN !DEAL WITH LAST NODE ON BOUNDARY
+               IF((global_here%NBV(global_here%JGW).global_here%NE.global_here%NBVV(K,1)).AND.& !IF UNCLOSED BOUNDARY&
+              (global_here%NBV(global_here%JGW).global_here%NE.global_here%NBV(1))) THEN !M.E. USES IT
+                  global_here%JME=global_here%JME+1
+                  global_here%ME2GW(global_here%JME)=global_here%JGW
                ENDIF
-               IF(NBVV(K,I).EQ.NBV(1)) THEN !IF OVERLAPS WITH VERY FIRST
-                  IF((LBCODEI(JGW).EQ.2) .OR.& ! L.B. NODE&
-                 (LBCODEI(JGW).EQ.12).OR.& ! M.E. USES IT ONLY IF IT IS&
-                 (LBCODEI(JGW).EQ.22).OR.& ! SPECIFIED FLOW,&
-                 (LBCODEI(JGW).EQ.3) .OR.& ! AN OVERFLOW BARRIER OR&
-                 (LBCODEI(JGW).EQ.13).OR.& ! A RADIATION&
-                 (LBCODEI(JGW).EQ.23).OR.& ! BOUNDARY&
-                 (LBCODEI(JGW).EQ.30)) ME2GW(1)=JGW
+               IF(global_here%NBVV(K,I).EQ.global_here%NBV(1)) THEN !IF OVERLAPS WITH VERY FIRST
+                  IF((global_here%LBCODEI(global_here%JGW).EQ.2) .OR.& ! L.B. NODE&
+                 (global_here%LBCODEI(global_here%JGW).EQ.12).OR.& ! M.E. USES IT ONLY IF IT IS&
+                 (global_here%LBCODEI(global_here%JGW).EQ.22).OR.& ! SPECIFIED FLOW,&
+                 (global_here%LBCODEI(global_here%JGW).EQ.3) .OR.& ! AN OVERFLOW BARRIER OR&
+                 (global_here%LBCODEI(global_here%JGW).EQ.13).OR.& ! A RADIATION&
+                 (global_here%LBCODEI(global_here%JGW).EQ.23).OR.& ! BOUNDARY&
+                 (global_here%LBCODEI(global_here%JGW).EQ.30)) global_here%ME2GW(1)=global_here%JGW
                ENDIF
             ENDIF
 
 !...........LOAD EXTERNAL BARRIER BOUNDARY INFORMATION INTO THE CORRECT VECTORS
-            IF((IBTYPE.EQ.3).OR.(IBTYPE.EQ.13).OR.(IBTYPE.EQ.23)) THEN
-               BARLANHT(JGW)=BARLANHTR(I)
-               BARLANCFSP(JGW)=BARLANCFSPR(I)
+            IF((global_here%IBTYPE.EQ.3).OR.(global_here%IBTYPE.EQ.13).OR.(global_here%IBTYPE.EQ.23)) THEN
+               global_here%BARLANHT(global_here%JGW)=global_here%BARLANHTR(I)
+               global_here%BARLANCFSP(global_here%JGW)=global_here%BARLANCFSPR(I)
             ENDIF
 
 !...........LOAD INTERNAL BARRIER BOUNDARY INFORMATION INTO THE CORRECT VECTORS
-            IF((IBTYPE.EQ.4).OR.(IBTYPE.EQ.24)) THEN
-               IBCONN(JGW)=IBCONNR(I)
-               BARINHT(JGW)=BARINHTR(I)
-               BARINCFSB(JGW)=BARINCFSBR(I)
-               BARINCFSP(JGW)=BARINCFSPR(I)
+            IF((global_here%IBTYPE.EQ.4).OR.(global_here%IBTYPE.EQ.24)) THEN
+               global_here%IBCONN(global_here%JGW)=global_here%IBCONNR(I)
+               global_here%BARINHT(global_here%JGW)=global_here%BARINHTR(I)
+               global_here%BARINCFSB(global_here%JGW)=global_here%BARINCFSBR(I)
+               global_here%BARINCFSP(global_here%JGW)=global_here%BARINCFSPR(I)
             ENDIF
 
 !...........LOAD INTERNAL BARRIER WITH PIPES BOUNDARY INFORMATION INTO 
 !............THE CORRECT VECTORS
-            IF((IBTYPE.EQ.5).OR.(IBTYPE.EQ.25)) THEN
-               IBCONN(JGW)=IBCONNR(I)
-               BARINHT(JGW)=BARINHTR(I)
-               BARINCFSB(JGW)=BARINCFSBR(I)
-               BARINCFSP(JGW)=BARINCFSPR(I)
-               PIPEHT(JGW)=PIPEHTR(I)
-               PIPECOEF(JGW)=PIPECOEFR(I)
-               PIPEDIAM(JGW)=PIPEDIAMR(I)
+            IF((global_here%IBTYPE.EQ.5).OR.(global_here%IBTYPE.EQ.25)) THEN
+               global_here%IBCONN(global_here%JGW)=global_here%IBCONNR(I)
+               global_here%BARINHT(global_here%JGW)=global_here%BARINHTR(I)
+               global_here%BARINCFSB(global_here%JGW)=global_here%BARINCFSBR(I)
+               global_here%BARINCFSP(global_here%JGW)=global_here%BARINCFSPR(I)
+               global_here%PIPEHT(global_here%JGW)=global_here%PIPEHTR(I)
+               global_here%PIPECOEF(global_here%JGW)=global_here%PIPECOEFR(I)
+               global_here%PIPEDIAM(global_here%JGW)=global_here%PIPEDIAMR(I)
             ENDIF
             
 !...........WRITE OUT BOUNDARY CONDITION ARRAY INFORMATION
 
-            WRITE(16,1857) JGW,JME,ME2GW(JME),NBV(JGW),LBCODEI(JGW),&
-           THETA,CSII(JGW),SIII(JGW),BNDLEN2O3(JGW)
+            WRITE(16,1857) global_here%JGW,global_here%JME,global_here%ME2GW(global_here%JME),global_here%NBV(global_here%JGW),global_here%LBCODEI(global_here%JGW),&
+           global_here%THETA,global_here%CSII(global_here%JGW),global_here%SIII(global_here%JGW),global_here%BNDLEN2O3(global_here%JGW)
  1857       FORMAT(1X,I6,1X,I6,1X,I6,3X,I6,3X,I4,9X,F8.2,2X,E16.8,1X,&
            E16.8,2X,E16.8)
 
 !...........CHECK EXTERNAL BARRIER HEIGHTS AGAINST DEPTHS
-            IF((IBTYPE.EQ.3).OR.(IBTYPE.EQ.13).OR.(IBTYPE.EQ.23)) THEN
-               IF(BARLANHT(JGW).LT.-DP(NBV(JGW))) THEN
-                  IF(NSCREEN.EQ.1.AND.s%MYPROC.EQ.0) WRITE(6,8367) &
-                 JGW,NBV(JGW),BARLANHT(JGW),DP(NBV(JGW))
-                  WRITE(16,8367) JGW,NBV(JGW),BARLANHT(JGW),DP(NBV(JGW))
+            IF((global_here%IBTYPE.EQ.3).OR.(global_here%IBTYPE.EQ.13).OR.(global_here%IBTYPE.EQ.23)) THEN
+               IF(global_here%BARLANHT(global_here%JGW).LT.-global_here%DP(global_here%NBV(global_here%JGW))) THEN
+                  IF(global_here%NSCREEN.EQ.1.AND.s%MYPROC.EQ.0) WRITE(6,8367) &
+                 global_here%JGW,global_here%NBV(global_here%JGW),global_here%BARLANHT(global_here%JGW),global_here%DP(global_here%NBV(global_here%JGW))
+                  WRITE(16,8367) global_here%JGW,global_here%NBV(global_here%JGW),global_here%BARLANHT(global_here%JGW),global_here%DP(global_here%NBV(global_here%JGW))
  8367             FORMAT(////,1X,'!!!!!!!!!!  FATAL INPUT ERROR   !!!'&
                  ,'!!!!!!!!!',//,&
                  1X,'AT BOUNDARY NODE NO.',I6,' (GLOBAL NODE NO.',&
@@ -2692,17 +2692,17 @@
                  ,'THE ASSOCIATED GLOBAL NODE = ',E12.5,/,2X,&
                  'USER MUST SPECIFY CONSISTENT BARRIER HEIGHTS',&
                  ' AND DEPTHS')
-                  IF(NSCREEN.EQ.1.AND.s%MYPROC.EQ.0) WRITE(6,9973)
+                  IF(global_here%NSCREEN.EQ.1.AND.s%MYPROC.EQ.0) WRITE(6,9973)
                   WRITE(16,9973)
                   STOP
                ENDIF
             ENDIF
 !...........CHECK INTERNAL BARRIER HEIGHTS AGAINST DEPTHS
-            IF((IBTYPE.EQ.4).OR.(IBTYPE.EQ.24)) THEN
-               IF(BARINHT(JGW).LT.-DP(NBV(JGW))) THEN
-                  IF(NSCREEN.EQ.1.AND.s%MYPROC.EQ.0) WRITE(6,8368) &
-                 JGW,NBV(JGW),BARINHT(JGW),DP(NBV(JGW))
-                  WRITE(16,8368) JGW,NBV(JGW),BARINHT(JGW),DP(NBV(JGW))
+            IF((global_here%IBTYPE.EQ.4).OR.(global_here%IBTYPE.EQ.24)) THEN
+               IF(global_here%BARINHT(global_here%JGW).LT.-global_here%DP(global_here%NBV(global_here%JGW))) THEN
+                  IF(global_here%NSCREEN.EQ.1.AND.s%MYPROC.EQ.0) WRITE(6,8368) &
+                 global_here%JGW,global_here%NBV(global_here%JGW),global_here%BARINHT(global_here%JGW),global_here%DP(global_here%NBV(global_here%JGW))
+                  WRITE(16,8368) global_here%JGW,global_here%NBV(global_here%JGW),global_here%BARINHT(global_here%JGW),global_here%DP(global_here%NBV(global_here%JGW))
  8368             FORMAT(////,1X,'!!!!!!!!!!  FATAL INPUT ERROR   !!!'&
                  ,'!!!!!!!!!',//,&
                  1X,'AT BOUNDARY NODE NO.',I6,' (GLOBAL NODE NO. ',&
@@ -2712,18 +2712,18 @@
                  ,'THE ASSOCIATED GLOBAL NODE = ',E12.5,/,2X,&
                  'USER MUST SPECIFY CONSISTENT BARRIER HEIGHTS',&
                  ' AND DEPTHS')
-                  IF(NSCREEN.EQ.1.AND.s%MYPROC.EQ.0) WRITE(6,9973)
+                  IF(global_here%NSCREEN.EQ.1.AND.s%MYPROC.EQ.0) WRITE(6,9973)
                   WRITE(16,9973)
                   STOP
                ENDIF
             ENDIF
             
 !...........CHECK INTERNAL BARRIER WITH PIPES BARRIER HEIGHTS AGAINST DEPTHS
-            IF((IBTYPE.EQ.5).OR.(IBTYPE.EQ.25)) THEN
-               IF(BARINHT(JGW).LT.-DP(NBV(JGW))) THEN
-                  IF(NSCREEN.EQ.1.AND.s%MYPROC.EQ.0) WRITE(6,8370) &
-                 JGW,NBV(JGW),BARINHT(JGW),DP(NBV(JGW))
-                  WRITE(16,8370) JGW,NBV(JGW),BARINHT(JGW),DP(NBV(JGW))
+            IF((global_here%IBTYPE.EQ.5).OR.(global_here%IBTYPE.EQ.25)) THEN
+               IF(global_here%BARINHT(global_here%JGW).LT.-global_here%DP(global_here%NBV(global_here%JGW))) THEN
+                  IF(global_here%NSCREEN.EQ.1.AND.s%MYPROC.EQ.0) WRITE(6,8370) &
+                 global_here%JGW,global_here%NBV(global_here%JGW),global_here%BARINHT(global_here%JGW),global_here%DP(global_here%NBV(global_here%JGW))
+                  WRITE(16,8370) global_here%JGW,global_here%NBV(global_here%JGW),global_here%BARINHT(global_here%JGW),global_here%DP(global_here%NBV(global_here%JGW))
  8370             FORMAT(////,1X,'!!!!!!!!!!  FATAL INPUT ERROR   !!!'&
                  ,'!!!!!!!!!',//,&
                  1X,'AT BOUNDARY NODE NO.',I6,' (GLOBAL NODE NO. ',&
@@ -2733,17 +2733,17 @@
                  ,'THE ASSOCIATED GLOBAL NODE = ',E12.5,/,2X,&
                  'USER MUST SPECIFY CONSISTENT BARRIER HEIGHTS',&
                  ' AND DEPTHS')
-                  IF(NSCREEN.EQ.1.AND.s%MYPROC.EQ.0) WRITE(6,9973)
+                  IF(global_here%NSCREEN.EQ.1.AND.s%MYPROC.EQ.0) WRITE(6,9973)
                   WRITE(16,9973)
                   STOP
                ENDIF
             ENDIF
 !...........CHECK INTERNAL BARRIER WITH PIPES PIPE HEIGHTS AGAINST DEPTHS
-            IF((IBTYPE.EQ.5).OR.(IBTYPE.EQ.25)) THEN
-               IF(PIPEHT(JGW).LT.-DP(NBV(JGW))) THEN
-                  IF(NSCREEN.EQ.1.AND.s%MYPROC.EQ.0) WRITE(6,8372) &
-                 JGW,NBV(JGW),BARINHT(JGW),DP(NBV(JGW))
-                  WRITE(16,8372) JGW,NBV(JGW),BARINHT(JGW),DP(NBV(JGW))
+            IF((global_here%IBTYPE.EQ.5).OR.(global_here%IBTYPE.EQ.25)) THEN
+               IF(global_here%PIPEHT(global_here%JGW).LT.-global_here%DP(global_here%NBV(global_here%JGW))) THEN
+                  IF(global_here%NSCREEN.EQ.1.AND.s%MYPROC.EQ.0) WRITE(6,8372) &
+                 global_here%JGW,global_here%NBV(global_here%JGW),global_here%BARINHT(global_here%JGW),global_here%DP(global_here%NBV(global_here%JGW))
+                  WRITE(16,8372) global_here%JGW,global_here%NBV(global_here%JGW),global_here%BARINHT(global_here%JGW),global_here%DP(global_here%NBV(global_here%JGW))
  8372             FORMAT(////,1X,'!!!!!!!!!!  FATAL INPUT ERROR   !!!'&
                  ,'!!!!!!!!!',//,&
                  1X,'AT BOUNDARY NODE NO.',I6,' (GLOBAL NODE NO. ',&
@@ -2753,7 +2753,7 @@
                  ,'THE ASSOCIATED GLOBAL NODE = ',E12.5,/,2X,&
                  'USER MUST SPECIFY CONSISTENT PIPE HEIGHTS',&
                  ' AND DEPTHS')
-                  IF(NSCREEN.EQ.1.AND.s%MYPROC.EQ.0) WRITE(6,9973)
+                  IF(global_here%NSCREEN.EQ.1.AND.s%MYPROC.EQ.0) WRITE(6,9973)
                   WRITE(16,9973)
                   STOP
                ENDIF
@@ -2762,17 +2762,17 @@
 !...........CHECK FOR OVERLAPPING OF AN INTERNAL BARRIER BOUNDARY WITH
 !............ANY EXTERNAL BARRIER BOUNDARY. IF THIS DOES OCCUR, TAKE
 !............APPROPRIATE ACTION
-            IF((IBTYPE.EQ.4).OR.(IBTYPE.EQ.24).OR.(IBTYPE.EQ.5)&
-           .OR.(IBTYPE.EQ.25)) THEN
-               DO ICK=1,NVELEXT
+            IF((global_here%IBTYPE.EQ.4).OR.(global_here%IBTYPE.EQ.24).OR.(global_here%IBTYPE.EQ.5)&
+           .OR.(global_here%IBTYPE.EQ.25)) THEN
+               DO global_here%ICK=1,global_here%NVELEXT
 !...............CHECK IF OVERLAP EXISTS
-                  IF(NBV(ICK).EQ.NBV(JGW)) THEN
+                  IF(global_here%NBV(global_here%ICK).EQ.global_here%NBV(global_here%JGW)) THEN
 !.................CHECK FOR ILLEGAL OVERLAPS
-                     IF((LBCODEI(ICK).EQ.2).OR.(LBCODEI(ICK).EQ.3).OR.&
-                    (LBCODEI(ICK).EQ.12).OR.(LBCODEI(ICK).EQ.13)) THEN 
-                        IF(NSCREEN.EQ.1.AND.s%MYPROC.EQ.0) WRITE(6,8567) &
-                       JGW,NBV(JGW),ICK,NBV(ICK)
-                        WRITE(16,8567) JGW,NBV(JGW),ICK,NBV(ICK)
+                     IF((global_here%LBCODEI(global_here%ICK).EQ.2).OR.(global_here%LBCODEI(global_here%ICK).EQ.3).OR.&
+                    (global_here%LBCODEI(global_here%ICK).EQ.12).OR.(global_here%LBCODEI(global_here%ICK).EQ.13)) THEN 
+                        IF(global_here%NSCREEN.EQ.1.AND.s%MYPROC.EQ.0) WRITE(6,8567) &
+                       global_here%JGW,global_here%NBV(global_here%JGW),global_here%ICK,global_here%NBV(global_here%ICK)
+                        WRITE(16,8567) global_here%JGW,global_here%NBV(global_here%JGW),global_here%ICK,global_here%NBV(global_here%ICK)
  8567                   FORMAT(////,1X,'!!!!!!!!!!  FATAL INPUT ERROR   !!!'&
                        ,'!!!!!!!!!',//,&
                        1X,'BOUNDARY NODE NO. ',I6,' (GLOBAL NODE NO. ',&
@@ -2782,16 +2782,16 @@
                        2X,'THIS IS AN ILLEGAL TYPE OVERLAP !! - INTERNAL '&
                        ,'BARRIER BOUNDARIES CAN ONLY OVERLAP WITH ',&
                        'NO NORMAL FLOW EXTERNAL BOUNDARIES',/&
-                       2X,'(I.E. IBTYPE=0,10,20)')
-                        IF(NSCREEN.EQ.1.AND.s%MYPROC.EQ.0) WRITE(6,9973)
+                       2X,'(I.E. global_here%IBTYPE=0,10,20)')
+                        IF(global_here%NSCREEN.EQ.1.AND.s%MYPROC.EQ.0) WRITE(6,9973)
                         WRITE(16,9973)
                         STOP
                      ENDIF
 !.................CHECK FOR OVERLAPS WHICH REQUIRE ADJUSTMENTS OF BOUNDARY
 !..................CODE ON THE EXTERNAL BOUNDARY
-                     IF(((IBTYPE.EQ.4).AND.(LBCODEI(ICK).EQ.0))&
-                    .OR.((IBTYPE.EQ.5).AND.(LBCODEI(ICK).EQ.0))) THEN
-                        WRITE(16,8568) JGW,ICK,ICK
+                     IF(((global_here%IBTYPE.EQ.4).AND.(global_here%LBCODEI(global_here%ICK).EQ.0))&
+                    .OR.((global_here%IBTYPE.EQ.5).AND.(global_here%LBCODEI(global_here%ICK).EQ.0))) THEN
+                        WRITE(16,8568) global_here%JGW,global_here%ICK,global_here%ICK
  8568                   FORMAT(1X,'DUE TO LEGAL OVERLAPPING OF ',&
                        'BOUNDARY NODE',I7,' (WHICH IS AN ESSENTIAL INTER'&
                        ,'NAL BARRIER BOUNDARY NODE)', /,2X,&
@@ -2799,13 +2799,13 @@
                        'EXTERNAL NO NORMAL FLOW WITH SLIP BOUNDARY',&
                        ' NODE),',/,2X,&
                        'THE BOUNDARY TYPE FOR BOUNDARY NODE ',I7,&
-                       ' IS BEING RESET TO IBTYPE=20',/,2X,&
+                       ' IS BEING RESET TO global_here%IBTYPE=20',/,2X,&
                        '(NATURAL NO NORMAL FLOW WITH SLIP BOUNDARY) ')
-                        LBCODEI(ICK)=20
+                        global_here%LBCODEI(global_here%ICK)=20
                      ENDIF
-                     IF(((IBTYPE.EQ.4).AND.(LBCODEI(ICK).EQ.10)) &
-                    .OR.((IBTYPE.EQ.5).AND.(LBCODEI(ICK).EQ.10))) THEN
-                        WRITE(16,8569) JGW,ICK,ICK
+                     IF(((global_here%IBTYPE.EQ.4).AND.(global_here%LBCODEI(global_here%ICK).EQ.10)) &
+                    .OR.((global_here%IBTYPE.EQ.5).AND.(global_here%LBCODEI(global_here%ICK).EQ.10))) THEN
+                        WRITE(16,8569) global_here%JGW,global_here%ICK,global_here%ICK
  8569                   FORMAT(1X,'DUE TO LEGAL OVERLAPPING OF ',&
                        'BOUNDARY NODE ',I7,' (WHICH IS AN ESSENTIAL INTER'&
                        ,'NAL BARRIER BOUNDARY NODE)', /,2X,&
@@ -2813,13 +2813,13 @@
                        'EXTERNAL NO NORMAL FLOW WITH NO SLIP BOUNDARY',&
                        ' NODE),',/,2X,&
                        'THE BOUNDARY TYPE FOR BOUNDARY NODE ',I7,&
-                       ' IS BEING RESET TO IBTYPE=20',/,2X,&
+                       ' IS BEING RESET TO global_here%IBTYPE=20',/,2X,&
                        '(NATURAL NO NORMAL FLOW WITH SLIP BOUNDARY) ')
-                        LBCODEI(ICK)=20
+                        global_here%LBCODEI(global_here%ICK)=20
                      ENDIF
-                     IF(((IBTYPE.EQ.24).AND.(LBCODEI(ICK).EQ.10))  &
-                    .OR.((IBTYPE.EQ.25).AND.(LBCODEI(ICK).EQ.10))) THEN
-                        WRITE(16,8570) JGW,ICK,ICK
+                     IF(((global_here%IBTYPE.EQ.24).AND.(global_here%LBCODEI(global_here%ICK).EQ.10))  &
+                    .OR.((global_here%IBTYPE.EQ.25).AND.(global_here%LBCODEI(global_here%ICK).EQ.10))) THEN
+                        WRITE(16,8570) global_here%JGW,global_here%ICK,global_here%ICK
  8570                   FORMAT(1X,'DUE TO LEGAL OVERLAPPING OF ',&
                        'BOUNDARY NODE',I7,' (WHICH IS A NATURAL INTERNAL'&
                        ,' BARRIER BOUNDARY NODE)', /,2X,&
@@ -2827,9 +2827,9 @@
                        'EXTERNAL NO NORMAL FLOW WITH NO SLIP BOUNDARY',&
                        ' NODE),',/,2X,&
                        'THE BOUNDARY TYPE FOR BOUNDARY NODE',I7,&
-                       ' IS BEING RESET TO IBTYPE=0',/,2X,&
+                       ' IS BEING RESET TO global_here%IBTYPE=0',/,2X,&
                        '(ESSENTIAL NO NORMAL FLOW WITH SLIP BOUNDARY) ')
-                        LBCODEI(ICK)=0
+                        global_here%LBCODEI(global_here%ICK)=0
                      ENDIF
                   ENDIF
                END DO
@@ -2840,47 +2840,47 @@
       
 !.......Put barrier data into arrays more amiable to DG data structure
 
-      IF ((IBTYPE.EQ.3).OR.(IBTYPE.EQ.13).OR.(IBTYPE.EQ.23)) THEN
-         DO I = 1,NVELL(K)-1
+      IF ((global_here%IBTYPE.EQ.3).OR.(global_here%IBTYPE.EQ.13).OR.(global_here%IBTYPE.EQ.23)) THEN
+         DO I = 1,global_here%NVELL(K)-1
             dg_here%NEBSEG = dg_here%NEBSEG + 1
-            dg_here%EBHT(dg_here%NEBSEG)   = 0.5D0*( BARLANHTR(I)   + BARLANHTR(I+1)   )
-            dg_here%EBCFSP(dg_here%NEBSEG) = 0.5D0*( BARLANCFSPR(I) + BARLANCFSPR(I+1) )
+            dg_here%EBHT(dg_here%NEBSEG)   = 0.5D0*( global_here%BARLANHTR(I)   + global_here%BARLANHTR(I+1)   )
+            dg_here%EBCFSP(dg_here%NEBSEG) = 0.5D0*( global_here%BARLANCFSPR(I) + global_here%BARLANCFSPR(I+1) )
          ENDDO
       ENDIF
       
-      IF ((IBTYPE.EQ.4).OR.(IBTYPE.EQ.24)) THEN
-         DO I = 1,NVELL(K)-1
+      IF ((global_here%IBTYPE.EQ.4).OR.(global_here%IBTYPE.EQ.24)) THEN
+         DO I = 1,global_here%NVELL(K)-1
             dg_here%NIBSEG = dg_here%NIBSEG + 1
-            dg_here%IBHT(dg_here%NIBSEG)   = 0.5D0*( BARINHTR(I)   + BARINHTR(I+1)   )
-            dg_here%IBCFSB(dg_here%NIBSEG) = 0.5D0*( BARINCFSBR(I) + BARINCFSBR(I+1) )
-            dg_here%IBCFSP(dg_here%NIBSEG) = 0.5D0*( BARINCFSPR(I) + BARINCFSPR(I+1) )
-            dg_here%BACKNODES(1,dg_here%NIBSEG) = IBCONNR(I)
-            dg_here%BACKNODES(2,dg_here%NIBSEG) = IBCONNR(I+1)
+            dg_here%IBHT(dg_here%NIBSEG)   = 0.5D0*( global_here%BARINHTR(I)   + global_here%BARINHTR(I+1)   )
+            dg_here%IBCFSB(dg_here%NIBSEG) = 0.5D0*( global_here%BARINCFSBR(I) + global_here%BARINCFSBR(I+1) )
+            dg_here%IBCFSP(dg_here%NIBSEG) = 0.5D0*( global_here%BARINCFSPR(I) + global_here%BARINCFSPR(I+1) )
+            dg_here%BACKNODES(1,dg_here%NIBSEG) = global_here%IBCONNR(I)
+            dg_here%BACKNODES(2,dg_here%NIBSEG) = global_here%IBCONNR(I+1)
          ENDDO
       ENDIF
       ENDDO
 
 !.....ONCE ALL FLOW BOUNDARY NODES HAVE BEEN PROCESSED, CHECK TO MAKE SURE
-!.....THAT JGW LE MNVEL.  NOTE, JME MUST BE < JGW.
+!.....THAT global_here%JGW LE MNVEL.  NOTE, global_here%JME MUST BE < global_here%JGW.
 
-      IF(s%MNVEL.LT.JGW) THEN
-         IF(NSCREEN.EQ.1.AND.s%MYPROC.EQ.0) WRITE(6,9947)
+      IF(s%MNVEL.LT.global_here%JGW) THEN
+         IF(global_here%NSCREEN.EQ.1.AND.s%MYPROC.EQ.0) WRITE(6,9947)
          WRITE(16,9947)
  9947    FORMAT(////,1X,'!!!!!!!!!!  FATAL INPUT ERROR   !!!!!!!!!!!!',&
         //,1X,'THE DIMENSION PARAMETER MNVEL IS LESS THAN ',&
         'THE TOTAL NUMBER OF FLOW BOUNDARY NODES',&
         /,1X,'FROM ALL THE SPECIFIED FLOW SEGMENTS COMBINED',/)
-         IF(NSCREEN.EQ.1.AND.s%MYPROC.EQ.0) WRITE(6,9973)
+         IF(global_here%NSCREEN.EQ.1.AND.s%MYPROC.EQ.0) WRITE(6,9973)
          WRITE(16,9973)
          STOP
       ENDIF
 
-      NVEL=JGW
-      NVELME=JME
+      global_here%NVEL=global_here%JGW
+      global_here%NVELME=global_here%JME
 
 !     
       DO IK=1,s%MNP               ! FINISH DET. MAX # NEIGHBORS
-         IF(NNEIGH(IK).GT.s%MNEI) s%MNEI=NNEIGH(IK)
+         IF(global_here%NNEIGH(IK).GT.s%MNEI) s%MNEI=global_here%NNEIGH(IK)
       ENDDO
       s%MNEI = s%MNEI+1
 
@@ -2897,39 +2897,39 @@
 
 !.....TRANSFER FLOW BOUNDARY INFORMATION INTO NODAL ARRAYS
 
-      DO I=1,NP
-         LBCODE(I)=-1
-         CSI(I)=0.
-         SII(I)=1.
+      DO I=1,global_here%NP
+         global_here%LBCODE(I)=-1
+         global_here%CSI(I)=0.
+         global_here%SII(I)=1.
       END DO
 
-      DO I=1,NVELME
-         J=ME2GW(I)
-         LBCODE(NBV(J))=LBCODEI(J)
-         CSI(NBV(J))=CSII(J)
-         SII(NBV(J))=SIII(J)
+      DO I=1,global_here%NVELME
+         J=global_here%ME2GW(I)
+         global_here%LBCODE(global_here%NBV(J))=global_here%LBCODEI(J)
+         global_here%CSI(global_here%NBV(J))=global_here%CSII(J)
+         global_here%SII(global_here%NBV(J))=global_here%SIII(J)
       END DO
 
-!...  IF ANY NON ZERO NORMAL FLOW BOUNDARIES WERE SPECIFIED, (NFLUXF=1)
+!...  IF ANY NON ZERO NORMAL FLOW BOUNDARIES WERE SPECIFIED, (global_here%NFLUXF=1)
 !.....READ FORCING INFORMATION FROM UNIT 15 FILE
 
-      NFFR = 0
-      IF(NFLUXF.EQ.1) THEN
+      global_here%NFFR = 0
+      IF(global_here%NFLUXF.EQ.1) THEN
 
 !.....INPUT FROM THE NUMBER OF FREQUENCIES PRESENT IN NORMAL FLOW FORCING
 !......DATA.  IF THIS = 0, NORMAL FLOW DATA IS READ IN FROM THE FORT.20 FILE.
 
-         READ(15,*) NFFR
-         s%MNFFR = NFFR
-         IF (NFFR.EQ.0) s%MNFFR = 1
+         READ(15,*) global_here%NFFR
+         s%MNFFR = global_here%NFFR
+         IF (global_here%NFFR.EQ.0) s%MNFFR = 1
 
 !.....Allocate space for periodic normal flow boundary conditions
          call alloc_main6(s)
 !     
-         DO I=1,NVELME
-            J=ME2GW(I)
-            QNAM(1,J)=0.
-            QNPH(1,J)=0.
+         DO I=1,global_here%NVELME
+            J=global_here%ME2GW(I)
+            global_here%QNAM(1,J)=0.
+            global_here%QNPH(1,J)=0.
          ENDDO
 
 !.....READ IN AND WRITE OUT INFO ON SPECIFIED NORMAL FLOW BOUNDARIES
@@ -2937,29 +2937,29 @@
          WRITE(16,1112)
          WRITE(16,2200)
  2200    FORMAT(//,1X,'NORMAL FLOW BOUNDARY FORCING INFORMATION ',//)
-         IF(NFFR.EQ.0) THEN
+         IF(global_here%NFFR.EQ.0) THEN
             WRITE(16,2201)
  2201       FORMAT(/,5X,'NORMAL FLOW VALUES WILL BE READ FROM UNIT 20 ',&
       /,9X,'INTERPOLATION IN TIME IS DONE TO SYNC THE FLOW DATA ',&
       /,9X,'WITH THE MODEL TIME STEP.')
          ENDIF
-         IF(NFFR.NE.0) THEN
-            WRITE(16,2202) NFFR
+         IF(global_here%NFFR.global_here%NE.0) THEN
+            WRITE(16,2202) global_here%NFFR
  2202       FORMAT(/,5X,'NUMBER OF PERIODIC NORMAL FLOW CONSTITUENTS =',&
            I5)
             WRITE(16,2203)
  2203       FORMAT(/,7X,'CONSTITUENT #',4X,'FREQUENCY',4X,'NODAL FACTOR',&
-           3X,'EQU.ARG (DEG)',2X,'CONSTITUENT',/)
-            DO I=1,NFFR
-               READ(15,'(A5)') FBOUNTAG(I)
-               READ(15,*) FAMIG(I),FFF(I),FFACE(I)
-               WRITE(16,2204) I,FAMIG(I),FFF(I),FFACE(I),FBOUNTAG(I)
+           3X,'EQU.global_here%ARG (DEG)',2X,'CONSTITUENT',/)
+            DO I=1,global_here%NFFR
+               READ(15,'(A5)') global_here%FBOUNTAG(I)
+               READ(15,*) global_here%FAMIG(I),global_here%FFF(I),global_here%FFACE(I)
+               WRITE(16,2204) I,global_here%FAMIG(I),global_here%FFF(I),global_here%FFACE(I),global_here%FBOUNTAG(I)
  2204          FORMAT(12X,I2,6X,F16.12,2X,F10.7,2X,F10.3,10X,A5)
-               FFACE(I)=FFACE(I)*DEG2RAD
-               IF(FAMIG(I).EQ.0.) THEN
-                  FPER(I)=0.
+               global_here%FFACE(I)=global_here%FFACE(I)*DEG2RAD
+               IF(global_here%FAMIG(I).EQ.0.) THEN
+                  global_here%FPER(I)=0.
                ELSE
-                  FPER(I)=2.D0*PI/FAMIG(I)
+                  global_here%FPER(I)=2.D0*PI/global_here%FAMIG(I)
                ENDIF
             END DO
 
@@ -2968,29 +2968,29 @@
 
             K = 1
             II = 1
-            DO I=1,NFFR
-               WRITE(16,2206) I,FBOUNTAG(I)
+            DO I=1,global_here%NFFR
+               WRITE(16,2206) I,global_here%FBOUNTAG(I)
  2206          FORMAT(////,5X,'PERIODIC NORMAL FLOW CONSTITUENT ',&
               'NUMBER',I4,1X,'DESIGNATED : ',A5)
-               READ(15,'(A10)') ALPHA
-               WRITE(16,31) ALPHA
+               READ(15,'(A10)') global_here%ALPHA
+               WRITE(16,31) global_here%ALPHA
                WRITE(16,30)
-               DO J=1,NVEL
-                  IF((LBCODEI(J).EQ.2).OR.(LBCODEI(J).EQ.12)&
-                 .OR.(LBCODEI(J).EQ.22)) THEN
+               DO J=1,global_here%NVEL
+                  IF((global_here%LBCODEI(J).EQ.2).OR.(global_here%LBCODEI(J).EQ.12)&
+                 .OR.(global_here%LBCODEI(J).EQ.22)) THEN
                      
-!.....Modified arrangement of QNAM and QNPH for DG
+!.....Modified arrangement of global_here%QNAM and global_here%QNPH for DG
 
-                     IF (DGSWE.EQ.1) THEN
-                        READ(15,*) QNAM(I,II),QNPH(I,II)
-                        WRITE(16,2205) NBV(J),QNAM(I,II),QNPH(I,II)
-                        QNPH(I,II)=QNPH(I,II)*DEG2RAD
+                     IF (global_here%DGSWE.EQ.1) THEN
+                        READ(15,*) global_here%QNAM(I,II),global_here%QNPH(I,II)
+                        WRITE(16,2205) global_here%NBV(J),global_here%QNAM(I,II),global_here%QNPH(I,II)
+                        global_here%QNPH(I,II)=global_here%QNPH(I,II)*DEG2RAD
                         II = II + 1
                      ELSE
-                        READ(15,*) QNAM(I,J),QNPH(I,J)
-                        WRITE(16,2205) NBV(J),QNAM(I,J),QNPH(I,J)
+                        READ(15,*) global_here%QNAM(I,J),global_here%QNPH(I,J)
+                        WRITE(16,2205) global_here%NBV(J),global_here%QNAM(I,J),global_here%QNPH(I,J)
  2205                   FORMAT(10X,I8,4X,F14.5,4X,F12.3)
-                        QNPH(I,J)=QNPH(I,J)*DEG2RAD
+                        global_here%QNPH(I,J)=global_here%QNPH(I,J)*DEG2RAD
                      ENDIF
                   ENDIF
                ENDDO
@@ -2999,11 +2999,11 @@
          ENDIF
       ENDIF
 
-!...  IF ANY EXTERNAL BARRIER BOUNDARIES WERE SPECIFIED, (NFLUXB=1)
+!...  IF ANY EXTERNAL BARRIER BOUNDARIES WERE SPECIFIED, (global_here%NFLUXB=1)
 !.....WRITE OUT EXTERNAL BARRIER BOUNDARY INFORMATION TO UNIT 16 FILE
 !.....NOTE THAT THIS INFORMATION WAS READ IN FROM THE UNIT 14 FILE
 
-      IF(NFLUXB.EQ.1) THEN
+      IF(global_here%NFLUXB.EQ.1) THEN
 
 !.....WRITE OUT INFO ON SPECIFIED EXTERNAL BARRIER BOUNDARIES
 
@@ -3016,20 +3016,20 @@
 !........DESIGNATED EXTERNAL BARRIER BOUNDARY NODES TO UNIT 16
          WRITE(16,2224)
  2224    FORMAT(//,9X,'NODE',10X,'BARRIER HEIGHT',&
-        6X,'SUPER-CRIT. EXTERNAL BAR. COEF.',/)
-         DO J=1,NVEL
-            IF((LBCODEI(J).EQ.3).OR.(LBCODEI(J).EQ.13)&
-           .OR.(LBCODEI(J).EQ.23)) THEN
-               WRITE(16,2225) NBV(J),BARLANHT(J),BARLANCFSP(J)
+        6X,'SUPER-CRIT. EXTERNAL BAR. global_here%COEF.',/)
+         DO J=1,global_here%NVEL
+            IF((global_here%LBCODEI(J).EQ.3).OR.(global_here%LBCODEI(J).EQ.13)&
+           .OR.(global_here%LBCODEI(J).EQ.23)) THEN
+               WRITE(16,2225) global_here%NBV(J),global_here%BARLANHT(J),global_here%BARLANCFSP(J)
  2225          FORMAT(5X,I8,6X,F14.5,15X,F12.3)
             ENDIF
          END DO
       ENDIF
 
-!...  IF ANY INTERNAL BARRIER BOUNDARIES WERE SPECIFIED, (NFLUXIB=1)
+!...  IF ANY INTERNAL BARRIER BOUNDARIES WERE SPECIFIED, (global_here%NFLUXIB=1)
 !.....WRITE INTERNAL BARRIER BOUNDARY INFORMATION TO UNIT 16 FILE
 
-      IF(NFLUXIB.EQ.1) THEN
+      IF(global_here%NFLUXIB.EQ.1) THEN
 
 !.....WRITE OUT INFO ON SPECIFIED INTERNAL BARRIER BOUNDARIES
 
@@ -3044,53 +3044,53 @@
 !........FILE WITH BOUNDARY NODE INFORMATION)
          WRITE(16,2324)
  2324    FORMAT(//,9X,'NODE',6X,'CONNECTED NODE',6X,'BARRIER HEIGHT',&
-        4X,'SUB-CRIT. INT. BAR. COEF.',&
-        4X,'SUPER-CRIT. INT. BAR. COEF.',/)
+        4X,'SUB-CRIT. INT. BAR. global_here%COEF.',&
+        4X,'SUPER-CRIT. INT. BAR. global_here%COEF.',/)
 
-         DO J=1,NVEL
-            IF((LBCODEI(J).EQ.4).OR.(LBCODEI(J).EQ.24)) THEN
+         DO J=1,global_here%NVEL
+            IF((global_here%LBCODEI(J).EQ.4).OR.(global_here%LBCODEI(J).EQ.24)) THEN
 
-               WRITE(16,2325) NBV(J),IBCONN(J),BARINHT(J),&
-              BARINCFSB(J),BARINCFSP(J)
+               WRITE(16,2325) global_here%NBV(J),global_here%IBCONN(J),global_here%BARINHT(J),&
+              global_here%BARINCFSB(J),global_here%BARINCFSP(J)
  2325          FORMAT(5X,I8,7X,I8,6X,F14.5,12X,F12.3,17X,F12.3)
             ENDIF
          END DO
       ENDIF
 
 !jj   wm001 - begin add                        
-!...  IF ANY INTERNAL BARRIER BOUNDARIES WITH CROSS BARRIER PIPES
-!.....WERE SPECIFIED, (NFLUXIBP=1)
-!.....WRITE INTERNAL BARRIER BOUNDARY INFORMATION WITH CROSS 
+!...  IF ANY INTERNAL BARRIER BOUNDARIES WITH global_here%CROSS BARRIER PIPES
+!.....WERE SPECIFIED, (global_here%NFLUXIBP=1)
+!.....WRITE INTERNAL BARRIER BOUNDARY INFORMATION WITH global_here%CROSS 
 !.....BARRIER PIPE INFORMATION TO UNIT 16 FILE
 
-      IF(NFLUXIBP.EQ.1) THEN
+      IF(global_here%NFLUXIBP.EQ.1) THEN
 
 !.....WRITE OUT INFO ON SPECIFIED INTERNAL BARRIER BOUNDARIES
 
          WRITE(16,1112)
          WRITE(16,2326)
- 2326    FORMAT(//,1X,'INTERNAL BARRIER BOUNDARY WITH CROSS BARRIER',&
+ 2326    FORMAT(//,1X,'INTERNAL BARRIER BOUNDARY WITH global_here%CROSS BARRIER',&
         ' PIPE INFORMATION ',/)
 
 !.......WRITE CONNECTION NODE NUMBER AND ELEVATION OF THE INTERNAL BARRIER
 !........NODES ABOVE THE GEOID AND THE COEFFICIENTS OF FREE SURFACE SUPERCRITICAL
 !........AND SUBCRITICAL FLOW AT DESIGNATED INTERNAL BARRIER BOUNDARY NODES
-!........IN ADDITION TO CROSS BARRIER PIPE CROWN HEIGHT, CROSS BARRIER PIPE
-!........COEFFICIENT AND CROSS BARRIER PIPE DIAMETER TO UNIT 16
+!........IN ADDITION TO global_here%CROSS BARRIER PIPE CROWN HEIGHT, global_here%CROSS BARRIER PIPE
+!........COEFFICIENT AND global_here%CROSS BARRIER PIPE DIAMETER TO UNIT 16
 !........(NOTE THAT THIS INFORMATION WAS INPUT FROM THE UNIT 14 FILE WITH 
 !........BOUNDARY NODE INFORMATION)
          WRITE(16,2327)
  2327    FORMAT(//,7X,'NODE',4X,'CONNECTED NODE',4X,'BARRIER HEIGHT',&
-        4X,'SUB-CRIT INT BAR COEF',&
-        4X,'SUPER-CRIT INT BAR COEF',&
-        4X,'PIPEHT  ',&
-        4X,'PIPECOEF',&
-        4X,'PIPEDIAM',/)
-         DO J=1,NVEL
-            IF((LBCODEI(J).EQ.5).OR.(LBCODEI(J).EQ.25)) THEN
-               WRITE(16,2328) NBV(J),IBCONN(J),BARINHT(J),&
-              BARINCFSB(J),BARINCFSP(J),&
-              PIPEHT(J),PIPECOEF(J),PIPEDIAM(J)
+        4X,'SUB-CRIT INT BAR global_here%COEF',&
+        4X,'SUPER-CRIT INT BAR global_here%COEF',&
+        4X,'global_here%PIPEHT  ',&
+        4X,'global_here%PIPECOEF',&
+        4X,'global_here%PIPEDIAM',/)
+         DO J=1,global_here%NVEL
+            IF((global_here%LBCODEI(J).EQ.5).OR.(global_here%LBCODEI(J).EQ.25)) THEN
+               WRITE(16,2328) global_here%NBV(J),global_here%IBCONN(J),global_here%BARINHT(J),&
+              global_here%BARINCFSB(J),global_here%BARINCFSP(J),&
+              global_here%PIPEHT(J),global_here%PIPECOEF(J),global_here%PIPEDIAM(J)
  2328          FORMAT(3X,I8,5X,I8,4X,F14.5,8X,F12.3,12X,F12.3,&
               2X,F10.5,2X,F10.5,2X,F10.5)
             ENDIF
@@ -3111,32 +3111,32 @@
 !...  INPUT INFORMATION FOR ELEVATION RECORDING STATIONS
 !...  
 
-!.... READ IN NOUTE,TOUTSE,TOUTFE,NSPOOLE : IF ABS(NOUTE)>0, INTERPOLATED
-!.... ELEVATIONS AT ELEVATION STATIONS ARE SPOOLED TO UNIT 61 EVERY NSPOOLE
-!.... TIME STEPS BETWEEN TIMES TOUTSE AND TOUTFE
+!.... READ IN global_here%NOUTE,global_here%TOUTSE,global_here%TOUTFE,global_here%NSPOOLE : IF ABS(global_here%NOUTE)>0, INTERPOLATED
+!.... ELEVATIONS AT ELEVATION STATIONS ARE SPOOLED TO UNIT 61 EVERY global_here%NSPOOLE
+!.... TIME STEPS BETWEEN TIMES global_here%TOUTSE AND global_here%TOUTFE
 
-      READ(15,*) NOUTE,TOUTSE,TOUTFE,NSPOOLE
-      WRITE(16,3001) NOUTE
+      READ(15,*) global_here%NOUTE,global_here%TOUTSE,global_here%TOUTFE,global_here%NSPOOLE
+      WRITE(16,3001) global_here%NOUTE
  3001 FORMAT(///,1X,'ELEVATION RECORDING STATION OUTPUT : ',&
-     //,5X,'NOUTE = ',I2)
+     //,5X,'global_here%NOUTE = ',I2)
 
-!.... CHECK INPUT PARAMETER NOUTE
+!.... CHECK INPUT PARAMETER global_here%NOUTE
 
-      IF(ABS(NOUTE).GT.2) THEN
-         IF(NSCREEN.EQ.1.AND.s%MYPROC.EQ.0) WRITE(6,3002)
+      IF(ABS(global_here%NOUTE).GT.2) THEN
+         IF(global_here%NSCREEN.EQ.1.AND.s%MYPROC.EQ.0) WRITE(6,3002)
          WRITE(16,3002)
  3002    FORMAT(////,1X,'!!!!!!!!!!  WARNING - FATAL ERROR !!!!!!!!!',&
         //,1X,'YOUR SELECTION OF THE UNIT 15 INPUT PARAMETER',&
-        ' NOUTE',&
+        ' global_here%NOUTE',&
         /,1X,'IS NOT AN ALLOWABLE VALUE.  CHECK YOUR INPUT!!')
-         IF(NSCREEN.EQ.1.AND.s%MYPROC.EQ.0) WRITE(6,9973)
+         IF(global_here%NSCREEN.EQ.1.AND.s%MYPROC.EQ.0) WRITE(6,9973)
          WRITE(16,9973)
          STOP
       ENDIF
 
 !.... IF STATION ELEVATION OUTPUT WILL NOT BE GENERATED
 
-      IF(NOUTE.EQ.0) THEN
+      IF(global_here%NOUTE.EQ.0) THEN
          WRITE(16,3003)
  3003    FORMAT(/,5X,'NO OUTPUT WILL BE SPOOLED AT ELEVATION ',&
         'RECORDING STATIONS')
@@ -3144,55 +3144,55 @@
 
 !.... IF STATION ELEVATION OUTPUT WILL BE GENERATED
 
-      IF(NOUTE.NE.0) THEN
+      IF(global_here%NOUTE.global_here%NE.0) THEN
 
-!......COMPUTE NTCYSE, NTCYFE, WHICH = TOUTSE AND TOUTFE IN TIMESTEPS
+!......COMPUTE global_here%NTCYSE, global_here%NTCYFE, WHICH = global_here%TOUTSE AND global_here%TOUTFE IN TIMESTEPS
 
-         NTCYSE=INT((TOUTSE-STATIM)*(86400.D0/DTDP)+0.5d0)
-         NTCYFE=INT((TOUTFE-STATIM)*(86400.D0/DTDP)+0.5d0)
+         global_here%NTCYSE=INT((global_here%TOUTSE-global_here%STATIM)*(86400.D0/global_here%DTDP)+0.5d0)
+         global_here%NTCYFE=INT((global_here%TOUTFE-global_here%STATIM)*(86400.D0/global_here%DTDP)+0.5d0)
 
-         IF(NTCYFE.GT.NT) NTCYFE=NT
+         IF(global_here%NTCYFE.GT.global_here%NT) global_here%NTCYFE=global_here%NT
 
-!......COMPUTE NTRSPE = THE NO. OF DATA SETS TO BE SPOOLED TO UNIT 61
+!......COMPUTE global_here%NTRSPE = THE NO. OF DATA SETS TO BE SPOOLED TO UNIT 61
 
-         IF(NSPOOLE.EQ.0) NTRSPE=0
-         IF(NSPOOLE.NE.0) NTRSPE=INT((NTCYFE-NTCYSE)/NSPOOLE)
+         IF(global_here%NSPOOLE.EQ.0) global_here%NTRSPE=0
+         IF(global_here%NSPOOLE.global_here%NE.0) global_here%NTRSPE=INT((global_here%NTCYFE-global_here%NTCYSE)/global_here%NSPOOLE)
 
-!......WRITE TOUTSE,TOUTFE,NTCYSE,NTCYFE,NSPOOLE TO UNIT 16
+!......WRITE global_here%TOUTSE,global_here%TOUTFE,global_here%NTCYSE,global_here%NTCYFE,global_here%NSPOOLE TO UNIT 16
 
-         WRITE(16,3004) TOUTSE,NTCYSE,TOUTFE,NTCYFE,NSPOOLE
- 3004    FORMAT(/,5X,'DATA RECORDS WILL START AFTER TOUTSE =',F8.3,&
-        ' DAY(S) RELATIVE',&
+         WRITE(16,3004) global_here%TOUTSE,global_here%NTCYSE,global_here%TOUTFE,global_here%NTCYFE,global_here%NSPOOLE
+ 3004    FORMAT(/,5X,'DATA RECORDS WILL START AFTER global_here%TOUTSE =',F8.3,&
+        ' global_here%DAY(S) RELATIVE',&
         /,9X,'TO THE STARTING TIME OR',I9,&
         ' TIME STEPS INTO THE SIMULATION',&
-        //,5X,'DATA RECORDS WILL STOP AFTER TOUTFE =',F8.3,&
-        ' DAY(S) RELATIVE',/,9X,'TO THE STARTING TIME OR',&
+        //,5X,'DATA RECORDS WILL STOP AFTER global_here%TOUTFE =',F8.3,&
+        ' global_here%DAY(S) RELATIVE',/,9X,'TO THE STARTING TIME OR',&
         I9,' TIME STEPS INTO THE SIMULATION',&
         //,5X,'INFORMATION WILL BE SPOOLED TO UNIT 61 EVERY',&
-        ' NSPOOLE =',I8,' TIME STEPS')
-         IF(ABS(NOUTE).EQ.1) WRITE(16,3005)
+        ' global_here%NSPOOLE =',I8,' TIME STEPS')
+         IF(ABS(global_here%NOUTE).EQ.1) WRITE(16,3005)
  3005    FORMAT(/,5X,'UNIT 61 FORMAT WILL BE ASCII')
-         IF(ABS(NOUTE).EQ.2) WRITE(16,3006)
+         IF(ABS(global_here%NOUTE).EQ.2) WRITE(16,3006)
  3006    FORMAT(/,5X,'UNIT 61 FORMAT WILL BE BINARY')
       ENDIF
 
-!.... REGARDLESS OF WHETHER NOUTE=0, READ IN THE NUMBER OF ELEVATION
+!.... REGARDLESS OF WHETHER global_here%NOUTE=0, READ IN THE NUMBER OF ELEVATION
 !.... RECORDING STATIONS
 
-      READ(15,*) NSTAE
-      WRITE(16,3007) NSTAE
+      READ(15,*) global_here%NSTAE
+      WRITE(16,3007) global_here%NSTAE
  3007 FORMAT(///,5X,'NUMBER OF INPUT ELEVATION RECORDING STATIONS = ',&
      I5)
 
-      IF(NSTAE.GT.0) THEN
-         IF(ICS.EQ.1) WRITE(16,3008)
- 3008    FORMAT(/,7X,'STATION #   ELEMENT',9X,'X',13X,'Y',/)
-         IF(ICS.EQ.2) WRITE(16,3009)
+      IF(global_here%NSTAE.GT.0) THEN
+         IF(global_here%ICS.EQ.1) WRITE(16,3008)
+ 3008    FORMAT(/,7X,'STATION #   ELEMENT',9X,'global_here%X',13X,'global_here%Y',/)
+         IF(global_here%ICS.EQ.2) WRITE(16,3009)
  3009    FORMAT(/,5X,'STATION   ELEMENT',3X,'LAMBDA(DEG)',&
         4X,'FEA(DEG)',10X,'XCP',12X,'YCP',/)
-         s%MNSTAE = NSTAE
+         s%MNSTAE = global_here%NSTAE
       ENDIF
-      IF (NSTAE.EQ.0) s%MNSTAE = 1
+      IF (global_here%NSTAE.EQ.0) s%MNSTAE = 1
 
 
 !     Allocate arrays dimensioned by MNSTAE
@@ -3202,44 +3202,44 @@
 !.... INPUT COORDINATES OF ELEVATION RECORDING STATIONS THEN COMPUTE
 !.... THE ELEMENT NO. THE STATION LIES IN
 
-      DO I=1,NSTAE
-         NNE(I)=0
-         IF(ICS.EQ.1) THEN
-            READ(15,*) XEL(I),YEL(I)
+      DO I=1,global_here%NSTAE
+         global_here%NNE(I)=0
+         IF(global_here%ICS.EQ.1) THEN
+            READ(15,*) global_here%XEL(I),global_here%YEL(I)
          ELSE
-            READ(15,*) SLEL(I),SFEL(I)
-            SLEL(I)=SLEL(I)*DEG2RAD
-            SFEL(I)=SFEL(I)*DEG2RAD
-            CALL CPP(XEL(I),YEL(I),SLEL(I),SFEL(I),SLAM0,SFEA0)
+            READ(15,*) global_here%SLEL(I),global_here%SFEL(I)
+            global_here%SLEL(I)=global_here%SLEL(I)*DEG2RAD
+            global_here%SFEL(I)=global_here%SFEL(I)*DEG2RAD
+            CALL CPP(global_here%XEL(I),global_here%YEL(I),global_here%SLEL(I),global_here%SFEL(I),global_here%SLAM0,global_here%SFEA0)
          ENDIF
-         AEMIN=1.0E+25
-         KMIN=0
-         DO K=1,NE
-            N1=NM(K,1)
-            N2=NM(K,2)
-            N3=NM(K,3)
-            X1=X(N1)
-            X2=X(N2)
-            X3=X(N3)
-            X4=XEL(I)
-            Y1=Y(N1)
-            Y2=Y(N2)
-            Y3=Y(N3)
-            Y4=YEL(I)
-            A1=(X4-X3)*(Y2-Y3)+(X2-X3)*(Y3-Y4)
-            A2=(X4-X1)*(Y3-Y1)-(Y4-Y1)*(X3-X1)
-            A3=(Y4-Y1)*(X2-X1)-(X4-X1)*(Y2-Y1)
-            AA=ABS(A1)+ABS(A2)+ABS(A3)
-            AE=ABS(AA-AREAS(K))/AREAS(K)
-            IF(AE.LT.AEMIN) THEN
-               AEMIN=AE
-               KMIN=K
+         global_here%AEMIN=1.0E+25
+         global_here%KMIN=0
+         DO K=1,global_here%NE
+            global_here%N1=global_here%NM(K,1)
+            global_here%N2=global_here%NM(K,2)
+            global_here%N3=global_here%NM(K,3)
+            global_here%X1=global_here%X(global_here%N1)
+            global_here%X2=global_here%X(global_here%N2)
+            global_here%X3=global_here%X(global_here%N3)
+            global_here%X4=global_here%XEL(I)
+            global_here%Y1=global_here%Y(global_here%N1)
+            global_here%Y2=global_here%Y(global_here%N2)
+            global_here%Y3=global_here%Y(global_here%N3)
+            global_here%Y4=global_here%YEL(I)
+            global_here%A1=(global_here%X4-global_here%X3)*(global_here%Y2-global_here%Y3)+(global_here%X2-global_here%X3)*(global_here%Y3-global_here%Y4)
+            global_here%A2=(global_here%X4-global_here%X1)*(global_here%Y3-global_here%Y1)-(global_here%Y4-global_here%Y1)*(global_here%X3-global_here%X1)
+            global_here%A3=(global_here%Y4-global_here%Y1)*(global_here%X2-global_here%X1)-(global_here%X4-global_here%X1)*(global_here%Y2-global_here%Y1)
+            global_here%AA=ABS(global_here%A1)+ABS(global_here%A2)+ABS(global_here%A3)
+            global_here%AE=ABS(global_here%AA-global_here%AREAS(K))/global_here%AREAS(K)
+            IF(global_here%AE.LT.global_here%AEMIN) THEN
+               global_here%AEMIN=global_here%AE
+               global_here%KMIN=K
             ENDIF
-            IF(AE.LT.1.0E-5) NNE(I)=K
+            IF(global_here%AE.LT.1.0E-5) global_here%NNE(I)=K
          END DO
 
-         IF(NNE(I).EQ.0) THEN
-            IF(NSCREEN.EQ.1.AND.s%MYPROC.EQ.0) WRITE(6,9784) I
+         IF(global_here%NNE(I).EQ.0) THEN
+            IF(global_here%NSCREEN.EQ.1.AND.s%MYPROC.EQ.0) WRITE(6,9784) I
             WRITE(16,9784) I
  9784       FORMAT(///,1X,'!!!!!!!!!!  WARNING - NONFATAL ',&
            'INPUT ERROR  !!!!!!!!!',//&
@@ -3247,18 +3247,18 @@
            ' WITHIN ANY ELEMENT IN THE DEFINED',&
            /,1X,'COMPUTATIONAL DOMAIN,   PLEASE CHECK THE INPUT',&
            ' COORDINATES FOR THIS STATION')
-            IF(NFOVER.EQ.1) THEN
-               IF(NSCREEN.EQ.1.AND.s%MYPROC.EQ.0) WRITE(6,9790) AEMIN
-               WRITE(16,9790) AEMIN
+            IF(global_here%NFOVER.EQ.1) THEN
+               IF(global_here%NSCREEN.EQ.1.AND.s%MYPROC.EQ.0) WRITE(6,9790) global_here%AEMIN
+               WRITE(16,9790) global_here%AEMIN
  9790          FORMAT(/,1X,'PROGRAM WILL ESTIMATE NEAREST ELEMENT',&
               /,1X,'PROXIMITY INDEX FOR THIS STATION EQUALS ',E15.6,&
               //,1X,'!!!!!! EXECUTION WILL CONTINUE !!!!!!',//)
-               NNE(I)=KMIN
+               global_here%NNE(I)=global_here%KMIN
             ELSE
-               IF(NSCREEN.EQ.1.AND.s%MYPROC.EQ.0) WRITE(6,9791) AEMIN
-               WRITE(16,9791) AEMIN
+               IF(global_here%NSCREEN.EQ.1.AND.s%MYPROC.EQ.0) WRITE(6,9791) global_here%AEMIN
+               WRITE(16,9791) global_here%AEMIN
  9791          FORMAT(/,1X,'PROGRAM WILL NOT CORRECT ERROR ',&
-              'SINCE NON-FATAL ERROR OVERIDE OPTION, NFOVER,',&
+              'SINCE NON-FATAL ERROR OVERIDE OPTION, global_here%NFOVER,',&
           /,1X,'HAS BEEN SELECTED EQUAL TO 0',&
           /,1X,'PROXIMITY INDEX FOR THIS STATION EQUALS ',E15.6,&
           //,1X,'!!!!!! EXECUTION WILL NOW BE TERMINATED !!!!!!',&
@@ -3267,31 +3267,31 @@
             ENDIF
          ENDIF
 
-         IF(ICS.EQ.1) THEN
-            WRITE(16,1880) I,NNE(I),XEL(I),YEL(I)
+         IF(global_here%ICS.EQ.1) THEN
+            WRITE(16,1880) I,global_here%NNE(I),global_here%XEL(I),global_here%YEL(I)
  1880       FORMAT(8X,I3,6X,I7,2(2X,F14.2))
          ELSE
-            WRITE(16,1883) I,NNE(I),SLEL(I)*RAD2DEG,&
-           SFEL(I)*RAD2DEG,XEL(I),YEL(I)
+            WRITE(16,1883) I,global_here%NNE(I),global_here%SLEL(I)*RAD2DEG,&
+           global_here%SFEL(I)*RAD2DEG,global_here%XEL(I),global_here%YEL(I)
  1883       FORMAT(6X,I3,4X,I7,2(2X,F13.8),2X,2(1X,F13.2))
          ENDIF
 
 !.... PRE-COMPUTE INFORMATION REQUIRED TO INTERPOLATE AT ELEV. RECORDING STATIONS
 
-         N1=NM(NNE(I),1)
-         N2=NM(NNE(I),2)
-         N3=NM(NNE(I),3)
-         X1=X(N1)
-         X2=X(N2)
-         X3=X(N3)
-         X4=XEL(I)
-         Y1=Y(N1)
-         Y2=Y(N2)
-         Y3=Y(N3)
-         Y4=YEL(I)
-         STAIE1(I)=((X4-X3)*(Y2-Y3)+(X2-X3)*(Y3-Y4))/AREAS(NNE(I))
-         STAIE2(I)=((X4-X1)*(Y3-Y1)-(Y4-Y1)*(X3-X1))/AREAS(NNE(I))
-         STAIE3(I)=(-(X4-X1)*(Y2-Y1)+(Y4-Y1)*(X2-X1))/AREAS(NNE(I))
+         global_here%N1=global_here%NM(global_here%NNE(I),1)
+         global_here%N2=global_here%NM(global_here%NNE(I),2)
+         global_here%N3=global_here%NM(global_here%NNE(I),3)
+         global_here%X1=global_here%X(global_here%N1)
+         global_here%X2=global_here%X(global_here%N2)
+         global_here%X3=global_here%X(global_here%N3)
+         global_here%X4=global_here%XEL(I)
+         global_here%Y1=global_here%Y(global_here%N1)
+         global_here%Y2=global_here%Y(global_here%N2)
+         global_here%Y3=global_here%Y(global_here%N3)
+         global_here%Y4=global_here%YEL(I)
+         global_here%STAIE1(I)=((global_here%X4-global_here%X3)*(global_here%Y2-global_here%Y3)+(global_here%X2-global_here%X3)*(global_here%Y3-global_here%Y4))/global_here%AREAS(global_here%NNE(I))
+         global_here%STAIE2(I)=((global_here%X4-global_here%X1)*(global_here%Y3-global_here%Y1)-(global_here%Y4-global_here%Y1)*(global_here%X3-global_here%X1))/global_here%AREAS(global_here%NNE(I))
+         global_here%STAIE3(I)=(-(global_here%X4-global_here%X1)*(global_here%Y2-global_here%Y1)+(global_here%Y4-global_here%Y1)*(global_here%X2-global_here%X1))/global_here%AREAS(global_here%NNE(I))
 
       END DO
 
@@ -3299,32 +3299,32 @@
 !...  INPUT INFORMATION FOR VELOCITY RECORDING STATIONS
 !...  
 
-!.... READ IN NOUTV,TOUTSV,TOUTFV,NSPOOLV : IF NOUTV<>0,INTERPOLATED VELOCITIES AT
-!.... VELOCITY STATIONS ARE SPOOLED TO UNIT 62 EVERY NSPOOLV TIME STEPS BETWEEN
-!.... TIMES TOUTSV AND TOUTFV; IF ABS(NOUTV)=2, OUTPUT WILL BE BINARY
+!.... READ IN global_here%NOUTV,global_here%TOUTSV,global_here%TOUTFV,global_here%NSPOOLV : IF global_here%NOUTV<>0,INTERPOLATED VELOCITIES AT
+!.... VELOCITY STATIONS ARE SPOOLED TO UNIT 62 EVERY global_here%NSPOOLV TIME STEPS BETWEEN
+!.... TIMES global_here%TOUTSV AND global_here%TOUTFV; IF ABS(global_here%NOUTV)=2, OUTPUT WILL BE BINARY
 
-      READ(15,*) NOUTV,TOUTSV,TOUTFV,NSPOOLV
-      WRITE(16,3101) NOUTV
+      READ(15,*) global_here%NOUTV,global_here%TOUTSV,global_here%TOUTFV,global_here%NSPOOLV
+      WRITE(16,3101) global_here%NOUTV
  3101 FORMAT(////,1X,'VELOCITY RECORDING STATION OUTPUT : ',&
-     //,5X,'NOUTV = ',I2)
+     //,5X,'global_here%NOUTV = ',I2)
 
-!.... CHECK INPUT PARAMETER NOUTV
+!.... CHECK INPUT PARAMETER global_here%NOUTV
 
-      IF(ABS(NOUTV).GT.2) THEN
-         IF(NSCREEN.EQ.1.AND.s%MYPROC.EQ.0) WRITE(6,3102)
+      IF(ABS(global_here%NOUTV).GT.2) THEN
+         IF(global_here%NSCREEN.EQ.1.AND.s%MYPROC.EQ.0) WRITE(6,3102)
          WRITE(16,3102)
  3102    FORMAT(////,1X,'!!!!!!!!!!  WARNING - FATAL ERROR !!!!!!!!!',&
         //,1X,'YOUR SELECTION OF THE UNIT 15 INPUT PARAMETER',&
-        ' NOUTV',&
+        ' global_here%NOUTV',&
         /,1X,'IS NOT AN ALLOWABLE VALUE.  CHECK YOUR INPUT!!')
-         IF(NSCREEN.EQ.1.AND.s%MYPROC.EQ.0) WRITE(6,9973)
+         IF(global_here%NSCREEN.EQ.1.AND.s%MYPROC.EQ.0) WRITE(6,9973)
          WRITE(16,9973)
          STOP
       ENDIF
 
 !.... IF STATION VELOCITY OUTPUT WILL NOT BE GENERATED
 
-      IF(NOUTV.EQ.0) THEN
+      IF(global_here%NOUTV.EQ.0) THEN
          WRITE(16,3103)
  3103    FORMAT(///,5X,'NO OUTPUT WILL BE SPOOLED AT VELOCITY',&
         ' RECORDING STATIONS')
@@ -3332,53 +3332,53 @@
 
 !.... IF STATION VELOCITY OUTPUT WILL BE GENERATED
 
-      IF(NOUTV.NE.0) THEN
+      IF(global_here%NOUTV.global_here%NE.0) THEN
 
-!......COMPUTE NTCYSV, NTCYFV, WHICH = TOUTSV AND TOUTFV IN TIME STEPS
+!......COMPUTE global_here%NTCYSV, global_here%NTCYFV, WHICH = global_here%TOUTSV AND global_here%TOUTFV IN TIME STEPS
 
-         NTCYSV=INT((TOUTSV-STATIM)*(86400.D0/DTDP) + 0.5d0)
-         NTCYFV=INT((TOUTFV-STATIM)*(86400.D0/DTDP) + 0.5d0)
-         IF(NTCYFV.GT.NT) NTCYFV=NT
+         global_here%NTCYSV=INT((global_here%TOUTSV-global_here%STATIM)*(86400.D0/global_here%DTDP) + 0.5d0)
+         global_here%NTCYFV=INT((global_here%TOUTFV-global_here%STATIM)*(86400.D0/global_here%DTDP) + 0.5d0)
+         IF(global_here%NTCYFV.GT.global_here%NT) global_here%NTCYFV=global_here%NT
 
-!......CALCULATE NTRSPV = THE NO. OF DATA SETS TO BE SPOOLED TO UNIT 62
+!......CALCULATE global_here%NTRSPV = THE NO. OF DATA SETS TO BE SPOOLED TO UNIT 62
 
-         IF(NSPOOLV.EQ.0) NTRSPV=0
-         IF(NSPOOLV.NE.0) NTRSPV=INT((NTCYFV-NTCYSV)/NSPOOLV)
+         IF(global_here%NSPOOLV.EQ.0) global_here%NTRSPV=0
+         IF(global_here%NSPOOLV.global_here%NE.0) global_here%NTRSPV=INT((global_here%NTCYFV-global_here%NTCYSV)/global_here%NSPOOLV)
 
-!......WRITE NOUTV,TOUTSV,TOUTFV,NTCYSV,NTCYFV,NSPOOLV TO UNIT 16
+!......WRITE global_here%NOUTV,global_here%TOUTSV,global_here%TOUTFV,global_here%NTCYSV,global_here%NTCYFV,global_here%NSPOOLV TO UNIT 16
 
-         WRITE(16,3104) TOUTSV,NTCYSV,TOUTFV,NTCYFV,NSPOOLV
- 3104    FORMAT(/,5X,'DATA RECORDS WILL START AFTER TOUTSV =',F8.3,&
-        ' DAY(S) RELATIVE',/,9X,'TO THE STARTING TIME OR',&
+         WRITE(16,3104) global_here%TOUTSV,global_here%NTCYSV,global_here%TOUTFV,global_here%NTCYFV,global_here%NSPOOLV
+ 3104    FORMAT(/,5X,'DATA RECORDS WILL START AFTER global_here%TOUTSV =',F8.3,&
+        ' global_here%DAY(S) RELATIVE',/,9X,'TO THE STARTING TIME OR',&
         I9,' TIME STEPS INTO THE SIMULATION',&
-        //,5X,'DATA RECORDS WILL STOP AFTER TOUTFV =',F8.3,&
-        ' DAY(S) RELATIVE',/,9X,'TO THE STARTING TIME OR',&
+        //,5X,'DATA RECORDS WILL STOP AFTER global_here%TOUTFV =',F8.3,&
+        ' global_here%DAY(S) RELATIVE',/,9X,'TO THE STARTING TIME OR',&
         I9,' TIME STEPS INTO THE SIMULATION',&
         //,5X,'INFORMATION WILL BE SPOOLED TO UNIT 62 EVERY ',&
-        ' NSPOOLV =',I8,' TIME STEPS')
-         IF(ABS(NOUTV).EQ.1) WRITE(16,3105)
+        ' global_here%NSPOOLV =',I8,' TIME STEPS')
+         IF(ABS(global_here%NOUTV).EQ.1) WRITE(16,3105)
  3105    FORMAT(/,5X,'UNIT 62 FORMAT WILL BE ASCII')
-         IF(ABS(NOUTV).EQ.2) WRITE(16,3106)
+         IF(ABS(global_here%NOUTV).EQ.2) WRITE(16,3106)
  3106    FORMAT(/,5X,'UNIT 62 FORMAT WILL BE BINARY')
       ENDIF
 
-!.... REGARDLESS OF WHETHER NOUTV=0, READ IN THE NUMBER OF VELOCITY
+!.... REGARDLESS OF WHETHER global_here%NOUTV=0, READ IN THE NUMBER OF VELOCITY
 !.... RECORDING STATIONS
 
-      READ(15,*) NSTAV
-      WRITE(16,3107) NSTAV
+      READ(15,*) global_here%NSTAV
+      WRITE(16,3107) global_here%NSTAV
  3107 FORMAT(////,5X,'NUMBER OF INPUT VELOCITY RECORDING STATIONS = ',&
      I5)
 
-      IF(NSTAV.GT.0) THEN
-         IF(ICS.EQ.1) WRITE(16,3108)
- 3108    FORMAT(/,7X,'STATION #   ELEMENT',9X,'X',13X,'Y',/)
-         IF(ICS.EQ.2) WRITE(16,3109)
+      IF(global_here%NSTAV.GT.0) THEN
+         IF(global_here%ICS.EQ.1) WRITE(16,3108)
+ 3108    FORMAT(/,7X,'STATION #   ELEMENT',9X,'global_here%X',13X,'global_here%Y',/)
+         IF(global_here%ICS.EQ.2) WRITE(16,3109)
  3109    FORMAT(/,5X,'STATION   ELEMENT',3X,'LAMBDA(DEG)',&
         4X,'FEA(DEG)',10X,'XCP',12X,'YCP',/)
-         s%MNSTAV = NSTAV
+         s%MNSTAV = global_here%NSTAV
       ENDIF
-      IF (NSTAV.EQ.0) s%MNSTAV = 1
+      IF (global_here%NSTAV.EQ.0) s%MNSTAV = 1
 
 !     Allocate arrays dimensioned by MNSTAV
       call alloc_main8(s)
@@ -3386,44 +3386,44 @@
 !.... INPUT COORDINATES OF VELOCITY RECORDING STATIONS
 !.... THEN COMPUTE ELEMENT NO. WITHIN WHICH STATION LIES
 
-      DO I=1,NSTAV
-         NNV(I)=0
-         IF(ICS.EQ.1) THEN
-            READ(15,*) XEV(I),YEV(I)
+      DO I=1,global_here%NSTAV
+         global_here%NNV(I)=0
+         IF(global_here%ICS.EQ.1) THEN
+            READ(15,*) global_here%XEV(I),global_here%YEV(I)
          ELSE
-            READ(15,*) SLEV(I),SFEV(I)
-            SLEV(I)=SLEV(I)*DEG2RAD
-            SFEV(I)=SFEV(I)*DEG2RAD
-            CALL CPP(XEV(I),YEV(I),SLEV(I),SFEV(I),SLAM0,SFEA0)
+            READ(15,*) global_here%SLEV(I),global_here%SFEV(I)
+            global_here%SLEV(I)=global_here%SLEV(I)*DEG2RAD
+            global_here%SFEV(I)=global_here%SFEV(I)*DEG2RAD
+            CALL CPP(global_here%XEV(I),global_here%YEV(I),global_here%SLEV(I),global_here%SFEV(I),global_here%SLAM0,global_here%SFEA0)
          ENDIF
-         AEMIN=1.0E+25
-         KMIN=0
-         DO K=1,NE
-            N1=NM(K,1)
-            N2=NM(K,2)
-            N3=NM(K,3)
-            X1=X(N1)
-            X2=X(N2)
-            X3=X(N3)
-            X4=XEV(I)
-            Y1=Y(N1)
-            Y2=Y(N2)
-            Y3=Y(N3)
-            Y4=YEV(I)
-            A1=(X4-X3)*(Y2-Y3)+(X2-X3)*(Y3-Y4)
-            A2=(X4-X1)*(Y3-Y1)-(Y4-Y1)*(X3-X1)
-            A3=(Y4-Y1)*(X2-X1)-(X4-X1)*(Y2-Y1)
-            AA=ABS(A1)+ABS(A2)+ABS(A3)
-            AE=ABS(AA-AREAS(K))/AREAS(K)
-            IF(AE.LT.AEMIN) THEN
-               AEMIN=AE
-               KMIN=K
+         global_here%AEMIN=1.0E+25
+         global_here%KMIN=0
+         DO K=1,global_here%NE
+            global_here%N1=global_here%NM(K,1)
+            global_here%N2=global_here%NM(K,2)
+            global_here%N3=global_here%NM(K,3)
+            global_here%X1=global_here%X(global_here%N1)
+            global_here%X2=global_here%X(global_here%N2)
+            global_here%X3=global_here%X(global_here%N3)
+            global_here%X4=global_here%XEV(I)
+            global_here%Y1=global_here%Y(global_here%N1)
+            global_here%Y2=global_here%Y(global_here%N2)
+            global_here%Y3=global_here%Y(global_here%N3)
+            global_here%Y4=global_here%YEV(I)
+            global_here%A1=(global_here%X4-global_here%X3)*(global_here%Y2-global_here%Y3)+(global_here%X2-global_here%X3)*(global_here%Y3-global_here%Y4)
+            global_here%A2=(global_here%X4-global_here%X1)*(global_here%Y3-global_here%Y1)-(global_here%Y4-global_here%Y1)*(global_here%X3-global_here%X1)
+            global_here%A3=(global_here%Y4-global_here%Y1)*(global_here%X2-global_here%X1)-(global_here%X4-global_here%X1)*(global_here%Y2-global_here%Y1)
+            global_here%AA=ABS(global_here%A1)+ABS(global_here%A2)+ABS(global_here%A3)
+            global_here%AE=ABS(global_here%AA-global_here%AREAS(K))/global_here%AREAS(K)
+            IF(global_here%AE.LT.global_here%AEMIN) THEN
+               global_here%AEMIN=global_here%AE
+               global_here%KMIN=K
             ENDIF
-            IF(AE.LT.1.0E-5) NNV(I)=K
+            IF(global_here%AE.LT.1.0E-5) global_here%NNV(I)=K
          END DO
 
-         IF(NNV(I).EQ.0) THEN
-            IF(NSCREEN.EQ.1.AND.s%MYPROC.EQ.0) WRITE(6,9786) I
+         IF(global_here%NNV(I).EQ.0) THEN
+            IF(global_here%NSCREEN.EQ.1.AND.s%MYPROC.EQ.0) WRITE(6,9786) I
             WRITE(16,9786) I
  9786       FORMAT(///,1X,'!!!!!!!!!!  WARNING - NONFATAL ',&
            'INPUT ERROR  !!!!!!!!!',//&
@@ -3431,40 +3431,40 @@
            ,' WITHIN ANY ELEMENT IN THE DEFINED',&
            /,1X,'COMPUTATIONAL DOMAIN,   PLEASE CHECK THE INPUT'&
            ,' COORDINATES FOR THIS STATION')
-            IF(NFOVER.EQ.1) THEN
-               IF(NSCREEN.EQ.1.AND.s%MYPROC.EQ.0) WRITE(6,9790) AEMIN
-               WRITE(16,9790) AEMIN
-               NNV(I)=KMIN
+            IF(global_here%NFOVER.EQ.1) THEN
+               IF(global_here%NSCREEN.EQ.1.AND.s%MYPROC.EQ.0) WRITE(6,9790) global_here%AEMIN
+               WRITE(16,9790) global_here%AEMIN
+               global_here%NNV(I)=global_here%KMIN
             ELSE
-               IF(NSCREEN.EQ.1.AND.s%MYPROC.EQ.0) WRITE(6,9791) AEMIN
-               WRITE(16,9791) AEMIN
+               IF(global_here%NSCREEN.EQ.1.AND.s%MYPROC.EQ.0) WRITE(6,9791) global_here%AEMIN
+               WRITE(16,9791) global_here%AEMIN
                STOP
             ENDIF
          ENDIF
 
-         IF(ICS.EQ.1) THEN
-            WRITE(16,1880) I,NNV(I),XEV(I),YEV(I)
+         IF(global_here%ICS.EQ.1) THEN
+            WRITE(16,1880) I,global_here%NNV(I),global_here%XEV(I),global_here%YEV(I)
          ELSE
-            WRITE(16,1883) I,NNV(I),SLEV(I)*RAD2DEG,SFEV(I)*RAD2DEG,&
-           XEV(I),YEV(I)
+            WRITE(16,1883) I,global_here%NNV(I),global_here%SLEV(I)*RAD2DEG,global_here%SFEV(I)*RAD2DEG,&
+           global_here%XEV(I),global_here%YEV(I)
          ENDIF
 
-!.... PRE-COMPUTE INFORMATION REQUIRED TO INTERPOLATE AT VEL. RECORDING STATIONS
+!.... PRE-COMPUTE INFORMATION REQUIRED TO INTERPOLATE AT global_here%VEL. RECORDING STATIONS
 
-         N1=NM(NNV(I),1)
-         N2=NM(NNV(I),2)
-         N3=NM(NNV(I),3)
-         X1=X(N1)
-         X2=X(N2)
-         X3=X(N3)
-         X4=XEV(I)
-         Y1=Y(N1)
-         Y2=Y(N2)
-         Y3=Y(N3)
-         Y4=YEV(I)
-         STAIV1(I)=((X4-X3)*(Y2-Y3)+(X2-X3)*(Y3-Y4))/AREAS(NNV(I))
-         STAIV2(I)=((X4-X1)*(Y3-Y1)-(Y4-Y1)*(X3-X1))/AREAS(NNV(I))
-         STAIV3(I)=(-(X4-X1)*(Y2-Y1)+(Y4-Y1)*(X2-X1))/AREAS(NNV(I))
+         global_here%N1=global_here%NM(global_here%NNV(I),1)
+         global_here%N2=global_here%NM(global_here%NNV(I),2)
+         global_here%N3=global_here%NM(global_here%NNV(I),3)
+         global_here%X1=global_here%X(global_here%N1)
+         global_here%X2=global_here%X(global_here%N2)
+         global_here%X3=global_here%X(global_here%N3)
+         global_here%X4=global_here%XEV(I)
+         global_here%Y1=global_here%Y(global_here%N1)
+         global_here%Y2=global_here%Y(global_here%N2)
+         global_here%Y3=global_here%Y(global_here%N3)
+         global_here%Y4=global_here%YEV(I)
+         global_here%STAIV1(I)=((global_here%X4-global_here%X3)*(global_here%Y2-global_here%Y3)+(global_here%X2-global_here%X3)*(global_here%Y3-global_here%Y4))/global_here%AREAS(global_here%NNV(I))
+         global_here%STAIV2(I)=((global_here%X4-global_here%X1)*(global_here%Y3-global_here%Y1)-(global_here%Y4-global_here%Y1)*(global_here%X3-global_here%X1))/global_here%AREAS(global_here%NNV(I))
+         global_here%STAIV3(I)=(-(global_here%X4-global_here%X1)*(global_here%Y2-global_here%Y1)+(global_here%Y4-global_here%Y1)*(global_here%X2-global_here%X1))/global_here%AREAS(global_here%NNV(I))
 
       END DO
 
@@ -3472,35 +3472,35 @@
 !...  IF TRANSPORT IS INCLUDED IN THE RUN, INPUT INFORMATION FOR CONCENTRATION
 !...  RECORDING STATIONS
 !...  
-      NOUTC=0
-      IF(IM.EQ.10) THEN
+      global_here%NOUTC=0
+      IF(global_here%IM.EQ.10) THEN
 
-!.....READ IN NOUTC,TOUTSC,TOUTFC,NSPOOLC : IF NOUTC<>0,INTERPOLATED
-!.....CONCENTRATIONS ARE SPOOLED TO UNIT 81 EVERY NSPOOLC TIME STEPS
-!.....BETWEEN TIMES TOUTSC AND TOUTFC; IF ABS(NOUTC)=2, OUTPUT WILL BE BINARY
+!.....READ IN global_here%NOUTC,global_here%TOUTSC,global_here%TOUTFC,global_here%NSPOOLC : IF global_here%NOUTC<>0,INTERPOLATED
+!.....CONCENTRATIONS ARE SPOOLED TO UNIT 81 EVERY global_here%NSPOOLC TIME STEPS
+!.....BETWEEN TIMES global_here%TOUTSC AND global_here%TOUTFC; IF ABS(global_here%NOUTC)=2, OUTPUT WILL BE BINARY
 
-         READ(15,*) NOUTC,TOUTSC,TOUTFC,NSPOOLC
-         WRITE(16,3201) NOUTC
+         READ(15,*) global_here%NOUTC,global_here%TOUTSC,global_here%TOUTFC,global_here%NSPOOLC
+         WRITE(16,3201) global_here%NOUTC
  3201    FORMAT(///,1X,'CONCENTRATION RECORDING STATION OUTPUT : ',&
-        //,5X,'NOUTC = ',I2)
+        //,5X,'global_here%NOUTC = ',I2)
 
-!.....CHECK INPUT PARAMETER NOUTC
+!.....CHECK INPUT PARAMETER global_here%NOUTC
 
-         IF(ABS(NOUTC).GT.2) THEN
-            IF(NSCREEN.EQ.1.AND.s%MYPROC.EQ.0) WRITE(6,3202)
+         IF(ABS(global_here%NOUTC).GT.2) THEN
+            IF(global_here%NSCREEN.EQ.1.AND.s%MYPROC.EQ.0) WRITE(6,3202)
             WRITE(16,3202)
  3202       FORMAT(////,1X,'!!!!!!!!!!  WARNING - FATAL ERROR !!!!!!!!!',&
            //,1X,'YOUR SELECTION OF THE UNIT 15 INPUT PARAMETER',&
-           ' NOUTC',&
+           ' global_here%NOUTC',&
            /,1X,'IS NOT AN ALLOWABLE VALUE.  CHECK YOUR INPUT!!')
-            IF(NSCREEN.EQ.1.AND.s%MYPROC.EQ.0) WRITE(6,9973)
+            IF(global_here%NSCREEN.EQ.1.AND.s%MYPROC.EQ.0) WRITE(6,9973)
             WRITE(16,9973)
             STOP
          ENDIF
 
 !.....IF STATION CONCENTRATION OUTPUT WILL NOT BE GENERATED
 
-         IF(NOUTC.EQ.0) THEN
+         IF(global_here%NOUTC.EQ.0) THEN
             WRITE(16,3203)
  3203       FORMAT(/,5X,'NO OUTPUT WILL BE SPOOLED AT CONCENTRATION',&
            ' RECORDING STATIONS')
@@ -3508,52 +3508,52 @@
 
 !.....IF STATION CONCENTRATION OUTPUT WILL BE GENERATED
 
-         NSTAC = 0
-         IF(NOUTC.NE.0) THEN
+         global_here%NSTAC = 0
+         IF(global_here%NOUTC.global_here%NE.0) THEN
 
-!.......COMPUTE NTCYSC, NTCYFC, WHICH = TOUTSC AND TOUTFC IN TIMESTEPS
+!.......COMPUTE global_here%NTCYSC, global_here%NTCYFC, WHICH = global_here%TOUTSC AND global_here%TOUTFC IN TIMESTEPS
 
-            NTCYSC=INT((TOUTSC-STATIM)*(86400.D0/DTDP) + 0.5d0)
-            NTCYFC=INT((TOUTFC-STATIM)*(86400.D0/DTDP) + 0.5d0)
-            IF(NTCYFC.GT.NT) NTCYFC=NT
+            global_here%NTCYSC=INT((global_here%TOUTSC-global_here%STATIM)*(86400.D0/global_here%DTDP) + 0.5d0)
+            global_here%NTCYFC=INT((global_here%TOUTFC-global_here%STATIM)*(86400.D0/global_here%DTDP) + 0.5d0)
+            IF(global_here%NTCYFC.GT.global_here%NT) global_here%NTCYFC=global_here%NT
 
-!.......COMPUTE NTRSPC = THE NO. OF DATA SETS TO BE SPOOLED TO UNIT 81
+!.......COMPUTE global_here%NTRSPC = THE NO. OF DATA SETS TO BE SPOOLED TO UNIT 81
 
-            IF(NSPOOLC.EQ.0) NTRSPC=0
-            IF(NSPOOLC.NE.0) NTRSPC=INT((NTCYFC-NTCYSC)/NSPOOLC)
+            IF(global_here%NSPOOLC.EQ.0) global_here%NTRSPC=0
+            IF(global_here%NSPOOLC.global_here%NE.0) global_here%NTRSPC=INT((global_here%NTCYFC-global_here%NTCYSC)/global_here%NSPOOLC)
 
-!.......WRITE TOUTSC,TOUTFC,NTCYSC,NTCYFC,NSPOOLC TO UNIT 16
+!.......WRITE global_here%TOUTSC,global_here%TOUTFC,global_here%NTCYSC,global_here%NTCYFC,global_here%NSPOOLC TO UNIT 16
 
-            WRITE(16,3204) TOUTSC,NTCYSC,TOUTFC,NTCYFC,NSPOOLC
- 3204       FORMAT(/,5X,'DATA RECORDS WILL START AFTER TOUTSC =',F8.3,&
-           ' DAY(S) RELATIVE',/,9X,'TO THE STARTING TIME OR',&
+            WRITE(16,3204) global_here%TOUTSC,global_here%NTCYSC,global_here%TOUTFC,global_here%NTCYFC,global_here%NSPOOLC
+ 3204       FORMAT(/,5X,'DATA RECORDS WILL START AFTER global_here%TOUTSC =',F8.3,&
+           ' global_here%DAY(S) RELATIVE',/,9X,'TO THE STARTING TIME OR',&
            I9,' TIME STEPS INTO THE SIMULATION',&
-           //,5X,'DATA RECORDS WILL STOP AFTER TOUTFC =',F8.3,&
-           ' DAY(S) RELATIVE',/,9X,'TO THE STARTING TIME OR',&
+           //,5X,'DATA RECORDS WILL STOP AFTER global_here%TOUTFC =',F8.3,&
+           ' global_here%DAY(S) RELATIVE',/,9X,'TO THE STARTING TIME OR',&
            I9,' TIME STEPS INTO THE SIMULATION',&
            //,5X,'INFORMATION WILL BE SPOOLED TO UNIT 81 EVERY',&
-           ' NSPOOLC =',I8,' TIME STEPS')
-            IF(ABS(NOUTC).EQ.1) WRITE(16,3205)
+           ' global_here%NSPOOLC =',I8,' TIME STEPS')
+            IF(ABS(global_here%NOUTC).EQ.1) WRITE(16,3205)
  3205       FORMAT(/,5X,'UNIT 81 FORMAT WILL BE ASCII')
-            IF(ABS(NOUTC).EQ.2) WRITE(16,3206)
+            IF(ABS(global_here%NOUTC).EQ.2) WRITE(16,3206)
  3206       FORMAT(/,5X,'UNIT 81 FORMAT WILL BE BINARY')
          ENDIF
 
-!.....REGARDLESS OF WHETHER NOUTC=0, READ IN THE NUMBER OF CONCENTRATION
+!.....REGARDLESS OF WHETHER global_here%NOUTC=0, READ IN THE NUMBER OF CONCENTRATION
 !.....RECORDING STATIONS
 
-         READ(15,*) NSTAC
-         WRITE(16,3207) NSTAC
+         READ(15,*) global_here%NSTAC
+         WRITE(16,3207) global_here%NSTAC
  3207    FORMAT(///,5X,'NUMBER OF INPUT CONCENTRATION RECORDING ',&
         'STATIONS = ',I5)
 
-         IF(NSTAC.GT.0) THEN
-            IF(ICS.EQ.1) WRITE(16,3208)
- 3208       FORMAT(/,7X,'STATION #   ELEMENT',9X,'X',13X,'Y',/)
-            IF(ICS.EQ.2) WRITE(16,3209)
+         IF(global_here%NSTAC.GT.0) THEN
+            IF(global_here%ICS.EQ.1) WRITE(16,3208)
+ 3208       FORMAT(/,7X,'STATION #   ELEMENT',9X,'global_here%X',13X,'global_here%Y',/)
+            IF(global_here%ICS.EQ.2) WRITE(16,3209)
  3209       FORMAT(/,5X,'STATION   ELEMENT',3X,'LAMBDA(DEG)',&
            4X,'FEA(DEG)',10X,'XCP',12X,'YCP',/)
-            s%MNSTAC = NSTAC
+            s%MNSTAC = global_here%NSTAC
          ENDIF
 
 !     Allocate arrays dimensioned by MNSTAC
@@ -3562,44 +3562,44 @@
 !.....INPUT COORDINATES OF CONCENTRATION RECORDING STATIONS
 !.....THEN COMPUTE ELEMENT NO. WITHIN WHICH STATION LIES
 
-         DO I=1,NSTAC
-            NNC(I)=0
-            IF(ICS.EQ.1) THEN
-               READ(15,*) XEC(I),YEC(I)
+         DO I=1,global_here%NSTAC
+            global_here%NNC(I)=0
+            IF(global_here%ICS.EQ.1) THEN
+               READ(15,*) global_here%XEC(I),global_here%YEC(I)
             ELSE
-               READ(15,*) SLEC(I),SFEC(I)
-               SLEC(I)=SLEC(I)*DEG2RAD
-               SFEC(I)=SFEC(I)*DEG2RAD
-               CALL CPP(XEC(I),YEC(I),SLEC(I),SFEC(I),SLAM0,SFEA0)
+               READ(15,*) global_here%SLEC(I),global_here%SFEC(I)
+               global_here%SLEC(I)=global_here%SLEC(I)*DEG2RAD
+               global_here%SFEC(I)=global_here%SFEC(I)*DEG2RAD
+               CALL CPP(global_here%XEC(I),global_here%YEC(I),global_here%SLEC(I),global_here%SFEC(I),global_here%SLAM0,global_here%SFEA0)
             ENDIF
-            AEMIN=1.0E+25
-            KMIN=0
-            DO K=1,NE
-               N1=NM(K,1)
-               N2=NM(K,2)
-               N3=NM(K,3)
-               X1=X(N1)
-               X2=X(N2)
-               X3=X(N3)
-               X4=XEC(I)
-               Y1=Y(N1)
-               Y2=Y(N2)
-               Y3=Y(N3)
-               Y4=YEC(I)
-               A1=(X4-X3)*(Y2-Y3)+(X2-X3)*(Y3-Y4)
-               A2=(X4-X1)*(Y3-Y1)-(Y4-Y1)*(X3-X1)
-               A3=(Y4-Y1)*(X2-X1)-(X4-X1)*(Y2-Y1)
-               AA=ABS(A1)+ABS(A2)+ABS(A3)
-               AE=ABS(AA-AREAS(K))/AREAS(K)
-               IF(AE.LT.AEMIN) THEN
-                  AEMIN=AE
-                  KMIN=K
+            global_here%AEMIN=1.0E+25
+            global_here%KMIN=0
+            DO K=1,global_here%NE
+               global_here%N1=global_here%NM(K,1)
+               global_here%N2=global_here%NM(K,2)
+               global_here%N3=global_here%NM(K,3)
+               global_here%X1=global_here%X(global_here%N1)
+               global_here%X2=global_here%X(global_here%N2)
+               global_here%X3=global_here%X(global_here%N3)
+               global_here%X4=global_here%XEC(I)
+               global_here%Y1=global_here%Y(global_here%N1)
+               global_here%Y2=global_here%Y(global_here%N2)
+               global_here%Y3=global_here%Y(global_here%N3)
+               global_here%Y4=global_here%YEC(I)
+               global_here%A1=(global_here%X4-global_here%X3)*(global_here%Y2-global_here%Y3)+(global_here%X2-global_here%X3)*(global_here%Y3-global_here%Y4)
+               global_here%A2=(global_here%X4-global_here%X1)*(global_here%Y3-global_here%Y1)-(global_here%Y4-global_here%Y1)*(global_here%X3-global_here%X1)
+               global_here%A3=(global_here%Y4-global_here%Y1)*(global_here%X2-global_here%X1)-(global_here%X4-global_here%X1)*(global_here%Y2-global_here%Y1)
+               global_here%AA=ABS(global_here%A1)+ABS(global_here%A2)+ABS(global_here%A3)
+               global_here%AE=ABS(global_here%AA-global_here%AREAS(K))/global_here%AREAS(K)
+               IF(global_here%AE.LT.global_here%AEMIN) THEN
+                  global_here%AEMIN=global_here%AE
+                  global_here%KMIN=K
                ENDIF
-               IF(AE.LT.1.0E-5) NNC(I)=K
+               IF(global_here%AE.LT.1.0E-5) global_here%NNC(I)=K
             END DO
 
-            IF(NNC(I).EQ.0) THEN
-               IF(NSCREEN.EQ.1.AND.s%MYPROC.EQ.0) WRITE(6,9785) I
+            IF(global_here%NNC(I).EQ.0) THEN
+               IF(global_here%NSCREEN.EQ.1.AND.s%MYPROC.EQ.0) WRITE(6,9785) I
                WRITE(16,9785) I
  9785          FORMAT(///,1X,'!!!!!!!!!!  WARNING - NONFATAL INPUT ERROR ',&
           '!!!!!!!!!',//,&
@@ -3607,81 +3607,81 @@
           ,' WITHIN ANY ELEMENT IN THE DEFINED',/,&
           ' COMPUTATIONAL DOMAIN,   PLEASE CHECK THE INPUT',&
           ' COORDINATES FOR THIS STATION')
-               IF(NFOVER.EQ.1) THEN
-                  IF(NSCREEN.EQ.1.AND.s%MYPROC.EQ.0) WRITE(6,9790) AEMIN
-                  WRITE(16,9790) AEMIN
-                  NNC(I)=KMIN
+               IF(global_here%NFOVER.EQ.1) THEN
+                  IF(global_here%NSCREEN.EQ.1.AND.s%MYPROC.EQ.0) WRITE(6,9790) global_here%AEMIN
+                  WRITE(16,9790) global_here%AEMIN
+                  global_here%NNC(I)=global_here%KMIN
                ELSE
-                  IF(NSCREEN.EQ.1.AND.s%MYPROC.EQ.0) WRITE(6,9791) AEMIN
-                  WRITE(16,9791) AEMIN
+                  IF(global_here%NSCREEN.EQ.1.AND.s%MYPROC.EQ.0) WRITE(6,9791) global_here%AEMIN
+                  WRITE(16,9791) global_here%AEMIN
                   STOP
                ENDIF
             ENDIF
 
-            IF(ICS.EQ.1) THEN
-               WRITE(16,1880) I,NNC(I),XEC(I),YEC(I)
+            IF(global_here%ICS.EQ.1) THEN
+               WRITE(16,1880) I,global_here%NNC(I),global_here%XEC(I),global_here%YEC(I)
             ELSE
-               WRITE(16,1883) I,NNC(I),SLEC(I)*RAD2DEG,&
-              SFEC(I)*RAD2DEG,XEC(I),YEC(I)
+               WRITE(16,1883) I,global_here%NNC(I),global_here%SLEC(I)*RAD2DEG,&
+              global_here%SFEC(I)*RAD2DEG,global_here%XEC(I),global_here%YEC(I)
             ENDIF
 
 !.....PRE-COMPUTE INFORMATION REQUIRED TO INTERPOLATE AT CONCENTRATION
 !.....RECORDING STATIONS
 
-            N1=NM(NNC(I),1)
-            N2=NM(NNC(I),2)
-            N3=NM(NNC(I),3)
-            X1=X(N1)
-            X2=X(N2)
-            X3=X(N3)
-            X4=XEL(I)
-            Y1=Y(N1)
-            Y2=Y(N2)
-            Y3=Y(N3)
-            Y4=YEL(I)
-            STAIC1(I)=((X4-X3)*(Y2-Y3)+(X2-X3)*(Y3-Y4))/AREAS(NNC(I))
-            STAIC2(I)=((X4-X1)*(Y3-Y1)-(Y4-Y1)*(X3-X1))/AREAS(NNC(I))
-            STAIC3(I)=(-(X4-X1)*(Y2-Y1)+(Y4-Y1)*(X2-X1))/AREAS(NNC(I))
+            global_here%N1=global_here%NM(global_here%NNC(I),1)
+            global_here%N2=global_here%NM(global_here%NNC(I),2)
+            global_here%N3=global_here%NM(global_here%NNC(I),3)
+            global_here%X1=global_here%X(global_here%N1)
+            global_here%X2=global_here%X(global_here%N2)
+            global_here%X3=global_here%X(global_here%N3)
+            global_here%X4=global_here%XEL(I)
+            global_here%Y1=global_here%Y(global_here%N1)
+            global_here%Y2=global_here%Y(global_here%N2)
+            global_here%Y3=global_here%Y(global_here%N3)
+            global_here%Y4=global_here%YEL(I)
+            global_here%STAIC1(I)=((global_here%X4-global_here%X3)*(global_here%Y2-global_here%Y3)+(global_here%X2-global_here%X3)*(global_here%Y3-global_here%Y4))/global_here%AREAS(global_here%NNC(I))
+            global_here%STAIC2(I)=((global_here%X4-global_here%X1)*(global_here%Y3-global_here%Y1)-(global_here%Y4-global_here%Y1)*(global_here%X3-global_here%X1))/global_here%AREAS(global_here%NNC(I))
+            global_here%STAIC3(I)=(-(global_here%X4-global_here%X1)*(global_here%Y2-global_here%Y1)+(global_here%Y4-global_here%Y1)*(global_here%X2-global_here%X1))/global_here%AREAS(global_here%NNC(I))
 
          END DO
       ENDIF
-      IF (NSTAC.EQ.0) s%MNSTAC = 1
+      IF (global_here%NSTAC.EQ.0) s%MNSTAC = 1
 
 !...  
 !...  IF METEOROLOICAL FORCING IS INCLUDED IN THE RUN, INPUT INFORMATION FOR MET
 !...  RECORDING STATIONS - OUTPUT
 !...  
-      NOUTM=0
-      NSTAM = 0
+      global_here%NOUTM=0
+      global_here%NSTAM = 0
 !     
-      IF(NWS.NE.0) THEN
+      IF(global_here%NWS.global_here%NE.0) THEN
 
-!.....READ IN NOUTM,TOUTSM,TOUTFM,NSPOOLM : IF NOUTM<>0,INTERPOLATED
-!.....MET DATA ARE SPOOLED TO UNITS 71&72 EVERY NSPOOLM TIME STEPS
-!.....BETWEEN TIMES TOUTSM AND TOUTFM; IF ABS(NOUTM)=2, OUTPUT WILL BE BINARY
+!.....READ IN global_here%NOUTM,global_here%TOUTSM,global_here%TOUTFM,global_here%NSPOOLM : IF global_here%NOUTM<>0,INTERPOLATED
+!.....MET DATA ARE SPOOLED TO UNITS 71&72 EVERY global_here%NSPOOLM TIME STEPS
+!.....BETWEEN TIMES global_here%TOUTSM AND global_here%TOUTFM; IF ABS(global_here%NOUTM)=2, OUTPUT WILL BE BINARY
 
-         READ(15,*) NOUTM,TOUTSM,TOUTFM,NSPOOLM
-         WRITE(16,3211) NOUTM
+         READ(15,*) global_here%NOUTM,global_here%TOUTSM,global_here%TOUTFM,global_here%NSPOOLM
+         WRITE(16,3211) global_here%NOUTM
  3211    FORMAT(///,1X,'METEOROLOGICAL RECORDING STATION OUTPUT : ',&
-        //,5X,'NOUTM = ',I2)
+        //,5X,'global_here%NOUTM = ',I2)
 
-!.....CHECK INPUT PARAMETER NOUTM
+!.....CHECK INPUT PARAMETER global_here%NOUTM
 
-         IF(ABS(NOUTM).GT.2) THEN
-            IF(NSCREEN.EQ.1.AND.s%MYPROC.EQ.0) WRITE(6,3212)
+         IF(ABS(global_here%NOUTM).GT.2) THEN
+            IF(global_here%NSCREEN.EQ.1.AND.s%MYPROC.EQ.0) WRITE(6,3212)
             WRITE(16,3202)
  3212       FORMAT(////,1X,'!!!!!!!!!!  WARNING - FATAL ERROR !!!!!!!!!',&
            //,1X,'YOUR SELECTION OF THE UNIT 15 INPUT PARAMETER',&
-           ' NOUTC',&
+           ' global_here%NOUTC',&
            /,1X,'IS NOT AN ALLOWABLE VALUE.  CHECK YOUR INPUT!!')
-            IF(NSCREEN.EQ.1.AND.s%MYPROC.EQ.0) WRITE(6,9973)
+            IF(global_here%NSCREEN.EQ.1.AND.s%MYPROC.EQ.0) WRITE(6,9973)
             WRITE(16,9973)
             STOP
          ENDIF
 
 !.....IF STATION METEOROLOGICAL OUTPUT WILL NOT BE GENERATED
 
-         IF(NOUTM.EQ.0) THEN
+         IF(global_here%NOUTM.EQ.0) THEN
             WRITE(16,3213)
  3213       FORMAT(/,5X,'NO OUTPUT WILL BE SPOOLED AT METEOROLOGICAL',&
            ' RECORDING STATIONS')
@@ -3689,51 +3689,51 @@
 
 !.....IF STATION MET OUTPUT WILL BE GENERATED
 
-         IF(NOUTM.NE.0) THEN
+         IF(global_here%NOUTM.global_here%NE.0) THEN
 
-!.......COMPUTE NTCYSM, NTCYFM, WHICH = TOUTSM AND TOUTFM IN TIMESTEPS
+!.......COMPUTE global_here%NTCYSM, global_here%NTCYFM, WHICH = global_here%TOUTSM AND global_here%TOUTFM IN TIMESTEPS
 
-            NTCYSM=INT((TOUTSM-STATIM)*(86400.D0/DTDP) + 0.5d0)
-            NTCYFM=INT((TOUTFM-STATIM)*(86400.D0/DTDP) + 0.5d0)
-            IF(NTCYFM.GT.NT) NTCYFM=NT
+            global_here%NTCYSM=INT((global_here%TOUTSM-global_here%STATIM)*(86400.D0/global_here%DTDP) + 0.5d0)
+            global_here%NTCYFM=INT((global_here%TOUTFM-global_here%STATIM)*(86400.D0/global_here%DTDP) + 0.5d0)
+            IF(global_here%NTCYFM.GT.global_here%NT) global_here%NTCYFM=global_here%NT
 
-!.......COMPUTE NTRSPM = THE NO. OF DATA SETS TO BE SPOOLED TO UNITS 71&72
+!.......COMPUTE global_here%NTRSPM = THE NO. OF DATA SETS TO BE SPOOLED TO UNITS 71&72
 
-            IF(NSPOOLM.EQ.0) NTRSPM=0
-            IF(NSPOOLM.NE.0) NTRSPM=INT((NTCYFM-NTCYSM)/NSPOOLM)
+            IF(global_here%NSPOOLM.EQ.0) global_here%NTRSPM=0
+            IF(global_here%NSPOOLM.global_here%NE.0) global_here%NTRSPM=INT((global_here%NTCYFM-global_here%NTCYSM)/global_here%NSPOOLM)
 
-!.......WRITE TOUTSM,TOUTFM,NTCYSM,NTCYFM,NSPOOLM TO UNIT 16
+!.......WRITE global_here%TOUTSM,global_here%TOUTFM,global_here%NTCYSM,global_here%NTCYFM,global_here%NSPOOLM TO UNIT 16
 
-            WRITE(16,3214) TOUTSM,NTCYSM,TOUTFM,NTCYFM,NSPOOLM
- 3214       FORMAT(/,5X,'DATA RECORDS WILL START AFTER TOUTSM =',F8.3,&
-           ' DAY(S) RELATIVE',/,9X,'TO THE STARTING TIME OR',&
+            WRITE(16,3214) global_here%TOUTSM,global_here%NTCYSM,global_here%TOUTFM,global_here%NTCYFM,global_here%NSPOOLM
+ 3214       FORMAT(/,5X,'DATA RECORDS WILL START AFTER global_here%TOUTSM =',F8.3,&
+           ' global_here%DAY(S) RELATIVE',/,9X,'TO THE STARTING TIME OR',&
            I9,' TIME STEPS INTO THE SIMULATION',&
-           //,5X,'DATA RECORDS WILL STOP AFTER TOUTFM =',F8.3,&
-           ' DAY(S) RELATIVE',/,9X,'TO THE STARTING TIME OR',&
+           //,5X,'DATA RECORDS WILL STOP AFTER global_here%TOUTFM =',F8.3,&
+           ' global_here%DAY(S) RELATIVE',/,9X,'TO THE STARTING TIME OR',&
            I9,' TIME STEPS INTO THE SIMULATION',&
            //,5X,'INFORMATION WILL BE SPOOLED TO UNITS 71&72',&
-           ' EVERY NSPOOLM =',I8,' TIME STEPS')
-            IF(ABS(NOUTM).EQ.1) WRITE(16,3215)
+           ' EVERY global_here%NSPOOLM =',I8,' TIME STEPS')
+            IF(ABS(global_here%NOUTM).EQ.1) WRITE(16,3215)
  3215       FORMAT(/,5X,'UNITS 71&72 FORMAT WILL BE ASCII')
-            IF(ABS(NOUTM).EQ.2) WRITE(16,3216)
+            IF(ABS(global_here%NOUTM).EQ.2) WRITE(16,3216)
  3216       FORMAT(/,5X,'UNITS 71&72 FORMAT WILL BE BINARY')
          ENDIF
 
-!.....REGARDLESS OF WHETHER NOUTM=0, READ IN THE NUMBER OF METEOROLOGICAL
+!.....REGARDLESS OF WHETHER global_here%NOUTM=0, READ IN THE NUMBER OF METEOROLOGICAL
 !.....RECORDING STATIONS
 
-         READ(15,*) NSTAM
-         WRITE(16,3217) NSTAM
+         READ(15,*) global_here%NSTAM
+         WRITE(16,3217) global_here%NSTAM
  3217    FORMAT(///,5X,'NUMBER OF INPUT METEOROLOGICAL RECORDING ',&
         'STATIONS = ',I5)
 
-         IF(NSTAM.GT.0) THEN
-            IF(ICS.EQ.1) WRITE(16,3218)
- 3218       FORMAT(/,7X,'STATION #   ELEMENT',9X,'X',13X,'Y',/)
-            IF(ICS.EQ.2) WRITE(16,3219)
+         IF(global_here%NSTAM.GT.0) THEN
+            IF(global_here%ICS.EQ.1) WRITE(16,3218)
+ 3218       FORMAT(/,7X,'STATION #   ELEMENT',9X,'global_here%X',13X,'global_here%Y',/)
+            IF(global_here%ICS.EQ.2) WRITE(16,3219)
  3219       FORMAT(/,5X,'STATION   ELEMENT',3X,'LAMBDA(DEG)',&
            4X,'FEA(DEG)',10X,'XCP',12X,'YCP',/)
-            s%MNSTAM = NSTAM
+            s%MNSTAM = global_here%NSTAM
          ENDIF
 
 !     Allocate arrays dimensioned by MNSTAM
@@ -3742,44 +3742,44 @@
 !.....INPUT COORDINATES OF METEOROLOGICAL RECORDING STATIONS
 !.....THEN COMPUTE ELEMENT NO. WITHIN WHICH STATION LIES
 
-         DO I=1,NSTAM
-            NNM(I)=0
-            IF(ICS.EQ.1) THEN
-               READ(15,*) XEM(I),YEM(I)
+         DO I=1,global_here%NSTAM
+            global_here%NNM(I)=0
+            IF(global_here%ICS.EQ.1) THEN
+               READ(15,*) global_here%XEM(I),global_here%YEM(I)
             ELSE
-               READ(15,*) SLEM(I),SFEM(I)
-               SLEM(I)=SLEM(I)*DEG2RAD
-               SFEM(I)=SFEM(I)*DEG2RAD
-               CALL CPP(XEM(I),YEM(I),SLEM(I),SFEM(I),SLAM0,SFEA0)
+               READ(15,*) global_here%SLEM(I),global_here%SFEM(I)
+               global_here%SLEM(I)=global_here%SLEM(I)*DEG2RAD
+               global_here%SFEM(I)=global_here%SFEM(I)*DEG2RAD
+               CALL CPP(global_here%XEM(I),global_here%YEM(I),global_here%SLEM(I),global_here%SFEM(I),global_here%SLAM0,global_here%SFEA0)
             ENDIF
-            AEMIN=1.0E+25
-            KMIN=0
-            DO K=1,NE
-               N1=NM(K,1)
-               N2=NM(K,2)
-               N3=NM(K,3)
-               X1=X(N1)
-               X2=X(N2)
-               X3=X(N3)
-               X4=XEM(I)
-               Y1=Y(N1)
-               Y2=Y(N2)
-               Y3=Y(N3)
-               Y4=YEM(I)
-               A1=(X4-X3)*(Y2-Y3)+(X2-X3)*(Y3-Y4)
-               A2=(X4-X1)*(Y3-Y1)-(Y4-Y1)*(X3-X1)
-               A3=(Y4-Y1)*(X2-X1)-(X4-X1)*(Y2-Y1)
-               AA=ABS(A1)+ABS(A2)+ABS(A3)
-               AE=ABS(AA-AREAS(K))/AREAS(K)
-               IF(AE.LT.AEMIN) THEN
-                  AEMIN=AE
-                  KMIN=K
+            global_here%AEMIN=1.0E+25
+            global_here%KMIN=0
+            DO K=1,global_here%NE
+               global_here%N1=global_here%NM(K,1)
+               global_here%N2=global_here%NM(K,2)
+               global_here%N3=global_here%NM(K,3)
+               global_here%X1=global_here%X(global_here%N1)
+               global_here%X2=global_here%X(global_here%N2)
+               global_here%X3=global_here%X(global_here%N3)
+               global_here%X4=global_here%XEM(I)
+               global_here%Y1=global_here%Y(global_here%N1)
+               global_here%Y2=global_here%Y(global_here%N2)
+               global_here%Y3=global_here%Y(global_here%N3)
+               global_here%Y4=global_here%YEM(I)
+               global_here%A1=(global_here%X4-global_here%X3)*(global_here%Y2-global_here%Y3)+(global_here%X2-global_here%X3)*(global_here%Y3-global_here%Y4)
+               global_here%A2=(global_here%X4-global_here%X1)*(global_here%Y3-global_here%Y1)-(global_here%Y4-global_here%Y1)*(global_here%X3-global_here%X1)
+               global_here%A3=(global_here%Y4-global_here%Y1)*(global_here%X2-global_here%X1)-(global_here%X4-global_here%X1)*(global_here%Y2-global_here%Y1)
+               global_here%AA=ABS(global_here%A1)+ABS(global_here%A2)+ABS(global_here%A3)
+               global_here%AE=ABS(global_here%AA-global_here%AREAS(K))/global_here%AREAS(K)
+               IF(global_here%AE.LT.global_here%AEMIN) THEN
+                  global_here%AEMIN=global_here%AE
+                  global_here%KMIN=K
                ENDIF
-               IF(AE.LT.1.0E-5) NNM(I)=K
+               IF(global_here%AE.LT.1.0E-5) global_here%NNM(I)=K
             END DO
 
-            IF(NNM(I).EQ.0) THEN
-               IF(NSCREEN.EQ.1.AND.s%MYPROC.EQ.0) WRITE(6,9942) I
+            IF(global_here%NNM(I).EQ.0) THEN
+               IF(global_here%NSCREEN.EQ.1.AND.s%MYPROC.EQ.0) WRITE(6,9942) I
                WRITE(16,9942) I
  9942          FORMAT(///,1X,'!!!!!!!!!!  WARNING - NONFATAL INPUT ERROR ',&
           '!!!!!!!!!',//,&
@@ -3787,109 +3787,109 @@
           ,' WITHIN ANY ELEMENT IN THE DEFINED',/,&
           ' COMPUTATIONAL DOMAIN,   PLEASE CHECK THE INPUT',&
           ' COORDINATES FOR THIS STATION')
-               IF(NFOVER.EQ.1) THEN
-                  IF(NSCREEN.EQ.1.AND.s%MYPROC.EQ.0) WRITE(6,9790) AEMIN
-                  WRITE(16,9790) AEMIN
-                  NNM(I)=KMIN
+               IF(global_here%NFOVER.EQ.1) THEN
+                  IF(global_here%NSCREEN.EQ.1.AND.s%MYPROC.EQ.0) WRITE(6,9790) global_here%AEMIN
+                  WRITE(16,9790) global_here%AEMIN
+                  global_here%NNM(I)=global_here%KMIN
                ELSE
-                  IF(NSCREEN.EQ.1.AND.s%MYPROC.EQ.0) WRITE(6,9791) AEMIN
-                  WRITE(16,9791) AEMIN
+                  IF(global_here%NSCREEN.EQ.1.AND.s%MYPROC.EQ.0) WRITE(6,9791) global_here%AEMIN
+                  WRITE(16,9791) global_here%AEMIN
                   STOP
                ENDIF
             ENDIF
 
-            IF(ICS.EQ.1) THEN
-               WRITE(16,1880) I,NNM(I),XEM(I),YEM(I)
+            IF(global_here%ICS.EQ.1) THEN
+               WRITE(16,1880) I,global_here%NNM(I),global_here%XEM(I),global_here%YEM(I)
             ELSE
-               WRITE(16,1883) I,NNM(I),SLEM(I)*RAD2DEG,&
-              SFEM(I)*RAD2DEG,XEM(I),YEM(I)
+               WRITE(16,1883) I,global_here%NNM(I),global_here%SLEM(I)*RAD2DEG,&
+              global_here%SFEM(I)*RAD2DEG,global_here%XEM(I),global_here%YEM(I)
             ENDIF
 
 !.....PRE-COMPUTE INFORMATION REQUIRED TO INTERPOLATE AT METEOROLOGICAL
 !.....RECORDING STATIONS
 
-            N1=NM(NNM(I),1)
-            N2=NM(NNM(I),2)
-            N3=NM(NNM(I),3)
-            X1=X(N1)
-            X2=X(N2)
-            X3=X(N3)
-            X4=XEM(I)
-            Y1=Y(N1)
-            Y2=Y(N2)
-            Y3=Y(N3)
-            Y4=YEM(I)
-            STAIM1(I)=((X4-X3)*(Y2-Y3)+(X2-X3)*(Y3-Y4))/AREAS(NNM(I))
-            STAIM2(I)=((X4-X1)*(Y3-Y1)-(Y4-Y1)*(X3-X1))/AREAS(NNM(I))
-            STAIM3(I)=(-(X4-X1)*(Y2-Y1)+(Y4-Y1)*(X2-X1))/AREAS(NNM(I))
+            global_here%N1=global_here%NM(global_here%NNM(I),1)
+            global_here%N2=global_here%NM(global_here%NNM(I),2)
+            global_here%N3=global_here%NM(global_here%NNM(I),3)
+            global_here%X1=global_here%X(global_here%N1)
+            global_here%X2=global_here%X(global_here%N2)
+            global_here%X3=global_here%X(global_here%N3)
+            global_here%X4=global_here%XEM(I)
+            global_here%Y1=global_here%Y(global_here%N1)
+            global_here%Y2=global_here%Y(global_here%N2)
+            global_here%Y3=global_here%Y(global_here%N3)
+            global_here%Y4=global_here%YEM(I)
+            global_here%STAIM1(I)=((global_here%X4-global_here%X3)*(global_here%Y2-global_here%Y3)+(global_here%X2-global_here%X3)*(global_here%Y3-global_here%Y4))/global_here%AREAS(global_here%NNM(I))
+            global_here%STAIM2(I)=((global_here%X4-global_here%X1)*(global_here%Y3-global_here%Y1)-(global_here%Y4-global_here%Y1)*(global_here%X3-global_here%X1))/global_here%AREAS(global_here%NNM(I))
+            global_here%STAIM3(I)=(-(global_here%X4-global_here%X1)*(global_here%Y2-global_here%Y1)+(global_here%Y4-global_here%Y1)*(global_here%X2-global_here%X1))/global_here%AREAS(global_here%NNM(I))
 
          END DO
       ENDIF
-      IF (NSTAM.EQ.0) s%MNSTAM = 1
+      IF (global_here%NSTAM.EQ.0) s%MNSTAM = 1
 
 !...  
 !...  INPUT INFORMATION ABOUT GLOBAL ELEVATION DATA OUTPUT
 !...  
 
-!.... READ IN NOUTGE,TOUTSGE,TOUTFGE,NSPOOLGE : IF NOUTGE<>0, GLOBAL ELEV.
-!.... OUTPUT IS SPOOLED TO UNIT 63 EVERY NSPOOLGE TIME STEPS BETWEEN
-!.... TIMES TOUTSGE AND TOUTFGE; IF ABS(NOUTGE)=2, OUTPUT WILL BE BINARY
+!.... READ IN global_here%NOUTGE,global_here%TOUTSGE,global_here%TOUTFGE,global_here%NSPOOLGE : IF global_here%NOUTGE<>0, GLOBAL ELEV.
+!.... OUTPUT IS SPOOLED TO UNIT 63 EVERY global_here%NSPOOLGE TIME STEPS BETWEEN
+!.... TIMES global_here%TOUTSGE AND global_here%TOUTFGE; IF ABS(global_here%NOUTGE)=2, OUTPUT WILL BE BINARY
 
-      READ(15,*) NOUTGE,TOUTSGE,TOUTFGE,NSPOOLGE
-      WRITE(16,3301) NOUTGE
+      READ(15,*) global_here%NOUTGE,global_here%TOUTSGE,global_here%TOUTFGE,global_here%NSPOOLGE
+      WRITE(16,3301) global_here%NOUTGE
  3301 FORMAT(////,1X,'GLOBAL NODAL ELEVATION INFORMATION OUTPUT: ',&
-     //,5X,'NOUTGE = ',I2)
+     //,5X,'global_here%NOUTGE = ',I2)
 
-!.... CHECK INPUT PARAMETER NOUTGE
+!.... CHECK INPUT PARAMETER global_here%NOUTGE
 
-      IF(ABS(NOUTGE).GT.2) THEN
-         IF(NSCREEN.EQ.1.AND.s%MYPROC.EQ.0) WRITE(6,3302)
+      IF(ABS(global_here%NOUTGE).GT.2) THEN
+         IF(global_here%NSCREEN.EQ.1.AND.s%MYPROC.EQ.0) WRITE(6,3302)
          WRITE(16,3302)
  3302    FORMAT(////,1X,'!!!!!!!!!!  WARNING - FATAL ERROR !!!!!!!!!',&
         //,1X,'YOUR SELECTION OF THE UNIT 15 INPUT PARAMETER',&
-        ' NOUTGE',&
+        ' global_here%NOUTGE',&
         /,1X,'IS NOT AN ALLOWABLE VALUE.  CHECK YOUR INPUT!!')
-         IF(NSCREEN.EQ.1.AND.s%MYPROC.EQ.0) WRITE(6,9973)
+         IF(global_here%NSCREEN.EQ.1.AND.s%MYPROC.EQ.0) WRITE(6,9973)
          WRITE(16,9973)
          STOP
       ENDIF
 
 !.... IF GLOBAL ELEVATION OUTPUT WILL NOT BE GENERATED
 
-      IF(NOUTGE.EQ.0) THEN
+      IF(global_here%NOUTGE.EQ.0) THEN
          WRITE(16,3303)
  3303    FORMAT(///,5X,'NO GLOBAL ELEVATION OUTPUT WILL BE SPOOLED')
       ENDIF
 
 !.... IF GLOBAL ELEVATION OUTPUT WILL BE GENERATED
 
-      IF(NOUTGE.NE.0) THEN
+      IF(global_here%NOUTGE.global_here%NE.0) THEN
 
-!......COMPUTE NTCYSGE, NTCYFGE, WHICH = TOUTSGE AND TOUTFGE IN TIMESTEPS
+!......COMPUTE global_here%NTCYSGE, global_here%NTCYFGE, WHICH = global_here%TOUTSGE AND global_here%TOUTFGE IN TIMESTEPS
 
-         NTCYSGE=INT((TOUTSGE-STATIM)*(86400.D0/DTDP) + 0.5d0)
-         NTCYFGE=INT((TOUTFGE-STATIM)*(86400.D0/DTDP) + 0.5d0)
-         IF(NTCYFGE.GT.NT) NTCYFGE=NT
+         global_here%NTCYSGE=INT((global_here%TOUTSGE-global_here%STATIM)*(86400.D0/global_here%DTDP) + 0.5d0)
+         global_here%NTCYFGE=INT((global_here%TOUTFGE-global_here%STATIM)*(86400.D0/global_here%DTDP) + 0.5d0)
+         IF(global_here%NTCYFGE.GT.global_here%NT) global_here%NTCYFGE=global_here%NT
 
-!......CALCULATE NDSETSE = THE # OF DATA SETS TO BE SPOOLED TO UNIT 63
+!......CALCULATE global_here%NDSETSE = THE # OF DATA SETS TO BE SPOOLED TO UNIT 63
 
-         IF(NSPOOLGE.EQ.0) NDSETSE=0
-         IF(NSPOOLGE.NE.0) NDSETSE=INT((NTCYFGE-NTCYSGE)/NSPOOLGE)
+         IF(global_here%NSPOOLGE.EQ.0) global_here%NDSETSE=0
+         IF(global_here%NSPOOLGE.global_here%NE.0) global_here%NDSETSE=INT((global_here%NTCYFGE-global_here%NTCYSGE)/global_here%NSPOOLGE)
 
-!......WRITE NOUTGE,TOUTSGE,TOUTFGE,NTCYSGE,NTCYFGE,NSPOOLGE TO UNIT 16
+!......WRITE global_here%NOUTGE,global_here%TOUTSGE,global_here%TOUTFGE,global_here%NTCYSGE,global_here%NTCYFGE,global_here%NSPOOLGE TO UNIT 16
 
-         WRITE(16,3304) TOUTSGE,NTCYSGE,TOUTFGE,NTCYFGE,NSPOOLGE
- 3304    FORMAT(/,5X,'DATA RECORDS WILL START AFTER TOUTSGE =',F8.3,&
-        ' DAY(S) RELATIVE',/,9X,'TO THE STARTING TIME OR',&
+         WRITE(16,3304) global_here%TOUTSGE,global_here%NTCYSGE,global_here%TOUTFGE,global_here%NTCYFGE,global_here%NSPOOLGE
+ 3304    FORMAT(/,5X,'DATA RECORDS WILL START AFTER global_here%TOUTSGE =',F8.3,&
+        ' global_here%DAY(S) RELATIVE',/,9X,'TO THE STARTING TIME OR',&
         I9,' TIME STEPS INTO THE SIMULATION',&
-        //,5X,'DATA RECORDS WILL STOP AFTER TOUTFGE =',F8.3,&
-        ' DAY(S) RELATIVE',/,9X,'TO THE STARTING TIME OR',&
+        //,5X,'DATA RECORDS WILL STOP AFTER global_here%TOUTFGE =',F8.3,&
+        ' global_here%DAY(S) RELATIVE',/,9X,'TO THE STARTING TIME OR',&
         I9,' TIME STEPS INTO THE SIMULATION',&
         //,5X,'INFORMATION WILL BE SPOOLED TO UNIT 63 EVERY ',&
-        'NSPOOLGE =',I8,' TIME STEPS')
-         IF(ABS(NOUTGE).EQ.1) WRITE(16,3305)
+        'global_here%NSPOOLGE =',I8,' TIME STEPS')
+         IF(ABS(global_here%NOUTGE).EQ.1) WRITE(16,3305)
  3305    FORMAT(/,5X,'UNIT 63 FORMAT WILL BE ASCII')
-         IF(ABS(NOUTGE).EQ.2) WRITE(16,3306)
+         IF(ABS(global_here%NOUTGE).EQ.2) WRITE(16,3306)
  3306    FORMAT(/,5X,'UNIT 63 FORMAT WILL BE BINARY')
       ENDIF
 
@@ -3897,65 +3897,65 @@
 !...  INPUT INFORMATION ABOUT GLOBAL VELOCITY DATA OUTPUT
 !...  
 
-!.... READ IN NOUTGV,TOUTSGV,TOUTFGV,NSPOOLGV : IF NOUTGV<>0, GLOBAL VEL.
-!.... OUTPUT IS SPOOLED TO UNIT 64 EVERY NSPOOLGV TIME STEPS BETWEEN
-!.... TIMES TOUTSGV AND TOUTFGV; IF ABS(NOUTGV)=2, OUTPUT WILL BE BINARY
+!.... READ IN global_here%NOUTGV,global_here%TOUTSGV,global_here%TOUTFGV,global_here%NSPOOLGV : IF global_here%NOUTGV<>0, GLOBAL global_here%VEL.
+!.... OUTPUT IS SPOOLED TO UNIT 64 EVERY global_here%NSPOOLGV TIME STEPS BETWEEN
+!.... TIMES global_here%TOUTSGV AND global_here%TOUTFGV; IF ABS(global_here%NOUTGV)=2, OUTPUT WILL BE BINARY
 
-      READ(15,*) NOUTGV,TOUTSGV,TOUTFGV,NSPOOLGV
-      WRITE(16,3351) NOUTGV
+      READ(15,*) global_here%NOUTGV,global_here%TOUTSGV,global_here%TOUTFGV,global_here%NSPOOLGV
+      WRITE(16,3351) global_here%NOUTGV
  3351 FORMAT(////,1X,'GLOBAL NODAL VELOCITY INFORMATION OUTPUT : ',&
-     //,5X,'NOUTGV = ',I2)
+     //,5X,'global_here%NOUTGV = ',I2)
 
-!.... CHECK INPUT PARAMETER NOUTGV
+!.... CHECK INPUT PARAMETER global_here%NOUTGV
 
-      IF(ABS(NOUTGV).GT.2) THEN
-         IF(NSCREEN.EQ.1.AND.s%MYPROC.EQ.0) WRITE(6,3352)
+      IF(ABS(global_here%NOUTGV).GT.2) THEN
+         IF(global_here%NSCREEN.EQ.1.AND.s%MYPROC.EQ.0) WRITE(6,3352)
          WRITE(16,3352)
  3352    FORMAT(////,1X,'!!!!!!!!!!  WARNING - FATAL ERROR !!!!!!!!!',&
         //,1X,'YOUR SELECTION OF THE UNIT 15 INPUT PARAMETER',&
-        ' NOUTGV',&
+        ' global_here%NOUTGV',&
         /,1X,'IS NOT AN ALLOWABLE VALUE.  CHECK YOUR INPUT!!')
-         IF(NSCREEN.EQ.1.AND.s%MYPROC.EQ.0) WRITE(6,9973)
+         IF(global_here%NSCREEN.EQ.1.AND.s%MYPROC.EQ.0) WRITE(6,9973)
          WRITE(16,9973)
          STOP
       ENDIF
 
 !.... IF GLOBAL VELOCITY OUTPUT WILL NOT BE GENERATED
 
-      IF(NOUTGV.EQ.0) THEN
+      IF(global_here%NOUTGV.EQ.0) THEN
          WRITE(16,3353)
  3353    FORMAT(///,5X,'NO GLOBAL VELOCITY OUTPUT WILL BE SPOOLED')
       ENDIF
 
 !.... IF GLOBAL VELOCITY OUTPUT WILL BE GENERATED
 
-      IF(NOUTGV.NE.0) THEN
+      IF(global_here%NOUTGV.global_here%NE.0) THEN
 
-!......COMPUTE NTCYSGV, NTCYFGV, WHICH = TOUTSGV AND TOUTFGV IN TIMESTEPS
+!......COMPUTE global_here%NTCYSGV, global_here%NTCYFGV, WHICH = global_here%TOUTSGV AND global_here%TOUTFGV IN TIMESTEPS
 
-         NTCYSGV=INT((TOUTSGV-STATIM)*(86400.D0/DTDP) + 0.5d0)
-         NTCYFGV=INT((TOUTFGV-STATIM)*(86400.D0/DTDP) + 0.5d0)
-         IF(NTCYFGV.GT.NT) NTCYFGV=NT
+         global_here%NTCYSGV=INT((global_here%TOUTSGV-global_here%STATIM)*(86400.D0/global_here%DTDP) + 0.5d0)
+         global_here%NTCYFGV=INT((global_here%TOUTFGV-global_here%STATIM)*(86400.D0/global_here%DTDP) + 0.5d0)
+         IF(global_here%NTCYFGV.GT.global_here%NT) global_here%NTCYFGV=global_here%NT
 
-!......CALCULATE NDSETSV = THE # OF DATA SETS TO BE SPOOLED TO UNIT 64
+!......CALCULATE global_here%NDSETSV = THE # OF DATA SETS TO BE SPOOLED TO UNIT 64
 
-         IF(NSPOOLGV.EQ.0) NDSETSV=0
-         IF(NSPOOLGV.NE.0) NDSETSV=INT((NTCYFGV-NTCYSGV)/NSPOOLGV)
+         IF(global_here%NSPOOLGV.EQ.0) global_here%NDSETSV=0
+         IF(global_here%NSPOOLGV.global_here%NE.0) global_here%NDSETSV=INT((global_here%NTCYFGV-global_here%NTCYSGV)/global_here%NSPOOLGV)
 
-!......WRITE NOUTGV,TOUTSGV,TOUTFGV,NTCYSGV,NTCYFGV,NSPOOLGV TO UNIT 16
+!......WRITE global_here%NOUTGV,global_here%TOUTSGV,global_here%TOUTFGV,global_here%NTCYSGV,global_here%NTCYFGV,global_here%NSPOOLGV TO UNIT 16
 
-         WRITE(16,3354) TOUTSGV,NTCYSGV,TOUTFGV,NTCYFGV,NSPOOLGV
- 3354    FORMAT(/,5X,'DATA RECORDS WILL START AFTER TOUTSGV =',F8.3,&
-        ' DAY(S) RELATIVE',/,9X,'TO THE STARTING TIME OR',&
+         WRITE(16,3354) global_here%TOUTSGV,global_here%NTCYSGV,global_here%TOUTFGV,global_here%NTCYFGV,global_here%NSPOOLGV
+ 3354    FORMAT(/,5X,'DATA RECORDS WILL START AFTER global_here%TOUTSGV =',F8.3,&
+        ' global_here%DAY(S) RELATIVE',/,9X,'TO THE STARTING TIME OR',&
         I9,' TIME STEPS INTO THE SIMULATION',&
-        //,5X,'DATA RECORDS WILL STOP AFTER TOUTFGV =',F8.3,&
-        ' DAY(S) RELATIVE',/,9X,'TO THE STARTING TIME OR',&
+        //,5X,'DATA RECORDS WILL STOP AFTER global_here%TOUTFGV =',F8.3,&
+        ' global_here%DAY(S) RELATIVE',/,9X,'TO THE STARTING TIME OR',&
         I9,' TIME STEPS INTO THE SIMULATION',&
         //,5X,'INFORMATION WILL BE SPOOLED TO UNIT 64 EVERY ',&
-        'NSPOOLGV =',I8,' TIME STEPS')
-         IF(ABS(NOUTGV).EQ.1) WRITE(16,3355)
+        'global_here%NSPOOLGV =',I8,' TIME STEPS')
+         IF(ABS(global_here%NOUTGV).EQ.1) WRITE(16,3355)
  3355    FORMAT(/,5X,'UNIT 64 FORMAT WILL BE ASCII')
-         IF(ABS(NOUTGV).EQ.2) WRITE(16,3356)
+         IF(ABS(global_here%NOUTGV).EQ.2) WRITE(16,3356)
  3356    FORMAT(/,5X,'UNIT 64 FORMAT WILL BE BINARY')
       ENDIF
 
@@ -3963,35 +3963,35 @@
 !...  IF TRANSPORT IS INCLUDED IN THE RUN, INPUT INFORMATION ABOUT GLOBAL
 !...  CONCENTRATION DATA OUTPUT
 !...  
-      NOUTGC=0
-      IF(IM.EQ.10) THEN
+      global_here%NOUTGC=0
+      IF(global_here%IM.EQ.10) THEN
 
-!.....READ IN NOUTGC,TOUTSGC,TOUTFGC,NSPOOLGC : IF NOUTGC<>0, GLOBAL
-!.....CONCENTRATION OUTPUT IS SPOOLED TO UNIT 73 EVERY NSPOOLGC TIME STEPS
-!.....BETWEEN TIMES TOUTSGC AND TOUTFGC; IF ABS(NOUTGC)=2, OUTPUT WILL BE BINARY
+!.....READ IN global_here%NOUTGC,global_here%TOUTSGC,global_here%TOUTFGC,global_here%NSPOOLGC : IF global_here%NOUTGC<>0, GLOBAL
+!.....CONCENTRATION OUTPUT IS SPOOLED TO UNIT 73 EVERY global_here%NSPOOLGC TIME STEPS
+!.....BETWEEN TIMES global_here%TOUTSGC AND global_here%TOUTFGC; IF ABS(global_here%NOUTGC)=2, OUTPUT WILL BE BINARY
 
-         READ(15,*) NOUTGC,TOUTSGC,TOUTFGC,NSPOOLGC
-         WRITE(16,3401) NOUTGC
+         READ(15,*) global_here%NOUTGC,global_here%TOUTSGC,global_here%TOUTFGC,global_here%NSPOOLGC
+         WRITE(16,3401) global_here%NOUTGC
  3401    FORMAT(////,1X,'GLOBAL NODAL CONCENTRATION INFORMATION OUTPUT:',&
-        //,5X,'NOUTGC = ',I2)
+        //,5X,'global_here%NOUTGC = ',I2)
 
-!.....CHECK INPUT PARAMETER NOUTGC
+!.....CHECK INPUT PARAMETER global_here%NOUTGC
 
-         IF(ABS(NOUTGC).GT.2) THEN
-            IF(NSCREEN.EQ.1.AND.s%MYPROC.EQ.0) WRITE(6,3402)
+         IF(ABS(global_here%NOUTGC).GT.2) THEN
+            IF(global_here%NSCREEN.EQ.1.AND.s%MYPROC.EQ.0) WRITE(6,3402)
             WRITE(16,3402)
  3402       FORMAT(////,1X,'!!!!!!!!!!  WARNING - FATAL ERROR !!!!!!!!!',&
            //,1X,'YOUR SELECTION OF THE UNIT 15 INPUT PARAMETER',&
-           ' NOUTGC',&
+           ' global_here%NOUTGC',&
            /,1X,'IS NOT AN ALLOWABLE VALUE.  CHECK YOUR INPUT!!')
-            IF(NSCREEN.EQ.1.AND.s%MYPROC.EQ.0) WRITE(6,9973)
+            IF(global_here%NSCREEN.EQ.1.AND.s%MYPROC.EQ.0) WRITE(6,9973)
             WRITE(16,9973)
             STOP
          ENDIF
 
 !.....IF GLOBAL CONCENTRATION OUTPUT WILL NOT BE GENERATED
 
-         IF(NOUTGC.EQ.0) THEN
+         IF(global_here%NOUTGC.EQ.0) THEN
             WRITE(16,3403)
  3403       FORMAT(///,5X,'NO GLOBAL CONCENTRATION OUTPUT WILL BE ',&
            'SPOOLED')
@@ -3999,102 +3999,102 @@
 
 !.....IF GLOBAL CONCENTRATION OUTPUT WILL BE GENERATED
 
-         IF(NOUTGC.NE.0) THEN
+         IF(global_here%NOUTGC.global_here%NE.0) THEN
 
-!.......COMPUTE NTCYSGC, NTCYFGC, WHICH = TOUTSGC AND TOUTFGC IN TIMESTEPS
+!.......COMPUTE global_here%NTCYSGC, global_here%NTCYFGC, WHICH = global_here%TOUTSGC AND global_here%TOUTFGC IN TIMESTEPS
 
-            NTCYSGC=INT((TOUTSGC-STATIM)*(86400.D0/DTDP) + 0.5d0)
-            NTCYFGC=INT((TOUTFGC-STATIM)*(86400.D0/DTDP) + 0.5d0)
-            IF(NTCYFGC.GT.NT) NTCYFGC=NT
+            global_here%NTCYSGC=INT((global_here%TOUTSGC-global_here%STATIM)*(86400.D0/global_here%DTDP) + 0.5d0)
+            global_here%NTCYFGC=INT((global_here%TOUTFGC-global_here%STATIM)*(86400.D0/global_here%DTDP) + 0.5d0)
+            IF(global_here%NTCYFGC.GT.global_here%NT) global_here%NTCYFGC=global_here%NT
 
-!.......CALCULATE NDSETSC = THE # OF DATA SETS TO BE SPOOLED TO UNIT 73
+!.......CALCULATE global_here%NDSETSC = THE # OF DATA SETS TO BE SPOOLED TO UNIT 73
 
-            IF(NSPOOLGC.EQ.0) NDSETSC=0
-            IF(NSPOOLGC.NE.0) NDSETSC=INT((NTCYFGC-NTCYSGC)/NSPOOLGC)
+            IF(global_here%NSPOOLGC.EQ.0) global_here%NDSETSC=0
+            IF(global_here%NSPOOLGC.global_here%NE.0) global_here%NDSETSC=INT((global_here%NTCYFGC-global_here%NTCYSGC)/global_here%NSPOOLGC)
 
-!.......WRITE NOUTGC,TOUTSGC,TOUTFGC,NTCYSGC,NTCYFGC,NSPOOLGC TO UNIT 16
+!.......WRITE global_here%NOUTGC,global_here%TOUTSGC,global_here%TOUTFGC,global_here%NTCYSGC,global_here%NTCYFGC,global_here%NSPOOLGC TO UNIT 16
 
-            WRITE(16,3404) TOUTSGC,NTCYSGC,TOUTFGC,NTCYFGC,NSPOOLGC
- 3404       FORMAT(/,5X,'DATA RECORDS WILL START AFTER TOUTSGC =',F8.3,&
-           ' DAY(S) RELATIVE',/,9X,'TO THE STARTING TIME OR',&
+            WRITE(16,3404) global_here%TOUTSGC,global_here%NTCYSGC,global_here%TOUTFGC,global_here%NTCYFGC,global_here%NSPOOLGC
+ 3404       FORMAT(/,5X,'DATA RECORDS WILL START AFTER global_here%TOUTSGC =',F8.3,&
+           ' global_here%DAY(S) RELATIVE',/,9X,'TO THE STARTING TIME OR',&
            I9,' TIME STEPS INTO THE SIMULATION',&
-           //,5X,'DATA RECORDS WILL STOP AFTER TOUTFGC =',F8.3,&
-           ' DAY(S) RELATIVE',/,9X,'TO THE STARTING TIME OR',&
+           //,5X,'DATA RECORDS WILL STOP AFTER global_here%TOUTFGC =',F8.3,&
+           ' global_here%DAY(S) RELATIVE',/,9X,'TO THE STARTING TIME OR',&
            I9,' TIME STEPS INTO THE SIMULATION',&
            //,5X,'INFORMATION WILL BE SPOOLED TO UNIT 73 EVERY ',&
-           'NSPOOLGC =',I8,' TIME STEPS')
-            IF(ABS(NOUTGC).EQ.1) WRITE(16,3405)
+           'global_here%NSPOOLGC =',I8,' TIME STEPS')
+            IF(ABS(global_here%NOUTGC).EQ.1) WRITE(16,3405)
  3405       FORMAT(/,5X,'UNIT 73 FORMAT WILL BE ASCII')
-            IF(ABS(NOUTGC).EQ.2) WRITE(16,3406)
+            IF(ABS(global_here%NOUTGC).EQ.2) WRITE(16,3406)
  3406       FORMAT(/,5X,'UNIT 73 FORMAT WILL BE BINARY')
          ENDIF
 
       ENDIF
 
 !...  
-!...  IF NWS<>0   INPUT INFORMATION ABOUT GLOBAL WIND DATA OUTPUT
+!...  IF global_here%NWS<>0   INPUT INFORMATION ABOUT GLOBAL WIND DATA OUTPUT
 !...  
-      IF(NWS.NE.0) THEN
+      IF(global_here%NWS.global_here%NE.0) THEN
 
-!......READ IN NOUTGW,TOUTSGW,TOUTFGW,NSPOOLGW : IF NOUTGW<>0, GLOBAL WIND
-!......OUTPUT IS SPOOLED TO UNIT 74 EVERY NSPOOLGW TIME STEPS BETWEEN
-!......TIMES TOUTSGW AND TOUTFGW; IF ABS(NOUTGW)=2, OUTPUT WILL BE BINARY
+!......READ IN global_here%NOUTGW,global_here%TOUTSGW,global_here%TOUTFGW,global_here%NSPOOLGW : IF global_here%NOUTGW<>0, GLOBAL WIND
+!......OUTPUT IS SPOOLED TO UNIT 74 EVERY global_here%NSPOOLGW TIME STEPS BETWEEN
+!......TIMES global_here%TOUTSGW AND global_here%TOUTFGW; IF ABS(global_here%NOUTGW)=2, OUTPUT WILL BE BINARY
 
-         READ(15,*) NOUTGW,TOUTSGW,TOUTFGW,NSPOOLGW
-         WRITE(16,3451) NOUTGW
+         READ(15,*) global_here%NOUTGW,global_here%TOUTSGW,global_here%TOUTFGW,global_here%NSPOOLGW
+         WRITE(16,3451) global_here%NOUTGW
  3451    FORMAT(////,1X,'GLOBAL WIND STRESS INFORMATION OUTPUT : ',&
-        //,5X,'NOUTGW = ',I2)
+        //,5X,'global_here%NOUTGW = ',I2)
 
-!......CHECK INPUT PARAMETER NOUTGW
+!......CHECK INPUT PARAMETER global_here%NOUTGW
 
-         IF(ABS(NOUTGW).GT.2) THEN
-            IF(NSCREEN.EQ.1.AND.s%MYPROC.EQ.0) WRITE(6,3452)
+         IF(ABS(global_here%NOUTGW).GT.2) THEN
+            IF(global_here%NSCREEN.EQ.1.AND.s%MYPROC.EQ.0) WRITE(6,3452)
             WRITE(16,3452)
  3452       FORMAT(////,1X,'!!!!!!!!!!  WARNING - FATAL ERROR !!!!!!!!!',&
            //,1X,'YOUR SELECTION OF THE UNIT 15 INPUT PARAMETER',&
-           ' NOUTGW',&
+           ' global_here%NOUTGW',&
            /,1X,'IS NOT AN ALLOWABLE VALUE.  CHECK YOUR INPUT!!')
-            IF(NSCREEN.EQ.1.AND.s%MYPROC.EQ.0) WRITE(6,3453)
+            IF(global_here%NSCREEN.EQ.1.AND.s%MYPROC.EQ.0) WRITE(6,3453)
             WRITE(16,3453)
             STOP
          ENDIF
 
 !......IF GLOBAL WIND STRESS OUTPUT WILL NOT BE GENERATED
 
-         IF(NOUTGW.EQ.0) THEN
+         IF(global_here%NOUTGW.EQ.0) THEN
             WRITE(16,3453)
  3453       FORMAT(///,5X,'NO GLOBAL WIND STRESS OUTPUT WILL BE SPOOLED')
          ENDIF
 
 !........IF GLOBAL WIND STRESS OUTPUT WILL BE GENERATED
 
-         IF(NOUTGW.NE.0) THEN
+         IF(global_here%NOUTGW.global_here%NE.0) THEN
 
-!........COMPUTE NTCYSGW, NTCYFGW, WHICH = TOUTSGW AND TOUTFGW IN TIMESTEPS
+!........COMPUTE global_here%NTCYSGW, global_here%NTCYFGW, WHICH = global_here%TOUTSGW AND global_here%TOUTFGW IN TIMESTEPS
 
-            NTCYSGW=INT((TOUTSGW-STATIM)*(86400.D0/DTDP) + 0.5d0)
-            NTCYFGW=INT((TOUTFGW-STATIM)*(86400.D0/DTDP) + 0.5d0)
-            IF(NTCYFGW.GT.NT) NTCYFGW=NT
+            global_here%NTCYSGW=INT((global_here%TOUTSGW-global_here%STATIM)*(86400.D0/global_here%DTDP) + 0.5d0)
+            global_here%NTCYFGW=INT((global_here%TOUTFGW-global_here%STATIM)*(86400.D0/global_here%DTDP) + 0.5d0)
+            IF(global_here%NTCYFGW.GT.global_here%NT) global_here%NTCYFGW=global_here%NT
 
-!........CALCULATE NDSETSW = THE # OF DATA SETS TO BE SPOOLED TO UNIT 74
+!........CALCULATE global_here%NDSETSW = THE # OF DATA SETS TO BE SPOOLED TO UNIT 74
 
-            IF(NSPOOLGW.EQ.0) NDSETSW=0
-            IF(NSPOOLGW.NE.0) NDSETSW=INT((NTCYFGW-NTCYSGW)/NSPOOLGW)
+            IF(global_here%NSPOOLGW.EQ.0) global_here%NDSETSW=0
+            IF(global_here%NSPOOLGW.global_here%NE.0) global_here%NDSETSW=INT((global_here%NTCYFGW-global_here%NTCYSGW)/global_here%NSPOOLGW)
 
-!........WRITE NOUTGW,TOUTSGW,TOUTFGW,NTCYSGW,NTCYFGW,NSPOOLGW TO UNIT 16
+!........WRITE global_here%NOUTGW,global_here%TOUTSGW,global_here%TOUTFGW,global_here%NTCYSGW,global_here%NTCYFGW,global_here%NSPOOLGW TO UNIT 16
 
-            WRITE(16,3454) TOUTSGW,NTCYSGW,TOUTFGW,NTCYFGW,NSPOOLGW
- 3454       FORMAT(/,5X,'DATA RECORDS WILL START AFTER TOUTSGW =',F8.3,&
-           ' DAY(S) RELATIVE',/,9X,'TO THE STARTING TIME OR',&
+            WRITE(16,3454) global_here%TOUTSGW,global_here%NTCYSGW,global_here%TOUTFGW,global_here%NTCYFGW,global_here%NSPOOLGW
+ 3454       FORMAT(/,5X,'DATA RECORDS WILL START AFTER global_here%TOUTSGW =',F8.3,&
+           ' global_here%DAY(S) RELATIVE',/,9X,'TO THE STARTING TIME OR',&
            I9,' TIME STEPS INTO THE SIMULATION',&
-           //,5X,'DATA RECORDS WILL STOP AFTER TOUTFGW =',F8.3,&
-           ' DAY(S) RELATIVE',/,9X,'TO THE STARTING TIME OR',&
+           //,5X,'DATA RECORDS WILL STOP AFTER global_here%TOUTFGW =',F8.3,&
+           ' global_here%DAY(S) RELATIVE',/,9X,'TO THE STARTING TIME OR',&
            I9,' TIME STEPS INTO THE SIMULATION',&
            //,5X,'INFORMATION WILL BE SPOOLED TO UNIT 74 EVERY ',&
-           'NSPOOLGW =',I8,' TIME STEPS')
-            IF(ABS(NOUTGW).EQ.1) WRITE(16,3455)
+           'global_here%NSPOOLGW =',I8,' TIME STEPS')
+            IF(ABS(global_here%NOUTGW).EQ.1) WRITE(16,3455)
  3455       FORMAT(/,5X,'UNIT 74 FORMAT WILL BE ASCII')
-            IF(ABS(NOUTGW).EQ.2) WRITE(16,3456)
+            IF(ABS(global_here%NOUTGW).EQ.2) WRITE(16,3456)
  3456       FORMAT(/,5X,'UNIT 74 FORMAT WILL BE BINARY')
          ENDIF
 
@@ -4120,17 +4120,17 @@
       ENDIF
 
       IF(NFREQ.LT.0) THEN
-         IF(NSCREEN.EQ.1.AND.s%MYPROC.EQ.0) WRITE(6,99391)
+         IF(global_here%NSCREEN.EQ.1.AND.s%MYPROC.EQ.0) WRITE(6,99391)
          WRITE(16,99391)
 99391    FORMAT(////,1X,'!!!!!!!!!!  WARNING - FATAL ERROR !!!!!!!!!',&
-        //,1X,'YOUR SELECTION OF NHARFR (A UNIT 15 '&
+        //,1X,'YOUR SELECTION OF global_here%NHARFR (A UNIT 15 '&
         ,'INPUT PARAMETER) IS NOT AN ALLOWABLE VALUE',/,1X,&
         'PLEASE CHECK YOUR INPUT',&
         //,1X,'!!!!!! EXECUTION WILL NOW BE TERMINATED !!!!!!',//)
          STOP
       ENDIF      
       IF(NFREQ.GT.0) WRITE(16,2330)
- 2330 FORMAT(/,7X,'FREQUENCY',4X,'NODAL FACTOR',6X,'EQU.ARG(DEG)',&
+ 2330 FORMAT(/,7X,'FREQUENCY',4X,'NODAL FACTOR',6X,'EQU.global_here%ARG(DEG)',&
      1X,'CONSTITUENT',/)
       DO 1201 I=1,NFREQ  
          READ(15,'(A10)') NAMEFR(I)
@@ -4139,7 +4139,7 @@
 #else
       READ(15,*) nfreq_dummy
       IF (nfreq_dummy.EQ.0) s%MNHARF = 1
-      if (nfreq_dummy.ne.0) then
+      if (nfreq_dummy.global_here%ne.0) then
          write(16,*) "HARM not supported. Stopping execution."
          stop
       end if
@@ -4148,25 +4148,25 @@
  1201 CONTINUE
 
 !.... READ IN INTERVAL INFORMATION FOR HARMONIC ANALYSIS
-!.... COMPUTE THAS AND THAF IN TERMS OF THE NUMBER OF TIME STEPS
-      READ(15,*) THAS,THAF,NHAINC,FMV
-      ITHAS=INT((THAS-STATIM)*(86400.D0/DTDP) + 0.5d0)
-      THAS=ITHAS*DTDP/86400.D0 + STATIM
-      ITHAF=INT((THAF-STATIM)*(86400.D0/DTDP) + 0.5d0)
-      THAF=ITHAF*DTDP/86400.D0 + STATIM
-      ITMV = ITHAF - (ITHAF-ITHAS)*FMV
+!.... COMPUTE global_here%THAS AND global_here%THAF IN TERMS OF THE NUMBER OF TIME STEPS
+      READ(15,*) global_here%THAS,global_here%THAF,global_here%NHAINC,global_here%FMV
+      global_here%ITHAS=INT((global_here%THAS-global_here%STATIM)*(86400.D0/global_here%DTDP) + 0.5d0)
+      global_here%THAS=global_here%ITHAS*global_here%DTDP/86400.D0 + global_here%STATIM
+      global_here%ITHAF=INT((global_here%THAF-global_here%STATIM)*(86400.D0/global_here%DTDP) + 0.5d0)
+      global_here%THAF=global_here%ITHAF*global_here%DTDP/86400.D0 + global_here%STATIM
+      global_here%ITMV = global_here%ITHAF - (global_here%ITHAF-global_here%ITHAS)*global_here%FMV
 #ifdef HARM
       IF(NFREQ.GT.0) THEN
-         WRITE(16,34634) THAS,ITHAS,THAF,ITHAF,NHAINC
-34634    FORMAT(/,5X,'HARMONIC ANALYSIS WILL START AFTER THAS =',F8.3,&
-        ' DAY(S) RELATIVE',/,9X,'TO THE STARTING TIME OR',I9,&
+         WRITE(16,34634) global_here%THAS,global_here%ITHAS,global_here%THAF,global_here%ITHAF,global_here%NHAINC
+34634    FORMAT(/,5X,'HARMONIC ANALYSIS WILL START AFTER global_here%THAS =',F8.3,&
+        ' global_here%DAY(S) RELATIVE',/,9X,'TO THE STARTING TIME OR',I9,&
         ' TIME STEPS INTO THE SIMULATION',&
-        //,5X,'HARMONIC ANALYSIS WILL STOP AFTER THAF =',F8.3,&
-        ' DAY(S) RELATIVE',/,9X,'TO THE STARTING TIME OR',I9,&
+        //,5X,'HARMONIC ANALYSIS WILL STOP AFTER global_here%THAF =',F8.3,&
+        ' global_here%DAY(S) RELATIVE',/,9X,'TO THE STARTING TIME OR',I9,&
         ' TIME STEPS INTO THE SIMULATION'&
         ,//,5X,'INFORMATION WILL BE ANALYZED EVERY ',&
-        'NHAINC =',I8,' TIME STEPS.')
-         WRITE(16,34639) FMV*100.,ITMV
+        'global_here%NHAINC =',I8,' TIME STEPS.')
+         WRITE(16,34639) global_here%FMV*100.,global_here%ITMV
 34639    FORMAT(/,5X,'MEANS AND VARIANCES WILL BE COMPUTED FOR THE ',&
         'FINAL ',F10.5,' %',/9X,'OF THE HARMONIC ANALYSIS ',&
         'PERIOD OR AFTER ',I9,' TIME STEPS INTO THE ',&
@@ -4178,112 +4178,112 @@
 34645    FORMAT(///,5X,'NO HARMONIC ANALYSIS WILL BE DONE')
 #ifdef HARM
       ENDIF
-      IF((FMV.GT.0.).AND.(NFREQ.GT.0).AND.(s%C2DDI)) s%CHARMV = .TRUE.
+      IF((global_here%FMV.GT.0.).AND.(NFREQ.GT.0).AND.(s%C2DDI)) s%CHARMV = .TRUE.
 #endif
 
 !.... READ IN AND WRITE OUT INFORMATION ON WHERE HARMONIC ANALYSIS WILL BE DONE
 
-      READ(15,*) NHASE,NHASV,NHAGE,NHAGV
-      IF((NHASE.LT.0).OR.(NHASE.GT.1)) THEN
-         IF(NSCREEN.EQ.1.AND.s%MYPROC.EQ.0) WRITE(6,99661)
+      READ(15,*) global_here%NHASE,global_here%NHASV,global_here%NHAGE,global_here%NHAGV
+      IF((global_here%NHASE.LT.0).OR.(global_here%NHASE.GT.1)) THEN
+         IF(global_here%NSCREEN.EQ.1.AND.s%MYPROC.EQ.0) WRITE(6,99661)
          WRITE(16,99661)
 99661    FORMAT(////,1X,'!!!!!!!!!!  WARNING - NONFATAL ',&
         'INPUT ERROR  !!!!!!!!!',//&
-        ,1X,'YOUR SELECTION OF NHASE (A UNIT 15 '&
+        ,1X,'YOUR SELECTION OF global_here%NHASE (A UNIT 15 '&
         ,'INPUT PARAMETER) IS NOT AN ALLOWABLE VALUE',/,1X,&
         'PLEASE CHECK YOUR INPUT')
-         IF(NFOVER.EQ.1) THEN
-            IF(NSCREEN.EQ.1.AND.s%MYPROC.EQ.0) WRITE(6,99671)
+         IF(global_here%NFOVER.EQ.1) THEN
+            IF(global_here%NSCREEN.EQ.1.AND.s%MYPROC.EQ.0) WRITE(6,99671)
             WRITE(16,99671)
 99671       FORMAT(/,1X,'PROGRAM WILL OVERRIDE SPECIFIED INPUT',&
-           ' AND SET NHASE EQUAL TO 0 ',&
+           ' AND SET global_here%NHASE EQUAL TO 0 ',&
            //,1X,'!!!!!! EXECUTION WILL CONTINUE !!!!!!',//)
-            NHASE=0
+            global_here%NHASE=0
          ELSE
-            IF(NSCREEN.EQ.1.AND.s%MYPROC.EQ.0) WRITE(6,9973)
+            IF(global_here%NSCREEN.EQ.1.AND.s%MYPROC.EQ.0) WRITE(6,9973)
             WRITE(16,9973)
             STOP
          ENDIF
       ENDIF
-      IF(NHASE.EQ.1) THEN
+      IF(global_here%NHASE.EQ.1) THEN
          WRITE(16,34641)
 34641    FORMAT(///,5X,'STATION ELEVATION HARMONIC ANAL WILL BE ',&
         'WRITTEN TO UNIT 51')
       ENDIF
-      IF((NHASV.LT.0).OR.(NHASV.GT.1)) THEN
-         IF(NSCREEN.EQ.1.AND.s%MYPROC.EQ.0) WRITE(6,99662)
+      IF((global_here%NHASV.LT.0).OR.(global_here%NHASV.GT.1)) THEN
+         IF(global_here%NSCREEN.EQ.1.AND.s%MYPROC.EQ.0) WRITE(6,99662)
          WRITE(16,99662)
 99662    FORMAT(////,1X,'!!!!!!!!!!  WARNING - NONFATAL ',&
         'INPUT ERROR  !!!!!!!!!',//&
-        ,1X,'YOUR SELECTION OF NHASV (A UNIT 15 '&
+        ,1X,'YOUR SELECTION OF global_here%NHASV (A UNIT 15 '&
         ,'INPUT PARAMETER) IS NOT AN ALLOWABLE VALUE',/,1X,&
         'PLEASE CHECK YOUR INPUT')
-         IF(NFOVER.EQ.1) THEN
-            IF(NSCREEN.EQ.1.AND.s%MYPROC.EQ.0) WRITE(6,99672)
+         IF(global_here%NFOVER.EQ.1) THEN
+            IF(global_here%NSCREEN.EQ.1.AND.s%MYPROC.EQ.0) WRITE(6,99672)
             WRITE(16,99672)
 99672       FORMAT(/,1X,'PROGRAM WILL OVERRIDE SPECIFIED INPUT',&
-           ' AND SET NHASV EQUAL TO 0 ',&
+           ' AND SET global_here%NHASV EQUAL TO 0 ',&
            //,1X,'!!!!!! EXECUTION WILL CONTINUE !!!!!!',//)
-            NHASV=0
+            global_here%NHASV=0
          ELSE
-            IF(NSCREEN.EQ.1.AND.s%MYPROC.EQ.0) WRITE(6,9973)
+            IF(global_here%NSCREEN.EQ.1.AND.s%MYPROC.EQ.0) WRITE(6,9973)
             WRITE(16,9973)
             STOP
          ENDIF
       ENDIF
-      IF(NHASV.EQ.1) THEN
+      IF(global_here%NHASV.EQ.1) THEN
          WRITE(16,34642)
 34642    FORMAT(///,5X,'STATION VELOCITY HARMONIC ANAL WILL BE ',&
         'WRITTEN TO UNIT 52')
       ENDIF
-      IF((NHAGE.LT.0).OR.(NHAGE.GT.1)) THEN
-         IF(NSCREEN.EQ.1.AND.s%MYPROC.EQ.0) WRITE(6,99663)
+      IF((global_here%NHAGE.LT.0).OR.(global_here%NHAGE.GT.1)) THEN
+         IF(global_here%NSCREEN.EQ.1.AND.s%MYPROC.EQ.0) WRITE(6,99663)
          WRITE(16,99663)
 99663    FORMAT(////,1X,'!!!!!!!!!!  WARNING - NONFATAL ',&
         'INPUT ERROR  !!!!!!!!!',//&
-        ,1X,'YOUR SELECTION OF NHAGE (A UNIT 15 '&
+        ,1X,'YOUR SELECTION OF global_here%NHAGE (A UNIT 15 '&
         ,'INPUT PARAMETER) IS NOT AN ALLOWABLE VALUE',/,1X,&
         'PLEASE CHECK YOUR INPUT')
-         IF(NFOVER.EQ.1) THEN
-            IF(NSCREEN.EQ.1.AND.s%MYPROC.EQ.0) WRITE(6,99673)
+         IF(global_here%NFOVER.EQ.1) THEN
+            IF(global_here%NSCREEN.EQ.1.AND.s%MYPROC.EQ.0) WRITE(6,99673)
             WRITE(16,99673)
 99673       FORMAT(/,1X,'PROGRAM WILL OVERRIDE SPECIFIED INPUT',&
-           ' AND SET NHAGE EQUAL TO 0 ',&
+           ' AND SET global_here%NHAGE EQUAL TO 0 ',&
            //,1X,'!!!!!! EXECUTION WILL CONTINUE !!!!!!',//)
-            NHAGE=0
+            global_here%NHAGE=0
          ELSE
-            IF(NSCREEN.EQ.1.AND.s%MYPROC.EQ.0) WRITE(6,9973)
+            IF(global_here%NSCREEN.EQ.1.AND.s%MYPROC.EQ.0) WRITE(6,9973)
             WRITE(16,9973)
             STOP
          ENDIF
       ENDIF
-      IF(NHAGE.EQ.1) THEN
+      IF(global_here%NHAGE.EQ.1) THEN
          WRITE(16,34643)
 34643    FORMAT(///,5X,'GLOBAL ELEVATION HARMONIC ANAL WILL BE ',&
               'WRITTEN TO UNIT 53')
       ENDIF
-      IF((NHAGV.LT.0).OR.(NHAGV.GT.1)) THEN
-         IF(NSCREEN.EQ.1.AND.s%MYPROC.EQ.0) WRITE(6,99664)
+      IF((global_here%NHAGV.LT.0).OR.(global_here%NHAGV.GT.1)) THEN
+         IF(global_here%NSCREEN.EQ.1.AND.s%MYPROC.EQ.0) WRITE(6,99664)
          WRITE(16,99664)
 99664    FORMAT(////,1X,'!!!!!!!!!!  WARNING - NONFATAL ',&
         'INPUT ERROR  !!!!!!!!!',//&
-        ,1X,'YOUR SELECTION OF NHAGV (A UNIT 15 '&
+        ,1X,'YOUR SELECTION OF global_here%NHAGV (A UNIT 15 '&
         ,'INPUT PARAMETER) IS NOT AN ALLOWABLE VALUE',/,1X,&
         'PLEASE CHECK YOUR INPUT')
-         IF(NFOVER.EQ.1) THEN
-            IF(NSCREEN.EQ.1.AND.s%MYPROC.EQ.0) WRITE(6,99674)
+         IF(global_here%NFOVER.EQ.1) THEN
+            IF(global_here%NSCREEN.EQ.1.AND.s%MYPROC.EQ.0) WRITE(6,99674)
             WRITE(16,99674)
 99674       FORMAT(/,1X,'PROGRAM WILL OVERRIDE SPECIFIED INPUT',&
-           ' AND SET NHAGV EQUAL TO 0 ',&
+           ' AND SET global_here%NHAGV EQUAL TO 0 ',&
            //,1X,'!!!!!! EXECUTION WILL CONTINUE !!!!!!',//)
-            NHAGV=0
+            global_here%NHAGV=0
          ELSE
-            IF(NSCREEN.EQ.1.AND.s%MYPROC.EQ.0) WRITE(6,9973)
+            IF(global_here%NSCREEN.EQ.1.AND.s%MYPROC.EQ.0) WRITE(6,9973)
             WRITE(16,9973)
             STOP
          ENDIF
       ENDIF
-      IF(NHAGV.EQ.1) THEN
+      IF(global_here%NHAGV.EQ.1) THEN
          WRITE(16,34644)
 34644    FORMAT(///,5X,'GLOBAL VELOCITY HARMONIC ANAL WILL BE ',&
         'WRITTEN TO UNIT 54')
@@ -4292,47 +4292,47 @@
 !.... ESTABLISH INDICATOR OF WHETHER ANY HARMONIC ANALYSIS WILL BE DONE
 
 #ifdef HARM
-      IHARIND=NFREQ*(NHASE+NHASV+NHAGE+NHAGV)
-      IF(IHARIND.GT.0) IHARIND=1
+      global_here%IHARIND=NFREQ*(global_here%NHASE+global_here%NHASV+global_here%NHAGE+global_here%NHAGV)
+      IF(global_here%IHARIND.GT.0) global_here%IHARIND=1
 #endif
 
 !...  
 !...  INPUT INFORMATION ABOUT HOT START OUTPUT
 !...  
-      READ(15,*) NHSTAR,NHSINC
+      READ(15,*) global_here%NHSTAR,global_here%NHSINC
       WRITE(16,99655)
 99655 FORMAT(////,1X,'HOT START OUTPUT INFORMATION OUTPUT : ')
-      IF((NHSTAR.LT.0).OR.(NHSTAR.GT.1)) THEN
-         IF(NSCREEN.EQ.1.AND.s%MYPROC.EQ.0) WRITE(6,99665)
+      IF((global_here%NHSTAR.LT.0).OR.(global_here%NHSTAR.GT.1)) THEN
+         IF(global_here%NSCREEN.EQ.1.AND.s%MYPROC.EQ.0) WRITE(6,99665)
          WRITE(16,99665)
 99665    FORMAT(////,1X,'!!!!!!!!!!  WARNING - NONFATAL ',&
         'INPUT ERROR  !!!!!!!!!',//&
-        ,1X,'YOUR SELECTION OF NHSTAR (A UNIT 15 '&
+        ,1X,'YOUR SELECTION OF global_here%NHSTAR (A UNIT 15 '&
         ,'INPUT PARAMETER) IS NOT AN ALLOWABLE VALUE',/,1X,&
         'PLEASE CHECK YOUR INPUT')
-         IF(NFOVER.EQ.1) THEN
-            IF(NSCREEN.EQ.1.AND.s%MYPROC.EQ.0) WRITE(6,99675)
+         IF(global_here%NFOVER.EQ.1) THEN
+            IF(global_here%NSCREEN.EQ.1.AND.s%MYPROC.EQ.0) WRITE(6,99675)
             WRITE(16,99675)
 99675       FORMAT(/,1X,'PROGRAM WILL OVERRIDE SPECIFIED INPUT',&
-           ' AND SET NHSTAR EQUAL TO 0 ',&
+           ' AND SET global_here%NHSTAR EQUAL TO 0 ',&
            //,1X,'!!!!!! EXECUTION WILL CONTINUE !!!!!!',//)
-            NHSTAR=0
+            global_here%NHSTAR=0
          ELSE
-            IF(NSCREEN.EQ.1.AND.s%MYPROC.EQ.0) WRITE(6,9973)
+            IF(global_here%NSCREEN.EQ.1.AND.s%MYPROC.EQ.0) WRITE(6,9973)
             WRITE(16,9973)
             STOP
          ENDIF
       ENDIF
-      IF(NHSTAR.EQ.1) THEN
-         WRITE(16,34636) NHSINC
+      IF(global_here%NHSTAR.EQ.1) THEN
+         WRITE(16,34636) global_here%NHSINC
 34636    FORMAT(/,5X,'HOT START OUTPUT WILL BE WRITTEN TO UNIT',&
         ' 67 OR 68 EVERY ',I5,' TIME STEPS')
       ELSE
          WRITE(16,34646)
 34646    FORMAT(///,5X,'NO HOT START OUTPUT WILL BE GENERATED')
       ENDIF
-      IF((IHOT.EQ.0).OR.(IHOT.EQ.68)) IHSFIL=67
-      IF(IHOT.EQ.67) IHSFIL=68
+      IF((global_here%IHOT.EQ.0).OR.(global_here%IHOT.EQ.68)) global_here%IHSFIL=67
+      IF(global_here%IHOT.EQ.67) global_here%IHSFIL=68
 !...  
 !...  INPUT INFORMATION ABOUT SOLVER
 !...  
@@ -4342,13 +4342,13 @@
 
 #ifdef LUMP
       s%CLUMP = .TRUE.
-      ILUMP=1
+      global_here%ILUMP=1
 #else
       s%CLUMP = .FALSE.
-      ILUMP=0
+      global_here%ILUMP=0
 #endif
       
-      READ(15,*) ITITER,ISLDIA,CONVCR,ITMAX
+      READ(15,*) global_here%ITITER,global_here%ISLDIA,global_here%CONVCR,global_here%ITMAX
 
       WRITE(16,99656)
 99656 FORMAT(//,1X,'SOLVER INFORMATION OUTPUT : ')
@@ -4358,21 +4358,21 @@
 
 !...  LINES TO USE THE ITERATIVE MATRIX SOLVER
 
-      IF((ISLDIA.LT.0).OR.(ISLDIA.GT.5)) THEN
-         IF(NSCREEN.EQ.1.AND.s%MYPROC.EQ.0) WRITE(6,9920)
+      IF((global_here%ISLDIA.LT.0).OR.(global_here%ISLDIA.GT.5)) THEN
+         IF(global_here%NSCREEN.EQ.1.AND.s%MYPROC.EQ.0) WRITE(6,9920)
          WRITE(16,9920)
  9920    FORMAT(////,1X,'!!!!!!!!!!  WARNING - NONFATAL INPUT ERROR',&
-        ' !!!!!!!!!',//,1X,'ISLDIA (A UNIT 15 INPUT PARAMETER) ',&
+        ' !!!!!!!!!',//,1X,'global_here%ISLDIA (A UNIT 15 INPUT PARAMETER) ',&
         'MUST BE 0-5',/,1X,'PLEASE CHECK YOUR INPUT')
-         IF(NFOVER.EQ.1) THEN
-            IF(NSCREEN.EQ.1.AND.s%MYPROC.EQ.0) WRITE(6,9921)
+         IF(global_here%NFOVER.EQ.1) THEN
+            IF(global_here%NSCREEN.EQ.1.AND.s%MYPROC.EQ.0) WRITE(6,9921)
             WRITE(16,9921)
  9921       FORMAT(/,1X,'PROGRAM WILL OVERRIDE SPECIFIED INPUT',&
-           ' AND SET ISLDIA EQUAL TO 0 ',&
+           ' AND SET global_here%ISLDIA EQUAL TO 0 ',&
            //,1X,'!!!!!! EXECUTION WILL CONTINUE !!!!!!',//)
-            ISLDIA=0
+            global_here%ISLDIA=0
          ELSE
-            IF(NSCREEN.EQ.1.AND.s%MYPROC.EQ.0) WRITE(6,9973)
+            IF(global_here%NSCREEN.EQ.1.AND.s%MYPROC.EQ.0) WRITE(6,9973)
             WRITE(16,9973)
             STOP
          ENDIF
@@ -4387,30 +4387,30 @@
 #endif
 
 !.....INITIALIZE AVERAGING FOR INTERNAL BARRIER WATER LEVELS
-!......BARAVGWT=0.000 -> NO AVERAGING PERFORMED
+!......global_here%BARAVGWT=0.000 -> NO AVERAGING PERFORMED
 !jj   wm001 changed one line                
-      BARAVGWT=0.000D0
-      IBSTART=0
-      DO I=1,NVEL
-         RBARWL1AVG(I)=0.D0
-         RBARWL2AVG(I)=0.D0
+      global_here%BARAVGWT=0.000D0
+      global_here%IBSTART=0
+      DO I=1,global_here%NVEL
+         global_here%RBARWL1AVG(I)=0.D0
+         global_here%RBARWL2AVG(I)=0.D0
       END DO
-!.....INITIALIZE NIBNODECODE(I)
-      DO I=1,NP
-         NIBNODECODE(I)=0
+!.....INITIALIZE global_here%NIBNODECODE(I)
+      DO I=1,global_here%NP
+         global_here%NIBNODECODE(I)=0
       END DO
 !...  
 !...  COMPUTE THE NEIGHBOR TABLE
 !...  
-      IF(NSCREEN.EQ.1.AND.s%MYPROC.EQ.0) WRITE(6,1196)
+      IF(global_here%NSCREEN.EQ.1.AND.s%MYPROC.EQ.0) WRITE(6,1196)
       WRITE(16,1196)
  1196 FORMAT(/,1X,'THE NEIGHBOR TABLE IS BEING COMPUTED ',/)
 !     
-      CALL NEIGHB(s,NE,NP,NM,NNEIGH,NEITAB,NEIMIN,NEIMAX,X,Y,NSCREEN,NNEIGH_ELEM,NEIGH_ELEM)
+      CALL NEIGHB(s,global_here%NE,global_here%NP,global_here%NM,global_here%NNEIGH,global_here%NEITAB,global_here%NEIMIN,global_here%NEIMAX,global_here%X,global_here%Y,global_here%NSCREEN,global_here%NNEIGH_ELEM,global_here%NEIGH_ELEM)
 !     
-      IF(NSCREEN.EQ.1.AND.s%MYPROC.EQ.0) &
-     WRITE(6,1195) NEIMIN,NEIMAX,NEIMAX
-      WRITE(16,1195) NEIMIN,NEIMAX,NEIMAX
+      IF(global_here%NSCREEN.EQ.1.AND.s%MYPROC.EQ.0) &
+     WRITE(6,1195) global_here%NEIMIN,global_here%NEIMAX,global_here%NEIMAX
+      WRITE(16,1195) global_here%NEIMIN,global_here%NEIMAX,global_here%NEIMAX
  1195 FORMAT(1X,'THE NEIGHBOR TABLE IS COMPLETED ',&
      /,5X,'THE MINIMUM NUMBER OF NEIGHBORS FOR ANY NODE = ',I3,&
      /,5X,'1+THE MAXIMUM NUMBER OF NEIGHBORS FOR ANY NODE = ',I3,&
@@ -4423,7 +4423,7 @@
       
 !.....Allocate arrays for wave modified bottom friction (EJK)
 
-      IF ((FRW.EQ.1).OR.(NRS.EQ.1)) THEN
+      IF ((global_here%FRW.EQ.1).OR.(global_here%NRS.EQ.1)) THEN
          CALL ALLOC_MAIN15(s)
       ENDIF
       
@@ -4431,68 +4431,68 @@
 !.....Count maximum of the number of the elements associated with a node
 
       DO I = 1,s%MNP
-         NNDEL(I) = 0
+         global_here%NNDEL(I) = 0
       ENDDO
       DO IK=1,s%MNE
-         NNDEL(NM(IK,1)) = NNDEL(NM(IK,1)) + 1
-         NNDEL(NM(IK,2)) = NNDEL(NM(IK,2)) + 1
-         NNDEL(NM(IK,3)) = NNDEL(NM(IK,3)) + 1
+         global_here%NNDEL(global_here%NM(IK,1)) = global_here%NNDEL(global_here%NM(IK,1)) + 1
+         global_here%NNDEL(global_here%NM(IK,2)) = global_here%NNDEL(global_here%NM(IK,2)) + 1
+         global_here%NNDEL(global_here%NM(IK,3)) = global_here%NNDEL(global_here%NM(IK,3)) + 1
       ENDDO
       s%MNNDEL = 0
       DO IK=1,s%MNP
-         IF(NNDEL(IK).GT.s%MNNDEL) s%MNNDEL = NNDEL(IK)
+         IF(global_here%NNDEL(IK).GT.s%MNNDEL) s%MNNDEL = global_here%NNDEL(IK)
       ENDDO
 
 !.....Allocate space for Arrays dimensioned by MNNDEL
       CALL ALLOC_MAIN16(s)
       
       DO I = 1,s%MNP
-         NNDEL(I) = 0
+         global_here%NNDEL(I) = 0
       ENDDO
 
 !.....Make node-to-elements table
 
 
       DO IK=1,s%MNE
-         NM1 = NM(IK,1)
-         NM2 = NM(IK,2)
-         NM3 = NM(IK,3)
+         global_here%NM1 = global_here%NM(IK,1)
+         global_here%NM2 = global_here%NM(IK,2)
+         global_here%NM3 = global_here%NM(IK,3)
          
-         NNDEL(NM1) = NNDEL(NM1) + 1
-         NDEL(NM1,NNDEL(NM1)) = IK
+         global_here%NNDEL(global_here%NM1) = global_here%NNDEL(global_here%NM1) + 1
+         global_here%NDEL(global_here%NM1,global_here%NNDEL(global_here%NM1)) = IK
 
-         NNDEL(NM2) = NNDEL(NM2) + 1
-         NDEL(NM2,NNDEL(NM2)) = IK
+         global_here%NNDEL(global_here%NM2) = global_here%NNDEL(global_here%NM2) + 1
+         global_here%NDEL(global_here%NM2,global_here%NNDEL(global_here%NM2)) = IK
 
-         NNDEL(NM3) = NNDEL(NM3) + 1
-         NDEL(NM3,NNDEL(NM3)) = IK
+         global_here%NNDEL(global_here%NM3) = global_here%NNDEL(global_here%NM3) + 1
+         global_here%NDEL(global_here%NM3,global_here%NNDEL(global_here%NM3)) = IK
       ENDDO
 !--   
 
 !.....Write table of parameter sizes (vjp 11/28/99)
 
       WRITE(16,4010) s%MNPROC,s%MNE,s%MNP,s%MNEI,s%MNOPE,s%MNETA,s%MNBOU,s%MNVEL,&
-     s%MNTIF,s%MNBFR,s%MNSTAE,s%MNSTAV,s%MNSTAC,s%MNSTAM,NWLAT,NWLON,s%MNHARF,s%MNFFR
-      IF (NWS.EQ.0) WRITE(16,4011)
-      IF (NWS.EQ.1) WRITE(16,4012)
-      IF (ABS(NWS).EQ.2) WRITE(16,4013)
-      IF (NWS.EQ.3) WRITE(16,4014)
-      IF (ABS(NWS).EQ.4) WRITE(16,4015)
-      IF (ABS(NWS).EQ.5) WRITE(16,4115)
-      IF (NWS.EQ.10) WRITE(16,4016)
-      IF (NWS.EQ.11) WRITE(16,4017)
+     s%MNTIF,s%MNBFR,s%MNSTAE,s%MNSTAV,s%MNSTAC,s%MNSTAM,global_here%NWLAT,global_here%NWLON,s%MNHARF,s%MNFFR
+      IF (global_here%NWS.EQ.0) WRITE(16,4011)
+      IF (global_here%NWS.EQ.1) WRITE(16,4012)
+      IF (ABS(global_here%NWS).EQ.2) WRITE(16,4013)
+      IF (global_here%NWS.EQ.3) WRITE(16,4014)
+      IF (ABS(global_here%NWS).EQ.4) WRITE(16,4015)
+      IF (ABS(global_here%NWS).EQ.5) WRITE(16,4115)
+      IF (global_here%NWS.EQ.10) WRITE(16,4016)
+      IF (global_here%NWS.EQ.11) WRITE(16,4017)
 #ifdef HARM
-      IF ((NFREQ.EQ.0).OR.(FMV.EQ.0.)) WRITE(16,4021)
-      IF ((NFREQ.GE.1).AND.(FMV.NE.0.)) WRITE(16,4022)
+      IF ((NFREQ.EQ.0).OR.(global_here%FMV.EQ.0.)) WRITE(16,4021)
+      IF ((NFREQ.GE.1).AND.(global_here%FMV.global_here%NE.0.)) WRITE(16,4022)
 #else
       WRITE(16,4021)
 #endif      
-      IF (ILUMP.EQ.0) WRITE(16,4031)
-      IF (ILUMP.EQ.1) WRITE(16,4032)
-      IF (IM.EQ.0) WRITE(16,4101)
-      IF (IM.EQ.10) WRITE(16,4109)
-      IF (IM.EQ.1) WRITE(16,4102)
-      IF (IM.EQ.2) WRITE(16,4103)
+      IF (global_here%ILUMP.EQ.0) WRITE(16,4031)
+      IF (global_here%ILUMP.EQ.1) WRITE(16,4032)
+      IF (global_here%IM.EQ.0) WRITE(16,4101)
+      IF (global_here%IM.EQ.10) WRITE(16,4109)
+      IF (global_here%IM.EQ.1) WRITE(16,4102)
+      IF (global_here%IM.EQ.2) WRITE(16,4103)
       WRITE(16,4105)
       WRITE(16,4108)
 
@@ -4519,7 +4519,7 @@
  4013 FORMAT(' *   Also, Semi-standard wind forcing will be used,  *')
  4014 FORMAT(' *   Also, Fleet numeric wind forcing will be used,  *')
  4015 FORMAT(' *   Also, PBL/JAG wind forcing will be used,        *')
- 4115 FORMAT(' *   Also, Standard wind vel and pres will be used,  *')
+ 4115 FORMAT(' *   Also, Standard wind global_here%vel and pres will be used,  *')
  4016 FORMAT(' *   Also, AVN wind & pressure forcing will be used, *')
  4017 FORMAT(' *   Also, ETA wind & pressure forcing will be used, *')
  4021 FORMAT(' *   means and variance calculation will NOT be made,*')

@@ -80,10 +80,10 @@
 
       CALL RK_TIME(dg_here)
       
-!.....Compute the degrees of freedom per element
+!.....Compute the degrees of freedom global_here%per element
 
       dg_here%DOF = (dg_here%pl+1)*(dg_here%pl+2)/2
-      dg_here%dofx = (dg_here%px+1)*(dg_here%px+2)/2    ! dg_here%dofx for variable functions dg_here%f=dg_here%f(x) 
+      dg_here%dofx = (dg_here%px+1)*(dg_here%px+2)/2    ! dg_here%dofx for variable functions dg_here%f=dg_here%f(global_here%x) 
       P_0 = dg_here%pl
       DOF_0 = (dg_here%pl+1)*(dg_here%pl+2)/2   ! dg_here%dof at lowest order when p!=0
       dg_here%dofh = (dg_here%ph + 1)*(dg_here%ph + 2)/2
@@ -116,12 +116,12 @@
 #endif
 
 
-!.....Compute the number of gauss points needed for the edge integrals
+!.....Compute the number of gauss points needed for the global_here%edge integrals
 
       CALL ALLOC_DG4(s,dg_here)          !moved here 6.28.10, for p_adapt because of messenger_elem      
 
          dg_here%dofs(:) = dg_here%dofl
-         PDG_EL(:) = dg_here%pl
+         global_here%PDG_EL(:) = dg_here%pl
          dg_here%PDG(:) = dg_here%pl  
          dg_here%PCOUNT(:) = 0
          dg_here%pa = dg_here%pl
@@ -132,7 +132,7 @@
 
       IF (dg_here%pl.eq.0) THEN
 
-         PDG_EL(:) = 1
+         global_here%PDG_EL(:) = 1
          dg_here%PDG(:) = 1     
          dg_here%DOF    = 3
          dg_here%pl     = 1
@@ -160,15 +160,15 @@
 
 #endif
 
-!.....Create the edge based data
+!.....Create the global_here%edge based data
 
       IF(MYPROC_HERE.EQ.0) THEN
-         PRINT*, 'CREATING EDGE DATA...'
+         PRINT*, 'CREATING global_here%EDGE DATA...'
          PRINT*, ''
       ENDIF
       CALL CREATE_EDGE_DATA(s,dg_here)
       IF(MYPROC_HERE.EQ.0) THEN
-         print *, 'CREATING EDGE DATA DONE'
+         print *, 'CREATING global_here%EDGE DATA DONE'
          print *, ''
       ENDIF
 
@@ -183,21 +183,21 @@
          CALL ALLOC_DG1(dg_here,s%MNBFR)
          II = 1
          JJ = 1
-         DO I = 1,NBFR
-            DO J = 1,NOPE
-               DO K = 1,NVDLL(J)-1
-                  dg_here%EMO_DG(I,II,1) = EMO(I,JJ)
-                  dg_here%EMO_DG(I,II,2) = EMO(I,JJ+1)
-                  dg_here%EFA_DG(I,II,1) = EFA(I,JJ)
-                  dg_here%EFA_DG(I,II,2) = EFA(I,JJ+1)
-                  dg_here%UMO_DG(I,II,1) = UMO(I,JJ)
-                  dg_here%UMO_DG(I,II,2) = UMO(I,JJ+1)
-                  dg_here%UFA_DG(I,II,1) = UFA(I,JJ)
-                  dg_here%UFA_DG(I,II,2) = UFA(I,JJ+1)
-                  dg_here%VMO_DG(I,II,1) = VMO(I,JJ)
-                  dg_here%VMO_DG(I,II,2) = VMO(I,JJ+1)
-                  dg_here%VFA_DG(I,II,1) = VFA(I,JJ)
-                  dg_here%VFA_DG(I,II,2) = VFA(I,JJ+1)
+         DO I = 1,global_here%NBFR
+            DO J = 1,global_here%NOPE
+               DO K = 1,global_here%NVDLL(J)-1
+                  dg_here%EMO_DG(I,II,1) = global_here%EMO(I,JJ)
+                  dg_here%EMO_DG(I,II,2) = global_here%EMO(I,JJ+1)
+                  dg_here%EFA_DG(I,II,1) = global_here%EFA(I,JJ)
+                  dg_here%EFA_DG(I,II,2) = global_here%EFA(I,JJ+1)
+                  dg_here%UMO_DG(I,II,1) = global_here%UMO(I,JJ)
+                  dg_here%UMO_DG(I,II,2) = global_here%UMO(I,JJ+1)
+                  dg_here%UFA_DG(I,II,1) = global_here%UFA(I,JJ)
+                  dg_here%UFA_DG(I,II,2) = global_here%UFA(I,JJ+1)
+                  dg_here%VMO_DG(I,II,1) = global_here%VMO(I,JJ)
+                  dg_here%VMO_DG(I,II,2) = global_here%VMO(I,JJ+1)
+                  dg_here%VFA_DG(I,II,1) = global_here%VFA(I,JJ)
+                  dg_here%VFA_DG(I,II,2) = global_here%VFA(I,JJ+1)
                   II = II + 1
                   JJ = JJ + 1
                ENDDO
@@ -214,15 +214,15 @@
          CALL ALLOC_DG2(dg_here,s%MNFFR)
          II = 1
          JJ = 1
-         DO I = 1,NFFR
-            DO J = 1,NBOU
-               IF ( (SEGTYPE(J).EQ.2 ).OR.(SEGTYPE(J).EQ.12)&
-              .OR.(SEGTYPE(J).EQ.22) ) THEN
-                  DO K = 1,NVELL(J)-1
-                     dg_here%QNAM_DG(I,II,1) = QNAM(I,JJ)
-                     dg_here%QNAM_DG(I,II,2) = QNAM(I,JJ+1)
-                     dg_here%QNPH_DG(I,II,1) = QNPH(I,JJ)
-                     dg_here%QNPH_DG(I,II,2) = QNPH(I,JJ+1)
+         DO I = 1,global_here%NFFR
+            DO J = 1,global_here%NBOU
+               IF ( (global_here%SEGTYPE(J).EQ.2 ).OR.(global_here%SEGTYPE(J).EQ.12)&
+              .OR.(global_here%SEGTYPE(J).EQ.22) ) THEN
+                  DO K = 1,global_here%NVELL(J)-1
+                     dg_here%QNAM_DG(I,II,1) = global_here%QNAM(I,JJ)
+                     dg_here%QNAM_DG(I,II,2) = global_here%QNAM(I,JJ+1)
+                     dg_here%QNPH_DG(I,II,1) = global_here%QNPH(I,JJ)
+                     dg_here%QNPH_DG(I,II,2) = global_here%QNPH(I,JJ+1)
                      II = II + 1
                      JJ = JJ + 1
                   ENDDO
@@ -236,7 +236,7 @@
       
 !.....If there are internal barriers allocate some stuff
 
-      IF (dg_here%NIBEDS.NE.0) CALL ALLOC_DG3(dg_here,S%MNP)
+      IF (dg_here%NIBEDS.global_here%NE.0) CALL ALLOC_DG3(dg_here,S%MNP)
 
 !.....Allocate the array for node to element table
 
@@ -244,66 +244,66 @@
 
 !.....Determine the number of elements connected at each node
 
-      EL_COUNT = 0
-      MAXEL = 1
+      global_here%EL_COUNT = 0
+      global_here%MAXEL = 1
       DO K = 1,3
          DO J = 1,S%MNE
-            N1 = NM(J,K)
-            EL_COUNT(N1) = EL_COUNT(N1) + 1
+            global_here%N1 = global_here%NM(J,K)
+            global_here%EL_COUNT(global_here%N1) = global_here%EL_COUNT(global_here%N1) + 1
          ENDDO
       ENDDO
-      MAXEL = MAXVAL(EL_COUNT)
+      global_here%MAXEL = MAXVAL(global_here%EL_COUNT)
 
 !.....Allocate the array for the node to element table
 
-      CALL ALLOC_NNOEL2(S,MAXEL)
+      CALL ALLOC_NNOEL2(S,global_here%MAXEL)
       
 !.....Construct node to element table
 
-      EL_COUNT = 0
+      global_here%EL_COUNT = 0
       DO K = 1,3
          DO J = 1,S%MNE
-            N1 = NM(J,K)
-            NNOEL(N1,1+EL_COUNT(N1)) = J
-            EL_COUNT(N1) = EL_COUNT(N1) + 1
+            global_here%N1 = global_here%NM(J,K)
+            global_here%NNOEL(global_here%N1,1+global_here%EL_COUNT(global_here%N1)) = J
+            global_here%EL_COUNT(global_here%N1) = global_here%EL_COUNT(global_here%N1) + 1
          ENDDO
       ENDDO
 
 !.....Construct node to element angle table
 
       DO I = 1,S%MNP
-         ETAMAX(I) = -99999
+         global_here%ETAMAX(I) = -99999
          KK = 1
-         ELETAB(I,1) = I
-         dg_here%S1 = SFAC(I)
-         dg_here%J1 = NEITAB(I,1)
-         DO 111 K = 1,NNEIGH(I)-1
-            dg_here%J2 = NEITAB(I,1+K)
-            IF (K.LT.(NNEIGH(I)-1)) THEN
-               dg_here%J3 = NEITAB(I,2+K)
+         global_here%ELETAB(I,1) = I
+         dg_here%S1 = global_here%SFAC(I)
+         dg_here%J1 = global_here%NEITAB(I,1)
+         DO 111 K = 1,global_here%NNEIGH(I)-1
+            dg_here%J2 = global_here%NEITAB(I,1+K)
+            IF (K.LT.(global_here%NNEIGH(I)-1)) THEN
+               dg_here%J3 = global_here%NEITAB(I,2+K)
             ELSE
-               dg_here%J3 = NEITAB(I,2)
+               dg_here%J3 = global_here%NEITAB(I,2)
             ENDIF
-            DO J = 1,EL_COUNT(I)
-               dg_here%EL = NNOEL(I,J)
-               N1 = NM(dg_here%EL,1)
-               N2 = NM(dg_here%EL,2)
-               N3 = NM(dg_here%EL,3)
-               IF ((dg_here%J1.EQ.N1).OR.(dg_here%J1.EQ.N2).OR.(dg_here%J1.EQ.N3)) THEN
-                  IF ((dg_here%J2.EQ.N1).OR.(dg_here%J2.EQ.N2).OR.(dg_here%J2.EQ.N3)) THEN
-                     IF ((dg_here%J3.EQ.N1).OR.(dg_here%J3.EQ.N2).OR.(dg_here%J3.EQ.N3)) THEN
-                        ELETAB(I,1+KK) = dg_here%EL
-                        dg_here%S2  = SFAC(dg_here%J2)
+            DO J = 1,global_here%EL_COUNT(I)
+               dg_here%EL = global_here%NNOEL(I,J)
+               global_here%N1 = global_here%NM(dg_here%EL,1)
+               global_here%N2 = global_here%NM(dg_here%EL,2)
+               global_here%N3 = global_here%NM(dg_here%EL,3)
+               IF ((dg_here%J1.EQ.global_here%N1).OR.(dg_here%J1.EQ.global_here%N2).OR.(dg_here%J1.EQ.global_here%N3)) THEN
+                  IF ((dg_here%J2.EQ.global_here%N1).OR.(dg_here%J2.EQ.global_here%N2).OR.(dg_here%J2.EQ.global_here%N3)) THEN
+                     IF ((dg_here%J3.EQ.global_here%N1).OR.(dg_here%J3.EQ.global_here%N2).OR.(dg_here%J3.EQ.global_here%N3)) THEN
+                        global_here%ELETAB(I,1+KK) = dg_here%EL
+                        dg_here%S2  = global_here%SFAC(dg_here%J2)
                         dg_here%SAV = (dg_here%S1 + dg_here%S2)/2.D0
-                        dg_here%VEC1(1) =      X(dg_here%J1) - X(dg_here%J2)
-                        dg_here%VEC1(2) = dg_here%SAV*(Y(dg_here%J1) - Y(dg_here%J2))
-                        dg_here%VEC2(1) =      X(dg_here%J1) - X(dg_here%J3)
-                        dg_here%VEC2(2) = dg_here%SAV*(Y(dg_here%J1) - Y(dg_here%J3))
+                        dg_here%VEC1(1) =      global_here%X(dg_here%J1) - global_here%X(dg_here%J2)
+                        dg_here%VEC1(2) = dg_here%SAV*(global_here%Y(dg_here%J1) - global_here%Y(dg_here%J2))
+                        dg_here%VEC2(1) =      global_here%X(dg_here%J1) - global_here%X(dg_here%J3)
+                        dg_here%VEC2(2) = dg_here%SAV*(global_here%Y(dg_here%J1) - global_here%Y(dg_here%J3))
                         dg_here%MAG1 = SQRT(dg_here%VEC1(1)**2 + dg_here%VEC1(2)**2)
                         dg_here%MAG2 = SQRT(dg_here%VEC2(1)**2 + dg_here%VEC2(2)**2)
                         dg_here%DOT = DOT_PRODUCT(dg_here%VEC1,dg_here%VEC2)
                         dg_here%EL_ANG  = ACOS(dg_here%DOT/(dg_here%MAG1*dg_here%MAG2))
-                        ANGTAB(I,KK+1) = RAD2DEG*dg_here%EL_ANG
+                        global_here%ANGTAB(I,KK+1) = RAD2DEG*dg_here%EL_ANG
                         KK = KK + 1
                         GOTO 111
                      ENDIF
@@ -335,7 +335,7 @@
       dg_here%iotaa = 0.D0
       dg_here%iotaa2 = 0.D0 
       dg_here%iotaa3 = 0.D0       
-      MassMax = 0.D0
+      global_here%MassMax = 0.D0
       dg_here%MARK = 0
 #ifdef SEDLAY
       dg_here%bed = 0.D0
@@ -346,54 +346,54 @@
       dg_here%RHS_iota = 0.D0
       dg_here%RHS_iota2 = 0.D0
       
-      WSX2(:) = 0
-      WSY2(:) = 0
+      global_here%WSX2(:) = 0
+      global_here%WSY2(:) = 0
 
 !.....If using modal initial conditions transform the bathymetry from
 !.....nodal coordinates to modal dg_here%dof
 
       DO J = 1,S%MNE
-         N1 = NM(J,1)
-         N2 = NM(J,2)
-         N3 = NM(J,3)
-         hbo(1,J,1) =  1.D0/3.D0 * (DP(N1) + DP(N2) + DP(N3))
-         hbo(2,J,1) = -1.D0/6.D0 * (DP(N1) + DP(N2)) + 1.D0/3.D0*DP(N3)
-         hbo(3,J,1) = -0.5D0*DP(N1) + 0.5D0*DP(N2)
+         global_here%N1 = global_here%NM(J,1)
+         global_here%N2 = global_here%NM(J,2)
+         global_here%N3 = global_here%NM(J,3)
+         hbo(1,J,1) =  1.D0/3.D0 * (global_here%DP(global_here%N1) + global_here%DP(global_here%N2) + global_here%DP(global_here%N3))
+         hbo(2,J,1) = -1.D0/6.D0 * (global_here%DP(global_here%N1) + global_here%DP(global_here%N2)) + 1.D0/3.D0*global_here%DP(global_here%N3)
+         hbo(3,J,1) = -0.5D0*global_here%DP(global_here%N1) + 0.5D0*global_here%DP(global_here%N2)
 
-         ydubo(1,J)= 1.D0/3.D0*(Y(N1) + Y(N2) + Y(N3))
-         ydubo(2,J) = -1.D0/6.D0*(Y(N1) + Y(N2))&
-        + 1.D0/3.D0*Y(N3)
-         ydubo(3,J) = -0.5D0*Y(N1) + 0.5D0*Y(N2)
+         ydubo(1,J)= 1.D0/3.D0*(global_here%Y(global_here%N1) + global_here%Y(global_here%N2) + global_here%Y(global_here%N3))
+         ydubo(2,J) = -1.D0/6.D0*(global_here%Y(global_here%N1) + global_here%Y(global_here%N2))&
+        + 1.D0/3.D0*global_here%Y(global_here%N3)
+         ydubo(3,J) = -0.5D0*global_here%Y(global_here%N1) + 0.5D0*global_here%Y(global_here%N2)
 
       ENDDO
 
 
       if (LoadManningsN) then
-         DO J = 1,NE
-            N1 = NM(J,1)
-            N2 = NM(J,2)
-            N3 = NM(J,3)
-            dg_here%MANN(1,J) =  1.D0/3.D0*(ManningsN(N1)&
-           + ManningsN(N2) + ManningsN(N3))
-            dg_here%MANN(2,J) = -1.D0/6.D0*(ManningsN(N1) &
-           + ManningsN(N2)) + 1.D0/3.D0*ManningsN(N3)
-            dg_here%MANN(3,J) = -0.5D0*ManningsN(N1) + 0.5D0*ManningsN(N2)
+         DO J = 1,global_here%NE
+            global_here%N1 = global_here%NM(J,1)
+            global_here%N2 = global_here%NM(J,2)
+            global_here%N3 = global_here%NM(J,3)
+            dg_here%MANN(1,J) =  1.D0/3.D0*(ManningsN(global_here%N1)&
+           + ManningsN(global_here%N2) + ManningsN(global_here%N3))
+            dg_here%MANN(2,J) = -1.D0/6.D0*(ManningsN(global_here%N1) &
+           + ManningsN(global_here%N2)) + 1.D0/3.D0*ManningsN(global_here%N3)
+            dg_here%MANN(3,J) = -0.5D0*ManningsN(global_here%N1) + 0.5D0*ManningsN(global_here%N2)
          ENDDO
       endif
 
       IF (dg_here%MODAL_IC.EQ.0) THEN
 !     this assumes a cold start
          if (LoadGeoidOffset) then
-            DO J = 1,NE
-               N1 = NM(J,1)
-               N2 = NM(J,2)
-               N3 = NM(J,3)
-               zeo(1,J,1)=1.d0/3.d0*(GeoidOffset(N1)+GeoidOffset(N2)+&
-              GeoidOffset(N3))
-               IF (dof_0.NE.1) THEN
-                  zeo(2,J,1)=-1.d0/6.d0*(GeoidOffset(N1)+GeoidOffset(N2))&
-                 +1.d0/3.d0*GeoidOffset(N3)
-                  zeo(3,J,1)=-.5d0*GeoidOffset(N1)+.5d0*GeoidOffset(N2)
+            DO J = 1,global_here%NE
+               global_here%N1 = global_here%NM(J,1)
+               global_here%N2 = global_here%NM(J,2)
+               global_here%N3 = global_here%NM(J,3)
+               zeo(1,J,1)=1.d0/3.d0*(GeoidOffset(global_here%N1)+GeoidOffset(global_here%N2)+&
+              GeoidOffset(global_here%N3))
+               IF (dof_0.global_here%NE.1) THEN
+                  zeo(2,J,1)=-1.d0/6.d0*(GeoidOffset(global_here%N1)+GeoidOffset(global_here%N2))&
+                 +1.d0/3.d0*GeoidOffset(global_here%N3)
+                  zeo(3,J,1)=-.5d0*GeoidOffset(global_here%N1)+.5d0*GeoidOffset(global_here%N2)
                ENDIF
             ENDDO
          endif
@@ -408,13 +408,13 @@
       IF(MYPROC_HERE.EQ.0)THEN
          print*, 'Parsing the following sediment discharge equations:'
          print *, ''
-         print*, 'In X we have: ', sed_equationX
-         print*, 'In Y we have: ', sed_equationY
-         open(444, file = "./sedlaw.X")
-         write(444,'(a)') sed_equationX
+         print*, 'In global_here%X we have: ', global_here%sed_equationX
+         print*, 'In global_here%Y we have: ', global_here%sed_equationY
+         open(444, file = "./sedlaw.global_here%X")
+         write(444,'(a)') global_here%sed_equationX
          close(444)
-         open(445, file = "./sedlaw.Y")
-         write(445,*) sed_equationY
+         open(445, file = "./sedlaw.global_here%Y")
+         write(445,*) global_here%sed_equationY
          close(445)
          CALL SYSTEM('python py_scriptX') !this writes db_partials_X file
          CALL SYSTEM('python py_scriptY') !this writes db_partials_Y file
@@ -442,9 +442,9 @@
       CALL ALLOC_DG_WETDRY(s,dg_here)
       dg_here%PHI_CHECK = 0.D0
       dg_here%PSI_CHECK = 0.D0
-      H0L = H0
-      H0H = H0 * 1.0
-      HABSMIN = H0 * 1.0
+      global_here%H0L = global_here%H0
+      global_here%H0H = global_here%H0 * 1.0
+      global_here%HABSMIN = global_here%H0 * 1.0
             
 !.....Retrieve the normals to the edges
 
@@ -458,7 +458,7 @@
 
       enddo
 
-!.....Retrieve the edge integral gauss quadrature points
+!.....Retrieve the global_here%edge integral gauss quadrature points
       
       do j=1,dg_here%ph
 
@@ -475,7 +475,7 @@
 
       enddo
 
-!.....Evaluate the orthogonal basis at the edge gauss quadrature points
+!.....Evaluate the orthogonal basis at the global_here%edge gauss quadrature points
 
       do j=1,dg_here%ph
 
@@ -489,25 +489,25 @@
       dg_here%qx = 0.D0
       dg_here%qy = 0.D0
       dg_here%ze = 0.D0
-      ydub = 0.d0
+      global_here%ydub = 0.d0
       hb1 = 0.D0
 
 !$$$      do k = 1,S%MNE
 !$$$
 !$$$         
-!$$$         n1 = NM(k,1)
-!$$$         n2 = NM(k,2)
-!$$$         n3 = NM(k,3)
+!$$$         global_here%n1 = global_here%NM(k,1)
+!$$$         global_here%n2 = global_here%NM(k,2)
+!$$$         global_here%n3 = global_here%NM(k,3)
 !$$$                                !Define lagrange transform
 !$$$
-!$$$         do mm = 1,dg_here%nagp(dg_here%ph)     !ICs should not have higher order than dg_here%ph
+!$$$         do mm = 1,dg_here%nagp(dg_here%ph)     !global_here%ICs should not have higher order than dg_here%ph
 !$$$
 !$$$            ell_1 = -0.5D0 * ( dg_here%xagp(mm,dg_here%ph) + dg_here%yagp(mm,dg_here%ph) )
 !$$$            ell_2 =  0.5D0 * ( dg_here%xagp(mm,dg_here%ph) + 1.D0 )
 !$$$            ell_3 =  0.5D0 * ( dg_here%yagp(mm,dg_here%ph) + 1.D0 )
 !$$$
-!$$$            XBCbt(k) = x(n1)*ell_1 + x(n2)*ell_2 + x(n3)*ell_3
-!$$$            YBCbt(k) = y(n1)*ell_1 + y(n2)*ell_2 + y(n3)*ell_3
+!$$$            XBCbt(k) = global_here%x(global_here%n1)*ell_1 + global_here%x(global_here%n2)*ell_2 + global_here%x(global_here%n3)*ell_3
+!$$$            YBCbt(k) = global_here%y(global_here%n1)*ell_1 + global_here%y(global_here%n2)*ell_2 + global_here%y(global_here%n3)*ell_3
 !$$$
 !$$$
 !$$$            rev =  3.141592653589793D0 / 4.D0
@@ -566,7 +566,7 @@
  
       dg_here%hb(1:dg_here%dofh,:,1) = hbo(1:dg_here%dofh,:,1)
       dg_here%ze(1:dg_here%dofh,:,1) = zeo(1:dg_here%dofh,:,1)
-      ydub(1:dg_here%dofh,:,1) = ydubo(1:dg_here%dofh,:)
+      global_here%ydub(1:dg_here%dofh,:,1) = ydubo(1:dg_here%dofh,:)
 
       do chi=dg_here%pl,dg_here%ph
          hb1(1:dg_here%dofh,:,1,chi) = hbo(1:dg_here%dofh,:,1)
@@ -590,7 +590,7 @@
       !Set up the artififical diffusion stuff
       dg_here%e1(:) = 0.D0
       dg_here%balance(:) = 0.D0
-      entrop(:,:) = -100.D0
+      global_here%entrop(:,:) = -100.D0
 
       if (dg_here%tune_by_hand.eq.1) then
 
@@ -615,8 +615,8 @@
 
 !Update dg_here%DPE_MIN
 
-      DO J = 1,NE
-         dg_here%DPE_MIN(J) = MIN(DP(NM(J,1)),DP(NM(J,2)),DP(NM(J,3)))
+      DO J = 1,global_here%NE
+         dg_here%DPE_MIN(J) = MIN(global_here%DP(global_here%NM(J,1)),global_here%DP(global_here%NM(J,2)),global_here%DP(global_here%NM(J,3)))
       ENDDO
 
 !.....Compute the values of the nodal basis functions at the
@@ -647,30 +647,30 @@
 
 !.....Retrieve the global node numbers for the element
 
-         N1 = NM(J,1)
-         N2 = NM(J,2)
-         N3 = NM(J,3)
-         x1=x(n1)
-         y1=y(n1)
-         x2=x(n2)
-         y2=y(n2)
-         x3=x(n3)
-         y3=y(n3)
-         AREA = (X1 - X3)*(Y2 - Y3) + (X3 - X2)*(Y1 - Y3)
+         global_here%N1 = global_here%NM(J,1)
+         global_here%N2 = global_here%NM(J,2)
+         global_here%N3 = global_here%NM(J,3)
+         global_here%x1=global_here%x(global_here%n1)
+         global_here%y1=global_here%y(global_here%n1)
+         global_here%x2=global_here%x(global_here%n2)
+         global_here%y2=global_here%y(global_here%n2)
+         global_here%x3=global_here%x(global_here%n3)
+         global_here%y3=global_here%y(global_here%n3)
+         AREA = (global_here%X1 - global_here%X3)*(global_here%Y2 - global_here%Y3) + (global_here%X3 - global_here%X2)*(global_here%Y1 - global_here%Y3)
          area=area*.5d0
 
 !.....Compute the derivatives of the coordinate transformation
 
-         dg_here%DRDX(J) = 1.D0/AREA*(Y(N3) - Y(N1))
-         dg_here%DSDX(J) = 1.D0/AREA*(Y(N1) - Y(N2))
+         dg_here%DRDX(J) = 1.D0/AREA*(global_here%Y(global_here%N3) - global_here%Y(global_here%N1))
+         dg_here%DSDX(J) = 1.D0/AREA*(global_here%Y(global_here%N1) - global_here%Y(global_here%N2))
 
-         dg_here%DRDY(J) = 1.D0/AREA*(X(N1) - X(N3))
-         dg_here%DSDY(J) = 1.D0/AREA*(X(N2) - X(N1))
+         dg_here%DRDY(J) = 1.D0/AREA*(global_here%X(global_here%N1) - global_here%X(global_here%N3))
+         dg_here%DSDY(J) = 1.D0/AREA*(global_here%X(global_here%N2) - global_here%X(global_here%N1))
          
 !.......Compute elemental Coriolis and friction terms
 
-         dg_here%CORI_EL(J) = (CORIF(N1) + CORIF(N2) + CORIF(N3))/3.D0
-         dg_here%FRIC_EL(J) = (FRIC(N1) + FRIC(N2) + FRIC(N3))/3.D0
+         dg_here%CORI_EL(J) = (global_here%CORIF(global_here%N1) + global_here%CORIF(global_here%N2) + global_here%CORIF(global_here%N3))/3.D0
+         dg_here%FRIC_EL(J) = (FRIC(global_here%N1) + FRIC(global_here%N2) + FRIC(global_here%N3))/3.D0
 
 !.......Pre-compute the bathymetry and the gradient of the bathymetry at
 !.......the quadrature points and compute volume of water
@@ -697,12 +697,12 @@
                      dg_here%YFAC(K,I,J,chi)  = dg_here%M_INV(K,chi)*dg_here%WAGP(I,chi)*dg_here%DPHIDY
                      dg_here%SRFAC(K,I,J,chi) = dg_here%M_INV(K,chi)*dg_here%WAGP(I,chi)*dg_here%PHI_AREA(K,I,chi)
                      dg_here%BATH(I,J,chi) = dg_here%BATH(I,J,chi) + dg_here%HB(K,J,1)*dg_here%PHI_AREA(K,I,chi)
-                     YELEM(chi) = YELEM(chi) + YDUB(K,J,chi)*dg_here%PHI_AREA(K,I,chi)
+                     YELEM(chi) = YELEM(chi) + global_here%YDUB(K,J,chi)*dg_here%PHI_AREA(K,I,chi)
                      
-                     IF (ICS.EQ.1) THEN
+                     IF (global_here%ICS.EQ.1) THEN
                         dg_here%SFAC_ELEM(I,J,chi)=1.0D0
                      ELSE
-                        dg_here%SFAC_ELEM(I,J,chi)=COS(SFEA0)/COS(YELEM(chi)/R)
+                        dg_here%SFAC_ELEM(I,J,chi)=COS(global_here%SFEA0)/COS(YELEM(chi)/R)
                      ENDIF
 
                      dg_here%DBATHDX(I,J,chi) = dg_here%DBATHDX(I,J,chi) + dg_here%HB(K,J,1)*dg_here%DPHIDX
@@ -730,12 +730,12 @@
                      dg_here%YFAC(K,I,J,chi)  = dg_here%M_INV(K,chi)*dg_here%WAGP(I,chi)*dg_here%DPHIDY
                      dg_here%SRFAC(K,I,J,chi) = dg_here%M_INV(K,chi)*dg_here%WAGP(I,chi)*dg_here%PHI_AREA(K,I,chi)
                      dg_here%BATH(I,J,chi) = dg_here%BATH(I,J,chi) + dg_here%HB(K,J,1)*dg_here%PHI_AREA(K,I,chi)
-                     YELEM(chi) = YELEM(chi) + YDUB(K,J,chi)*dg_here%PHI_AREA(K,I,chi)
+                     YELEM(chi) = YELEM(chi) + global_here%YDUB(K,J,chi)*dg_here%PHI_AREA(K,I,chi)
                      
-                     IF (ICS.EQ.1) THEN
+                     IF (global_here%ICS.EQ.1) THEN
                         dg_here%SFAC_ELEM(I,J,chi)=1.0D0
                      ELSE
-                        dg_here%SFAC_ELEM(I,J,chi)=COS(SFEA0)/COS(YELEM(chi)/R)
+                        dg_here%SFAC_ELEM(I,J,chi)=COS(global_here%SFEA0)/COS(YELEM(chi)/R)
                      ENDIF
 
                      dg_here%DBATHDX(I,J,chi) = dg_here%DBATHDX(I,J,chi) + dg_here%HB(K,J,1)*dg_here%DPHIDX
@@ -751,7 +751,7 @@
          enddo 
 
          do chi = 1,dg_here%ph
-            dg_here%DP_VOL(J,chi) = 0.25D0*AREAS(J)*dg_here%DP_VOL(J,chi)
+            dg_here%DP_VOL(J,chi) = 0.25D0*global_here%AREAS(J)*dg_here%DP_VOL(J,chi)
          enddo
 
          do chi = 1,dg_here%ph
@@ -759,7 +759,7 @@
             if (chi.ge.1) then
 
                DO L = 1,3
-                  do I = 1,dg_here%NEGP(chi) ! Edge quadrature points
+                  do I = 1,dg_here%NEGP(chi) ! global_here%Edge quadrature points
 
                      dg_here%BATHED(I,L,J,chi) = 0.D0
                      yed(chi) = 0.d0
@@ -768,12 +768,12 @@
                         
                         dg_here%BATHED(I,L,J,chi) = dg_here%BATHED(I,L,J,chi)+dg_here%HB(K,J,1)*dg_here%PHI_EDGE(K,I,L,chi)
 
-                        YED(chi) = YED(chi) + YDUB(K,J,chi)*dg_here%PHI_EDGE(K,I,L,chi)
+                        YED(chi) = YED(chi) + global_here%YDUB(K,J,chi)*dg_here%PHI_EDGE(K,I,L,chi)
 
-                        IF (ICS.EQ.1) THEN
+                        IF (global_here%ICS.EQ.1) THEN
                            dg_here%SFACED(I,L,J,chi)=1.0d0
                         ELSE
-                           dg_here%SFACED(I,L,J,chi)=COS(SFEA0)/COS(YED(chi)/R)
+                           dg_here%SFACED(I,L,J,chi)=COS(global_here%SFEA0)/COS(YED(chi)/R)
                         ENDIF
 
                         dg_here%EDGEQ(K,I,L,chi) = 2.0*dg_here%M_INV(K,chi)*dg_here%PHI_EDGE(K,I,L,chi)*dg_here%WEGP(I,chi)
@@ -785,7 +785,7 @@
             else
 
                DO L = 1,3
-                  do I = 1,dg_here%NEGP(chi) ! Edge quadrature points
+                  do I = 1,dg_here%NEGP(chi) ! global_here%Edge quadrature points
 
                      dg_here%BATHED(I,L,J,chi) = 0.D0
                      yed(chi) = 0.d0
@@ -794,12 +794,12 @@
                         
                         dg_here%BATHED(I,L,J,chi) = dg_here%BATHED(I,L,J,chi)+dg_here%HB(K,J,1)*dg_here%PHI_EDGE(K,I,L,chi)
 
-                        YED(chi) = YED(chi) + YDUB(K,J,chi)*dg_here%PHI_EDGE(K,I,L,chi)
+                        YED(chi) = YED(chi) + global_here%YDUB(K,J,chi)*dg_here%PHI_EDGE(K,I,L,chi)
 
-                        IF (ICS.EQ.1) THEN
+                        IF (global_here%ICS.EQ.1) THEN
                            dg_here%SFACED(I,L,J,chi)=1.0d0
                         ELSE
-                           dg_here%SFACED(I,L,J,chi)=COS(SFEA0)/COS(YED(chi)/R)
+                           dg_here%SFACED(I,L,J,chi)=COS(global_here%SFEA0)/COS(YED(chi)/R)
                         ENDIF
 
                         dg_here%EDGEQ(K,I,L,chi) = 2.0*dg_here%M_INV(K,chi)*dg_here%PHI_EDGE(K,I,L,chi)*dg_here%WEGP(I,chi)
@@ -812,14 +812,14 @@
 
          enddo
 
-!........Store bathymetry at triangular vertices and edge gauss points for wet-dry
+!........Store bathymetry at triangular vertices and global_here%edge gauss points for wet-dry
 !........
 
 
          do chi = 1,dg_here%ph
 
             DO I = 1,3
-               dg_here%DP_NODE(I,J,chi) = DP(NM(J,I))
+               dg_here%DP_NODE(I,J,chi) = global_here%DP(global_here%NM(J,I))
             ENDDO
 
 
@@ -885,7 +885,7 @@
 
 !.....Wetting and drying is not turned on
 
-      IF(NOLIFA.EQ.0.OR.NOLIFA.EQ.1) THEN
+      IF(global_here%NOLIFA.EQ.0.OR.global_here%NOLIFA.EQ.1) THEN
          DO J = 1,S%MNE
             dg_here%WDFLG(J) = 1
                                 !dg_here%DOFS(J) = 3
@@ -894,7 +894,7 @@
 !.....Wetting and drying is turned on but there are no dry nodes below
 !.....geoid
 
-      ELSEIF (NOLIFA.EQ.2.AND.NSTARTDRY.EQ.0) THEN
+      ELSEIF (global_here%NOLIFA.EQ.2.AND.global_here%NSTARTDRY.EQ.0) THEN
 
          DO J = 1,S%MNE
             
@@ -907,26 +907,26 @@
             ZE1 = dg_here%ze(1,J,1)
             ZE2 = dg_here%ze(1,J,1)
             ZE3 = dg_here%ze(1,J,1)
-            IF (DP(NM(J,1)).LT.H0) ZE1 = max(ze1,H0 - DP(NM(J,1)))
-            IF (DP(NM(J,2)).LT.H0) ZE2 = max(ze2,H0 - DP(NM(J,2)))
-            IF (DP(NM(J,3)).LT.H0) ZE3 = max(ze3,H0 - DP(NM(J,3)))
+            IF (global_here%DP(global_here%NM(J,1)).LT.global_here%H0) ZE1 = max(ze1,global_here%H0 - global_here%DP(global_here%NM(J,1)))
+            IF (global_here%DP(global_here%NM(J,2)).LT.global_here%H0) ZE2 = max(ze2,global_here%H0 - global_here%DP(global_here%NM(J,2)))
+            IF (global_here%DP(global_here%NM(J,3)).LT.global_here%H0) ZE3 = max(ze3,global_here%H0 - global_here%DP(global_here%NM(J,3)))
             
 !.........If so set initial surface elevation values
             
-            IF ((ZE1 + ZE2 + ZE3)/3.D0.NE.dg_here%ze(1,J,1)) THEN
+            IF ((ZE1 + ZE2 + ZE3)/3.D0.global_here%NE.dg_here%ze(1,J,1)) THEN
                IF (p_0.EQ.0) THEN
-                  DP_MIN = MIN(DP(NM(J,1)),DP(NM(J,2)),DP(NM(J,3)))
-                  dg_here%ze(1,J,1) = max(dg_here%ze(1,j,1),H0 - DP_MIN)
+                  DP_MIN = MIN(global_here%DP(global_here%NM(J,1)),global_here%DP(global_here%NM(J,2)),global_here%DP(global_here%NM(J,3)))
+                  dg_here%ze(1,J,1) = max(dg_here%ze(1,j,1),global_here%H0 - DP_MIN)
                ELSE
                   IF (dg_here%ze(1,J,1).GT.(ZE1+ZE2+ZE3)/3.d0) THEN
-                     IF (dof_0.NE.1) THEN
+                     IF (dof_0.global_here%NE.1) THEN
                         dg_here%ze(2,J,1)=0.d0
                         dg_here%ze(3,J,1)=0.d0
                         dg_here%ze(4:dg_here%dofh,J,1) = 0.D0 ! forced again for transparency
                      ENDIF
                   ELSE
                      dg_here%ze(1,J,1)=(ZE1+ZE2+ZE3)/3.D0
-                     IF (DOF_0.NE.1) THEN
+                     IF (DOF_0.global_here%NE.1) THEN
                         dg_here%ze(2,J,1) = -1.D0/6.D0*(ZE1 + ZE2) + 1.D0/3.D0*ZE3
                         dg_here%ze(3,J,1) = -0.5D0*ZE1 + 0.5D0*ZE2
                         dg_here%ze(4:dg_here%dofh,J,1) = 0.D0 ! forced again for transparency
@@ -948,64 +948,64 @@
 
 !.....If there are dry nodes below geoid
 
-      ELSEIF (NOLIFA.EQ.2.AND.NSTARTDRY.EQ.1) THEN
+      ELSEIF (global_here%NOLIFA.EQ.2.AND.global_here%NSTARTDRY.EQ.1) THEN
          
 !.......Loop over elements
          
-         DO J = 1,NE
+         DO J = 1,global_here%NE
 
 !........Retrieve global node numbers for element
 
-            N1 = NM(J,1)
-            N2 = NM(J,2)
-            N3 = NM(J,3)
+            global_here%N1 = global_here%NM(J,1)
+            global_here%N2 = global_here%NM(J,2)
+            global_here%N3 = global_here%NM(J,3)
 
 !........Check to see if nodes are initially dry
 
             ZE1 = 0
             ZE2 = 0
             ZE3 = 0
-            IF (STARTDRY(N1).EQ.1) ZE1 = H0 - DP(N1)
-            IF (DP(N1).LT.H0) ZE1 = H0 - DP(N1)
-            IF (STARTDRY(N2).EQ.1) ZE2 = H0 - DP(N2)
-            IF (DP(N2).LT.H0) ZE2 = H0 - DP(N2)
-            IF (STARTDRY(N3).EQ.1) ZE3 = H0 - DP(N3)
-            IF (DP(N3).LT.H0) ZE3 = H0 - DP(N3)
+            IF (STARTDRY(global_here%N1).EQ.1) ZE1 = global_here%H0 - global_here%DP(global_here%N1)
+            IF (global_here%DP(global_here%N1).LT.global_here%H0) ZE1 = global_here%H0 - global_here%DP(global_here%N1)
+            IF (STARTDRY(global_here%N2).EQ.1) ZE2 = global_here%H0 - global_here%DP(global_here%N2)
+            IF (global_here%DP(global_here%N2).LT.global_here%H0) ZE2 = global_here%H0 - global_here%DP(global_here%N2)
+            IF (STARTDRY(global_here%N3).EQ.1) ZE3 = global_here%H0 - global_here%DP(global_here%N3)
+            IF (global_here%DP(global_here%N3).LT.global_here%H0) ZE3 = global_here%H0 - global_here%DP(global_here%N3)
 
             IF (dg_here%MODAL_IC.EQ.3) THEN
-               IF (STARTDRY(N1).EQ.-88888) then
-                  ZE1 = H0 - DP(N1)
+               IF (STARTDRY(global_here%N1).EQ.-88888) then
+                  ZE1 = global_here%H0 - global_here%DP(global_here%N1)
                else
-                  ZE1 = STARTDRY(N1)
+                  ZE1 = STARTDRY(global_here%N1)
                endif
-               IF (STARTDRY(N2).EQ.-88888) then
-                  ZE2 = H0 - DP(N2)
+               IF (STARTDRY(global_here%N2).EQ.-88888) then
+                  ZE2 = global_here%H0 - global_here%DP(global_here%N2)
                else
-                  ZE2 = STARTDRY(N2)
+                  ZE2 = STARTDRY(global_here%N2)
                endif
-               IF (STARTDRY(N3).EQ.-88888) then
-                  ZE3 = H0 - DP(N3)
+               IF (STARTDRY(global_here%N3).EQ.-88888) then
+                  ZE3 = global_here%H0 - global_here%DP(global_here%N3)
                else
-                  ZE3 = STARTDRY(N3)
+                  ZE3 = STARTDRY(global_here%N3)
                endif
             ENDIF
 
 !.........If so set initial surface elevation values
 
-            IF ((ZE1 + ZE2 + ZE3).NE.0) THEN
+            IF ((ZE1 + ZE2 + ZE3).global_here%NE.0) THEN
                IF (P_0.EQ.0) THEN
-                  DP_MIN = MIN(DP(NM(J,1)),DP(NM(J,2)),DP(NM(J,3)))
-                  dg_here%ze(1,J,1) = max(dg_here%ze(1,j,1),H0 - DP_MIN)
+                  DP_MIN = MIN(global_here%DP(global_here%NM(J,1)),global_here%DP(global_here%NM(J,2)),global_here%DP(global_here%NM(J,3)))
+                  dg_here%ze(1,J,1) = max(dg_here%ze(1,j,1),global_here%H0 - DP_MIN)
                ELSE
                   IF (dg_here%ze(1,J,1).GT.(ZE1+ZE2+ZE3)/3.d0) THEN
-                     IF (DOF_0.NE.1) THEN
+                     IF (DOF_0.global_here%NE.1) THEN
                         dg_here%ze(2,J,1)=0.d0
                         dg_here%ze(3,J,1)=0.d0
                         dg_here%ze(4:dg_here%dofh,J,1) = 0.D0 ! forced again for transparency
                      ENDIF
                   ELSE
                      dg_here%ze(1,J,1)=(ZE1+ZE2+ZE3)/3.D0
-                     IF (DOF_0.NE.1) THEN
+                     IF (DOF_0.global_here%NE.1) THEN
                         dg_here%ze(2,J,1) = -1.D0/6.D0*(ZE1 + ZE2) + 1.D0/3.D0*ZE3
                         dg_here%ze(3,J,1) = -0.5D0*ZE1 + 0.5D0*ZE2
                         dg_here%ze(4:dg_here%dofh,J,1) = 0.D0 ! forced again for transparency
@@ -1040,7 +1040,7 @@
          READ(163,*) dg_here%P_READ
          READ(164,*) dg_here%P_READ,dg_here%P_READ
          READ(114,*) dg_here%P_READ
-         IF (dg_here%P_READ.NE.dg_here%ph) THEN
+         IF (dg_here%P_READ.global_here%NE.dg_here%ph) THEN
             PRINT*,'INCONSISTENCY IN P -- CHECK INPUT FILES'
             STOP
          ENDIF
@@ -1051,7 +1051,7 @@
                READ(114,*) dg_here%HB(K,J,1)
             ENDDO
          ENDDO
-         dg_here%H_TRI = SQRT((X(1)-X(2))**2 + (Y(1)-Y(2))**2)
+         dg_here%H_TRI = SQRT((global_here%X(1)-global_here%X(2))**2 + (global_here%Y(1)-global_here%Y(2))**2)
          CLOSE(163)
          CLOSE(164)
          CLOSE(114)
@@ -1077,8 +1077,8 @@
 !$$$#endif
          READ(263,*) dg_here%P_READ
          READ(264,*) dg_here%P_READ,dg_here%P_READ
-         READ(214,*) ITHS
-         IF (dg_here%P_READ.NE.dg_here%PH) THEN
+         READ(214,*) global_here%ITHS
+         IF (dg_here%P_READ.global_here%NE.dg_here%PH) THEN
             PRINT*,'INCONSISTENCY IN P -- CHECK INPUT FILES'
             STOP
          ENDIF
@@ -1122,35 +1122,35 @@
       
 !.....Initialize the DG.63 output file
 
-      IF (ABS(NOUTGE).EQ.1) THEN
+      IF (ABS(global_here%NOUTGE).EQ.1) THEN
          OPEN(631,FILE=S%DIRNAME//'/'//'DG.63')
-         WRITE(631,3220) RUNDES, RUNID, AGRID
-         WRITE(631,3645) NDSETSE, dg_here%dofh, DTDP*NSPOOLGE, NSPOOLGE, 1
+         WRITE(631,3220) global_here%RUNDES, global_here%RUNID, global_here%AGRID
+         WRITE(631,3645) global_here%NDSETSE, dg_here%dofh, global_here%DTDP*global_here%NSPOOLGE, global_here%NSPOOLGE, 1
       ENDIF
 
 !.....Initialize the DG.64 output file
 
-      IF (ABS(NOUTGV).EQ.1) THEN
+      IF (ABS(global_here%NOUTGV).EQ.1) THEN
          OPEN(641,FILE=S%DIRNAME//'/'//'DG.64')
-         WRITE(641,3220) RUNDES, RUNID, AGRID
-         WRITE(641,3645) NDSETSV, dg_here%dofh, DTDP*NSPOOLGV, NSPOOLGV, 2
+         WRITE(641,3220) global_here%RUNDES, global_here%RUNID, global_here%AGRID
+         WRITE(641,3645) global_here%NDSETSV, dg_here%dofh, global_here%DTDP*global_here%NSPOOLGV, global_here%NSPOOLGV, 2
       ENDIF
 
 !.....Initialize the DG.65 output file (contains elemental statuses such
 !.....as the wet/dry status.
 
-      IF ((ABS(NOUTGE).EQ.1).AND.(NOLIFA.GE.2)) THEN
+      IF ((ABS(global_here%NOUTGE).EQ.1).AND.(global_here%NOLIFA.GE.2)) THEN
          OPEN(651,FILE=S%DIRNAME//'/'//'DG.65')
-         WRITE(651,3220) RUNDES, RUNID, AGRID
-         WRITE(651,3645) NDSETSE, dg_here%dofh, DTDP*NSPOOLGE, NSPOOLGE, 1
+         WRITE(651,3220) global_here%RUNDES, global_here%RUNID, global_here%AGRID
+         WRITE(651,3645) global_here%NDSETSE, dg_here%dofh, global_here%DTDP*global_here%NSPOOLGE, global_here%NSPOOLGE, 1
       ENDIF
  3220 FORMAT(1X,A32,2X,A24,2X,A24)
  3645 FORMAT(1X,I10,1X,I10,1X,E15.7,1X,I5,1X,I5)
 
 !.....Set p back to original value if p = 0
 
-      IF (P_0.NE.dg_here%pl) THEN
-         PDG_EL(:) = 0
+      IF (P_0.global_here%NE.dg_here%pl) THEN
+         global_here%PDG_EL(:) = 0
          dg_here%PDG(:) = 0
          dg_here%DOF = 1
          dg_here%DOFL = 1
@@ -1163,23 +1163,23 @@
       
 !.....Compute basis functions at stations
 
-      IF (NSTAE.GT.0) THEN      ! Elevation stations
-         CALL ALLOC_STAE(dg_here, NSTAE )
-         DO I = 1,NSTAE
-            CALL STA_BASIS(dg_here, XEL(I), YEL(I),  NNE(I), dg_here%PHI_STAE(:,I) )
+      IF (global_here%NSTAE.GT.0) THEN      ! Elevation stations
+         CALL ALLOC_STAE(dg_here, global_here%NSTAE )
+         DO I = 1,global_here%NSTAE
+            CALL STA_BASIS(dg_here, global_here%XEL(I), global_here%YEL(I),  global_here%NNE(I), dg_here%PHI_STAE(:,I) )
          ENDDO
       ENDIF
       
-      IF (NSTAV.GT.0) THEN      ! Velocity Stations
-         CALL ALLOC_STAV(dg_here, NSTAV )
-         DO I = 1,NSTAV
-            CALL STA_BASIS(dg_here, XEV(I), YEV(I),  NNV(I), dg_here%PHI_STAV(:,I) )
+      IF (global_here%NSTAV.GT.0) THEN      ! Velocity Stations
+         CALL ALLOC_STAV(dg_here, global_here%NSTAV )
+         DO I = 1,global_here%NSTAV
+            CALL STA_BASIS(dg_here, global_here%XEV(I), global_here%YEV(I),  global_here%NNV(I), dg_here%PHI_STAV(:,I) )
          ENDDO
       ENDIF
 
 !.....Prep the slopelimiter
 
-      IF (dg_here%SLOPEFLAG.NE.0) THEN
+      IF (dg_here%SLOPEFLAG.global_here%NE.0) THEN
          IF(MYPROC_HERE.EQ.0)THEN
             print *, 'Slope limiting prep begins, "kshanti"'
          ENDIF
@@ -1569,18 +1569,18 @@
          ENDDO
       ENDDO
 
-!.....Compute the maximum beta over alpha ratio at each stage
+!.....Compute the maximum beta over global_here%alpha ratio at each stage
 
       DO irk = 1,dg_here%RK_STAGE
          MAX_BOA = 0.D0
          DO I = 1,irk
             ARK = dg_here%ATVD(irk,I)
             BRK = dg_here%BTVD(irk,I)
-            IF (ARK.NE.0.D0) THEN
+            IF (ARK.global_here%NE.0.D0) THEN
                IF (MAX_BOA.LT.BRK/ARK) MAX_BOA = BRK/ARK
             ENDIF
          ENDDO
-         dg_here%MAX_BOA_DT(irk) = MAX_BOA*DT
+         dg_here%MAX_BOA_DT(irk) = MAX_BOA*global_here%DT
       ENDDO
 
 #endif

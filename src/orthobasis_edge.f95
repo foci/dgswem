@@ -3,7 +3,7 @@
 !     SUBROUTINE ORTHOBASIS_EDGE()
 !     
 !     Evaluates the polynomials for the P degree orthogonal basis
-!     for a triangle at the edge integral gauss points.
+!     for a triangle at the global_here%edge integral gauss points.
 !     
 !     Reference for orthogonal basis:
 !     
@@ -36,7 +36,7 @@
       DO 100 II = 1,3
 
 !.....Construct and evaluate the necessary dg_here%Jacobi polynomials at the
-!.....edge integral gauss points and the edge mid point
+!.....global_here%edge integral gauss points and the global_here%edge mid point
          
          DO Q=1,dg_here%NEGP(L)+1
             IF (II.EQ.1) THEN
@@ -103,8 +103,8 @@
             ENDDO
          ENDDO
          
-!.....Construct and evaluate the orthogonal basis at the edge quadrature
-!.....points and the edge midpoint
+!.....Construct and evaluate the orthogonal basis at the global_here%edge quadrature
+!.....points and the global_here%edge midpoint
 
          DO Q=1,dg_here%NEGP(L)+1
             
