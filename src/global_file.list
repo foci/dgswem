@@ -16,6 +16,11 @@ prep_DG.f95
 quad_pts_area.f95
 quad_pts_edge.f95
 radiation_edge_hydro.f95
+read_input.f95
+rhs_dg_hydro.f95
+tidal_potential.f95
+wetdry.f95
+write_results.f95
 
 dgswem.f95 #only used in main program
 
@@ -34,13 +39,10 @@ numerical_flux.f95 # start with line 54
 
 prep_slopelim.f95 # end with line 525
 
-read_fort_dg.f95
-read_input.f95
-rhs_dg_hydro.f95
-slopelimiter.f95
-sta_basis.f95
-tidal_potential.f95
-wetdry.f95
-wind.f95
-write_output.f95
-write_results.f95
+read_fort_dg.f95 # did this mostly manually
+
+slopelimiter.f95 1-1823, 1905-8763, then do SUBROUTINE HYDRO_EIGEN_VALUES manually
+
+sta_basis.f95 1-54
+
+wind.f95  only uses screenUnit?

@@ -70,10 +70,9 @@
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!      
 
-      SUBROUTINE READ_FIXED_FORT_DG(s,dg_here)
+      SUBROUTINE READ_FIXED_FORT_DG(s,dg_here,global_here)
       
-      USE global, ONLY: dgswe,dg_to_cg,sedflag,reaction_rate,sed_equationX,sed_equationY, &
-                        rhowat0,vertexslope
+      USE global
       USE sizes
       USE dg   
       
@@ -177,7 +176,7 @@
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! 
  
-      SUBROUTINE READ_KEYWORD_FORT_DG(s,dg_here)
+      SUBROUTINE READ_KEYWORD_FORT_DG(s,dg_here,global)
       
       USE sizes
       USE global, ONLY: nfover
