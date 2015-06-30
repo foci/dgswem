@@ -18,7 +18,7 @@
 !     
 !***********************************************************************
 
-      SUBROUTINE IBARRIER_EDGE_HYDRO(s,dg_here,IT)
+      SUBROUTINE IBARRIER_EDGE_HYDRO(s,dg_here,global_here,IT)
       
 !.....Use appropriate modules
 
@@ -30,6 +30,7 @@
 
       type (sizes_type) :: s
       type (dg_type) :: dg_here
+      type (global_type) :: global_here
 
 !.....Declare local variables
 
@@ -334,7 +335,7 @@
 
 !...........Compute the numerical flux
                
-               CALL NUMERICAL_FLUX(s,dg_here,IT)
+               CALL NUMERICAL_FLUX(s,dg_here,global_here,IT)
                FB_HAT = global_here%F_HAT
                GB_HAT = global_here%G_HAT
                HB_HAT = global_here%H_HAT
@@ -390,7 +391,7 @@
                      G_TMP = global_here%G
                      global_here%G = 0.D0
                   ENDIF
-                  call numerical_flux(s,dg_here,IT)
+                  call numerical_flux(s,dg_here,global_here,IT)
                   FF_HAT = global_here%F_HAT
                   GF_HAT = global_here%G_HAT
                   HF_HAT = global_here%H_HAT
@@ -461,7 +462,7 @@
                dg_here%QX_EX = ( TYF*global_here%Q_N_EXT - NYF*global_here%Q_T_EXT)/(NXF*TYF - NYF*TXF)
                dg_here%QY_EX = (-TXF*global_here%Q_N_EXT + NXF*global_here%Q_T_EXT)/(NXF*TYF - NYF*TXF)
 
-               call numerical_flux(s,dg_here,IT)
+               call numerical_flux(s,dg_here,global_here,IT)
                FF_HAT = global_here%F_HAT
                GF_HAT = global_here%G_HAT
                HF_HAT = global_here%H_HAT
@@ -515,7 +516,7 @@
                      G_TMP = global_here%G
                      global_here%G = 0.D0
                   ENDIF
-                  call numerical_flux(s,dg_here,IT)
+                  call numerical_flux(s,dg_here,global_here,IT)
                   FB_HAT = global_here%F_HAT
                   GB_HAT = global_here%G_HAT
 

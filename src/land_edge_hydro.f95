@@ -23,7 +23,7 @@
 !     
 !***********************************************************************
 
-      SUBROUTINE LAND_EDGE_HYDRO(s,dg_here,IT)
+      SUBROUTINE LAND_EDGE_HYDRO(s,dg_here,global_here,IT)
 
 !.....Use appropriate modules
 
@@ -35,6 +35,7 @@
 
       type (sizes_type) :: s
       type (dg_type) :: dg_here
+      type (global_type) :: global_here
 
 !.....Declare local variables
 
@@ -233,7 +234,7 @@
 
 !.....Compute the Roe flux
 
-            CALL NUMERICAL_FLUX(s,dg_here,IT,dg_here%test_el)
+            CALL NUMERICAL_FLUX(s,dg_here,global_here,IT,dg_here%test_el)
 
 !.....Add LDG terms for viscosity
 

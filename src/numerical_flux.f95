@@ -12,27 +12,29 @@
 !     
 !***********************************************************************
 
-      SUBROUTINE NUMERICAL_FLUX(s,dg_here,IT,MM)
+      SUBROUTINE NUMERICAL_FLUX(s,dg_here,global_here,IT,MM)
       
       USE DG
       use sizes
+      use global
 
       IMPLICIT NONE
 
       type (sizes_type) :: s
       type (dg_type) :: dg_here
+      type (global_type) :: global_here
 
       INTEGER IT,MM
 
 
       IF(dg_here%FLUXTYPE.EQ.1) THEN
-         CALL ROE_FLUX(s,dg_here,IT,MM)
+         CALL ROE_FLUX(s,dg_here,global_here,IT,MM)
       ELSEIF(dg_here%FLUXTYPE.EQ.2) THEN
-         CALL LLF_FLUX(s,dg_here)
+         CALL LLF_FLUX(s,dg_here,global_here)
       ELSEIF (dg_here%FLUXTYPE.EQ.3) THEN
-         CALL HLLC_FLUX(s,dg_here)
+         CALL HLLC_FLUX(s,dg_here,global_here)
       ELSEIF (dg_here%FLUXTYPE.EQ.4) THEN
-         CALL NCP_FLUX(s,dg_here)
+         CALL NCP_FLUX(s,dg_here,global_here)
       ELSE
          STOP 'INVALID FLUXTYPE'
       ENDIF
@@ -51,7 +53,7 @@
 !     Written by Ethan Kubatko (06-11-2004)
 !     
 !***********************************************************************
-      SUBROUTINE ROE_FLUX(s,dg_here,IT,MM)
+      SUBROUTINE ROE_FLUX(s,dg_here,global_here,IT,MM)
       
 !.....Use appropriate modules
 
@@ -65,6 +67,7 @@
 
       type (sizes_type) :: s
       type (dg_type) :: dg_here
+      type (global_type) :: global_here
       
 !.....Declare local variables
       
@@ -891,7 +894,7 @@
 !     
 !***********************************************************************
 
-      SUBROUTINE LLF_FLUX(s,dg_here)
+      SUBROUTINE LLF_FLUX(s,dg_here,global_here)
 
 !.....Use appropriate modules
 
@@ -903,6 +906,7 @@
 
       type (sizes_type) :: s
       type (dg_type) :: dg_here
+      type (global_type) :: global_here
 
 !.....Declare local variables
 
@@ -1161,7 +1165,7 @@
 !     
 !***********************************************************************
 
-      SUBROUTINE HLLC_FLUX(s,dg_here)
+      SUBROUTINE HLLC_FLUX(s,dg_here,global_here)
 
 !.....Use appropriate modules
 
@@ -1173,6 +1177,7 @@
 
       type (sizes_type) :: s
       type (dg_type) :: dg_here
+      type (global_type) :: global_here
 
 !.....Declare local variables
 
@@ -1547,7 +1552,7 @@
 !     
 !***********************************************************************
 
-      SUBROUTINE NCP_FLUX(s,dg_here)
+      SUBROUTINE NCP_FLUX(s,dg_here,global_here)
 
 !.....Use appropriate modules
 
@@ -1559,6 +1564,7 @@
 
       type (sizes_type) :: s
       type (dg_type) :: dg_here
+      type (global_type) :: global_here
 
 !.....Declare local variables
 

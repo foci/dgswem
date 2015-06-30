@@ -8,7 +8,7 @@
 !     
 !***********************************************************************
 
-      SUBROUTINE READ_INPUT(s,dg_here)
+      SUBROUTINE READ_INPUT(s,dg_here,global_here)
       use sizes
 !.....Use appropriate modules
 
@@ -35,6 +35,7 @@
 
       type (sizes_type) :: s
       type (dg_type) :: dg_here
+      type (global_type) :: global_here
 
 !.....Declare local variables
 

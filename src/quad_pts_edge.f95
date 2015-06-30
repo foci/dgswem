@@ -12,7 +12,7 @@
 !     
 !***********************************************************************
 
-      SUBROUTINE QUAD_PTS_EDGE(s,dg_here,P,pad)
+      SUBROUTINE QUAD_PTS_EDGE(s,dg_here,global_here,P,pad)
 
 !.....Use appropriate modules
 
@@ -24,6 +24,7 @@
       
       type (sizes_type) :: s
       type (dg_type) :: dg_here
+      type (global_type) :: global_here
 
 !.....Declare local variables
 

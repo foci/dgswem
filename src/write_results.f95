@@ -11,7 +11,7 @@
 !     
 !***********************************************************************
 
-      SUBROUTINE WRITE_RESULTS(s,dg_here,IT,FORCE_WRITE)
+      SUBROUTINE WRITE_RESULTS(s,dg_here,global_here,IT,FORCE_WRITE)
 
 !.....Use appropriate modules
 
@@ -28,6 +28,8 @@
       
       type (sizes_type) :: s
       type (dg_type) :: dg_here
+      type (global_type) :: global_here
+
 
 !.....Declare local variables
 

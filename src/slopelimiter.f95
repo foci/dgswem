@@ -11,7 +11,7 @@
 !
 !***********************************************************************
 
-      SUBROUTINE SLOPELIMITER(s,dg_here)
+      SUBROUTINE SLOPELIMITER(s,dg_here,global_here)
 
       USE SIZES
       USE DG
@@ -20,6 +20,7 @@
       
       type (sizes_type) :: s
       type (dg_type) :: dg_here
+      type (global_type) :: global_here
 
 #ifdef SLOPEALL
       IF (DG_HERE%SLOPEFLAG.EQ.1) THEN
@@ -31,7 +32,7 @@
       ELSE IF (DG_HERE%SLOPEFLAG.EQ.4) THEN
         CALL SLOPELIMITER4()
       ELSE IF (DG_HERE%SLOPEFLAG.EQ.5) THEN
-        CALL SLOPELIMITER5(s,dg_here)
+        CALL SLOPELIMITER5(s,dg_here,global_here)
       ELSE IF (DG_HERE%SLOPEFLAG.EQ.6) THEN
         CALL SLOPELIMITER6()
       ELSE IF (DG_HERE%SLOPEFLAG.EQ.7) THEN
@@ -75,7 +76,7 @@
 !     
 !***********************************************************************
 
-      SUBROUTINE SLOPELIMITER1(dg_here)
+      SUBROUTINE SLOPELIMITER1(dg_here,global_here)
 
 !.....Use appropriate modules
 
@@ -85,6 +86,7 @@
       IMPLICIT NONE
 
       type (dg_type) :: dg_here
+      type (global_type) :: global_here
 
 !.....Declare local variables
 
@@ -417,7 +419,7 @@
 !     
 !***********************************************************************
 
-      SUBROUTINE SLOPELIMITER2(dg_here)
+      SUBROUTINE SLOPELIMITER2(dg_here,global_here)
 
 !.....Use appropriate modules
 
@@ -428,6 +430,7 @@
       IMPLICIT NONE
 
       type (dg_type) :: dg_here
+      type (global_type) :: global_here
 
 
 !.....Declare local variables
@@ -756,7 +759,7 @@
 !     
 !***********************************************************************
 
-      SUBROUTINE SLOPELIMITER3(dg_here)
+      SUBROUTINE SLOPELIMITER3(dg_here,global_here)
 
 !.....Use appropriate modules
 
@@ -766,6 +769,7 @@
 
       IMPLICIT NONE
       type (dg_type) :: dg_here
+      type (global_type) :: global_here
 
 !.....Declare local variables
 
@@ -796,7 +800,7 @@
       RETURN
       END SUBROUTINE
 
-      SUBROUTINE SLOPELIMITER3_3NBORS(L)
+      SUBROUTINE SLOPELIMITER3_3NBORS(L,global_here)
 
 !.....Use appropriate modules
 
@@ -806,6 +810,8 @@
 
 
       IMPLICIT NONE
+
+      type (global_type) :: global_here
 
 !.....Declare local variables
 
@@ -1147,7 +1153,7 @@
       RETURN
       END SUBROUTINE
 
-      SUBROUTINE SLOPELIMITER3_2NBORS(dg_here,L)
+      SUBROUTINE SLOPELIMITER3_2NBORS(dg_here,global_here,L)
 
 !.....Use appropriate modules
 
@@ -1158,6 +1164,7 @@
       IMPLICIT NONE
 
       type (dg_type) :: dg_here
+      type (global_type) :: global_here
 
 !.....Declare local variables
 
@@ -1475,7 +1482,7 @@
       RETURN
       END SUBROUTINE
 
-      SUBROUTINE SLOPELIMITER3_1NBORS(dg_here,L)
+      SUBROUTINE SLOPELIMITER3_1NBORS(dg_here,global_here,L)
 
 !.....Use appropriate modules
 
@@ -1486,6 +1493,7 @@
       IMPLICIT NONE
 
       type (dg_type) :: dg_here
+      type (global_type) :: global_here
 
 !.....Declare local variables
 
@@ -1904,7 +1912,7 @@
 !     
 !***********************************************************************
 
-      SUBROUTINE SLOPELIMITER4(dg_here) 
+      SUBROUTINE SLOPELIMITER4(dg_here,global_here) 
 
 !.....Use appropriate modules
 
@@ -1919,6 +1927,7 @@
       IMPLICIT NONE
 
       type (dg_type) :: dg_here
+      type (global_type) :: global_here
 
       Integer k,ll,ss,lll,ell,bb,maxneigh
 
@@ -2810,7 +2819,7 @@
 !     
 !***********************************************************************
 
-      SUBROUTINE SLOPELIMITER5(s,dg_here)
+      SUBROUTINE SLOPELIMITER5(s,dg_here,global_here)
 
 !.....Use appropriate modules
 
@@ -2826,6 +2835,7 @@
 
       type (sizes_type) :: s
       type (dg_type) :: dg_here
+      type (global_type) :: global_here
 
 !.....Declare local variables
 
@@ -3356,7 +3366,7 @@
 !     
 !***********************************************************************
 
-      SUBROUTINE SLOPELIMITER5(s,dg_here)
+      SUBROUTINE SLOPELIMITER5(s,dg_here,global_here)
 
 !.....Use appropriate modules
 
@@ -3372,6 +3382,7 @@
       
       type (sizes_type) :: s
       type (dg_type) :: dg_here
+      type (global_type) :: global_here
 
 !.....Declare local variables
 
@@ -3903,7 +3914,7 @@
 !     
 !***********************************************************************
 
-      SUBROUTINE SLOPELIMITER5(s,dg_here)
+      SUBROUTINE SLOPELIMITER5(s,dg_here,global_here)
 
 !.....Use appropriate modules
 
@@ -3919,6 +3930,7 @@
 
       type (sizes_type) :: s
       type (dg_type) :: dg_here
+      type (global_type) :: global_here
 
 !.....Declare local variables
 
@@ -4452,7 +4464,7 @@
 !     
 !***********************************************************************
 
-      SUBROUTINE SLOPELIMITER6()
+      SUBROUTINE SLOPELIMITER6(global_here)
 
 !.....Use appropriate modules
 
@@ -4464,6 +4476,8 @@
 #endif
 
       IMPLICIT NONE
+
+      type (global_type) :: global_here
 
       Integer k,ll,ss,lll,ell,bb
 
@@ -5257,7 +5271,7 @@
 !     
 !***********************************************************************
 
-      SUBROUTINE SLOPELIMITER10(dg_here)
+      SUBROUTINE SLOPELIMITER10(dg_here,global_here)
 
 !.....Use appropriate modules
 
@@ -5272,6 +5286,7 @@
       IMPLICIT NONE
 
       type (dg_type) :: dg_here
+      type (global_type) :: global_here
 
       Integer k,ll,ss,lll,ell,bb,maxneigh
 
@@ -6281,7 +6296,7 @@
 !     
 !******************************************************************************
 
-      SUBROUTINE SLOPELIMITER9(dg_here)
+      SUBROUTINE SLOPELIMITER9(dg_here,global_here)
 
 !.....Use appropriate modules
 
@@ -6294,6 +6309,7 @@
 
       IMPLICIT NONE
       type (dg_type) :: dg_here
+      type (global_type) :: global_here
 
 
       Integer k,ll,ss,lll,ell,bb
@@ -7118,7 +7134,7 @@
 !     
 !***********************************************************************
 
-      SUBROUTINE SLOPELIMITER7(dg_here)
+      SUBROUTINE SLOPELIMITER7(dg_here,global_here)
 
 !.....Use appropriate modules
 
@@ -7132,6 +7148,7 @@
 
       IMPLICIT NONE
       type (dg_type) :: dg_here
+      type (global_type) :: global_here
 
       Integer k,ll,ss,lll,ell,bb,MUSCL,ENO,Mixed_MUSCL,Mixed_ENO,b_index,i,j,mm,neigh_flag
 
@@ -7916,7 +7933,7 @@
 !     
 !***********************************************************************
 
-      SUBROUTINE SLOPELIMITER8(dg_here)
+      SUBROUTINE SLOPELIMITER8(dg_here,global_here)
 
 !.....Use appropriate modules
 
@@ -7931,6 +7948,7 @@
 
       IMPLICIT NONE
       type (dg_type) :: dg_here
+      type (global_type) :: global_here
 
 
 !.....Declare local variables
@@ -8338,7 +8356,7 @@
 !     *
 !***********************************
 
-      SUBROUTINE Slopelim_Aux(ZEder,QXder,QYder,
+      SUBROUTINE Slopelim_Aux(global_here,ZEder,QXder,QYder,
      &     iotader,iota2der,l1,l2,l3)
 
 !.....Use appropriate modules
@@ -8352,6 +8370,7 @@
 #endif
 
       IMPLICIT NONE
+      type (global_type) :: global_here
 
 !.....Declare local variables
 

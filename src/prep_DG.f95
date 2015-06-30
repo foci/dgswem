@@ -21,7 +21,7 @@
 !     
 !***********************************************************************
 
-      SUBROUTINE PREP_DG(s,dg_here)
+      SUBROUTINE PREP_DG(s,dg_here,global_here)
 
 !.....Use appropriate modules
       USE SIZES
@@ -37,6 +37,7 @@
       
       type (sizes_type) :: s
       type (dg_type) :: dg_here
+      type (global_type) :: global_here
 
 !.....Declare local variables
 
@@ -448,13 +449,13 @@
             
 !.....Retrieve the normals to the edges
 
-      CALL CALC_NORMAL(dg_here)
+      CALL CALC_NORMAL(dg_here,global_here)
 
 !.....Retrieve the area integral gauss quadrature points
       
       do j=1,dg_here%ph
          
-         CALL QUAD_PTS_AREA(s,dg_here,2*j,j)
+         CALL QUAD_PTS_AREA(s,dg_here,global_here,2*j,j)
 
       enddo
 
@@ -462,7 +463,7 @@
       
       do j=1,dg_here%ph
 
-         CALL QUAD_PTS_EDGE(s,dg_here,j,j)
+         CALL QUAD_PTS_EDGE(s,dg_here,global_here,j,j)
 
       enddo
 
@@ -471,7 +472,7 @@
 
       do j=1,dg_here%ph
 
-         CALL ORTHOBASIS_AREA(dg_here,j,j)
+         CALL ORTHOBASIS_AREA(dg_here,global_here,j,j)
 
       enddo
 
@@ -479,7 +480,7 @@
 
       do j=1,dg_here%ph
 
-         CALL ORTHOBASIS_EDGE(dg_here,j,j)
+         CALL ORTHOBASIS_EDGE(dg_here,global_here,j,j)
 
       enddo
 
@@ -1166,14 +1167,14 @@
       IF (global_here%NSTAE.GT.0) THEN      ! Elevation stations
          CALL ALLOC_STAE(dg_here, global_here%NSTAE )
          DO I = 1,global_here%NSTAE
-            CALL STA_BASIS(dg_here, global_here%XEL(I), global_here%YEL(I),  global_here%NNE(I), dg_here%PHI_STAE(:,I) )
+            CALL STA_BASIS(dg_here, global_here, global_here%XEL(I), global_here%YEL(I),  global_here%NNE(I), dg_here%PHI_STAE(:,I) )
          ENDDO
       ENDIF
       
       IF (global_here%NSTAV.GT.0) THEN      ! Velocity Stations
          CALL ALLOC_STAV(dg_here, global_here%NSTAV )
          DO I = 1,global_here%NSTAV
-            CALL STA_BASIS(dg_here, global_here%XEV(I), global_here%YEV(I),  global_here%NNV(I), dg_here%PHI_STAV(:,I) )
+            CALL STA_BASIS(dg_here, global_here, global_here%XEV(I), global_here%YEV(I),  global_here%NNV(I), dg_here%PHI_STAV(:,I) )
          ENDDO
       ENDIF
 
@@ -1184,7 +1185,7 @@
             print *, 'Slope limiting prep begins, "kshanti"'
          ENDIF
          CALL ALLOC_SLOPELIM(s,dg_here)
-         CALL PREP_SLOPELIM(s,dg_here)
+         CALL PREP_SLOPELIM(s,dg_here,global_here)
          IF(MYPROC_HERE.EQ.0)THEN
             print *, 'Finished'
          ENDIF

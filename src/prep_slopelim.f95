@@ -11,7 +11,7 @@
 !     
 !***********************************************************************
 
-      SUBROUTINE PREP_SLOPELIM(s,dg_here)
+      SUBROUTINE PREP_SLOPELIM(s,dg_here,global_here)
       
 !.....Use appropriate modules
       use sizes
@@ -22,6 +22,7 @@
       
       type (sizes_type) :: s
       type (dg_type) :: dg_here
+      type (global_type) :: global_here
 
 !.....Declare local variables
 

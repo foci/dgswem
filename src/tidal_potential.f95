@@ -12,7 +12,7 @@
 !
 !***********************************************************************
 
-      SUBROUTINE TIDAL_POTENTIAL(dg_here)
+      SUBROUTINE TIDAL_POTENTIAL(dg_here,global_here)
 
 !.....Use appropriate modules
 
@@ -22,6 +22,7 @@
       IMPLICIT NONE
 
       type (dg_type) :: dg_here
+      type (global_type) :: global_here
 
       INTEGER j,i
       

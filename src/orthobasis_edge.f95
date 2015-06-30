@@ -15,7 +15,7 @@
 !     
 !***********************************************************************
 
-      SUBROUTINE ORTHOBASIS_EDGE(dg_here,P,L)
+      SUBROUTINE ORTHOBASIS_EDGE(dg_here,global_here,P,L)
 
 !.....Use appropriate modules
 
@@ -25,6 +25,7 @@
       IMPLICIT NONE
 
       type (dg_type) :: dg_here
+      type (global_type) :: global_here
 
       INTEGER Q, A, B, M, II, III,jj,i,j,P,L
       REAL(SZ) COEFF1,COEFF2,POLY1,POLY2,NUM,DEN,NUM1,DEN1,DEN2,DEN3,Z

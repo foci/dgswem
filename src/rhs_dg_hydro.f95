@@ -15,7 +15,7 @@
 !     01-10-2011 - cem - adapted for p_enrichment and multicomponent
 !     
 !***********************************************************************
-      SUBROUTINE RHS_DG_HYDRO(s,dg_here)
+      SUBROUTINE RHS_DG_HYDRO(s,dg_here,global_here)
       
 !.....Use appropriate modules
 
@@ -30,7 +30,8 @@
 
       type (sizes_type) :: s
       type (dg_type) :: dg_here
-      
+      type (global_type) :: global_here
+
 !.....Declare local variables
 
       INTEGER L,k,i,ll

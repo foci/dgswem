@@ -55,6 +55,7 @@ Using this sed command: ` sed 's:\(\bVAR\b\):g%\1:gi'` works fairly well for rep
 
 Currently, the procedure I am using involves making a list of variables contained in the user-defined type of the module, for example `src/dg.list`. I have created a script, `scripts/sed_vars.bash` which takes 5 command line arguments, the last two of which are optional: `source_code_filename`, `variable_names_list`, `module_prefix`, `start_line`, and `end_line`. This uses the sed command above to replace all instances of `VAR` in `variable_names_list` with `module_prefix%VAR` in `source_code_filename` between `start_line` and `end_line`.  In instances where a single file contains multiple subroutines, multiple calls to this script can be made with different line numbers specified in order to only replace variables in that subroutine.  In instances where a `USE module_name, ONLY: VAR1, VAR2, ...` is used, a separate list of variables (`VAR1 VAR2 ...`) is made so that only those variables are replaced in that subroutine. Source code files are then manually checked using emacs `ediff` mode.  So far, with module `DG`, the only problems coming from using the sed script is replacing `#ifdef VAR` with `#ifdef dg%VAR`, which needs to be fixed manually.  
 
+The next step is to go to each subroutine using the module and add two things: the definition of the global type `type (global_type) :: global_here`, and adding `global_here` in the subroutine call.
 
 # Module GLOBAL
 

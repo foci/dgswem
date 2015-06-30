@@ -33,7 +33,7 @@
       
 !.....Hydrodynamics
 
-      CALL DG_HYDRO_TIMESTEP(s,dg_here,IT)
+      CALL DG_HYDRO_TIMESTEP(s,dg_here,global_here,IT)
 
 !.....Write out results
 
@@ -42,7 +42,7 @@
       CALL MSG_BLOCKSYNC_START()
 #endif
 #endif
-      CALL WRITE_RESULTS(s,dg_here,IT,.FALSE.)
+      CALL WRITE_RESULTS(s,dg_here,global_here,IT,.FALSE.)
 #ifdef CMPI
 #ifdef BLKOUT
       CALL MSG_BLOCKSYNC_FINISH()

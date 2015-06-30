@@ -21,7 +21,7 @@
 !     01-02-2007, sb, Modified for LDG
 !     C***********************************************************************
 
-      SUBROUTINE INTERNAL_EDGE_HYDRO(s,dg_here,IT)
+      SUBROUTINE INTERNAL_EDGE_HYDRO(s,dg_here,global_here,IT)
 
 !.....Use appropriate modules
 
@@ -34,6 +34,7 @@
 
       type (sizes_type) :: s
       type (dg_type) :: dg_here
+      type (global_type) :: global_here
 
 !.....Declare local variables
 
@@ -379,7 +380,7 @@
 
 !.....Compute the numerical flux
             
-            CALL NUMERICAL_FLUX(s,dg_here,IT,dg_here%test_el)
+            CALL NUMERICAL_FLUX(s,dg_here,global_here,IT,dg_here%test_el)
 
 !......... dummy
             F_HAT_O  = global_here%F_HAT
@@ -491,7 +492,7 @@
 
                      dg_here%HB_IN = dg_here%HB_EX
                      dg_here%SFAC_IN = dg_here%SFAC_EX
-                     CALL NUMERICAL_FLUX(s,dg_here,IT,dg_here%test_el)
+                     CALL NUMERICAL_FLUX(s,dg_here,global_here,IT,dg_here%test_el)
 
                      F_HAT_O  = global_here%F_HAT
                      G_HAT_EX = global_here%G_HAT
@@ -528,7 +529,7 @@
                      global_here%NLEQG = 0.D0
                      G_TMP = global_here%G
                      global_here%G = 0.D0
-                     CALL NUMERICAL_FLUX(s,dg_here,IT,dg_here%test_el)
+                     CALL NUMERICAL_FLUX(s,dg_here,global_here,IT,dg_here%test_el)
                      global_here%NLEQG = NLEQG_TMP
                      global_here%G = G_TMP
                      G_HAT_IN = global_here%G_HAT
@@ -572,7 +573,7 @@
                      dg_here%bed_EX(:) = dg_here%bed_IN(:)
 #endif
 
-                     CALL NUMERICAL_FLUX(s,dg_here,IT,dg_here%test_el)
+                     CALL NUMERICAL_FLUX(s,dg_here,global_here,IT,dg_here%test_el)
                      F_HAT_O  = global_here%F_HAT
 
 #ifdef TRACE
@@ -608,7 +609,7 @@
                      global_here%NLEQG = 0.D0
                      G_TMP = global_here%G
                      global_here%G = 0.D0
-                     CALL NUMERICAL_FLUX(s,dg_here,IT,dg_here%test_el)
+                     CALL NUMERICAL_FLUX(s,dg_here,global_here,IT,dg_here%test_el)
                      global_here%NLEQG = NLEQG_TMP
                      global_here%G = G_TMP
                      G_HAT_EX = global_here%G_HAT
@@ -892,11 +893,11 @@
                global_here%NLEQG = 0.D0
                G_TMP = global_here%G
                global_here%G = 0.D0
-               CALL NUMERICAL_FLUX(s,dg_here,IT,dg_here%test_el)
+               CALL NUMERICAL_FLUX(s,dg_here,global_here,IT,dg_here%test_el)
                global_here%NLEQG = NLEQG_TMP
                global_here%G = G_TMP
             ELSE
-               CALL NUMERICAL_FLUX(s,dg_here,IT,dg_here%test_el)
+               CALL NUMERICAL_FLUX(s,dg_here,global_here,IT,dg_here%test_el)
             ENDIF
             global_here%F_HAT = 0.D0        ! Ensure zero mass flux
 
@@ -1113,11 +1114,11 @@
                global_here%NLEQG = 0.D0
                G_TMP = global_here%G
                global_here%G = 0.D0
-               CALL NUMERICAL_FLUX(s,dg_here,IT,dg_here%test_el)
+               CALL NUMERICAL_FLUX(s,dg_here,global_here,IT,dg_here%test_el)
                global_here%NLEQG = NLEQG_TMP
                global_here%G = G_TMP
             ELSE
-               CALL NUMERICAL_FLUX(s,dg_here,IT,dg_here%test_el)
+               CALL NUMERICAL_FLUX(s,dg_here,global_here,IT,dg_here%test_el)
             ENDIF
             global_here%F_HAT = 0.D0        ! Ensure zero mass flux
 

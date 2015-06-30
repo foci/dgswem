@@ -11,7 +11,7 @@
 !     
 !***********************************************************************
 
-      SUBROUTINE LDG_HYDRO(s,dg_here,IT)
+      SUBROUTINE LDG_HYDRO(s,dg_here,global_here,IT)
 
 !.....Use appropriate modules
       
@@ -28,6 +28,7 @@
       
       type (sizes_type) :: s
       type (dg_type) :: dg_here
+      type (global_type) :: global_here
 
 !.....Declare local variables
 
@@ -53,27 +54,27 @@
      
 !.....Compute elevation specified edges
 
-      IF (dg_here%NEEDS.GT.0)  CALL OCEAN_EDGE_LDG_HYDRO(s,dg_here)
+      IF (dg_here%NEEDS.GT.0)  CALL OCEAN_EDGE_LDG_HYDRO(s,dg_here,global_here)
 
 !.....Compute no-normal flow edges
 
-      IF (dg_here%NLEDS.GT.0)  CALL LAND_EDGE_LDG_HYDRO(s,dg_here)
+      IF (dg_here%NLEDS.GT.0)  CALL LAND_EDGE_LDG_HYDRO(s,dg_here,global_here)
 
 !.....Compute non-zero flow edges
 
-      IF (dg_here%NFEDS.GT.0)  CALL FLOW_EDGE_LDG_HYDRO(s,dg_here)
+      IF (dg_here%NFEDS.GT.0)  CALL FLOW_EDGE_LDG_HYDRO(s,dg_here,global_here)
       
 !.....Compute radiation edges
 
-      IF (dg_here%NREDS.GT.0)  CALL RADIATION_EDGE_LDG_HYDRO(s,dg_here)
+      IF (dg_here%NREDS.GT.0)  CALL RADIATION_EDGE_LDG_HYDRO(s,dg_here,global_here)
 
 !.....Compute internal edges
 
-      CALL INTERNAL_EDGE_LDG_HYDRO(s,dg_here)
+      CALL INTERNAL_EDGE_LDG_HYDRO(s,dg_here,global_here)
 
 !.....Loop over interior elements
 
-      CALL RHS_LDG_HYDRO(s,dg_here)
+      CALL RHS_LDG_HYDRO(s,dg_here,global_here)
 
       do L=1,NE
 
@@ -235,7 +236,7 @@
 !     01-10-2011 - cem - adapted for p_enrichment and multicomponent
 !     
 !***********************************************************************
-      SUBROUTINE OCEAN_EDGE_LDG_HYDRO(s,dg_here)
+      SUBROUTINE OCEAN_EDGE_LDG_HYDRO(s,dg_here,global_here)
 
 !.....Use appropriate modules
 
@@ -247,6 +248,7 @@
 
       type (sizes_type) :: s
       type (dg_type) :: dg_here
+      type (global_type) :: global_here
 
 !.....Declare local variables
 
@@ -359,7 +361,7 @@
             
             DO K = 1,dg_here%DOFS(EL_IN)
                CALL EDGE_INT_LDG_HYDRO&
-              (s,dg_here,K,EL_IN,LED,GED,I,iota_AVG,ZE_AVG,QX_AVG,QY_AVG,dg_here%NX,dg_here%NY,dg_here%pa)
+              (s,dg_here,global_here,K,EL_IN,LED,GED,I,iota_AVG,ZE_AVG,QX_AVG,QY_AVG,dg_here%NX,dg_here%NY,dg_here%pa)
 #ifdef SED_LAY
                do ll=1,s%layers
                   CALL EDGE_INT_LDG_sediment&
@@ -392,7 +394,7 @@
 !     
 !***********************************************************************
 
-      SUBROUTINE LAND_EDGE_LDG_HYDRO(s,dg_here)
+      SUBROUTINE LAND_EDGE_LDG_HYDRO(s,dg_here,global_here)
 
 !.....Use appropriate modules
 
@@ -403,6 +405,7 @@
 
       type (sizes_type) :: s
       type (dg_type) :: dg_here
+      type (global_type) :: global_here
 
 !.....Declare local variables
 
@@ -517,7 +520,7 @@
 
             DO K = 1,dg_here%DOFS(EL_IN)
                CALL EDGE_INT_LDG_HYDRO&
-              (s,dg_here,K,EL_IN,LED,GED,I,iota_AVG,ZE_AVG,QX_AVG,QY_AVG,dg_here%NX,dg_here%NY,dg_here%pa)
+              (s,dg_here,global_here,K,EL_IN,LED,GED,I,iota_AVG,ZE_AVG,QX_AVG,QY_AVG,dg_here%NX,dg_here%NY,dg_here%pa)
 #ifdef SED_LAY
                do ll=1,s%layers
                   CALL EDGE_INT_LDG_sediment&
@@ -550,7 +553,7 @@
 !     
 !***********************************************************************
 
-      SUBROUTINE FLOW_EDGE_LDG_HYDRO(s,dg_here)
+      SUBROUTINE FLOW_EDGE_LDG_HYDRO(s,dg_here,global_here)
 
 !.....Use appropriate modules
 
@@ -562,6 +565,7 @@
 
       type (sizes_type) :: s
       type (dg_type) :: dg_here
+      type (global_type) :: global_here
 
 !.....Declare local variables
 
@@ -694,7 +698,7 @@
 
             DO K = 1,dg_here%DOFS(EL_IN)
                CALL EDGE_INT_LDG_HYDRO&
-              (s,dg_here,K,EL_IN,LED,GED,I,iota_AVG,ZE_AVG,QX_AVG,QY_AVG,dg_here%NX,dg_here%NY,dg_here%pa)
+              (s,dg_here,global_here,K,EL_IN,LED,GED,I,iota_AVG,ZE_AVG,QX_AVG,QY_AVG,dg_here%NX,dg_here%NY,dg_here%pa)
 #ifdef SED_LAY
                do ll=1,s%layers
                   CALL EDGE_INT_LDG_sediment&
@@ -726,7 +730,7 @@
 !     
 !***********************************************************************
 
-      SUBROUTINE RADIATION_EDGE_LDG_HYDRO(s,dg_here)
+      SUBROUTINE RADIATION_EDGE_LDG_HYDRO(s,dg_here,global_here)
 
 !.....Use appropriate modules
 
@@ -738,6 +742,7 @@
 
       type (sizes_type) :: s
       type (dg_type) :: dg_here
+      type (global_type) :: global_here
 
 !.....Declare local variables
 
@@ -814,7 +819,7 @@
            
             DO K = 1,dg_here%DOFS(EL_IN)
                CALL EDGE_INT_LDG_HYDRO&
-              (s,dg_here,K,EL_IN,LED,GED,I,dg_here%iota_IN,dg_here%ZE_IN,dg_here%QX_IN,dg_here%QY_IN,dg_here%NX,dg_here%NY,dg_here%pa)
+              (s,dg_here,global_here,K,EL_IN,LED,GED,I,dg_here%iota_IN,dg_here%ZE_IN,dg_here%QX_IN,dg_here%QY_IN,dg_here%NX,dg_here%NY,dg_here%pa)
 #ifdef SED_LAY
                do ll=1,s%layers
                   CALL EDGE_INT_LDG_sediment&
@@ -845,7 +850,7 @@
 !     
 !***********************************************************************
 
-      SUBROUTINE INTERNAL_EDGE_LDG_HYDRO(s,dg_here)
+      SUBROUTINE INTERNAL_EDGE_LDG_HYDRO(s,dg_here,global_here)
 
 !.....Use appropriate modules
       
@@ -857,6 +862,7 @@
 
       type (sizes_type) :: s
       type (dg_type) :: dg_here
+      type (global_type) :: global_here
 
 !.....Declare local variables
 
@@ -1110,7 +1116,7 @@
 !***********************************************************************
 
       SUBROUTINE EDGE_INT_LDG_sediment&
-     (s,dg_here,K,EL,LED,GED,GP,bed_avg,NX,NY,pa,ll)
+     (s,dg_here,global_here,K,EL,LED,GED,GP,bed_avg,NX,NY,pa,ll)
                                 ! <ezpp-noinst>
       
 !.....Use appropriate modules
@@ -1158,7 +1164,7 @@
 !     2012 - cem - added sediment layers
 !***********************************************************************
 
-      SUBROUTINE RHS_LDG_HYDRO(s,dg_here)
+      SUBROUTINE RHS_LDG_HYDRO(s,dg_here,global_here)
       
 !.....Use appropriate modules
 

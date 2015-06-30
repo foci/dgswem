@@ -25,6 +25,7 @@
 
       type (sizes_type) :: s
       type (dg_type) :: dg_here
+      type (global_type) :: global_here
       
       INTEGER TESTFLAG,OUTITER,istop,i,ModetoNode
 !     sb-PDG1
@@ -174,8 +175,8 @@
 !     write(200+myproc,*) 'call prep_dg'
 !     write(200+myproc,*) 'back from prep_dg'
 
-      CALL PREP_DG(s,dg_here)
-      CALL WRITE_RESULTS(s,dg_here,0,.FALSE.)
+      CALL PREP_DG(s,dg_here,global_here)
+      CALL WRITE_RESULTS(s,dg_here,global_here,0,.FALSE.)
 
                                !cnd...for tecplot output
 !Casey 120813: Begin the OUT_TEC conditional.
