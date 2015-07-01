@@ -27,7 +27,7 @@
       type (dg_type) :: dg_here
       type (global_type) :: global_here
       
-      INTEGER TESTFLAG,OUTITER,istop,i,ModetoNode
+      INTEGER TESTFLAG,OUTITER,istop,i,ModetoNode,time_here,ie
 !     sb-PDG1
       REAL(4) CPU_TIME,CPU_SEC(2)
       REAL(4) TARRAY(2)
@@ -47,10 +47,11 @@
      
       type (sizes_type) :: s
       type (dg_type) :: dg_here
+      type (global_type) :: global_here
 
       REAL(4) CPU_TIME,CPU_SEC(2)
       REAL(4) TARRAY(2)
-      INTEGER TESTFLAG,OUTITER,i,ModetoNode
+      INTEGER TESTFLAG,OUTITER,i,ModetoNode,time_here,ie
       character*80 tecfile, tecfile_max
 
       CALL MAKE_DIRNAME(s)       ! Establish Working Directory Name
@@ -64,7 +65,7 @@
 !...  
 !     
       IF (global_here%IHOT.EQ.0) THEN
-         CALL COLDSTART(s)
+         CALL COLDSTART(s,global_here)
       ELSE
 #ifdef HOTSTART
          CALL HOTSTART()
@@ -85,7 +86,7 @@
          global_here%NODECODE(I)=global_here%NNODECODE(I)
       END DO
 
-      DO global_here%IE=1,global_here%NE
+      DO IE=1,global_here%NE
          global_here%NM1=global_here%NM(global_here%IE,1)
          global_here%NM2=global_here%NM(global_here%IE,2)
          global_here%NM3=global_here%NM(global_here%IE,3)
@@ -323,7 +324,8 @@
 !     endif
 #endif
 !.....Begin time stepping
-      DO 200 global_here%ITIME_A = global_here%ITHS+1,global_here%NT
+      DO 200 time_here = global_here%ITHS+1,global_here%NT
+         global_here%ITIME_A = time_here
 !$$$         if (mod(global_here%itime_a,1000).eq.1) then
 !$$$            if (myproc.eq.0) write(*,*) 'timestep ',global_here%itime_a
 !$$$c     write(200+myproc,*) 'timestep ',global_here%itime_a,myproc

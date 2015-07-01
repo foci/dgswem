@@ -241,7 +241,7 @@
 
 !.....Allocate the array for node to element table
 
-      CALL ALLOC_NNOEL1(S)
+      CALL ALLOC_NNOEL1(S,global_here)
 
 !.....Determine the number of elements connected at each node
 
@@ -257,7 +257,7 @@
 
 !.....Allocate the array for the node to element table
 
-      CALL ALLOC_NNOEL2(S,global_here%MAXEL)
+      CALL ALLOC_NNOEL2(S,global_here,global_here%MAXEL)
       
 !.....Construct node to element table
 

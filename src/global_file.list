@@ -119,3 +119,8 @@ sourcefile=LDG_hydro.f95
 # the module itself needs to be turned into a data type anyway
 
 sourcefile=nodalattr.f95 #is a module, no "use global" statements
+
+
+# **** the alloc routines in the module itself *****
+sourcefile=global.f95
+../scripts/sed_vars.bash global.f95 global.list global_here 390 749

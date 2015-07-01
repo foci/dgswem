@@ -387,47 +387,49 @@
 
       CONTAINS
 
-      SUBROUTINE ALLOC_MAIN1(s)
+      SUBROUTINE ALLOC_MAIN1(s,global_here)
       use sizes
       implicit none
       type (sizes_type) :: s
+      type (global_type) :: global_here
+      
 !
 !     Allocate space for Arrays dimensioned by MNE and MNP
 !
-      ALLOCATE ( SLAM(s%MNP),SFEA(s%MNP),X(s%MNP),Y(s%MNP))
-      ALLOCATE ( DP(s%MNP),DP0(s%MNP),DPe(s%MNE),SFAC(s%MNP))!,STARTDRY(s%MNP))
-      ALLOCATE ( NM(s%MNE,3))
-      ALLOCATE ( NOT_AN_EDGE(s%MNP) )
-      ALLOCATE ( WEIR_BUDDY_NODE(s%MNP,2) )
-      ALLOCATE ( ONE_OR_TWO(s%MNP) )
-      ALLOCATE ( NELED(3,s%MNE))
-      ALLOCATE ( ETAS(s%MNP))
-      ALLOCATE ( QW(s%MNP))
+      ALLOCATE ( global_here%SLAM(s%MNP),global_here%SFEA(s%MNP),global_here%X(s%MNP),global_here%Y(s%MNP))
+      ALLOCATE ( global_here%DP(s%MNP),global_here%DP0(s%MNP),global_here%DPe(s%MNE),global_here%SFAC(s%MNP))!,STARTDRY(s%MNP))
+      ALLOCATE ( global_here%NM(s%MNE,3))
+      ALLOCATE ( global_here%NOT_AN_EDGE(s%MNP) )
+      ALLOCATE ( global_here%WEIR_BUDDY_NODE(s%MNP,2) )
+      ALLOCATE ( global_here%ONE_OR_TWO(s%MNP) )
+      ALLOCATE ( global_here%NELED(3,s%MNE))
+      ALLOCATE ( global_here%ETAS(s%MNP))
+      ALLOCATE ( global_here%QW(s%MNP))
 !.....ek now allocated in nodal attributes
 !      ALLOCATE ( FRIC(s%MNP),EVM(s%MNP))
-      ALLOCATE ( UU1(s%MNP),VV1(s%MNP))
-      ALLOCATE ( NNODECODE(s%MNP),NODEREP(s%MNP))
-      ALLOCATE ( NNEIGH(s%MNP),MJU(s%MNP),NODELE(s%MNP))
-      ALLOCATE ( NIBNODECODE(s%MNP),NNEIGH_ELEM(s%MNP))
+      ALLOCATE ( global_here%UU1(s%MNP),global_here%VV1(s%MNP))
+      ALLOCATE ( global_here%NNODECODE(s%MNP),global_here%NODEREP(s%MNP))
+      ALLOCATE ( global_here%NNEIGH(s%MNP),global_here%MJU(s%MNP),global_here%NODELE(s%MNP))
+      ALLOCATE ( global_here%NIBNODECODE(s%MNP),global_here%NNEIGH_ELEM(s%MNP))
 !      ALLOCATE ( TAU0VAR(s%MNP))
-      ALLOCATE ( CH1(s%MNP),QB(s%MNP),QA(s%MNP),SOURSIN(s%MNP))!,EVC(s%MNP))
-      ALLOCATE ( TKXX(s%MNP),TKYY(s%MNP),TKXY(s%MNP))
-      ALLOCATE ( AREAS(s%MNE),SFACDUB(3,s%MNE),RTEMP2(s%MNE))
-      ALLOCATE ( YDUB(36,s%MNE,8))
-      ALLOCATE ( UU2(max(s%MNP,s%MNE)))
-      ALLOCATE ( VV2(max(s%MNP,s%MNE)))
-      ALLOCATE ( ETA1(max(s%MNP,s%MNE)),ETA2(max(s%MNP,s%MNE)), ETAMAX(s%MNP), MassMax(s%MNE) )
-      Allocate ( tracer(max(s%MNP,s%MNE)), tracer2(max(s%MNP,s%MNE)), bed_int(max(s%mnp,s%mne),s%layers), entrop(5,s%MNE) )
-      ALLOCATE ( CORIF(s%MNP), dyn_P(max(s%MNP,s%MNE)), pdg_el(s%MNE) )
-      ALLOCATE ( QU(s%MNP),QV(s%MNP))
-      ALLOCATE ( LBCODE(s%MNP))
-      ALLOCATE ( CSI(s%MNP),SII(s%MNP))
-      ALLOCATE ( NODECODE(s%MNP))
-      ALLOCATE (GRAVX(s%MNP),GRAVY(s%MNP))
-      ALLOCATE ( NIBCNT(s%MNP) )    !  added 7/31/2000 to fix wetdry bug
+      ALLOCATE ( global_here%CH1(s%MNP),global_here%QB(s%MNP),global_here%QA(s%MNP),global_here%SOURSIN(s%MNP))!,EVC(s%MNP))
+      ALLOCATE ( global_here%TKXX(s%MNP),global_here%TKYY(s%MNP),global_here%TKXY(s%MNP))
+      ALLOCATE ( global_here%AREAS(s%MNE),global_here%SFACDUB(3,s%MNE),global_here%RTEMP2(s%MNE))
+      ALLOCATE ( global_here%YDUB(36,s%MNE,8))
+      ALLOCATE ( global_here%UU2(max(s%MNP,s%MNE)))
+      ALLOCATE ( global_here%VV2(max(s%MNP,s%MNE)))
+      ALLOCATE ( global_here%ETA1(max(s%MNP,s%MNE)),global_here%ETA2(max(s%MNP,s%MNE)), global_here%ETAMAX(s%MNP), global_here%MassMax(s%MNE) )
+      Allocate ( global_here%tracer(max(s%MNP,s%MNE)), global_here%tracer2(max(s%MNP,s%MNE)), global_here%bed_int(max(s%mnp,s%mne),s%layers), global_here%entrop(5,s%MNE) )
+      ALLOCATE ( global_here%CORIF(s%MNP), global_here%dyn_P(max(s%MNP,s%MNE)), global_here%pdg_el(s%MNE) )
+      ALLOCATE ( global_here%QU(s%MNP),global_here%QV(s%MNP))
+      ALLOCATE ( global_here%LBCODE(s%MNP))
+      ALLOCATE ( global_here%CSI(s%MNP),global_here%SII(s%MNP))
+      ALLOCATE ( global_here%NODECODE(s%MNP))
+      ALLOCATE (global_here%GRAVX(s%MNP),global_here%GRAVY(s%MNP))
+      ALLOCATE ( global_here%NIBCNT(s%MNP) )    !  added 7/31/2000 to fix wetdry bug
 !sb-added by sb 10/11/2005
-      ALLOCATE( NNDEL(s%MNP) )
-      ALLOCATE( EDFLG(3,s%MNE) )
+      ALLOCATE( global_here%NNDEL(s%MNP) )
+      ALLOCATE( global_here%EDFLG(3,s%MNE) )
 
 !--
 
@@ -436,37 +438,39 @@
 #endif
 
 #ifdef CVEC
-      ALLOCATE ( QTEMA(s%MNE,3),QTEMB(s%MNE,3))
+      ALLOCATE ( global_here%QTEMA(s%MNE,3),global_here%QTEMB(s%MNE,3))
 #endif
 
       IF ( s%C3DDSS) THEN
-        ALLOCATE( AUV11(s%MNP),AUV12(s%MNP),AUV13(s%MNP),AUV14(s%MNP))
+        ALLOCATE( global_here%AUV11(s%MNP),global_here%AUV12(s%MNP),global_here%AUV13(s%MNP),global_here%AUV14(s%MNP))
       ELSEIF (s%C2DDI) THEN
-        ALLOCATE( AUV11(s%MNP),AUV12(s%MNP))
-        ALLOCATE( AUVXX(s%MNP),AUVYY(s%MNP),AUVXY(s%MNP),AUVYX(s%MNP))
+        ALLOCATE( global_here%AUV11(s%MNP),global_here%AUV12(s%MNP))
+        ALLOCATE( global_here%AUVXX(s%MNP),global_here%AUVYY(s%MNP),global_here%AUVXY(s%MNP),global_here%AUVYX(s%MNP))
       ENDIF
 
       IF ( s%C3D) THEN
-       ALLOCATE( DUU1(s%MNP),DUV1(s%MNP),DVV1(s%MNP),BSX1(s%MNP),BSY1(s%MNP))
+       ALLOCATE( global_here%DUU1(s%MNP),global_here%DUV1(s%MNP),global_here%DVV1(s%MNP),global_here%BSX1(s%MNP),global_here%BSY1(s%MNP))
        endif
 !
       RETURN
       END SUBROUTINE
 
 
-      SUBROUTINE ALLOC_MAIN2(s)
+      SUBROUTINE ALLOC_MAIN2(s,global_here)
       use sizes
       implicit none
       type (sizes_type) :: s
+      type (global_type) :: global_here
+
 !
 !     Allocate space for Arrays dimensioned by MNOPE and MNETA
 !
-      ALLOCATE ( ESBIN1(s%MNETA),ESBIN2(s%MNETA))
-      ALLOCATE ( NBDV(s%MNOPE,s%MNETA))
-      ALLOCATE ( NVDLL(s%MNOPE),NBD(s%MNETA))
-      ALLOCATE ( EMO(s%MNBFR,s%MNETA),EFA(s%MNBFR,s%MNETA))
-      ALLOCATE ( UMO(s%MNBFR,s%MNETA),UFA(s%MNBFR,s%MNETA))
-      ALLOCATE ( VMO(s%MNBFR,s%MNETA),VFA(s%MNBFR,s%MNETA))
+      ALLOCATE ( global_here%ESBIN1(s%MNETA),global_here%ESBIN2(s%MNETA))
+      ALLOCATE ( global_here%NBDV(s%MNOPE,s%MNETA))
+      ALLOCATE ( global_here%NVDLL(s%MNOPE),global_here%NBD(s%MNETA))
+      ALLOCATE ( global_here%EMO(s%MNBFR,s%MNETA),global_here%EFA(s%MNBFR,s%MNETA))
+      ALLOCATE ( global_here%UMO(s%MNBFR,s%MNETA),global_here%UFA(s%MNBFR,s%MNETA))
+      ALLOCATE ( global_here%VMO(s%MNBFR,s%MNETA),global_here%VFA(s%MNBFR,s%MNETA))
 
       RETURN
       END SUBROUTINE
@@ -476,31 +480,33 @@
 !     Allocate space for nonperiodic zero and nonzero normal flow boundary arrays
 !     including barriers
 !
-      SUBROUTINE ALLOC_MAIN3(s)
+      SUBROUTINE ALLOC_MAIN3(s,global_here)
       use sizes
       implicit none
       type (sizes_type) :: s
-      ALLOCATE ( QN0(s%MNVEL),QN1(s%MNVEL),QN2(s%MNVEL))
-      ALLOCATE ( NBV(s%MNVEL),LBCODEI(s%MNVEL))
-      ALLOCATE ( BNDLEN2O3(s%MNVEL))
-      ALLOCATE ( ME2GW(s%MNVEL))
-      ALLOCATE ( CSII(s%MNVEL),SIII(s%MNVEL))
-      ALLOCATE ( BARLANHT(s%MNVEL),BARLANCFSP(s%MNVEL))
-      ALLOCATE ( BARLANHTR(s%MNVEL),BARLANCFSPR(s%MNVEL))
-      ALLOCATE ( BARINHT(s%MNVEL),BARINCFSB(s%MNVEL),BARINCFSP(s%MNVEL))
-      ALLOCATE ( PIPEHT(s%MNVEL),PIPECOEF(s%MNVEL),PIPEDIAM(s%MNVEL))
-      ALLOCATE ( IBCONN(s%MNVEL))
-      ALLOCATE ( BARINHTR(s%MNVEL),BARINCFSBR(s%MNVEL),BARINCFSPR(s%MNVEL))
-      ALLOCATE ( PIPEHTR(s%MNVEL),PIPECOEFR(s%MNVEL),PIPEDIAMR(s%MNVEL))
-      ALLOCATE ( IBCONNR(s%MNVEL),NTRAN1(s%MNVEL),NTRAN2(s%MNVEL))
-      ALLOCATE ( BTRAN3(s%MNVEL),BTRAN4(s%MNVEL),BTRAN5(s%MNVEL))
-      ALLOCATE ( BTRAN6(s%MNVEL),BTRAN7(s%MNVEL),BTRAN8(s%MNVEL))
-      ALLOCATE ( RBARWL1AVG(s%MNVEL),RBARWL2AVG(s%MNVEL))
-      ALLOCATE ( RPIPEWL1AVG(s%MNVEL),RPIPEWL2AVG(s%MNVEL))
-      ALLOCATE ( QNIN1(s%MNVEL),QNIN2(s%MNVEL))
-      ALLOCATE ( NBVV(s%MNBOU,0:s%MNVEL))
-      ALLOCATE ( NVELL(s%MNBOU))
-      ALLOCATE ( SEGTYPE(s%MNBOU))
+      type (global_type) :: global_here
+
+      ALLOCATE ( global_here%QN0(s%MNVEL),global_here%QN1(s%MNVEL),global_here%QN2(s%MNVEL))
+      ALLOCATE ( global_here%NBV(s%MNVEL),global_here%LBCODEI(s%MNVEL))
+      ALLOCATE ( global_here%BNDLEN2O3(s%MNVEL))
+      ALLOCATE ( global_here%ME2GW(s%MNVEL))
+      ALLOCATE ( global_here%CSII(s%MNVEL),global_here%SIII(s%MNVEL))
+      ALLOCATE ( global_here%BARLANHT(s%MNVEL),global_here%BARLANCFSP(s%MNVEL))
+      ALLOCATE ( global_here%BARLANHTR(s%MNVEL),global_here%BARLANCFSPR(s%MNVEL))
+      ALLOCATE ( global_here%BARINHT(s%MNVEL),global_here%BARINCFSB(s%MNVEL),global_here%BARINCFSP(s%MNVEL))
+      ALLOCATE ( global_here%PIPEHT(s%MNVEL),global_here%PIPECOEF(s%MNVEL),global_here%PIPEDIAM(s%MNVEL))
+      ALLOCATE ( global_here%IBCONN(s%MNVEL))
+      ALLOCATE ( global_here%BARINHTR(s%MNVEL),global_here%BARINCFSBR(s%MNVEL),global_here%BARINCFSPR(s%MNVEL))
+      ALLOCATE ( global_here%PIPEHTR(s%MNVEL),global_here%PIPECOEFR(s%MNVEL),global_here%PIPEDIAMR(s%MNVEL))
+      ALLOCATE ( global_here%IBCONNR(s%MNVEL),global_here%NTRAN1(s%MNVEL),global_here%NTRAN2(s%MNVEL))
+      ALLOCATE ( global_here%BTRAN3(s%MNVEL),global_here%BTRAN4(s%MNVEL),global_here%BTRAN5(s%MNVEL))
+      ALLOCATE ( global_here%BTRAN6(s%MNVEL),global_here%BTRAN7(s%MNVEL),global_here%BTRAN8(s%MNVEL))
+      ALLOCATE ( global_here%RBARWL1AVG(s%MNVEL),global_here%RBARWL2AVG(s%MNVEL))
+      ALLOCATE ( global_here%RPIPEWL1AVG(s%MNVEL),global_here%RPIPEWL2AVG(s%MNVEL))
+      ALLOCATE ( global_here%QNIN1(s%MNVEL),global_here%QNIN2(s%MNVEL))
+      ALLOCATE ( global_here%NBVV(s%MNBOU,0:s%MNVEL))
+      ALLOCATE ( global_here%NVELL(s%MNBOU))
+      ALLOCATE ( global_here%SEGTYPE(s%MNBOU))
 
       RETURN
       END SUBROUTINE
@@ -509,16 +515,18 @@
 !
 !     Allocate space for tidal potential terms 
 !
-      SUBROUTINE ALLOC_MAIN4a(s)
+      SUBROUTINE ALLOC_MAIN4a(s,global_here)
       use sizes
       implicit none
       type (sizes_type) :: s
-      ALLOCATE ( TPK(s%MNTIF),AMIGT(s%MNTIF),FFT(s%MNTIF) )
-      ALLOCATE ( FACET(s%MNTIF),PERT(s%MNTIF),ETRF(s%MNTIF) )
-      ALLOCATE ( TIPOTAG(s%MNTIF) )
+      type (global_type) :: global_here
+
+      ALLOCATE ( global_here%TPK(s%MNTIF),global_here%AMIGT(s%MNTIF),global_here%FFT(s%MNTIF) )
+      ALLOCATE ( global_here%FACET(s%MNTIF),global_here%PERT(s%MNTIF),global_here%ETRF(s%MNTIF) )
+      ALLOCATE ( global_here%TIPOTAG(s%MNTIF) )
 
       IF ( s%CTIP ) THEN
-        ALLOCATE( TIP1(s%MNP),TIP2(s%MNP))
+        ALLOCATE( global_here%TIP1(s%MNP),global_here%TIP2(s%MNP))
         ENDIF  
 
       RETURN
@@ -528,11 +536,13 @@
 !
 !     Allocate space for Earth load/self-attraction tide 
 !
-      SUBROUTINE ALLOC_MAIN4b(s)
+      SUBROUTINE ALLOC_MAIN4b(s,global_here)
       use sizes
       implicit none
       type (sizes_type) :: s
-      ALLOCATE ( SALTAMP(s%MNTIF,s%MNP),SALTPHA(s%MNTIF,s%MNP) )
+      type (global_type) :: global_here
+
+      ALLOCATE ( global_here%SALTAMP(s%MNTIF,s%MNP),global_here%SALTPHA(s%MNTIF,s%MNP) )
       RETURN
       END SUBROUTINE
 
@@ -540,13 +550,15 @@
 !
 !     Allocate space for Arrays dimensioned by s%MNBFR      
 !
-      SUBROUTINE ALLOC_MAIN5(s)
+      SUBROUTINE ALLOC_MAIN5(s,global_here)
       use sizes
       implicit none
       type (sizes_type) :: s
-      ALLOCATE ( AMIG(s%MNBFR),PER(s%MNBFR))
-      ALLOCATE ( FF(s%MNBFR),FACE(s%MNBFR))
-      ALLOCATE ( BOUNTAG(s%MNBFR) )
+       type (global_type) :: global_here
+
+     ALLOCATE ( global_here%AMIG(s%MNBFR),global_here%PER(s%MNBFR))
+      ALLOCATE ( global_here%FF(s%MNBFR),global_here%FACE(s%MNBFR))
+      ALLOCATE ( global_here%BOUNTAG(s%MNBFR) )
 
       RETURN
       END SUBROUTINE
@@ -556,13 +568,15 @@
 !
 !     Allocate space for periodic normal flow boundary conditions
 !
-      SUBROUTINE ALLOC_MAIN6(s)
+      SUBROUTINE ALLOC_MAIN6(s,global_here)
       use sizes
       implicit none
       type (sizes_type) :: s
-      ALLOCATE ( QNAM(s%MNFFR,s%MNVEL),QNPH(s%MNFFR,s%MNVEL))
-      ALLOCATE ( FBOUNTAG(s%MNFFR))
-      ALLOCATE ( FAMIG(s%MNFFR), FFF(s%MNFFR), FFACE(s%MNFFR), FPER(s%MNFFR) )
+      type (global_type) :: global_here
+
+      ALLOCATE ( global_here%QNAM(s%MNFFR,s%MNVEL),global_here%QNPH(s%MNFFR,s%MNVEL))
+      ALLOCATE ( global_here%FBOUNTAG(s%MNFFR))
+      ALLOCATE ( global_here%FAMIG(s%MNFFR), global_here%FFF(s%MNFFR), global_here%FFACE(s%MNFFR), global_here%FPER(s%MNFFR) )
 
       RETURN
       END SUBROUTINE
@@ -571,13 +585,15 @@
 !
 !     Allocate space for arrays used for station elevation output
 !
-      SUBROUTINE ALLOC_MAIN7(s)
+      SUBROUTINE ALLOC_MAIN7(s,global_here)
       use sizes
       implicit none
       type (sizes_type) :: s
-      ALLOCATE ( NNE(s%MNSTAE),ET00(s%MNSTAE),BT00(s%MNSTAE))
-      ALLOCATE ( STAIE1(s%MNSTAE),STAIE2(s%MNSTAE),STAIE3(s%MNSTAE))
-      ALLOCATE ( XEL(s%MNSTAE),YEL(s%MNSTAE),SLEL(s%MNSTAE),SFEL(s%MNSTAE))
+      type (global_type) :: global_here
+
+      ALLOCATE ( global_here%NNE(s%MNSTAE),global_here%ET00(s%MNSTAE),global_here%BT00(s%MNSTAE))
+      ALLOCATE ( global_here%STAIE1(s%MNSTAE),global_here%STAIE2(s%MNSTAE),global_here%STAIE3(s%MNSTAE))
+      ALLOCATE ( global_here%XEL(s%MNSTAE),global_here%YEL(s%MNSTAE),global_here%SLEL(s%MNSTAE),global_here%SFEL(s%MNSTAE))
       RETURN
       END SUBROUTINE
 
@@ -585,14 +601,16 @@
 !
 !     Allocate space for arrays used for station velocity output
 !
-      SUBROUTINE ALLOC_MAIN8(s)
+      SUBROUTINE ALLOC_MAIN8(s,global_here)
       use sizes
       implicit none
       type (sizes_type) :: s
-      ALLOCATE ( XEV(s%MNSTAV),YEV(s%MNSTAV),SLEV(s%MNSTAV),SFEV(s%MNSTAV))
-      ALLOCATE ( NNV(s%MNSTAV))
-      ALLOCATE ( UU00(s%MNSTAV),VV00(s%MNSTAV))
-      ALLOCATE ( STAIV1(s%MNSTAV),STAIV2(s%MNSTAV),STAIV3(s%MNSTAV))
+      type (global_type) :: global_here
+
+      ALLOCATE ( global_here%XEV(s%MNSTAV),global_here%YEV(s%MNSTAV),global_here%SLEV(s%MNSTAV),global_here%SFEV(s%MNSTAV))
+      ALLOCATE ( global_here%NNV(s%MNSTAV))
+      ALLOCATE ( global_here%UU00(s%MNSTAV),global_here%VV00(s%MNSTAV))
+      ALLOCATE ( global_here%STAIV1(s%MNSTAV),global_here%STAIV2(s%MNSTAV),global_here%STAIV3(s%MNSTAV))
 
       RETURN
       END SUBROUTINE
@@ -601,14 +619,16 @@
 !
 !     Allocate space for arrays used for station concentration output
 !
-      SUBROUTINE ALLOC_MAIN9(s)
+      SUBROUTINE ALLOC_MAIN9(s,global_here)
       use sizes
       implicit none
       type (sizes_type) :: s
-      ALLOCATE ( XEC(s%MNSTAC),YEC(s%MNSTAC),SLEC(s%MNSTAC),SFEC(s%MNSTAC))
-      ALLOCATE ( NNC(s%MNSTAC))
-      ALLOCATE ( CC00(s%MNSTAC))
-      ALLOCATE ( STAIC1(s%MNSTAC),STAIC2(s%MNSTAC),STAIC3(s%MNSTAC))
+      type (global_type) :: global_here
+
+      ALLOCATE ( global_here%XEC(s%MNSTAC),global_here%YEC(s%MNSTAC),global_here%SLEC(s%MNSTAC),global_here%SFEC(s%MNSTAC))
+      ALLOCATE ( global_here%NNC(s%MNSTAC))
+      ALLOCATE ( global_here%CC00(s%MNSTAC))
+      ALLOCATE ( global_here%STAIC1(s%MNSTAC),global_here%STAIC2(s%MNSTAC),global_here%STAIC3(s%MNSTAC))
 
       RETURN
       END SUBROUTINE
@@ -617,14 +637,16 @@
 !
 !     Allocate space for arrays used for station meteorological output
 !
-      SUBROUTINE ALLOC_MAIN10(s)
+      SUBROUTINE ALLOC_MAIN10(s,global_here)
       use sizes
       implicit none
       type (sizes_type) :: s
-      ALLOCATE ( XEM(s%MNSTAM),YEM(s%MNSTAM),SLEM(s%MNSTAM),SFEM(s%MNSTAM))
-      ALLOCATE ( NNM(s%MNSTAM))
-      ALLOCATE ( RMU00(s%MNSTAM),RMV00(s%MNSTAM),RMP00(s%MNSTAM))
-      ALLOCATE ( STAIM1(s%MNSTAM),STAIM2(s%MNSTAM),STAIM3(s%MNSTAM))
+      type (global_type) :: global_here
+
+      ALLOCATE ( global_here%XEM(s%MNSTAM),global_here%YEM(s%MNSTAM),global_here%SLEM(s%MNSTAM),global_here%SFEM(s%MNSTAM))
+      ALLOCATE ( global_here%NNM(s%MNSTAM))
+      ALLOCATE ( global_here%RMU00(s%MNSTAM),global_here%RMV00(s%MNSTAM),global_here%RMP00(s%MNSTAM))
+      ALLOCATE ( global_here%STAIM1(s%MNSTAM),global_here%STAIM2(s%MNSTAM),global_here%STAIM3(s%MNSTAM))
 
       RETURN
       END SUBROUTINE
@@ -633,20 +655,21 @@
 !
 !     Allocate space for Arrays dimensioned by s%s%MNEI   
 !
-      SUBROUTINE ALLOC_MAIN11(s)
+      SUBROUTINE ALLOC_MAIN11(s,global_here)
       use sizes
       implicit none
       type (sizes_type) :: s
+      type (global_type) :: global_here
 
 !  Arrays used by JCG iterative solver
 
-      ALLOCATE( OBCCOEF(s%MNETA,s%MNEI-1),COEF(s%MNP,s%MNEI))
-      ALLOCATE( IWKSP(3*s%MNP),WKSP(4*s%MNP+400) )
-      ALLOCATE( IPARM(12),RPARM(12) )
+      ALLOCATE( global_here%OBCCOEF(s%MNETA,s%MNEI-1),global_here%COEF(s%MNP,s%MNEI))
+      ALLOCATE( global_here%IWKSP(3*s%MNP),global_here%WKSP(4*s%MNP+400) )
+      ALLOCATE( global_here%IPARM(12),global_here%RPARM(12) )
 
 !  Neighbor Table
 
-      ALLOCATE ( NEITAB(s%MNP,s%MNEI),NEIGH_ELEM(s%MNP,s%MNEI))
+      ALLOCATE ( global_here%NEITAB(s%MNP,s%MNEI),global_here%NEIGH_ELEM(s%MNP,s%MNEI))
 
       RETURN
       END SUBROUTINE
@@ -655,16 +678,18 @@
 !
 !     Allocate space for wind forcing   
 !
-      SUBROUTINE ALLOC_MAIN12(s)
+      SUBROUTINE ALLOC_MAIN12(s,global_here)
       use sizes
       implicit none
       type (sizes_type) :: s
-      ALLOCATE ( WSX1(s%MNP),WSY1(s%MNP),PR1(s%MNP) )
-      ALLOCATE ( WSX2(s%MNP),WSY2(s%MNP),PR2(s%MNP) )
-      ALLOCATE ( WVNX1(s%MNP),WVNY1(s%MNP),PRN1(s%MNP) )
-      ALLOCATE ( WVNX2(s%MNP),WVNY2(s%MNP),PRN2(s%MNP) )
-      ALLOCATE ( RSNX1(s%MNP),RSNY1(s%MNP),RSNX2(s%MNP),RSNY2(s%MNP) )
-      ALLOCATE ( WVNXOUT(s%MNP),WVNYOUT(s%MNP) )
+      type (global_type) :: global_here
+
+      ALLOCATE ( global_here%WSX1(s%MNP),global_here%WSY1(s%MNP),global_here%PR1(s%MNP) )
+      ALLOCATE ( global_here%WSX2(s%MNP),global_here%WSY2(s%MNP),global_here%PR2(s%MNP) )
+      ALLOCATE ( global_here%WVNX1(s%MNP),global_here%WVNY1(s%MNP),global_here%PRN1(s%MNP) )
+      ALLOCATE ( global_here%WVNX2(s%MNP),global_here%WVNY2(s%MNP),global_here%PRN2(s%MNP) )
+      ALLOCATE ( global_here%RSNX1(s%MNP),global_here%RSNY1(s%MNP),global_here%RSNX2(s%MNP),global_here%RSNY2(s%MNP) )
+      ALLOCATE ( global_here%WVNXOUT(s%MNP),global_here%WVNYOUT(s%MNP) )
 #ifdef SWAN
 !asey 101118: Added the next line for output of radiation stress gradients.
       ALLOCATE ( RSNXOUT(s%MNP),RSNYOUT(s%MNP) )
@@ -676,11 +701,13 @@
 !
 !     Allocate space for bridge piling friction arrays   
 !
-      SUBROUTINE ALLOC_MAIN13(s)
+      SUBROUTINE ALLOC_MAIN13(s,global_here)
       use sizes
       implicit none
       type (sizes_type) :: s
-      ALLOCATE ( NBNNUM(s%MNP),BK(s%MNP),BALPHA(s%MNP),BDELX(s%MNP) )
+      type (global_type) :: global_here
+
+      ALLOCATE ( global_here%NBNNUM(s%MNP),global_here%BK(s%MNP),global_here%BALPHA(s%MNP),global_here%BDELX(s%MNP) )
       RETURN
       END SUBROUTINE
 !
@@ -688,61 +715,70 @@
 !     global data because the variables are used in main source, outside of HA analysis
 !     subroutines.  This should probably be changed.
 !
-      SUBROUTINE ALLOC_MAIN14(s)
+      SUBROUTINE ALLOC_MAIN14(s,global_here)
       use sizes
       implicit none
       type (sizes_type) :: s
-      ALLOCATE ( XVELAV(s%MNP),YVELAV(s%MNP),XVELVA(s%MNP),YVELVA(s%MNP) )
-      ALLOCATE ( ELAV(s%MNP),ELVA(s%MNP) )
+      type (global_type) :: global_here
+
+      ALLOCATE ( global_here%XVELAV(s%MNP),global_here%YVELAV(s%MNP),global_here%XVELVA(s%MNP),global_here%YVELVA(s%MNP) )
+      ALLOCATE ( global_here%ELAV(s%MNP),global_here%ELVA(s%MNP) )
       RETURN
       END SUBROUTINE
       
 !.....Allocate for wave friction
 
-      SUBROUTINE ALLOC_MAIN15(s)
+      SUBROUTINE ALLOC_MAIN15(s,global_here)
       use sizes
       implicit none
       type (sizes_type) :: s
-      ALLOCATE ( WAVE_T1(s%MNP),WAVE_H1(s%MNP),WAVE_A1(s%MNP),WAVE_D1(s%MNP) )
-      ALLOCATE ( WAVE_T2(s%MNP),WAVE_H2(s%MNP),WAVE_A2(s%MNP),WAVE_D2(s%MNP) )
-      ALLOCATE ( WAVE_T(s%MNP),WAVE_H(s%MNP),WAVE_A(s%MNP),WAVE_D(s%MNP) )
-      ALLOCATE ( WB(s%MNP) )
+      type (global_type) :: global_here
+
+      ALLOCATE ( global_here%WAVE_T1(s%MNP),global_here%WAVE_H1(s%MNP),global_here%WAVE_A1(s%MNP),global_here%WAVE_D1(s%MNP) )
+      ALLOCATE ( global_here%WAVE_T2(s%MNP),global_here%WAVE_H2(s%MNP),global_here%WAVE_A2(s%MNP),global_here%WAVE_D2(s%MNP) )
+      ALLOCATE ( global_here%WAVE_T(s%MNP),global_here%WAVE_H(s%MNP),global_here%WAVE_A(s%MNP),global_here%WAVE_D(s%MNP) )
+      ALLOCATE ( global_here%WB(s%MNP) )
       END SUBROUTINE
 
 !.....Allocate arrays used for node to element table
 !
-      SUBROUTINE ALLOC_NNOEL1(s)
+      SUBROUTINE ALLOC_NNOEL1(s,global_here)
       use sizes
       implicit none
       type (sizes_type) :: s
-      ALLOCATE ( EL_COUNT(s%MNP) )
+      type (global_type) :: global_here
+
+      ALLOCATE ( global_here%EL_COUNT(s%MNP) )
       RETURN
       END SUBROUTINE
 !
-      SUBROUTINE ALLOC_NNOEL2(s,MAXEL)
+      SUBROUTINE ALLOC_NNOEL2(s,global_here,MAXEL)
       use sizes
       implicit none
       type (sizes_type) :: s
-      integer :: MAXEL
-      ALLOCATE ( DP_DG(MAXEL),DG_ANG(MAXEL) )
-      ALLOCATE ( NNOEL(s%MNP,MAXEL),CENTAB(s%MNP,MAXEL+1) )
-      ALLOCATE ( ELETAB(s%MNP,MAXEL+1),ANGTAB(s%MNP,MAXEL+1),dynP_DG(MAXEL) )
-      ALLOCATE ( ZE_DG(MAXEL), QX_DG(MAXEL), QY_DG(MAXEL), HB_DG(MAXEL))
-      Allocate ( iota2_DG(MAXEL), iota_DG(MAXEL), iotaa_DG(MAXEL) )
-      Allocate ( bed_DG(MAXEL,s%layers),bed_N_int(s%layers), bed_N_ext(s%layers) )
+      type (global_type) :: global_here
+
+      integer :: maxel
+      ALLOCATE ( global_here%DP_DG(maxel),global_here%DG_ANG(maxel) )
+      ALLOCATE ( global_here%NNOEL(s%MNP,maxel),global_here%CENTAB(s%MNP,maxel+1) )
+      ALLOCATE ( global_here%ELETAB(s%MNP,maxel+1),global_here%ANGTAB(s%MNP,maxel+1),global_here%dynP_DG(maxel) )
+      ALLOCATE ( global_here%ZE_DG(maxel), global_here%QX_DG(maxel), global_here%QY_DG(maxel), global_here%HB_DG(maxel))
+      Allocate ( global_here%iota2_DG(maxel), global_here%iota_DG(maxel), global_here%iotaa_DG(maxel) )
+      Allocate ( global_here%bed_DG(maxel,s%layers),global_here%bed_N_int(s%layers), global_here%bed_N_ext(s%layers) )
       RETURN
       END SUBROUTINE
 
 !sb
 !     Allocate space for Arrays dimensioned by   MNNDEL
 !
-      SUBROUTINE ALLOC_MAIN16(s)
+      SUBROUTINE ALLOC_MAIN16(s,global_here)
       use sizes
       implicit none
       type (sizes_type) :: s
+      type (global_type) :: global_here
 
 !.....Node-to-elements table      
-      ALLOCATE( NDEL(s%MNP,s%MNNDEL) )
+      ALLOCATE( global_here%NDEL(s%MNP,s%MNNDEL) )
 
       RETURN
       END SUBROUTINE

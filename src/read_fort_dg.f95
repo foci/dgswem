@@ -79,11 +79,12 @@
       IMPLICIT NONE
       type (sizes_type) :: s
       type (dg_type) :: dg_here
+      type (global_type) :: global_here
 
       INTEGER :: i
       CHARACTER(256) :: LINE
       
-      CALL FORT_DG_SETUP(dg_here)
+      CALL FORT_DG_SETUP(dg_here,global_here)
 
       OPEN(25,FILE=s%DIRNAME//'/'//'fort.dg',POSITION="rewind")  
       
@@ -91,7 +92,7 @@
       PRINT("(A)"), "READING FIXED FORMAT FORT.DG..."
       PRINT*, ""      
       
-      READ(25,*) DGSWE
+      READ(25,*) global_here%DGSWE
       READ(25,*) dg_here%padapt,dg_here%pflag
       READ(25,*) dg_here%gflag,dg_here%diorism
       READ(25,*) dg_here%pl,dg_here%ph,dg_here%px
@@ -100,7 +101,7 @@
       READ(25,*) dg_here%pflag2con1,dg_here%pflag2con2,dg_here%lebesgueP 
       READ(25,*) dg_here%FLUXTYPE
       READ(25,*) dg_here%RK_STAGE, dg_here%RK_ORDER
-      READ(25,*) DG_TO_CG
+      READ(25,*) global_here%DG_TO_CG
       READ(25,*) dg_here%MODAL_IC
       READ(25,*) dg_here%DGHOT, dg_here%DGHOTSPOOL
       READ(25,"(A256)") LINE
@@ -113,38 +114,38 @@
       ENDIF
       IF(dg_here%SLOPEFLAG.EQ.4) THEN
          READ(LINE,*) dg_here%SLOPEFLAG,dg_here%slope_weight
-         vertexslope = .True.
+         global_here%vertexslope = .True.
       ENDIF
       IF(dg_here%SLOPEFLAG.EQ.5) THEN
          READ(LINE,*) dg_here%SLOPEFLAG
-         vertexslope = .True.
+         global_here%vertexslope = .True.
       ENDIF
       IF(dg_here%SLOPEFLAG.EQ.6) THEN
          READ(LINE,*) dg_here%SLOPEFLAG,dg_here%slope_weight
-         vertexslope = .True.
+         global_here%vertexslope = .True.
       ENDIF
       IF(dg_here%SLOPEFLAG.EQ.7) THEN
          READ(LINE,*) dg_here%SLOPEFLAG,dg_here%slope_weight
-         vertexslope = .True.
+         global_here%vertexslope = .True.
       ENDIF
       IF(dg_here%SLOPEFLAG.EQ.8) THEN
          READ(LINE,*) dg_here%SLOPEFLAG,dg_here%slope_weight
-         vertexslope = .True.
+         global_here%vertexslope = .True.
       ENDIF
       IF(dg_here%SLOPEFLAG.EQ.9) THEN
          READ(LINE,*) dg_here%SLOPEFLAG,dg_here%slope_weight
-         vertexslope = .True.
+         global_here%vertexslope = .True.
       ENDIF
       IF(dg_here%SLOPEFLAG.EQ.10) THEN
          READ(LINE,*) dg_here%SLOPEFLAG,dg_here%slope_weight
-         vertexslope = .True.
+         global_here%vertexslope = .True.
       ENDIF
-      READ(25,*) SEDFLAG,dg_here%porosity,dg_here%SEVDM,s%layers
-      READ(25,*) reaction_rate
+      READ(25,*) global_here%SEDFLAG,dg_here%porosity,dg_here%SEVDM,s%layers
+      READ(25,*) global_here%reaction_rate
       READ(25,*) dg_here%MNES
       READ(25,*) dg_here%artdif,dg_here%kappa,dg_here%s0,dg_here%uniform_dif,dg_here%tune_by_hand
-      READ(25,'(a)') sed_equationX
-      READ(25,'(a)') sed_equationY
+      READ(25,'(a)') global_here%sed_equationX
+      READ(25,'(a)') global_here%sed_equationY
       
       IF(dg_here%FLUXTYPE.NE.1.AND.dg_here%FLUXTYPE.NE.2.AND.dg_here%FLUXTYPE.NE.3.AND.dg_here%FLUXTYPE.NE.4) THEN
          PRINT *, 'SPECIFIED dg_here%FLUXTYPE (=', dg_here%FLUXTYPE,') IS NOT ALLOWED.'
@@ -176,16 +177,17 @@
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! 
  
-      SUBROUTINE READ_KEYWORD_FORT_DG(s,dg_here,global)
+      SUBROUTINE READ_KEYWORD_FORT_DG(s,dg_here,global_here)
       
       USE sizes
-      USE global, ONLY: nfover
+      USE global
       use dg
 
       IMPLICIT NONE
       
       type (sizes_type) :: s
       type (dg_type) :: dg_here
+      type (global_type) :: global_here
 
       INTEGER :: i,j,opt
       INTEGER :: read_stat
@@ -198,7 +200,7 @@
       CHARACTER(100) :: test_val
       
       ! initialize the fortdg option structure
-      CALL FORT_DG_SETUP(dg_here)
+      CALL FORT_DG_SETUP(dg_here,global_here)
       
       opt_read = 0
       comment = 0 
@@ -450,6 +452,7 @@
       character*100, target :: sed_equationY_target
       integer, target :: dgswe_target
 
+      real(sz), target :: reaction_rate_target
       
       ! initialize fortdg structure
       DO i = 1,maxopt
@@ -492,7 +495,7 @@
       fortdg(24)%key = "porosity";      fortdg(24)%rptr => porosity_target;       fortdg(24)%required = .true.;     fortdg(24)%rptr = 0.0001
       fortdg(25)%key = "sevdm";         fortdg(25)%rptr => sevdm_target;          fortdg(25)%required = .true.;     fortdg(25)%rptr = 0.00001
       fortdg(26)%key = "layers";        fortdg(26)%iptr => layers_target;         fortdg(26)%required = .false.;    fortdg(26)%iptr = 1
-      fortdg(27)%key = "rxn_rate";      fortdg(27)%rptr => reaction_rate;  fortdg(27)%required = .true.;     fortdg(27)%rptr = 1.0
+      fortdg(27)%key = "rxn_rate";      fortdg(27)%rptr => reaction_rate_target;  fortdg(27)%required = .true.;     fortdg(27)%rptr = 1.0
       fortdg(28)%key = "nelem";         fortdg(28)%iptr => mnes_target;           fortdg(28)%required = .true.;     fortdg(28)%iptr = 23556
       fortdg(29)%key = "artdif";        fortdg(29)%iptr => artdif_target;         fortdg(29)%required = .true.;     fortdg(29)%iptr = 0
       fortdg(30)%key = "kappa";         fortdg(30)%rptr => kappa_target;          fortdg(30)%required = .true.;     fortdg(30)%rptr = -1.0
@@ -542,6 +545,7 @@
       global_here%sed_equationX=sed_equationX_target
       global_here%sed_equationY=sed_equationY_target
       global_here%dgswe=dgswe_target
+      global_here%reaction_rate = reaction_rate_target
       
       nopt = 0
       ncheck = 0

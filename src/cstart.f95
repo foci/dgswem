@@ -10,7 +10,7 @@
 !  v41.07 - 04/09/01 - rl - from 41.06 - initialized global_here%PRN1(), global_here%PRN2() for global_here%NRS<>0
 !**************************************************************************
 !
-        SUBROUTINE COLDSTART(s)
+        SUBROUTINE COLDSTART(s,global_here)
 !
 !**************************************************************************
 !
@@ -31,6 +31,7 @@
       IMPLICIT NONE
 
       type (sizes_type) :: s
+      type (global_type) :: global_here
 
       INTEGER i,j
 !
@@ -129,7 +130,7 @@
 !....READ IN AND INTERPOLATE IN SPACE ONTO THE ADCIRC GRID THE
 !....TIME LEVEL 1 AND LEVEL 2 WIND FIELDS
 
-        IF(global_here%NWS.global_here%NE.0) THEN
+        IF(global_here%NWS.NE.0) THEN
           DO I=1,global_here%NP
             global_here%WSX1(I)=0.D0
             global_here%WSY1(I)=0.D0
@@ -163,7 +164,7 @@
  2222     CALL NWS3GET(s, global_here%X, global_here%Y, global_here%SLAM, global_here%SFEA, global_here%WVNX2, global_here%WVNY2, global_here%IWTIME, global_here%IWYR,&
                   global_here%WTIMED, global_here%NP, global_here%NWLON, global_here%NWLAT, global_here%WLATMAX, global_here%WLONMIN,&
                   global_here%WLATINC, global_here%WLONINC, global_here%ICS, global_here%NSCREEN, global_here%ScreenUnit )
-          IF(global_here%IWYR.global_here%NE.global_here%IREFYR) THEN
+          IF(global_here%IWYR.NE.global_here%IREFYR) THEN
             global_here%IWTIMEP=global_here%IWTIME
             DO I=1,global_here%NP
               global_here%WVNX1(I)=global_here%WVNX2(I)
@@ -219,10 +220,10 @@
           global_here%WTIME1=global_here%STATIM*86400.D0
           global_here%WTIME2=global_here%WTIME1+global_here%WTIMINC
           global_here%NWSGGWI=-1
-          CALL NWS10GET(s,global_here%NWSGGWI,global_here%SLAM,global_here%SFEA,global_here%WVNX1,global_here%WVNY1,global_here%PRN1,global_here%NP,global_here%RHOWAT0,global_here%G,&
+          CALL NWS10GET(s,global_here,global_here%NWSGGWI,global_here%SLAM,global_here%SFEA,global_here%WVNX1,global_here%WVNY1,global_here%PRN1,global_here%NP,global_here%RHOWAT0,global_here%G,&
                   global_here%NWLON,global_here%NWLAT,global_here%WTIMINC) !JUST COMPUTE INTERPOLATING FACTORS
           global_here%NWSGGWI=1
-          CALL NWS10GET(s,global_here%NWSGGWI,global_here%SLAM,global_here%SFEA,global_here%WVNX2,global_here%WVNY2,global_here%PRN2,global_here%NP,global_here%RHOWAT0,global_here%G,&
+          CALL NWS10GET(s,global_here,global_here%NWSGGWI,global_here%SLAM,global_here%SFEA,global_here%WVNX2,global_here%WVNY2,global_here%PRN2,global_here%NP,global_here%RHOWAT0,global_here%G,&
                   global_here%NWLON,global_here%NWLAT,global_here%WTIMINC) !NOW INTERPOLATE 1st WIND FIELD
           ENDIF
 
@@ -235,14 +236,14 @@
           WRITE(16,1197)
  1197     FORMAT(/,1X,'THE E29 MET GRID INTERPOLATING FACTORS ARE ',&
                 'BEING COMPUTED ')
-          CALL NWS11GET(s,global_here%NWSEGWI,global_here%IDSETFLG,global_here%SLAM,global_here%SFEA,global_here%WVNX1,global_here%WVNY1,global_here%PRN1,global_here%NP,&
+          CALL NWS11GET(s,global_here,global_here%NWSEGWI,global_here%IDSETFLG,global_here%SLAM,global_here%SFEA,global_here%WVNX1,global_here%WVNY1,global_here%PRN1,global_here%NP,&
                   global_here%RHOWAT0,global_here%G)  !JUST COMPUTE INTERPOLATING FACTORS
           IF(global_here%NSCREEN.EQ.1.AND.S%MYPROC.EQ.0) WRITE(6,1198)
           WRITE(16,1198)
  1198     FORMAT(1X,'FINISHED COMPUTING E29 INTERPOLATING FACTORS',/)
           global_here%NWSEGWI=1
           global_here%IDSETFLG=1
-          CALL NWS11GET(s,global_here%NWSEGWI,global_here%IDSETFLG,global_here%SLAM,global_here%SFEA,global_here%WVNX2,global_here%WVNY2,global_here%PRN2,global_here%NP,&
+          CALL NWS11GET(s,global_here,global_here%NWSEGWI,global_here%IDSETFLG,global_here%SLAM,global_here%SFEA,global_here%WVNX2,global_here%WVNY2,global_here%PRN2,global_here%NP,&
                   global_here%RHOWAT0,global_here%G) !NOW INTERPOLATE 1st WIND FIELD
         ENDIF
         

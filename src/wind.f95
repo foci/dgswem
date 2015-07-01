@@ -570,10 +570,12 @@
 !                LATB,LONB; elminiated MNWP as a dimension             *
 !***********************************************************************
 
-      SUBROUTINE NWS10GET(s,NWSGGWI,FLON,FLAT,ULL,VLL,PLL,NP,RHOWAT0,G,LONB,LATB,WTIMINC)
+      SUBROUTINE NWS10GET(s,global_here,NWSGGWI,FLON,FLAT,ULL,VLL,PLL,NP,RHOWAT0,G,LONB,LATB,WTIMINC)
       USE SIZES
+      USE GLOBAL
       IMPLICIT NONE
       type (sizes_type) :: s
+      type (global_type) :: global_here
       INTEGER, SAVE :: FIRSTCALL = 0
       INTEGER N,NP,NWSGGWI,LONB,LATB,I,J,JJ,IEXT,IDIG1,IDIG2,IDIG3,KERR
       REAL*8 WTIMINC
@@ -635,16 +637,16 @@
  1010 FORMAT(' File ',A8,' WAS NOT FOUND!  FATAL ERROR',/)
  1011 FORMAT(' File ',A8,' WAS FOUND!  Opening & Processing file',/)
 
-      if (s%myproc == 0) WRITE(screenunit,*) '  '
+      if (s%myproc == 0) WRITE(global_here%screenunit,*) '  '
       INQUIRE(FILE=FNAME1,EXIST=FOUND)
       IF(FOUND) GOTO 32
-      if (s%myproc == 0) WRITE(screenunit,1010) FNAME1
+      if (s%myproc == 0) WRITE(global_here%screenunit,1010) FNAME1
       WRITE(16,1010) FNAME1
 #ifdef CMPI
 !      call msg_fini()
 #endif
       STOP
- 32   WRITE(screenunit,1011) FNAME1
+ 32   WRITE(global_here%screenunit,1011) FNAME1
 
 !...Open and read the GRIB BINARY data file
 !     OPEN(IEXT,FILE=FNAME1,status='old',access='sequential',
@@ -950,10 +952,12 @@
 !                271,181                                               *
 !***********************************************************************
 
-      SUBROUTINE NWS11GET(s,NWSEGWI,IDSETFLG,FLON,FLAT,ULL,VLL,PLL,NP,RHOWAT0,G)
+      SUBROUTINE NWS11GET(s,global_here,NWSEGWI,IDSETFLG,FLON,FLAT,ULL,VLL,PLL,NP,RHOWAT0,G)
       USE SIZES
+      USE GLOBAL
       IMPLICIT NONE
       type (sizes_type) :: s
+      type (global_type) :: global_here
       INTEGER,SAVE  ::  ICALL = 0
       INTEGER NWSEGWI,IDSETFLG,NP,I,IEXT,IDIG1,IDIG2,IDIG3,KERR,N
       INTEGER IYEAR,IMONTH,IDAY,IHOUR
@@ -982,11 +986,11 @@
       RHOWATG100=RHOWAT0*G*100.d0
 
 !...  The first time the subroutine is called, setup the interpolating factors
-!...  between the Eta-29 grid and the ADCIRC grid.
+!...  between the Eta-29 grid aN the ADCIRC grid.
 
       IF((NWSEGWI.EQ.0).AND.(IDSETFLG.EQ.0)) THEN
          if (s%myproc == 0) then
-          WRITE(screenunit,*) 'Computing ETA29 met field interp factors'
+            WRITE(global_here%screenunit,*) 'Computing ETA29 met field interp factors'
          endif
          DO I=1,NP
             flondeg=rad2deg*flon(i)
@@ -1012,16 +1016,16 @@
  1010 FORMAT(' File ',A8,' WAS NOT FOUND!  FATAL ERROR',/)
  1011 FORMAT(' File ',A8,' WAS FOUND!  Opening & Processing file',/)
 
-      if (s%myproc == 0) WRITE(screenunit,*) '  '
+      if (s%myproc == 0) WRITE(global_here%screenunit,*) '  '
       INQUIRE(FILE=FNAME1,EXIST=FOUND)
       IF(FOUND) GOTO 32
-      if (s%myproc == 0) WRITE(screenunit,1010) FNAME1
+      if (s%myproc == 0) WRITE(global_here%screenunit,1010) FNAME1
       WRITE(16,1010) FNAME1
 #ifdef CMPI
 !      call msg_fini()
 #endif
       STOP
- 32   if (s%myproc == 0) WRITE(screenunit,1011) FNAME1
+ 32   if (s%myproc == 0) WRITE(global_here%screenunit,1011) FNAME1
       IF((NWSEGWI.EQ.0).OR.(IDSETFLG.EQ.1)) OPEN(IEXT,FILE=FNAME1,status='old',access='sequential',form='unformatted',iostat=kerr)
 
 !...  Read the met data file

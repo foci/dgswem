@@ -797,8 +797,12 @@
 !     attributes read in from the Nodal Attributes File (unit 13).
 !
 !     ----------------------------------------------------------------
-      SUBROUTINE InitNodalAttr(DP, NP, G, NScreen, ScreenUnit,MyProc, NAbOut)
+      SUBROUTINE InitNodalAttr(global_here,DP, NP, G, NScreen, ScreenUnit,MyProc, NAbOut)
+      USE GLOBAL
       IMPLICIT NONE
+
+      type (global_type) :: global_here
+
       INTEGER, intent(in) :: NP ! number of nodes in the grid file 
       REAL(SZ), intent(in), dimension(NP) :: DP ! array of bathymetric depths
       REAL(SZ), intent(in):: G  ! gravitational acceleration
@@ -969,7 +973,7 @@
          END DO
       ENDIF
       DO I=1,NP
-         EVMSUM=EVMSUM+ABS(EVM(I))
+         global_here%EVMSUM=global_here%EVMSUM+ABS(EVM(I))
       ENDDO
       IF (.not.LoadEVC.and.ESLC.ne.0) THEN
          DO I=1,NP

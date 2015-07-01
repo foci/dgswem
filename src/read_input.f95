@@ -39,9 +39,8 @@
 
 !.....Declare local variables
 
-      INTEGER NIBP, IBN1, IK, NDISC, NBBN, NVEL2, II, i,j,jj,k
+      INTEGER NIBP, IBN1, IK, NDISC, NBBN, NVEL2, II, i,j,jj,k,IPRBI_here,ICK_here
       CHARACTER(256) LINE,LINE2
-
 #ifndef HARM
       integer nfreq_dummy
 #endif
@@ -72,7 +71,7 @@
       READ(80,*) IDUM80         !Skip NELG & NNODG
       READ(80,*) IDUM80         !Read in NPROC
       CLOSE(80)
-      IF(IDUM80.global_here%NE.s%MNPROC) THEN
+      IF(IDUM80.NE.s%MNPROC) THEN
          IF(s%MYPROC.EQ.0) THEN
             WRITE(*,'(A)') '*** ERROR IN PARALLEL SETUP!'
             WRITE(*,'(2A,I4,A)') '*** Number of CPUS for submitted job ',&
@@ -205,9 +204,9 @@
       LINE2 = ADJUSTL(LINE)
       
       IF (LINE2(1:1) .EQ. "1") THEN
-        CALL read_fixed_fort_dg(s,dg_here)   ! first line of old fort.dg is a 1 for the global_here%dgswe option
+        CALL read_fixed_fort_dg(s,dg_here,global_here)   ! first line of old fort.dg is a 1 for the global_here%dgswe option
       ELSE
-        CALL read_keyword_fort_dg(s,dg_here) ! otherwise assume keyword format
+        CALL read_keyword_fort_dg(s,dg_here,global_here) ! otherwise assume keyword format
       ENDIF     
       
       global_here%RHOWAT0 = 1000.D0
@@ -258,7 +257,7 @@
 
       READ(15,*) global_here%NSCREEN
       global_here%NSCREEN_INC = global_here%NSCREEN
-      IF (global_here%NSCREEN.global_here%NE.0) global_here%NSCREEN = 1
+      IF (global_here%NSCREEN.NE.0) global_here%NSCREEN = 1
       IF(global_here%NSCREEN.EQ.1.AND.s%MYPROC.EQ.0) THEN
          WRITE(16,3561) global_here%NSCREEN
  3561    FORMAT(5X,'global_here%NSCREEN = ',I2,&
@@ -272,7 +271,7 @@
 !.....Read and process global_here%IHOT - hot start option
 
       READ(15,*) global_here%IHOT
-      IF ((global_here%IHOT.global_here%NE.0).AND.(global_here%IHOT.global_here%NE.67).AND.(global_here%IHOT.global_here%NE.68)) THEN
+      IF ((global_here%IHOT.NE.0).AND.(global_here%IHOT.NE.67).AND.(global_here%IHOT.NE.68)) THEN
          IF ((global_here%NSCREEN.EQ.1).AND.(s%MYPROC.EQ.0)) THEN
             WRITE(6,9972)
             WRITE(6,*) 'global_here%IHOT =',global_here%IHOT
@@ -287,7 +286,7 @@
         'parameter) is not an allowable value')
          STOP
       ENDIF
-      IF (global_here%IHOT.global_here%NE.0) THEN
+      IF (global_here%IHOT.NE.0) THEN
          WRITE(16,9733) global_here%IHOT
  9733    FORMAT(/,5X,'dgswem will be hot started using information ',&
         'on UNIT ',I2)
@@ -304,7 +303,7 @@
 !.....Read and process global_here%ICS - cartesian/spherical coordinate option
 
       READ(15,*) global_here%ICS
-      IF ((global_here%ICS.global_here%NE.1).AND.(global_here%ICS.global_here%NE.2)) THEN
+      IF ((global_here%ICS.NE.1).AND.(global_here%ICS.NE.2)) THEN
          IF ((global_here%NSCREEN.EQ.1).AND.(s%MYPROC.EQ.0)) THEN
             WRITE(6,9972)
             WRITE(6,*) 'global_here%ICS =',global_here%ICS
@@ -522,7 +521,7 @@
             STOP
          ENDIF
       ENDIF
-      IF (global_here%NOLICA.global_here%NE.global_here%NOLICAT) THEN
+      IF (global_here%NOLICA.NE.global_here%NOLICAT) THEN
          IF ((global_here%NSCREEN.EQ.1).AND.(s%MYPROC.EQ.0)) THEN
             WRITE(6,9972)
             WRITE(6,*) 'global_here%NOLICAT =',global_here%NOLICAT
@@ -565,7 +564,7 @@
 !.....Read and process global_here%NCOR - spatially varying Coriolis parameter
 
       READ(15,*) global_here%NCOR
-      IF ((global_here%NCOR.global_here%NE.0).AND.(global_here%NCOR.global_here%NE.1)) THEN
+      IF ((global_here%NCOR.NE.0).AND.(global_here%NCOR.NE.1)) THEN
          IF ((global_here%NSCREEN.EQ.1).AND.(s%MYPROC.EQ.0)) THEN
             WRITE(6,9972)
             WRITE(6,*) 'global_here%NCOR =',global_here%NCOR
@@ -647,7 +646,7 @@
         /,1X,'Spherical coordinates')
          STOP
       ENDIF
-      IF (global_here%NTIP.global_here%NE.0) s%CTIP = .TRUE.
+      IF (global_here%NTIP.NE.0) s%CTIP = .TRUE.
       IF (global_here%NTIP.EQ.0) THEN
          WRITE(16,235) global_here%NTIP
  235    FORMAT(/,5X,'global_here%NTIP = ',I2,&
@@ -668,22 +667,22 @@
 !.....Read and process global_here%NWS - wind and pressure forcing & wave rad stress
 
       READ(15,*) global_here%NWS
-      IF ( (global_here%NWS.global_here%NE.0)  .AND.(global_here%NWS.global_here%NE.1)       .AND.(ABS(global_here%NWS).global_here%NE.2)  .AND.&
-     (global_here%NWS.global_here%NE.3)  .AND.(ABS(global_here%NWS).global_here%NE.4)  .AND.(ABS(global_here%NWS).global_here%NE.5)  .AND.&
-     (global_here%NWS.global_here%NE.6)  .AND.(global_here%NWS.global_here%NE.10)      .AND.(global_here%NWS.global_here%NE.11)      .AND.&
-     (ABS(global_here%NWS).global_here%NE.12 ).AND.&
-     (global_here%NWS.global_here%NE.100).AND.(global_here%NWS.global_here%NE.101)     .AND.(ABS(global_here%NWS).global_here%NE.102).AND.&
-     (global_here%NWS.global_here%NE.103).AND.(ABS(global_here%NWS).global_here%NE.104).AND.(ABS(global_here%NWS).global_here%NE.105).AND.&
-     (global_here%NWS.global_here%NE.106).AND.(global_here%NWS.global_here%NE.110)     .AND.(global_here%NWS.global_here%NE.111)     .AND.&
-     (global_here%NWS.global_here%NE.200).AND.(global_here%NWS.global_here%NE.201)     .AND.(ABS(global_here%NWS).global_here%NE.202).AND.&
-     (global_here%NWS.global_here%NE.203).AND.(ABS(global_here%NWS).global_here%NE.204).AND.(ABS(global_here%NWS).global_here%NE.205).AND.&
-     (global_here%NWS.global_here%NE.8).AND.&
-     (global_here%NWS.global_here%NE.206).AND.(global_here%NWS.global_here%NE.210)     .AND.(global_here%NWS.global_here%NE.211) .AND.&
+      IF ( (global_here%NWS.NE.0)  .AND.(global_here%NWS.NE.1)       .AND.(ABS(global_here%NWS).NE.2)  .AND.&
+     (global_here%NWS.NE.3)  .AND.(ABS(global_here%NWS).NE.4)  .AND.(ABS(global_here%NWS).NE.5)  .AND.&
+     (global_here%NWS.NE.6)  .AND.(global_here%NWS.NE.10)      .AND.(global_here%NWS.NE.11)      .AND.&
+     (ABS(global_here%NWS).NE.12 ).AND.&
+     (global_here%NWS.NE.100).AND.(global_here%NWS.NE.101)     .AND.(ABS(global_here%NWS).NE.102).AND.&
+     (global_here%NWS.NE.103).AND.(ABS(global_here%NWS).NE.104).AND.(ABS(global_here%NWS).NE.105).AND.&
+     (global_here%NWS.NE.106).AND.(global_here%NWS.NE.110)     .AND.(global_here%NWS.NE.111)     .AND.&
+     (global_here%NWS.NE.200).AND.(global_here%NWS.NE.201)     .AND.(ABS(global_here%NWS).NE.202).AND.&
+     (global_here%NWS.NE.203).AND.(ABS(global_here%NWS).NE.204).AND.(ABS(global_here%NWS).NE.205).AND.&
+     (global_here%NWS.NE.8).AND.&
+     (global_here%NWS.NE.206).AND.(global_here%NWS.NE.210)     .AND.(global_here%NWS.NE.211) .AND.&
 !asey 101118: Added the following cases for coupling to unstructured SWAN.
-   (ABS(global_here%NWS).global_here%NE.300).AND.(ABS(global_here%NWS).global_here%NE.303).AND.(ABS(global_here%NWS).global_here%NE.304).AND.&
-   (ABS(global_here%NWS).global_here%NE.305).AND.(ABS(global_here%NWS).global_here%NE.306).AND.(ABS(global_here%NWS).global_here%NE.308).AND.&
-   (ABS(global_here%NWS).global_here%NE.309).AND.(ABS(global_here%NWS).global_here%NE.310).AND.(ABS(global_here%NWS).global_here%NE.311).AND.&
-   (ABS(global_here%NWS).global_here%NE.312)) THEN
+   (ABS(global_here%NWS).NE.300).AND.(ABS(global_here%NWS).NE.303).AND.(ABS(global_here%NWS).NE.304).AND.&
+   (ABS(global_here%NWS).NE.305).AND.(ABS(global_here%NWS).NE.306).AND.(ABS(global_here%NWS).NE.308).AND.&
+   (ABS(global_here%NWS).NE.309).AND.(ABS(global_here%NWS).NE.310).AND.(ABS(global_here%NWS).NE.311).AND.&
+   (ABS(global_here%NWS).NE.312)) THEN
          IF ((global_here%NSCREEN.EQ.1).AND.(s%MYPROC.EQ.0)) THEN
             WRITE(6,9972)
             WRITE(6,*) 'global_here%NWS =',global_here%NWS
@@ -920,7 +919,7 @@
 !.....Read and process global_here%NRAMP - whether a global_here%ramp function will be used
 
       READ(15,*) global_here%NRAMP
-      IF ((global_here%NRAMP.global_here%NE.0).AND.(global_here%NRAMP.GT.7)) THEN
+      IF ((global_here%NRAMP.NE.0).AND.(global_here%NRAMP.GT.7)) THEN
          IF ((global_here%NSCREEN.EQ.1).AND.(s%MYPROC.EQ.0)) THEN
             WRITE(6,9972)
             WRITE(6,*) 'global_here%NRAMP =',global_here%NRAMP
@@ -1089,9 +1088,9 @@
          IF(global_here%NRS.GE.1) READ(15,*) global_here%WTIMINC,global_here%RSTIMINC ! sb46.28sb03
       ENDIF
 
-      IF (global_here%NWS.global_here%NE.0) WRITE(16,1117) global_here%WTIMINC
+      IF (global_here%NWS.NE.0) WRITE(16,1117) global_here%WTIMINC
  1117 FORMAT(5X,'WIND TIME INCREMENT (SEC) = ',F10.2,/)
-      IF (global_here%NRS.global_here%NE.0) WRITE(16,1118) global_here%RSTIMINC
+      IF (global_here%NRS.NE.0) WRITE(16,1118) global_here%RSTIMINC
  1118 FORMAT(5X,'RADIATION STRESS TIME INCREMENT (SEC) = ',F10.2,/)
 
 !.....Read and process global_here%RNDAY - simulation duration i days
@@ -1176,7 +1175,7 @@
 !     ------------
       CASE DEFAULT              ! fall-through
 !     ------------
-         IF(global_here%NSCREEN.global_here%NE.0.AND.s%MYPROC.EQ.0) THEN
+         IF(global_here%NSCREEN.NE.0.AND.s%MYPROC.EQ.0) THEN
             WRITE(global_here%ScreenUnit,9972)
             WRITE(global_here%ScreenUnit,*) 'global_here%NRAMP =',global_here%NRAMP
             WRITE(global_here%ScreenUnit,9713)
@@ -1208,7 +1207,7 @@
 
 !.....Read minimum depth or wet/dry parameters from unit 15
 
-      IF (global_here%NOLIFA.global_here%NE.2) THEN
+      IF (global_here%NOLIFA.NE.2) THEN
          READ(15,*) global_here%H0
          WRITE(16,16) global_here%H0
  16      FORMAT(//,5X,'THE BATHYMETRIC DEPTH AT ALL NODES WILL BE ',&
@@ -1244,7 +1243,7 @@
 
 !.....Allocate arrays dimensioned by MNP and MNE
 
-      CALL ALLOC_MAIN1(s)
+      CALL ALLOC_MAIN1(s,global_here)
 
 !.....If global_here%ICS = 1 input nodal coordinates and bathymetry from unit 14
 !.....If either global_here%NTIP or global_here%NCOR = 1 compute the inverse CPP projection
@@ -1252,7 +1251,7 @@
       IF (global_here%ICS.EQ.1) THEN
          DO I = 1,global_here%NP
             READ(14,*) global_here%JKI,global_here%X(global_here%JKI),global_here%Y(global_here%JKI),global_here%DP(global_here%JKI)
-            IF(global_here%JKI.global_here%NE.I) THEN
+            IF(global_here%JKI.NE.I) THEN
                IF ((global_here%NSCREEN.EQ.1).AND.(s%MYPROC.EQ.0)) WRITE(6,99801)
                WRITE(16,99801)
 99801          FORMAT(////,1X,'!!!!!!!!!!  WARNING - NONFATAL ',&
@@ -1272,7 +1271,7 @@
       IF (global_here%ICS.EQ.2) THEN
          DO I = 1,global_here%NP
             READ(14,*) global_here%JKI,global_here%SLAM(global_here%JKI),global_here%SFEA(global_here%JKI),global_here%DP(global_here%JKI)
-            IF (global_here%JKI.global_here%NE.I) THEN
+            IF (global_here%JKI.NE.I) THEN
                IF ((global_here%NSCREEN.EQ.1).AND.(s%MYPROC.EQ.0)) WRITE(6,99801)
                WRITE(16,99801)
             ENDIF
@@ -1321,7 +1320,7 @@
          global_here%NNEIGH(global_here%NM(global_here%JKI,1)) = global_here%NNEIGH(global_here%NM(global_here%JKI,1)) + 1
          global_here%NNEIGH(global_here%NM(global_here%JKI,2)) = global_here%NNEIGH(global_here%NM(global_here%JKI,2)) + 1
          global_here%NNEIGH(global_here%NM(global_here%JKI,3)) = global_here%NNEIGH(global_here%NM(global_here%JKI,3)) + 1
-         IF (global_here%JKI.global_here%NE.I) THEN
+         IF (global_here%JKI.NE.I) THEN
             IF ((global_here%NSCREEN.EQ.1).AND.(s%MYPROC.EQ.0)) WRITE(6,99802)
             WRITE(16,99802)
 99802       FORMAT(////,1X,'!!!!!!!!!!  WARNING - NONFATAL ',&
@@ -1412,7 +1411,7 @@
 
 !.....Check that global_here%NE2 and global_here%NP2 mathe with grid file
 
-         IF ((global_here%NE2.global_here%NE.global_here%NE).OR.(global_here%NP2.global_here%NE.global_here%NP)) THEN
+         IF ((global_here%NE2.NE.global_here%NE).OR.(global_here%NP2.NE.global_here%NP)) THEN
             IF ((global_here%NSCREEN.EQ.1).AND.(s%MYPROC.EQ.0)) WRITE(6,9900)
             WRITE(16,9900)
  9900       FORMAT(////,1X,'!!!!!!!!!!  FATAL ERROR  !!!!!!!!!',&
@@ -1426,14 +1425,14 @@
 
          DO I = 1,global_here%NP
             READ(12,*) global_here%JKI,global_here%DUM1,global_here%DUM2,STARTDRY(global_here%JKI)
-            IF (dg_here%MODAL_IC.global_here%NE.3) THEN
+            IF (dg_here%MODAL_IC.NE.3) THEN
                IF (STARTDRY(global_here%JKI).EQ.-88888) THEN
                   STARTDRY(global_here%JKI) = 1
                ELSE
                   STARTDRY(global_here%JKI) = 0
                ENDIF
             ENDIF
-            IF (global_here%JKI.global_here%NE.I) THEN
+            IF (global_here%JKI.NE.I) THEN
                IF ((global_here%NSCREEN.EQ.1).AND.(s%MYPROC.EQ.0)) WRITE(6,99805)
                WRITE(16,99805)
 99805          FORMAT(////,1X,'!!!!!!!!!!  WARNING - NONFATAL ',&
@@ -1469,7 +1468,7 @@
 !     ENDIF
 !     ENDDO
 
-!.....Output to unit 16 grid information including global_here%AGRID, global_here%NE, global_here%NP, global_here%H0,
+!.....Output to unit 16 grid information including global_here%AGRID, NE, global_here%NP, global_here%H0,
 !.....and nodal coordinates and bathymetry
 
       WRITE(16,2039) global_here%AGRID
@@ -1486,7 +1485,7 @@
      /,5X,'LATITUDE  ABOUT WHICH CPP PROJECTION IS CENTERED',&
      '  global_here%SFEA0 = ',F9.4,' DEGREES',/)
       IF (global_here%NSTARTDRY.EQ.0) THEN
-         IF (global_here%NABOUT.global_here%NE.1) THEN
+         IF (global_here%NABOUT.NE.1) THEN
             WRITE(16,24)
  24         FORMAT(/,1X,'NODAL COORDINATES AND BATHYMETRY :')
             IF (global_here%ICS.EQ.1) THEN
@@ -1524,7 +1523,7 @@
            /,6X,'UNIT 14 INPUT FILE')
          ENDIF
       ELSE
-         IF (global_here%NABOUT.global_here%NE.1) THEN
+         IF (global_here%NABOUT.NE.1) THEN
             WRITE(16,24)
             IF (global_here%ICS.EQ.1) THEN
                IF ((global_here%NTIP.EQ.0).AND.(global_here%NCOR.EQ.0)) THEN
@@ -1583,7 +1582,7 @@
 !.....Output to unit 16 the global connectivity table (node numbers for
 !.....elements
 
-      IF (global_here%NABOUT.global_here%NE.1) THEN
+      IF (global_here%NABOUT.NE.1) THEN
          WRITE(16,26)
  26      FORMAT(//,5X,'GLOBAL NODE NUMBERS FOR EACH ELEMENT :')
          WRITE(16,27)
@@ -1640,7 +1639,7 @@
          IF(NOLIBF.EQ.0) THEN
             WRITE(16,106) TAU
  106        FORMAT(5X,'LINEAR BOTTOM FRICTION TAU =',F12.8,5X,'1/sec'/)
-            IF(TAU.global_here%NE.TAU0) THEN !CHECK TAU VALUE AGAINST TAU0
+            IF(TAU.NE.TAU0) THEN !CHECK TAU VALUE AGAINST TAU0
                IF(global_here%NSCREEN.EQ.1.AND.s%MYPROC.EQ.0) WRITE(6,9951)
                WRITE(16,9951)
  9951          FORMAT(////,1X,'!!!!!!!!!!  WARNING - NONFATAL ',&
@@ -1756,7 +1755,7 @@
 !     in from unit 14 file.
 
       IF (NWP.GT.0)&
-     CALL InitNodalAttr(global_here%DP, global_here%NP, global_here%G, global_here%NScreen, global_here%ScreenUnit,S%MYPROC,global_here%NAbOut)
+     CALL InitNodalAttr(global_here,global_here%DP, global_here%NP, global_here%G, global_here%NScreen, global_here%ScreenUnit,S%MYPROC,global_here%NAbOut)
       
 
 
@@ -1788,7 +1787,7 @@
          WRITE(16,3604)
  3604    FORMAT(/,5X,'LATITUDES ARE USED TO COMPUTE VARIABLE CORIOLIS',&
         /,7X,'AND ARE BASED ON INPUT NODAL COORDINATES',/)
-         IF(global_here%NABOUT.global_here%NE.1) THEN
+         IF(global_here%NABOUT.NE.1) THEN
             WRITE(16,2092)
  2092       FORMAT(/,10X,' NODE ',5X,'NODAL CORIOLIS global_here%CORIF',/)
             DO I=1,global_here%NP
@@ -1808,7 +1807,7 @@
 
 !.... allocate tidal potential arrays
 
-      call alloc_main4a(s)
+      call alloc_main4a(s,global_here)
 
 !.... READ TIDAL POTENTIAL AMPLITUDE, FREQUENCIES, NODAL FACTORS,
 !.... EQUILIBRIUM ARGUMENTS AND ALPHANUMERIC LABEL
@@ -1825,7 +1824,7 @@
 
 !...  LINES TO USE EARTH LOAD/SELF-ATTRACTION PART OF TIDAL POTENTIAL FORCING
 
-      CALL ALLOC_MAIN4b(s)
+      CALL ALLOC_MAIN4b(s,global_here)
       IF(global_here%NTIP.EQ.2) THEN
          OPEN(24,FILE='fort.24')
          DO I=1,global_here%NTIF
@@ -1874,7 +1873,7 @@
 !...  
 !...  CHECK CONSISTENCY OF INPUT PARAMETERS global_here%NTIF AND global_here%NTIP
 !...  
-      IF(((global_here%NTIP.EQ.0).AND.(global_here%NTIF.global_here%NE.0)).OR.((global_here%NTIP.global_here%NE.0).AND.&
+      IF(((global_here%NTIP.EQ.0).AND.(global_here%NTIF.NE.0)).OR.((global_here%NTIP.NE.0).AND.&
      (global_here%NTIF.EQ.0))) THEN
          IF(global_here%NSCREEN.EQ.1.AND.s%MYPROC.EQ.0) WRITE(6,9961)
          WRITE(16,9961)
@@ -1931,7 +1930,7 @@
 
 !     - Allocate arrays dimensioned by MNBFR
 
-      call alloc_main5(s)
+      call alloc_main5(s,global_here)
 
       WRITE(16,1112)
       WRITE(16,2106)
@@ -1980,7 +1979,7 @@
       s%MNETA = global_here%NETA
       IF (global_here%NETA.EQ.0) s%MNETA = 1
 
-      call alloc_main2(s)     
+      call alloc_main2(s,global_here)     
 !...  
 !...  INPUT THE NODE NUMBERS ON EACH ELEVATION BOUNDARY FORCING SEGMENT
 !...  
@@ -1995,7 +1994,7 @@
             READ(14,*) global_here%NBDV(K,I)
             WRITE(16,1855) global_here%NBDV(K,I)
  1855       FORMAT(7X,I7)
-            IF (global_here%NNEIGH(global_here%NBDV(K,I)).global_here%NE.0) THEN
+            IF (global_here%NNEIGH(global_here%NBDV(K,I)).NE.0) THEN
                global_here%NNEIGH(global_here%NBDV(K,I))=global_here%NNEIGH(global_here%NBDV(K,I))+1
                IF (global_here%NNEIGH(global_here%NBDV(K,I)).GT.s%MNEI) s%MNEI=global_here%NNEIGH(global_here%NBDV(K,I))
                global_here%NNEIGH(global_here%NBDV(K,I)) = 0
@@ -2008,7 +2007,7 @@
 !...  
 !...  CHECK TO MAKE SURE THAT global_here%JNMM EQUALS global_here%NETA
 !...  
-      IF(global_here%NETA.global_here%NE.global_here%JNMM) THEN
+      IF(global_here%NETA.NE.global_here%JNMM) THEN
          IF(global_here%NSCREEN.EQ.1.AND.s%MYPROC.EQ.0) WRITE(6,9945)
          WRITE(16,9945)
  9945    FORMAT(////,1X,'!!!!!!!!!!  WARNING - NONFATAL INPUT ERROR ',&
@@ -2116,7 +2115,7 @@
 
 !.....Allocate space for nonperiodic zero and nonzero normal flow boundary arrays
 !.....including barriers
-      call alloc_main3(s)
+      call alloc_main3(s,global_here)
 
 !.....INPUT THE NUMBER OF NODES IN THE NEXT FLOW BOUNDARY SEGMENT
 !.....AND THE BOUNDARY TYPE
@@ -2138,13 +2137,13 @@
 !     jcf dg - added variable global_here%SEGTYPE to record boundary segment global_here%IBTYPE
          global_here%SEGTYPE(K) = global_here%IBTYPE
 !.......CHECK THAT global_here%IBTYPE PARAMETER HAS BEEN SET PROPERLY
-         IF(    (global_here%IBTYPE.global_here%NE.0).AND.(global_here%IBTYPE.global_here%NE.10).AND.(global_here%IBTYPE.global_here%NE.20)&
-        .AND.(global_here%IBTYPE.global_here%NE.1).AND.(global_here%IBTYPE.global_here%NE.11).AND.(global_here%IBTYPE.global_here%NE.21)&
-        .AND.(global_here%IBTYPE.global_here%NE.2).AND.(global_here%IBTYPE.global_here%NE.12).AND.(global_here%IBTYPE.global_here%NE.22)&
-        .AND.(global_here%IBTYPE.global_here%NE.3).AND.(global_here%IBTYPE.global_here%NE.13).AND.(global_here%IBTYPE.global_here%NE.23)&
+         IF(    (global_here%IBTYPE.NE.0).AND.(global_here%IBTYPE.NE.10).AND.(global_here%IBTYPE.NE.20)&
+        .AND.(global_here%IBTYPE.NE.1).AND.(global_here%IBTYPE.NE.11).AND.(global_here%IBTYPE.NE.21)&
+        .AND.(global_here%IBTYPE.NE.2).AND.(global_here%IBTYPE.NE.12).AND.(global_here%IBTYPE.NE.22)&
+        .AND.(global_here%IBTYPE.NE.3).AND.(global_here%IBTYPE.NE.13).AND.(global_here%IBTYPE.NE.23)&
 !jj   wm001 - following 2 lines modified 
-        .AND.(global_here%IBTYPE.global_here%NE.4).AND.(global_here%IBTYPE.global_here%NE.24)&
-        .AND.(global_here%IBTYPE.global_here%NE.5).AND.(global_here%IBTYPE.global_here%NE.25).AND.(global_here%IBTYPE.global_here%NE.30)) THEN
+        .AND.(global_here%IBTYPE.NE.4).AND.(global_here%IBTYPE.NE.24)&
+        .AND.(global_here%IBTYPE.NE.5).AND.(global_here%IBTYPE.NE.25).AND.(global_here%IBTYPE.NE.30)) THEN
          IF(global_here%NSCREEN.EQ.1.AND.s%MYPROC.EQ.0) WRITE(6,9985) K
          WRITE(16,9985) K
  9985    FORMAT(////,1X,'!!!!!!!!!!  WARNING - FATAL ERROR !!!!!!!!!',&
@@ -2344,9 +2343,9 @@
 
 !.....INPUT INFORMATION FOR VARIOUS TYPES OF FLOW BOUNDARY SEGMENTS
 !.......INPUT THE STANDARD NODE NUMBERS FOR THE Kth FLOW BOUNDARY SEGMENT
-      IF((global_here%IBTYPE.global_here%NE.3).AND.(global_here%IBTYPE.global_here%NE.13).AND.(global_here%IBTYPE.global_here%NE.23).AND.&
-     (global_here%IBTYPE.global_here%NE.4).AND.(global_here%IBTYPE.global_here%NE.24).AND.&
-     (global_here%IBTYPE.global_here%NE.5).AND.(global_here%IBTYPE.global_here%NE.25)) THEN
+      IF((global_here%IBTYPE.NE.3).AND.(global_here%IBTYPE.NE.13).AND.(global_here%IBTYPE.NE.23).AND.&
+     (global_here%IBTYPE.NE.4).AND.(global_here%IBTYPE.NE.24).AND.&
+     (global_here%IBTYPE.NE.5).AND.(global_here%IBTYPE.NE.25)) THEN
          DO I=1,global_here%NVELL(K)
             READ(14,*) global_here%NBVV(K,I)
          END DO
@@ -2395,8 +2394,9 @@
 
 !.....PROCESS INFORMATION FOR VARIOUS TYPES OF FLOW BOUNDARY SEGMENTS
 
-      DO global_here%IPRBI=1,global_here%NPRBI
+      DO IPRBI_here=1,global_here%NPRBI
 
+         global_here%IPRBI = IPRBI_here
 !.........LOAD PAIRED NODES INTO PRIMARY PROCESSING VECTORS AND RESET
 !..........CONNECTING NODES FOR BACK global_here%FACE
 !..........THUS BACK/CONNECTING NODES ARE BEING LOADED AS PRIMARY NODES
@@ -2468,7 +2468,7 @@
 
          global_here%NBVV(K,0)=global_here%NBVV(K,1)    !UNCLOSED EXTERNAL
          IF((global_here%IBTYPE.EQ.1).OR.(global_here%IBTYPE.EQ.11).OR.(global_here%IBTYPE.EQ.21)) THEN
-            IF(global_here%NBVV(K,global_here%NVELL(K)).global_here%NE.global_here%NBVV(K,1)) THEN !CLOSE AN UNCLOSED INTERNAL
+            IF(global_here%NBVV(K,global_here%NVELL(K)).NE.global_here%NBVV(K,1)) THEN !CLOSE AN UNCLOSED INTERNAL
                global_here%NVELL(K)=global_here%NVELL(K)+1
                global_here%NBVV(K,global_here%NVELL(K))=global_here%NBVV(K,1)
             ENDIF
@@ -2608,8 +2608,8 @@
                   global_here%JME=global_here%JME+1     !M.E. USES IT
                   global_here%ME2GW(global_here%JME)=global_here%JGW
                ENDIF
-               IF(global_here%JGW.global_here%NE.1) THEN
-                  IF(global_here%NBV(global_here%JGW).global_here%NE.global_here%NBV(global_here%JGW-1)) THEN !L.B. SEGS DON'T OVERLAP
+               IF(global_here%JGW.NE.1) THEN
+                  IF(global_here%NBV(global_here%JGW).NE.global_here%NBV(global_here%JGW-1)) THEN !L.B. SEGS DON'T OVERLAP
                      global_here%JME=global_here%JME+1  !M.E. USES IT
                      global_here%ME2GW(global_here%JME)=global_here%JGW
                   ENDIF
@@ -2629,8 +2629,8 @@
                global_here%ME2GW(global_here%JME)=global_here%JGW   !M.E. USES IT
             ENDIF
             IF(I.EQ.global_here%NVELL(K)) THEN !DEAL WITH LAST NODE ON BOUNDARY
-               IF((global_here%NBV(global_here%JGW).global_here%NE.global_here%NBVV(K,1)).AND.& !IF UNCLOSED BOUNDARY&
-              (global_here%NBV(global_here%JGW).global_here%NE.global_here%NBV(1))) THEN !M.E. USES IT
+               IF((global_here%NBV(global_here%JGW).NE.global_here%NBVV(K,1)).AND.& !IF UNCLOSED BOUNDARY&
+              (global_here%NBV(global_here%JGW).NE.global_here%NBV(1))) THEN !M.E. USES IT
                   global_here%JME=global_here%JME+1
                   global_here%ME2GW(global_here%JME)=global_here%JGW
                ENDIF
@@ -2765,7 +2765,8 @@
 !............APPROPRIATE ACTION
             IF((global_here%IBTYPE.EQ.4).OR.(global_here%IBTYPE.EQ.24).OR.(global_here%IBTYPE.EQ.5)&
            .OR.(global_here%IBTYPE.EQ.25)) THEN
-               DO global_here%ICK=1,global_here%NVELEXT
+               DO ICK_here=1,global_here%NVELEXT
+                  global_here%ICK=ICK_here
 !...............CHECK IF OVERLAP EXISTS
                   IF(global_here%NBV(global_here%ICK).EQ.global_here%NBV(global_here%JGW)) THEN
 !.................CHECK FOR ILLEGAL OVERLAPS
@@ -2925,7 +2926,7 @@
          IF (global_here%NFFR.EQ.0) s%MNFFR = 1
 
 !.....Allocate space for periodic normal flow boundary conditions
-         call alloc_main6(s)
+         call alloc_main6(s,global_here)
 !     
          DO I=1,global_here%NVELME
             J=global_here%ME2GW(I)
@@ -2944,7 +2945,7 @@
       /,9X,'INTERPOLATION IN TIME IS DONE TO SYNC THE FLOW DATA ',&
       /,9X,'WITH THE MODEL TIME STEP.')
          ENDIF
-         IF(global_here%NFFR.global_here%NE.0) THEN
+         IF(global_here%NFFR.NE.0) THEN
             WRITE(16,2202) global_here%NFFR
  2202       FORMAT(/,5X,'NUMBER OF PERIODIC NORMAL FLOW CONSTITUENTS =',&
            I5)
@@ -3145,7 +3146,7 @@
 
 !.... IF STATION ELEVATION OUTPUT WILL BE GENERATED
 
-      IF(global_here%NOUTE.global_here%NE.0) THEN
+      IF(global_here%NOUTE.NE.0) THEN
 
 !......COMPUTE global_here%NTCYSE, global_here%NTCYFE, WHICH = global_here%TOUTSE AND global_here%TOUTFE IN TIMESTEPS
 
@@ -3157,7 +3158,7 @@
 !......COMPUTE global_here%NTRSPE = THE NO. OF DATA SETS TO BE SPOOLED TO UNIT 61
 
          IF(global_here%NSPOOLE.EQ.0) global_here%NTRSPE=0
-         IF(global_here%NSPOOLE.global_here%NE.0) global_here%NTRSPE=INT((global_here%NTCYFE-global_here%NTCYSE)/global_here%NSPOOLE)
+         IF(global_here%NSPOOLE.NE.0) global_here%NTRSPE=INT((global_here%NTCYFE-global_here%NTCYSE)/global_here%NSPOOLE)
 
 !......WRITE global_here%TOUTSE,global_here%TOUTFE,global_here%NTCYSE,global_here%NTCYFE,global_here%NSPOOLE TO UNIT 16
 
@@ -3197,7 +3198,7 @@
 
 
 !     Allocate arrays dimensioned by MNSTAE
-      call alloc_main7(s)
+      call alloc_main7(s,global_here)
 
 
 !.... INPUT COORDINATES OF ELEVATION RECORDING STATIONS THEN COMPUTE
@@ -3333,7 +3334,7 @@
 
 !.... IF STATION VELOCITY OUTPUT WILL BE GENERATED
 
-      IF(global_here%NOUTV.global_here%NE.0) THEN
+      IF(global_here%NOUTV.NE.0) THEN
 
 !......COMPUTE global_here%NTCYSV, global_here%NTCYFV, WHICH = global_here%TOUTSV AND global_here%TOUTFV IN TIME STEPS
 
@@ -3344,7 +3345,7 @@
 !......CALCULATE global_here%NTRSPV = THE NO. OF DATA SETS TO BE SPOOLED TO UNIT 62
 
          IF(global_here%NSPOOLV.EQ.0) global_here%NTRSPV=0
-         IF(global_here%NSPOOLV.global_here%NE.0) global_here%NTRSPV=INT((global_here%NTCYFV-global_here%NTCYSV)/global_here%NSPOOLV)
+         IF(global_here%NSPOOLV.NE.0) global_here%NTRSPV=INT((global_here%NTCYFV-global_here%NTCYSV)/global_here%NSPOOLV)
 
 !......WRITE global_here%NOUTV,global_here%TOUTSV,global_here%TOUTFV,global_here%NTCYSV,global_here%NTCYFV,global_here%NSPOOLV TO UNIT 16
 
@@ -3382,7 +3383,7 @@
       IF (global_here%NSTAV.EQ.0) s%MNSTAV = 1
 
 !     Allocate arrays dimensioned by MNSTAV
-      call alloc_main8(s)
+      call alloc_main8(s,global_here)
 
 !.... INPUT COORDINATES OF VELOCITY RECORDING STATIONS
 !.... THEN COMPUTE ELEMENT NO. WITHIN WHICH STATION LIES
@@ -3510,7 +3511,7 @@
 !.....IF STATION CONCENTRATION OUTPUT WILL BE GENERATED
 
          global_here%NSTAC = 0
-         IF(global_here%NOUTC.global_here%NE.0) THEN
+         IF(global_here%NOUTC.NE.0) THEN
 
 !.......COMPUTE global_here%NTCYSC, global_here%NTCYFC, WHICH = global_here%TOUTSC AND global_here%TOUTFC IN TIMESTEPS
 
@@ -3521,7 +3522,7 @@
 !.......COMPUTE global_here%NTRSPC = THE NO. OF DATA SETS TO BE SPOOLED TO UNIT 81
 
             IF(global_here%NSPOOLC.EQ.0) global_here%NTRSPC=0
-            IF(global_here%NSPOOLC.global_here%NE.0) global_here%NTRSPC=INT((global_here%NTCYFC-global_here%NTCYSC)/global_here%NSPOOLC)
+            IF(global_here%NSPOOLC.NE.0) global_here%NTRSPC=INT((global_here%NTCYFC-global_here%NTCYSC)/global_here%NSPOOLC)
 
 !.......WRITE global_here%TOUTSC,global_here%TOUTFC,global_here%NTCYSC,global_here%NTCYFC,global_here%NSPOOLC TO UNIT 16
 
@@ -3558,7 +3559,7 @@
          ENDIF
 
 !     Allocate arrays dimensioned by MNSTAC
-         call alloc_main9(s)
+         call alloc_main9(s,global_here)
 
 !.....INPUT COORDINATES OF CONCENTRATION RECORDING STATIONS
 !.....THEN COMPUTE ELEMENT NO. WITHIN WHICH STATION LIES
@@ -3655,7 +3656,7 @@
       global_here%NOUTM=0
       global_here%NSTAM = 0
 !     
-      IF(global_here%NWS.global_here%NE.0) THEN
+      IF(global_here%NWS.NE.0) THEN
 
 !.....READ IN global_here%NOUTM,global_here%TOUTSM,global_here%TOUTFM,global_here%NSPOOLM : IF global_here%NOUTM<>0,INTERPOLATED
 !.....MET DATA ARE SPOOLED TO UNITS 71&72 EVERY global_here%NSPOOLM TIME STEPS
@@ -3690,7 +3691,7 @@
 
 !.....IF STATION MET OUTPUT WILL BE GENERATED
 
-         IF(global_here%NOUTM.global_here%NE.0) THEN
+         IF(global_here%NOUTM.NE.0) THEN
 
 !.......COMPUTE global_here%NTCYSM, global_here%NTCYFM, WHICH = global_here%TOUTSM AND global_here%TOUTFM IN TIMESTEPS
 
@@ -3701,7 +3702,7 @@
 !.......COMPUTE global_here%NTRSPM = THE NO. OF DATA SETS TO BE SPOOLED TO UNITS 71&72
 
             IF(global_here%NSPOOLM.EQ.0) global_here%NTRSPM=0
-            IF(global_here%NSPOOLM.global_here%NE.0) global_here%NTRSPM=INT((global_here%NTCYFM-global_here%NTCYSM)/global_here%NSPOOLM)
+            IF(global_here%NSPOOLM.NE.0) global_here%NTRSPM=INT((global_here%NTCYFM-global_here%NTCYSM)/global_here%NSPOOLM)
 
 !.......WRITE global_here%TOUTSM,global_here%TOUTFM,global_here%NTCYSM,global_here%NTCYFM,global_here%NSPOOLM TO UNIT 16
 
@@ -3738,7 +3739,7 @@
          ENDIF
 
 !     Allocate arrays dimensioned by MNSTAM
-         call alloc_main10(s)
+         call alloc_main10(s,global_here)
 
 !.....INPUT COORDINATES OF METEOROLOGICAL RECORDING STATIONS
 !.....THEN COMPUTE ELEMENT NO. WITHIN WHICH STATION LIES
@@ -3864,7 +3865,7 @@
 
 !.... IF GLOBAL ELEVATION OUTPUT WILL BE GENERATED
 
-      IF(global_here%NOUTGE.global_here%NE.0) THEN
+      IF(global_here%NOUTGE.NE.0) THEN
 
 !......COMPUTE global_here%NTCYSGE, global_here%NTCYFGE, WHICH = global_here%TOUTSGE AND global_here%TOUTFGE IN TIMESTEPS
 
@@ -3875,7 +3876,7 @@
 !......CALCULATE global_here%NDSETSE = THE # OF DATA SETS TO BE SPOOLED TO UNIT 63
 
          IF(global_here%NSPOOLGE.EQ.0) global_here%NDSETSE=0
-         IF(global_here%NSPOOLGE.global_here%NE.0) global_here%NDSETSE=INT((global_here%NTCYFGE-global_here%NTCYSGE)/global_here%NSPOOLGE)
+         IF(global_here%NSPOOLGE.NE.0) global_here%NDSETSE=INT((global_here%NTCYFGE-global_here%NTCYSGE)/global_here%NSPOOLGE)
 
 !......WRITE global_here%NOUTGE,global_here%TOUTSGE,global_here%TOUTFGE,global_here%NTCYSGE,global_here%NTCYFGE,global_here%NSPOOLGE TO UNIT 16
 
@@ -3930,7 +3931,7 @@
 
 !.... IF GLOBAL VELOCITY OUTPUT WILL BE GENERATED
 
-      IF(global_here%NOUTGV.global_here%NE.0) THEN
+      IF(global_here%NOUTGV.NE.0) THEN
 
 !......COMPUTE global_here%NTCYSGV, global_here%NTCYFGV, WHICH = global_here%TOUTSGV AND global_here%TOUTFGV IN TIMESTEPS
 
@@ -3941,7 +3942,7 @@
 !......CALCULATE global_here%NDSETSV = THE # OF DATA SETS TO BE SPOOLED TO UNIT 64
 
          IF(global_here%NSPOOLGV.EQ.0) global_here%NDSETSV=0
-         IF(global_here%NSPOOLGV.global_here%NE.0) global_here%NDSETSV=INT((global_here%NTCYFGV-global_here%NTCYSGV)/global_here%NSPOOLGV)
+         IF(global_here%NSPOOLGV.NE.0) global_here%NDSETSV=INT((global_here%NTCYFGV-global_here%NTCYSGV)/global_here%NSPOOLGV)
 
 !......WRITE global_here%NOUTGV,global_here%TOUTSGV,global_here%TOUTFGV,global_here%NTCYSGV,global_here%NTCYFGV,global_here%NSPOOLGV TO UNIT 16
 
@@ -4000,7 +4001,7 @@
 
 !.....IF GLOBAL CONCENTRATION OUTPUT WILL BE GENERATED
 
-         IF(global_here%NOUTGC.global_here%NE.0) THEN
+         IF(global_here%NOUTGC.NE.0) THEN
 
 !.......COMPUTE global_here%NTCYSGC, global_here%NTCYFGC, WHICH = global_here%TOUTSGC AND global_here%TOUTFGC IN TIMESTEPS
 
@@ -4011,7 +4012,7 @@
 !.......CALCULATE global_here%NDSETSC = THE # OF DATA SETS TO BE SPOOLED TO UNIT 73
 
             IF(global_here%NSPOOLGC.EQ.0) global_here%NDSETSC=0
-            IF(global_here%NSPOOLGC.global_here%NE.0) global_here%NDSETSC=INT((global_here%NTCYFGC-global_here%NTCYSGC)/global_here%NSPOOLGC)
+            IF(global_here%NSPOOLGC.NE.0) global_here%NDSETSC=INT((global_here%NTCYFGC-global_here%NTCYSGC)/global_here%NSPOOLGC)
 
 !.......WRITE global_here%NOUTGC,global_here%TOUTSGC,global_here%TOUTFGC,global_here%NTCYSGC,global_here%NTCYFGC,global_here%NSPOOLGC TO UNIT 16
 
@@ -4035,7 +4036,7 @@
 !...  
 !...  IF global_here%NWS<>0   INPUT INFORMATION ABOUT GLOBAL WIND DATA OUTPUT
 !...  
-      IF(global_here%NWS.global_here%NE.0) THEN
+      IF(global_here%NWS.NE.0) THEN
 
 !......READ IN global_here%NOUTGW,global_here%TOUTSGW,global_here%TOUTFGW,global_here%NSPOOLGW : IF global_here%NOUTGW<>0, GLOBAL WIND
 !......OUTPUT IS SPOOLED TO UNIT 74 EVERY global_here%NSPOOLGW TIME STEPS BETWEEN
@@ -4069,7 +4070,7 @@
 
 !........IF GLOBAL WIND STRESS OUTPUT WILL BE GENERATED
 
-         IF(global_here%NOUTGW.global_here%NE.0) THEN
+         IF(global_here%NOUTGW.NE.0) THEN
 
 !........COMPUTE global_here%NTCYSGW, global_here%NTCYFGW, WHICH = global_here%TOUTSGW AND global_here%TOUTFGW IN TIMESTEPS
 
@@ -4080,7 +4081,7 @@
 !........CALCULATE global_here%NDSETSW = THE # OF DATA SETS TO BE SPOOLED TO UNIT 74
 
             IF(global_here%NSPOOLGW.EQ.0) global_here%NDSETSW=0
-            IF(global_here%NSPOOLGW.global_here%NE.0) global_here%NDSETSW=INT((global_here%NTCYFGW-global_here%NTCYSGW)/global_here%NSPOOLGW)
+            IF(global_here%NSPOOLGW.NE.0) global_here%NDSETSW=INT((global_here%NTCYFGW-global_here%NTCYSGW)/global_here%NSPOOLGW)
 
 !........WRITE global_here%NOUTGW,global_here%TOUTSGW,global_here%TOUTFGW,global_here%NTCYSGW,global_here%NTCYFGW,global_here%NSPOOLGW TO UNIT 16
 
@@ -4117,7 +4118,7 @@
 
       IF (NFREQ.GT.0) THEN
          CALL ALLOC_HA()
-         CALL ALLOC_MAIN14(s)
+         CALL ALLOC_MAIN14(s,global_here)
       ENDIF
 
       IF(NFREQ.LT.0) THEN
@@ -4140,7 +4141,7 @@
 #else
       READ(15,*) nfreq_dummy
       IF (nfreq_dummy.EQ.0) s%MNHARF = 1
-      if (nfreq_dummy.global_here%ne.0) then
+      if (nfreq_dummy.ne.0) then
          write(16,*) "HARM not supported. Stopping execution."
          stop
       end if
@@ -4355,7 +4356,7 @@
 99656 FORMAT(//,1X,'SOLVER INFORMATION OUTPUT : ')
 
 !     - allocate arrays dimensioned by MNEI
-      call alloc_main11(s)
+      call alloc_main11(s,global_here)
 
 !...  LINES TO USE THE ITERATIVE MATRIX SOLVER
 
@@ -4420,12 +4421,12 @@
 
 !.....Allocate arrays dealing with wind forcing
 
-      CALL ALLOC_MAIN12(s)
+      CALL ALLOC_MAIN12(s,global_here)
       
 !.....Allocate arrays for wave modified bottom friction (EJK)
 
       IF ((global_here%FRW.EQ.1).OR.(global_here%NRS.EQ.1)) THEN
-         CALL ALLOC_MAIN15(s)
+         CALL ALLOC_MAIN15(s,global_here)
       ENDIF
       
 !     sb-
@@ -4445,7 +4446,7 @@
       ENDDO
 
 !.....Allocate space for Arrays dimensioned by MNNDEL
-      CALL ALLOC_MAIN16(s)
+      CALL ALLOC_MAIN16(s,global_here)
       
       DO I = 1,s%MNP
          global_here%NNDEL(I) = 0
@@ -4484,7 +4485,7 @@
       IF (global_here%NWS.EQ.11) WRITE(16,4017)
 #ifdef HARM
       IF ((NFREQ.EQ.0).OR.(global_here%FMV.EQ.0.)) WRITE(16,4021)
-      IF ((NFREQ.GE.1).AND.(global_here%FMV.global_here%NE.0.)) WRITE(16,4022)
+      IF ((NFREQ.GE.1).AND.(global_here%FMV.NE.0.)) WRITE(16,4022)
 #else
       WRITE(16,4021)
 #endif      
