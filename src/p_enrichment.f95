@@ -483,21 +483,21 @@
                   
 #endif
 
-                  if (ze_sensor(l).global_here%ne.0.d0) then
+                  if (ze_sensor(l).ne.0.d0) then
 
                      minze_sensor = min(ze_sensor(l),minze_sensor)
                      maxze_sensor = max(ze_sensor(l),maxze_sensor)
                      
                   endif
 
-                  if (qx_sensor(l).global_here%ne.0.d0) then
+                  if (qx_sensor(l).ne.0.d0) then
 
                      minqx_sensor = min(qx_sensor(l),minqx_sensor)
                      maxqx_sensor = max(qx_sensor(l),maxqx_sensor)
 
                   endif
 
-                  if (qy_sensor(l).global_here%ne.0.d0) then
+                  if (qy_sensor(l).ne.0.d0) then
 
                      minqy_sensor = min(qy_sensor(l),minqy_sensor)
                      maxqy_sensor = max(qy_sensor(l),maxqy_sensor)
@@ -505,7 +505,7 @@
                   endif
 
 #ifdef TRACE
-                  if (iota_sensor(l).global_here%ne.0.d0) then
+                  if (iota_sensor(l).ne.0.d0) then
 
                      miniota_sensor = min(iota_sensor(l),miniota_sensor)
                      maxiota_sensor = max(iota_sensor(l),maxiota_sensor)
@@ -514,14 +514,14 @@
 #endif
 
 #ifdef CHEM
-                  if (iota_sensor(l).global_here%ne.0.d0) then
+                  if (iota_sensor(l).ne.0.d0) then
 
                      miniota_sensor = min(iota_sensor(l),miniota_sensor)
                      maxiota_sensor = max(iota_sensor(l),maxiota_sensor)
 
                   endif
 
-                  if (iota2_sensor(l).global_here%ne.0.d0) then
+                  if (iota2_sensor(l).ne.0.d0) then
                      
                      miniota2_sensor = min(iota2_sensor(l),miniota2_sensor)
                      maxiota2_sensor = max(iota2_sensor(l),maxiota2_sensor)
@@ -530,7 +530,7 @@
 #endif
 
 #ifdef SED_LAY
-                  if (tbed_sensor(l).global_here%ne.0.d0) then
+                  if (tbed_sensor(l).ne.0.d0) then
 
                      mintbed_sensor = min(tbed_sensor(l),mintbed_sensor)
                      maxtbed_sensor = max(tbed_sensor(l),maxtbed_sensor)
@@ -1464,28 +1464,28 @@
                   
 #endif
 
-                  if (ze_sensor(l).global_here%ne.0.d0) then
+                  if (ze_sensor(l).ne.0.d0) then
 
                      minze_sensor = min(ze_sensor(l),minze_sensor)
                      maxze_sensor = max(ze_sensor(l),maxze_sensor)
                      
                   endif
 
-                  if (qx_sensor(l).global_here%ne.0.d0) then
+                  if (qx_sensor(l).ne.0.d0) then
 
                      minqx_sensor = min(qx_sensor(l),minqx_sensor)
                      maxqx_sensor = max(qx_sensor(l),maxqx_sensor)
 
                   endif
 
-                  if (qy_sensor(l).global_here%ne.0.d0) then
+                  if (qy_sensor(l).ne.0.d0) then
 
                      minqy_sensor = min(qy_sensor(l),minqy_sensor)
                      maxqy_sensor = max(qy_sensor(l),maxqy_sensor)
                      
                   endif
 #ifdef TRACE
-                  if (iota_sensor(l).global_here%ne.0.d0) then
+                  if (iota_sensor(l).ne.0.d0) then
 
                      miniota_sensor = min(iota_sensor(l),miniota_sensor)
                      maxiota_sensor = max(iota_sensor(l),maxiota_sensor)
@@ -1494,14 +1494,14 @@
 #endif
 
 #ifdef CHEM
-                  if (iota_sensor(l).global_here%ne.0.d0) then
+                  if (iota_sensor(l).ne.0.d0) then
 
                      miniota_sensor = min(iota_sensor(l),miniota_sensor)
                      maxiota_sensor = max(iota_sensor(l),maxiota_sensor)
 
                   endif
 
-                  if (iota2_sensor(l).global_here%ne.0.d0) then
+                  if (iota2_sensor(l).ne.0.d0) then
                      
                      miniota2_sensor = min(iota2_sensor(l),miniota2_sensor)
                      maxiota2_sensor = max(iota2_sensor(l),maxiota2_sensor)
@@ -1510,7 +1510,7 @@
 #endif
 
 #ifdef SED_LAY
-                  if (tbed_sensor(l).global_here%ne.0.d0) then
+                  if (tbed_sensor(l).ne.0.d0) then
 
                      mintbed_sensor = min(tbed_sensor(l),mintbed_sensor)
                      maxtbed_sensor = max(tbed_sensor(l),maxtbed_sensor)
@@ -1831,7 +1831,7 @@
 
          do j = 1,dg_here%nibseg
 
-            if ( global_here%pdg_el(dg_here%nedel(1,dg_here%nibsegn(1,j))).global_here%ne.global_here%pdg_el(dg_here%nedel(1,dg_here%nibsegn(2,j))) ) then
+            if ( global_here%pdg_el(dg_here%nedel(1,dg_here%nibsegn(1,j))).ne.global_here%pdg_el(dg_here%nedel(1,dg_here%nibsegn(2,j))) ) then
 
                global_here%pdg_el(dg_here%nedel(1,dg_here%nibsegn(1,j))) = max(global_here%pdg_el(dg_here%nedel(1,dg_here%nibsegn(1,j))), global_here%pdg_el(dg_here%nedel(1,dg_here%nibsegn(2,j))) )
                global_here%pdg_el(dg_here%nedel(2,dg_here%nibsegn(1,j))) = max(global_here%pdg_el(dg_here%nedel(1,dg_here%nibsegn(1,j))), global_here%pdg_el(dg_here%nedel(1,dg_here%nibsegn(2,j))) )

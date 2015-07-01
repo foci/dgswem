@@ -15,6 +15,7 @@
 
       USE SIZES
       USE DG
+      USE GLOBAL
       
       IMPLICIT NONE
       
@@ -48,12 +49,12 @@
 
 #ifdef SLOPE5 
       IF (DG_HERE%SLOPEFLAG .NE. 0) THEN
-        CALL SLOPELIMITER5(s,dg_here)
+        CALL SLOPELIMITER5(s,dg_here,global_here)
       ENDIF
 #endif
 
 #ifdef STBLZR
-        CALL SLOPELIMITER5(s,dg_here)
+        CALL SLOPELIMITER5(s,dg_here,global_here)
 #endif
     
 

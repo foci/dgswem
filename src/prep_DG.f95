@@ -79,7 +79,7 @@
 
 !.....Obtain RK time scheme parameters
 
-      CALL RK_TIME(dg_here)
+      CALL RK_TIME(dg_here,global_here)
       
 !.....Compute the degrees of freedom global_here%per element
 
@@ -237,7 +237,7 @@
       
 !.....If there are internal barriers allocate some stuff
 
-      IF (dg_here%NIBEDS.global_here%NE.0) CALL ALLOC_DG3(dg_here,S%MNP)
+      IF (dg_here%NIBEDS.ne.0) CALL ALLOC_DG3(dg_here,S%MNP)
 
 !.....Allocate the array for node to element table
 
@@ -391,7 +391,7 @@
                global_here%N3 = global_here%NM(J,3)
                zeo(1,J,1)=1.d0/3.d0*(GeoidOffset(global_here%N1)+GeoidOffset(global_here%N2)+&
               GeoidOffset(global_here%N3))
-               IF (dof_0.global_here%NE.1) THEN
+               IF (dof_0.ne.1) THEN
                   zeo(2,J,1)=-1.d0/6.d0*(GeoidOffset(global_here%N1)+GeoidOffset(global_here%N2))&
                  +1.d0/3.d0*GeoidOffset(global_here%N3)
                   zeo(3,J,1)=-.5d0*GeoidOffset(global_here%N1)+.5d0*GeoidOffset(global_here%N2)
@@ -914,20 +914,20 @@
             
 !.........If so set initial surface elevation values
             
-            IF ((ZE1 + ZE2 + ZE3)/3.D0.global_here%NE.dg_here%ze(1,J,1)) THEN
+            IF ((ZE1 + ZE2 + ZE3)/3.D0.ne.dg_here%ze(1,J,1)) THEN
                IF (p_0.EQ.0) THEN
                   DP_MIN = MIN(global_here%DP(global_here%NM(J,1)),global_here%DP(global_here%NM(J,2)),global_here%DP(global_here%NM(J,3)))
                   dg_here%ze(1,J,1) = max(dg_here%ze(1,j,1),global_here%H0 - DP_MIN)
                ELSE
                   IF (dg_here%ze(1,J,1).GT.(ZE1+ZE2+ZE3)/3.d0) THEN
-                     IF (dof_0.global_here%NE.1) THEN
+                     IF (dof_0.ne.1) THEN
                         dg_here%ze(2,J,1)=0.d0
                         dg_here%ze(3,J,1)=0.d0
                         dg_here%ze(4:dg_here%dofh,J,1) = 0.D0 ! forced again for transparency
                      ENDIF
                   ELSE
                      dg_here%ze(1,J,1)=(ZE1+ZE2+ZE3)/3.D0
-                     IF (DOF_0.global_here%NE.1) THEN
+                     IF (DOF_0.ne.1) THEN
                         dg_here%ze(2,J,1) = -1.D0/6.D0*(ZE1 + ZE2) + 1.D0/3.D0*ZE3
                         dg_here%ze(3,J,1) = -0.5D0*ZE1 + 0.5D0*ZE2
                         dg_here%ze(4:dg_here%dofh,J,1) = 0.D0 ! forced again for transparency
@@ -993,20 +993,20 @@
 
 !.........If so set initial surface elevation values
 
-            IF ((ZE1 + ZE2 + ZE3).global_here%NE.0) THEN
+            IF ((ZE1 + ZE2 + ZE3).ne.0) THEN
                IF (P_0.EQ.0) THEN
                   DP_MIN = MIN(global_here%DP(global_here%NM(J,1)),global_here%DP(global_here%NM(J,2)),global_here%DP(global_here%NM(J,3)))
                   dg_here%ze(1,J,1) = max(dg_here%ze(1,j,1),global_here%H0 - DP_MIN)
                ELSE
                   IF (dg_here%ze(1,J,1).GT.(ZE1+ZE2+ZE3)/3.d0) THEN
-                     IF (DOF_0.global_here%NE.1) THEN
+                     IF (DOF_0.ne.1) THEN
                         dg_here%ze(2,J,1)=0.d0
                         dg_here%ze(3,J,1)=0.d0
                         dg_here%ze(4:dg_here%dofh,J,1) = 0.D0 ! forced again for transparency
                      ENDIF
                   ELSE
                      dg_here%ze(1,J,1)=(ZE1+ZE2+ZE3)/3.D0
-                     IF (DOF_0.global_here%NE.1) THEN
+                     IF (DOF_0.ne.1) THEN
                         dg_here%ze(2,J,1) = -1.D0/6.D0*(ZE1 + ZE2) + 1.D0/3.D0*ZE3
                         dg_here%ze(3,J,1) = -0.5D0*ZE1 + 0.5D0*ZE2
                         dg_here%ze(4:dg_here%dofh,J,1) = 0.D0 ! forced again for transparency
@@ -1041,7 +1041,7 @@
          READ(163,*) dg_here%P_READ
          READ(164,*) dg_here%P_READ,dg_here%P_READ
          READ(114,*) dg_here%P_READ
-         IF (dg_here%P_READ.global_here%NE.dg_here%ph) THEN
+         IF (dg_here%P_READ.ne.dg_here%ph) THEN
             PRINT*,'INCONSISTENCY IN P -- CHECK INPUT FILES'
             STOP
          ENDIF
@@ -1079,7 +1079,7 @@
          READ(263,*) dg_here%P_READ
          READ(264,*) dg_here%P_READ,dg_here%P_READ
          READ(214,*) global_here%ITHS
-         IF (dg_here%P_READ.global_here%NE.dg_here%PH) THEN
+         IF (dg_here%P_READ.ne.dg_here%PH) THEN
             PRINT*,'INCONSISTENCY IN P -- CHECK INPUT FILES'
             STOP
          ENDIF
@@ -1150,7 +1150,7 @@
 
 !.....Set p back to original value if p = 0
 
-      IF (P_0.global_here%NE.dg_here%pl) THEN
+      IF (P_0.ne.dg_here%pl) THEN
          global_here%PDG_EL(:) = 0
          dg_here%PDG(:) = 0
          dg_here%DOF = 1
@@ -1180,7 +1180,7 @@
 
 !.....Prep the slopelimiter
 
-      IF (dg_here%SLOPEFLAG.global_here%NE.0) THEN
+      IF (dg_here%SLOPEFLAG.ne.0) THEN
          IF(MYPROC_HERE.EQ.0)THEN
             print *, 'Slope limiting prep begins, "kshanti"'
          ENDIF
@@ -1210,7 +1210,7 @@
 !     
 !***********************************************************************
 
-      SUBROUTINE RK_TIME(dg_here)
+      SUBROUTINE RK_TIME(dg_here,global_here)
 
       USE GLOBAL
       USE DG
@@ -1218,7 +1218,8 @@
       IMPLICIT NONE
 
       type (dg_type) :: dg_here
-
+      type (global_type) :: global_here
+      
       INTEGER L,i,j,k,irk
       REAL(SZ) ARK, BRK, CASUM, MAX_BOA
       Real(SZ) eps_const,RKC_omega0,RKC_omega1
@@ -1577,7 +1578,7 @@
          DO I = 1,irk
             ARK = dg_here%ATVD(irk,I)
             BRK = dg_here%BTVD(irk,I)
-            IF (ARK.global_here%NE.0.D0) THEN
+            IF (ARK.ne.0.D0) THEN
                IF (MAX_BOA.LT.BRK/ARK) MAX_BOA = BRK/ARK
             ENDIF
          ENDDO

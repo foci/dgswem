@@ -292,7 +292,7 @@
 !...  CALCULATE ELEVATION SOLUTIONS AT STATIONS USING INTERPOLATION
 !...  
       
-      IF(global_here%NOUTE.global_here%NE.0) THEN
+      IF(global_here%NOUTE.ne.0) THEN
          IF((IT.GT.global_here%NTCYSE).AND.(IT.LE.global_here%NTCYFE).OR.FORCE_WRITE) THEN
             global_here%NSCOUE=global_here%NSCOUE+1
             IF(global_here%NSCOUE.EQ.global_here%NSPOOLE.OR.FORCE_WRITE) THEN
@@ -358,7 +358,7 @@
 !.... AND THE TIME STEP FALLS WITHIN THE SPECIFIED WINDOW
 !...  CALCULATE VELOCITY SOLUTIONS AT STATIONS USING INTERPOLATION
 !...  
-      IF(global_here%NOUTV.global_here%NE.0) THEN
+      IF(global_here%NOUTV.ne.0) THEN
          IF((IT.GT.global_here%NTCYSV).AND.(IT.LE.global_here%NTCYFV).OR.FORCE_WRITE) THEN
             global_here%NSCOUV=global_here%NSCOUV+1
             IF(global_here%NSCOUV.EQ.global_here%NSPOOLV.OR.FORCE_WRITE) THEN
@@ -401,7 +401,7 @@
 !...  CALCULATE CONCENTRATION SOLUTIONS AT STATIONS USING INTERPOLATION
 !...  
 
-      IF(global_here%NOUTC.global_here%NE.0) THEN
+      IF(global_here%NOUTC.ne.0) THEN
          IF((IT.GT.global_here%NTCYSC).AND.(IT.LE.global_here%NTCYFC).OR.FORCE_WRITE) THEN
             global_here%NSCOUC=global_here%NSCOUC+1
             IF(global_here%NSCOUC.EQ.global_here%NSPOOLC.OR.FORCE_WRITE) THEN
@@ -453,7 +453,7 @@
 !...  CALCULATE METEOROLOGICAL SOLUTIONS AT STATIONS USING INTERPOLATION
 !...  
 
-      IF((global_here%NWS.global_here%NE.0).AND.(global_here%NOUTM.global_here%NE.0)) THEN
+      IF((global_here%NWS.ne.0).AND.(global_here%NOUTM.ne.0)) THEN
          IF((IT.GT.global_here%NTCYSM).AND.(IT.LE.global_here%NTCYFM).OR.FORCE_WRITE) THEN
             global_here%NSCOUM=global_here%NSCOUM+1
             IF(global_here%NSCOUM.EQ.global_here%NSPOOLM.OR.FORCE_WRITE) THEN
@@ -511,7 +511,7 @@
 !.....Output the gloabl elevation data if global_here%NOUTGE ~= 0 and the
 !.....time step falls within the specified window
 
-      IF (global_here%NOUTGE.global_here%NE.0) THEN
+      IF (global_here%NOUTGE.ne.0) THEN
          IF ((IT.GT.global_here%NTCYSGE).AND.(IT.LE.global_here%NTCYFGE).OR.FORCE_WRITE) THEN
             global_here%NSCOUGE = global_here%NSCOUGE + 1
             IF (global_here%NSCOUGE.EQ.global_here%NSPOOLGE.OR.FORCE_WRITE) THEN
@@ -682,7 +682,7 @@
 !...  OUTPUT GLOBAL VELOCITY DATA IF global_here%NOUTGV<>0 AND THE
 !.... TIME STEP FALLS WITHIN THE SPECIFIED WINDOW
 !...  
-      IF (global_here%NOUTGV.global_here%NE.0) THEN
+      IF (global_here%NOUTGV.ne.0) THEN
          IF ((IT.GT.global_here%NTCYSGV).AND.(IT.LE.global_here%NTCYFGV).OR.FORCE_WRITE) THEN
             global_here%NSCOUGV=global_here%NSCOUGV+1
             IF (global_here%NSCOUGV.EQ.global_here%NSPOOLGV.OR.FORCE_WRITE) THEN
@@ -728,7 +728,7 @@
 !...  OUTPUT GLOBAL WIND STRESS and atmospheric pressure data IF global_here%NOUTGW<>0 AND THE
 !.... TIME STEP FALLS WITHIN THE SPECIFIED WINDOW
 !...  
-      IF((global_here%NWS.global_here%NE.0).AND.(global_here%NOUTGW.global_here%NE.0)) THEN
+      IF((global_here%NWS.ne.0).AND.(global_here%NOUTGW.ne.0)) THEN
          IF((IT.GT.global_here%NTCYSGW).AND.(IT.LE.global_here%NTCYFGW).OR.FORCE_WRITE) THEN
             global_here%NSCOUGW=global_here%NSCOUGW+1
             IF(global_here%NSCOUGW.EQ.global_here%NSPOOLGW.OR.FORCE_WRITE) THEN
@@ -800,7 +800,7 @@
 !...  OUTPUT GLOBAL CONCENTRATION DATA IF global_here%NOUTGC<>0 AND THE
 !.... TIME STEP FALLS WITHIN THE SPECIFIED WINDOW
 !...  
-      IF(global_here%NOUTGC.global_here%NE.0) THEN
+      IF(global_here%NOUTGC.ne.0) THEN
          IF((IT.GT.global_here%NTCYSGC).AND.(IT.LE.global_here%NTCYFGC).OR.FORCE_WRITE) THEN
             global_here%NSCOUGC=global_here%NSCOUGC+1
             IF(global_here%NSCOUGC.EQ.global_here%NSPOOLGC.OR.FORCE_WRITE) THEN
@@ -1080,7 +1080,7 @@
          END DO
 !     nd
          do i=1,global_here%ne
-            if (dg_here%wdflg(i).global_here%ne.0) then
+            if (dg_here%wdflg(i).ne.0) then
                if (abs(dg_here%ze(1,i,1)).gt.elmaxe) then
                   imaxze=i
                   elmaxe=abs(dg_here%ze(1,i,1))

@@ -1176,6 +1176,7 @@
 
       type (sizes_type) :: s
       type (dg_type) :: dg_here
+      type (global_type) :: global_here
       
 !.....Declare local variables
       INTEGER L,K,I,pa,ll,kk

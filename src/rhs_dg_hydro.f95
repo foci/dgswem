@@ -91,7 +91,7 @@
          
 !.......Compute derivatives of Lagrange basis functions at nodes
          
-         IF ((global_here%NWS.global_here%NE.0).OR.(global_here%NTIP.global_here%NE.0)) THEN
+         IF ((global_here%NWS.ne.0).OR.(global_here%NTIP.ne.0)) THEN
             DPSIDX(1) = dg_here%DRPSI(1)*dg_here%DRDX(L) + dg_here%DSPSI(1)*dg_here%DSDX(L)
             DPSIDX(2) = dg_here%DRPSI(2)*dg_here%DRDX(L) + dg_here%DSPSI(2)*dg_here%DSDX(L)
             DPSIDX(3) = dg_here%DRPSI(3)*dg_here%DRDX(L) + dg_here%DSPSI(3)*dg_here%DSDX(L)
@@ -359,7 +359,7 @@
             
 !.........4.) Wind and pressure forcing (in global_here%x and global_here%y)
 
-            IF (global_here%NWS.global_here%NE.0) THEN
+            IF (global_here%NWS.ne.0) THEN
                FW_NL = 1.D0/F1_NL
                dg_here%SOURCE_X = dg_here%SOURCE_X + FW_NL*( global_here%WSX2(global_here%N1)*dg_here%PSI1(I,dg_here%pa)&
                     + global_here%WSX2(global_here%N2)*dg_here%PSI2(I,dg_here%pa)  + global_here%WSX2(global_here%N3)*dg_here%PSI3(I,dg_here%pa) )&
@@ -378,7 +378,7 @@
 
 !.........5) Tidal potential forcing (in global_here%x and global_here%y)
 
-            IF (global_here%NTIP.global_here%NE.0) THEN
+            IF (global_here%NTIP.ne.0) THEN
 !$$$               dg_here%SOURCE_X = dg_here%SOURCE_X + dg_here%RAMPDG*global_here%G*DEPTH*dg_here%SFAC_ELEM(I,L,dg_here%pa)*
 !$$$     &              ( DPSIDX(1)*global_here%TIP2(global_here%N1)
 !$$$     &              + DPSIDX(2)*global_here%TIP2(global_here%N2) + DPSIDX(3)*global_here%TIP2(global_here%N3) )

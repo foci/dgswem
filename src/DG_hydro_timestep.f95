@@ -101,7 +101,7 @@
          
 !.......Obtain the meteorological forcing
 
-         IF (global_here%NWS.global_here%NE.0) CALL MET_FORCING(s,dg_here,global_here,IT)
+         IF (global_here%NWS.NE.0) CALL MET_FORCING(s,dg_here,global_here,IT)
         
         IF(global_here%NRS.GE.1) THEN
           IF(global_here%TIME_A.GT.global_here%RSTIME2) THEN
@@ -145,11 +145,11 @@
  
 !.......Compute tidal potential terms
 
-         IF (global_here%NTIP.global_here%NE.0) CALL TIDAL_POTENTIAL(dg_here,global_here)
+         IF (global_here%NTIP.NE.0) CALL TIDAL_POTENTIAL(dg_here,global_here)
 
 !.......Compute LDG auxiliary equations
          
-         IF (global_here%EVMSUM.global_here%NE.0.D0.or.dg_here%artdif.eq.1) CALL LDG_HYDRO(s,dg_here,global_here,IT)
+         IF (global_here%EVMSUM.NE.0.D0.or.dg_here%artdif.eq.1) CALL LDG_HYDRO(s,dg_here,global_here,IT)
          
 !.......Compute elevation specified edges
 

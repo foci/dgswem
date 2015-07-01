@@ -116,50 +116,50 @@
       
 !.....Evaluate right eigenvectors at Roe averaged variables
 
-      RI(1,1) = 1.D0
-      RI(2,1) = global_here%U_ROE*global_here%IFNLCT + (global_here%IFNLCT*global_here%C_ROE + (1-global_here%IFNLCT)*global_here%G/global_here%C_ROE)*dg_here%NX*dg_here%SFAC_IN !srb - spherical coordinate correction
-      RI(3,1) = global_here%V_ROE*global_here%IFNLCT + (global_here%IFNLCT*global_here%C_ROE + (1-global_here%IFNLCT)*global_here%G/global_here%C_ROE)*dg_here%NY
+      GLOBAL_HERE%RI(1,1) = 1.D0
+      GLOBAL_HERE%RI(2,1) = global_here%U_ROE*global_here%IFNLCT + (global_here%IFNLCT*global_here%C_ROE + (1-global_here%IFNLCT)*global_here%G/global_here%C_ROE)*dg_here%NX*dg_here%SFAC_IN !srb - spherical coordinate correction
+      GLOBAL_HERE%RI(3,1) = global_here%V_ROE*global_here%IFNLCT + (global_here%IFNLCT*global_here%C_ROE + (1-global_here%IFNLCT)*global_here%G/global_here%C_ROE)*dg_here%NY
 
-      RI(1,2) = 0.D0
-      RI(2,2) = -dg_here%NY
-      RI(3,2) =  dg_here%NX*dg_here%SFAC_IN
+      GLOBAL_HERE%RI(1,2) = 0.D0
+      GLOBAL_HERE%RI(2,2) = -dg_here%NY
+      GLOBAL_HERE%RI(3,2) =  dg_here%NX*dg_here%SFAC_IN
 
-      RI(1,3) = 1.D0
-      RI(2,3) = global_here%U_ROE*global_here%IFNLCT - (global_here%IFNLCT*global_here%C_ROE + (1-global_here%IFNLCT)*global_here%G/global_here%C_ROE)*dg_here%NX*dg_here%SFAC_IN !srb - spherical coordinate correction
-      RI(3,3) = global_here%V_ROE*global_here%IFNLCT - (global_here%IFNLCT*global_here%C_ROE + (1-global_here%IFNLCT)*global_here%G/global_here%C_ROE)*dg_here%NY
+      GLOBAL_HERE%RI(1,3) = 1.D0
+      GLOBAL_HERE%RI(2,3) = global_here%U_ROE*global_here%IFNLCT - (global_here%IFNLCT*global_here%C_ROE + (1-global_here%IFNLCT)*global_here%G/global_here%C_ROE)*dg_here%NX*dg_here%SFAC_IN !srb - spherical coordinate correction
+      GLOBAL_HERE%RI(3,3) = global_here%V_ROE*global_here%IFNLCT - (global_here%IFNLCT*global_here%C_ROE + (1-global_here%IFNLCT)*global_here%G/global_here%C_ROE)*dg_here%NY
 
 !.....Evaluate left eigenvectors at Roe averaged variables
 
-      DEN = 1.0d0/(RI(2,2)*RI(3,3)-RI(2,3)*RI(3,2)+RI(2,1)*RI(3,2)&
-     -RI(3,1)*RI(2,2))
+      DEN = 1.0d0/(GLOBAL_HERE%RI(2,2)*GLOBAL_HERE%RI(3,3)-GLOBAL_HERE%RI(2,3)*GLOBAL_HERE%RI(3,2)+GLOBAL_HERE%RI(2,1)*GLOBAL_HERE%RI(3,2)&
+     -GLOBAL_HERE%RI(3,1)*GLOBAL_HERE%RI(2,2))
 
-      LE(1,1) =  DEN*( RI(2,2)*RI(3,3)-RI(2,3)*RI(3,2) )
-      LE(1,2) =  DEN*RI(3,2)
-      LE(1,3) = -DEN*RI(2,2)
+      GLOBAL_HERE%LE(1,1) =  DEN*( GLOBAL_HERE%RI(2,2)*GLOBAL_HERE%RI(3,3)-GLOBAL_HERE%RI(2,3)*GLOBAL_HERE%RI(3,2) )
+      GLOBAL_HERE%LE(1,2) =  DEN*GLOBAL_HERE%RI(3,2)
+      GLOBAL_HERE%LE(1,3) = -DEN*GLOBAL_HERE%RI(2,2)
 
-      LE(2,1) = -DEN*( RI(2,1)*RI(3,3)-RI(2,3)*RI(3,1) )
-      LE(2,2) =  DEN*( RI(3,3)-RI(3,1) )
-      LE(2,3) = -DEN*( RI(2,3)-RI(2,1) )
+      GLOBAL_HERE%LE(2,1) = -DEN*( GLOBAL_HERE%RI(2,1)*GLOBAL_HERE%RI(3,3)-GLOBAL_HERE%RI(2,3)*GLOBAL_HERE%RI(3,1) )
+      GLOBAL_HERE%LE(2,2) =  DEN*( GLOBAL_HERE%RI(3,3)-GLOBAL_HERE%RI(3,1) )
+      GLOBAL_HERE%LE(2,3) = -DEN*( GLOBAL_HERE%RI(2,3)-GLOBAL_HERE%RI(2,1) )
 
-      LE(3,1) =  DEN*( RI(2,1)*RI(3,2) - RI(2,2)*RI(3,1) )
-      LE(3,2) = -DEN*RI(3,2)
-      LE(3,3) =  DEN*RI(2,2)
+      GLOBAL_HERE%LE(3,1) =  DEN*( GLOBAL_HERE%RI(2,1)*GLOBAL_HERE%RI(3,2) - GLOBAL_HERE%RI(2,2)*GLOBAL_HERE%RI(3,1) )
+      GLOBAL_HERE%LE(3,2) = -DEN*GLOBAL_HERE%RI(3,2)
+      GLOBAL_HERE%LE(3,3) =  DEN*GLOBAL_HERE%RI(2,2)
 
 !.....Compute the Roe matrix
 
       DO II = 1,3
 
-         A_ROE(II,1) = RI(II,1)*ABS(global_here%EIGVAL(1))*LE(1,1) +&
-                 RI(II,2)*ABS(global_here%EIGVAL(2))*LE(2,1) +&
-                 RI(II,3)*ABS(global_here%EIGVAL(3))*LE(3,1)
+         GLOBAL_HERE%A_ROE(II,1) = GLOBAL_HERE%RI(II,1)*ABS(global_here%EIGVAL(1))*GLOBAL_HERE%LE(1,1) +&
+                 GLOBAL_HERE%RI(II,2)*ABS(global_here%EIGVAL(2))*GLOBAL_HERE%LE(2,1) +&
+                 GLOBAL_HERE%RI(II,3)*ABS(global_here%EIGVAL(3))*GLOBAL_HERE%LE(3,1)
 
-         A_ROE(II,2) = RI(II,1)*ABS(global_here%EIGVAL(1))*LE(1,2) +&
-                 RI(II,2)*ABS(global_here%EIGVAL(2))*LE(2,2) +&
-                 RI(II,3)*ABS(global_here%EIGVAL(3))*LE(3,2)
+         GLOBAL_HERE%A_ROE(II,2) = GLOBAL_HERE%RI(II,1)*ABS(global_here%EIGVAL(1))*GLOBAL_HERE%LE(1,2) +&
+                 GLOBAL_HERE%RI(II,2)*ABS(global_here%EIGVAL(2))*GLOBAL_HERE%LE(2,2) +&
+                 GLOBAL_HERE%RI(II,3)*ABS(global_here%EIGVAL(3))*GLOBAL_HERE%LE(3,2)
 
-         A_ROE(II,3) = RI(II,1)*ABS(global_here%EIGVAL(1))*LE(1,3) +&
-                 RI(II,2)*ABS(global_here%EIGVAL(2))*LE(2,3) +&
-                 RI(II,3)*ABS(global_here%EIGVAL(3))*LE(3,3)
+         GLOBAL_HERE%A_ROE(II,3) = GLOBAL_HERE%RI(II,1)*ABS(global_here%EIGVAL(1))*GLOBAL_HERE%LE(1,3) +&
+                 GLOBAL_HERE%RI(II,2)*ABS(global_here%EIGVAL(2))*GLOBAL_HERE%LE(2,3) +&
+                 GLOBAL_HERE%RI(II,3)*ABS(global_here%EIGVAL(3))*GLOBAL_HERE%LE(3,3)
 
       ENDDO
 
@@ -220,12 +220,12 @@
 
 !.....Compute the Roe flux
 
-      global_here%F_HAT = global_here%F_AVG - 0.5D0*(A_ROE(1,1)*global_here%JUMP(1) + A_ROE(1,2)*global_here%JUMP(2) +&
-     A_ROE(1,3)*global_here%JUMP(3) )
-      global_here%G_HAT = global_here%G_AVG - 0.5D0*(A_ROE(2,1)*global_here%JUMP(1) + A_ROE(2,2)*global_here%JUMP(2) +&
-     A_ROE(2,3)*global_here%JUMP(3) )
-      global_here%H_HAT = global_here%H_AVG - 0.5D0*(A_ROE(3,1)*global_here%JUMP(1) + A_ROE(3,2)*global_here%JUMP(2) +&
-     A_ROE(3,3)*global_here%JUMP(3) )
+      global_here%F_HAT = global_here%F_AVG - 0.5D0*(GLOBAL_HERE%A_ROE(1,1)*global_here%JUMP(1) + GLOBAL_HERE%A_ROE(1,2)*global_here%JUMP(2) +&
+     GLOBAL_HERE%A_ROE(1,3)*global_here%JUMP(3) )
+      global_here%G_HAT = global_here%G_AVG - 0.5D0*(GLOBAL_HERE%A_ROE(2,1)*global_here%JUMP(1) + GLOBAL_HERE%A_ROE(2,2)*global_here%JUMP(2) +&
+     GLOBAL_HERE%A_ROE(2,3)*global_here%JUMP(3) )
+      global_here%H_HAT = global_here%H_AVG - 0.5D0*(GLOBAL_HERE%A_ROE(3,1)*global_here%JUMP(1) + GLOBAL_HERE%A_ROE(3,2)*global_here%JUMP(2) +&
+     GLOBAL_HERE%A_ROE(3,3)*global_here%JUMP(3) )
 
       !global_here%cfl_max = max(abs(global_here%F_HAT),abs(global_here%G_HAT),abs(global_here%H_HAT),global_here%cfl_max)
 
@@ -466,101 +466,101 @@
      *gamma4*J7-global_here%EIGVAL(3)*gamma4*J7)*(dg_here%NY**2)-dg_here%NX*global_here%EIGVAL(1)*gamma3*iot5-dg_here%NX*global_here%EIGVAL(3)&
      *gamma3*iot5+dg_here%NX*global_here%EIGVAL(1)*gamma4*iot5-dg_here%NX*global_here%EIGVAL(3)*gamma4*iot5+iot*iot5
 
-      RI = 0.D0
-      LE = 0.D0
-      A_ROE = 0.D0
+      GLOBAL_HERE%RI = 0.D0
+      GLOBAL_HERE%LE = 0.D0
+      GLOBAL_HERE%A_ROE = 0.D0
     
 !.....Evaluate right eigenvectors at Roe averaged variables
 
       if (abs(global_here%EIGVAL(1)*alpha_0*gamma1).le.epsilon) then
 
-         RI(1,1) = 0.D0
+         GLOBAL_HERE%RI(1,1) = 0.D0
 
       else
 
-         RI(1,1) = ( -global_here%C_ROE*(global_here%EIGVAL(2)**2) + (global_here%C_ROE**3) ) * ( global_here%EIGVAL(2) + global_here%C_ROE - global_here%EIGVAL(4) ) &
+         GLOBAL_HERE%RI(1,1) = ( -global_here%C_ROE*(global_here%EIGVAL(2)**2) + (global_here%C_ROE**3) ) * ( global_here%EIGVAL(2) + global_here%C_ROE - global_here%EIGVAL(4) ) &
         *((dg_here%NY**2) * xi - (global_here%V_ROE**2) ) / (global_here%EIGVAL(1)*alpha_0*gamma1)
 
       endif
 
       if (abs(alpha_0*gamma1).le.epsilon) then
 
-         RI(2,1)= 0.D0
+         GLOBAL_HERE%RI(2,1)= 0.D0
 
       else
 
-         RI(2,1) = ((dg_here%NY**2) * xi - (global_here%V_ROE**2)) * ( global_here%EIGVAL(2) + global_here%C_ROE - global_here%EIGVAL(4) )&
+         GLOBAL_HERE%RI(2,1) = ((dg_here%NY**2) * xi - (global_here%V_ROE**2)) * ( global_here%EIGVAL(2) + global_here%C_ROE - global_here%EIGVAL(4) )&
         *( -gamma4 + gamma3 ) / (alpha_0*gamma1)
 
       endif
 
       if (abs(alpha_0).le.epsilon) then
 
-         RI(3,1) = 0.D0
+         GLOBAL_HERE%RI(3,1) = 0.D0
       
       else
          
-         RI(3,1) = (global_here%EIGVAL(2)+global_here%C_ROE-global_here%EIGVAL(4))*( (dg_here%NY*global_here%C_ROE)**2 - global_here%V_ROE**2 )/ alpha_0
+         GLOBAL_HERE%RI(3,1) = (global_here%EIGVAL(2)+global_here%C_ROE-global_here%EIGVAL(4))*( (dg_here%NY*global_here%C_ROE)**2 - global_here%V_ROE**2 )/ alpha_0
 
       endif
 
-      RI(4,1) = 1.D0
+      GLOBAL_HERE%RI(4,1) = 1.D0
 
-      RI(1,2) = 0.D0
+      GLOBAL_HERE%RI(1,2) = 0.D0
 
       if (abs(chi).le.epsilon) then
 
-         RI(2,2) = 0.D0
-         RI(3,2) = 0.D0
+         GLOBAL_HERE%RI(2,2) = 0.D0
+         GLOBAL_HERE%RI(3,2) = 0.D0
 
       else
 
-         RI(2,2) = (global_here%EIGVAL(2) - global_here%EIGVAL(4)) * dg_here%NY / chi
-         RI(3,2) = (global_here%EIGVAL(4) - global_here%EIGVAL(2)) * dg_here%NX / chi
+         GLOBAL_HERE%RI(2,2) = (global_here%EIGVAL(2) - global_here%EIGVAL(4)) * dg_here%NY / chi
+         GLOBAL_HERE%RI(3,2) = (global_here%EIGVAL(4) - global_here%EIGVAL(2)) * dg_here%NX / chi
 
       endif
 
-      RI(4,2) = 1.D0
+      GLOBAL_HERE%RI(4,2) = 1.D0
 
 
       if ( abs(global_here%EIGVAL(3)*beta_0*gamma2).le.epsilon) then
 
-         RI(1,3) = 0.D0
+         GLOBAL_HERE%RI(1,3) = 0.D0
 
       else
 
-         RI(1,3) = (global_here%C_ROE*global_here%EIGVAL(2)**2 - global_here%C_ROE**3)*(global_here%EIGVAL(2) - global_here%C_ROE - global_here%EIGVAL(4))&
+         GLOBAL_HERE%RI(1,3) = (global_here%C_ROE*global_here%EIGVAL(2)**2 - global_here%C_ROE**3)*(global_here%EIGVAL(2) - global_here%C_ROE - global_here%EIGVAL(4))&
         * ((dg_here%NY**2) * xi - global_here%V_ROE**2) / (global_here%EIGVAL(3)*beta_0*gamma2)
 
       endif
 
       if (abs(beta_0*gamma2).le.epsilon) then
 
-         RI(2,3) = 0.D0
+         GLOBAL_HERE%RI(2,3) = 0.D0
 
       else
 
-         RI(2,3) = ((dg_here%NY**2) * xi - global_here%V_ROE**2)*(global_here%EIGVAL(2)-global_here%C_ROE-global_here%EIGVAL(4))&
+         GLOBAL_HERE%RI(2,3) = ((dg_here%NY**2) * xi - global_here%V_ROE**2)*(global_here%EIGVAL(2)-global_here%C_ROE-global_here%EIGVAL(4))&
         *(gamma4 + gamma3 ) / (beta_0*gamma2)
 
       endif
 
       if (abs(beta_0).le.epsilon) then
          
-         RI(3,3) = 0.D0
+         GLOBAL_HERE%RI(3,3) = 0.D0
       
       else
          
-         RI(3,3) = (global_here%EIGVAL(2)-global_here%C_ROE-global_here%EIGVAL(4))*((dg_here%NY**2) * xi - global_here%V_ROE**2) / beta_0
+         GLOBAL_HERE%RI(3,3) = (global_here%EIGVAL(2)-global_here%C_ROE-global_here%EIGVAL(4))*((dg_here%NY**2) * xi - global_here%V_ROE**2) / beta_0
          
       endif
 
-      RI(4,3) = 1.D0
+      GLOBAL_HERE%RI(4,3) = 1.D0
 
-      RI(1,4) = 0.D0
-      RI(2,4) = 0.D0
-      RI(3,4) = 0.D0
-      RI(4,4) = 1.D0
+      GLOBAL_HERE%RI(1,4) = 0.D0
+      GLOBAL_HERE%RI(2,4) = 0.D0
+      GLOBAL_HERE%RI(3,4) = 0.D0
+      GLOBAL_HERE%RI(4,4) = 1.D0
 
       
 !.....Evaluate left eigenvectors (inverse) at Roe averaged variables
@@ -568,11 +568,11 @@
       if ( abs(global_here%C_ROE*(global_here%EIGVAL(2)+global_here%C_ROE-global_here%EIGVAL(4))*iot*(-(global_here%EIGVAL(2)**2)+xi)*iot2)&
   .le.epsilon) then
 
-         LE(1,1) = 0.D0
+         GLOBAL_HERE%LE(1,1) = 0.D0
 
       else
 
-         LE(1,1) =  - ( alpha_0*global_here%EIGVAL(3)*global_here%EIGVAL(1)*gamma1*(dg_here%NY*gamma2+dg_here%NX*gamma4+dg_here%NX*gamma3))&
+         GLOBAL_HERE%LE(1,1) =  - ( alpha_0*global_here%EIGVAL(3)*global_here%EIGVAL(1)*gamma1*(dg_here%NY*gamma2+dg_here%NX*gamma4+dg_here%NX*gamma3))&
         / (global_here%C_ROE*bigB*iot*iot2*(-(global_here%EIGVAL(2)**2)+xi))
 
 
@@ -580,11 +580,11 @@
 
       if ( abs(global_here%C_ROE*(-(global_here%EIGVAL(2)**2)+xi)*(global_here%EIGVAL(2)-global_here%EIGVAL(4))*iot).le.epsilon) then
 
-         LE(2,1) = 0.D0
+         GLOBAL_HERE%LE(2,1) = 0.D0
 
       else
 
-         LE(2,1) = chi*global_here%EIGVAL(1)*global_here%EIGVAL(3)*(gamma2*gamma4-gamma2*gamma3+gamma4*gamma1&
+         GLOBAL_HERE%LE(2,1) = chi*global_here%EIGVAL(1)*global_here%EIGVAL(3)*(gamma2*gamma4-gamma2*gamma3+gamma4*gamma1&
         +gamma3*gamma1) / (global_here%C_ROE*(-(global_here%EIGVAL(2)**2)+xi)*(global_here%EIGVAL(2)-global_here%EIGVAL(4))*iot)
 
 
@@ -592,11 +592,11 @@
 
       if ( abs(global_here%C_ROE*bigA*iot*(-(global_here%EIGVAL(2)**2)+xi)*iot2).le.epsilon) then
 
-         LE(3,1) = 0.D0
+         GLOBAL_HERE%LE(3,1) = 0.D0
 
       else
 
-         LE(3,1) = -beta_0*global_here%EIGVAL(1)*global_here%EIGVAL(3)*gamma2*(gamma1*dg_here%NY-dg_here%NX*gamma4+dg_here%NX*gamma3)&
+         GLOBAL_HERE%LE(3,1) = -beta_0*global_here%EIGVAL(1)*global_here%EIGVAL(3)*gamma2*(gamma1*dg_here%NY-dg_here%NX*gamma4+dg_here%NX*gamma3)&
         / (global_here%C_ROE*bigA*iot*(-(global_here%EIGVAL(2)**2)+xi)*iot2)
 
       endif
@@ -604,48 +604,48 @@
       if ( abs(global_here%C_ROE*iot*bigA*bigB*(global_here%EIGVAL(2)-global_here%EIGVAL(4))*iot2&
  *(-(global_here%EIGVAL(2)**2)+xi)).le.epsilon) then
 
-         LE(4,1) = 0.D0
+         GLOBAL_HERE%LE(4,1) = 0.D0
          
       else
       
-         LE(4,1) = (global_here%EIGVAL(1)*global_here%EIGVAL(3)*bigD) / (global_here%C_ROE*iot*iot2*bigA*bigB &
+         GLOBAL_HERE%LE(4,1) = (global_here%EIGVAL(1)*global_here%EIGVAL(3)*bigD) / (global_here%C_ROE*iot*iot2*bigA*bigB &
         *(global_here%EIGVAL(2)-global_here%EIGVAL(4))*(-(global_here%EIGVAL(2)**2)+xi))
 
       endif
 
       if ( abs( bigB*iot*iot2 ).le.epsilon) then
 
-         LE(1,2) = 0.D0
+         GLOBAL_HERE%LE(1,2) = 0.D0
 
       else
 
-         LE(1,2) = -alpha_0*gamma1*global_here%EIGVAL(1)*dg_here%NX / ( bigB*iot*iot2 )
+         GLOBAL_HERE%LE(1,2) = -alpha_0*gamma1*global_here%EIGVAL(1)*dg_here%NX / ( bigB*iot*iot2 )
 
       endif
 
       if ( abs((global_here%EIGVAL(2)-global_here%EIGVAL(4))*iot).le.epsilon) then
       
-         LE(2,2) = 0.D0
+         GLOBAL_HERE%LE(2,2) = 0.D0
 
       else
 
-         LE(2,2) = chi * ( global_here%EIGVAL(3)*gamma2 + gamma1*global_here%EIGVAL(1) ) / ((global_here%EIGVAL(2)-global_here%EIGVAL(4))*iot)
+         GLOBAL_HERE%LE(2,2) = chi * ( global_here%EIGVAL(3)*gamma2 + gamma1*global_here%EIGVAL(1) ) / ((global_here%EIGVAL(2)-global_here%EIGVAL(4))*iot)
 
       endif
 
       if ( abs(bigA*iot*iot2).le.epsilon) then
 
-         LE(3,2) = 0.D0
+         GLOBAL_HERE%LE(3,2) = 0.D0
          
       else
 
-         LE(3,2) = beta_0*gamma2*global_here%EIGVAL(3)*dg_here%NX / (bigA*iot*iot2)
+         GLOBAL_HERE%LE(3,2) = beta_0*gamma2*global_here%EIGVAL(3)*dg_here%NX / (bigA*iot*iot2)
 
       endif
 
       if ( abs(iot*iot2*bigA*bigB*(global_here%EIGVAL(2)-global_here%EIGVAL(4))).le.epsilon) then
 
-         LE(4,2) = 0.D0
+         GLOBAL_HERE%LE(4,2) = 0.D0
 
       else
 
@@ -655,22 +655,22 @@
 
       if ( abs(bigB*iot*iot2).le.epsilon) then
 
-         LE(1,3) = 0.D0
+         GLOBAL_HERE%LE(1,3) = 0.D0
          
       else
 
-         LE(1,3) = -alpha_0*(-gamma2*global_here%EIGVAL(3)*dg_here%NY-dg_here%NX*global_here%EIGVAL(3)*gamma4-dg_here%NX*global_here%EIGVAL(3)*gamma3&
+         GLOBAL_HERE%LE(1,3) = -alpha_0*(-gamma2*global_here%EIGVAL(3)*dg_here%NY-dg_here%NX*global_here%EIGVAL(3)*gamma4-dg_here%NX*global_here%EIGVAL(3)*gamma3&
         +dg_here%NX*global_here%EIGVAL(1)*gamma4-dg_here%NX*global_here%EIGVAL(1)*gamma3+iot) / (bigB*iot*iot2)
 
       endif
 
       if ( abs((global_here%EIGVAL(2)-global_here%EIGVAL(4))*iot).le.epsilon) then
          
-         LE(2,3) = 0.D0
+         GLOBAL_HERE%LE(2,3) = 0.D0
          
       else
 
-         LE(2,3) = -chi*(global_here%EIGVAL(3)*gamma4+global_here%EIGVAL(3)*gamma3-global_here%EIGVAL(1)*gamma4+global_here%EIGVAL(1)*gamma3)&
+         GLOBAL_HERE%LE(2,3) = -chi*(global_here%EIGVAL(3)*gamma4+global_here%EIGVAL(3)*gamma3-global_here%EIGVAL(1)*gamma4+global_here%EIGVAL(1)*gamma3)&
         / ((global_here%EIGVAL(2)-global_here%EIGVAL(4))*iot)
 
 
@@ -679,28 +679,28 @@
 
       if ( abs(bigA*iot*iot2).le.epsilon) then 
 
-         LE(3,3) = 0.D0
+         GLOBAL_HERE%LE(3,3) = 0.D0
          
       else
 
-         LE(3,3) = ( beta_0*gamma2*global_here%EIGVAL(3)*dg_here%NY ) / (bigA*iot*iot2)
+         GLOBAL_HERE%LE(3,3) = ( beta_0*gamma2*global_here%EIGVAL(3)*dg_here%NY ) / (bigA*iot*iot2)
 
       endif
 
       if ( abs(iot*iot2*bigA*bigB*(global_here%EIGVAL(2)-global_here%EIGVAL(4))).le.epsilon) then
 
-         LE(4,3) = 0.D0
+         GLOBAL_HERE%LE(4,3) = 0.D0
 
       else
 
-         LE(4,3) = bigF / (iot*iot2*bigA*bigB*(global_here%EIGVAL(2)-global_here%EIGVAL(4)))
+         GLOBAL_HERE%LE(4,3) = bigF / (iot*iot2*bigA*bigB*(global_here%EIGVAL(2)-global_here%EIGVAL(4)))
       
       endif
 
-      LE(1,4) = 0.D0
-      LE(2,4) = 0.D0
-      LE(3,4) = 0.D0
-      LE(4,4) = 1.D0
+      GLOBAL_HERE%LE(1,4) = 0.D0
+      GLOBAL_HERE%LE(2,4) = 0.D0
+      GLOBAL_HERE%LE(3,4) = 0.D0
+      GLOBAL_HERE%LE(4,4) = 1.D0
 
 !.....Compute the Roe matrix
 
@@ -710,8 +710,8 @@
       do ii=1,4
          if(abs(global_here%EIGVAL(ii)).le.1.0e-14) then
 
-            RI(:,ii) = 0.D0
-            LE(ii,:) = 0.D0
+            GLOBAL_HERE%RI(:,ii) = 0.D0
+            GLOBAL_HERE%LE(ii,:) = 0.D0
 
          endif
       enddo
@@ -719,25 +719,25 @@
 
       DO II = 1,4
 
-         A_ROE(II,1) = RI(II,1)*ABS(global_here%EIGVAL(1))*LE(1,1) +&
-        RI(II,2)*ABS(global_here%EIGVAL(2))*LE(2,1) +&
-        RI(II,3)*ABS(global_here%EIGVAL(3))*LE(3,1) +&
-        RI(II,4)*ABS(global_here%EIGVAL(4))*LE(4,1) 
+         GLOBAL_HERE%A_ROE(II,1) = GLOBAL_HERE%RI(II,1)*ABS(global_here%EIGVAL(1))*GLOBAL_HERE%LE(1,1) +&
+        GLOBAL_HERE%RI(II,2)*ABS(global_here%EIGVAL(2))*GLOBAL_HERE%LE(2,1) +&
+        GLOBAL_HERE%RI(II,3)*ABS(global_here%EIGVAL(3))*GLOBAL_HERE%LE(3,1) +&
+        GLOBAL_HERE%RI(II,4)*ABS(global_here%EIGVAL(4))*GLOBAL_HERE%LE(4,1) 
 
-         A_ROE(II,2) = RI(II,1)*ABS(global_here%EIGVAL(1))*LE(1,2) +&
-        RI(II,2)*ABS(global_here%EIGVAL(2))*LE(2,2) +&
-        RI(II,3)*ABS(global_here%EIGVAL(3))*LE(3,2) +&
-        RI(II,4)*ABS(global_here%EIGVAL(4))*LE(4,2)
+         GLOBAL_HERE%A_ROE(II,2) = GLOBAL_HERE%RI(II,1)*ABS(global_here%EIGVAL(1))*GLOBAL_HERE%LE(1,2) +&
+        GLOBAL_HERE%RI(II,2)*ABS(global_here%EIGVAL(2))*GLOBAL_HERE%LE(2,2) +&
+        GLOBAL_HERE%RI(II,3)*ABS(global_here%EIGVAL(3))*GLOBAL_HERE%LE(3,2) +&
+        GLOBAL_HERE%RI(II,4)*ABS(global_here%EIGVAL(4))*GLOBAL_HERE%LE(4,2)
 
-         A_ROE(II,3) = RI(II,1)*ABS(global_here%EIGVAL(1))*LE(1,3) +&
-        RI(II,2)*ABS(global_here%EIGVAL(2))*LE(2,3) +&
-        RI(II,3)*ABS(global_here%EIGVAL(3))*LE(3,3) +&
-        RI(II,4)*ABS(global_here%EIGVAL(4))*LE(4,3)
+         GLOBAL_HERE%A_ROE(II,3) = GLOBAL_HERE%RI(II,1)*ABS(global_here%EIGVAL(1))*GLOBAL_HERE%LE(1,3) +&
+        GLOBAL_HERE%RI(II,2)*ABS(global_here%EIGVAL(2))*GLOBAL_HERE%LE(2,3) +&
+        GLOBAL_HERE%RI(II,3)*ABS(global_here%EIGVAL(3))*GLOBAL_HERE%LE(3,3) +&
+        GLOBAL_HERE%RI(II,4)*ABS(global_here%EIGVAL(4))*GLOBAL_HERE%LE(4,3)
 
-         A_ROE(II,4) = RI(II,1)*ABS(global_here%EIGVAL(1))*LE(1,4) +&
-        RI(II,2)*ABS(global_here%EIGVAL(2))*LE(2,4) +&
-        RI(II,3)*ABS(global_here%EIGVAL(3))*LE(3,4) + &
-        RI(II,4)*ABS(global_here%EIGVAL(4))*LE(4,4)
+         GLOBAL_HERE%A_ROE(II,4) = GLOBAL_HERE%RI(II,1)*ABS(global_here%EIGVAL(1))*GLOBAL_HERE%LE(1,4) +&
+        GLOBAL_HERE%RI(II,2)*ABS(global_here%EIGVAL(2))*GLOBAL_HERE%LE(2,4) +&
+        GLOBAL_HERE%RI(II,3)*ABS(global_here%EIGVAL(3))*GLOBAL_HERE%LE(3,4) + &
+        GLOBAL_HERE%RI(II,4)*ABS(global_here%EIGVAL(4))*GLOBAL_HERE%LE(4,4)
 
       ENDDO
 
@@ -752,7 +752,7 @@
       do ii=1,4
          if(abs(global_here%jump(ii)).le.1.0e-14) then
 
-            A_ROE(:,ii) = 0.D0
+            GLOBAL_HERE%A_ROE(:,ii) = 0.D0
 
          endif
       enddo
@@ -815,25 +815,25 @@
 
 !.....Compute the Roe flux (only formed for one sediment layer!) !Can add path conservative contribution
 
-      global_here%F_HAT = global_here%F_AVG  - 0.5D0*(A_ROE(1,1)*global_here%JUMP(1) + A_ROE(1,2)*global_here%JUMP(2) +&
-     A_ROE(1,3)*global_here%JUMP(3) + A_ROE(1,4) * global_here%JUMP(4) ) 
+      global_here%F_HAT = global_here%F_AVG  - 0.5D0*(GLOBAL_HERE%A_ROE(1,1)*global_here%JUMP(1) + GLOBAL_HERE%A_ROE(1,2)*global_here%JUMP(2) +&
+     GLOBAL_HERE%A_ROE(1,3)*global_here%JUMP(3) + GLOBAL_HERE%A_ROE(1,4) * global_here%JUMP(4) ) 
       !&        - (Select_IN*Select_EX)*(global_here%HT_IN-global_here%HT_EX) / (Select_EX-Select_IN)
 
       !print*, global_here%F_Hat
 
-      global_here%G_HAT = global_here%G_AVG - 0.5D0*(A_ROE(2,1)*global_here%JUMP(1) + A_ROE(2,2)*global_here%JUMP(2) +&
-     A_ROE(2,3)*global_here%JUMP(3) + A_ROE(2,4) * global_here%JUMP(4) )
+      global_here%G_HAT = global_here%G_AVG - 0.5D0*(GLOBAL_HERE%A_ROE(2,1)*global_here%JUMP(1) + GLOBAL_HERE%A_ROE(2,2)*global_here%JUMP(2) +&
+     GLOBAL_HERE%A_ROE(2,3)*global_here%JUMP(3) + GLOBAL_HERE%A_ROE(2,4) * global_here%JUMP(4) )
       !&        - 0.5D0*(Select_IN+Select_EX)*rVncU
       !&        / (Select_EX-Select_IN)
 
 
-      global_here%H_HAT = global_here%H_AVG - 0.5D0*(A_ROE(3,1)*global_here%JUMP(1) + A_ROE(3,2)*global_here%JUMP(2) +&
-     A_ROE(3,3)*global_here%JUMP(3)+ A_ROE(3,4) * global_here%JUMP(4) )
+      global_here%H_HAT = global_here%H_AVG - 0.5D0*(GLOBAL_HERE%A_ROE(3,1)*global_here%JUMP(1) + GLOBAL_HERE%A_ROE(3,2)*global_here%JUMP(2) +&
+     GLOBAL_HERE%A_ROE(3,3)*global_here%JUMP(3)+ GLOBAL_HERE%A_ROE(3,4) * global_here%JUMP(4) )
       !&        - 0.5D0*(Select_IN+Select_EX)*rVncV
       !&        / (Select_EX-Select_IN)
 
-      dg_here%bed_HAT(1) = bed_AVG(1) - 0.5D0*( A_ROE(4,1)*global_here%JUMP(1) + A_ROE(4,2)*global_here%JUMP(2) +&
-     A_ROE(4,3)*global_here%JUMP(3) + A_ROE(4,4) * global_here%JUMP(4) )
+      dg_here%bed_HAT(1) = bed_AVG(1) - 0.5D0*( GLOBAL_HERE%A_ROE(4,1)*global_here%JUMP(1) + GLOBAL_HERE%A_ROE(4,2)*global_here%JUMP(2) +&
+     GLOBAL_HERE%A_ROE(4,3)*global_here%JUMP(3) + GLOBAL_HERE%A_ROE(4,4) * global_here%JUMP(4) )
       !&           - ((Select_IN*Select_EX) * (dg_here%bed_IN(1) - dg_here%bed_EX(1)))
       !&           / (Select_EX-Select_IN) 
       

@@ -115,7 +115,7 @@
 
             dg_here%SL3(I,J) = global_here%X1*(global_here%Y2 - global_here%Y3) + global_here%X2*(global_here%Y3 - global_here%Y1) + global_here%X3*(global_here%Y1 - global_here%Y2)
 
-            IF (dg_here%SL3(I,J).LE.0.AND.dg_here%SLOPEFLAG.global_here%NE.0) then
+            IF (dg_here%SL3(I,J).LE.0.AND.dg_here%SLOPEFLAG.ne.0) then
            WRITE(16,*) 'WARNING. dg_here%SL3(',I,',',J,') =',dg_here%SL3(I,J),' <= 0.',&
                    '    ELEMENT ',J,&
                    ' WILL NOT BE CONSIDERED IN SLOPE LIMITING.'
@@ -260,7 +260,7 @@
 
                      do nin =1,3 !number of vertices
 
-                        if( global_here%NM(k,lll).eq.global_here%NM(mm,nin).and.k.global_here%ne.mm ) then !find common vertices of "nearby" elements
+                        if( global_here%NM(k,lll).eq.global_here%NM(mm,nin).and.k.ne.mm ) then !find common vertices of "nearby" elements
                            
 !.....Compute the centroids of all conterminous (of codimension 2) elements (by vertex) of base element k in physical space
 
