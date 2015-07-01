@@ -153,7 +153,7 @@
          
 !.......Compute elevation specified edges
 
-         IF (dg_here%NEEDS.GT.0)  CALL OCEAN_EDGE_HYDRO(s,dg_here,IT)
+         IF (dg_here%NEEDS.GT.0)  CALL OCEAN_EDGE_HYDRO(s,dg_here,global_here,IT)
 
 !.......Compute no-normal flow edges
 
@@ -161,11 +161,11 @@
 
 !.......Compute non-zero flow edges
 
-         IF (dg_here%NFEDS.GT.0)  CALL FLOW_EDGE_HYDRO(s,dg_here,IT)
+         IF (dg_here%NFEDS.GT.0)  CALL FLOW_EDGE_HYDRO(s,dg_here,global_here,IT)
          
 !.......Compute radiation edges
 
-         IF (dg_here%NREDS.GT.0)  CALL RADIATION_EDGE_HYDRO(s,dg_here,IT)
+         IF (dg_here%NREDS.GT.0)  CALL RADIATION_EDGE_HYDRO(s,dg_here,global_here,IT)
 
 !.......Compute internal barrier edges
 
@@ -282,7 +282,7 @@
          
 !.......Compute elevation specified edges
 
-         IF (dg_here%NEEDS.GT.0)  CALL OCEAN_EDGE_HYDRO(s,dg_here,IT)
+         IF (dg_here%NEEDS.GT.0)  CALL OCEAN_EDGE_HYDRO(s,dg_here,global_here,IT)
 
 !.......Compute no-normal flow edges
 
@@ -290,11 +290,11 @@
 
 !.......Compute non-zero flow edges
 
-         IF (dg_here%NFEDS.GT.0)  CALL FLOW_EDGE_HYDRO(s,dg_here,IT)
+         IF (dg_here%NFEDS.GT.0)  CALL FLOW_EDGE_HYDRO(s,dg_here,global_here,IT)
          
 !.......Compute radiation edges
 
-         IF (dg_here%NREDS.GT.0)  CALL RADIATION_EDGE_HYDRO(s,dg_here,IT)
+         IF (dg_here%NREDS.GT.0)  CALL RADIATION_EDGE_HYDRO(s,dg_here,global_here,IT)
 
 !.......Compute internal barrier edges
 

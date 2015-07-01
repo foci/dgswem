@@ -55,7 +55,7 @@
       character*80 tecfile, tecfile_max
 
       CALL MAKE_DIRNAME(s)       ! Establish Working Directory Name
-      CALL READ_INPUT(s,dg_here)         ! Establish sizes by reading fort.14 and fort.15
+      CALL READ_INPUT(s,dg_here,global_here)         ! Establish sizes by reading fort.14 and fort.15
 #endif         
 
       
@@ -87,6 +87,7 @@
       END DO
 
       DO IE=1,global_here%NE
+         global_here%IE=IE
          global_here%NM1=global_here%NM(global_here%IE,1)
          global_here%NM2=global_here%NM(global_here%IE,2)
          global_here%NM3=global_here%NM(global_here%IE,3)
@@ -330,7 +331,7 @@
 !$$$            if (myproc.eq.0) write(*,*) 'timestep ',global_here%itime_a
 !$$$c     write(200+myproc,*) 'timestep ',global_here%itime_a,myproc
 !$$$         endif
-         CALL DG_TIMESTEP(s,dg_here,global_here%ITIME_A)
+         CALL DG_TIMESTEP(s,dg_here,global_here,global_here%ITIME_A)
 #ifdef SWAN
 !asey 090302: If it is time, then call the following subroutine
 !             to then call the SWAN time-stepping subroutine.
