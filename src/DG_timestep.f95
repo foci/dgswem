@@ -107,7 +107,7 @@
             PRINT *, '  HE(',1,',',J,',1) = ',dg_here%ZE(1,J,1)+DPAVG
             PRINT *, '  global_here%DP = ',global_here%DP(global_here%NM(J,1)),global_here%DP(global_here%NM(J,2)),global_here%DP(global_here%NM(J,3))
             PRINT *, '  DPAVG = ',DPAVG
-            PRINT *, ' global_here%x,  global_here%y ',global_here%SLAM(global_here%NM(J,1))/global_here%DEG2RAD,global_here%SFEA(global_here%NM(J,1))/global_here%DEG2RAD
+            PRINT *, ' global_here%x,  global_here%y ',global_here%SLAM(global_here%NM(J,1))/deg2rad,global_here%SFEA(global_here%NM(J,1))/DEG2RAD
             Detected = .TRUE.
             ErrorElevExceeded=1    
          ENDIF
@@ -158,33 +158,33 @@
          DO K = 1,dg_here%DOF
 
             Detected = .FALSE.
-            IF(dg_here%ZE(K,J,1).global_here%NE.dg_here%ZE(K,J,1)) THEN
+            IF(dg_here%ZE(K,J,1).NE.dg_here%ZE(K,J,1)) THEN
                PRINT *, ''
 #ifdef CMPI
                PRINT *, 'IN SUBDOMAIN ',MYPROC
 #endif
                PRINT *, '  dg_here%ZE(',K,',',J,',1) IS ',dg_here%ZE(K,J,1)
-               PRINT *, ' global_here%x,  global_here%y ',global_here%SLAM(global_here%NM(J,1))/global_here%DEG2RAD,global_here%SFEA(global_here%NM(J,1))/global_here%DEG2RAD
+               PRINT *, ' global_here%x,  global_here%y ',global_here%SLAM(global_here%NM(J,1))/DEG2RAD,global_here%SFEA(global_here%NM(J,1))/DEG2RAD
                Detected = .TRUE.
                ErrorElevExceeded = 1
             ENDIF
-            IF(dg_here%QX(K,J,1).global_here%NE.dg_here%QX(K,J,1)) THEN
+            IF(dg_here%QX(K,J,1).NE.dg_here%QX(K,J,1)) THEN
 #ifdef CMPI
                PRINT *, 'IN SUBDOMAIN ',MYPROC
 #endif
                PRINT *, ''
                PRINT *, '  dg_here%QX(',K,',',J,',1) IS ',dg_here%QX(K,J,1)
-               PRINT *, ' global_here%x,  global_here%y ',global_here%SLAM(global_here%NM(J,1))/global_here%DEG2RAD,global_here%SFEA(global_here%NM(J,1))/global_here%DEG2RAD
+               PRINT *, ' global_here%x,  global_here%y ',global_here%SLAM(global_here%NM(J,1))/DEG2RAD,global_here%SFEA(global_here%NM(J,1))/DEG2RAD
                Detected = .TRUE.
                ErrorElevExceeded = 1
             ENDIF
-            IF(dg_here%QY(K,J,1).global_here%NE.dg_here%QY(K,J,1)) THEN
+            IF(dg_here%QY(K,J,1).NE.dg_here%QY(K,J,1)) THEN
 #ifdef CMPI
                PRINT *, 'IN SUBDOMAIN ',MYPROC
 #endif
                PRINT *, ''
                PRINT *, '  dg_here%QY(',K,',',J,',1) IS ',dg_here%QY(K,J,1)
-               PRINT *, ' global_here%x,  global_here%y ',global_here%SLAM(global_here%NM(J,1))/global_here%DEG2RAD,global_here%SFEA(global_here%NM(J,1))/global_here%DEG2RAD
+               PRINT *, ' global_here%x,  global_here%y ',global_here%SLAM(global_here%NM(J,1))/deg2rad,global_here%SFEA(global_here%NM(J,1))/deg2rad
                Detected = .TRUE.
                ErrorElevExceeded = 1
             ENDIF

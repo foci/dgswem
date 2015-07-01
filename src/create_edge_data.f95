@@ -28,7 +28,7 @@
 !
 !***********************************************************************
 
-      SUBROUTINE CREATE_EDGE_DATA(s,dg_here)
+      SUBROUTINE CREATE_EDGE_DATA(s,dg_here,global_here)
 
 !.....Use appropriate modules
 
@@ -41,6 +41,7 @@
       IMPLICIT NONE
       type (sizes_type) :: s
       type (dg_type) :: dg_here
+      type (global_type) :: global_here
       
 !.....Declare local variables
 
@@ -267,7 +268,7 @@
       DO I = 1,dg_here%NEDGES
         IEL1 = dg_here%NEDEL(1,I)
         IEL2 = dg_here%NEDEL(2,I)
-        IF((IEL1.global_here%NE.0).AND.(IEL2.global_here%NE.0))THEN
+        IF((IEL1.NE.0).AND.(IEL2.NE.0))THEN
           dg_here%NIEDS = dg_here%NIEDS + 1
           dg_here%NIEDN(dg_here%NIEDS) = I
           dg_here%NCOUNT(I) = 0
@@ -606,7 +607,7 @@
       dg_here%NEDSD(:,:) = 0.D0
       DO I = 1,dg_here%MNED
         DO K = 1,2
-          IF (dg_here%NEDEL(K,I).global_here%NE.0) THEN
+          IF (dg_here%NEDEL(K,I).NE.0) THEN
             global_here%N1 = global_here%NELED(1,dg_here%NEDEL(K,I))
             global_here%N2 = global_here%NELED(2,dg_here%NEDEL(K,I))
             global_here%N3 = global_here%NELED(3,dg_here%NEDEL(K,I))

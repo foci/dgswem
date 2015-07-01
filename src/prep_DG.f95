@@ -167,7 +167,7 @@
          PRINT*, 'CREATING global_here%EDGE DATA...'
          PRINT*, ''
       ENDIF
-      CALL CREATE_EDGE_DATA(s,dg_here)
+      CALL CREATE_EDGE_DATA(s,dg_here,global_here)
       IF(MYPROC_HERE.EQ.0) THEN
          print *, 'CREATING global_here%EDGE DATA DONE'
          print *, ''
