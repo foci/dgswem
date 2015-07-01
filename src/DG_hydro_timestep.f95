@@ -183,7 +183,7 @@
 
 !.......Compute elements to finish building the rhs
          
-         CALL RHS_DG_HYDRO(s,dg_here,global_here)
+         CALL RHS_DG_HYDRO(s,dg_here,global_here,nodalattr_here)
 
 !.......SSP Runge-Kutta Time Scheme
 
@@ -312,7 +312,7 @@
 
 !.......Compute elements to finish building the rhs
          
-         CALL RHS_DG_HYDRO(s,dg_here,global_here)
+         CALL RHS_DG_HYDRO(s,dg_here,global_here,nodalattr_here)
 
 !.......RKC Time Scheme
 
