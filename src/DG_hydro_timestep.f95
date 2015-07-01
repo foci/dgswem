@@ -21,12 +21,13 @@
 !     
 !***********************************************************************
 
-      SUBROUTINE DG_HYDRO_TIMESTEP(s,dg_here,global_here,IT)
+      SUBROUTINE DG_HYDRO_TIMESTEP(s,dg_here,global_here,nodalattr_here,IT)
 
 !.....Use appropriate modules
       USE SIZES
       USE GLOBAL
       USE DG
+      USE NodalAttributes
 
 #ifdef CMPI
       USE MESSENGER_ELEM 
@@ -45,6 +46,7 @@
       type (sizes_type) :: s
       type (dg_type) :: dg_here
       type (global_type) :: global_here
+      type (nodalattr_type) :: nodalattr_here
 
       integer :: irk ! defining this locally
       INTEGER IT,L,GED,NBOREL,NNBORS,NDRYNBORS,Istop,k,j,kk,i,mm
@@ -101,7 +103,7 @@
          
 !.......Obtain the meteorological forcing
 
-         IF (global_here%NWS.NE.0) CALL MET_FORCING(s,dg_here,global_here,IT)
+         IF (global_here%NWS.NE.0) CALL MET_FORCING(s,dg_here,global_here,nodalattr_here,IT)
         
         IF(global_here%NRS.GE.1) THEN
           IF(global_here%TIME_A.GT.global_here%RSTIME2) THEN
@@ -149,11 +151,11 @@
 
 !.......Compute LDG auxiliary equations
          
-         IF (global_here%EVMSUM.NE.0.D0.or.dg_here%artdif.eq.1) CALL LDG_HYDRO(s,dg_here,global_here,IT)
+         IF (global_here%EVMSUM.NE.0.D0.or.dg_here%artdif.eq.1) CALL LDG_HYDRO(s,dg_here,global_here,nodalattr_here,IT)
          
 !.......Compute elevation specified edges
 
-         IF (dg_here%NEEDS.GT.0)  CALL OCEAN_EDGE_HYDRO(s,dg_here,global_here,IT)
+         IF (dg_here%NEEDS.GT.0)  CALL OCEAN_EDGE_HYDRO(s,dg_here,global_here,nodalattr_here,IT)
 
 !.......Compute no-normal flow edges
 
@@ -270,7 +272,7 @@
          
 !.......Obtain the meteorological forcing
 
-         IF (global_here%NWS.global_here%NE.0) CALL MET_FORCING(s,dg_here,global_here,IT)
+         IF (global_here%NWS.global_here%NE.0) CALL MET_FORCING(s,dg_here,global_here,nodalattr_here,IT)
          
 !.......Compute tidal potential terms
 
@@ -278,11 +280,11 @@
 
 !.......Compute LDG auxiliary equations
          
-         IF (global_here%EVMSUM.global_here%NE.0.D0.or.dg_here%artdif.eq.1) CALL LDG_HYDRO(s,dg_here,global_here,IT)
+         IF (global_here%EVMSUM.global_here%NE.0.D0.or.dg_here%artdif.eq.1) CALL LDG_HYDRO(s,dg_here,global_here,nodalattr_here,IT)
          
 !.......Compute elevation specified edges
 
-         IF (dg_here%NEEDS.GT.0)  CALL OCEAN_EDGE_HYDRO(s,dg_here,global_here,IT)
+         IF (dg_here%NEEDS.GT.0)  CALL OCEAN_EDGE_HYDRO(s,dg_here,global_here,nodalattr_here,IT)
 
 !.......Compute no-normal flow edges
 

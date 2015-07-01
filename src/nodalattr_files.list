@@ -1,0 +1,28 @@
+#!/bin/bash
+prefix=nodalattr_here
+varlist=nodalattr.list
+
+sourcefile=nodalattr.f95 
+../scripts/sed_vars.bash $sourcefile $varlist $prefix 217 1335
+
+sourcefile=met_forcing.f95
+../scripts/sed_vars.bash $sourcefile $varlist $prefix 
+
+sourcefile=read_input.f95 
+varlist=read_input.nodalattr.list
+../scripts/sed_vars.bash $sourcefile $varlist $prefix
+
+sourcefile=rhs_dg_hydro.f95 
+varlist=rhs_dg_hydro.nodalattr.list
+
+sourcefile=prep_DG.f95 
+varlist=prep_dg.nodalattr.list
+../scripts/sed_vars.bash $sourcefile $varlist $prefix 1 1201
+
+sourcefile=dgswem.f95 
+varlist=dgswem.nodalattr.list 
+../scripts/sed_vars.bash $sourcefile $varlist $prefix 1 419
+
+
+#ocean_edge_hydro.f95  ONLY: GeoidOffset, LoadGeoidOffset
+#LDG_hydro.f95 14-222   ONLY : EVM

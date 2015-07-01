@@ -16,7 +16,7 @@
 !     01-10-2011 - cem - adapted for p_enrichment and multicomponent  
 !     
 !***********************************************************************
-      SUBROUTINE OCEAN_EDGE_HYDRO(s,dg_here,global_here,IT)
+      SUBROUTINE OCEAN_EDGE_HYDRO(s,dg_here,global_here,nodalattr_here,IT)
 
 !.....Use appropriate modules
 
@@ -24,7 +24,7 @@
       USE DG
       Use SIZES
 !     
-      USE NodalAttributes, ONLY: GeoidOffset, LoadGeoidOffset
+      USE NodalAttributes
 !      use fparser
 !      use fparser2
 
@@ -33,6 +33,7 @@
       type (sizes_type) :: s
       type (dg_type) :: dg_here
       type (global_type) :: global_here
+      type (nodalattr_type) :: nodalattr_here
 
 !.....Declare local variables
       
@@ -225,8 +226,8 @@
 #endif
             dg_here%SFAC_EX = dg_here%SFAC_IN
 
-            IF (LoadGeoidOffset) then
-               dg_here%ZE_EX = dg_here%ZE_EX + .5*(GeoidOffset(global_here%N1)+GeoidOffset(global_here%N2))
+            IF (Nodalattr_here%loadgeoidoffset) then
+               dg_here%ZE_EX = dg_here%ZE_EX + .5*(Nodalattr_here%geoidoffset(global_here%N1)+Nodalattr_here%geoidoffset(global_here%N2))
             endif
 
 

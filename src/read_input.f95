@@ -8,7 +8,7 @@
 !     
 !***********************************************************************
 
-      SUBROUTINE READ_INPUT(s,dg_here,global_here)
+      SUBROUTINE READ_INPUT(s,dg_here,global_here,nodalattr_here)
       use sizes
 !.....Use appropriate modules
 
@@ -18,10 +18,7 @@
 #endif
       USE WIND
       USE DG
-      USE NodalAttributes, ONLY :&
-     NoLiBF, NWP, Tau0, HBreak, FTheta, FGamma, Tau, CF,&
-     InitNAModule, ReadNodalAttr, InitNodalAttr, ESLM, ESLC,&
-     TAU0VAR, STARTDRY, FRIC, EVM, EVC
+      USE NodalAttributes
       USE fort_dg, ONLY: read_keyword_fort_dg,read_fixed_fort_dg
 #ifdef CMPI
       USE MESSENGER_ELEM
@@ -36,7 +33,8 @@
       type (sizes_type) :: s
       type (dg_type) :: dg_here
       type (global_type) :: global_here
-
+      type (nodalattr_type) :: nodalattr_here
+      
 !.....Declare local variables
 
       INTEGER NIBP, IBN1, IK, NDISC, NBBN, NVEL2, II, i,j,jj,k,IPRBI_here,ICK_here
@@ -54,7 +52,7 @@
 !     ek...Zero out all the variables in the Nodal Attributes Module
 !     ek...Added from version 46
 
-      CALL InitNAModule()
+      CALL InitNAModule(nodalattr_here)
 
 !     sb-PDG1 added
 #ifdef CMPI
@@ -358,31 +356,31 @@
          STOP
       ENDIF
 
-!.....Read and process NOLIBF - nonlinear bottom friction option
+!.....Read and process nodalattr_here%NOLIBF - nonlinear bottom friction option
 
-      READ(15,*) NOLIBF
-      IF ((NOLIBF.LT.0).OR.(NOLIBF.GT.2)) THEN
+      READ(15,*) nodalattr_here%NOLIBF
+      IF ((nodalattr_here%NOLIBF.LT.0).OR.(nodalattr_here%NOLIBF.GT.2)) THEN
          IF ((global_here%NSCREEN.EQ.1).AND.(s%MYPROC.EQ.0)) THEN
             WRITE(6,9972)
-            WRITE(6,*) 'NOLIBF =',NOLIBF
+            WRITE(6,*) 'nodalattr_here%NOLIBF =',nodalattr_here%NOLIBF
             WRITE(6,9722)
             WRITE(6,9973)
          ENDIF
          WRITE(16,9972)
-         WRITE(16,*) 'NOLIBF =',NOLIBF
+         WRITE(16,*) 'nodalattr_here%NOLIBF =',nodalattr_here%NOLIBF
          WRITE(16,9722)
          WRITE(16,9973)
- 9722    FORMAT(/,1X,'Your selection of NOLIBF (a UNIT 15 input ',&
+ 9722    FORMAT(/,1X,'Your selection of nodalattr_here%NOLIBF (a UNIT 15 input ',&
         'parameter) is not an allowable value')
          STOP
       ENDIF
-      WRITE(16,9845) NOLIBF
- 9845 FORMAT(/,5X,'NOLIBF = ',I3)
-      IF (NOLIBF.EQ.0) WRITE(16,2050)
+      WRITE(16,9845) nodalattr_here%NOLIBF
+ 9845 FORMAT(/,5X,'nodalattr_here%NOLIBF = ',I3)
+      IF (nodalattr_here%NOLIBF.EQ.0) WRITE(16,2050)
  2050 FORMAT(9X,'THE MODEL WILL USE LINEAR BOTTOM FRICTION')
-      IF (NOLIBF.EQ.1) WRITE(16,2051)
+      IF (nodalattr_here%NOLIBF.EQ.1) WRITE(16,2051)
  2051 FORMAT(9X,'THE MODEL WILL USE STANDARD QUADRATIC BOTTOM FRICTION')
-      IF (NOLIBF.EQ.2) WRITE(16,2052)
+      IF (nodalattr_here%NOLIBF.EQ.2) WRITE(16,2052)
  2052 FORMAT(9X,'THE MODEL WILL USE STANDARD QUADRATIC BOTTOM FRICTION',&
      'IN DEEP WATER ',&
      /,9X,'AND A FRICTION FACTOR THAT INCREASES AS THE DEPTH ',&
@@ -556,10 +554,10 @@
  2058 FORMAT(9X,'THE MODEL WILL USE TIME DERIVATIVE COMPONENTS ',&
      /,9X,'OF THE ADVECTIVE TERMS IN THE GWCE')
 
-!.....Read and process NWP - spatially varying bottom friction
+!.....Read and process nodalattr_here%NWP - spatially varying bottom friction
 
-      READ(15,*) NWP
-      CALL ReadNodalAttr(s, global_here%NSCREEN, global_here%ScreenUnit, s%MYPROC, global_here%NABOUT) ! Ek added call to nodalatt
+      READ(15,*) nodalattr_here%NWP
+      CALL ReadNodalAttr(s, nodalattr_here, global_here%NSCREEN, global_here%ScreenUnit, s%MYPROC, global_here%NABOUT) ! Ek added call to nodalatt
 
 !.....Read and process global_here%NCOR - spatially varying Coriolis parameter
 
@@ -969,24 +967,24 @@
       WRITE(16,5) global_here%G
     5 FORMAT(///,5X,'GRAVITATIONAL CONSTANT global_here%G =',F10.5,/)
 
-!.....Read and process TAU0 - weighting coefficient in the GWCE
+!.....Read and process nodalattr_here%TAU0 - weighting coefficient in the GWCE
 
-      READ(15,*) TAU0
-      IF (TAU0.LT.0) THEN
+      READ(15,*) nodalattr_here%TAU0
+      IF (nodalattr_here%TAU0.LT.0) THEN
          WRITE(16,6)
  6       FORMAT(/,5X,'WEIGHTING COEFFICIENT FOR THE GENERALIZED',&
         ' WAVE CONTINUITY EQUATION :',&
         /,5x,'THIS VALUE WILL BE  SELECTED BASED ON NODAL DEPTH',&
         ' ONCE DEPTHS HAVE BEEN PROCESSED',    &
-        /,5X,' DEPTH > 10       -> TAU0 = 0.005  ',    &
-        /,5X,' 10 >/ DEPTH        -> TAU0 = 0.020 ',  &
-        /,5X,' STARTDRY VALUE = -77777  -> TAU0 = 0.020 ',  &
-        /,5X,' STARTDRY VALUE = -88888  -> TAU0 = 0.020 ',/)  
+        /,5X,' DEPTH > 10       -> nodalattr_here%TAU0 = 0.005  ',    &
+        /,5X,' 10 >/ DEPTH        -> nodalattr_here%TAU0 = 0.020 ',  &
+        /,5X,' nodalattr_here%STARTDRY VALUE = -77777  -> nodalattr_here%TAU0 = 0.020 ',  &
+        /,5X,' nodalattr_here%STARTDRY VALUE = -88888  -> nodalattr_here%TAU0 = 0.020 ',/)  
       ELSE
-         WRITE(16,7) TAU0
+         WRITE(16,7) nodalattr_here%TAU0
  7       FORMAT(/,5X,'WEIGHTING COEFFICIENT FOR THE GENERALIZED',&
         ' WAVE CONTINUITY EQUATION :',&
-        /,5X, 'TAU0 = ',E15.8,2X,'1/sec',/)
+        /,5X, 'nodalattr_here%TAU0 = ',E15.8,2X,'1/sec',/)
       ENDIF
 
 !.....Input from unit 15 and output to unit 16 time integration info
@@ -1393,18 +1391,18 @@
 !     CLOSE(11)
 !     ENDIF
 
-!.....Process startdry info from unit 12 (if global_here%NOLIFA = 3 -> global_here%NSTARTDRY = 1
-!.....STARTDRY now set in nodal attributes
+!.....Process nodalattr_here%startdry info from unit 12 (if global_here%NOLIFA = 3 -> global_here%NSTARTDRY = 1
+!.....nodalattr_here%STARTDRY now set in nodal attributes
 
-      IF ((global_here%NSTARTDRY.EQ.1).AND.(NWP.EQ.0)) THEN
+      IF ((global_here%NSTARTDRY.EQ.1).AND.(nodalattr_here%NWP.EQ.0)) THEN
          
-         ALLOCATE(STARTDRY(global_here%NP))
+         ALLOCATE(nodalattr_here%STARTDRY(global_here%NP))
 
 !.....Open unit 12 file
 
          OPEN(12,FILE=S%DIRNAME//'/'//'fort.12')
 
-!.....Read startdry info from unit 12
+!.....Read nodalattr_here%startdry info from unit 12
 
          READ(12,'(A24)') global_here%AGRID2
          READ(12,*) global_here%NE2,global_here%NP2
@@ -1421,15 +1419,15 @@
             STOP
          ENDIF
 
-!.....Read in startdry code values
+!.....Read in nodalattr_here%startdry code values
 
          DO I = 1,global_here%NP
-            READ(12,*) global_here%JKI,global_here%DUM1,global_here%DUM2,STARTDRY(global_here%JKI)
+            READ(12,*) global_here%JKI,global_here%DUM1,global_here%DUM2,nodalattr_here%STARTDRY(global_here%JKI)
             IF (dg_here%MODAL_IC.NE.3) THEN
-               IF (STARTDRY(global_here%JKI).EQ.-88888) THEN
-                  STARTDRY(global_here%JKI) = 1
+               IF (nodalattr_here%STARTDRY(global_here%JKI).EQ.-88888) THEN
+                  nodalattr_here%STARTDRY(global_here%JKI) = 1
                ELSE
-                  STARTDRY(global_here%JKI) = 0
+                  nodalattr_here%STARTDRY(global_here%JKI) = 0
                ENDIF
             ENDIF
             IF (global_here%JKI.NE.I) THEN
@@ -1451,20 +1449,20 @@
       ENDIF
 
 
-!.....Reset tau0var values based on input values of startdry and
-!.....automatic selection of tau0 on a processor
+!.....Reset nodalattr_here%tau0var values based on input values of nodalattr_here%startdry and
+!.....automatic selection of nodalattr_here%tau0 on a processor
 
 !     DO I = 1,global_here%NP
-!     IF (TAU0.LT.0.D0) THEN
-!     IF (global_here%DP(I).LE.10.D0) TAU0VAR(I) = 0.02D0
-!     IF (global_here%DP(I).GT.10.D0) TAU0VAR(I) = 0.005D0
-!     IF (STARTDRY(I).EQ.-77777) TAU0VAR(I) = 0.02D0
-!     IF (STARTDRY(I).EQ.-88888) TAU0VAR(I) = 0.02D0
-!     WRITE(16,248) MYPROC,I,TAU0VAR(I)
+!     IF (nodalattr_here%TAU0.LT.0.D0) THEN
+!     IF (global_here%DP(I).LE.10.D0) nodalattr_here%TAU0VAR(I) = 0.02D0
+!     IF (global_here%DP(I).GT.10.D0) nodalattr_here%TAU0VAR(I) = 0.005D0
+!     IF (nodalattr_here%STARTDRY(I).EQ.-77777) nodalattr_here%TAU0VAR(I) = 0.02D0
+!     IF (nodalattr_here%STARTDRY(I).EQ.-88888) nodalattr_here%TAU0VAR(I) = 0.02D0
+!     WRITE(16,248) MYPROC,I,nodalattr_here%TAU0VAR(I)
 !     248       FORMAT(/,' myproc = ',I6,' node = ',I8,
-!     &             ' tau0 set to ',F12.6,/)
+!     &             ' nodalattr_here%tau0 set to ',F12.6,/)
 !     ELSE
-!     C          TAU0VAR(I) = TAU0
+!     C          nodalattr_here%TAU0VAR(I) = nodalattr_here%TAU0
 !     ENDIF
 !     ENDDO
 
@@ -1474,7 +1472,7 @@
       WRITE(16,2039) global_here%AGRID
  2039 FORMAT(/,5X,'GRID IDENTIFICATION : ',A24,/)
       IF(global_here%NSTARTDRY.EQ.1) WRITE(16,2038) global_here%AGRID2
- 2038 FORMAT(5X,'STARTDRY FILE IDENTIFICATION : ',A24,/)
+ 2038 FORMAT(5X,'nodalattr_here%STARTDRY FILE IDENTIFICATION : ',A24,/)
       WRITE(16,3) global_here%NP
     3 FORMAT(5X,'TOTAL NUMBER OF NODES =',I6,/)
       WRITE(16,4) global_here%NE
@@ -1529,10 +1527,10 @@
                IF ((global_here%NTIP.EQ.0).AND.(global_here%NCOR.EQ.0)) THEN
                   WRITE(16,3527)
  3527             FORMAT(/,10X,'NODE NO.',10X,'global_here%X',20X,'global_here%Y',15X,'global_here%DP',&
-                 5X,'STARTDRY',/)
+                 5X,'nodalattr_here%STARTDRY',/)
                   DO I = 1,global_here%NP
-                     IF (STARTDRY(I).EQ.-88888.D0) THEN
-                        WRITE (16,3529) I,global_here%X(I),global_here%Y(I),global_here%DP(I),STARTDRY(I)
+                     IF (nodalattr_here%STARTDRY(I).EQ.-88888.D0) THEN
+                        WRITE (16,3529) I,global_here%X(I),global_here%Y(I),global_here%DP(I),nodalattr_here%STARTDRY(I)
  3529                   FORMAT(5X,I6,2(2X,F20.2),2X,F12.2,2X,F12.0)
                      ELSE
                         WRITE (16,2008) I,global_here%X(I),global_here%Y(I),global_here%DP(I)
@@ -1542,11 +1540,11 @@
                   WRITE(16,3530)
  3530             FORMAT(/,1X,'   NODE ',7X,'global_here%X',14X,'global_here%Y',9X,&
                  'LAMBDA(DEG)',6X,'FEA(DEG)',9X,'global_here%DP',&
-                 5X,'STARTDRY',/)
+                 5X,'nodalattr_here%STARTDRY',/)
                   DO I = 1,global_here%NP
-                     IF (STARTDRY(I).EQ.-88888.D0) THEN
+                     IF (nodalattr_here%STARTDRY(I).EQ.-88888.D0) THEN
                         WRITE (16,3531) I,global_here%X(I),global_here%Y(I),global_here%SLAM(I)*RAD2DEG,&
-                       global_here%SFEA(I)*RAD2DEG,global_here%DP(I),STARTDRY(I)
+                       global_here%SFEA(I)*RAD2DEG,global_here%DP(I),nodalattr_here%STARTDRY(I)
  3531                   FORMAT(1X,I6,2(1X,F14.1),1X,2(1X,E15.7),1X,F8.2,&
                        1X,F10.0)
                      ELSE
@@ -1559,11 +1557,11 @@
                WRITE(16,3535)
  3535          FORMAT(/,1X,'   NODE ',2X,'LAMBDA(DEG)',5X,'FEA(DEG)',11X,&
               'XCP',14X,'YCP',11X,'global_here%DP',&
-              5X,'STARTDRY',/)
+              5X,'nodalattr_here%STARTDRY',/)
                DO I = 1,global_here%NP
-                  IF (STARTDRY(I).EQ.-88888.D0) THEN
+                  IF (nodalattr_here%STARTDRY(I).EQ.-88888.D0) THEN
                      WRITE (16,3537) I,global_here%SLAM(I)*RAD2DEG,global_here%SFEA(I)*RAD2DEG,&
-                    global_here%X(I),global_here%Y(I),global_here%DP(I),STARTDRY(I)
+                    global_here%X(I),global_here%Y(I),global_here%DP(I),nodalattr_here%STARTDRY(I)
  3537                FORMAT(1X,I6,2(1X,F14.8),2(1X,F15.1),1X,F10.2,2X,F10.0)
                   ELSE
                      WRITE (16,9228) I,global_here%SLAM(I)*RAD2DEG,global_here%SFEA(I)*RAD2DEG,&
@@ -1599,63 +1597,63 @@
       ENDIF
       
 !.....Read information concerning bottom friction coefficient
-!.....If NWP = 1, input nodal friction coefficients from unit 21
-!.....If NWP = 2, set nodal friction coefficients equal to Cf
-!.....If NWP = 3
+!.....If nodalattr_here%NWP = 1, input nodal friction coefficients from unit 21
+!.....If nodalattr_here%NWP = 2, set nodal friction coefficients equal to nodalattr_here%Cf
+!.....If nodalattr_here%NWP = 3
 
 !...  
 !...  READ INFORMATION CONCERNING BOTTOM FRICTION COEFFICIENT
-!...  IF NWP=1, INPUT NODAL FRICTION COEFFICIENTS FROM UNIT 21
-!...  IF NWP=0, SET NODAL FRICTION COEFFICIENTS EQUAL TO CF
-!...  IF NWP=2, READ ADDITIONAL FRICTIONAL PARAMETERS FOR BRIDGE PILINGS
+!...  IF nodalattr_here%NWP=1, INPUT NODAL FRICTION COEFFICIENTS FROM UNIT 21
+!...  IF nodalattr_here%NWP=0, SET NODAL FRICTION COEFFICIENTS EQUAL TO nodalattr_here%CF
+!...  IF nodalattr_here%NWP=2, READ ADDITIONAL FRICTIONAL PARAMETERS FOR BRIDGE PILINGS
 !...  
       WRITE(16,1112)
       WRITE(16,2045)
  2045 FORMAT(//,' BOTTOM FRICTION INFORMATION',//)
 
-      HBREAK=1.
-      FTHETA=1.
-      FGAMMA=1.
-      IF(NOLIBF.EQ.0) READ(15,*) TAU
-      CF=TAU
-      IF(NOLIBF.EQ.1) READ(15,*) CF
-      IF(NOLIBF.EQ.2) READ(15,*) CF,HBREAK,FTHETA,FGAMMA
+      nodalattr_here%HBREAK=1.
+      nodalattr_here%FTHETA=1.
+      nodalattr_here%FGAMMA=1.
+      IF(nodalattr_here%NOLIBF.EQ.0) READ(15,*) nodalattr_here%TAU
+      nodalattr_here%CF=nodalattr_here%TAU
+      IF(nodalattr_here%NOLIBF.EQ.1) READ(15,*) nodalattr_here%CF
+      IF(nodalattr_here%NOLIBF.EQ.2) READ(15,*) nodalattr_here%CF,nodalattr_here%HBREAK,nodalattr_here%FTHETA,nodalattr_here%FGAMMA
 
-      IF (NWP.EQ.0) THEN
-         ALLOCATE(FRIC(global_here%NP))
+      IF (nodalattr_here%NWP.EQ.0) THEN
+         ALLOCATE(nodalattr_here%FRIC(global_here%NP))
          DO I=1,global_here%NP
-            FRIC(I)=CF
+            nodalattr_here%FRIC(I)=nodalattr_here%CF
          END DO
-         IF(NOLIBF.EQ.2) THEN
-            WRITE(16,101) CF,HBREAK,FTHETA,FGAMMA
+         IF(nodalattr_here%NOLIBF.EQ.2) THEN
+            WRITE(16,101) nodalattr_here%CF,nodalattr_here%HBREAK,nodalattr_here%FTHETA,nodalattr_here%FGAMMA
  101        FORMAT(5X,'HYBRID FRICTION RELATIONSHIP PARAMTERS, CFMIN =',&
-           F12.8,'  HBREAK = ',F8.2,&
-           /,5X,'FTHETA = ',F8.2,'  FGAMMA = ',F10.4,//)
+           F12.8,'  nodalattr_here%HBREAK = ',F8.2,&
+           /,5X,'nodalattr_here%FTHETA = ',F8.2,'  nodalattr_here%FGAMMA = ',F10.4,//)
          ENDIF
-         IF(NOLIBF.EQ.1) THEN
-            WRITE(16,8) CF
- 8          FORMAT(5X,'NONLINEAR FRICTION COEFFICIENT CF =',F12.8,/)
+         IF(nodalattr_here%NOLIBF.EQ.1) THEN
+            WRITE(16,8) nodalattr_here%CF
+ 8          FORMAT(5X,'NONLINEAR FRICTION COEFFICIENT nodalattr_here%CF =',F12.8,/)
          ENDIF
-         IF(NOLIBF.EQ.0) THEN
-            WRITE(16,106) TAU
- 106        FORMAT(5X,'LINEAR BOTTOM FRICTION TAU =',F12.8,5X,'1/sec'/)
-            IF(TAU.NE.TAU0) THEN !CHECK TAU VALUE AGAINST TAU0
+         IF(nodalattr_here%NOLIBF.EQ.0) THEN
+            WRITE(16,106) nodalattr_here%TAU
+ 106        FORMAT(5X,'LINEAR BOTTOM FRICTION nodalattr_here%TAU =',F12.8,5X,'1/sec'/)
+            IF(nodalattr_here%TAU.NE.nodalattr_here%TAU0) THEN !CHECK nodalattr_here%TAU VALUE AGAINST nodalattr_here%TAU0
                IF(global_here%NSCREEN.EQ.1.AND.s%MYPROC.EQ.0) WRITE(6,9951)
                WRITE(16,9951)
  9951          FORMAT(////,1X,'!!!!!!!!!!  WARNING - NONFATAL ',&
               'INPUT ERROR  !!!!!!!!!',&
               //,1X,'TYPICALLY YOUR INPUT VALUE FOR ',&
-              'TAU0 SHOULD BE SET EQUAL TO TAU')
+              'nodalattr_here%TAU0 SHOULD BE SET EQUAL TO nodalattr_here%TAU')
             ENDIF
          ENDIF
       ENDIF
 
 
-!     IF(NWP.EQ.1) THEN
+!     IF(nodalattr_here%NWP.EQ.1) THEN
 !     OPEN(21,FILE=DIRNAME//'/'//'fort.21')
 !     READ(21,'(A20)') global_here%AFRIC
 !     DO I=1,global_here%NP
-!     READ(21,*) global_here%NHG,FRIC(global_here%NHG)
+!     READ(21,*) global_here%NHG,nodalattr_here%FRIC(global_here%NHG)
 !     IF(global_here%NHG.global_here%NE.I) THEN
 !     IF(global_here%NSCREEN.EQ.1.AND.MYPROC.EQ.0) WRITE(6,99803)
 !     WRITE(16,99803)
@@ -1671,9 +1669,9 @@
 !     3601   FORMAT(/,5X,'FRICTION FILE IDENTIFICATN : ',A20,/)
 !     IF(global_here%NABOUT.global_here%NE.1) THEN
 !     WRITE(16,2080)
-!     2080     FORMAT(/,10X,'NODE',5X,'BOTTOM FRICTION FRIC',5X,/)
+!     2080     FORMAT(/,10X,'NODE',5X,'BOTTOM FRICTION nodalattr_here%FRIC',5X,/)
 !     DO I=1,global_here%NP
-!     WRITE(16,2087) I,FRIC(I)
+!     WRITE(16,2087) I,nodalattr_here%FRIC(I)
 !     2087       FORMAT(7X,I6,6X,E15.10)
 !     END DO
 !     ELSE
@@ -1683,7 +1681,7 @@
 !     ENDIF
 !     ENDIF
 
-!     IF(NWP.EQ.2) THEN
+!     IF(nodalattr_here%NWP.EQ.2) THEN
 !     CALL ALLOC_MAIN13()   !allocate bridge piling arrays
 !     DO I=1,global_here%NP
 !     global_here%NBNNUM(I)=0
@@ -1721,32 +1719,32 @@
 
 
       IF (global_here%IM.EQ.10) THEN
-         READ(15,*) ESLM,ESLC
+         READ(15,*) nodalattr_here%ESLM,nodalattr_here%ESLC
          DO I=1,global_here%NP
-            EVM(I)=ESLM
-            EVC(I)=ESLC
+            nodalattr_here%EVM(I)=nodalattr_here%ESLM
+            nodalattr_here%EVC(I)=nodalattr_here%ESLC
          END DO
-         WRITE(16,111) ESLM,ESLC
- 111     FORMAT(5X,'EVM, EDDY VISCOSITY COEFFICIENT =',E15.8,/,&
-        5X,'EVC, EDDY DIFFUSIVITY COEFFICIENT =',E15.8,//)
+         WRITE(16,111) nodalattr_here%ESLM,nodalattr_here%ESLC
+ 111     FORMAT(5X,'nodalattr_here%EVM, EDDY VISCOSITY COEFFICIENT =',E15.8,/,&
+        5X,'nodalattr_here%EVC, EDDY DIFFUSIVITY COEFFICIENT =',E15.8,//)
       ELSE
-         READ(15,*) ESLM
-         IF (NWP.EQ.0) THEN
-            ALLOCATE(EVM(global_here%NP))
+         READ(15,*) nodalattr_here%ESLM
+         IF (nodalattr_here%NWP.EQ.0) THEN
+            ALLOCATE(nodalattr_here%EVM(global_here%NP))
             DO I=1,global_here%NP
-               EVM(I)=ESLM
+               nodalattr_here%EVM(I)=nodalattr_here%ESLM
             END DO
-            WRITE(16,11) ESLM
- 11         FORMAT(5X,'EVM, EDDY VISCOSITY COEFFICIENT =',E15.8,//)
+            WRITE(16,11) nodalattr_here%ESLM
+ 11         FORMAT(5X,'nodalattr_here%EVM, EDDY VISCOSITY COEFFICIENT =',E15.8,//)
          ENDIF
       ENDIF
 
 
 !...  02/19/2007 s.b.
       global_here%EVMSUM = 0.D0
-      IF (NWP.EQ.0) THEN
+      IF (nodalattr_here%NWP.EQ.0) THEN
          DO I=1,global_here%NP
-            global_here%EVMSUM = global_here%EVMSUM + ABS(EVM(I))
+            global_here%EVMSUM = global_here%EVMSUM + ABS(nodalattr_here%EVM(I))
          ENDDO
       ENDIF
       
@@ -1754,8 +1752,8 @@
 !     ek: Initialize nodal attributes, now that grid has been read
 !     in from unit 14 file.
 
-      IF (NWP.GT.0)&
-     CALL InitNodalAttr(global_here,global_here%DP, global_here%NP, global_here%G, global_here%NScreen, global_here%ScreenUnit,S%MYPROC,global_here%NAbOut)
+      IF (nodalattr_here%NWP.GT.0)&
+     CALL InitNodalAttr(global_here,nodalattr_here,global_here%DP, global_here%NP, global_here%G, global_here%NScreen, global_here%ScreenUnit,S%MYPROC,global_here%NAbOut)
       
 
 

@@ -15,14 +15,15 @@
 !     01-10-2011 - cem - adapted for p_enrichment and multicomponent
 !     
 !***********************************************************************
-      SUBROUTINE RHS_DG_HYDRO(s,dg_here,global_here)
+      SUBROUTINE RHS_DG_HYDRO(s,dg_here,global_here,nodalattr_here)
       
 !.....Use appropriate modules
 
       USE GLOBAL
       USE DG
-      USE NodalAttributes, ONLY : TAU, IFLINBF, IFHYBF, HBREAK, FTHETA,&
-     FGAMMA,LoadManningsN,ManningsN,CF
+      USE NodalAttributes
+!, ONLY : nodalattr_here%TAU, nodalattr_here%IFLINBF, nodalattr_here%IFHYBF, nodalattr_here%HBREAK, nodalattr_here%FTHETA,&
+!     nodalattr_here%FGAMMA,nodalattr_here%LoadManningsN,nodalattr_here%ManningsN,nodalattr_here%CF
 
       USE sizes
 
@@ -31,6 +32,7 @@
       type (sizes_type) :: s
       type (dg_type) :: dg_here
       type (global_type) :: global_here
+      type (nodalattr_type) :: nodalattr_here
 
 !.....Declare local variables
 
@@ -280,49 +282,49 @@
             dg_here%advectqy(l)=dg_here%advectqy(l)+global_here%hx_in+global_here%hy_in
 
 !.........Compute the friction factor
-            if (LoadManningsN) then
+            if (nodalattr_here%LoadManningsN) then
 !     MN_IN=dg_here%MANN(1,L)
 !     do k=2,dg_here%dof
 !     MN_IN=MN_IN + dg_here%MANN(K,L)*dg_here%PHI_AREA(K,I)
 !     enddo
                dg_here%fric_el(L)=global_here%G*&
-                   ((ManningsN(global_here%n1)+ManningsN(global_here%n2)+ManningsN(global_here%n3))/3.)**2&
+                   ((nodalattr_here%ManningsN(global_here%n1)+nodalattr_here%ManningsN(global_here%n2)+nodalattr_here%ManningsN(global_here%n3))/3.)**2&
 !     $            MN_IN**2
                    /(DEPTH**(1.d0/3.d0))
-               if (dg_here%fric_el(L).lt.CF) dg_here%fric_el(L)=CF
+               if (dg_here%fric_el(L).lt.nodalattr_here%CF) dg_here%fric_el(L)=nodalattr_here%CF
             endif
-            TAU = dg_here%FRIC_EL(L)
-!     IF (IFLINBF.EQ.0) THEN
+            nodalattr_here%TAU = dg_here%FRIC_EL(L)
+!     IF (nodalattr_here%IFLINBF.EQ.0) THEN
 !     dg_here%UMAG = SQRT( global_here%U_IN*global_here%U_IN + global_here%V_IN*global_here%V_IN )
-!     TAU  = TAU*dg_here%UMAG*FH_NL
-!     IF (IFHYBF.EQ.1) TAU = TAU*
-!     &             (1.D0  + (HBREAK*FH_NL)**FTHETA)**(FGAMMA/FTHETA)
+!     nodalattr_here%TAU  = nodalattr_here%TAU*dg_here%UMAG*FH_NL
+!     IF (nodalattr_here%IFHYBF.EQ.1) nodalattr_here%TAU = nodalattr_here%TAU*
+!     &             (1.D0  + (nodalattr_here%HBREAK*FH_NL)**nodalattr_here%FTHETA)**(nodalattr_here%FGAMMA/nodalattr_here%FTHETA)
 !     ENDIF
-!     Modified to compute TAU using elemental averages.
+!     Modified to compute nodalattr_here%TAU using elemental averages.
 !     This seems necessary to avoid exessive bottom friction
 !     at wetting-drying fronts where the total column height is very
 !     small. S.B. 9-Feb-2008
 
-            IF (IFLINBF.EQ.0) THEN
+            IF (nodalattr_here%IFLINBF.EQ.0) THEN
                dg_here%UMAG = SQRT( global_here%U_IN*global_here%U_IN + global_here%V_IN*global_here%V_IN )
 !     cnd modified 4/23/10 to test friction 
-!     TAU  = TAU*UMAG_C*FH_NL_C
-               TAU  = TAU*dg_here%UMAG*FH_NL
-               IF (IFHYBF.EQ.1) TAU = TAU*&
-              (1.D0  + (HBREAK*FH_NL_C)**FTHETA)**(FGAMMA/FTHETA)
-!     &            (1.D0  + (HBREAK*FH_NL)**FTHETA)**(FGAMMA/FTHETA)
+!     nodalattr_here%TAU  = nodalattr_here%TAU*UMAG_C*FH_NL_C
+               nodalattr_here%TAU  = nodalattr_here%TAU*dg_here%UMAG*FH_NL
+               IF (nodalattr_here%IFHYBF.EQ.1) nodalattr_here%TAU = nodalattr_here%TAU*&
+              (1.D0  + (nodalattr_here%HBREAK*FH_NL_C)**nodalattr_here%FTHETA)**(nodalattr_here%FGAMMA/nodalattr_here%FTHETA)
+!     &            (1.D0  + (nodalattr_here%HBREAK*FH_NL)**nodalattr_here%FTHETA)**(nodalattr_here%FGAMMA/nodalattr_here%FTHETA)
 !     It is numerically probable that the bottom friction is large enoght
 !     to reverse the direction of currents backward due to a too small column
 !     height even though it does not happen in reality. To avoid this, the MIN
 !     function bellow is added. It is expected that this MIN function upper-limits
-!     TAU so the bottom friction force does not reverse the currents within
+!     nodalattr_here%TAU so the bottom friction force does not reverse the currents within
 !     half a time step.  S.B. 9-Feb-2008
-!     IF(TAU.GT.2.D0*DTDPH) PRINT *, "TAU = ", TAU, 2.D0*DTDPH,
+!     IF(nodalattr_here%TAU.GT.2.D0*DTDPH) PRINT *, "nodalattr_here%TAU = ", nodalattr_here%TAU, 2.D0*DTDPH,
 !     $           global_here%u_in,global_here%v_in,myproc,L
-!     TAU = MIN(TAU, 2.D0*DTDPH)
-               TAU = MIN(TAU, .9D0*DTDPH)
+!     nodalattr_here%TAU = MIN(nodalattr_here%TAU, 2.D0*DTDPH)
+               nodalattr_here%TAU = MIN(nodalattr_here%TAU, .9D0*DTDPH)
             ENDIF
-!     IF (dg_here%RAMPDG.LT.1.D0) TAU = MAX(TAU,0.001)
+!     IF (dg_here%RAMPDG.LT.1.D0) nodalattr_here%TAU = MAX(nodalattr_here%TAU,0.001)
 
 !.........Compute the global_here%x momentum source/sink terms
 
@@ -330,7 +332,7 @@
 
 !.........1.) Friction term
 
-               - TAU*dg_here%QX_IN&
+               - nodalattr_here%TAU*dg_here%QX_IN&
       
 !.........2.) Bathymetric slope term
 
@@ -346,7 +348,7 @@
 
 !.........1.) Friction term
 
-                - TAU*dg_here%QY_IN&
+                - nodalattr_here%TAU*dg_here%QY_IN&
 
 !.........2) Bathymetric slope term
 
@@ -373,7 +375,7 @@
             ENDIF
 
 !     if (myproc.eq.1.and.l.eq.440.and.i.eq.1) then
-!     write(440,*) 'tau ',tau,dg_here%umag,dg_here%fric_el(l)
+!     write(440,*) 'nodalattr_here%tau ',nodalattr_here%tau,dg_here%umag,dg_here%fric_el(l)
 !     endif
 
 !.........5) Tidal potential forcing (in global_here%x and global_here%y)

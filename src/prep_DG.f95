@@ -15,19 +15,19 @@
 !     v10_sb1      - Aug 05 - sb - reflect fort.12as an initial surface elevation
 !     v10_sb5      - Oct 03 - sb - consolidate Ethan's slope limiter
 !     v10_sb5      - Oct 24 - sb - DG.65 output is added
-!     - Aug 29, 2007 - Fixed bug for startdry = 1
+!     - Aug 29, 2007 - Fixed bug for nodalattr_here%startdry = 1
 !     01-10-2011 - cem - adapted for p_enrichment and multicomponent
 !     06-01-2012 - cem -sediment added
 !     
 !***********************************************************************
 
-      SUBROUTINE PREP_DG(s,dg_here,global_here)
+      SUBROUTINE PREP_DG(s,dg_here,global_here,nodalattr_here)
 
 !.....Use appropriate modules
       USE SIZES
       USE GLOBAL
       USE DG
-      USE NodalAttributes, ONLY : STARTDRY, FRIC, GeoidOffset,LoadGeoidOffset,LoadManningsN,ManningsN
+      USE NodalAttributes
 #ifdef CMPI
       USE MESSENGER_ELEM
       USE MESSENGER
@@ -38,6 +38,7 @@
       type (sizes_type) :: s
       type (dg_type) :: dg_here
       type (global_type) :: global_here
+      type (nodalattr_type) ::  nodalattr_here
 
 !.....Declare local variables
 
@@ -369,32 +370,32 @@
       ENDDO
 
 
-      if (LoadManningsN) then
+      if (nodalattr_here%LoadManningsN) then
          DO J = 1,global_here%NE
             global_here%N1 = global_here%NM(J,1)
             global_here%N2 = global_here%NM(J,2)
             global_here%N3 = global_here%NM(J,3)
-            dg_here%MANN(1,J) =  1.D0/3.D0*(ManningsN(global_here%N1)&
-           + ManningsN(global_here%N2) + ManningsN(global_here%N3))
-            dg_here%MANN(2,J) = -1.D0/6.D0*(ManningsN(global_here%N1) &
-           + ManningsN(global_here%N2)) + 1.D0/3.D0*ManningsN(global_here%N3)
-            dg_here%MANN(3,J) = -0.5D0*ManningsN(global_here%N1) + 0.5D0*ManningsN(global_here%N2)
+            dg_here%MANN(1,J) =  1.D0/3.D0*(nodalattr_here%ManningsN(global_here%N1)&
+           + nodalattr_here%ManningsN(global_here%N2) + nodalattr_here%ManningsN(global_here%N3))
+            dg_here%MANN(2,J) = -1.D0/6.D0*(nodalattr_here%ManningsN(global_here%N1) &
+           + nodalattr_here%ManningsN(global_here%N2)) + 1.D0/3.D0*nodalattr_here%ManningsN(global_here%N3)
+            dg_here%MANN(3,J) = -0.5D0*nodalattr_here%ManningsN(global_here%N1) + 0.5D0*nodalattr_here%ManningsN(global_here%N2)
          ENDDO
       endif
 
       IF (dg_here%MODAL_IC.EQ.0) THEN
 !     this assumes a cold start
-         if (LoadGeoidOffset) then
+         if (nodalattr_here%LoadGeoidOffset) then
             DO J = 1,global_here%NE
                global_here%N1 = global_here%NM(J,1)
                global_here%N2 = global_here%NM(J,2)
                global_here%N3 = global_here%NM(J,3)
-               zeo(1,J,1)=1.d0/3.d0*(GeoidOffset(global_here%N1)+GeoidOffset(global_here%N2)+&
-              GeoidOffset(global_here%N3))
+               zeo(1,J,1)=1.d0/3.d0*(nodalattr_here%GeoidOffset(global_here%N1)+nodalattr_here%GeoidOffset(global_here%N2)+&
+              nodalattr_here%GeoidOffset(global_here%N3))
                IF (dof_0.ne.1) THEN
-                  zeo(2,J,1)=-1.d0/6.d0*(GeoidOffset(global_here%N1)+GeoidOffset(global_here%N2))&
-                 +1.d0/3.d0*GeoidOffset(global_here%N3)
-                  zeo(3,J,1)=-.5d0*GeoidOffset(global_here%N1)+.5d0*GeoidOffset(global_here%N2)
+                  zeo(2,J,1)=-1.d0/6.d0*(nodalattr_here%GeoidOffset(global_here%N1)+nodalattr_here%GeoidOffset(global_here%N2))&
+                 +1.d0/3.d0*nodalattr_here%GeoidOffset(global_here%N3)
+                  zeo(3,J,1)=-.5d0*nodalattr_here%GeoidOffset(global_here%N1)+.5d0*nodalattr_here%GeoidOffset(global_here%N2)
                ENDIF
             ENDDO
          endif
@@ -671,7 +672,7 @@
 !.......Compute elemental Coriolis and friction terms
 
          dg_here%CORI_EL(J) = (global_here%CORIF(global_here%N1) + global_here%CORIF(global_here%N2) + global_here%CORIF(global_here%N3))/3.D0
-         dg_here%FRIC_EL(J) = (FRIC(global_here%N1) + FRIC(global_here%N2) + FRIC(global_here%N3))/3.D0
+         dg_here%FRIC_EL(J) = (nodalattr_here%FRIC(global_here%N1) + nodalattr_here%FRIC(global_here%N2) + nodalattr_here%FRIC(global_here%N3))/3.D0
 
 !.......Pre-compute the bathymetry and the gradient of the bathymetry at
 !.......the quadrature points and compute volume of water
@@ -966,28 +967,28 @@
             ZE1 = 0
             ZE2 = 0
             ZE3 = 0
-            IF (STARTDRY(global_here%N1).EQ.1) ZE1 = global_here%H0 - global_here%DP(global_here%N1)
+            IF (nodalattr_here%STARTDRY(global_here%N1).EQ.1) ZE1 = global_here%H0 - global_here%DP(global_here%N1)
             IF (global_here%DP(global_here%N1).LT.global_here%H0) ZE1 = global_here%H0 - global_here%DP(global_here%N1)
-            IF (STARTDRY(global_here%N2).EQ.1) ZE2 = global_here%H0 - global_here%DP(global_here%N2)
+            IF (nodalattr_here%STARTDRY(global_here%N2).EQ.1) ZE2 = global_here%H0 - global_here%DP(global_here%N2)
             IF (global_here%DP(global_here%N2).LT.global_here%H0) ZE2 = global_here%H0 - global_here%DP(global_here%N2)
-            IF (STARTDRY(global_here%N3).EQ.1) ZE3 = global_here%H0 - global_here%DP(global_here%N3)
+            IF (nodalattr_here%STARTDRY(global_here%N3).EQ.1) ZE3 = global_here%H0 - global_here%DP(global_here%N3)
             IF (global_here%DP(global_here%N3).LT.global_here%H0) ZE3 = global_here%H0 - global_here%DP(global_here%N3)
 
             IF (dg_here%MODAL_IC.EQ.3) THEN
-               IF (STARTDRY(global_here%N1).EQ.-88888) then
+               IF (nodalattr_here%STARTDRY(global_here%N1).EQ.-88888) then
                   ZE1 = global_here%H0 - global_here%DP(global_here%N1)
                else
-                  ZE1 = STARTDRY(global_here%N1)
+                  ZE1 = nodalattr_here%STARTDRY(global_here%N1)
                endif
-               IF (STARTDRY(global_here%N2).EQ.-88888) then
+               IF (nodalattr_here%STARTDRY(global_here%N2).EQ.-88888) then
                   ZE2 = global_here%H0 - global_here%DP(global_here%N2)
                else
-                  ZE2 = STARTDRY(global_here%N2)
+                  ZE2 = nodalattr_here%STARTDRY(global_here%N2)
                endif
-               IF (STARTDRY(global_here%N3).EQ.-88888) then
+               IF (nodalattr_here%STARTDRY(global_here%N3).EQ.-88888) then
                   ZE3 = global_here%H0 - global_here%DP(global_here%N3)
                else
-                  ZE3 = STARTDRY(global_here%N3)
+                  ZE3 = nodalattr_here%STARTDRY(global_here%N3)
                endif
             ENDIF
 

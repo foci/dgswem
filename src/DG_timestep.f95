@@ -8,12 +8,13 @@
 !     
 !***********************************************************************
 
-      SUBROUTINE DG_TIMESTEP(s,dg_here,global_here,IT)
+      SUBROUTINE DG_TIMESTEP(s,dg_here,global_here,nodalattr_here,IT)
 
 !.....Use appropriate modules
       
       USE SIZES
       USE GLOBAL
+      USE NodalAttributes
 
 #ifdef CMPI
       USE MESSENGER_ELEM
@@ -26,6 +27,7 @@
       type (sizes_type) :: s
       type (dg_type) :: dg_here
       type (global_type) :: global_here
+      type (nodalattr_type) :: nodalattr_here
 
 !.....Declare local variables
 
@@ -33,7 +35,7 @@
       
 !.....Hydrodynamics
 
-      CALL DG_HYDRO_TIMESTEP(s,dg_here,global_here,IT)
+      CALL DG_HYDRO_TIMESTEP(s,dg_here,global_here,nodalattr_here,IT)
 
 !.....Write out results
 

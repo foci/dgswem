@@ -14,10 +14,7 @@
       USE HARM
 #endif
       USE DG
-      USE NodalAttributes, ONLY :&
-          NoLiBF, NWP, Tau0, HBreak, FTheta, FGamma, Tau, CF, IFNLBF,&
-          InitNAModule, ReadNodalAttr, InitNodalAttr, ESLM, ESLC,&
-          IFLINBF, IFHYBF
+      USE NodalAttributes
 #ifdef CMPI
       USE MESSENGER_ELEM
 !--   
@@ -48,6 +45,7 @@
       type (sizes_type) :: s
       type (dg_type) :: dg_here
       type (global_type) :: global_here
+      type (nodalattr_type) :: nodalattr_here
 
       REAL(4) CPU_TIME,CPU_SEC(2)
       REAL(4) TARRAY(2)
@@ -55,7 +53,7 @@
       character*80 tecfile, tecfile_max
 
       CALL MAKE_DIRNAME(s)       ! Establish Working Directory Name
-      CALL READ_INPUT(s,dg_here,global_here)         ! Establish sizes by reading fort.14 and fort.15
+      CALL READ_INPUT(s,dg_here,global_here,nodalattr_here)         ! Establish sizes by reading fort.14 and fort.15
 #endif         
 
       
@@ -111,20 +109,20 @@
 
 !...  NONLINEAR FLAGS
 
-      IF(NOLIBF.EQ.0) THEN
-         IFNLBF=0
-         IFLINBF=1
-         IFHYBF=0
+      IF(nodalattr_here%NOLIBF.EQ.0) THEN
+         nodalattr_here%IFNLBF=0
+         nodalattr_here%IFLINBF=1
+         nodalattr_here%IFHYBF=0
       ENDIF
-      IF(NOLIBF.EQ.1) THEN
-         IFNLBF=1
-         IFLINBF=0
-         IFHYBF=0
+      IF(nodalattr_here%NOLIBF.EQ.1) THEN
+         nodalattr_here%IFNLBF=1
+         nodalattr_here%IFLINBF=0
+         nodalattr_here%IFHYBF=0
       ENDIF
-      IF(NOLIBF.EQ.2) THEN
-         IFNLBF=0
-         IFLINBF=0
-         IFHYBF=1
+      IF(nodalattr_here%NOLIBF.EQ.2) THEN
+         nodalattr_here%IFNLBF=0
+         nodalattr_here%IFLINBF=0
+         nodalattr_here%IFHYBF=1
       ENDIF
       IF(global_here%NOLIFA.EQ.0) THEN
          global_here%IFNLFA=0
@@ -157,10 +155,10 @@
  
 !...  CONSTANT COEFFICIENTS
 !jj   w - version m10
-!jj   w      global_here%TT0L=((1.0+0.5*global_here%DT*TAU0)/global_here%DT)/global_here%DT
+!jj   w      global_here%TT0L=((1.0+0.5*global_here%DT*nodalattr_here%TAU0)/global_here%DT)/global_here%DT
       global_here%GA00=global_here%G*global_here%A00
 !jj   w - version m10
-!jj   w      global_here%TT0R=((0.5*TAU0*global_here%DT-1.0)/global_here%DT)/global_here%DT
+!jj   w      global_here%TT0R=((0.5*nodalattr_here%TAU0*global_here%DT-1.0)/global_here%DT)/global_here%DT
       global_here%GC00=global_here%G*global_here%C00
       global_here%TADVODT=global_here%IFNLCAT/global_here%DT
       global_here%GB00A00=global_here%G*(global_here%B00+global_here%A00)
@@ -177,7 +175,7 @@
 !     write(200+myproc,*) 'call prep_dg'
 !     write(200+myproc,*) 'back from prep_dg'
 
-      CALL PREP_DG(s,dg_here,global_here)
+      CALL PREP_DG(s,dg_here,global_here,nodalattr_here)
       CALL WRITE_RESULTS(s,dg_here,global_here,0,.FALSE.)
 
                                !cnd...for tecplot output
@@ -331,7 +329,7 @@
 !$$$            if (myproc.eq.0) write(*,*) 'timestep ',global_here%itime_a
 !$$$c     write(200+myproc,*) 'timestep ',global_here%itime_a,myproc
 !$$$         endif
-         CALL DG_TIMESTEP(s,dg_here,global_here,global_here%ITIME_A)
+         CALL DG_TIMESTEP(s,dg_here,global_here,nodalattr_here,global_here%ITIME_A)
 #ifdef SWAN
 !asey 090302: If it is time, then call the following subroutine
 !             to then call the SWAN time-stepping subroutine.

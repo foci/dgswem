@@ -11,14 +11,14 @@
 !     
 !***********************************************************************
 
-      SUBROUTINE LDG_HYDRO(s,dg_here,global_here,IT)
+      SUBROUTINE LDG_HYDRO(s,dg_here,global_here,nodalattr_here,IT)
 
 !.....Use appropriate modules
       
       USE SIZES
       USE GLOBAL
       USE DG
-      USE NodalAttributes, ONLY : EVM
+      USE NodalAttributes
 
 #ifdef CMPI
       USE MESSENGER_ELEM,ONLY : UPDATELZ_ELEM,UPDATEMZ_ELEM
@@ -29,7 +29,8 @@
       type (sizes_type) :: s
       type (dg_type) :: dg_here
       type (global_type) :: global_here
-
+      type (nodalattr_type) :: nodalattr_here
+      
 !.....Declare local variables
 
       INTEGER IT,L,GED,NBOREL,NNBORS,NDRYNBORS,k,i,ll
@@ -82,7 +83,7 @@
          global_here%N2 = global_here%NM(L,2)
          global_here%N3 = global_here%NM(L,3)
          if (global_here%EVMSUM.NE.0.D0) then
-            dg_here%EVMAvg = (EVM(global_here%N1)+EVM(global_here%N2)+EVM(global_here%N3))/3.d0
+            dg_here%EVMAvg = (NODALATTR_HERE%EVM(global_here%N1)+NODALATTR_HERE%EVM(global_here%N2)+NODALATTR_HERE%EVM(global_here%N3))/3.d0
          else
             dg_here%EVMAvg = 0.D0
          endif

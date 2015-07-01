@@ -7,7 +7,7 @@
 !
 !***********************************************************************
 
-      SUBROUTINE MET_FORCING(s,dg_here,global_here,IT)
+      SUBROUTINE MET_FORCING(s,dg_here,global_here,nodalattr_here,IT)
       
       USE GLOBAL
       USE DG
@@ -33,6 +33,7 @@
       type (sizes_type) :: s
       type (dg_type) :: dg_here
       type (global_type) :: global_here
+      type (nodalattr_type) :: nodalattr_here
 
       REAL(SZ) WindDragLimit
       INTEGER II, IT
@@ -176,8 +177,8 @@
            
 !..........Apply directional wind reductions
            
-           IF (LoadDirEffRLen) THEN
-             CALL ApplyDirectionalWindReduction( II, global_here%WDRAGCO, global_here%WINDMAG,&
+           IF (nodalattr_here%LoadDirEffRLen) THEN
+             CALL ApplyDirectionalWindReduction(nodalattr_here, II, global_here%WDRAGCO, global_here%WINDMAG,&
                                           global_here%DP(II), global_here%ETA2(II), global_here%H0, global_here%G,&
                                           global_here%WINDX, global_here%WINDY )
              global_here%WINDMAG = SQRT( global_here%WINDX*global_here%WINDX + global_here%WINDY*global_here%WINDY )
@@ -248,8 +249,8 @@
            
 !.........Apply directional wind reductions
 
-          IF (LoadDirEffRLen) THEN
-            CALL ApplyDirectionalWindReduction( II, global_here%WDRAGCO, global_here%WINDMAG,&
+          IF (nodalattr_here%LoadDirEffRLen) THEN
+            CALL ApplyDirectionalWindReduction(nodalattr_here, II, global_here%WDRAGCO, global_here%WINDMAG,&
                                           global_here%DP(II), global_here%ETA2(II), global_here%H0, global_here%G,&
                                           global_here%WINDX, global_here%WINDY )
             global_here%WINDMAG = SQRT(global_here%WINDX*global_here%WINDX+global_here%WINDY*global_here%WINDY)
@@ -320,8 +321,8 @@
           
 !.........Apply directional wind reductions
           
-          IF (LoadDirEffRLen) THEN
-            CALL ApplyDirectionalWindReduction( II, global_here%WDRAGCO, global_here%WINDMAG,&
+          IF (nodalattr_here%LoadDirEffRLen) THEN
+            CALL ApplyDirectionalWindReduction(nodalattr_here, II, global_here%WDRAGCO, global_here%WINDMAG,&
                                           global_here%DP(II), global_here%ETA2(II), global_here%H0, global_here%G,&
                                           global_here%WINDX, global_here%WINDY )
             global_here%WINDMAG = SQRT( global_here%WINDX*global_here%WINDX + global_here%WINDY*global_here%WINDY )
@@ -398,8 +399,8 @@
           
 !.........Apply directional wind reductions
 
-          IF (LoadDirEffRLen) THEN
-            CALL ApplyDirectionalWindReduction( II, global_here%WDRAGCO, global_here%WINDMAG,&
+          IF (nodalattr_here%LoadDirEffRLen) THEN
+            CALL ApplyDirectionalWindReduction(nodalattr_here, II, global_here%WDRAGCO, global_here%WINDMAG,&
                                           global_here%DP(II), global_here%ETA2(II), global_here%H0, global_here%G,&
                                           global_here%WINDX, global_here%WINDY )
             global_here%WINDMAG = SQRT(global_here%WINDX*global_here%WINDX+global_here%WINDY*global_here%WINDY)
@@ -504,8 +505,8 @@
           
 !.........Apply directional wind reductions
           
-          IF (LoadDirEffRLen) THEN
-            CALL ApplyDirectionalWindReduction( II, global_here%WDRAGCO, global_here%WINDMAG,&
+          IF (nodalattr_here%LoadDirEffRLen) THEN
+            CALL ApplyDirectionalWindReduction(nodalattr_here, II, global_here%WDRAGCO, global_here%WINDMAG,&
                                           global_here%DP(II), global_here%ETA2(II), global_here%H0, global_here%G,&
                                           global_here%WINDX, global_here%WINDY )
             global_here%WINDMAG = SQRT(global_here%WINDX*global_here%WINDX + global_here%WINDY*global_here%WINDY)
@@ -534,7 +535,7 @@
 !     global_here%NWS = 9
 !
 !     jgf46.16 Merged:
-!     cf & cm added global_here%nws = 9: asymmetric hurricane winds
+!     nodalattr_here%cf & cm added global_here%nws = 9: asymmetric hurricane winds
 !
 !-----------------------------------------------------------------------
 
@@ -554,7 +555,7 @@
           
 !.........Apply directional wind reductions
           
-!          IF (LoadDirEffRLen) THEN
+!          IF (nodalattr_here%LoadDirEffRLen) THEN
 !            CALL ApplyDirectionalWindReduction( II, global_here%WDRAGCO, global_here%WINDMAG,
 !     &                                          global_here%DP(II), global_here%ETA2(II), global_here%H0, global_here%G,
 !     &                                          global_here%WINDX, global_here%WINDY )
@@ -630,8 +631,8 @@
 
 !.........Apply directional wind reductions
 
-          IF (LoadDirEffRLen) THEN
-            CALL ApplyDirectionalWindReduction( II, global_here%WDRAGCO, global_here%WINDMAG,&
+          IF (nodalattr_here%LoadDirEffRLen) THEN
+            CALL ApplyDirectionalWindReduction(nodalattr_here, II, global_here%WDRAGCO, global_here%WINDMAG,&
                                           global_here%DP(II), global_here%ETA2(II), global_here%H0, global_here%G,&
                                           global_here%WINDX, global_here%WINDY )
             global_here%WINDMAG = SQRT(global_here%WINDX*global_here%WINDX + global_here%WINDY*global_here%WINDY)
@@ -712,8 +713,8 @@
             
 !.........Apply directional wind reductions
 
-          IF (LoadDirEffRLen) THEN
-            CALL ApplyDirectionalWindReduction( II, global_here%WDRAGCO, global_here%WINDMAG,&
+          IF (nodalattr_here%LoadDirEffRLen) THEN
+            CALL ApplyDirectionalWindReduction(nodalattr_here, II, global_here%WDRAGCO, global_here%WINDMAG,&
                                           global_here%DP(II), global_here%ETA2(II), global_here%H0, global_here%G,&
                                           global_here%WINDX, global_here%WINDY )
             global_here%WINDMAG = SQRT(global_here%WINDX*global_here%WINDX + global_here%WINDY*global_here%WINDY)
@@ -781,8 +782,8 @@
           
 !.........Apply directional wind reductions
           
-          IF (LoadDirEffRLen) THEN
-            CALL ApplyDirectionalWindReduction( II, global_here%WDRAGCO, global_here%WINDMAG,&
+          IF (nodalattr_here%LoadDirEffRLen) THEN
+            CALL ApplyDirectionalWindReduction(nodalattr_here, II, global_here%WDRAGCO, global_here%WINDMAG,&
                                           global_here%DP(II), global_here%ETA2(II), global_here%H0, global_here%G,&
                                           global_here%WINDX, global_here%WINDY )
             global_here%WINDMAG = SQRT(global_here%WINDX*global_here%WINDX + global_here%WINDY*global_here%WINDY)
