@@ -76,13 +76,13 @@
 
       CALL RHS_LDG_HYDRO(s,dg_here,global_here)
 
-      do L=1,NE
+      do L=1,global_here%NE
 
-         N1 = NM(L,1)
-         N2 = NM(L,2)
-         N3 = NM(L,3)
-         if (EVMSUM.NE.0.D0) then
-            dg_here%EVMAvg = (EVM(N1)+EVM(N2)+EVM(N3))/3.d0
+         global_here%N1 = global_here%NM(L,1)
+         global_here%N2 = global_here%NM(L,2)
+         global_here%N3 = global_here%NM(L,3)
+         if (global_here%EVMSUM.NE.0.D0) then
+            dg_here%EVMAvg = (EVM(global_here%N1)+EVM(global_here%N2)+EVM(global_here%N3))/3.d0
          else
             dg_here%EVMAvg = 0.D0
          endif
@@ -99,7 +99,7 @@
          lim_by = 1.D0
          
 #ifdef WAVE_DIF
-         if (entrop(1,L).gt.dg_here%s0+dg_here%kappa) then
+         if (global_here%entrop(1,L).gt.dg_here%s0+dg_here%kappa) then
             
             dg_here%HZ(:,:,:,L) = (dg_here%bg_dif+dg_here%e1(1)) *&
            (abs(lim_by+dg_here%balance(1)))**dg_here%pa * dg_here%HZ(:,:,:,L)
@@ -111,7 +111,7 @@
          endif
 #endif
 
-         if (entrop(2,L).gt.dg_here%s0+dg_here%kappa) then
+         if (global_here%entrop(2,L).gt.dg_here%s0+dg_here%kappa) then
             
             dg_here%LZ(:,1,1,L) = (dg_here%EVMAvg+dg_here%e1(2) * &
            (abs(lim_by+dg_here%balance(2)))**dg_here%pa)  * dg_here%LZ(:,1,1,L)
@@ -127,12 +127,12 @@
             
          endif
 
-         if (entrop(3,L).gt.dg_here%s0+dg_here%kappa) then
+         if (global_here%entrop(3,L).gt.dg_here%s0+dg_here%kappa) then
             
             dg_here%LZ(:,2,2,L) = (dg_here%EVMAvg+dg_here%e1(3) * &
            (abs(lim_by+dg_here%balance(3)))**dg_here%pa) * dg_here%LZ(:,2,2,L)
 
-            if (entrop(2,L).le.dg_here%s0+dg_here%kappa) then
+            if (global_here%entrop(2,L).global_here%le.dg_here%s0+dg_here%kappa) then
                
                dg_here%LZ(:,2,1,L) = (dg_here%EVMAvg+dg_here%e1(3) *&
               (abs(lim_by+dg_here%balance(3)))**dg_here%pa ) * dg_here%LZ(:,2,1,L)
@@ -145,7 +145,7 @@
             
             dg_here%LZ(:,2,2,L) = dg_here%EVMAvg* dg_here%LZ(:,2,2,L)
             
-            if (entrop(2,L).le.dg_here%s0+dg_here%kappa) then
+            if (global_here%entrop(2,L).global_here%le.dg_here%s0+dg_here%kappa) then
                
                dg_here%LZ(:,1,2,L) = dg_here%EVMAvg* dg_here%LZ(:,1,2,L)
                dg_here%LZ(:,2,1,L) = dg_here%EVMAvg* dg_here%LZ(:,2,1,L)
@@ -155,7 +155,7 @@
          endif
 
 #ifdef TRACE
-         if (entrop(4,L).gt.dg_here%s0+dg_here%kappa) then
+         if (global_here%entrop(4,L).gt.dg_here%s0+dg_here%kappa) then
             
             dg_here%TZ(:,:,:,L) = (dg_here%trc_dif+dg_here%e1(4)) *&
            (abs(lim_by+dg_here%balance(4)))**dg_here%pa * dg_here%TZ(:,:,:,L)
@@ -169,7 +169,7 @@
 
 #ifdef SED_LAY
 
-         if (entrop(5,L).gt.dg_here%s0+dg_here%kappa) then
+         if (global_here%entrop(5,L).gt.dg_here%s0+dg_here%kappa) then
             
             dg_here%MZ(:,:,:,L) = (dg_here%SEVDMAvg+dg_here%e1(5)) *&
            (abs(lim_by+dg_here%balance(5)))**dg_here%pa * dg_here%MZ(:,:,:,L)
@@ -227,7 +227,7 @@
 !     
 !     This subroutine does the following:
 !     
-!     1.  Calculates the values of the necessary variables at the edge
+!     1.  Calculates the values of the necessary variables at the global_here%edge
 !     gauss points for NO-NORMAL FLOW edges
 !     2.  Compute the LDG flux at these points (sediment diffusion?).
 !     3.  Compute the boundary integrals.
@@ -258,16 +258,16 @@
 
       DO 1000 L = 1, dg_here%needs
          
-!.....Retrieve the global and local edge number
+!.....Retrieve the global and local global_here%edge number
 
          GED = dg_here%NEEDN(L)
          LED = dg_here%NEDSD(1,GED)
 
-!.....Retrieve the elements which share the edge
+!.....Retrieve the elements which share the global_here%edge
 
-         EL_IN = dg_here%NEDEL(1,GED)
+         global_here%EL_IN = dg_here%NEDEL(1,GED)
 
-         dg_here%pa = PDG_EL(EL_IN)
+         dg_here%pa = global_here%PDG_EL(global_here%EL_IN)
 
 #ifdef P0
          if (dg_here%pa.eq.0) then
@@ -275,17 +275,17 @@
          endif
 #endif
          
-!.....Retrieve the components of the normal vector to the edge
+!.....Retrieve the components of the normal vector to the global_here%edge
          
          dg_here%NX = dg_here%COSNX(GED)
          dg_here%NY = dg_here%SINNX(GED)
          
-!.....Retrieve the nodes of the edge
+!.....Retrieve the nodes of the global_here%edge
          
-         N1 = dg_here%NEDNO(1,GED)
-         N2 = dg_here%NEDNO(2,GED)
+         global_here%N1 = dg_here%NEDNO(1,GED)
+         global_here%N2 = dg_here%NEDNO(2,GED)
          
-!.....Compute dg_here%ZE, dg_here%QX, dg_here%QY, and dg_here%HB at each edge Gauss quadrature point
+!.....Compute dg_here%ZE, dg_here%QX, dg_here%QY, and dg_here%HB at each global_here%edge Gauss quadrature point
 
          DO I = 1,dg_here%NEGP(dg_here%pa)
 
@@ -314,19 +314,19 @@
            
 !.....Compute the solution at the interior state
 
-            DO K = 1,dg_here%DOFS(EL_IN)
+            DO K = 1,dg_here%DOFS(global_here%EL_IN)
 #ifdef WAVE_DIF
-               dg_here%ZE_IN = dg_here%ZE_IN + dg_here%ZE(K,EL_IN,dg_here%IRK)*dg_here%PHI_EDGE(K,I,LED,dg_here%pa)
+               dg_here%ZE_IN = dg_here%ZE_IN + dg_here%ZE(K,global_here%EL_IN,dg_here%IRK)*dg_here%PHI_EDGE(K,I,LED,dg_here%pa)
 #endif
-               dg_here%QX_IN = dg_here%QX_IN + dg_here%QX(K,EL_IN,dg_here%IRK)*dg_here%PHI_EDGE(K,I,LED,dg_here%pa)
-               dg_here%QY_IN = dg_here%QY_IN + dg_here%QY(K,EL_IN,dg_here%IRK)*dg_here%PHI_EDGE(K,I,LED,dg_here%pa)
+               dg_here%QX_IN = dg_here%QX_IN + dg_here%QX(K,global_here%EL_IN,dg_here%IRK)*dg_here%PHI_EDGE(K,I,LED,dg_here%pa)
+               dg_here%QY_IN = dg_here%QY_IN + dg_here%QY(K,global_here%EL_IN,dg_here%IRK)*dg_here%PHI_EDGE(K,I,LED,dg_here%pa)
 #ifdef TRACE
-               dg_here%iota_IN = dg_here%iota_IN + dg_here%iota(K,EL_IN,dg_here%IRK)*dg_here%PHI_EDGE(K,I,LED,dg_here%pa)
+               dg_here%iota_IN = dg_here%iota_IN + dg_here%iota(K,global_here%EL_IN,dg_here%IRK)*dg_here%PHI_EDGE(K,I,LED,dg_here%pa)
 #endif
 #ifdef SED_LAY
                do ll=1,s%layers
                   dg_here%bed_IN(ll) = dg_here%bed_IN(ll) &
-                 + dg_here%bed(K,EL_IN,dg_here%IRK,ll)*dg_here%PHI_EDGE(K,I,LED,dg_here%pa)
+                 + dg_here%bed(K,global_here%EL_IN,dg_here%IRK,ll)*dg_here%PHI_EDGE(K,I,LED,dg_here%pa)
                enddo
 #endif
             ENDDO
@@ -346,7 +346,7 @@
 #ifdef WAVE_DIF
             ZE_AVG = dg_here%ZE_IN
 #endif
-            QX_AVG = 0.5D0*(dg_here%QX_IN + dg_here%QX_EX)*dg_here%SFACED(I,LED,EL_IN,dg_here%pa)
+            QX_AVG = 0.5D0*(dg_here%QX_IN + dg_here%QX_EX)*dg_here%SFACED(I,LED,global_here%EL_IN,dg_here%pa)
             QY_AVG = 0.5D0*(dg_here%QY_IN + dg_here%QY_EX)
 #ifdef TRACE
             iota_AVG = dg_here%iota_IN
@@ -357,15 +357,15 @@
             enddo
 #endif
 
-!.....Compute the edge integral
+!.....Compute the global_here%edge integral
             
-            DO K = 1,dg_here%DOFS(EL_IN)
+            DO K = 1,dg_here%DOFS(global_here%EL_IN)
                CALL EDGE_INT_LDG_HYDRO&
-              (s,dg_here,global_here,K,EL_IN,LED,GED,I,iota_AVG,ZE_AVG,QX_AVG,QY_AVG,dg_here%NX,dg_here%NY,dg_here%pa)
+              (s,dg_here,global_here,K,global_here%EL_IN,LED,GED,I,iota_AVG,ZE_AVG,QX_AVG,QY_AVG,dg_here%NX,dg_here%NY,dg_here%pa)
 #ifdef SED_LAY
                do ll=1,s%layers
                   CALL EDGE_INT_LDG_sediment&
-                (K,EL_IN,LED,GED,I,bed_AVG(ll),dg_here%NX,dg_here%NY,dg_here%pa,ll)
+                (K,global_here%EL_IN,LED,GED,I,bed_AVG(ll),dg_here%NX,dg_here%NY,dg_here%pa,ll)
                enddo
 #endif
             ENDDO
@@ -384,7 +384,7 @@
 !     
 !     This subroutine does the following:
 !     
-!     1.  Calculates the values of the necessary variables at the edge
+!     1.  Calculates the values of the necessary variables at the global_here%edge
 !     gauss points for NO-NORMAL FLOW edges
 !     2.  Compute the LDG flux at these points.
 !     3.  Compute the boundary integrals.
@@ -416,16 +416,16 @@
       
       DO 1000 L = 1,dg_here%NLEDS
          
-!.....Retrieve the global and local edge number
+!.....Retrieve the global and local global_here%edge number
          
          GED = dg_here%NLEDN(L)
          LED = dg_here%NEDSD(1,GED)
          
-!.....Retrieve the elements which share the edge
+!.....Retrieve the elements which share the global_here%edge
          
-         EL_IN = dg_here%NEDEL(1,GED)
+         global_here%EL_IN = dg_here%NEDEL(1,GED)
          
-         dg_here%pa = PDG_EL(EL_IN)
+         dg_here%pa = global_here%PDG_EL(global_here%EL_IN)
          
 #ifdef P0
          if (dg_here%pa.eq.0) then
@@ -433,12 +433,12 @@
          endif
 #endif
 
-!.....Retrieve the components of the normal vector to the edge
+!.....Retrieve the components of the normal vector to the global_here%edge
          
          dg_here%NX = dg_here%COSNX(GED)
          dg_here%NY = dg_here%SINNX(GED)
          
-!.....Set the components for the tangential vector to the edge
+!.....Set the components for the tangential vector to the global_here%edge
          
          TX = -dg_here%NY
          TY =  dg_here%NX
@@ -462,18 +462,18 @@
 
 !.....Compute the solution at the interior state
 
-            DO K = 1,dg_here%DOFS(EL_IN)
+            DO K = 1,dg_here%DOFS(global_here%EL_IN)
 #ifdef WAVE_DIF
-               dg_here%ZE_IN = dg_here%ZE_IN + dg_here%ZE(K,EL_IN,dg_here%IRK)*dg_here%PHI_EDGE(K,I,LED,dg_here%pa)
+               dg_here%ZE_IN = dg_here%ZE_IN + dg_here%ZE(K,global_here%EL_IN,dg_here%IRK)*dg_here%PHI_EDGE(K,I,LED,dg_here%pa)
 #endif
-               dg_here%QX_IN = dg_here%QX_IN + dg_here%QX(K,EL_IN,dg_here%IRK)*dg_here%PHI_EDGE(K,I,LED,dg_here%pa)
-               dg_here%QY_IN = dg_here%QY_IN + dg_here%QY(K,EL_IN,dg_here%IRK)*dg_here%PHI_EDGE(K,I,LED,dg_here%pa)
+               dg_here%QX_IN = dg_here%QX_IN + dg_here%QX(K,global_here%EL_IN,dg_here%IRK)*dg_here%PHI_EDGE(K,I,LED,dg_here%pa)
+               dg_here%QY_IN = dg_here%QY_IN + dg_here%QY(K,global_here%EL_IN,dg_here%IRK)*dg_here%PHI_EDGE(K,I,LED,dg_here%pa)
 #ifdef TRACE
-               dg_here%iota_IN = dg_here%iota_IN + dg_here%iota(K,EL_IN,dg_here%IRK)*dg_here%PHI_EDGE(K,I,LED,dg_here%pa)
+               dg_here%iota_IN = dg_here%iota_IN + dg_here%iota(K,global_here%EL_IN,dg_here%IRK)*dg_here%PHI_EDGE(K,I,LED,dg_here%pa)
 #endif
 #ifdef SED_LAY
                do ll=1,s%layers
-                  dg_here%bed_IN(ll) = dg_here%bed_IN(ll) + dg_here%bed(K,EL_IN,dg_here%IRK,ll)*dg_here%PHI_EDGE(K,I,LED,dg_here%pa)
+                  dg_here%bed_IN(ll) = dg_here%bed_IN(ll) + dg_here%bed(K,global_here%EL_IN,dg_here%IRK,ll)*dg_here%PHI_EDGE(K,I,LED,dg_here%pa)
                enddo
 #endif
 
@@ -481,18 +481,18 @@
             
 !.....Compute the velocity in the normal and tangental direction
             
-            Q_N_INT = dg_here%QX_IN*dg_here%NX + dg_here%QY_IN*dg_here%NY
-            Q_T_INT = dg_here%QX_IN*TX + dg_here%QY_IN*TY
+            global_here%Q_N_INT = dg_here%QX_IN*dg_here%NX + dg_here%QY_IN*dg_here%NY
+            global_here%Q_T_INT = dg_here%QX_IN*TX + dg_here%QY_IN*TY
 
 !.....Reflect the velocity in the normal direction
 
-            Q_N_EXT = -Q_N_INT
-            Q_T_EXT =  Q_T_INT
+            global_here%Q_N_EXT = -global_here%Q_N_INT
+            global_here%Q_T_EXT =  global_here%Q_T_INT
             
-!.....Compute the x and y components of the external state flow
+!.....Compute the global_here%x and global_here%y components of the external state flow
 
-            dg_here%QX_EX = ( TY*Q_N_EXT - dg_here%NY*Q_T_EXT)/(dg_here%NX*TY - dg_here%NY*TX)
-            dg_here%QY_EX = (-TX*Q_N_EXT + dg_here%NX*Q_T_EXT)/(dg_here%NX*TY - dg_here%NY*TX)
+            dg_here%QX_EX = ( TY*global_here%Q_N_EXT - dg_here%NY*global_here%Q_T_EXT)/(dg_here%NX*TY - dg_here%NY*TX)
+            dg_here%QY_EX = (-TX*global_here%Q_N_EXT + dg_here%NX*global_here%Q_T_EXT)/(dg_here%NX*TY - dg_here%NY*TX)
 
 #ifdef SED_LAY
             do ll=1,s%layers !maybe this should be changed?
@@ -505,7 +505,7 @@
 #ifdef WAVE_DIF
             ZE_AVG = dg_here%ZE_IN
 #endif
-            QX_AVG = 0.5D0*(dg_here%QX_IN + dg_here%QX_EX)*dg_here%SFACED(I,LED,EL_IN,dg_here%pa)
+            QX_AVG = 0.5D0*(dg_here%QX_IN + dg_here%QX_EX)*dg_here%SFACED(I,LED,global_here%EL_IN,dg_here%pa)
             QY_AVG = 0.5D0*(dg_here%QY_IN + dg_here%QY_EX)
 #ifdef TRACE
             iota_AVG = dg_here%iota_IN
@@ -516,15 +516,15 @@
             enddo
 #endif
 
-!.....Compute the edge integral
+!.....Compute the global_here%edge integral
 
-            DO K = 1,dg_here%DOFS(EL_IN)
+            DO K = 1,dg_here%DOFS(global_here%EL_IN)
                CALL EDGE_INT_LDG_HYDRO&
-              (s,dg_here,global_here,K,EL_IN,LED,GED,I,iota_AVG,ZE_AVG,QX_AVG,QY_AVG,dg_here%NX,dg_here%NY,dg_here%pa)
+              (s,dg_here,global_here,K,global_here%EL_IN,LED,GED,I,iota_AVG,ZE_AVG,QX_AVG,QY_AVG,dg_here%NX,dg_here%NY,dg_here%pa)
 #ifdef SED_LAY
                do ll=1,s%layers
                   CALL EDGE_INT_LDG_sediment&
-                 (K,EL_IN,LED,GED,I,bed_AVG(ll),dg_here%NX,dg_here%NY,dg_here%pa,ll)
+                 (K,global_here%EL_IN,LED,GED,I,bed_AVG(ll),dg_here%NX,dg_here%NY,dg_here%pa,ll)
                enddo
 #endif
             ENDDO
@@ -543,7 +543,7 @@
 !     
 !     This subroutine does the following:
 !     
-!     1.  Calculates the values of the necessary variables at the edge
+!     1.  Calculates the values of the necessary variables at the global_here%edge
 !     gauss points for INTERNAL edges
 !     2.  Take the average of these values (sediment diffusion)
 !     3.  Perform boundary integration
@@ -575,16 +575,16 @@
 
       DO 1000 L = 1,dg_here%NFEDS
          
-!.....Retrieve the global and local edge number
+!.....Retrieve the global and local global_here%edge number
 
          GED = dg_here%NFEDN(L)
          LED = dg_here%NEDSD(1,GED)
 
-!.....Retrieve the element to which the edge belongs
+!.....Retrieve the element to which the global_here%edge belongs
 
-         EL_IN = dg_here%NEDEL(1,GED)
+         global_here%EL_IN = dg_here%NEDEL(1,GED)
 
-         dg_here%PA = PDG_EL(EL_IN)
+         dg_here%PA = global_here%PDG_EL(global_here%EL_IN)
 
 #ifdef P0
          if (dg_here%pa.eq.0) then
@@ -592,17 +592,17 @@
          endif
 #endif
          
-!.....Retrieve the components of the normal vector to the edge
+!.....Retrieve the components of the normal vector to the global_here%edge
          
          dg_here%NX = dg_here%COSNX(GED)
          dg_here%NY = dg_here%SINNX(GED)
          
-!.....Set the components for the tangential vector to the edge
+!.....Set the components for the tangential vector to the global_here%edge
 
          TX = -dg_here%NY
          TY =  dg_here%NX
          
-!.....Compute dg_here%ZE, dg_here%QX, dg_here%QY, and dg_here%HB at each edge Gauss quadrature point
+!.....Compute dg_here%ZE, dg_here%QX, dg_here%QY, and dg_here%HB at each global_here%edge Gauss quadrature point
 
          DO I = 1,dg_here%NEGP(dg_here%pa)
 
@@ -629,60 +629,60 @@
             
 !.....Compute the specified flow boundaries for the exterior state
 
-            Q_N_EXT = 0.D0
-            DO JJ = 1,NFFR
+            global_here%Q_N_EXT = 0.D0
+            DO JJ = 1,global_here%NFFR
                
-               IF(FPER(JJ).EQ.0.D0) THEN
-                  NCYC = 0.D0
+               IF(global_here%FPER(JJ).EQ.0.D0) THEN
+                  global_here%NCYC = 0.D0
                ELSE
-                  NCYC = INT(dg_here%TIMEDG/FPER(JJ))
+                  global_here%NCYC = INT(dg_here%TIMEDG/global_here%FPER(JJ))
                ENDIF
 
-               ARGJ = FAMIG(JJ)*(dg_here%TIMEDG - NCYC*FPER(JJ)) + FFACE(JJ)
-               RFF  = FFF(JJ)*RAMPExtFlux
+               global_here%ARGJ = global_here%FAMIG(JJ)*(dg_here%TIMEDG - global_here%NCYC*global_here%FPER(JJ)) + global_here%FFACE(JJ)
+               global_here%RFF  = global_here%FFF(JJ)*global_here%RAMPExtFlux
                
                dg_here%QNAM_GP = 0.5D0*(dg_here%QNAM_DG(JJ,L,1) + dg_here%QNAM_DG(JJ,L,2))&
               + 0.5D0*(dg_here%QNAM_DG(JJ,L,2) - dg_here%QNAM_DG(JJ,L,1))*dg_here%XEGP(I,dg_here%pa)
                dg_here%QNPH_GP = 0.5D0*(dg_here%QNPH_DG(JJ,L,1) + dg_here%QNPH_DG(JJ,L,2))&
               + 0.5D0*(dg_here%QNPH_DG(JJ,L,2) - dg_here%QNPH_DG(JJ,L,1))*dg_here%XEGP(I,dg_here%pa)
                
-               ARG = ARGJ - dg_here%QNPH_GP
+               global_here%ARG = global_here%ARGJ - dg_here%QNPH_GP
                
-               Q_N_EXT = Q_N_EXT + dg_here%QNAM_GP*RFF*COS(ARG)
-               Q_T_EXT =  0.D0
+               global_here%Q_N_EXT = global_here%Q_N_EXT + dg_here%QNAM_GP*global_here%RFF*COS(global_here%ARG)
+               global_here%Q_T_EXT =  0.D0
 
 
             ENDDO
             
 !.....Compute the solution at the interior state
 
-            DO K = 1,dg_here%DOFS(EL_IN)
+            DO K = 1,dg_here%DOFS(global_here%EL_IN)
 
 #ifdef WAVE_DIF
-               dg_here%ZE_IN = dg_here%ZE_IN + dg_here%ZE(K,EL_IN,dg_here%IRK)*dg_here%PHI_EDGE(K,I,LED,dg_here%pa)
+               dg_here%ZE_IN = dg_here%ZE_IN + dg_here%ZE(K,global_here%EL_IN,dg_here%IRK)*dg_here%PHI_EDGE(K,I,LED,dg_here%pa)
 #endif
 
-               dg_here%QX_IN = dg_here%QX_IN + dg_here%QX(K,EL_IN,dg_here%IRK)*dg_here%PHI_EDGE(K,I,LED,dg_here%pa)
-               dg_here%QY_IN = dg_here%QY_IN + dg_here%QY(K,EL_IN,dg_here%IRK)*dg_here%PHI_EDGE(K,I,LED,dg_here%pa)
+               dg_here%QX_IN = dg_here%QX_IN + dg_here%QX(K,global_here%EL_IN,dg_here%IRK)*dg_here%PHI_EDGE(K,I,LED,dg_here%pa)
+               dg_here%QY_IN = dg_here%QY_IN + dg_here%QY(K,global_here%EL_IN,dg_here%IRK)*dg_here%PHI_EDGE(K,I,LED,dg_here%pa)
 
 #ifdef SED_LAY
                do ll=1,s%layers
-                  dg_here%bed_in(ll) = dg_here%bed_in(ll) + dg_here%bed(K,EL_IN,dg_here%IRK,ll)*dg_here%PHI_EDGE(K,I,LED,dg_here%pa)
-                  dg_here%bed_ex(ll) = dg_here%bed_ex(ll) + dg_here%bed(K,EL_IN,dg_here%IRK,ll)*dg_here%PHI_EDGE(K,I,LED,dg_here%pa)
+                  dg_here%bed_in(ll) = dg_here%bed_in(ll) + dg_here%bed(K,global_here%EL_IN,dg_here%IRK,ll)*dg_here%PHI_EDGE(K,I,LED,dg_here%pa)
+                  dg_here%bed_ex(ll) = dg_here%bed_ex(ll) + dg_here%bed(K,global_here%EL_IN,dg_here%IRK,ll)*dg_here%PHI_EDGE(K,I,LED,dg_here%pa)
                enddo
 #endif
             ENDDO
 
 
-               dg_here%QX_EX = -( TY*Q_N_EXT - dg_here%NY*Q_T_EXT)/(dg_here%NX*TY - dg_here%NY*TX)
-               dg_here%QY_EX = -(-TX*Q_N_EXT + dg_here%NX*Q_T_EXT)/(dg_here%NX*TY - dg_here%NY*TX)
+               dg_here%QX_EX = -( TY*global_here%Q_N_EXT - dg_here%NY*global_here%Q_T_EXT)/(dg_here%NX*TY - dg_here%NY*TX)
+               dg_here%QY_EX = -(-TX*global_here%Q_N_EXT + dg_here%NX*global_here%Q_T_EXT)/(dg_here%NX*TY - dg_here%NY*TX)
             
 !.....Take the average
 
 #ifdef WAVE_DIF
                ZE_AVG = dg_here%ZE_IN
 #endif
-               QX_AVG = 0.5*(dg_here%QX_IN + dg_here%QX_EX)*dg_here%SFACED(I,LED,EL_IN,dg_here%pa)
+               QX_AVG = 0.5*(dg_here%QX_IN + dg_here%QX_EX)*dg_here%SFACED(I,LED,global_here%EL_IN,dg_here%pa)
                QY_AVG = 0.5*(dg_here%QY_IN + dg_here%QY_EX)
 #ifdef TRACE
                iota_AVG = dg_here%iota_IN
@@ -694,15 +694,15 @@
                enddo
 #endif
 
-!.....Compute the edge integral
+!.....Compute the global_here%edge integral
 
-            DO K = 1,dg_here%DOFS(EL_IN)
+            DO K = 1,dg_here%DOFS(global_here%EL_IN)
                CALL EDGE_INT_LDG_HYDRO&
-              (s,dg_here,global_here,K,EL_IN,LED,GED,I,iota_AVG,ZE_AVG,QX_AVG,QY_AVG,dg_here%NX,dg_here%NY,dg_here%pa)
+              (s,dg_here,global_here,K,global_here%EL_IN,LED,GED,I,iota_AVG,ZE_AVG,QX_AVG,QY_AVG,dg_here%NX,dg_here%NY,dg_here%pa)
 #ifdef SED_LAY
                do ll=1,s%layers
                   CALL EDGE_INT_LDG_sediment&
-                 (K,EL_IN,LED,GED,I,bed_AVG(ll),dg_here%NX,dg_here%NY,dg_here%pa,ll)
+                 (K,global_here%EL_IN,LED,GED,I,bed_AVG(ll),dg_here%NX,dg_here%NY,dg_here%pa,ll)
                enddo
 #endif
             ENDDO
@@ -720,7 +720,7 @@
 !     
 !     This subroutine does the following:
 !     
-!     1.  Calculates the values of the necessary variables at the edge
+!     1.  Calculates the values of the necessary variables at the global_here%edge
 !     gauss points for INTERNAL edges (sediment diffusion?)
 !     2.  Take the average of these values
 !     3.  Perform boundary integration
@@ -751,16 +751,16 @@
 
       DO 1000 L = 1,dg_here%NREDS
          
-!.....Retrieve the global and local edge number
+!.....Retrieve the global and local global_here%edge number
 
          GED = dg_here%NREDN(L)
          LED = dg_here%NEDSD(1,GED)
 
-!.....Retrieve the elements which share the edge
+!.....Retrieve the elements which share the global_here%edge
 
-         EL_IN = dg_here%NEDEL(1,GED)
+         global_here%EL_IN = dg_here%NEDEL(1,GED)
 
-         dg_here%PA = PDG_EL(EL_IN)
+         dg_here%PA = global_here%PDG_EL(global_here%EL_IN)
 
 #ifdef P0
          if (dg_here%pa.eq.0) then
@@ -768,7 +768,7 @@
          endif
 #endif
 
-!.....Retrieve the components of the normal vector to the edge
+!.....Retrieve the components of the normal vector to the global_here%edge
          
          dg_here%NX = dg_here%COSNX(GED)
          dg_here%NY = dg_here%SINNX(GED)
@@ -793,37 +793,37 @@
 
 !.....Compute the solution at the interior state
 
-            DO K = 1,dg_here%DOFS(EL_IN)
+            DO K = 1,dg_here%DOFS(global_here%EL_IN)
                
 #ifdef WAVE_DIF
-               dg_here%ZE_IN = dg_here%ZE_IN + dg_here%ZE(K,EL_IN,dg_here%IRK)*dg_here%PHI_EDGE(K,I,LED,dg_here%pa)
+               dg_here%ZE_IN = dg_here%ZE_IN + dg_here%ZE(K,global_here%EL_IN,dg_here%IRK)*dg_here%PHI_EDGE(K,I,LED,dg_here%pa)
 #endif
-               dg_here%QX_IN = dg_here%QX_IN + dg_here%QX(K,EL_IN,dg_here%IRK)*dg_here%PHI_EDGE(K,I,LED,dg_here%pa)
-               dg_here%QY_IN = dg_here%QY_IN + dg_here%QY(K,EL_IN,dg_here%IRK)*dg_here%PHI_EDGE(K,I,LED,dg_here%pa)
+               dg_here%QX_IN = dg_here%QX_IN + dg_here%QX(K,global_here%EL_IN,dg_here%IRK)*dg_here%PHI_EDGE(K,I,LED,dg_here%pa)
+               dg_here%QY_IN = dg_here%QY_IN + dg_here%QY(K,global_here%EL_IN,dg_here%IRK)*dg_here%PHI_EDGE(K,I,LED,dg_here%pa)
 #ifdef TRACE
-               dg_here%iota_IN = dg_here%iota_IN + dg_here%iota(K,EL_IN,dg_here%IRK)*dg_here%PHI_EDGE(K,I,LED,dg_here%pa)
+               dg_here%iota_IN = dg_here%iota_IN + dg_here%iota(K,global_here%EL_IN,dg_here%IRK)*dg_here%PHI_EDGE(K,I,LED,dg_here%pa)
 #endif
 
 #ifdef SED_LAY
                do ll=1,s%layers
-                  dg_here%bed_in(ll) = dg_here%bed_in(ll) + dg_here%bed(K,EL_IN,dg_here%IRK,ll)*dg_here%PHI_EDGE(K,I,LED,dg_here%pa)
+                  dg_here%bed_in(ll) = dg_here%bed_in(ll) + dg_here%bed(K,global_here%EL_IN,dg_here%IRK,ll)*dg_here%PHI_EDGE(K,I,LED,dg_here%pa)
                enddo
 #endif
         
 
             ENDDO
 
-            dg_here%QX_IN = dg_here%QX_IN*dg_here%SFACED(I,LED,EL_IN,dg_here%pa)
+            dg_here%QX_IN = dg_here%QX_IN*dg_here%SFACED(I,LED,global_here%EL_IN,dg_here%pa)
 
-!.....Compute the edge integral
+!.....Compute the global_here%edge integral
            
-            DO K = 1,dg_here%DOFS(EL_IN)
+            DO K = 1,dg_here%DOFS(global_here%EL_IN)
                CALL EDGE_INT_LDG_HYDRO&
-              (s,dg_here,global_here,K,EL_IN,LED,GED,I,dg_here%iota_IN,dg_here%ZE_IN,dg_here%QX_IN,dg_here%QY_IN,dg_here%NX,dg_here%NY,dg_here%pa)
+              (s,dg_here,global_here,K,global_here%EL_IN,LED,GED,I,dg_here%iota_IN,dg_here%ZE_IN,dg_here%QX_IN,dg_here%QY_IN,dg_here%NX,dg_here%NY,dg_here%pa)
 #ifdef SED_LAY
                do ll=1,s%layers
                   CALL EDGE_INT_LDG_sediment&
-                 (K,EL_IN,LED,GED,I,dg_here%bed_IN(ll),dg_here%NX,dg_here%NY,dg_here%pa,ll)
+                 (K,global_here%EL_IN,LED,GED,I,dg_here%bed_IN(ll),dg_here%NX,dg_here%NY,dg_here%pa,ll)
                enddo
 #endif
             ENDDO
@@ -840,7 +840,7 @@
 !     
 !     This subroutine does the following:
 !     
-!     1.  Calculates the values of the necessary variables at the edge
+!     1.  Calculates the values of the necessary variables at the global_here%edge
 !     gauss points for INTERNAL edges (sediment diffusion?)
 !     2.  Take the average of these values
 !     3.  Perform boundary integration
@@ -873,24 +873,24 @@
 
       DO 1000 L = 1,dg_here%NIEDS
 
-!.....Retrieve the global and local edge number
+!.....Retrieve the global and local global_here%edge number
 
          GED = dg_here%NIEDN(L)
          LED_IN = dg_here%NEDSD(1,GED)
          LED_EX = dg_here%NEDSD(2,GED)
 
-!.....Retrieve the elements which share the edge
+!.....Retrieve the elements which share the global_here%edge
 
-         EL_IN = dg_here%NEDEL(1,GED)
-         EL_EX = dg_here%NEDEL(2,GED)
+         global_here%EL_IN = dg_here%NEDEL(1,GED)
+         global_here%EL_EX = dg_here%NEDEL(2,GED)
 
-         dg_here%EL = EL_IN
+         dg_here%EL = global_here%EL_IN
 
-         IF (dg_here%DOFS(EL_EX).LT.dg_here%DOFS(EL_IN)) then
-            dg_here%EL = EL_EX
+         IF (dg_here%DOFS(global_here%EL_EX).LT.dg_here%DOFS(global_here%EL_IN)) then
+            dg_here%EL = global_here%EL_EX
          endif
 
-         dg_here%pa = PDG_EL(dg_here%EL)
+         dg_here%pa = global_here%PDG_EL(dg_here%EL)
 
 #ifdef P0
          if (dg_here%pa.eq.0) then
@@ -898,12 +898,12 @@
          endif
 #endif
 
-!.....Retrieve the components of the normal vector to the edge
+!.....Retrieve the components of the normal vector to the global_here%edge
 
          dg_here%NX = dg_here%COSNX(GED)
          dg_here%NY = dg_here%SINNX(GED)
 
-!.....Compute dg_here%ZE, dg_here%QX, dg_here%QY, and dg_here%HB at each edge Gauss quadrature point
+!.....Compute dg_here%ZE, dg_here%QX, dg_here%QY, and dg_here%HB at each global_here%edge Gauss quadrature point
 
          DO I = 1,dg_here%NEGP(dg_here%pa)
 
@@ -936,26 +936,26 @@
             DO K = 1,dg_here%DOFS(dg_here%EL)
 
 #ifdef WAVE_DIF
-               dg_here%ZE_IN = dg_here%ZE_IN + dg_here%ZE(K,EL_IN,dg_here%IRK)*dg_here%PHI_EDGE(K,GP_IN,LED_IN,dg_here%pa)
+               dg_here%ZE_IN = dg_here%ZE_IN + dg_here%ZE(K,global_here%EL_IN,dg_here%IRK)*dg_here%PHI_EDGE(K,GP_IN,LED_IN,dg_here%pa)
 #endif
-               dg_here%QX_IN = dg_here%QX_IN + dg_here%QX(K,EL_IN,dg_here%IRK)*dg_here%PHI_EDGE(K,GP_IN,LED_IN,dg_here%pa)
-               dg_here%QY_IN = dg_here%QY_IN + dg_here%QY(K,EL_IN,dg_here%IRK)*dg_here%PHI_EDGE(K,GP_IN,LED_IN,dg_here%pa)
+               dg_here%QX_IN = dg_here%QX_IN + dg_here%QX(K,global_here%EL_IN,dg_here%IRK)*dg_here%PHI_EDGE(K,GP_IN,LED_IN,dg_here%pa)
+               dg_here%QY_IN = dg_here%QY_IN + dg_here%QY(K,global_here%EL_IN,dg_here%IRK)*dg_here%PHI_EDGE(K,GP_IN,LED_IN,dg_here%pa)
 #ifdef WAVE_DIF
-               dg_here%ZE_EX = dg_here%ZE_EX + dg_here%ZE(K,EL_EX,dg_here%IRK)*dg_here%PHI_EDGE(K,GP_EX,LED_EX,dg_here%pa)
+               dg_here%ZE_EX = dg_here%ZE_EX + dg_here%ZE(K,global_here%EL_EX,dg_here%IRK)*dg_here%PHI_EDGE(K,GP_EX,LED_EX,dg_here%pa)
 #endif
-               dg_here%QX_EX = dg_here%QX_EX + dg_here%QX(K,EL_EX,dg_here%IRK)*dg_here%PHI_EDGE(K,GP_EX,LED_EX,dg_here%pa)
-               dg_here%QY_EX = dg_here%QY_EX + dg_here%QY(K,EL_EX,dg_here%IRK)*dg_here%PHI_EDGE(K,GP_EX,LED_EX,dg_here%pa)
+               dg_here%QX_EX = dg_here%QX_EX + dg_here%QX(K,global_here%EL_EX,dg_here%IRK)*dg_here%PHI_EDGE(K,GP_EX,LED_EX,dg_here%pa)
+               dg_here%QY_EX = dg_here%QY_EX + dg_here%QY(K,global_here%EL_EX,dg_here%IRK)*dg_here%PHI_EDGE(K,GP_EX,LED_EX,dg_here%pa)
 #ifdef TRACE
-               dg_here%iota_IN = dg_here%iota_IN + dg_here%iota(K,EL_IN,dg_here%IRK)*dg_here%PHI_EDGE(K,GP_IN,LED_IN,dg_here%pa)
-               dg_here%iota_EX = dg_here%iota_EX + dg_here%iota(K,EL_EX,dg_here%IRK)*dg_here%PHI_EDGE(K,GP_EX,LED_EX,dg_here%pa)
+               dg_here%iota_IN = dg_here%iota_IN + dg_here%iota(K,global_here%EL_IN,dg_here%IRK)*dg_here%PHI_EDGE(K,GP_IN,LED_IN,dg_here%pa)
+               dg_here%iota_EX = dg_here%iota_EX + dg_here%iota(K,global_here%EL_EX,dg_here%IRK)*dg_here%PHI_EDGE(K,GP_EX,LED_EX,dg_here%pa)
 #endif
 
 #ifdef SED_LAY
                do ll=1,s%layers
                   dg_here%bed_IN(ll) = dg_here%bed_IN(ll) &
-                 + dg_here%bed(K,EL_IN,dg_here%IRK,ll)*dg_here%PHI_EDGE(K,GP_IN,LED_IN,dg_here%pa)
+                 + dg_here%bed(K,global_here%EL_IN,dg_here%IRK,ll)*dg_here%PHI_EDGE(K,GP_IN,LED_IN,dg_here%pa)
                   dg_here%bed_EX(ll) = dg_here%bed_EX(ll) &
-                 + dg_here%bed(K,EL_EX,dg_here%IRK,ll)*dg_here%PHI_EDGE(K,GP_EX,LED_EX,dg_here%pa)
+                 + dg_here%bed(K,global_here%EL_EX,dg_here%IRK,ll)*dg_here%PHI_EDGE(K,GP_EX,LED_EX,dg_here%pa)
                enddo
 #endif
 
@@ -967,8 +967,8 @@
             ZE_AVG = 0.5D0*(dg_here%ZE_IN + dg_here%ZE_EX)
 #endif
 
-            QX_AVG = 0.5D0*(dg_here%QX_IN*dg_here%SFACED(GP_IN,LED_IN,EL_IN,dg_here%pa) &
-           + dg_here%QX_EX*dg_here%SFACED(GP_EX,LED_EX,EL_EX,dg_here%pa))
+            QX_AVG = 0.5D0*(dg_here%QX_IN*dg_here%SFACED(GP_IN,LED_IN,global_here%EL_IN,dg_here%pa) &
+           + dg_here%QX_EX*dg_here%SFACED(GP_EX,LED_EX,global_here%EL_EX,dg_here%pa))
             QY_AVG = 0.5D0*(dg_here%QY_IN + dg_here%QY_EX)
 
 #ifdef TRACE
@@ -981,49 +981,49 @@
             enddo
 #endif
 
-!.....Compute the edge integral
+!.....Compute the global_here%edge integral
 
             DO K = 1,dg_here%DOFS(dg_here%EL)
 
-               W_IN = 2.0*dg_here%M_INV(K,dg_here%pa)/AREAS(EL_IN)*dg_here%XLEN(GED)*&
+               W_IN = 2.0*dg_here%M_INV(K,dg_here%pa)/global_here%AREAS(global_here%EL_IN)*dg_here%XLEN(GED)*&
               dg_here%PHI_EDGE(K,GP_IN,LED_IN,dg_here%pa)*dg_here%WEGP(GP_IN,dg_here%pa)
-               W_EX = 2.0*dg_here%M_INV(K,dg_here%pa)/AREAS(EL_EX)*dg_here%XLEN(GED)*&
+               W_EX = 2.0*dg_here%M_INV(K,dg_here%pa)/global_here%AREAS(global_here%EL_EX)*dg_here%XLEN(GED)*&
               dg_here%PHI_EDGE(K,GP_EX,LED_EX,dg_here%pa)*dg_here%WEGP(GP_EX,dg_here%pa)
                
 #ifdef WAVE_DIF
-               dg_here%HZ(K,1,1,EL_IN) = dg_here%HZ(K,1,1,EL_IN) - ZE_AVG*dg_here%NX*W_IN
-               dg_here%HZ(K,2,2,EL_IN) = dg_here%HZ(K,2,2,EL_IN) - ZE_AVG*dg_here%NY*W_IN
+               dg_here%HZ(K,1,1,global_here%EL_IN) = dg_here%HZ(K,1,1,global_here%EL_IN) - ZE_AVG*dg_here%NX*W_IN
+               dg_here%HZ(K,2,2,global_here%EL_IN) = dg_here%HZ(K,2,2,global_here%EL_IN) - ZE_AVG*dg_here%NY*W_IN
 #endif
-               dg_here%LZ(K,1,1,EL_IN) = dg_here%LZ(K,1,1,EL_IN) - QX_AVG*dg_here%NX*W_IN
-               dg_here%LZ(K,1,2,EL_IN) = dg_here%LZ(K,1,2,EL_IN) - QX_AVG*dg_here%NY*W_IN
-               dg_here%LZ(K,2,1,EL_IN) = dg_here%LZ(K,2,1,EL_IN) - QY_AVG*dg_here%NX*W_IN
-               dg_here%LZ(K,2,2,EL_IN) = dg_here%LZ(K,2,2,EL_IN) - QY_AVG*dg_here%NY*W_IN
+               dg_here%LZ(K,1,1,global_here%EL_IN) = dg_here%LZ(K,1,1,global_here%EL_IN) - QX_AVG*dg_here%NX*W_IN
+               dg_here%LZ(K,1,2,global_here%EL_IN) = dg_here%LZ(K,1,2,global_here%EL_IN) - QX_AVG*dg_here%NY*W_IN
+               dg_here%LZ(K,2,1,global_here%EL_IN) = dg_here%LZ(K,2,1,global_here%EL_IN) - QY_AVG*dg_here%NX*W_IN
+               dg_here%LZ(K,2,2,global_here%EL_IN) = dg_here%LZ(K,2,2,global_here%EL_IN) - QY_AVG*dg_here%NY*W_IN
                
 #ifdef WAVE_DIF
-               dg_here%HZ(K,1,1,EL_EX) = dg_here%HZ(K,1,1,EL_EX) + ZE_AVG*dg_here%NX*W_EX
-               dg_here%HZ(K,2,2,EL_EX) = dg_here%HZ(K,2,2,EL_EX) + ZE_AVG*dg_here%NY*W_EX
+               dg_here%HZ(K,1,1,global_here%EL_EX) = dg_here%HZ(K,1,1,global_here%EL_EX) + ZE_AVG*dg_here%NX*W_EX
+               dg_here%HZ(K,2,2,global_here%EL_EX) = dg_here%HZ(K,2,2,global_here%EL_EX) + ZE_AVG*dg_here%NY*W_EX
 #endif
-               dg_here%LZ(K,1,1,EL_EX) = dg_here%LZ(K,1,1,EL_EX) + QX_AVG*dg_here%NX*W_EX
-               dg_here%LZ(K,1,2,EL_EX) = dg_here%LZ(K,1,2,EL_EX) + QX_AVG*dg_here%NY*W_EX
-               dg_here%LZ(K,2,1,EL_EX) = dg_here%LZ(K,2,1,EL_EX) + QY_AVG*dg_here%NX*W_EX
-               dg_here%LZ(K,2,2,EL_EX) = dg_here%LZ(K,2,2,EL_EX) + QY_AVG*dg_here%NY*W_EX
+               dg_here%LZ(K,1,1,global_here%EL_EX) = dg_here%LZ(K,1,1,global_here%EL_EX) + QX_AVG*dg_here%NX*W_EX
+               dg_here%LZ(K,1,2,global_here%EL_EX) = dg_here%LZ(K,1,2,global_here%EL_EX) + QX_AVG*dg_here%NY*W_EX
+               dg_here%LZ(K,2,1,global_here%EL_EX) = dg_here%LZ(K,2,1,global_here%EL_EX) + QY_AVG*dg_here%NX*W_EX
+               dg_here%LZ(K,2,2,global_here%EL_EX) = dg_here%LZ(K,2,2,global_here%EL_EX) + QY_AVG*dg_here%NY*W_EX
 #ifdef TRACE
-               dg_here%TZ(K,1,1,EL_IN) = dg_here%TZ(K,1,1,EL_IN) - iota_AVG*dg_here%NX*W_IN
-               dg_here%TZ(K,2,2,EL_IN) = dg_here%TZ(K,2,2,EL_IN) - iota_AVG*dg_here%NY*W_IN
+               dg_here%TZ(K,1,1,global_here%EL_IN) = dg_here%TZ(K,1,1,global_here%EL_IN) - iota_AVG*dg_here%NX*W_IN
+               dg_here%TZ(K,2,2,global_here%EL_IN) = dg_here%TZ(K,2,2,global_here%EL_IN) - iota_AVG*dg_here%NY*W_IN
 
-               dg_here%TZ(K,1,1,EL_EX) = dg_here%TZ(K,1,1,EL_EX) + iota_AVG*dg_here%NX*W_EX
-               dg_here%TZ(K,2,2,EL_EX) = dg_here%TZ(K,2,2,EL_EX) + iota_AVG*dg_here%NY*W_EX
+               dg_here%TZ(K,1,1,global_here%EL_EX) = dg_here%TZ(K,1,1,global_here%EL_EX) + iota_AVG*dg_here%NX*W_EX
+               dg_here%TZ(K,2,2,global_here%EL_EX) = dg_here%TZ(K,2,2,global_here%EL_EX) + iota_AVG*dg_here%NY*W_EX
 #endif
 
 #ifdef SED_LAY
                do ll=1,s%layers
-                  dg_here%MZ(K,1,ll,EL_IN) = dg_here%MZ(K,1,ll,EL_IN) &
+                  dg_here%MZ(K,1,ll,global_here%EL_IN) = dg_here%MZ(K,1,ll,global_here%EL_IN) &
                  - bed_AVG(ll)*dg_here%NX*W_IN
-                  dg_here%MZ(K,2,ll,EL_IN) = dg_here%MZ(K,2,ll,EL_IN) &
+                  dg_here%MZ(K,2,ll,global_here%EL_IN) = dg_here%MZ(K,2,ll,global_here%EL_IN) &
                  - bed_AVG(ll)*dg_here%NY*W_IN
-                  dg_here%MZ(K,1,ll,EL_EX) = dg_here%MZ(K,1,ll,EL_EX) &
+                  dg_here%MZ(K,1,ll,global_here%EL_EX) = dg_here%MZ(K,1,ll,global_here%EL_EX) &
                  + bed_AVG(ll)*dg_here%NX*W_EX
-                  dg_here%MZ(K,2,ll,EL_EX) = dg_here%MZ(K,2,ll,EL_EX) &
+                  dg_here%MZ(K,2,ll,global_here%EL_EX) = dg_here%MZ(K,2,ll,global_here%EL_EX) &
                  + bed_AVG(ll)*dg_here%NY*W_EX
                enddo
 #endif

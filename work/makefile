@@ -71,7 +71,7 @@ ADC_SRC    =  dgswem.f95 read_input.f95 cstart.f95 hstart.f95 radiation_edge_hyd
 	quad_pts_edge.f95 radiation_edge_hydro.f95 read_input.f95 rhs_dg_hydro.f95 \
 	numerical_flux.f95 tidal_potential.f95 write_results.f95 \
 	slopelimiter.f95 prep_slopelim.f95 \
-	wetdry.f95 LDG_hydro.f95 met_forcing.f95 sta_basis.f95 write_output.f95 make_dirname.f95
+	wetdry.f95 LDG_hydro.f95 met_forcing.f95 sta_basis.f95 make_dirname.f95
 #Casey 121126: Added modal2nodal.f95 and write_output.f95 to the previous line.
 
 METIS1_OBJ:= $(patsubst %.f95, $(O_DIR)%.o, $(METIS1_SRC) )
@@ -243,7 +243,6 @@ $(O_DIR)wetdry.o                    :  wetdry.f95  $(ADC_MOBJ)
 $(O_DIR)LDG_hydro.o                 :  LDG_hydro.f95  $(ADC_MOBJ)
 $(O_DIR)met_forcing.o               :  met_forcing.f95  $(ADC_MOBJ)
 $(O_DIR)sta_basis.o                 :  sta_basis.f95  $(ADC_MOBJ)
-$(O_DIR)write_output.o              :  write_output.f95
 #Casey 121126: Added the previous lines for modal2nodal.F and write_output.F.
 
 debug:

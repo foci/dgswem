@@ -611,7 +611,7 @@
           
 !.........Obtain meteorological forcing data
           
-          CALL NWS10GET(s, global_here%NWSGGWI, global_here%SLAM, global_here%SFEA, global_here%WVNX2, global_here%WVNY2, global_here%PRN2, global_here%NP,&
+          CALL NWS10GET(s,global_here, global_here%NWSGGWI, global_here%SLAM, global_here%SFEA, global_here%WVNX2, global_here%WVNY2, global_here%PRN2, global_here%NP,&
                    global_here%RHOWAT0, global_here%G, global_here%NWLON, global_here%NWLAT, global_here%WTIMINC )
         ENDIF
         
@@ -693,7 +693,7 @@
             
 !.........Obtain meteorological forcing data
             
-          CALL NWS11GET(s, global_here%NWSEGWI, global_here%IDSETFLG, global_here%SLAM, global_here%SFEA, global_here%WVNX2, global_here%WVNY2,&
+          CALL NWS11GET(s,global_here, global_here%NWSEGWI, global_here%IDSETFLG, global_here%SLAM, global_here%SFEA, global_here%WVNX2, global_here%WVNY2,&
                    global_here%PRN2, global_here%NP, global_here%RHOWAT0, global_here%G )
         ENDIF
 
