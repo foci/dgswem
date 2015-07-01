@@ -3,6 +3,30 @@
 !     
 !******************************************************************************
 
+#ifdef HPX
+  PROGRAM DGSWEM
+    USE GLOBAL
+    USE DG
+    USE NodalAttributes
+    IMPLICIT NONE
+    
+    type (sizes_type) :: s
+    type (dg_type) :: dg_here
+    type (global_type) :: global_here
+    type (nodalattr_type) :: nodalattr_here
+    
+    integer :: timestep,NT
+    print*,"HPX defined"
+    CALL DGSWEM_INIT(s,dg_here,global_here,nodalattr_here,NT)
+
+    DO timestep = global_here%ITHS+1,global_here%NT
+       global_here%ITIME_A = timestep
+       CALL DG_TIMESTEP(s,dg_here,global_here,nodalattr_here,timestep)
+    END DO
+
+  END PROGRAM DGSWEM
+
+#else
       PROGRAM DGSWEM
 !     
 !     sb-disabled for Linux&Intel compiler
@@ -451,6 +475,9 @@
 !     *
 !******************************************************************************
 !     
+
+#endif
+
       SUBROUTINE NEIGHB(s,NE,NP,NM,NNEIGH,NEIGH,NEIMIN,NEIMAX,X,Y,NSCREEN,NNEIGH_ELEM,NEIGH_ELEM)
       USE SIZES
       type (sizes_type) :: s
