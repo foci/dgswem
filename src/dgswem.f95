@@ -10,12 +10,18 @@
     USE NodalAttributes
     IMPLICIT NONE
     
-    type (sizes_type) :: s
-    type (dg_type) :: dg_here
-    type (global_type) :: global_here
-    type (nodalattr_type) :: nodalattr_here
+    type (sizes_type), pointer :: s
+    type (dg_type), pointer :: dg_here
+    type (global_type), pointer :: global_here
+    type (nodalattr_type), pointer :: nodalattr_here
     
     integer :: timestep,NT
+
+    allocate(s)
+    allocate(dg_here)
+    allocate(global_here)
+    allocate(nodalattr_here)
+
     print*,"HPX defined"
     CALL DGSWEM_INIT(s,dg_here,global_here,nodalattr_here,NT)
 
@@ -23,6 +29,12 @@
        global_here%ITIME_A = timestep
        CALL DG_TIMESTEP(s,dg_here,global_here,nodalattr_here,timestep)
     END DO
+
+    deallocate(s)
+    deallocate(dg_here)
+    deallocate(global_here)
+    deallocate(nodalattr_here)
+    
 
   END PROGRAM DGSWEM
 
@@ -478,162 +490,3 @@
 
 #endif
 
-      SUBROUTINE NEIGHB(s,NE,NP,NM,NNEIGH,NEIGH,NEIMIN,NEIMAX,X,Y,NSCREEN,NNEIGH_ELEM,NEIGH_ELEM)
-      USE SIZES
-      type (sizes_type) :: s
-!     
-      INTEGER NP,NE,NEIMIN,NEIMAX,NSCREEN,N,NN,EN1,EN2,EN3,I,J,JJ,JLOW
-      INTEGER :: NEIGH(S%MNP,S%MNEI),NNEIGH(S%MNP),NNEIGH_ELEM(S%MNP)
-      INTEGER NM(S%MNE,3),NEIGH_ELEM(S%MNP,S%MNEI)
-      REAL(8) X(S%MNP),Y(S%MNP),DELX,DELY,DIST
-      REAL(8) ANGLELOW,ANGLEMORE,RAD2DEG
-      REAL(8), ALLOCATABLE :: ANGLE(:)
-      INTEGER,ALLOCATABLE :: NEITEM(:)
-
-      integer :: myproc_here
-      myproc_here = 0
-!     
-      ALLOCATE ( ANGLE(S%MNEI) )
-      ALLOCATE ( NEITEM(S%MNP) )
-!     
-      RAD2DEG=45.0d0/ATAN(1.0d0)
-!     
-
-      print*, "NP=", np, "s%MNP=", s%MNP
-      DO N=1,NP
-         NNEIGH(N) = 0
-         NNEIGH_ELEM(N) = 0
-         DO NN=1,S%MNEI
-            NEIGH(N,NN) = 0
-            NEIGH_ELEM(N,NN) = 0
-         ENDDO
-      ENDDO
-!     
-      DO 10 N=1,NE
-         EN1 = NM(N,1)
-         EN2 = NM(N,2)
-         EN3 = NM(N,3)
-  NNEIGH_ELEM(EN1) = NNEIGH_ELEM(EN1)+1
-  NEIGH_ELEM(EN1,NNEIGH_ELEM(EN1)) = N
-  NNEIGH_ELEM(EN2) = NNEIGH_ELEM(EN2)+1
-  NEIGH_ELEM(EN2,NNEIGH_ELEM(EN2)) = N
-  NNEIGH_ELEM(EN3) = NNEIGH_ELEM(EN3)+1
-  NEIGH_ELEM(EN3,NNEIGH_ELEM(EN3)) = N
-         DO 20 J=1,NNEIGH(EN1)
- 20         IF(EN2.EQ.NEIGH(EN1,J)) GOTO 25
-            NNEIGH(EN1)=NNEIGH(EN1)+1
-            NNEIGH(EN2)=NNEIGH(EN2)+1
-            IF((NNEIGH(EN1).GT.S%MNEI-1).OR.(NNEIGH(EN2).GT.S%MNEI-1)) GOTO 999
-            NEIGH(EN1,NNEIGH(EN1))=EN2
-            NEIGH(EN2,NNEIGH(EN2))=EN1
- 25         DO 30 J=1,NNEIGH(EN1)
- 30            IF(EN3.EQ.NEIGH(EN1,J)) GOTO 35
-               NNEIGH(EN1)=NNEIGH(EN1)+1
-               NNEIGH(EN3)=NNEIGH(EN3)+1
-               IF((NNEIGH(EN1).GT.S%MNEI-1).OR.(NNEIGH(EN3).GT.S%MNEI-1)) GOTO 999
-               NEIGH(EN1,NNEIGH(EN1))=EN3
-               NEIGH(EN3,NNEIGH(EN3))=EN1
- 35            DO 50 J=1,NNEIGH(EN2)
- 50               IF(EN3.EQ.NEIGH(EN2,J)) GOTO 10
-                  NNEIGH(EN2)=NNEIGH(EN2)+1
-                  NNEIGH(EN3)=NNEIGH(EN3)+1
-                  IF((NNEIGH(EN2).GT.S%MNEI-1).OR.(NNEIGH(EN3).GT.S%MNEI-1)) GOTO 999
-                  NEIGH(EN2,NNEIGH(EN2))=EN3
-                  NEIGH(EN3,NNEIGH(EN3))=EN2
- 10            CONTINUE
-!     
-!     INSERT NODE ITSELF IN PLACE #1 and SORT other NEIGHBORS by increasing cw angle from East
-!     
-               DO I=1,NP
-                  DO J=1,NNEIGH(I)
-                     NEITEM(J)=NEIGH(I,J)
-                     DELX=X(NEITEM(J))-X(I)
-                     DELY=Y(NEITEM(J))-Y(I)
-                     DIST=SQRT(DELX*DELX+DELY*DELY)
-                     IF(DIST.EQ.0.0d0) GOTO 998
-                     IF(DELY.NE.0.0d0) THEN
-                        ANGLE(J)=RAD2DEG*ACOS(DELX/DIST)
-                        IF(DELY.GT.0.0) ANGLE(J)=360.0d0-ANGLE(J)
-                     ENDIF
-                     IF(DELY.EQ.0.0d0) THEN
-                        IF(DELX.GT.0.0d0) ANGLE(J)=0.0d0
-                        IF(DELX.LT.0.d0) ANGLE(J)=180.0d0
-                     ENDIF
-                  END DO
-                  ANGLEMORE=-1.d0
-                  DO JJ=1,NNEIGH(I)
-                     ANGLELOW=400.d0
-                     DO J=1,NNEIGH(I)
-                        IF((ANGLE(J).LT.ANGLELOW).AND.(ANGLE(J).GT.ANGLEMORE))&
-                            THEN
-                           ANGLELOW=ANGLE(J)
-                           JLOW=J
-                        ENDIF
-                     END DO
-                     NEIGH(I,JJ+1)=NEITEM(JLOW)
-                     ANGLEMORE=ANGLELOW
-                  END DO
-                  NEIGH(I,1)=I
-                  NNEIGH(I)=NNEIGH(I)+1
-               ENDDO
-
-!     
-!     DETERMINE THE MAXIMUM AND MINIMUM NUMBER OF NEIGHBORS
-!     
-               NEIMAX = 0
-               NEIMIN = 1000
-               DO 60 N=1,NP
-                  IF(NNEIGH(N).LT.NEIMIN) NEIMIN=NNEIGH(N)
-                  IF(NNEIGH(N).GT.NEIMAX) NEIMAX=NNEIGH(N)
- 60            CONTINUE
-!     
-               RETURN
-
-!     TERMINATE PROGRAM IF MAXIMUM NUMBER OF NEIGHBORS SET TOO SMALL
-
- 999           CONTINUE
-               IF(NSCREEN.EQ.1.AND.MYPROC_HERE.EQ.0) WRITE(6,99311)
-               WRITE(16,99311)
-99311          FORMAT(////,1X,'!!!!!!!!!!  WARNING - FATAL ERROR !!!!!!!!!',              //,1X,'THE DIMENSIONING PARAMETER MNEI IS TOO SMALL'              /,1X,'USER MUST RE-DIMENSION PROGRAM',              //,1X,'!!!!!! EXECUTION WILL NOW BE TERMINATED !!!!!!',//)
-               STOP
-
- 998           CONTINUE
-               IF(NSCREEN.EQ.1.AND.MYPROC_HERE.EQ.0) WRITE(6,99312) I,NEITEM(J)
-               WRITE(16,99312) I,NEITEM(J)
-99312          FORMAT(////,1X,'!!!!!!!!!!  WARNING - FATAL ERROR !!!!!!!!!',              //,1X,'NODES ',I7,' AND ',I7,         ' HAVE THE SAME COORDINATES'              //,1X,'!!!!!! EXECUTION WILL NOW BE TERMINATED !!!!!!',//)
-
-               STOP
-               END         
-      
-
-
-!******************************************************************************
-!                                                                             *
-!    Transform from lon,lat (lamda,phi) coordinates into CPP coordinates.     *
-!    Lon,Lat must be in radians.                                              *
-!                                                                             *
-!******************************************************************************
-
-      SUBROUTINE CPP(X,Y,RLAMBDA,PHI,RLAMBDA0,PHI0)
-      REAL*8 X,Y,RLAMBDA,PHI,RLAMBDA0,PHI0,R
-      R=6378206.4d0
-      X=R*(RLAMBDA-RLAMBDA0)*COS(PHI0)
-      Y=PHI*R
-      RETURN
-      END
-
-
-!******************************************************************************
-!                                                                             *
-!    Transform from CPP coordinates to lon,lat (lamda,phi) coordinates        *
-!    Lon,Lat is in radians.                                                   *
-!                                                                             *
-!******************************************************************************
-
-      SUBROUTINE INVCP(XXCP,YYCP,RLAMBDA,PHI,RLAMBDA0,PHI0)
-      REAL*8 XXCP,YYCP,RLAMBDA,PHI,RLAMBDA0,PHI0,R
-      R=6378206.4d0
-      RLAMBDA=RLAMBDA0+XXCP/(R*COS(PHI0))
-      PHI=YYCP/R
-      RETURN
-      END

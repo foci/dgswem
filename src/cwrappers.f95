@@ -18,6 +18,11 @@ subroutine dgswem_init_fort(sizes_c_ptr,dg_c_ptr,global_c_ptr,nodalattr_c_ptr,n_
   type (global_type), pointer :: global_here
   type (nodalattr_type), pointer :: nodalattr_here
 
+  allocate(s)
+  allocate(dg_here)
+  allocate(global_here)
+  allocate(nodalattr_here)
+
   call dgswem_init(s,dg_here,global_here,nodalattr_here,n_timesteps)
   
   sizes_c_ptr = C_LOC(s)
