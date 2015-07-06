@@ -6,4 +6,6 @@ adcpost
 adcprep
 dgswem
 dgswem_serial
-#*
+work/fort.*
+build/
+\#*#
