@@ -15,11 +15,11 @@ SUBROUTINE DGSWEM_INIT(s,dg_here,global_here,nodalattr_here,NT)
   INTEGER TESTFLAG,OUTITER,i,ModetoNode,time_here,ie,NT
   character*80 tecfile, tecfile_max
   
+  print*,"@@@@@@@@@@@@ myproc =",s%myproc
 
   CALL MAKE_DIRNAME(s)       ! Establish Working Directory Name
   CALL READ_INPUT(s,dg_here,global_here,nodalattr_here)         ! Establish sizes by reading fort.14 and fort.15
 
-  
   
   !...  
   !...  ******************* START PROGRAM SETUP SECTION ********************

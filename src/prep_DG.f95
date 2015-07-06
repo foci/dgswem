@@ -72,7 +72,11 @@
 #ifdef CMPI
       myproc_here = s%myproc
 #else
+#ifdef HPX
+      myproc_here = s%myproc
+#else
       myproc_here = 0
+#endif
 #endif
 
 

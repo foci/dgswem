@@ -61,8 +61,13 @@ MODULE SIZES
      INTEGER :: LNAME = 6
      CHARACTER*6 :: DIRNAME = 'PE0000'
 #else
+#ifdef HPX
+     INTEGER :: LNAME = 6
+     CHARACTER*6 :: DIRNAME = 'PE0000'
+#else
      INTEGER :: LNAME = 1
      CHARACTER*1 :: DIRNAME = '.'
+#endif
 #endif
      
      LOGICAL      :: WRITE_LOCAL_FILES

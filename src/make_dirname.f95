@@ -22,8 +22,14 @@ SUBROUTINE MAKE_DIRNAME(s)
 #ifdef CMPI
   WRITE(s%DIRNAME(3:6),'(I4.4)') s%MYPROC
 #else
+#ifdef HPX
+  WRITE(s%DIRNAME(3:6),'(I4.4)') s%MYPROC
+#else
   s%MYPROC=0
 #endif
+#endif
+
+
   
   IF (ARGCOUNT > 0) THEN
      I = 0

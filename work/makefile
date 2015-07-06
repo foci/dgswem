@@ -39,6 +39,15 @@ ifeq ($(BUILDTYPE),dgswem)
   MSG_OBJ:= 
 endif
 
+ifeq ($(BUILDTYPE),dgswem_hpx)
+  CF:= $(PPFC)
+  O_DIR:=odir4/
+  FFLAGS:= -DHPX $(FFLAGS3) $(DA) $(IMODS)$(O_DIR)
+  VPATH:=  ../src 
+  MSG_MOBJ:=
+endif
+
+
 $(O_DIR):
 	mkdir -p $@
 
@@ -112,9 +121,9 @@ $(O_DIR)%.o  : %.F90
 
 ########################## Executable Targets ##################################
 
-.PHONY: all metis adcprep adcpost dgswem_serial dgswem winds
+.PHONY: all metis adcprep adcpost dgswem_serial dgswem_hpx dgswem winds
 
-all :  adcprep adcpost dgswem_serial dgswem winds
+all :  adcprep adcpost dgswem_serial dgswem_hpx dgswem winds
  
 winds : 
 	python ./get_winds.py 
@@ -131,13 +140,17 @@ ifeq ($(MAKELEVEL),0)
 	$(MAKE) BUILDTYPE=adcpost $@            
    dgswem_serial:
 	$(MAKE) BUILDTYPE=dgswem_serial  $@
+   dgswem_hpx:
+	$(MAKE) BUILDTYPE=dgswem_hpx  $@
    dgswem:
 	$(MAKE) BUILDTYPE=dgswem $@
+
 else
    adcprep::  $(O_DIR)
    adcprep2:: $(O_DIR)
    adcpost::  $(O_DIR)
    dgswem_serial::   $(O_DIR)
+   dgswem_hpx::   $(O_DIR)
    dgswem::  $(O_DIR)
 
    adcprep ::  $(METIS1_OBJ) $(PREP_OBJ) 
@@ -152,6 +165,9 @@ else
    dgswem_serial ::  $(ADC_OBJ) 
 	$(CF) $(FFLAGS) -o $@  $(O_DIR)*.o
 
+   dgswem_hpx ::  $(ADC_OBJ) 
+	$(CF) $(FFLAGS) -o $@  $(O_DIR)*.o
+
    dgswem ::  $(MSG_MOBJ) $(MSG_OBJ) $(ADC_OBJ) 
 	$(CF) $(FFLAGS) -o $@  $(O_DIR)*.o  $(MSGLIBS)
 endif
@@ -163,7 +179,7 @@ clean:
 	 rm -f odir*/*.o  odir*/*.mod 
 clobber:
 	rm -r -f odir*
-	rm -f  graphchk adcprep adcprep2 adcpost dgswem_serial dgswem swemswan dgswemswan \
+	rm -f  graphchk adcprep adcprep2 adcpost dgswem_serial dgswem swemswan dgswemswan dgswem_hpx \
                 ../metis/Lib/*.o  ../metis/libmetis.a ../metis/Programs/*.o
 help:
 	@echo "This makefile supports the following:"

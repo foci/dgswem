@@ -48,6 +48,11 @@
       INTEGER IDUM80
       CHARACTER CDUM80
 #endif
+
+#ifdef HPX
+      INTEGER IDUM80
+      CHARACTER CDUM80
+#endif
 !--   
 !     ek...Zero out all the variables in the Nodal Attributes Module
 !     ek...Added from version 46
@@ -83,7 +88,26 @@
       ENDIF
 #endif
 !--   
-
+#ifdef HPX
+      OPEN(80,FILE='fort.80')
+      READ(80,'(A)') CDUM80     !Skip global_here%RUNDES
+      READ(80,'(A)') CDUM80     !Skip global_here%RUNID
+      READ(80,'(A)') CDUM80     !Skip global_here%AGRID
+      READ(80,*) IDUM80         !Skip NELG & NNODG
+      READ(80,*) IDUM80         !Read in NPROC
+      CLOSE(80)
+      IF(IDUM80.NE.s%MNPROC) THEN
+         IF(s%MYPROC.EQ.0) THEN
+            WRITE(*,'(A)') '*** ERROR IN PARALLEL SETUP!'
+            WRITE(*,'(2A,I4,A)') '*** Number of CPUS for submitted job ',&
+           '(NCPU = ',s%MNPROC,') is not equal to the'
+            WRITE(*,'(2A,I4,A)') '*** number of CPUS specified during',&
+           ' ADCPREP (see fort.80: NCPU = ',IDUM80,').'
+            WRITE(*,'(A)') '*** dgswem will now quit!'
+         ENDIF
+         STOP
+      ENDIF
+#endif
       global_here%ScreenUnit = 6
 
 !.....Initialize all runtime option logicals to false

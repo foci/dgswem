@@ -3,6 +3,6 @@ INCLUDES=`ls -d -1 ./odir4/*.o`
 echo $INCLUDES
 mv ./odir4/dgswem.oB ./odir4/dgswem.o
 
-CMD="g++ -o dgswem ../src/dgswem_cpp.cpp $INCLUDES -lgfortran"
+CMD="g++ -o dgswem_hpx_cpp ../src/dgswem_cpp.cpp $INCLUDES -lgfortran"
 echo $CMD
 $CMD
