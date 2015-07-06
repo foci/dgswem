@@ -17,6 +17,7 @@ include cmplrflags.zachtop.mk
 # Debugging 
 $(info $$NAME is [${NAME}])
 $(info $$FC is [${FC}])
+$(info $$PFC is [${PFC}])
 #
 ######################## Target Specific Rules ###################################
 
@@ -26,6 +27,15 @@ ifeq ($(BUILDTYPE),dgswem_serial)
   FFLAGS:= $(FFLAGS3) $(DA) $(IMODS)$(O_DIR)
   VPATH:=  ../src 
   MSG_MOBJ:=
+endif
+
+ifeq ($(BUILDTYPE),dgswem)
+  CF:= $(PFC)
+  O_DIR:=odir5/
+  FFLAGS:= $(FFLAGS4) $(DP) $(IMODS)$(O_DIR)
+  VPATH :=  ../src 
+  MSG_MOBJ:= $(O_DIR)messenger_elem.o $(O_DIR)messenger.o
+  MSG_OBJ:= 
 endif
 
 $(O_DIR):
