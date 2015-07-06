@@ -2055,23 +2055,23 @@
       CALL UPDATER_ELEM_MOD2(dg_here%iotataylor,dg_here%iota2taylor,dg_here%QYtaylor,1,2 )
 #endif
 
-      CALL UPDATERV(dg_here%ZEmin)
-      CALL UPDATERV(dg_here%ZEmax)
-      CALL UPDATERV(dg_here%QXmin)
-      CALL UPDATERV(dg_here%QXmax)
-      CALL UPDATERV(dg_here%QYmin)
-      CALL UPDATERV(dg_here%QYmax)
+      CALL UPDATERV(S,DG_HERE,dg_here%ZEmin)
+      CALL UPDATERV(S,DG_HERE,dg_here%ZEmax)
+      CALL UPDATERV(S,DG_HERE,dg_here%QXmin)
+      CALL UPDATERV(S,DG_HERE,dg_here%QXmax)
+      CALL UPDATERV(S,DG_HERE,dg_here%QYmin)
+      CALL UPDATERV(S,DG_HERE,dg_here%QYmax)
 
 #ifdef TRACE
-      CALL UPDATERV(dg_here%iotamax)
-      CALL UPDATERV(dg_here%iotamin)
+      CALL UPDATERV(S,DG_HERE,dg_here%iotamax)
+      CALL UPDATERV(S,DG_HERE,dg_here%iotamin)
 #endif
 
 #ifdef CHEM
-      CALL UPDATERV(dg_here%iotamax)
-      CALL UPDATERV(dg_here%iotamin)
-      CALL UPDATERV(dg_here%iota2max)
-      CALL UPDATERV(dg_here%iota2min)
+      CALL UPDATERV(S,DG_HERE,dg_here%iotamax)
+      CALL UPDATERV(S,DG_HERE,dg_here%iotamin)
+      CALL UPDATERV(S,DG_HERE,dg_here%iota2max)
+      CALL UPDATERV(S,DG_HERE,dg_here%iota2min)
 #endif
 
 #endif
@@ -2121,23 +2121,23 @@
 #ifdef CMPI
 
 
-      CALL UPDATERV(dg_here%ZEmin)
-      CALL UPDATERV(dg_here%ZEmax)
-      CALL UPDATERV(dg_here%QXmin)
-      CALL UPDATERV(dg_here%QXmax)
-      CALL UPDATERV(dg_here%QYmin)
-      CALL UPDATERV(dg_here%QYmax)
+      CALL UPDATERV(S,DG_HERE,dg_here%ZEmin)
+      CALL UPDATERV(S,DG_HERE,dg_here%ZEmax)
+      CALL UPDATERV(S,DG_HERE,dg_here%QXmin)
+      CALL UPDATERV(S,DG_HERE,dg_here%QXmax)
+      CALL UPDATERV(S,DG_HERE,dg_here%QYmin)
+      CALL UPDATERV(S,DG_HERE,dg_here%QYmax)
 
 #ifdef TRACE
-      CALL UPDATERV(dg_here%iotamax)
-      CALL UPDATERV(dg_here%iotamin)
+      CALL UPDATERV(S,DG_HERE,dg_here%iotamax)
+      CALL UPDATERV(S,DG_HERE,dg_here%iotamin)
 #endif
 
 #ifdef CHEM
-      CALL UPDATERV(dg_here%iotamax)
-      CALL UPDATERV(dg_here%iotamin)
-      CALL UPDATERV(dg_here%iota2max)
-      CALL UPDATERV(dg_here%iota2min)
+      CALL UPDATERV(S,DG_HERE,dg_here%iotamax)
+      CALL UPDATERV(S,DG_HERE,dg_here%iotamin)
+      CALL UPDATERV(S,DG_HERE,dg_here%iota2max)
+      CALL UPDATERV(S,DG_HERE,dg_here%iota2min)
 #endif
 
 #endif
@@ -5415,23 +5415,23 @@
       CALL UPDATER_ELEM_MOD2(dg_here%iotataylor,dg_here%iota2taylor,dg_here%QYtaylor,1,2 )  
 #endif
 
-      CALL UPDATERV(dg_here%ZEmin)
-      CALL UPDATERV(dg_here%ZEmax)
-      CALL UPDATERV(dg_here%QXmin)
-      CALL UPDATERV(dg_here%QXmax)
-      CALL UPDATERV(dg_here%QYmin)
-      CALL UPDATERV(dg_here%QYmax)
+      CALL UPDATERV(S,DG_HERE,dg_here%ZEmin)
+      CALL UPDATERV(S,DG_HERE,dg_here%ZEmax)
+      CALL UPDATERV(S,DG_HERE,dg_here%QXmin)
+      CALL UPDATERV(S,DG_HERE,dg_here%QXmax)
+      CALL UPDATERV(S,DG_HERE,dg_here%QYmin)
+      CALL UPDATERV(S,DG_HERE,dg_here%QYmax)
 
 #ifdef TRACE
-         CALL UPDATERV(dg_here%iotamax)
-         CALL UPDATERV(dg_here%iotamin)
+         CALL UPDATERV(S,DG_HERE,dg_here%iotamax)
+         CALL UPDATERV(S,DG_HERE,dg_here%iotamin)
 #endif
 
 #ifdef CHEM
-         CALL UPDATERV(dg_here%iotamax)
-         CALL UPDATERV(dg_here%iotamin)
-         CALL UPDATERV(dg_here%iota2max)
-         CALL UPDATERV(dg_here%iota2min)
+         CALL UPDATERV(S,DG_HERE,dg_here%iotamax)
+         CALL UPDATERV(S,DG_HERE,dg_here%iotamin)
+         CALL UPDATERV(S,DG_HERE,dg_here%iota2max)
+         CALL UPDATERV(S,DG_HERE,dg_here%iota2min)
 #endif
 
 #endif
@@ -5480,23 +5480,23 @@
 
 #ifdef CMPI
 
-      CALL UPDATERV(dg_here%ZEmin)
-      CALL UPDATERV(dg_here%ZEmax)
-      CALL UPDATERV(dg_here%QXmin)
-      CALL UPDATERV(dg_here%QXmax)
-      CALL UPDATERV(dg_here%QYmin)
-      CALL UPDATERV(dg_here%QYmax)
+      CALL UPDATERV(S,DG_HERE,dg_here%ZEmin)
+      CALL UPDATERV(S,DG_HERE,dg_here%ZEmax)
+      CALL UPDATERV(S,DG_HERE,dg_here%QXmin)
+      CALL UPDATERV(S,DG_HERE,dg_here%QXmax)
+      CALL UPDATERV(S,DG_HERE,dg_here%QYmin)
+      CALL UPDATERV(S,DG_HERE,dg_here%QYmax)
 
 #ifdef TRACE
-      CALL UPDATERV(dg_here%iotamax)
-      CALL UPDATERV(dg_here%iotamin)
+      CALL UPDATERV(S,DG_HERE,dg_here%iotamax)
+      CALL UPDATERV(S,DG_HERE,dg_here%iotamin)
 #endif
 
 #ifdef CHEM
-      CALL UPDATERV(dg_here%iotamax)
-      CALL UPDATERV(dg_here%iotamin)
-      CALL UPDATERV(dg_here%iota2max)
-      CALL UPDATERV(dg_here%iota2min)
+      CALL UPDATERV(S,DG_HERE,dg_here%iotamax)
+      CALL UPDATERV(S,DG_HERE,dg_here%iotamin)
+      CALL UPDATERV(S,DG_HERE,dg_here%iota2max)
+      CALL UPDATERV(S,DG_HERE,dg_here%iota2min)
 #endif
 
 #endif

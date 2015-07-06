@@ -70,7 +70,7 @@
       R = 6378206.4d0
 
 #ifdef CMPI
-      myproc_here = myproc
+      myproc_here = s%myproc
 #else
       myproc_here = 0
 #endif
@@ -153,11 +153,11 @@
 #ifdef CMPI
 
       CALL MSG_TYPES_ELEM()     ! Determine Word Sizes for Message-Passing
-      CALL MSG_TABLE_ELEM()     ! Read Message-Passing Tables
+      CALL MSG_TABLE_ELEM(s)     ! Read Message-Passing Tables
 
       IF (dg_here%SLOPEFLAG.ge.4) THEN
          CALL MSG_TYPES()
-         CALL MSG_TABLE()
+         CALL MSG_TABLE(s)
       ENDIF
 
 #endif
@@ -175,8 +175,8 @@
       ENDIF
 
 #ifdef CMPI
-      CALL MESSAGE_START_ELEM() ! Startup persistent message passing
-      IF (dg_here%SLOPEFLAG.ge.4) CALL MESSAGE_START()
+      CALL MESSAGE_START_ELEM(dg_here,s) ! Startup persistent message passing
+      IF (dg_here%SLOPEFLAG.ge.4) CALL MESSAGE_START(s)
 #endif
 
 !.....Re-arrange elevation specified boundary segment data for DG

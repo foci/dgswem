@@ -73,7 +73,6 @@
 !.....Use appropriate modules
       
 #ifdef CMPI
-      USE SIZES, ONLY : SZ,MYPROC,layers
       USE MESSENGER_ELEM, ONLY: MESSAGE_FINI, ErrorElevSum
 #else
       USE SIZES
@@ -103,7 +102,7 @@
          IF((dg_here%ZE(1,J,1)+DPAVG).LE.0.D0) THEN
             PRINT *, ''
 #ifdef CMPI
-            PRINT *, 'IN SUBDOMAIN ',MYPROC
+            PRINT *, 'IN SUBDOMAIN ',s%MYPROC
 #endif
             PRINT *, '  dg_here%ZE(',1,',',J,',1) = ',dg_here%ZE(1,J,1)
             PRINT *, '  HE(',1,',',J,',1) = ',dg_here%ZE(1,J,1)+DPAVG
@@ -116,14 +115,14 @@
       ENDDO
 #ifdef CMPI
       CALL ErrorElevSum(ErrorElevExceeded)
-      IF(ErrorElevExceeded.global_here%NE.0) THEN
-         if (myproc.eq.0) then
+      IF(ErrorElevExceeded.NE.0) THEN
+         if (s%myproc.eq.0) then
             PRINT *, ''
             PRINT *,'  PROGRAM WILL BE TERMINATED in DG_timestep'
             PRINT *, ''
          endif
 
-         call message_fini ()
+         call message_fini (s)
          STOP
       endif
 #else
@@ -163,7 +162,7 @@
             IF(dg_here%ZE(K,J,1).NE.dg_here%ZE(K,J,1)) THEN
                PRINT *, ''
 #ifdef CMPI
-               PRINT *, 'IN SUBDOMAIN ',MYPROC
+               PRINT *, 'IN SUBDOMAIN ',s%MYPROC
 #endif
                PRINT *, '  dg_here%ZE(',K,',',J,',1) IS ',dg_here%ZE(K,J,1)
                PRINT *, ' global_here%x,  global_here%y ',global_here%SLAM(global_here%NM(J,1))/DEG2RAD,global_here%SFEA(global_here%NM(J,1))/DEG2RAD
@@ -172,7 +171,7 @@
             ENDIF
             IF(dg_here%QX(K,J,1).NE.dg_here%QX(K,J,1)) THEN
 #ifdef CMPI
-               PRINT *, 'IN SUBDOMAIN ',MYPROC
+               PRINT *, 'IN SUBDOMAIN ',s%MYPROC
 #endif
                PRINT *, ''
                PRINT *, '  dg_here%QX(',K,',',J,',1) IS ',dg_here%QX(K,J,1)
@@ -182,7 +181,7 @@
             ENDIF
             IF(dg_here%QY(K,J,1).NE.dg_here%QY(K,J,1)) THEN
 #ifdef CMPI
-               PRINT *, 'IN SUBDOMAIN ',MYPROC
+               PRINT *, 'IN SUBDOMAIN ',s%MYPROC
 #endif
                PRINT *, ''
                PRINT *, '  dg_here%QY(',K,',',J,',1) IS ',dg_here%QY(K,J,1)
@@ -192,11 +191,11 @@
             ENDIF
 
 #ifdef TRACE
-            IF(dg_here%iota(K,J,1).global_here%NE.dg_here%iota(K,J,1)) THEN
+            IF(dg_here%iota(K,J,1).NE.dg_here%iota(K,J,1)) THEN
                PRINT *, ''
 
 #ifdef CMPI
-               PRINT *, 'IN SUBDOMAIN ',MYPROC
+               PRINT *, 'IN SUBDOMAIN ',s%MYPROC
 #endif
                PRINT *, '  dg_here%iota(',K,',',J,',1) IS ',dg_here%iota(K,J,1)
                PRINT *, ' global_here%x,  global_here%y ',global_here%X(global_here%NM(J,1)),global_here%Y(global_here%NM(J,1))
@@ -206,19 +205,19 @@
 #endif
             
 #ifdef CHEM
-            IF(dg_here%iota(K,J,1).global_here%NE.dg_here%iota(K,J,1)) THEN
+            IF(dg_here%iota(K,J,1).NE.dg_here%iota(K,J,1)) THEN
                PRINT *, ''
 #ifdef CMPI
-               PRINT *, 'IN SUBDOMAIN ',MYPROC
+               PRINT *, 'IN SUBDOMAIN ',s%MYPROC
 #endif
                PRINT *, '  dg_here%iota(',K,',',J,',1) IS ',dg_here%iota(K,J,1)
                PRINT *, ' global_here%x,  global_here%y ',global_here%X(global_here%NM(J,1)),global_here%Y(global_here%NM(J,1))
                Detected = .TRUE.
             ENDIF
-            IF(dg_here%iota2(K,J,1).global_here%NE.dg_here%iota2(K,J,1)) THEN
+            IF(dg_here%iota2(K,J,1).NE.dg_here%iota2(K,J,1)) THEN
                PRINT *, ''
 #ifdef CMPI
-               PRINT *, 'IN SUBDOMAIN ',MYPROC
+               PRINT *, 'IN SUBDOMAIN ',s%MYPROC
 #endif
                PRINT *, '  dg_here%iota2(',K,',',J,',1) IS ',dg_here%iota2(K,J,1)
                PRINT *, ' global_here%x,  global_here%y ',global_here%X(global_here%NM(J,1)),global_here%Y(global_here%NM(J,1))
@@ -228,7 +227,7 @@
 #endif
 
 #ifdef DYNP
-            IF(dg_here%dynP(K,J,1).global_here%NE.dg_here%dynP(K,J,1)) THEN
+            IF(dg_here%dynP(K,J,1).NE.dg_here%dynP(K,J,1)) THEN
                PRINT *, ''
 
 #ifdef CMPI
@@ -243,7 +242,7 @@
 #ifdef SED_LAY
             
             do l = 1,s%layers
-               IF(dg_here%bed(K,J,1,l).global_here%NE.dg_here%bed(K,J,1,l)) THEN
+               IF(dg_here%bed(K,J,1,l).NE.dg_here%bed(K,J,1,l)) THEN
                   PRINT *, ''
                   
 #ifdef CMPI
@@ -277,8 +276,8 @@
 #ifdef CMPI
       CALL ErrorElevSum(ErrorElevExceeded)
 !      write(*,*) myproc,ErrorElevExceeded
-      IF (ErrorElevExceeded.global_here%NE.0) THEN
-         CALL MESSAGE_FINI()
+      IF (ErrorElevExceeded.NE.0) THEN
+         CALL MESSAGE_FINI(s)
          stop
       ENDIF
 #else

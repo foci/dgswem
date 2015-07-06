@@ -103,6 +103,7 @@
 !...
 !...DECLARE ALL ARRAYS
 !...
+
 #ifdef CMPI
       INTEGER, ALLOCATABLE ::   IDUMY(:)
       REAL(SZ),ALLOCATABLE ::   DUMY1(:),DUMY2(:)
@@ -434,7 +435,7 @@
 !--
 
 #ifdef CMPI
-      ALLOCATE ( IDUMY(1), DUMY1(1), DUMY2(1) )
+      ALLOCATE ( global_here%IDUMY(1), global_here%DUMY1(1), global_here%DUMY2(1) )
 #endif
 
 #ifdef CVEC

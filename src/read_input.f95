@@ -73,12 +73,12 @@
          IF(s%MYPROC.EQ.0) THEN
             WRITE(*,'(A)') '*** ERROR IN PARALLEL SETUP!'
             WRITE(*,'(2A,I4,A)') '*** Number of CPUS for submitted job ',&
-           '(NCPU = ',MNPROC,') is not equal to the'
+           '(NCPU = ',s%MNPROC,') is not equal to the'
             WRITE(*,'(2A,I4,A)') '*** number of CPUS specified during',&
            ' ADCPREP (see fort.80: NCPU = ',IDUM80,').'
             WRITE(*,'(A)') '*** dgswem will now quit!'
          ENDIF
-         CALL MESSAGE_FINI()
+         CALL MESSAGE_FINI(s)
          STOP
       ENDIF
 #endif
@@ -1184,7 +1184,7 @@
          WRITE(16,9713)
          WRITE(16,9973)
 #ifdef CMPI
-         call MESSAGE_FINI()
+         call MESSAGE_FINI(s)
 #endif
          STOP
       END SELECT

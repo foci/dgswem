@@ -59,6 +59,7 @@
       type (sizes_type) :: s
       type (dg_type) :: dg_here
       type (global_type) :: global_here
+      type (nodalattr_type) :: nodalattr_here
       
       INTEGER TESTFLAG,OUTITER,istop,i,ModetoNode,time_here,ie
 !     sb-PDG1
@@ -67,14 +68,14 @@
 !     nd
       character*80 tecfile,tecfile_max
 
-      CALL MESSAGE_INIT()       ! Init MPI and get MPI-rank of this cpu
+      CALL MESSAGE_INIT(s)       ! Init MPI and get MPI-rank of this cpu
 
                                 ! <ezpp-begin>
-      IF(MYPROC.EQ.0)THEN
-         write(*,*) 'mnproc ',mnproc
+      IF(s%MYPROC.EQ.0)THEN
+         write(*,*) 'mnproc ',s%mnproc
       ENDIF
       CALL MAKE_DIRNAME(s)       ! Establish Working Directory Name
-      CALL READ_INPUT(s,dg_here)         ! Establish sizes by reading fort.14 and fort.15
+      CALL READ_INPUT(s,dg_here,global_here,nodalattr_here) ! Establish sizes by reading fort.14 and fort.15
 #else
       IMPLICIT NONE
      
@@ -342,8 +343,8 @@
       WRITE(16,1112)
       WRITE(16,17931)
 #ifdef CMPI
-      IF (global_here%NSCREEN.EQ.1.AND.MYPROC.EQ.0) WRITE(6,1112)
-      IF (global_here%NSCREEN.EQ.1.AND.MYPROC.EQ.0) WRITE(6,17931)
+      IF (global_here%NSCREEN.EQ.1.AND.s%MYPROC.EQ.0) WRITE(6,1112)
+      IF (global_here%NSCREEN.EQ.1.AND.s%MYPROC.EQ.0) WRITE(6,17931)
 #else      
       IF (global_here%NSCREEN.EQ.1) WRITE(6,1112)
       IF (global_here%NSCREEN.EQ.1) WRITE(6,17931)
@@ -439,7 +440,7 @@
 #endif
 
 #ifdef CMPI
-      CALL MESSAGE_FINI()
+      CALL MESSAGE_FINI(s)
 #endif
 !     
 !     

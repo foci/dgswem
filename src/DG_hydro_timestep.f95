@@ -434,23 +434,23 @@
 #endif
 
 #ifdef CMPI
-         CALL UPDATER_ELEM_MOD(dg_here%ZE,dg_here%QX,dg_here%QY,irk+1,3)
+         CALL UPDATER_ELEM_MOD(DG_HERE,dg_here%ZE,dg_here%QX,dg_here%QY,irk+1,3)
 #ifdef TRACE
-         CALL UPDATER_ELEM_MOD(dg_here%iota,dg_here%iota2,dg_here%QY,irk+1,2 )
+         CALL UPDATER_ELEM_MOD(DG_HERE,dg_here%iota,dg_here%iota2,dg_here%QY,irk+1,2 )
 #endif
 
 #ifdef DYNP
-         CALL UPDATER_ELEM_MOD(dg_here%dynP,dg_here%iota2,dg_here%QY,irk+1,2 )
+         CALL UPDATER_ELEM_MOD(DG_HERE,dg_here%dynP,dg_here%iota2,dg_here%QY,irk+1,2 )
 #endif
 
 #ifdef CHEM
-         CALL UPDATER_ELEM_MOD(dg_here%iota,dg_here%iota2,dg_here%QY,irk+1,2 )
+         CALL UPDATER_ELEM_MOD(DG_HERE,dg_here%iota,dg_here%iota2,dg_here%QY,irk+1,2 )
 #endif
 
 #ifdef SED_LAY
          do l = 1,layers
             dg_here%arrayfix => dg_here%bed(:,:,:,l) 
-            CALL UPDATER_ELEM_MOD(dg_here%arrayfix,dg_here%QX,dg_here%QY,irk+1,1 )
+            CALL UPDATER_ELEM_MOD(DG_HERE,dg_here%arrayfix,dg_here%QX,dg_here%QY,irk+1,1 )
          enddo
 #endif
 
@@ -496,26 +496,26 @@
 !.......drying is being used
 
 #ifdef CMPI
-         if (dg_here%SLOPEFLAG.global_here%NE.0.OR.global_here%NOLIFA.GE.2) THEN
-            CALL UPDATER_ELEM_MOD(dg_here%ZE,dg_here%QX,dg_here%QY,irk+1,3)
+         if (dg_here%SLOPEFLAG.NE.0.OR.global_here%NOLIFA.GE.2) THEN
+            CALL UPDATER_ELEM_MOD(DG_HERE,dg_here%ZE,dg_here%QX,dg_here%QY,irk+1,3)
             
 #ifdef TRACE
-            CALL UPDATER_ELEM_MOD(dg_here%iota,dg_here%iota2,dg_here%QY,irk+1,2 )
+            CALL UPDATER_ELEM_MOD(DG_HERE,dg_here%iota,dg_here%iota2,dg_here%QY,irk+1,2 )
 #endif
 
 #ifdef CHEM
-            CALL UPDATER_ELEM_MOD(dg_here%iota,dg_here%iota2,dg_here%QY,irk+1,2 )
+            CALL UPDATER_ELEM_MOD(DG_HERE,dg_here%iota,dg_here%iota2,dg_here%QY,irk+1,2 )
 #endif
 
 #ifdef DYNP
-            CALL UPDATER_ELEM_MOD(dg_here%dynP,dg_here%iota2,dg_here%QY,irk+1,2 )
+            CALL UPDATER_ELEM_MOD(DG_HERE,dg_here%dynP,dg_here%iota2,dg_here%QY,irk+1,2 )
 #endif
 
 
 #ifdef SED_LAY
             do l = 1,layers
                dg_here%arrayfix => dg_here%bed(:,:,:,l)
-               CALL UPDATER_ELEM_MOD(dg_here%arrayfix,dg_here%QX,dg_here%QY,irk+1,1 )
+               CALL UPDATER_ELEM_MOD(DG_HERE,dg_here%arrayfix,dg_here%QX,dg_here%QY,irk+1,1 )
             enddo
 #endif
          endif
@@ -529,24 +529,24 @@
          endif
 #ifdef CMPI
 
-         CALL UPDATER_ELEM_MOD(dg_here%ZE,dg_here%QX,dg_here%QY,irk+1,3)
+         CALL UPDATER_ELEM_MOD(DG_HERE,dg_here%ZE,dg_here%QX,dg_here%QY,irk+1,3)
 
 #ifdef TRACE
-         CALL UPDATER_ELEM_MOD(dg_here%iota,dg_here%iota2,dg_here%QY,irk+1,2 )
+         CALL UPDATER_ELEM_MOD(DG_HERE,dg_here%iota,dg_here%iota2,dg_here%QY,irk+1,2 )
 #endif
 
 #ifdef CHEM
-         CALL UPDATER_ELEM_MOD(dg_here%iota,dg_here%iota2,dg_here%QY,irk+1,2 )
+         CALL UPDATER_ELEM_MOD(DG_HERE,dg_here%iota,dg_here%iota2,dg_here%QY,irk+1,2 )
 #endif
 
 #ifdef DYNP
-         CALL UPDATER_ELEM_MOD(dg_here%dynP,dg_here%iota2,dg_here%QY,irk+1,2 )
+         CALL UPDATER_ELEM_MOD(DG_HERE,dg_here%dynP,dg_here%iota2,dg_here%QY,irk+1,2 )
 #endif
 
 #ifdef SED_LAY
          do l = 1,layers
             dg_here%arrayfix => dg_here%bed(:,:,:,l)
-            CALL UPDATER_ELEM_MOD(dg_here%arrayfix,dg_here%QX,dg_here%QY,irk+1,1 )
+            CALL UPDATER_ELEM_MOD(DG_HERE,dg_here%arrayfix,dg_here%QX,dg_here%QY,irk+1,1 )
          enddo
 #endif
 

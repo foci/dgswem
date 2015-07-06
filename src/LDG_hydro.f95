@@ -204,11 +204,11 @@
 
 #ifdef CMPI
 #ifdef WAVE_DIF
-      CALL UPDATELZ_ELEM(dg_here%HZ)
+      CALL UPDATELZ_ELEM(DG_HERE,dg_here%HZ)
 #endif
-      CALL UPDATELZ_ELEM(dg_here%LZ)
+      CALL UPDATELZ_ELEM(DG_HERE,dg_here%LZ)
 #ifdef TRACE
-      CALL UPDATELZ_ELEM(dg_here%TZ)
+      CALL UPDATELZ_ELEM(DG_HERE,dg_here%TZ)
 #endif
 #ifdef SED_LAY
       do ll=1,layers

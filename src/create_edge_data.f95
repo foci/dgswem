@@ -80,7 +80,7 @@
 
       dg_here%NEDGES = 0
 #ifdef CMPI
-      IF(MYPROC.EQ.0) THEN
+      IF(s%MYPROC.EQ.0) THEN
          PRINT *,'CREATING global_here%EDGE PAIRS...'
       ENDIF
 #else
@@ -124,7 +124,7 @@
                 IF(global_here%EDFLG(JED,JEL).EQ.1) THEN
                   PRINT *,'POSSIBLE DUPLICATE ELEMENT'
 #ifdef CMPI
-                  PRINT *,'MYPROC=',MYPROC
+                  PRINT *,'MYPROC=',s%MYPROC
 #endif
                   PRINT *,'dg_here%EL=',JEL,', dg_here%J1=',dg_here%J1,', dg_here%J2=',dg_here%J2
                   PRINT *,'  (CREATE_EDGE_DATA.dg_here%F)'
@@ -147,7 +147,7 @@
       DEALLOCATE(global_here%EDFLG)
 
 #ifdef CMPI
-      IF(MYPROC.EQ.0) THEN
+      IF(s%MYPROC.EQ.0) THEN
          PRINT *,'DONE'
          PRINT *,''
       ENDIF
@@ -461,7 +461,7 @@
                  dg_here%NREDS)
 
 #ifdef CMPI
-      IF(MYPROC.EQ.0) THEN
+      IF(s%MYPROC.EQ.0) THEN
          WRITE(6,*) '  '
          WRITE(6,*) 'TOTAL NO. OF EDGES = ', dg_here%NEDGES
          WRITE(6,*) '  '

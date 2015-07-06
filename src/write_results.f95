@@ -610,12 +610,12 @@
 !                 write(777,7777) global_here%x(i), global_here%y(i), 
      $                   global_here%dp(i), global_here%eta2(i), global_here%eta2(i)+global_here%dp(i),global_here%uu2(i),global_here%vv2(i),
      $           sqrt(global_here%uu2(i)**2+global_here%vv2(i)**2),sqrt(global_here%wsx2(i)**2+global_here%wsy2(i)**2),
-     $                   myproc
+     $                   s%myproc
                     else
                        write(777,7777) global_here%x(i), global_here%y(i), 
      $                   global_here%dp(i), global_here%eta2(i), global_here%eta2(i)+global_here%dp(i),global_here%uu2(i),global_here%vv2(i),
      $           sqrt(global_here%uu2(i)**2+global_here%vv2(i)**2),sqrt(global_here%wsx2(i)**2+global_here%wsy2(i)**2),
-     $                   myproc
+     $                   s%myproc
                     endif
 
                  enddo
@@ -1036,7 +1036,7 @@
 !...  CLOSE THE HOT START OUTPUT FILE
 !...  
             CLOSE(global_here%IHSFIL)
-            IF(global_here%NSCREEN.EQ.1.AND.MYPROC.EQ.0) THEN
+            IF(global_here%NSCREEN.EQ.1.AND.s%MYPROC.EQ.0) THEN
                WRITE(6,24541) global_here%IHSFIL,IT,global_here%TIME_A
             ENDIF
             WRITE(16,24541) global_here%IHSFIL,IT,global_here%TIME_A
@@ -1098,7 +1098,7 @@
 #ifdef CMPI
 !     sb
 !     IF(MYPROC.EQ.0.AND.global_here%ELMAX.LT.200.0.AND.global_here%KEMAX.GT.0) THEN
-         IF( (MYPROC.EQ.0).AND.(global_here%ELMAX.LT.200.0).AND.&
+         IF( (s%MYPROC.EQ.0).AND.(global_here%ELMAX.LT.200.0).AND.&
         (MOD(IT,global_here%NSCREEN_INC).EQ.0) ) THEN
             if (global_here%kemax.eq.0) then 
                global_here%kemax = 1 
@@ -1108,7 +1108,7 @@
             print*,''
 
          WRITE(6,1991) IT,global_here%NUMITR,global_here%ETA2(global_here%KEMAX),global_here%KEMAX,global_here%VELMAX,global_here%KVMAX,&
-           MYPROC
+           s%MYPROC
  1991   FORMAT(1X,'TIME STEP =',I8,5X,'ITERATIONS =',I5,&
            /,2X,'global_here%ELMAX = ', E11.4,' AT NODE',I7,&
            2X,'SPEEDMAX = ',E11.4,' AT NODE',I7,&
@@ -1170,9 +1170,9 @@
                global_here%kemax = 1 
             endif
             WRITE(6,1993) IT,global_here%NUMITR,global_here%ETA2(global_here%KEMAX),global_here%KEMAX,global_here%VELMAX,global_here%KVMAX,&
-           MYPROC
+           s%MYPROC
             WRITE(16,1993) IT,global_here%NUMITR,global_here%ETA2(global_here%KEMAX),global_here%KEMAX,global_here%VELMAX,global_here%KVMAX,&
-           MYPROC
+           s%MYPROC
  1993       FORMAT(1X,'TIME STEP =',I8,6X,'ITERATIONS =',I5,&
       /,2X,'global_here%ELMAX = ', E11.4,' AT NODE',I7,&
       2X,'SPEEDMAX = ',E11.4,' AT NODE',I7,&
