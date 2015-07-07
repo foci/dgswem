@@ -111,6 +111,8 @@
       CHARACTER(len=80) Skipped ! data in unit 13 we do not need
       INTEGER L                 ! line counter
 !
+      integer :: fort13unit, fort15unit
+
       NAFound = .False.
       SkipDataSet = .False.
 !
@@ -163,6 +165,7 @@
 !
 !     Read the unit 15 control file to determine what data must be
 !     loaded from nodal attributes file.
+      fort15unit = 15*100+s%myproc
       WRITE(16,235) nodalattr_here%NWP
  235  FORMAT(/,9X,'Need to load ',I2,' nodal attribute(s):')
       DO k=1,nodalattr_here%NWP
@@ -210,7 +213,8 @@
       WRITE(16,240) 
  240  FORMAT(/,9X,'Nodal Attributes File (unit 13) was found.',&
           ' Opening file.') 
-      OPEN(UNIT=13, FILE=s%DIRNAME//'/'//'fort.13', &
+      fort13unit=13*100+s%myproc
+      OPEN(FORT13UNIT, FILE=s%DIRNAME//'/'//'fort.13', &
          IOSTAT=ErrorIO)
       IF ( ErrorIO .GT. 0 ) THEN 
          WRITE(16,1001)         ! Nodal attribute file
@@ -225,80 +229,80 @@
       ENDIF
 !
 !     Read each attribute name, units, number of values, and default value
-      READ(13,'(A80)') header
+      READ(fort13unit,'(A80)') header
       WRITE(16,250) 
  250  FORMAT(/,9X,'User comment line from unit 13:') 
       WRITE(16,'(14X,A80,/)') header
-      READ(13,*) nodalattr_here%NumOfNodes     ! number of nodes according to unit 13
-      READ(13,*) nodalattr_here%NAttr          ! number of attributes in the unit 13 file
+      READ(fort13unit,*) nodalattr_here%NumOfNodes     ! number of nodes according to unit 13
+      READ(fort13unit,*) nodalattr_here%NAttr          ! number of attributes in the unit 13 file
       DO k=1, nodalattr_here%NAttr
-         READ(13,'(A80)') AttrName
+         READ(fort13unit,'(A80)') AttrName
          WRITE(16,'(9X,A80)') AttrName
          WRITE(16,260) 
  260     FORMAT(14X,'was found!',/) 
          SELECT CASE (TRIM(ADJUSTL(AttrName)))
          CASE("primitive_weighting_in_continuity_equation")
             nodalattr_here%FoundTau0 = .True.
-            READ(13,'(A80)') nodalattr_here%Tau0Units   
-            READ(13,*) nodalattr_here%Tau0NoOfVals
-            READ(13,*) nodalattr_here%Tau0DefVal
+            READ(fort13unit,'(A80)') nodalattr_here%Tau0Units   
+            READ(fort13unit,*) nodalattr_here%Tau0NoOfVals
+            READ(fort13unit,*) nodalattr_here%Tau0DefVal
          CASE("surface_submergence_state")
             nodalattr_here%FoundStartDry = .True. 
-            READ(13,'(A80)') nodalattr_here%StartDryUnits      
-            READ(13,*) nodalattr_here%StartDryNoOfVals
-            READ(13,*) nodalattr_here%StartDryDefVal            
+            READ(fort13unit,'(A80)') nodalattr_here%StartDryUnits      
+            READ(fort13unit,*) nodalattr_here%StartDryNoOfVals
+            READ(fort13unit,*) nodalattr_here%StartDryDefVal            
          CASE("quadratic_friction_coefficient_at_sea_floor")
             nodalattr_here%FoundQuadraticFric = .True.
-            READ(13,'(A80)') nodalattr_here%QuadraticFricUnits 
-            READ(13,*) nodalattr_here%QuadraticFricNoOfVals
-            READ(13,*) nodalattr_here%QuadraticFricDefVal
+            READ(fort13unit,'(A80)') nodalattr_here%QuadraticFricUnits 
+            READ(fort13unit,*) nodalattr_here%QuadraticFricNoOfVals
+            READ(fort13unit,*) nodalattr_here%QuadraticFricDefVal
          CASE("surface_directional_effective_roughness_length") 
             nodalattr_here%FoundDirEffRLen = .True. 
-            READ(13,'(A80)') nodalattr_here%DirEffRLenUnits  
-            READ(13,*) nodalattr_here%DirEffRLenNoOfVals
-            READ(13,*) (nodalattr_here%DirEffRLenDefVal(j),j=1,12)    
+            READ(fort13unit,'(A80)') nodalattr_here%DirEffRLenUnits  
+            READ(fort13unit,*) nodalattr_here%DirEffRLenNoOfVals
+            READ(fort13unit,*) (nodalattr_here%DirEffRLenDefVal(j),j=1,12)    
          CASE("surface_canopy_coefficient") 
             nodalattr_here%FoundCanopyCoef = .True. 
-            READ(13,'(A80)') nodalattr_here%CanopyCoefUnits  
-            READ(13,*) nodalattr_here%CanopyCoefNoOfVals
-            READ(13,*) nodalattr_here%CanopyCoefDefVal 
+            READ(fort13unit,'(A80)') nodalattr_here%CanopyCoefUnits  
+            READ(fort13unit,*) nodalattr_here%CanopyCoefNoOfVals
+            READ(fort13unit,*) nodalattr_here%CanopyCoefDefVal 
          CASE("bridge_pilings_friction_parameters") 
             nodalattr_here%FoundBridgePilings = .True.
-            READ(13,'(A80)') nodalattr_here%BridgePilingsUnits  
-            READ(13,*) nodalattr_here%BridgePilingsNoOfVals
-            READ(13,*) (nodalattr_here%BridgePilingsDefVal(j),j=1,12)  
+            READ(fort13unit,'(A80)') nodalattr_here%BridgePilingsUnits  
+            READ(fort13unit,*) nodalattr_here%BridgePilingsNoOfVals
+            READ(fort13unit,*) (nodalattr_here%BridgePilingsDefVal(j),j=1,12)  
          CASE("mannings_n_at_sea_floor")
             nodalattr_here%FoundManningsN = .True. 
-            READ(13,'(A80)') nodalattr_here%ManningsNUnits 
-            READ(13,*) nodalattr_here%ManningsNNoOfVals
-            READ(13,*) nodalattr_here%ManningsNDefVal 
+            READ(fort13unit,'(A80)') nodalattr_here%ManningsNUnits 
+            READ(fort13unit,*) nodalattr_here%ManningsNNoOfVals
+            READ(fort13unit,*) nodalattr_here%ManningsNDefVal 
          CASE("chezy_friction_coefficient_at_sea_floor")
             nodalattr_here%FoundChezy = .True.
-            READ(13,'(A80)') nodalattr_here%ChezyUnits     
-            READ(13,*) nodalattr_here%ChezyNoOfVals
-            READ(13,*) nodalattr_here%ChezyDefVal          
+            READ(fort13unit,'(A80)') nodalattr_here%ChezyUnits     
+            READ(fort13unit,*) nodalattr_here%ChezyNoOfVals
+            READ(fort13unit,*) nodalattr_here%ChezyDefVal          
          CASE("sea_surface_height_above_geoid")
             nodalattr_here%FoundGeoidOffset = .True.
-            READ(13,'(A80)') nodalattr_here%GeoidOffsetUnits     
-            READ(13,*) nodalattr_here%GeoidOffsetNoOfVals
-            READ(13,*) nodalattr_here%GeoidOffsetDefVal
+            READ(fort13unit,'(A80)') nodalattr_here%GeoidOffsetUnits     
+            READ(fort13unit,*) nodalattr_here%GeoidOffsetNoOfVals
+            READ(fort13unit,*) nodalattr_here%GeoidOffsetDefVal
          CASE&
          ("average_horizontal_eddy_viscosity_in_sea_water_wrt_depth")
             nodalattr_here%FoundEVM = .True.
-            READ(13,'(A80)') nodalattr_here%EVMUnits     
-            READ(13,*) nodalattr_here%EVMNoOfVals
-            READ(13,*) nodalattr_here%EVMDefVal
+            READ(fort13unit,'(A80)') nodalattr_here%EVMUnits     
+            READ(fort13unit,*) nodalattr_here%EVMNoOfVals
+            READ(fort13unit,*) nodalattr_here%EVMDefVal
          CASE&
         ("average_horizontal_eddy_diffusivity_in_sea_water_wrt_depth")
-            READ(13,'(A80)') nodalattr_here%EVCUnits     
-            READ(13,*) nodalattr_here%EVCNoOfVals
-            READ(13,*) nodalattr_here%EVCDefVal
+            READ(fort13unit,'(A80)') nodalattr_here%EVCUnits     
+            READ(fort13unit,*) nodalattr_here%EVCNoOfVals
+            READ(fort13unit,*) nodalattr_here%EVCDefVal
 !asey 101118: Allow SWAN to handle wave refraction as a nodal attribute.
          CASE("wave_refraction_in_swan")
             nodalattr_here%FoundSwanWaveRefrac = .TRUE.
-            READ(13,'(A80)') nodalattr_here%SwanWaveRefracUnits
-            READ(13,*) nodalattr_here%SwanWaveRefracNoOfVals
-            READ(13,*) nodalattr_here%SwanWaveRefracDefVal
+            READ(fort13unit,'(A80)') nodalattr_here%SwanWaveRefracUnits
+            READ(fort13unit,*) nodalattr_here%SwanWaveRefracNoOfVals
+            READ(fort13unit,*) nodalattr_here%SwanWaveRefracDefVal
          CASE DEFAULT     
             WRITE(16,1001)          ! Nodal Attributes file
             WRITE(16,1021) AttrName ! contains invalid name
@@ -306,8 +310,8 @@
                WRITE(ScreenUnit,1001)       
                WRITE(ScreenUnit,1021) AttrName 
             ENDIF
-            READ(13,'(A80)') Skipped  ! skip the Units for the invalid name
-            READ(13,'(A80)') Skipped  ! skip the NoOfVals for invalid name
+            READ(fort13unit,'(A80)') Skipped  ! skip the Units for the invalid name
+            READ(fort13unit,'(A80)') Skipped  ! skip the NoOfVals for invalid name
          END SELECT
       END DO
 !
@@ -366,28 +370,28 @@
       DO k=1, nodalattr_here%NAttr
          WRITE(16,280) k
  280     FORMAT(/,9X,'Attribute ',I2,':')
-         READ(13,'(A80)') AttrName
-         READ(13,*) NumNodesNotDefault
+         READ(fort13unit,'(A80)') AttrName
+         READ(fort13unit,*) NumNodesNotDefault
          WRITE(16,'(14X,A80)') AttrName
          SELECT CASE (TRIM(ADJUSTL(AttrName)))
          CASE("primitive_weighting_in_continuity_equation")
             IF (nodalattr_here%LoadTau0) THEN
                CALL LoadAttrVec(nodalattr_here%TAU0VAR, nodalattr_here%Tau0DefVal,&
-                   NumNodesNotDefault, NScreen, MyProc, NAbOut,nodalattr_here%NumOfNodes)
+                   NumNodesNotDefault, NScreen, MyProc, NAbOut,nodalattr_here%NumOfNodes, fort13unit)
             ELSE
                SkipDataSet = .True.
             ENDIF
          CASE("surface_submergence_state")
             IF (nodalattr_here%LoadStartDry) THEN
                CALL LoadAttrVec(nodalattr_here%STARTDRY, nodalattr_here%StartDryDefVal, &
-                    NumNodesNotDefault, NScreen, MyProc, NAbOut,nodalattr_here%NumOfNodes)
+                    NumNodesNotDefault, NScreen, MyProc, NAbOut,nodalattr_here%NumOfNodes, fort13unit)
             ELSE
                SkipDataSet = .True.
             ENDIF
          CASE("quadratic_friction_coefficient_at_sea_floor")
             IF (nodalattr_here%LoadQuadraticFric) THEN
                CALL LoadAttrVec(nodalattr_here%FRIC, nodalattr_here%QuadraticFricDefVal, &
-                   NumNodesNotDefault, NScreen, MyProc, NAbOut,nodalattr_here%NumOfNodes)
+                   NumNodesNotDefault, NScreen, MyProc, NAbOut,nodalattr_here%NumOfNodes, fort13unit)
             ELSE
                SkipDataSet = .True.
             ENDIF
@@ -395,14 +399,14 @@
             IF (nodalattr_here%LoadDirEffRLen) THEN
                CALL LoadAttrMat(nodalattr_here%z0land, nodalattr_here%DirEffRLenNoOfVals,  &
                    nodalattr_here%DirEffRLenDefVal, NumNodesNotDefault,  &
-                   NScreen, MyProc, NAbOut,nodalattr_here%NumOfNodes)
+                   NScreen, MyProc, NAbOut,nodalattr_here%NumOfNodes, fort13unit)
             ELSE
                SkipDataSet = .True.
             ENDIF
          CASE("surface_canopy_coefficient") 
             IF (nodalattr_here%LoadCanopyCoef) THEN
                CALL LoadAttrVec(nodalattr_here%vcanopy, nodalattr_here%CanopyCoefDefVal,&
-                    NumNodesNotDefault, NScreen, MyProc, NAbOut,nodalattr_here%NumOfNodes)
+                    NumNodesNotDefault, NScreen, MyProc, NAbOut,nodalattr_here%NumOfNodes, fort13unit)
             ELSE
                SkipDataSet = .True.
             ENDIF
@@ -410,28 +414,28 @@
             IF (nodalattr_here%LoadBridgePilings) THEN
                CALL LoadAttrMat(nodalattr_here%BridgePilings, nodalattr_here%BridgePilingsNoOfVals, &
                    nodalattr_here%BridgePilingsDefVal,  NumNodesNotDefault, &
-                   NScreen, MyProc, NAbOut,nodalattr_here%NumOfNodes)
+                   NScreen, MyProc, NAbOut,nodalattr_here%NumOfNodes, fort13unit)
             ELSE
                SkipDataSet = .True.
             ENDIF
          CASE("mannings_n_at_sea_floor")
             IF (nodalattr_here%LoadManningsN) THEN
                CALL LoadAttrVec(nodalattr_here%ManningsN, nodalattr_here%ManningsNDefVal, &
-                   NumNodesNotDefault, NScreen, MyProc, NAbOut,nodalattr_here%NumOfNodes)
+                   NumNodesNotDefault, NScreen, MyProc, NAbOut,nodalattr_here%NumOfNodes, fort13unit)
             ELSE
                SkipDataSet = .True.
             ENDIF
          CASE("chezy_friction_coefficient_at_sea_floor")
             IF (nodalattr_here%LoadChezy) THEN
                CALL LoadAttrVec(nodalattr_here%Chezy, nodalattr_here%ChezyDefVal, &
-                    NumNodesNotDefault, NScreen, MyProc, NAbOut,nodalattr_here%NumOfNodes)
+                    NumNodesNotDefault, NScreen, MyProc, NAbOut,nodalattr_here%NumOfNodes, fort13unit)
             ELSE
                SkipDataSet = .True.
             ENDIF
          CASE("sea_surface_height_above_geoid")
             IF (nodalattr_here%LoadGeoidOffset) THEN
                CALL LoadAttrVec(nodalattr_here%GeoidOffset, nodalattr_here%GeoidOffsetDefVal, &
-                    NumNodesNotDefault, NScreen, MyProc, NAbOut,nodalattr_here%NumOfNodes)
+                    NumNodesNotDefault, NScreen, MyProc, NAbOut,nodalattr_here%NumOfNodes, fort13unit)
             ELSE
                SkipDataSet = .True.
             ENDIF
@@ -439,7 +443,7 @@
         ("average_horizontal_eddy_viscosity_in_sea_water_wrt_depth")
             IF (nodalattr_here%LoadEVM) THEN
                CALL LoadAttrVec(nodalattr_here%EVM, nodalattr_here%EVMDefVal, &
-                    NumNodesNotDefault, NScreen, MyProc, NAbOut,nodalattr_here%NumOfNodes)
+                    NumNodesNotDefault, NScreen, MyProc, NAbOut,nodalattr_here%NumOfNodes, fort13unit)
             ELSE
                SkipDataSet = .True.
             ENDIF
@@ -447,7 +451,7 @@
         ("average_horizontal_eddy_diffusivity_in_sea_water_wrt_depth")
             IF (nodalattr_here%LoadEVC) THEN
                CALL LoadAttrVec(nodalattr_here%EVC, nodalattr_here%EVCDefVal, &
-                    NumNodesNotDefault, NScreen, MyProc, NAbOut,nodalattr_here%NumOfNodes)
+                    NumNodesNotDefault, NScreen, MyProc, NAbOut,nodalattr_here%NumOfNodes, fort13unit)
             ELSE
                SkipDataSet = .True.
             ENDIF
@@ -455,7 +459,7 @@
          CASE("wave_refraction_in_swan")
             IF (nodalattr_here%LoadSwanWaveRefrac) THEN
                CALL LoadAttrVec(nodalattr_here%SwanWaveRefrac, nodalattr_here%SwanWaveRefracDefVal,&
-                   NumNodesNotDefault, NScreen, MyProc, NAbOut,nodalattr_here%NumOfNodes)
+                   NumNodesNotDefault, NScreen, MyProc, NAbOut,nodalattr_here%NumOfNodes, fort13unit)
             ELSE
                SkipDataSet = .TRUE.
             ENDIF
@@ -470,7 +474,7 @@
          END SELECT
          IF (SkipDataSet) THEN
             DO L=1, NumNodesNotDefault
-               READ(13,*) Skipped
+               READ(fort13unit,*) Skipped
             END DO
             WRITE(16,'(9X,A8)') 'Skipped.'
             SkipDataSet = .False.
@@ -602,7 +606,7 @@
 !     the suffix "vec" in the name.
 !
 !     ----------------------------------------------------------------
-      SUBROUTINE LoadAttrVec(AttributeData, Default, NumNodesNotDef,NScreen, MyProc, NAbOut,NumOfNodes)
+      SUBROUTINE LoadAttrVec(AttributeData, Default, NumNodesNotDef,NScreen, MyProc, NAbOut,NumOfNodes,fort13unit)
         USE SIZES, ONLY: SZ
       IMPLICIT NONE
       REAL(SZ), intent(out), dimension(NumOfNodes) :: AttributeData
@@ -615,6 +619,7 @@
       integer :: i,j,k
       INTEGER NodeNum            ! node number listed in the file
       integer :: NumOfNodes
+      integer :: fort13unit
 !
 !     Set all values to user-specified default values.
       IF (NABOUT.EQ.0) WRITE(16,1001) Default 
@@ -624,7 +629,7 @@
 !
       IF (NABOUT.EQ.0) WRITE(16,1005) 
       DO i=1, NumNodesNotDef
-         READ(13,*) NodeNum, AttributeData(NodeNum)
+         READ(fort13unit,*) NodeNum, AttributeData(NodeNum)
          IF (NABOUT.EQ.0) WRITE(16,1010) NodeNum, AttributeData(NodeNum)     
       END DO
 !
@@ -648,7 +653,7 @@
 !     value per node.
 !
 !     ----------------------------------------------------------------
-      SUBROUTINE LoadAttrMat(AttributeData, NumCol, Default,NumNodesNotDef, NScreen, MyProc, NAbOut, NumOfNodes)
+      SUBROUTINE LoadAttrMat(AttributeData, NumCol, Default,NumNodesNotDef, NScreen, MyProc, NAbOut, NumOfNodes, fort13unit)
         USE SIZES, ONLY: SZ
       IMPLICIT NONE
       INTEGER, intent(in) :: NumCol  ! number of columns in the matrix 
@@ -662,7 +667,7 @@
 !
       INTEGER NodeNum            ! node number listed in the file
       integer :: NumOfNodes
-
+      integer :: fort13unit
       integer :: i,j,k
 !
 !     Set all nodes to user-specified default values.
@@ -675,7 +680,7 @@
 !
       IF (NABOUT.EQ.0) WRITE(16,1005) 
       DO i=1, NumNodesNotDef
-         READ(13,*) NodeNum, (AttributeData(NodeNum,j),j=1,NumCol)
+         READ(fort13unit,*) NodeNum, (AttributeData(NodeNum,j),j=1,NumCol)
          IF (NABOUT.EQ.0) WRITE(16,1010) NodeNum, &
              (AttributeData(NodeNum,j),j=1,NumCol)
       END DO

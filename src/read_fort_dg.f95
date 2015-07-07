@@ -84,27 +84,30 @@
       INTEGER :: i
       CHARACTER(256) :: LINE
       
+      integer :: fortdgunit
+
       CALL FORT_DG_SETUP(dg_here,global_here)
 
-      OPEN(25,FILE=s%DIRNAME//'/'//'fort.dg',POSITION="rewind")  
+      fortdgunit = 25*100*s%myproc
+      OPEN(fortdgunit,FILE=s%DIRNAME//'/'//'fort.dg',POSITION="rewind")  
       
       PRINT*, ""
       PRINT("(A)"), "READING FIXED FORMAT FORT.DG..."
       PRINT*, ""      
       
-      READ(25,*) global_here%DGSWE
-      READ(25,*) dg_here%padapt,dg_here%pflag
-      READ(25,*) dg_here%gflag,dg_here%diorism
-      READ(25,*) dg_here%pl,dg_here%ph,dg_here%px
-      READ(25,*) dg_here%slimit
-      READ(25,*) dg_here%plimit
-      READ(25,*) dg_here%pflag2con1,dg_here%pflag2con2,dg_here%lebesgueP 
-      READ(25,*) dg_here%FLUXTYPE
-      READ(25,*) dg_here%RK_STAGE, dg_here%RK_ORDER
-      READ(25,*) global_here%DG_TO_CG
-      READ(25,*) dg_here%MODAL_IC
-      READ(25,*) dg_here%DGHOT, dg_here%DGHOTSPOOL
-      READ(25,"(A256)") LINE
+      READ(fortdgunit,*) global_here%DGSWE
+      READ(fortdgunit,*) dg_here%padapt,dg_here%pflag
+      READ(fortdgunit,*) dg_here%gflag,dg_here%diorism
+      READ(fortdgunit,*) dg_here%pl,dg_here%ph,dg_here%px
+      READ(fortdgunit,*) dg_here%slimit
+      READ(fortdgunit,*) dg_here%plimit
+      READ(fortdgunit,*) dg_here%pflag2con1,dg_here%pflag2con2,dg_here%lebesgueP 
+      READ(fortdgunit,*) dg_here%FLUXTYPE
+      READ(fortdgunit,*) dg_here%RK_STAGE, dg_here%RK_ORDER
+      READ(fortdgunit,*) global_here%DG_TO_CG
+      READ(fortdgunit,*) dg_here%MODAL_IC
+      READ(fortdgunit,*) dg_here%DGHOT, dg_here%DGHOTSPOOL
+      READ(fortdgunit,"(A256)") LINE
       READ(LINE,*) dg_here%SLOPEFLAG
       IF(dg_here%SLOPEFLAG.EQ.2) THEN
          READ(LINE,*) dg_here%SLOPEFLAG, dg_here%SL2_M, dg_here%SL2_NYU
@@ -140,12 +143,12 @@
          READ(LINE,*) dg_here%SLOPEFLAG,dg_here%slope_weight
          global_here%vertexslope = .True.
       ENDIF
-      READ(25,*) global_here%SEDFLAG,dg_here%porosity,dg_here%SEVDM,s%layers
-      READ(25,*) global_here%reaction_rate
-      READ(25,*) dg_here%MNES
-      READ(25,*) dg_here%artdif,dg_here%kappa,dg_here%s0,dg_here%uniform_dif,dg_here%tune_by_hand
-      READ(25,'(a)') global_here%sed_equationX
-      READ(25,'(a)') global_here%sed_equationY
+      READ(fortdgunit,*) global_here%SEDFLAG,dg_here%porosity,dg_here%SEVDM,s%layers
+      READ(fortdgunit,*) global_here%reaction_rate
+      READ(fortdgunit,*) dg_here%MNES
+      READ(fortdgunit,*) dg_here%artdif,dg_here%kappa,dg_here%s0,dg_here%uniform_dif,dg_here%tune_by_hand
+      READ(fortdgunit,'(a)') global_here%sed_equationX
+      READ(fortdgunit,'(a)') global_here%sed_equationY
       
       IF(dg_here%FLUXTYPE.NE.1.AND.dg_here%FLUXTYPE.NE.2.AND.dg_here%FLUXTYPE.NE.3.AND.dg_here%FLUXTYPE.NE.4) THEN
          PRINT *, 'SPECIFIED dg_here%FLUXTYPE (=', dg_here%FLUXTYPE,') IS NOT ALLOWED.'
@@ -169,7 +172,7 @@
       ENDDO      
       
       PRINT*, " "
-      CLOSE(25)
+      CLOSE(fortdgunit)
       
       RETURN
       END SUBROUTINE READ_FIXED_FORT_DG
@@ -198,6 +201,8 @@
       CHARACTER(100) :: temp,line
       CHARACTER(15) :: test_opt
       CHARACTER(100) :: test_val
+
+      integer :: fortdgunit
       
       ! initialize the fortdg option structure
       CALL FORT_DG_SETUP(dg_here,global_here)
@@ -206,8 +211,8 @@
       comment = 0 
       blank = 0
       
-      
-      OPEN(25,FILE=s%DIRNAME//'/'//'fort.dg',POSITION="rewind")   
+      fortdgunit = 25*100*s%myproc      
+      OPEN(fortdgunit,FILE=s%DIRNAME//'/'//'fort.dg',POSITION="rewind")   
       
       PRINT*, ""
       PRINT("(A)"), "READING KEYWORD FORMAT FORT.DG..."
@@ -216,7 +221,7 @@
       
       DO WHILE (opt_read < nopt)
       
-        READ(25,"(A100)",IOSTAT=read_stat) temp
+        READ(fortdgunit,"(A100)",IOSTAT=read_stat) temp
         IF(read_stat /= 0) THEN                    ! check for end-of-file
           EXIT
         ENDIF
@@ -289,7 +294,7 @@
       CALL CHECK_ERRORS(opt_read)
       
       PRINT*, ""
-      CLOSE(25)
+      CLOSE(fortdgunit)
             
       END SUBROUTINE READ_KEYWORD_FORT_DG
       
