@@ -1,75 +1,3 @@
-      MODULE FORT_DG
-      
-      ! Module containing subroutines to read the fort.dg file
-      !
-      !  - Supports both fixed and keyword formats
-      !
-      !  - Keyword format is intended to increase flexibility in adding/depreciating features
-      !    while maintaining forward compatibility and some degree of backward compatibility 
-      !    for the fort.dg file.  
-      !
-      !      * The keywords are configured in the FORT_DG_SETUP subroutine.
-      !        (See subrotine header for details.)
-      !
-      !      * keyword fort.dg file format rules are:
-      !
-      !          1) options are assigned in keyword = value format (e.g. fluxtype = 1)
-      !          2) one option per line
-      !          3) options can be specified in any order
-      !          4) line beginning with ! indicates a comment
-      !          5) blank lines are skipped
-      !          6) comments may follow an assignment (e.g. fluxtype = 1 !comment)
-      !          7) unrecognized keyword assignments are skipped      
-      !          8) unassigned options that are not required will use 
-      !             default values specified in FORT_DG_SETUP
-      !          
-      !  - Subroutines contained are:
-      !
-      !      1) READ_FIXED_FORT_DG
-      !         
-      !         * reads old fixed format fort.dg used in dgswem v11.13/dg-adcirc v22
-      !
-      !      2) READ_KEYWORD_FORT_DG
-      !
-      !         * reads keyword format fort.dg described above
-      !
-      !      3) CHECK_ERRORS
-      !
-      !         * Handles missing options 
-      !         * Terminates if required options are missing
-      !         * Warns that default values are used for missing optional options and continues      
-      !
-      !      4) FORT_DG_SETUP
-      !
-      !         * Responsible for configuring fort.dg options
-      !         * MODIFICATIONS FOR ADDITION/REMOVAL OF FORT.DG OPTIONS SHOULD BE DONE HERE
-      
-      USE sizes, ONLY: sz
-      
-      TYPE :: key_val
-        CHARACTER(15) :: key            ! keyword
-        REAL(SZ), POINTER :: rptr       ! pointer to real target
-        INTEGER, POINTER :: iptr        ! pointer to integer target
-        CHARACTER(100), POINTER :: cptr ! pointer to character target      
-        
-        INTEGER :: vartype              ! target type indicator: 1=integer, 2=real, 3=character
-        
-        LOGICAL :: required             ! required/optional flag
-        
-        INTEGER :: flag                 ! successful read flag
-      END TYPE key_val
-      
-      INTEGER, PARAMETER :: maxopt = 100          ! maximum allowable fort.dg options
-      TYPE(key_val), DIMENSION(maxopt) :: fortdg      
-      
-      INTEGER :: nopt                             ! number of valid options in fortdg structure
-      INTEGER, DIMENSION(maxopt) :: fortdg_ind    ! indicies of valid options in fortdg structure
- 
-      CONTAINS            
-      
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!      
-
       SUBROUTINE READ_FIXED_FORT_DG(s,dg_here,global_here)
       
       USE global
@@ -86,7 +14,8 @@
       
       integer :: fortdgunit
 
-      CALL FORT_DG_SETUP(dg_here,global_here)
+      ! Why does this need to be called?
+!      CALL FORT_DG_SETUP(dg_here,global_here)
 
       fortdgunit = 25*100*s%myproc
       OPEN(fortdgunit,FILE=s%DIRNAME//'/'//'fort.dg',POSITION="rewind")  
@@ -156,20 +85,21 @@
          STOP 'SPECIFIED dg_here%FLUXTYPE IS NOT ALLOWED.'
       ENDIF     
       
-      ! print inputs
-      DO i = 1,maxopt        
-        IF (ASSOCIATED(fortdg(i)%iptr)) THEN  
-          PRINT("(A,A,I8)"), fortdg(i)%key," = ",fortdg(i)%iptr
-        ENDIF
-        
-        IF (ASSOCIATED(fortdg(i)%rptr)) THEN 
-          PRINT("(A,A,E21.8)"), fortdg(i)%key," = ",fortdg(i)%rptr
-        ENDIF
-        
-        IF (ASSOCIATED(fortdg(i)%cptr)) THEN 
-          PRINT("(A,A,A)"), fortdg(i)%key," = ",fortdg(i)%cptr 
-        ENDIF
-      ENDDO      
+      ! why is this done here?
+      ! print inputs 
+!!$      DO i = 1,maxopt
+!!$        IF (ASSOCIATED(fortdg(i)%iptr)) THEN  
+!!$          PRINT("(A,A,I8)"), fortdg(i)%key," = ",fortdg(i)%iptr
+!!$        ENDIF
+!!$        
+!!$        IF (ASSOCIATED(fortdg(i)%rptr)) THEN 
+!!$          PRINT("(A,A,E21.8)"), fortdg(i)%key," = ",fortdg(i)%rptr
+!!$        ENDIF
+!!$        
+!!$        IF (ASSOCIATED(fortdg(i)%cptr)) THEN 
+!!$          PRINT("(A,A,A)"), fortdg(i)%key," = ",fortdg(i)%cptr 
+!!$        ENDIF
+!!$      ENDDO      
       
       PRINT*, " "
       CLOSE(fortdgunit)
@@ -186,8 +116,17 @@
       USE global
       use dg
 
+      use fort_dg
+
       IMPLICIT NONE
       
+      ! these are moved from the fort_dg module *************
+      TYPE(key_val), DIMENSION(maxopt) :: fortdg      
+      
+      INTEGER :: nopt                             ! number of valid options in fortdg structure
+      INTEGER, DIMENSION(maxopt) :: fortdg_ind    ! indicies of valid options in fortdg structure
+      ! *****************************************************
+
       type (sizes_type) :: s
       type (dg_type) :: dg_here
       type (global_type) :: global_here
@@ -205,7 +144,7 @@
       integer :: fortdgunit
       
       ! initialize the fortdg option structure
-      CALL FORT_DG_SETUP(dg_here,global_here)
+      CALL FORT_DG_SETUP(dg_here,global_here,fortdg,fortdg_ind,nopt) ! need to pass fortdg, nopt, fortdg_ind
       
       opt_read = 0
       comment = 0 
@@ -291,7 +230,7 @@
       
       PRINT*, ""
      
-      CALL CHECK_ERRORS(opt_read)
+      CALL CHECK_ERRORS(opt_read,fortdg,fortdg_ind,nopt)
       
       PRINT*, ""
       CLOSE(fortdgunit)
@@ -301,10 +240,20 @@
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-     SUBROUTINE CHECK_ERRORS(opt_read)
+     SUBROUTINE CHECK_ERRORS(opt_read,fortdg,fortdg_ind,nopt)
+
+       use fort_dg
      
      IMPLICIT NONE
      
+      ! these are moved from the fort_dg module *************
+      TYPE(key_val), DIMENSION(maxopt) :: fortdg      
+      
+      INTEGER :: nopt                             ! number of valid options in fortdg structure
+      INTEGER, DIMENSION(maxopt) :: fortdg_ind    ! indicies of valid options in fortdg structure
+      ! *****************************************************
+
+
      INTEGER :: i,j,opt
      INTEGER :: opt_read
      INTEGER :: quit
@@ -371,7 +320,7 @@
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!           
       
-      SUBROUTINE FORT_DG_SETUP(dg_here,global_here)
+      SUBROUTINE FORT_DG_SETUP(dg_here,global_here,fortdg,fortdg_ind,nopt)
       
       ! Subroutine that configures the fort.dg options
       !
@@ -407,12 +356,20 @@
       USE global
       USE sizes
       USE dg
+      use fort_dg
       
       IMPLICIT NONE        
 
       type (sizes_type) :: s
       type (dg_type) :: dg_here
       type (global_type) :: global_here
+
+      ! these are moved from the fort_dg module *************
+      TYPE(key_val), DIMENSION(maxopt) :: fortdg      
+      
+      INTEGER :: nopt                             ! number of valid options in fortdg structure
+      INTEGER, DIMENSION(maxopt) :: fortdg_ind    ! indicies of valid options in fortdg structure
+      ! *****************************************************
 
       INTEGER :: i
       INTEGER :: ncheck
@@ -557,7 +514,6 @@
       DO i = 1,maxopt
       
         ! find and keep track of populated indicies         
-        ! zach temp debugging
         IF (fortdg(i)%key .ne. "empty") THEN      
           nopt = nopt + 1      
           fortdg_ind(nopt) = i
@@ -595,8 +551,3 @@
       
       RETURN
       END SUBROUTINE FORT_DG_SETUP
-      
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!            
-      
-      END MODULE FORT_DG

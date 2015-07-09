@@ -67,3 +67,6 @@ List of variables is `global.list`, script to replace variables is `global_file.
 All of the "alloc_" subroutines associated with a module have to be explicitly passed the module they are attached to when it is in a user defined data type.
 
 irritating problem: there is a variable named "NE" in the global module, and `.NE.` is also used in fortran if statements.
+
+## File unit number uniqueness
+For each file unit, multiply unit number times 100 and add the domain number.

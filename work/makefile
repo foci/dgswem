@@ -56,7 +56,7 @@ $(O_DIR):
 PREP_MSRC  =  presizes.f95 
 PGLO_MSRC  =  pre_global.f95  
 POST_MSRC  =  post_global.f95
-ADC_MSRC   =  sizes.f95 diff45_41.f95 global.f95 dg.f95 nodalattr.f95 read_fort_dg.f95 make_dirname.f95
+ADC_MSRC   =  sizes.f95 diff45_41.f95 global.f95 dg.f95 nodalattr.f95 fort_dg_module.f95 
 HARM_MSRC  =  harm.f95  
 WIND_MSRC  =  wind.f95  
 #Casey 121126: Add file for coupling to unstructured SWAN.
@@ -91,7 +91,7 @@ ADC_SRC    =  dgswem.f95 read_input.f95 cstart.f95 hstart.f95 radiation_edge_hyd
 	quad_pts_edge.f95 radiation_edge_hydro.f95 read_input.f95 rhs_dg_hydro.f95 \
 	numerical_flux.f95 tidal_potential.f95 write_results.f95 \
 	slopelimiter.f95 prep_slopelim.f95 \
-	wetdry.f95 LDG_hydro.f95 met_forcing.f95 sta_basis.f95 make_dirname.f95 nodalattr_subs.f95 dgswem_init.f95 cwrappers.f95
+	wetdry.f95 LDG_hydro.f95 met_forcing.f95 sta_basis.f95 make_dirname.f95 nodalattr_subs.f95 dgswem_init.f95 cwrappers.f95 make_dirname.f95 read_fort_dg.f95
 #Casey 121126: Added modal2nodal.f95 and write_output.f95 to the previous line.
 
 METIS1_OBJ:= $(patsubst %.f95, $(O_DIR)%.o, $(METIS1_SRC) )
@@ -227,11 +227,12 @@ $(O_DIR)itpackv.o     			:  itpackv.f95   $(ADC_MOBJ)
 $(O_DIR)dg.o          			:  dg.f95 sizes.f95 global.f95
 $(O_DIR)diff45_41.o   			:  diff45_41.f95
 $(O_DIR)nodalattr.o   			:  nodalattr.f95
+$(O_DIR)fort_dg_module.o                :  fort_dg_module.f95
 #Casey 121126: Added the next line.
 $(O_DIR)globalio.o                      :  globalio.f95 $(ADC_MOBJ)
 $(O_DIR)couple2swan.o                   :  couple2swan.f95 $(ADC_MOBJ)
 
-$(ODIR)read_fort_dg.o                   :  read_fort_dg.f95 $(O_DIR)sizes.o $(O_DIR)dg.o $(O_DIR)global.o
+$(ODIR)read_fort_dg.o                   :  read_fort_dg.f95 $(O_DIR)sizes.o $(O_DIR)dg.o $(O_DIR)global.o $(O_DIR) fort_dg_module.o
 
 #  adcirc & padcirc
 

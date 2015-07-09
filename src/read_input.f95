@@ -19,7 +19,7 @@
       USE WIND
       USE DG
       USE NodalAttributes
-      USE fort_dg, ONLY: read_keyword_fort_dg,read_fixed_fort_dg
+!      USE fort_dg, ONLY: read_keyword_fort_dg,read_fixed_fort_dg
 #ifdef CMPI
       USE MESSENGER_ELEM
 #endif
