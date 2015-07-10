@@ -1,0 +1,8 @@
+mv ./odir4/dgswem.o ./odir4/dgswem.oB
+INCLUDES=`ls -d -1 ./odir4/*.o`
+echo $INCLUDES
+mv ./odir4/dgswem.oB ./odir4/dgswem.o
+
+CMD="g++ -o dgswem_hpx_cpp_series ../src/dgswem_cpp_series.cpp $INCLUDES -lgfortran"
+echo $CMD
+$CMD
