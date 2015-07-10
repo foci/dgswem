@@ -75,7 +75,66 @@ MODULE SIZES
      CHARACTER(256) :: ROOTDIR
      CHARACTER(2048) :: INPUTDIR, GLOBALDIR, LOCALDIR
      CHARACTER(2048) :: GBLINPUTDIR, HOTSTARTDIR
+
+
+
+     ! file unit numbers
+     ! 
+     integer :: fort12unit 
+     integer :: fort13unit
+     integer :: fort14unit
+     integer :: fort15unit
+     integer :: fort16unit
+     integer :: fort17unit
+     integer :: fort19unit
+
+     integer :: fort20unit
+     integer :: fort22unit
+     integer :: fort23unit
+     integer :: fort24unit
+
+     integer :: fort41unit !4441
+
+     integer :: fort55unit
+
+     integer :: fort61unit
+     integer :: fort62unit
+     integer :: fort63unit
+     integer :: fort64unit
+
+     integer :: fort67unit
+     integer :: fort68unit
+
+
+     integer :: fort71unit
+     integer :: fort72unit
+     integer :: fort73unit
+     integer :: fort74unit
+
      
+     integer :: fort81unit
+     integer :: fort82unit
+     integer :: fort83unit
+     integer :: fort84unit
+     integer :: fort85unit
+     integer :: fort88unit
+     integer :: fort89unit
+
+     integer :: fort94unit
+     integer :: fort96unit
+
+     integer :: rads64unit ! 164 or 716?
+     
+     integer :: fort199unit
+     
+     integer :: fortdgunit 
+
+     integer :: dg18unit ! 18??
+
+     integer :: tecfileunit ! 777
+     integer :: tecfile_maxunit ! 778
+
+
   end type sizes_type
   
 END MODULE SIZES
