@@ -102,13 +102,15 @@ int hpx_main(
     int neighbors_fort[MAX_DOMAIN_NEIGHBORS];
     std::vector<int> neighbors_here;
     FNAME(get_neighbors_fort)(&sizes[i],
-			      &dg[i],
-			      &global[i],
-			      neighbors_fort[MAX_DOMAIN_NEIGHBORS],
-			      &num_neighbors_fort);
+			      &dgs[i],
+			      &globals[i],
+			      &neighbors_fort[MAX_DOMAIN_NEIGHBORS],
+			      &numneighbors_fort);
 
     numneighbors.push_back(numneighbors_fort);
     
+    std::cout << "domain =" << i << std::endl;
+    std::cout << "neighbors: ";
     for (int j=0; j<numneighbors_fort; j++) {
       std::cout << neighbors_fort[j] << " ";
       neighbors_here.push_back(neighbors_fort[j]);
