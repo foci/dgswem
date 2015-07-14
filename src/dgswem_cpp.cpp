@@ -109,9 +109,6 @@ int hpx_main(
 
     numneighbors.push_back(numneighbors_fort);
     
-    std::cout << "domain =" << i << std::endl;
-    std::cout << "num_neighbors = " << numneighbors_fort << std::endl;
-    std::cout << "neighbors: ";
     for (int j=0; j<numneighbors_fort; j++) {
       std::cout << neighbors_fort[j] << " ";
       neighbors_here.push_back(neighbors_fort[j]);
@@ -126,9 +123,24 @@ int hpx_main(
   wait_all(inits);
 #endif
 
+  // Print out some information about the domains and their neighbors
+  std::cout << "*** Grid Information ***" << std::endl;
+  std::cout << "ids.size() = " << ids.size() << std::endl;
+  std::cout << "numneighbors.size() = " << numneighbors.size() << std::endl;
+  for (int domain=0; domain<numneighbors.size(); domain++) {
+    std::cout << "numneighbors[" << domain << "] = " << numneighbors[domain] << std::endl;
+    std::cout << "neighbors: ";
+    std::vector<int> neighbors_here = neighbors[domain];
+    for (int neighbor=0; neighbor<numneighbors[domain]; neighbor++) {      
+      std::cout << neighbors_here[neighbor] << " ";
+    }
+    std::cout << std::endl;
+  }
 
-  std::cout << "c++: n_timesteps = " << n_timesteps << std::endl;
+  std::cout << "*** End Grid Information ***" << std::endl;
 
+  std::cout << "c++: Starting timestep loop: n_timesteps = " << n_timesteps << std::endl;
+  
   
   // Start timestepping loop
   for (int timestep=1; timestep<=n_timesteps; timestep++) {
