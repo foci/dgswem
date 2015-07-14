@@ -78,6 +78,8 @@ subroutine get_neighbors_fort(sizes_c_ptr,dg_c_ptr,global_c_ptr,neighbors,num_ne
   integer :: neighbors(MAX_DOMAIN_NEIGHBORS)
   integer :: num_neighbors
 
+  integer :: i
+
   type (sizes_type), pointer :: s
   type (dg_type), pointer :: dg_here
   type (global_type), pointer :: global_here
