@@ -34,14 +34,6 @@
       type (global_type) :: global_here
 
       INTEGER i,j
-!
-      integer :: fort61unit, fort62unit, fort63unit, fort64unit
-
-
-      fort61unit=61*100+s%myproc
-      fort62unit=62*100+s%myproc
-      fort63unit=63*100+s%myproc
-      fort64unit=64*100+s%myproc
       
       global_here%ITHS = 0
 
@@ -85,18 +77,18 @@
 
         IF((global_here%NOPE.GT.0).AND.(global_here%NBFR.EQ.0)) THEN
           IF(global_here%NSCREEN.EQ.1.AND.S%MYPROC.EQ.0) WRITE(6,1112)
-          WRITE(16,1112)
+          WRITE(s%fort16unit,1112)
           IF(global_here%NSCREEN.EQ.1.AND.S%MYPROC.EQ.0) WRITE(6,1977)
-          WRITE(16,1977)
+          WRITE(s%fort16unit,1977)
  1977     FORMAT(/,1X,'ELEVATION SPECIFIED INFORMATION READ FROM UNIT ',&
            '19',/)
-          OPEN(19,FILE=S%DIRNAME//'/'//'fort.19')
-          READ(19,*) global_here%ETIMINC
+          OPEN(s%fort19unit,FILE=S%DIRNAME//'/'//'fort.19')
+          READ(s%fort19unit,*) global_here%ETIMINC
           DO J=1,global_here%NETA
-             READ(19,*) global_here%ESBIN1(J)
+             READ(s%fort19unit,*) global_here%ESBIN1(J)
           END DO
           DO J=1,global_here%NETA
-             READ(19,*) global_here%ESBIN2(J)
+             READ(s%fort19unit,*) global_here%ESBIN2(J)
           END DO
           global_here%ETIME1 = global_here%STATIM*86400.D0
           global_here%ETIME2 = global_here%ETIME1 + global_here%ETIMINC
@@ -112,23 +104,23 @@
 
         IF((global_here%NFLUXF.EQ.1).AND.(global_here%NFFR.EQ.0)) THEN
           IF(global_here%NSCREEN.EQ.1.AND.S%MYPROC.EQ.0) WRITE(6,1112)
-          WRITE(16,1112)
+          WRITE(s%fort16unit,1112)
           IF(global_here%NSCREEN.EQ.1.AND.S%MYPROC.EQ.0) WRITE(6,1979)
-          WRITE(16,1979)
+          WRITE(s%fort16unit,1979)
  1979     FORMAT(/,1X,'NORMAL FLOW INFORMATION READ FROM UNIT 20',/)
-          OPEN(20,FILE=S%DIRNAME//'/'//'fort.20')
-          READ(20,*) global_here%FTIMINC
+          OPEN(s%fort20unit,FILE=S%DIRNAME//'/'//'fort.20')
+          READ(s%fort20unit,*) global_here%FTIMINC
           DO J=1,global_here%NVEL
             global_here%QNIN1(J)=0.D0
             IF((global_here%LBCODEI(J).EQ.2).OR.(global_here%LBCODEI(J).EQ.12)&
                           .OR.(global_here%LBCODEI(J).EQ.22))&
-                                          READ(20,*) global_here%QNIN1(J)
+                                          READ(s%fort20unit,*) global_here%QNIN1(J)
             END DO
           DO J=1,global_here%NVEL
             global_here%QNIN2(J)=0.D0
             IF((global_here%LBCODEI(J).EQ.2).OR.(global_here%LBCODEI(J).EQ.12)&
                           .OR.(global_here%LBCODEI(J).EQ.22))&
-                                          READ(20,*) global_here%QNIN2(J)
+                                          READ(s%fort20unit,*) global_here%QNIN2(J)
             END DO
           global_here%QTIME1 = global_here%STATIM*86400.D0
           global_here%QTIME2 = global_here%QTIME1 + global_here%FTIMINC
@@ -151,26 +143,26 @@
             ENDDO
 
           IF(global_here%NSCREEN.EQ.1.AND.S%MYPROC.EQ.0) WRITE(6,1112)
-          WRITE(16,1112)
+          WRITE(s%fort16unit,1112)
           IF(global_here%NSCREEN.EQ.1.AND.S%MYPROC.EQ.0) WRITE(6,1980)
-          WRITE(16,1980)
+          WRITE(s%fort16unit,1980)
  1980     FORMAT(/,1X,'WIND (AND PRESSURE) INFORMATION READ.',/)
           ENDIF
 
         IF(global_here%NWS.EQ.1) THEN
-          OPEN(22,FILE=S%DIRNAME//'/'//'fort.22')
+          OPEN(s%fort22unit,FILE=S%DIRNAME//'/'//'fort.22')
           ENDIF
 
         IF(ABS(global_here%NWS).EQ.2) THEN
-          OPEN(22,FILE=S%DIRNAME//'/'//'fort.22')
-          READ(22,*) (global_here%NHG,global_here%WVNX1(I),global_here%WVNY1(I),global_here%PRN1(I),I=1,global_here%NP)
-          READ(22,*) (global_here%NHG,global_here%WVNX2(I),global_here%WVNY2(I),global_here%PRN2(I),I=1,global_here%NP)
+          OPEN(s%fort22unit,FILE=S%DIRNAME//'/'//'fort.22')
+          READ(s%fort22unit,*) (global_here%NHG,global_here%WVNX1(I),global_here%WVNY1(I),global_here%PRN1(I),I=1,global_here%NP)
+          READ(s%fort22unit,*) (global_here%NHG,global_here%WVNX2(I),global_here%WVNY2(I),global_here%PRN2(I),I=1,global_here%NP)
           global_here%WTIME1 = global_here%STATIM*86400.D0
           global_here%WTIME2 = global_here%WTIME1 + global_here%WTIMINC
           ENDIF
 
         IF(global_here%NWS.EQ.3) THEN
-          OPEN(22,FILE=S%DIRNAME//'/'//'fort.22')
+          OPEN(s%fort22unit,FILE=S%DIRNAME//'/'//'fort.22')
  2222     CALL NWS3GET(s, global_here%X, global_here%Y, global_here%SLAM, global_here%SFEA, global_here%WVNX2, global_here%WVNY2, global_here%IWTIME, global_here%IWYR,&
                   global_here%WTIMED, global_here%NP, global_here%NWLON, global_here%NWLAT, global_here%WLATMAX, global_here%WLONMIN,&
                   global_here%WLATINC, global_here%WLONINC, global_here%ICS, global_here%NSCREEN, global_here%ScreenUnit )
@@ -192,16 +184,16 @@
             ENDIF
           IF(global_here%NSCREEN.EQ.1.AND.S%MYPROC.EQ.0) &
          WRITE(6,*)'FOUND WIND DATA AT TIME= ',global_here%IWTIMEP
-          WRITE(16,*) 'FOUND WIND DATA AT TIME= ',global_here%IWTIMEP
+          WRITE(s%fort16unit,*) 'FOUND WIND DATA AT TIME= ',global_here%IWTIMEP
           IF(global_here%NSCREEN.EQ.1.AND.S%MYPROC.EQ.0) &
          WRITE(6,*)'FOUND WIND DATA AT TIME= ',global_here%IWTIME
-          WRITE(16,*) 'FOUND WIND DATA AT TIME= ',global_here%IWTIME
+          WRITE(s%fort16unit,*) 'FOUND WIND DATA AT TIME= ',global_here%IWTIME
           global_here%WTIME2=global_here%WTIMED-global_here%WREFTIM                  !CAST INTO MODEL TIME REFRENCE
           global_here%WTIME1=global_here%WTIME2-global_here%WTIMINC
           ENDIF
 
         IF(ABS(global_here%NWS).EQ.4) THEN
-          OPEN(22,FILE=S%DIRNAME//'/'//'fort.22')
+          OPEN(s%fort22unit,FILE=S%DIRNAME//'/'//'fort.22')
           global_here%WTIME1 = global_here%STATIM*86400.D0
           global_here%WTIME2=global_here%WTIME1+global_here%WTIMINC
           CALL NWS4GET(global_here%WVNX1,global_here%WVNY1,global_here%PRN1,global_here%NP,global_here%RHOWAT0,global_here%G)
@@ -209,15 +201,15 @@
           ENDIF
 
         IF(ABS(global_here%NWS).EQ.5) THEN
-          OPEN(22,FILE=S%DIRNAME//'/'//'fort.22')
-          READ(22,*) (global_here%NHG,global_here%WVNX1(I),global_here%WVNY1(I),global_here%PRN1(I),I=1,global_here%NP)
-          READ(22,*) (global_here%NHG,global_here%WVNX2(I),global_here%WVNY2(I),global_here%PRN2(I),I=1,global_here%NP)
+          OPEN(s%fort22unit,FILE=S%DIRNAME//'/'//'fort.22')
+          READ(s%fort22unit,*) (global_here%NHG,global_here%WVNX1(I),global_here%WVNY1(I),global_here%PRN1(I),I=1,global_here%NP)
+          READ(s%fort22unit,*) (global_here%NHG,global_here%WVNX2(I),global_here%WVNY2(I),global_here%PRN2(I),I=1,global_here%NP)
           global_here%WTIME1 = global_here%STATIM*86400.D0
           global_here%WTIME2 = global_here%WTIME1 + global_here%WTIMINC
           ENDIF
 
         IF(global_here%NWS.EQ.6) THEN
-          OPEN(22,FILE=S%DIRNAME//'/'//'fort.22')
+          OPEN(s%fort22unit,FILE=S%DIRNAME//'/'//'fort.22')
           CALL NWS6GET(global_here%X,global_here%Y,global_here%SLAM,global_here%SFEA,global_here%WVNX1,global_here%WVNY1,global_here%PRN1,global_here%NP,global_here%NWLON,global_here%NWLAT,&
                  global_here%WLATMAX,global_here%WLONMIN,global_here%WLATINC,global_here%WLONINC,global_here%ICS,global_here%RHOWAT0,global_here%G)
           CALL NWS6GET(global_here%X,global_here%Y,global_here%SLAM,global_here%SFEA,global_here%WVNX2,global_here%WVNY2,global_here%PRN2,global_here%NP,global_here%NWLON,global_here%NWLAT,&
@@ -243,13 +235,13 @@
           global_here%NWSEGWI=0
           global_here%IDSETFLG=0
           IF(global_here%NSCREEN.EQ.1.AND.S%MYPROC.EQ.0) WRITE(6,1197)
-          WRITE(16,1197)
+          WRITE(s%fort16unit,1197)
  1197     FORMAT(/,1X,'THE E29 MET GRID INTERPOLATING FACTORS ARE ',&
                 'BEING COMPUTED ')
           CALL NWS11GET(s,global_here,global_here%NWSEGWI,global_here%IDSETFLG,global_here%SLAM,global_here%SFEA,global_here%WVNX1,global_here%WVNY1,global_here%PRN1,global_here%NP,&
                   global_here%RHOWAT0,global_here%G)  !JUST COMPUTE INTERPOLATING FACTORS
           IF(global_here%NSCREEN.EQ.1.AND.S%MYPROC.EQ.0) WRITE(6,1198)
-          WRITE(16,1198)
+          WRITE(s%fort16unit,1198)
  1198     FORMAT(1X,'FINISHED COMPUTING E29 INTERPOLATING FACTORS',/)
           global_here%NWSEGWI=1
           global_here%IDSETFLG=1
@@ -283,7 +275,7 @@
               global_here%PRN2(I)=0.D0    !even if not used
               ENDDO
             ENDIF
-          OPEN(23,FILE=S%DIRNAME//'/'//'fort.23')
+          OPEN(s%fort23unit,FILE=S%DIRNAME//'/'//'fort.23')
           global_here%RSTIME1 = global_here%STATIM*86400.D0
           global_here%RSTIME2 = global_here%RSTIME1+global_here%RSTIMINC
           IF (global_here%FRW.EQ.0) THEN
@@ -313,9 +305,9 @@
          ENDIF
 #endif
           IF(global_here%NSCREEN.EQ.1.AND.S%MYPROC.EQ.0) WRITE(6,1112)
-          WRITE(16,1112)
+          WRITE(s%fort16unit,1112)
           IF(global_here%NSCREEN.EQ.1.AND.S%MYPROC.EQ.0) WRITE(6,1981)
-          WRITE(16,1981)
+          WRITE(s%fort16unit,1981)
  1981     FORMAT(/,1X,'RADIATION STRESS INFORMATION READ.',/)
           ENDIF
 
@@ -354,7 +346,7 @@
             IF((global_here%NNODECODE(I).EQ.1).AND.(global_here%MJU(I).EQ.0)) THEN
               global_here%NNODECODE(I)=0
               IF(global_here%NSCREEN.EQ.1.AND.S%MYPROC.EQ.0) WRITE(*,9883) I
-              WRITE(16,9883) I
+              WRITE(s%fort16unit,9883) I
               ENDIF
           ENDDO
         ENDIF
@@ -389,51 +381,51 @@
         
 
         IF(ABS(global_here%NOUTE).EQ.1) THEN
-          OPEN(fort61unit,FILE=S%DIRNAME//'/'//'fort.61')
-          WRITE(fort61unit,3220) global_here%RUNDES,global_here%RUNID,global_here%AGRID
-          WRITE(fort61unit,3645) global_here%NTRSPE,global_here%NSTAE,global_here%DTDP*global_here%NSPOOLE,global_here%NSPOOLE,1
+          OPEN(s%fort61unit,FILE=S%DIRNAME//'/'//'fort.61')
+          WRITE(s%fort61unit,3220) global_here%RUNDES,global_here%RUNID,global_here%AGRID
+          WRITE(s%fort61unit,3645) global_here%NTRSPE,global_here%NSTAE,global_here%DTDP*global_here%NSPOOLE,global_here%NSPOOLE,1
           global_here%IESTP=2
           ENDIF
 
           IF(ABS(global_here%NOUTE).EQ.2) THEN
-             OPEN(fort61unit,FILE=S%DIRNAME//'/'//'fort.61',&
+             OPEN(s%fort61unit,FILE=S%DIRNAME//'/'//'fort.61',&
                   ACCESS='DIRECT',RECL=NBYTE)
              IF(NBYTE.EQ.4) THEN
                 DO I=1,8
-                   WRITE(fort61unit,REC=global_here%IESTP+I) global_here%RDES4(I)
+                   WRITE(s%fort61unit,REC=global_here%IESTP+I) global_here%RDES4(I)
                 ENDDO
                 global_here%IESTP=global_here%IESTP+8
                 DO I=1,6
-                   WRITE(fort61unit,REC=global_here%IESTP+I) global_here%RID4(I)
+                   WRITE(s%fort61unit,REC=global_here%IESTP+I) global_here%RID4(I)
                 ENDDO
                 global_here%IESTP=global_here%IESTP+6
                 DO I=1,6
-                   WRITE(fort61unit,REC=global_here%IESTP+I) global_here%AID4(I)
+                   WRITE(s%fort61unit,REC=global_here%IESTP+I) global_here%AID4(I)
                 ENDDO
                 global_here%IESTP=global_here%IESTP+6
              ENDIF
              IF(NBYTE.EQ.8) THEN
                 DO I=1,4
-                   WRITE(fort61unit,REC=global_here%IESTP+I) global_here%RDES8(I)
+                   WRITE(s%fort61unit,REC=global_here%IESTP+I) global_here%RDES8(I)
                 ENDDO
                 global_here%IESTP=global_here%IESTP+4
                 DO I=1,3
-                   WRITE(fort61unit,REC=global_here%IESTP+I) global_here%RID8(I)
+                   WRITE(s%fort61unit,REC=global_here%IESTP+I) global_here%RID8(I)
                 ENDDO
                 global_here%IESTP=global_here%IESTP+3
                 DO I=1,3
-                   WRITE(fort61unit,REC=global_here%IESTP+I) global_here%AID8(I)
+                   WRITE(s%fort61unit,REC=global_here%IESTP+I) global_here%AID8(I)
                 ENDDO
                 global_here%IESTP=global_here%IESTP+3
              ENDIF
-             WRITE(fort61unit,REC=global_here%IESTP+1) global_here%NTRSPE
-             WRITE(fort61unit,REC=global_here%IESTP+2) global_here%NSTAE
-             WRITE(fort61unit,REC=global_here%IESTP+3) global_here%DT*global_here%NSPOOLE
-             WRITE(fort61unit,REC=global_here%IESTP+4) global_here%NSPOOLE
-             WRITE(fort61unit,REC=global_here%IESTP+5) 1
+             WRITE(s%fort61unit,REC=global_here%IESTP+1) global_here%NTRSPE
+             WRITE(s%fort61unit,REC=global_here%IESTP+2) global_here%NSTAE
+             WRITE(s%fort61unit,REC=global_here%IESTP+3) global_here%DT*global_here%NSPOOLE
+             WRITE(s%fort61unit,REC=global_here%IESTP+4) global_here%NSPOOLE
+             WRITE(s%fort61unit,REC=global_here%IESTP+5) 1
              global_here%IESTP=global_here%IESTP+5
-             CLOSE(fort61unit)                    ! DO THIS TO FLUSH THE WRITE BUFFER
-             OPEN(fort61unit,FILE=S%DIRNAME//'/'//'fort.61',&
+             CLOSE(s%fort61unit)                    ! DO THIS TO FLUSH THE WRITE BUFFER
+             OPEN(s%fort61unit,FILE=S%DIRNAME//'/'//'fort.61',&
                   ACCESS='DIRECT',RECL=NBYTE)
           ENDIF
 
@@ -447,51 +439,51 @@
         global_here%IVSTP=0
 
         IF(ABS(global_here%NOUTV).EQ.1) THEN
-          OPEN(fort62unit,FILE=S%DIRNAME//'/'//'fort.62')
-          WRITE(fort62unit,3220) global_here%RUNDES,global_here%RUNID,global_here%AGRID
-          WRITE(fort62unit,3645) global_here%NTRSPV,global_here%NSTAV,global_here%DTDP*global_here%NSPOOLV,global_here%NSPOOLV,2
+          OPEN(s%fort62unit,FILE=S%DIRNAME//'/'//'fort.62')
+          WRITE(s%fort62unit,3220) global_here%RUNDES,global_here%RUNID,global_here%AGRID
+          WRITE(s%fort62unit,3645) global_here%NTRSPV,global_here%NSTAV,global_here%DTDP*global_here%NSPOOLV,global_here%NSPOOLV,2
           global_here%IVSTP=2
           ENDIF
 
         IF(ABS(global_here%NOUTV).EQ.2) THEN
-          OPEN(fort62unit,FILE=S%DIRNAME//'/'//'fort.62',&
+          OPEN(s%fort62unit,FILE=S%DIRNAME//'/'//'fort.62',&
           ACCESS='DIRECT',RECL=NBYTE)
           IF(NBYTE.EQ.4) THEN
             DO I=1,8
-              WRITE(fort62unit,REC=global_here%IVSTP+I) global_here%RDES4(I)
+              WRITE(s%fort62unit,REC=global_here%IVSTP+I) global_here%RDES4(I)
               ENDDO
             global_here%IVSTP=global_here%IVSTP+8
             DO I=1,6
-              WRITE(fort62unit,REC=global_here%IVSTP+I) global_here%RID4(I)
+              WRITE(s%fort62unit,REC=global_here%IVSTP+I) global_here%RID4(I)
               ENDDO
             global_here%IVSTP=global_here%IVSTP+6
             DO I=1,6
-              WRITE(fort62unit,REC=global_here%IVSTP+I) global_here%AID4(I)
+              WRITE(s%fort62unit,REC=global_here%IVSTP+I) global_here%AID4(I)
               ENDDO
             global_here%IVSTP=global_here%IVSTP+6
             ENDIF
           IF(NBYTE.EQ.8) THEN
             DO I=1,4
-              WRITE(fort62unit,REC=global_here%IVSTP+I) global_here%RDES8(I)
+              WRITE(s%fort62unit,REC=global_here%IVSTP+I) global_here%RDES8(I)
               ENDDO
             global_here%IVSTP=global_here%IVSTP+4
             DO I=1,3
-              WRITE(fort62unit,REC=global_here%IVSTP+I) global_here%RID8(I)
+              WRITE(s%fort62unit,REC=global_here%IVSTP+I) global_here%RID8(I)
               ENDDO
             global_here%IVSTP=global_here%IVSTP+3
             DO I=1,3
-              WRITE(fort62unit,REC=global_here%IVSTP+I) global_here%AID8(I)
+              WRITE(s%fort62unit,REC=global_here%IVSTP+I) global_here%AID8(I)
               ENDDO
             global_here%IVSTP=global_here%IVSTP+3
             ENDIF
-          WRITE(fort62unit,REC=global_here%IVSTP+1) global_here%NTRSPV
-          WRITE(fort62unit,REC=global_here%IVSTP+2) global_here%NSTAV
-          WRITE(fort62unit,REC=global_here%IVSTP+3) global_here%DT*global_here%NSPOOLV
-          WRITE(fort62unit,REC=global_here%IVSTP+4) global_here%NSPOOLV
-          WRITE(fort62unit,REC=global_here%IVSTP+5) 2
+          WRITE(s%fort62unit,REC=global_here%IVSTP+1) global_here%NTRSPV
+          WRITE(s%fort62unit,REC=global_here%IVSTP+2) global_here%NSTAV
+          WRITE(s%fort62unit,REC=global_here%IVSTP+3) global_here%DT*global_here%NSPOOLV
+          WRITE(s%fort62unit,REC=global_here%IVSTP+4) global_here%NSPOOLV
+          WRITE(s%fort62unit,REC=global_here%IVSTP+5) 2
           global_here%IVSTP=global_here%IVSTP+5
-          CLOSE(fort62unit)                    ! DO THIS TO FLUSH THE WRITE BUFFER
-          OPEN(fort62unit,FILE=S%DIRNAME//'/'//'fort.62',&
+          CLOSE(s%fort62unit)                    ! DO THIS TO FLUSH THE WRITE BUFFER
+          OPEN(s%fort62unit,FILE=S%DIRNAME//'/'//'fort.62',&
          ACCESS='DIRECT',RECL=NBYTE)
           ENDIF
 
@@ -505,51 +497,51 @@
         global_here%ICSTP=0
 
         IF(ABS(global_here%NOUTC).EQ.1) THEN
-          OPEN(81,FILE=S%DIRNAME//'/'//'fort.81')
-          WRITE(81,3220) global_here%RUNDES,global_here%RUNID,global_here%AGRID
-          WRITE(81,3645) global_here%NTRSPC,global_here%NSTAC,global_here%DTDP*global_here%NSPOOLC,global_here%NSPOOLC,1
+          OPEN(s%fort81unit,FILE=S%DIRNAME//'/'//'fort.81')
+          WRITE(s%fort81unit,3220) global_here%RUNDES,global_here%RUNID,global_here%AGRID
+          WRITE(s%fort81unit,3645) global_here%NTRSPC,global_here%NSTAC,global_here%DTDP*global_here%NSPOOLC,global_here%NSPOOLC,1
           global_here%ICSTP=2
           ENDIF
 
         IF(ABS(global_here%NOUTC).EQ.2) THEN
-          OPEN(81,FILE=S%DIRNAME//'/'//'fort.81',&
+          OPEN(s%fort81unit,FILE=S%DIRNAME//'/'//'fort.81',&
           ACCESS='DIRECT',RECL=NBYTE)
           IF(NBYTE.EQ.4) THEN
             DO I=1,8
-              WRITE(81,REC=global_here%ICSTP+I) global_here%RDES4(I)
+              WRITE(s%fort81unit,REC=global_here%ICSTP+I) global_here%RDES4(I)
               ENDDO
             global_here%ICSTP=global_here%ICSTP+8
             DO I=1,6
-              WRITE(81,REC=global_here%ICSTP+I) global_here%RID4(I)
+              WRITE(s%fort81unit,REC=global_here%ICSTP+I) global_here%RID4(I)
               ENDDO
             global_here%ICSTP=global_here%ICSTP+6
             DO I=1,6
-              WRITE(81,REC=global_here%ICSTP+I) global_here%AID4(I)
+              WRITE(s%fort81unit,REC=global_here%ICSTP+I) global_here%AID4(I)
               ENDDO
             global_here%ICSTP=global_here%ICSTP+6
             ENDIF
           IF(NBYTE.EQ.8) THEN
             DO I=1,4
-              WRITE(81,REC=global_here%ICSTP+I) global_here%RDES8(I)
+              WRITE(s%fort81unit,REC=global_here%ICSTP+I) global_here%RDES8(I)
               ENDDO
             global_here%ICSTP=global_here%ICSTP+4
             DO I=1,3
-              WRITE(81,REC=global_here%ICSTP+I) global_here%RID8(I)
+              WRITE(s%fort81unit,REC=global_here%ICSTP+I) global_here%RID8(I)
               ENDDO
             global_here%ICSTP=global_here%ICSTP+3
             DO I=1,3
-              WRITE(81,REC=global_here%ICSTP+I) global_here%AID8(I)
+              WRITE(s%fort81unit,REC=global_here%ICSTP+I) global_here%AID8(I)
               ENDDO
             global_here%ICSTP=global_here%ICSTP+3
             ENDIF
-          WRITE(81,REC=global_here%ICSTP+1) global_here%NTRSPC
-          WRITE(81,REC=global_here%ICSTP+2) global_here%NSTAC
-          WRITE(81,REC=global_here%ICSTP+3) global_here%DT*global_here%NSPOOLC
-          WRITE(81,REC=global_here%ICSTP+4) global_here%NSPOOLC
-          WRITE(81,REC=global_here%ICSTP+5) 1
+          WRITE(s%fort81unit,REC=global_here%ICSTP+1) global_here%NTRSPC
+          WRITE(s%fort81unit,REC=global_here%ICSTP+2) global_here%NSTAC
+          WRITE(s%fort81unit,REC=global_here%ICSTP+3) global_here%DT*global_here%NSPOOLC
+          WRITE(s%fort81unit,REC=global_here%ICSTP+4) global_here%NSPOOLC
+          WRITE(s%fort81unit,REC=global_here%ICSTP+5) 1
           global_here%ICSTP=global_here%ICSTP+5
-          CLOSE(81)                    ! DO THIS TO FLUSH THE WRITE BUFFER
-          OPEN(81,FILE=S%DIRNAME//'/'//'fort.81',&
+          CLOSE(s%fort81unit)                    ! DO THIS TO FLUSH THE WRITE BUFFER
+          OPEN(s%fort81unit,FILE=S%DIRNAME//'/'//'fort.81',&
          ACCESS='DIRECT',RECL=NBYTE)
           ENDIF
 
@@ -564,51 +556,51 @@
         global_here%IESTP=0
 
         IF(ABS(global_here%NOUTE).EQ.1) THEN
-          OPEN(82,FILE=S%DIRNAME//'/'//'fort.82')
-          WRITE(82,3220) global_here%RUNDES,global_here%RUNID,global_here%AGRID
-          WRITE(82,3645) global_here%NTRSPE,global_here%NSTAE,global_here%DTDP*global_here%NSPOOLE,global_here%NSPOOLE,1
+          OPEN(s%fort82unit,FILE=S%DIRNAME//'/'//'fort.82')
+          WRITE(s%fort82unit,3220) global_here%RUNDES,global_here%RUNID,global_here%AGRID
+          WRITE(s%fort82unit,3645) global_here%NTRSPE,global_here%NSTAE,global_here%DTDP*global_here%NSPOOLE,global_here%NSPOOLE,1
           global_here%IESTP=2
           ENDIF
 
         IF(ABS(global_here%NOUTE).EQ.2) THEN
-          OPEN(82,FILE=S%DIRNAME//'/'//'fort.82',&
+          OPEN(s%fort82unit,FILE=S%DIRNAME//'/'//'fort.82',&
           ACCESS='DIRECT',RECL=NBYTE)
           IF(NBYTE.EQ.4) THEN
             DO I=1,8
-              WRITE(82,REC=global_here%IESTP+I) global_here%RDES4(I)
+              WRITE(s%fort82unit,REC=global_here%IESTP+I) global_here%RDES4(I)
               ENDDO
             global_here%IESTP=global_here%IESTP+8
             DO I=1,6
-              WRITE(82,REC=global_here%IESTP+I) global_here%RID4(I)
+              WRITE(s%fort82unit,REC=global_here%IESTP+I) global_here%RID4(I)
               ENDDO
             global_here%IESTP=global_here%IESTP+6
             DO I=1,6
-              WRITE(82,REC=global_here%IESTP+I) global_here%AID4(I)
+              WRITE(s%fort82unit,REC=global_here%IESTP+I) global_here%AID4(I)
               ENDDO
             global_here%IESTP=global_here%IESTP+6
             ENDIF
           IF(NBYTE.EQ.8) THEN
             DO I=1,4
-              WRITE(82,REC=global_here%IESTP+I) global_here%RDES8(I)
+              WRITE(s%fort82unit,REC=global_here%IESTP+I) global_here%RDES8(I)
               ENDDO
             global_here%IESTP=global_here%IESTP+4
             DO I=1,3
-              WRITE(82,REC=global_here%IESTP+I) global_here%RID8(I)
+              WRITE(s%fort82unit,REC=global_here%IESTP+I) global_here%RID8(I)
               ENDDO
             global_here%IESTP=global_here%IESTP+3
             DO I=1,3
-              WRITE(82,REC=global_here%IESTP+I) global_here%AID8(I)
+              WRITE(s%fort82unit,REC=global_here%IESTP+I) global_here%AID8(I)
               ENDDO
             global_here%IESTP=global_here%IESTP+3
             ENDIF
-          WRITE(82,REC=global_here%IESTP+1) global_here%NTRSPE
-          WRITE(82,REC=global_here%IESTP+2) global_here%NSTAE
-          WRITE(82,REC=global_here%IESTP+3) global_here%DT*global_here%NSPOOLE
-          WRITE(82,REC=global_here%IESTP+4) global_here%NSPOOLE
-          WRITE(82,REC=global_here%IESTP+5) 1
+          WRITE(s%fort82unit,REC=global_here%IESTP+1) global_here%NTRSPE
+          WRITE(s%fort82unit,REC=global_here%IESTP+2) global_here%NSTAE
+          WRITE(s%fort82unit,REC=global_here%IESTP+3) global_here%DT*global_here%NSPOOLE
+          WRITE(s%fort82unit,REC=global_here%IESTP+4) global_here%NSPOOLE
+          WRITE(s%fort82unit,REC=global_here%IESTP+5) 1
           global_here%IESTP=global_here%IESTP+5
-          CLOSE(82)                    ! DO THIS TO FLUSH THE WRITE BUFFER
-          OPEN(82,FILE=S%DIRNAME//'/'//'fort.82',&
+          CLOSE(s%fort82unit)                    ! DO THIS TO FLUSH THE WRITE BUFFER
+          OPEN(s%fort82unit,FILE=S%DIRNAME//'/'//'fort.82',&
          ACCESS='DIRECT',RECL=NBYTE)
           ENDIF
 
@@ -624,78 +616,78 @@
         global_here%IWSTP=0
 
         IF(ABS(global_here%NOUTM).EQ.1) THEN
-          OPEN(71,FILE=S%DIRNAME//'/'//'fort.71')
-          WRITE(71,3220) global_here%RUNDES,global_here%RUNID,global_here%AGRID
-          WRITE(71,3645) global_here%NTRSPM,global_here%NSTAM,global_here%DTDP*global_here%NSPOOLM,global_here%NSPOOLM,1
+          OPEN(s%fort17unit,FILE=S%DIRNAME//'/'//'fort.71')
+          WRITE(s%fort17unit,3220) global_here%RUNDES,global_here%RUNID,global_here%AGRID
+          WRITE(s%fort17unit,3645) global_here%NTRSPM,global_here%NSTAM,global_here%DTDP*global_here%NSPOOLM,global_here%NSPOOLM,1
           global_here%IPSTP=2
-          OPEN(72,FILE=S%DIRNAME//'/'//'fort.72')
-          WRITE(72,3220) global_here%RUNDES,global_here%RUNID,global_here%AGRID
-          WRITE(72,3645) global_here%NTRSPM,global_here%NSTAM,global_here%DTDP*global_here%NSPOOLM,global_here%NSPOOLM,2
+          OPEN(s%fort72unit,FILE=S%DIRNAME//'/'//'fort.72')
+          WRITE(s%fort72unit,3220) global_here%RUNDES,global_here%RUNID,global_here%AGRID
+          WRITE(s%fort72unit,3645) global_here%NTRSPM,global_here%NSTAM,global_here%DTDP*global_here%NSPOOLM,global_here%NSPOOLM,2
           global_here%IWSTP=2
           ENDIF
 
         IF(ABS(global_here%NOUTM).EQ.2) THEN
-          OPEN(71,FILE=S%DIRNAME//'/'//'fort.71',&
+          OPEN(s%fort17unit,FILE=S%DIRNAME//'/'//'fort.71',&
           ACCESS='DIRECT',RECL=NBYTE)
-          OPEN(72,FILE=S%DIRNAME//'/'//'fort.72',&
+          OPEN(s%fort72unit,FILE=S%DIRNAME//'/'//'fort.72',&
           ACCESS='DIRECT',RECL=NBYTE)
           IF(NBYTE.EQ.4) THEN
             DO I=1,8
-              WRITE(71,REC=global_here%IPSTP+I) global_here%RDES4(I)
-              WRITE(72,REC=global_here%IWSTP+I) global_here%RDES4(I)
+              WRITE(s%fort17unit,REC=global_here%IPSTP+I) global_here%RDES4(I)
+              WRITE(s%fort72unit,REC=global_here%IWSTP+I) global_here%RDES4(I)
               ENDDO
             global_here%IPSTP=global_here%IPSTP+8
             global_here%IWSTP=global_here%IWSTP+8
             DO I=1,6
-              WRITE(71,REC=global_here%IPSTP+I) global_here%RID4(I)
-              WRITE(72,REC=global_here%IWSTP+I) global_here%RID4(I)
+              WRITE(s%fort17unit,REC=global_here%IPSTP+I) global_here%RID4(I)
+              WRITE(s%fort72unit,REC=global_here%IWSTP+I) global_here%RID4(I)
               ENDDO
             global_here%IPSTP=global_here%IPSTP+6
             global_here%IWSTP=global_here%IWSTP+6
             DO I=1,6
-              WRITE(71,REC=global_here%IPSTP+I) global_here%AID4(I)
-              WRITE(72,REC=global_here%IWSTP+I) global_here%AID4(I)
+              WRITE(s%fort17unit,REC=global_here%IPSTP+I) global_here%AID4(I)
+              WRITE(s%fort72unit,REC=global_here%IWSTP+I) global_here%AID4(I)
               ENDDO
             global_here%IPSTP=global_here%IPSTP+6
             global_here%IWSTP=global_here%IWSTP+6
             ENDIF
           IF(NBYTE.EQ.8) THEN
             DO I=1,4
-              WRITE(71,REC=global_here%IPSTP+I) global_here%RDES8(I)
-              WRITE(72,REC=global_here%IWSTP+I) global_here%RDES8(I)
+              WRITE(s%fort17unit,REC=global_here%IPSTP+I) global_here%RDES8(I)
+              WRITE(s%fort72unit,REC=global_here%IWSTP+I) global_here%RDES8(I)
               ENDDO
             global_here%IPSTP=global_here%IPSTP+4
             global_here%IWSTP=global_here%IWSTP+4
             DO I=1,3
-              WRITE(71,REC=global_here%IPSTP+I) global_here%RID8(I)
-              WRITE(72,REC=global_here%IWSTP+I) global_here%RID8(I)
+              WRITE(s%fort17unit,REC=global_here%IPSTP+I) global_here%RID8(I)
+              WRITE(s%fort72unit,REC=global_here%IWSTP+I) global_here%RID8(I)
               ENDDO
             global_here%IPSTP=global_here%IPSTP+3
             global_here%IWSTP=global_here%IWSTP+3
             DO I=1,3
-              WRITE(71,REC=global_here%IPSTP+I) global_here%AID8(I)
-              WRITE(72,REC=global_here%IWSTP+I) global_here%AID8(I)
+              WRITE(s%fort17unit,REC=global_here%IPSTP+I) global_here%AID8(I)
+              WRITE(s%fort72unit,REC=global_here%IWSTP+I) global_here%AID8(I)
               ENDDO
             global_here%IPSTP=global_here%IPSTP+3
             global_here%IWSTP=global_here%IWSTP+3
             ENDIF
-          WRITE(71,REC=global_here%IPSTP+1) global_here%NTRSPM
-          WRITE(71,REC=global_here%IPSTP+2) global_here%NSTAM
-          WRITE(71,REC=global_here%IPSTP+3) global_here%DT*global_here%NSPOOLM
-          WRITE(71,REC=global_here%IPSTP+4) global_here%NSPOOLM
-          WRITE(71,REC=global_here%IPSTP+5) 1
-          WRITE(72,REC=global_here%IWSTP+1) global_here%NTRSPM
-          WRITE(72,REC=global_here%IWSTP+2) global_here%NSTAM
-          WRITE(72,REC=global_here%IWSTP+3) global_here%DT*global_here%NSPOOLM
-          WRITE(72,REC=global_here%IWSTP+4) global_here%NSPOOLM
-          WRITE(72,REC=global_here%IWSTP+5) 2
+          WRITE(s%fort17unit,REC=global_here%IPSTP+1) global_here%NTRSPM
+          WRITE(s%fort17unit,REC=global_here%IPSTP+2) global_here%NSTAM
+          WRITE(s%fort17unit,REC=global_here%IPSTP+3) global_here%DT*global_here%NSPOOLM
+          WRITE(s%fort17unit,REC=global_here%IPSTP+4) global_here%NSPOOLM
+          WRITE(s%fort17unit,REC=global_here%IPSTP+5) 1
+          WRITE(s%fort72unit,REC=global_here%IWSTP+1) global_here%NTRSPM
+          WRITE(s%fort72unit,REC=global_here%IWSTP+2) global_here%NSTAM
+          WRITE(s%fort72unit,REC=global_here%IWSTP+3) global_here%DT*global_here%NSPOOLM
+          WRITE(s%fort72unit,REC=global_here%IWSTP+4) global_here%NSPOOLM
+          WRITE(s%fort72unit,REC=global_here%IWSTP+5) 2
           global_here%IPSTP=global_here%IPSTP+5
           global_here%IWSTP=global_here%IWSTP+5
-          CLOSE(71)                    ! DO THIS TO FLUSH THE WRITE BUFFER
-          CLOSE(72)                    ! DO THIS TO FLUSH THE WRITE BUFFER
-          OPEN(71,FILE=S%DIRNAME//'/'//'fort.71',&
+          CLOSE(s%fort17unit)                    ! DO THIS TO FLUSH THE WRITE BUFFER
+          CLOSE(s%fort72unit)                    ! DO THIS TO FLUSH THE WRITE BUFFER
+          OPEN(s%fort17unit,FILE=S%DIRNAME//'/'//'fort.71',&
          ACCESS='DIRECT',RECL=NBYTE)
-          OPEN(72,FILE=S%DIRNAME//'/'//'fort.72',&
+          OPEN(s%fort72unit,FILE=S%DIRNAME//'/'//'fort.72',&
          ACCESS='DIRECT',RECL=NBYTE)
           ENDIF
 
@@ -710,72 +702,72 @@
         global_here%IGEP=0
 
         IF(ABS(global_here%NOUTGE).EQ.1) THEN
-          OPEN(fort63unit,FILE=S%DIRNAME//'/'//'fort.63')
-          WRITE(fort63unit,3220) global_here%RUNDES,global_here%RUNID,global_here%AGRID
-          WRITE(fort63unit,3645) global_here%NDSETSE,global_here%NE,global_here%DTDP*global_here%NSPOOLGE,global_here%NSPOOLGE,1
+          OPEN(s%fort63unit,FILE=S%DIRNAME//'/'//'fort.63')
+          WRITE(s%fort63unit,3220) global_here%RUNDES,global_here%RUNID,global_here%AGRID
+          WRITE(s%fort63unit,3645) global_here%NDSETSE,global_here%NE,global_here%DTDP*global_here%NSPOOLGE,global_here%NSPOOLGE,1
           global_here%IGEP=2
           ENDIF
 
         IF(ABS(global_here%NOUTGE).EQ.1) THEN
-          OPEN(88,FILE=S%DIRNAME//'/'//'fort.88')
-          WRITE(88,3220) global_here%RUNDES,global_here%RUNID,global_here%AGRID
-          WRITE(88,3645) global_here%NDSETSE,global_here%NE,global_here%DTDP*global_here%NSPOOLGE,global_here%NSPOOLGE,1
+          OPEN(s%fort88unit,FILE=S%DIRNAME//'/'//'fort.88')
+          WRITE(s%fort88unit,3220) global_here%RUNDES,global_here%RUNID,global_here%AGRID
+          WRITE(s%fort88unit,3645) global_here%NDSETSE,global_here%NE,global_here%DTDP*global_here%NSPOOLGE,global_here%NSPOOLGE,1
           global_here%IGEP=2
           ENDIF
 
         IF(ABS(global_here%NOUTGE).EQ.1) THEN
-          OPEN(89,FILE=S%DIRNAME//'/'//'fort.89')
-          WRITE(89,3220) global_here%RUNDES,global_here%RUNID,global_here%AGRID
-          WRITE(89,3645) global_here%NDSETSE,global_here%NE,global_here%DTDP*global_here%NSPOOLGE,global_here%NSPOOLGE,1
+          OPEN(s%fort89unit,FILE=S%DIRNAME//'/'//'fort.89')
+          WRITE(s%fort89unit,3220) global_here%RUNDES,global_here%RUNID,global_here%AGRID
+          WRITE(s%fort89unit,3645) global_here%NDSETSE,global_here%NE,global_here%DTDP*global_here%NSPOOLGE,global_here%NSPOOLGE,1
           global_here%IGEP=2
           ENDIF
 
         IF(ABS(global_here%NOUTGE).EQ.1) THEN
-          OPEN(4441,FILE=S%DIRNAME//'/'//'fort.4l')
-          WRITE(4441,3220) global_here%RUNDES,global_here%RUNID,global_here%AGRID
-          WRITE(4441,3645) global_here%NDSETSE,global_here%NE,global_here%DTDP*global_here%NSPOOLGE,global_here%NSPOOLGE,1
+          OPEN(s%fort4lunit,FILE=S%DIRNAME//'/'//'fort.4l')
+          WRITE(s%fort4lunit,3220) global_here%RUNDES,global_here%RUNID,global_here%AGRID
+          WRITE(s%fort4lunit,3645) global_here%NDSETSE,global_here%NE,global_here%DTDP*global_here%NSPOOLGE,global_here%NSPOOLGE,1
           global_here%IGEP=2
           ENDIF
 
         IF(ABS(global_here%NOUTGE).EQ.2) THEN
-          OPEN(fort63unit,FILE=S%DIRNAME//'/'//'fort.63',&
+          OPEN(s%fort63unit,FILE=S%DIRNAME//'/'//'fort.63',&
           ACCESS='DIRECT',RECL=NBYTE)
           IF(NBYTE.EQ.4) THEN
             DO I=1,8
-              WRITE(fort63unit,REC=global_here%IGEP+I) global_here%RDES4(I)
+              WRITE(s%fort63unit,REC=global_here%IGEP+I) global_here%RDES4(I)
               ENDDO
             global_here%IGEP=global_here%IGEP+8
             DO I=1,6
-              WRITE(fort63unit,REC=global_here%IGEP+I) global_here%RID4(I)
+              WRITE(s%fort63unit,REC=global_here%IGEP+I) global_here%RID4(I)
               ENDDO
             global_here%IGEP=global_here%IGEP+6
             DO I=1,6
-              WRITE(fort63unit,REC=global_here%IGEP+I) global_here%AID4(I)
+              WRITE(s%fort63unit,REC=global_here%IGEP+I) global_here%AID4(I)
               ENDDO
             global_here%IGEP=global_here%IGEP+6
             ENDIF
           IF(NBYTE.EQ.8) THEN
             DO I=1,4
-              WRITE(fort63unit,REC=global_here%IGEP+I) global_here%RDES8(I)
+              WRITE(s%fort63unit,REC=global_here%IGEP+I) global_here%RDES8(I)
               ENDDO
             global_here%IGEP=global_here%IGEP+4
             DO I=1,3
-              WRITE(fort63unit,REC=global_here%IGEP+I) global_here%RID8(I)
+              WRITE(s%fort63unit,REC=global_here%IGEP+I) global_here%RID8(I)
               ENDDO
             global_here%IGEP=global_here%IGEP+3
             DO I=1,3
-              WRITE(fort63unit,REC=global_here%IGEP+I) global_here%AID8(I)
+              WRITE(s%fort63unit,REC=global_here%IGEP+I) global_here%AID8(I)
               ENDDO
             global_here%IGEP=global_here%IGEP+3
             ENDIF
-          WRITE(fort63unit,REC=global_here%IGEP+1) global_here%NDSETSE
-          WRITE(fort63unit,REC=global_here%IGEP+2) global_here%NE
-          WRITE(fort63unit,REC=global_here%IGEP+3) global_here%DT*global_here%NSPOOLGE
-          WRITE(fort63unit,REC=global_here%IGEP+4) global_here%NSPOOLGE
-          WRITE(fort63unit,REC=global_here%IGEP+5) 1
+          WRITE(s%fort63unit,REC=global_here%IGEP+1) global_here%NDSETSE
+          WRITE(s%fort63unit,REC=global_here%IGEP+2) global_here%NE
+          WRITE(s%fort63unit,REC=global_here%IGEP+3) global_here%DT*global_here%NSPOOLGE
+          WRITE(s%fort63unit,REC=global_here%IGEP+4) global_here%NSPOOLGE
+          WRITE(s%fort63unit,REC=global_here%IGEP+5) 1
           global_here%IGEP=global_here%IGEP+5
-          CLOSE(fort63unit)                    ! DO THIS TO FLUSH THE WRITE BUFFER
-          OPEN(fort63unit,FILE=S%DIRNAME//'/'//'fort.63',&
+          CLOSE(s%fort63unit)                    ! DO THIS TO FLUSH THE WRITE BUFFER
+          OPEN(s%fort63unit,FILE=S%DIRNAME//'/'//'fort.63',&
          ACCESS='DIRECT',RECL=NBYTE)
           ENDIF
 
@@ -790,51 +782,51 @@
         global_here%IGVP=0
 
         IF(ABS(global_here%NOUTGV).EQ.1) THEN
-          OPEN(fort64unit,FILE=S%DIRNAME//'/'//'fort.64')
-          WRITE(fort64unit,3220) global_here%RUNDES,global_here%RUNID,global_here%AGRID
-          WRITE(fort64unit,3645) global_here%NDSETSV,global_here%NE,global_here%DTDP*global_here%NSPOOLGV,global_here%NSPOOLGV,2
+          OPEN(s%fort64unit,FILE=S%DIRNAME//'/'//'fort.64')
+          WRITE(s%fort64unit,3220) global_here%RUNDES,global_here%RUNID,global_here%AGRID
+          WRITE(s%fort64unit,3645) global_here%NDSETSV,global_here%NE,global_here%DTDP*global_here%NSPOOLGV,global_here%NSPOOLGV,2
           global_here%IGVP=2
           ENDIF
 
         IF(ABS(global_here%NOUTGV).EQ.2) THEN
-          OPEN(fort64unit,FILE=S%DIRNAME//'/'//'fort.64',&
+          OPEN(s%fort64unit,FILE=S%DIRNAME//'/'//'fort.64',&
           ACCESS='DIRECT',RECL=NBYTE)
           IF(NBYTE.EQ.4) THEN
             DO I=1,8
-              WRITE(fort64unit,REC=global_here%IGVP+I) global_here%RDES4(I)
+              WRITE(s%fort64unit,REC=global_here%IGVP+I) global_here%RDES4(I)
               ENDDO
             global_here%IGVP=global_here%IGVP+8
             DO I=1,6
-              WRITE(fort64unit,REC=global_here%IGVP+I) global_here%RID4(I)
+              WRITE(s%fort64unit,REC=global_here%IGVP+I) global_here%RID4(I)
               ENDDO
             global_here%IGVP=global_here%IGVP+6
             DO I=1,6
-              WRITE(fort64unit,REC=global_here%IGVP+I) global_here%AID4(I)
+              WRITE(s%fort64unit,REC=global_here%IGVP+I) global_here%AID4(I)
               ENDDO
             global_here%IGVP=global_here%IGVP+6
             ENDIF
           IF(NBYTE.EQ.8) THEN
             DO I=1,4
-              WRITE(fort64unit,REC=global_here%IGVP+I) global_here%RDES8(I)
+              WRITE(s%fort64unit,REC=global_here%IGVP+I) global_here%RDES8(I)
               ENDDO
             global_here%IGVP=global_here%IGVP+4
             DO I=1,3
-              WRITE(fort64unit,REC=global_here%IGVP+I) global_here%RID8(I)
+              WRITE(s%fort64unit,REC=global_here%IGVP+I) global_here%RID8(I)
               ENDDO
             global_here%IGVP=global_here%IGVP+3
             DO I=1,3
-              WRITE(fort64unit,REC=global_here%IGVP+I) global_here%AID8(I)
+              WRITE(s%fort64unit,REC=global_here%IGVP+I) global_here%AID8(I)
               ENDDO
             global_here%IGVP=global_here%IGVP+3
             ENDIF
-          WRITE(fort64unit,REC=global_here%IGVP+1) global_here%NDSETSV
-          WRITE(fort64unit,REC=global_here%IGVP+2) global_here%NE
-          WRITE(fort64unit,REC=global_here%IGVP+3) global_here%DT*global_here%NSPOOLGV
-          WRITE(fort64unit,REC=global_here%IGVP+4) global_here%NSPOOLGV
-          WRITE(fort64unit,REC=global_here%IGVP+5) 2
+          WRITE(s%fort64unit,REC=global_here%IGVP+1) global_here%NDSETSV
+          WRITE(s%fort64unit,REC=global_here%IGVP+2) global_here%NE
+          WRITE(s%fort64unit,REC=global_here%IGVP+3) global_here%DT*global_here%NSPOOLGV
+          WRITE(s%fort64unit,REC=global_here%IGVP+4) global_here%NSPOOLGV
+          WRITE(s%fort64unit,REC=global_here%IGVP+5) 2
           global_here%IGVP=global_here%IGVP+5
-          CLOSE(fort64unit)                    ! DO THIS TO FLUSH THE WRITE BUFFER
-          OPEN(fort64unit,FILE=S%DIRNAME//'/'//'fort.64',&
+          CLOSE(s%fort64unit)                    ! DO THIS TO FLUSH THE WRITE BUFFER
+          OPEN(s%fort64unit,FILE=S%DIRNAME//'/'//'fort.64',&
          ACCESS='DIRECT',RECL=NBYTE)
           ENDIF
 
@@ -850,127 +842,127 @@
         global_here%igpp=0
 
         IF(ABS(global_here%NOUTGW).EQ.1) THEN
-          open(73,file=s%DIRNAME//'/'//'fort.73')
-          write(73,3220) global_here%rundes,global_here%runid,global_here%agrid
-          write(73,3645) global_here%ndsetsw,global_here%np,global_here%dtdp*global_here%nspoolgw,global_here%nspoolgw,1
+          open(s%fort73unit,file=s%DIRNAME//'/'//'fort.73')
+          write(s%fort73unit,3220) global_here%rundes,global_here%runid,global_here%agrid
+          write(s%fort73unit,3645) global_here%ndsetsw,global_here%np,global_here%dtdp*global_here%nspoolgw,global_here%nspoolgw,1
           global_here%igpp=2
-          OPEN(74,FILE=S%DIRNAME//'/'//'fort.74')
-          WRITE(74,3220) global_here%RUNDES,global_here%RUNID,global_here%AGRID
-          WRITE(74,3645) global_here%NDSETSW,global_here%NP,global_here%DTDP*global_here%NSPOOLGW,global_here%NSPOOLGW,2
+          OPEN(s%fort74unit,FILE=S%DIRNAME//'/'//'fort.74')
+          WRITE(s%fort74unit,3220) global_here%RUNDES,global_here%RUNID,global_here%AGRID
+          WRITE(s%fort74unit,3645) global_here%NDSETSW,global_here%NP,global_here%DTDP*global_here%NSPOOLGW,global_here%NSPOOLGW,2
           global_here%IGWP=2
           ENDIF
 
         IF(ABS(global_here%NOUTGW).EQ.2) THEN
-          open(73,file=s%DIRNAME//'/'//'fort.73',&
+          open(s%fort73unit,file=s%DIRNAME//'/'//'fort.73',&
           access='direct',recl=nbyte)
-          OPEN(74,FILE=S%DIRNAME//'/'//'fort.74',&
+          OPEN(s%fort74unit,FILE=S%DIRNAME//'/'//'fort.74',&
           ACCESS='DIRECT',RECL=NBYTE)
           IF(NBYTE.EQ.4) THEN
             DO I=1,8
-              write(73,rec=global_here%igpp+i) global_here%rdes4(i)
-              WRITE(74,REC=global_here%IGWP+I) global_here%RDES4(I)
+              write(s%fort73unit,rec=global_here%igpp+i) global_here%rdes4(i)
+              WRITE(s%fort74unit,REC=global_here%IGWP+I) global_here%RDES4(I)
               ENDDO
             global_here%igpp=global_here%igpp+8
             global_here%IGWP=global_here%IGWP+8
             DO I=1,6
-              write(73,rec=global_here%igpp+i) global_here%rid4(i)
-              WRITE(74,REC=global_here%IGWP+I) global_here%RID4(I)
+              write(s%fort73unit,rec=global_here%igpp+i) global_here%rid4(i)
+              WRITE(s%fort74unit,REC=global_here%IGWP+I) global_here%RID4(I)
               ENDDO
             global_here%igpp=global_here%igpp+6
             global_here%IGWP=global_here%IGWP+6
             DO I=1,6
-              write(73,rec=global_here%igpp+i) global_here%aid4(i)
-              WRITE(74,REC=global_here%IGWP+I) global_here%AID4(I)
+              write(s%fort73unit,rec=global_here%igpp+i) global_here%aid4(i)
+              WRITE(s%fort74unit,REC=global_here%IGWP+I) global_here%AID4(I)
               ENDDO
             global_here%igpp=global_here%igpp+6
             global_here%IGWP=global_here%IGWP+6
             ENDIF
           IF(NBYTE.EQ.8) THEN
             DO I=1,4
-              write(73,rec=global_here%igpp+i) global_here%rdes8(i)
-              WRITE(74,REC=global_here%IGWP+I) global_here%RDES8(I)
+              write(s%fort73unit,rec=global_here%igpp+i) global_here%rdes8(i)
+              WRITE(s%fort74unit,REC=global_here%IGWP+I) global_here%RDES8(I)
               ENDDO
             global_here%igpp=global_here%igpp+4
             global_here%IGWP=global_here%IGWP+4
             DO I=1,3
-              write(73,rec=global_here%igpp+i) global_here%rid8(i)
-              WRITE(74,REC=global_here%IGWP+I) global_here%RID8(I)
+              write(s%fort73unit,rec=global_here%igpp+i) global_here%rid8(i)
+              WRITE(s%fort74unit,REC=global_here%IGWP+I) global_here%RID8(I)
               ENDDO
             global_here%igpp=global_here%igpp+3
             global_here%IGWP=global_here%IGWP+3
             DO I=1,3
-              write(73,rec=global_here%igpp+i) global_here%aid8(i)
-              WRITE(74,REC=global_here%IGWP+I) global_here%AID8(I)
+              write(s%fort73unit,rec=global_here%igpp+i) global_here%aid8(i)
+              WRITE(s%fort74unit,REC=global_here%IGWP+I) global_here%AID8(I)
               ENDDO
             global_here%igpp=global_here%igpp+3
             global_here%IGWP=global_here%IGWP+3
             ENDIF
-          write(73,rec=global_here%igpp+1) global_here%ndsetsw
-          write(73,rec=global_here%igpp+2) global_here%np
-          write(73,rec=global_here%igpp+3) global_here%dt*global_here%nspoolgw
-          write(73,rec=global_here%igpp+4) global_here%nspoolgw
-          write(73,rec=global_here%igpp+5) 2
+          write(s%fort73unit,rec=global_here%igpp+1) global_here%ndsetsw
+          write(s%fort73unit,rec=global_here%igpp+2) global_here%np
+          write(s%fort73unit,rec=global_here%igpp+3) global_here%dt*global_here%nspoolgw
+          write(s%fort73unit,rec=global_here%igpp+4) global_here%nspoolgw
+          write(s%fort73unit,rec=global_here%igpp+5) 2
           global_here%igpp=global_here%igpp+5
-          close(73)                    ! DO THIS TO FLUSH THE WRITE BUFFER
-          open(73,file=s%DIRNAME//'/'//'fort.73',&
+          close(s%fort73unit)                    ! DO THIS TO FLUSH THE WRITE BUFFER
+          open(s%fort73unit,file=s%DIRNAME//'/'//'fort.73',&
          access='direct',recl=nbyte)
-          WRITE(74,REC=global_here%IGWP+1) global_here%NDSETSW
-          WRITE(74,REC=global_here%IGWP+2) global_here%NP
-          WRITE(74,REC=global_here%IGWP+3) global_here%DT*global_here%NSPOOLGW
-          WRITE(74,REC=global_here%IGWP+4) global_here%NSPOOLGW
-          WRITE(74,REC=global_here%IGWP+5) 2
+          WRITE(s%fort74unit,REC=global_here%IGWP+1) global_here%NDSETSW
+          WRITE(s%fort74unit,REC=global_here%IGWP+2) global_here%NP
+          WRITE(s%fort74unit,REC=global_here%IGWP+3) global_here%DT*global_here%NSPOOLGW
+          WRITE(s%fort74unit,REC=global_here%IGWP+4) global_here%NSPOOLGW
+          WRITE(s%fort74unit,REC=global_here%IGWP+5) 2
           global_here%IGWP=global_here%IGWP+5
-          CLOSE(74)                    ! DO THIS TO FLUSH THE WRITE BUFFER
-          OPEN(74,FILE=S%DIRNAME//'/'//'fort.74',&
+          CLOSE(s%fort74unit)                    ! DO THIS TO FLUSH THE WRITE BUFFER
+          OPEN(s%fort74unit,FILE=S%DIRNAME//'/'//'fort.74',&
          ACCESS='DIRECT',RECL=NBYTE)
           ENDIF
 #ifdef SWAN
 !asey 101118: Added the output of radiation stress gradients.
        IGRadS=0
        IF(ABS(global_here%NOUTGW).EQ.1) THEN
-          OPEN(164,FILE=S%DIRNAME//'/'//'rads.64')
-          WRITE(164,3220) global_here%RUNDES,global_here%RUNID,global_here%AGRID
-          WRITE(164,3645) global_here%NDSETSW,global_here%NP,global_here%DTDP*global_here%NSPOOLGW,global_here%NSPOOLGW,2
+          OPEN(rads64unit,FILE=S%DIRNAME//'/'//'rads.64')
+          WRITE(rads64unit,3220) global_here%RUNDES,global_here%RUNID,global_here%AGRID
+          WRITE(rads64unit,3645) global_here%NDSETSW,global_here%NP,global_here%DTDP*global_here%NSPOOLGW,global_here%NSPOOLGW,2
           IGRadS=2
           ENDIF
        IF(ABS(global_here%NOUTGW).EQ.2) THEN
-          OPEN(164,FILE=TRIM(LOCALDIR)//'/'//'rads.64',&
+          OPEN(rads64unit,FILE=TRIM(LOCALDIR)//'/'//'rads.64',&
            ACCESS='DIRECT',RECL=NByte)
           IF(NBYTE.EQ.4) THEN
              DO I=1,8
-                WRITE(164,REC=IGRadS+I) global_here%RDES4(I)
+                WRITE(rads64unit,REC=IGRadS+I) global_here%RDES4(I)
                 ENDDO
              IGRadS=IGRadS+8
              DO I=1,6
-                WRITE(164,REC=IGRadS+I) global_here%RID4(I)
+                WRITE(rads64unit,REC=IGRadS+I) global_here%RID4(I)
                 ENDDO
              IGRadS=IGRadS+6
              DO I=1,6
-                WRITE(164,REC=IGRadS+I) global_here%AID4(I)
+                WRITE(rads64unit,REC=IGRadS+I) global_here%AID4(I)
                 ENDDO
              IGRadS=IGRadS+6
              ENDIF
           IF(NBYTE.EQ.8) THEN
              DO I=1,4
-                WRITE(164,REC=IGRadS+I) global_here%RDES8(I)
+                WRITE(rads64unit,REC=IGRadS+I) global_here%RDES8(I)
                 ENDDO
              IGRadS=IGRadS+4
              DO I=1,3
-                WRITE(164,REC=IGRadS+I) global_here%RID8(I)
+                WRITE(rads64unit,REC=IGRadS+I) global_here%RID8(I)
                 ENDDO
              IGRadS=IGRadS+3
              DO I=1,3
-                WRITE(164,REC=IGRadS+I) global_here%AID8(I)
+                WRITE(rads64unit,REC=IGRadS+I) global_here%AID8(I)
                 ENDDO
              IGRadS=IGRadS+3
              ENDIF
-          WRITE(164,REC=IGRadS+1) global_here%NDSETSW
-          WRITE(164,REC=IGRadS+2) global_here%NP
-          WRITE(164,REC=IGRadS+3) global_here%DT*global_here%NSPOOLGW
-          WRITE(164,REC=IGRadS+4) global_here%NSPOOLGW
-          WRITE(164,REC=IGRadS+5) 2
+          WRITE(rads64unit,REC=IGRadS+1) global_here%NDSETSW
+          WRITE(rads64unit,REC=IGRadS+2) global_here%NP
+          WRITE(rads64unit,REC=IGRadS+3) global_here%DT*global_here%NSPOOLGW
+          WRITE(rads64unit,REC=IGRadS+4) global_here%NSPOOLGW
+          WRITE(rads64unit,REC=IGRadS+5) 2
           IGRadS=IGRadS+5
-          CLOSE(164)
+          CLOSE(rads64unit)
           ENDIF
 #endif
 
@@ -985,51 +977,51 @@
         global_here%IGCP=0
 
         IF(ABS(global_here%NOUTGC).EQ.1) THEN
-          OPEN(83,FILE=S%DIRNAME//'/'//'fort.83')
-          WRITE(83,3220) global_here%RUNDES,global_here%RUNID,global_here%AGRID
-          WRITE(83,3645) global_here%NDSETSC,global_here%NP,global_here%DTDP*global_here%NSPOOLGC,global_here%NSPOOLGC,1
+          OPEN(s%fort83unit,FILE=S%DIRNAME//'/'//'fort.83')
+          WRITE(s%fort83unit,3220) global_here%RUNDES,global_here%RUNID,global_here%AGRID
+          WRITE(s%fort83unit,3645) global_here%NDSETSC,global_here%NP,global_here%DTDP*global_here%NSPOOLGC,global_here%NSPOOLGC,1
           global_here%IGCP=2
           ENDIF
 
         IF(ABS(global_here%NOUTGC).EQ.2) THEN
-          OPEN(83,FILE=S%DIRNAME//'/'//'fort.83',&
+          OPEN(s%fort83unit,FILE=S%DIRNAME//'/'//'fort.83',&
           ACCESS='DIRECT',RECL=NBYTE)
           IF(NBYTE.EQ.4) THEN
             DO I=1,8
-              WRITE(83,REC=global_here%IGCP+I) global_here%RDES4(I)
+              WRITE(s%fort83unit,REC=global_here%IGCP+I) global_here%RDES4(I)
               ENDDO
             global_here%IGCP=global_here%IGCP+8
             DO I=1,6
-              WRITE(83,REC=global_here%IGCP+I) global_here%RID4(I)
+              WRITE(s%fort83unit,REC=global_here%IGCP+I) global_here%RID4(I)
               ENDDO
             global_here%IGCP=global_here%IGCP+6
             DO I=1,6
-              WRITE(83,REC=global_here%IGCP+I) global_here%AID4(I)
+              WRITE(s%fort83unit,REC=global_here%IGCP+I) global_here%AID4(I)
               ENDDO
             global_here%IGCP=global_here%IGCP+6
             ENDIF
           IF(NBYTE.EQ.8) THEN
             DO I=1,4
-              WRITE(83,REC=global_here%IGCP+I) global_here%RDES8(I)
+              WRITE(s%fort83unit,REC=global_here%IGCP+I) global_here%RDES8(I)
               ENDDO
             global_here%IGCP=global_here%IGCP+4
             DO I=1,3
-              WRITE(83,REC=global_here%IGCP+I) global_here%RID8(I)
+              WRITE(s%fort83unit,REC=global_here%IGCP+I) global_here%RID8(I)
               ENDDO
             global_here%IGCP=global_here%IGCP+3
             DO I=1,3
-              WRITE(83,REC=global_here%IGCP+I) global_here%AID8(I)
+              WRITE(s%fort83unit,REC=global_here%IGCP+I) global_here%AID8(I)
               ENDDO
             global_here%IGCP=global_here%IGCP+3
             ENDIF
-          WRITE(83,REC=global_here%IGCP+1) global_here%NDSETSC
-          WRITE(83,REC=global_here%IGCP+2) global_here%NP
-          WRITE(83,REC=global_here%IGCP+3) global_here%DT*global_here%NSPOOLGC
-          WRITE(83,REC=global_here%IGCP+4) global_here%NSPOOLGC
-          WRITE(83,REC=global_here%IGCP+5) 1
+          WRITE(s%fort83unit,REC=global_here%IGCP+1) global_here%NDSETSC
+          WRITE(s%fort83unit,REC=global_here%IGCP+2) global_here%NP
+          WRITE(s%fort83unit,REC=global_here%IGCP+3) global_here%DT*global_here%NSPOOLGC
+          WRITE(s%fort83unit,REC=global_here%IGCP+4) global_here%NSPOOLGC
+          WRITE(s%fort83unit,REC=global_here%IGCP+5) 1
           global_here%IGCP=global_here%IGCP+5
-          CLOSE(83)                    ! DO THIS TO FLUSH THE WRITE BUFFER
-          OPEN(83,FILE=S%DIRNAME//'/'//'fort.83',&
+          CLOSE(s%fort83unit)                    ! DO THIS TO FLUSH THE WRITE BUFFER
+          OPEN(s%fort83unit,FILE=S%DIRNAME//'/'//'fort.83',&
          ACCESS='DIRECT',RECL=NBYTE)
           ENDIF
 
@@ -1074,70 +1066,70 @@
           global_here%IGEP = 0
 
           IF (ABS(global_here%NOUTGE).EQ.1) THEN
-            OPEN(84,FILE=S%DIRNAME//'/'//'fort.84')
-            OPEN(85,FILE=S%DIRNAME//'/'//'fort.85')
-            WRITE(84,3220) global_here%RUNDES,global_here%RUNID,global_here%AGRID
-            WRITE(84,3645) global_here%NDSETSE,global_here%NP,global_here%DTDP*global_here%NSPOOLGE,global_here%NSPOOLGE,1
-            WRITE(85,3220) global_here%RUNDES,global_here%RUNID,global_here%AGRID
-            WRITE(85,3645) global_here%NDSETSE,global_here%NP,global_here%DTDP*global_here%NSPOOLGE,global_here%NSPOOLGE,1
+            OPEN(s%fort84unit,FILE=S%DIRNAME//'/'//'fort.84')
+            OPEN(s%fort85unit,FILE=S%DIRNAME//'/'//'fort.85')
+            WRITE(s%fort84unit,3220) global_here%RUNDES,global_here%RUNID,global_here%AGRID
+            WRITE(s%fort84unit,3645) global_here%NDSETSE,global_here%NP,global_here%DTDP*global_here%NSPOOLGE,global_here%NSPOOLGE,1
+            WRITE(s%fort85unit,3220) global_here%RUNDES,global_here%RUNID,global_here%AGRID
+            WRITE(s%fort85unit,3645) global_here%NDSETSE,global_here%NP,global_here%DTDP*global_here%NSPOOLGE,global_here%NSPOOLGE,1
             global_here%IGEP=2
           ENDIF
 
           IF (ABS(global_here%NOUTGE).EQ.2) THEN
-            OPEN(84,FILE=S%DIRNAME//'/'//'fort.84',&
+            OPEN(s%fort84unit,FILE=S%DIRNAME//'/'//'fort.84',&
           ACCESS='DIRECT',RECL=NBYTE)
-            OPEN(85,FILE=S%DIRNAME//'/'//'fort.85',&
+            OPEN(s%fort85unit,FILE=S%DIRNAME//'/'//'fort.85',&
           ACCESS='DIRECT',RECL=NBYTE)
             IF(NBYTE.EQ.4) THEN
               DO I=1,8
-                WRITE(84,REC=global_here%IGEP+I) global_here%RDES4(I)
-                WRITE(85,REC=global_here%IGEP+I) global_here%RDES4(I)
+                WRITE(s%fort84unit,REC=global_here%IGEP+I) global_here%RDES4(I)
+                WRITE(s%fort85unit,REC=global_here%IGEP+I) global_here%RDES4(I)
               ENDDO
               global_here%IGEP=global_here%IGEP+8
               DO I=1,6
-                WRITE(84,REC=global_here%IGEP+I) global_here%RID4(I)
-                WRITE(85,REC=global_here%IGEP+I) global_here%RID4(I)
+                WRITE(s%fort84unit,REC=global_here%IGEP+I) global_here%RID4(I)
+                WRITE(s%fort85unit,REC=global_here%IGEP+I) global_here%RID4(I)
               ENDDO
               global_here%IGEP=global_here%IGEP+6
               DO I=1,6
-                WRITE(84,REC=global_here%IGEP+I) global_here%AID4(I)
-                WRITE(85,REC=global_here%IGEP+I) global_here%AID4(I)
+                WRITE(s%fort84unit,REC=global_here%IGEP+I) global_here%AID4(I)
+                WRITE(s%fort85unit,REC=global_here%IGEP+I) global_here%AID4(I)
               ENDDO
               global_here%IGEP=global_here%IGEP+6
               ENDIF
             IF(NBYTE.EQ.8) THEN
               DO I=1,4
-                WRITE(84,REC=global_here%IGEP+I) global_here%RDES8(I)
-                WRITE(85,REC=global_here%IGEP+I) global_here%RDES8(I)
+                WRITE(s%fort84unit,REC=global_here%IGEP+I) global_here%RDES8(I)
+                WRITE(s%fort85unit,REC=global_here%IGEP+I) global_here%RDES8(I)
               ENDDO
               global_here%IGEP=global_here%IGEP+4
               DO I=1,3
-                WRITE(84,REC=global_here%IGEP+I) global_here%RID8(I)
-                WRITE(85,REC=global_here%IGEP+I) global_here%RID8(I)
+                WRITE(s%fort84unit,REC=global_here%IGEP+I) global_here%RID8(I)
+                WRITE(s%fort85unit,REC=global_here%IGEP+I) global_here%RID8(I)
               ENDDO
               global_here%IGEP=global_here%IGEP+3
               DO I=1,3
-                WRITE(84,REC=global_here%IGEP+I) global_here%AID8(I)
-                WRITE(85,REC=global_here%IGEP+I) global_here%AID8(I)
+                WRITE(s%fort84unit,REC=global_here%IGEP+I) global_here%AID8(I)
+                WRITE(s%fort85unit,REC=global_here%IGEP+I) global_here%AID8(I)
               ENDDO
               global_here%IGEP=global_here%IGEP+3
             ENDIF
-            WRITE(84,REC=global_here%IGEP+1) global_here%NDSETSE
-            WRITE(84,REC=global_here%IGEP+2) global_here%NP
-            WRITE(84,REC=global_here%IGEP+3) global_here%DT*global_here%NSPOOLGE
-            WRITE(84,REC=global_here%IGEP+4) global_here%NSPOOLGE
-            WRITE(84,REC=global_here%IGEP+5) 1
-            WRITE(85,REC=global_here%IGEP+1) global_here%NDSETSE
-            WRITE(85,REC=global_here%IGEP+2) global_here%NP
-            WRITE(85,REC=global_here%IGEP+3) global_here%DT*global_here%NSPOOLGE
-            WRITE(85,REC=global_here%IGEP+4) global_here%NSPOOLGE
-            WRITE(85,REC=global_here%IGEP+5) 1
+            WRITE(s%fort84unit,REC=global_here%IGEP+1) global_here%NDSETSE
+            WRITE(s%fort84unit,REC=global_here%IGEP+2) global_here%NP
+            WRITE(s%fort84unit,REC=global_here%IGEP+3) global_here%DT*global_here%NSPOOLGE
+            WRITE(s%fort84unit,REC=global_here%IGEP+4) global_here%NSPOOLGE
+            WRITE(s%fort84unit,REC=global_here%IGEP+5) 1
+            WRITE(s%fort85unit,REC=global_here%IGEP+1) global_here%NDSETSE
+            WRITE(s%fort85unit,REC=global_here%IGEP+2) global_here%NP
+            WRITE(s%fort85unit,REC=global_here%IGEP+3) global_here%DT*global_here%NSPOOLGE
+            WRITE(s%fort85unit,REC=global_here%IGEP+4) global_here%NSPOOLGE
+            WRITE(s%fort85unit,REC=global_here%IGEP+5) 1
             global_here%IGEP=global_here%IGEP+5
-            CLOSE(84)                    ! DO THIS TO FLUSH THE WRITE BUFFER
-            CLOSE(85)                    ! DO THIS TO FLUSH THE WRITE BUFFER
-            OPEN(84,FILE=S%DIRNAME//'/'//'fort.84',&
+            CLOSE(s%fort84unit)                    ! DO THIS TO FLUSH THE WRITE BUFFER
+            CLOSE(s%fort85unit)                    ! DO THIS TO FLUSH THE WRITE BUFFER
+            OPEN(s%fort84unit,FILE=S%DIRNAME//'/'//'fort.84',&
          ACCESS='DIRECT',RECL=NBYTE)
-            OPEN(85,FILE=S%DIRNAME//'/'//'fort.85',&
+            OPEN(s%fort85unit,FILE=S%DIRNAME//'/'//'fort.85',&
          ACCESS='DIRECT',RECL=NBYTE)
           ENDIF
 !...
@@ -1150,51 +1142,51 @@
           global_here%IESTP=0
 
           IF (ABS(global_here%NOUTE).EQ.1) THEN
-            OPEN(82,FILE=S%DIRNAME//'/'//'fort.82')
-            WRITE(82,3220) global_here%RUNDES,global_here%RUNID,global_here%AGRID
-            WRITE(82,3645) global_here%NTRSPE,global_here%NSTAE,global_here%DTDP*global_here%NSPOOLE,global_here%NSPOOLE,1
+            OPEN(s%fort82unit,FILE=S%DIRNAME//'/'//'fort.82')
+            WRITE(s%fort82unit,3220) global_here%RUNDES,global_here%RUNID,global_here%AGRID
+            WRITE(s%fort82unit,3645) global_here%NTRSPE,global_here%NSTAE,global_here%DTDP*global_here%NSPOOLE,global_here%NSPOOLE,1
             global_here%IESTP=2
           ENDIF
 
           IF (ABS(global_here%NOUTE).EQ.2) THEN
-            OPEN(82,FILE=S%DIRNAME//'/'//'fort.82',&
+            OPEN(s%fort82unit,FILE=S%DIRNAME//'/'//'fort.82',&
           ACCESS='DIRECT',RECL=NBYTE)
             IF(NBYTE.EQ.4) THEN
               DO I=1,8
-                WRITE(82,REC=global_here%IESTP+I) global_here%RDES4(I)
+                WRITE(s%fort82unit,REC=global_here%IESTP+I) global_here%RDES4(I)
               ENDDO
               global_here%IESTP=global_here%IESTP+8
               DO I=1,6
-                WRITE(82,REC=global_here%IESTP+I) global_here%RID4(I)
+                WRITE(s%fort82unit,REC=global_here%IESTP+I) global_here%RID4(I)
               ENDDO
               global_here%IESTP=global_here%IESTP+6
               DO I=1,6
-                WRITE(82,REC=global_here%IESTP+I) global_here%AID4(I)
+                WRITE(s%fort82unit,REC=global_here%IESTP+I) global_here%AID4(I)
               ENDDO
               global_here%IESTP=global_here%IESTP+6
             ENDIF
             IF(NBYTE.EQ.8) THEN
               DO I=1,4
-                WRITE(82,REC=global_here%IESTP+I) global_here%RDES8(I)
+                WRITE(s%fort82unit,REC=global_here%IESTP+I) global_here%RDES8(I)
               ENDDO
               global_here%IESTP=global_here%IESTP+4
               DO I=1,3
-                WRITE(82,REC=global_here%IESTP+I) global_here%RID8(I)
+                WRITE(s%fort82unit,REC=global_here%IESTP+I) global_here%RID8(I)
               ENDDO
               global_here%IESTP=global_here%IESTP+3
               DO I=1,3
-                WRITE(82,REC=global_here%IESTP+I) global_here%AID8(I)
+                WRITE(s%fort82unit,REC=global_here%IESTP+I) global_here%AID8(I)
               ENDDO
               global_here%IESTP=global_here%IESTP+3
             ENDIF
-            WRITE(82,REC=global_here%IESTP+1) global_here%NTRSPE
-            WRITE(82,REC=global_here%IESTP+2) global_here%NSTAE
-            WRITE(82,REC=global_here%IESTP+3) global_here%DT*global_here%NSPOOLE
-            WRITE(82,REC=global_here%IESTP+4) global_here%NSPOOLE
-            WRITE(82,REC=global_here%IESTP+5) 1
+            WRITE(s%fort82unit,REC=global_here%IESTP+1) global_here%NTRSPE
+            WRITE(s%fort82unit,REC=global_here%IESTP+2) global_here%NSTAE
+            WRITE(s%fort82unit,REC=global_here%IESTP+3) global_here%DT*global_here%NSPOOLE
+            WRITE(s%fort82unit,REC=global_here%IESTP+4) global_here%NSPOOLE
+            WRITE(s%fort82unit,REC=global_here%IESTP+5) 1
             global_here%IESTP=global_here%IESTP+5
-            CLOSE(82)                    ! DO THIS TO FLUSH THE WRITE BUFFER
-            OPEN(82,FILE=S%DIRNAME//'/'//'fort.82',&
+            CLOSE(s%fort82unit)                    ! DO THIS TO FLUSH THE WRITE BUFFER
+            OPEN(s%fort82unit,FILE=S%DIRNAME//'/'//'fort.82',&
          ACCESS='DIRECT',RECL=NBYTE)
           ENDIF
 
@@ -1208,51 +1200,51 @@
           global_here%IGVP=0
 
           IF(ABS(global_here%NOUTGV).EQ.1) THEN
-            OPEN(94,FILE=S%DIRNAME//'/'//'fort.94')
-            WRITE(94,3220) global_here%RUNDES,global_here%RUNID,global_here%AGRID
-            WRITE(94,3645) global_here%NDSETSV,global_here%NP,global_here%DTDP*global_here%NSPOOLGV,global_here%NSPOOLGV,2
+            OPEN(s%fort94unit,FILE=S%DIRNAME//'/'//'fort.94')
+            WRITE(s%fort94unit,3220) global_here%RUNDES,global_here%RUNID,global_here%AGRID
+            WRITE(s%fort94unit,3645) global_here%NDSETSV,global_here%NP,global_here%DTDP*global_here%NSPOOLGV,global_here%NSPOOLGV,2
             global_here%IGVP=2
           ENDIF
 
           IF(ABS(global_here%NOUTGV).EQ.2) THEN
-            OPEN(94,FILE=S%DIRNAME//'/'//'fort.94',&
+            OPEN(s%fort94unit,FILE=S%DIRNAME//'/'//'fort.94',&
           ACCESS='DIRECT',RECL=NBYTE)
             IF(NBYTE.EQ.4) THEN
               DO I=1,8
-                WRITE(94,REC=global_here%IGVP+I) global_here%RDES4(I)
+                WRITE(s%fort94unit,REC=global_here%IGVP+I) global_here%RDES4(I)
               ENDDO
               global_here%IGVP=global_here%IGVP+8
               DO I=1,6
-                WRITE(94,REC=global_here%IGVP+I) global_here%RID4(I)
+                WRITE(s%fort94unit,REC=global_here%IGVP+I) global_here%RID4(I)
               ENDDO
               global_here%IGVP=global_here%IGVP+6
               DO I=1,6
-                WRITE(94,REC=global_here%IGVP+I) global_here%AID4(I)
+                WRITE(s%fort94unit,REC=global_here%IGVP+I) global_here%AID4(I)
               ENDDO
               global_here%IGVP=global_here%IGVP+6
             ENDIF
             IF(NBYTE.EQ.8) THEN
               DO I=1,4
-                WRITE(94,REC=global_here%IGVP+I) global_here%RDES8(I)
+                WRITE(s%fort94unit,REC=global_here%IGVP+I) global_here%RDES8(I)
               ENDDO
               global_here%IGVP=global_here%IGVP+4
               DO I=1,3
-                WRITE(94,REC=global_here%IGVP+I) global_here%RID8(I)
+                WRITE(s%fort94unit,REC=global_here%IGVP+I) global_here%RID8(I)
               ENDDO
               global_here%IGVP=global_here%IGVP+3
               DO I=1,3
-                WRITE(94,REC=global_here%IGVP+I) global_here%AID8(I)
+                WRITE(s%fort94unit,REC=global_here%IGVP+I) global_here%AID8(I)
               ENDDO
               global_here%IGVP=global_here%IGVP+3
             ENDIF
-            WRITE(94,REC=global_here%IGVP+1) global_here%NDSETSV
-            WRITE(94,REC=global_here%IGVP+2) global_here%NP
-            WRITE(94,REC=global_here%IGVP+3) global_here%DT*global_here%NSPOOLGV
-            WRITE(94,REC=global_here%IGVP+4) global_here%NSPOOLGV
-            WRITE(94,REC=global_here%IGVP+5) 2
+            WRITE(s%fort94unit,REC=global_here%IGVP+1) global_here%NDSETSV
+            WRITE(s%fort94unit,REC=global_here%IGVP+2) global_here%NP
+            WRITE(s%fort94unit,REC=global_here%IGVP+3) global_here%DT*global_here%NSPOOLGV
+            WRITE(s%fort94unit,REC=global_here%IGVP+4) global_here%NSPOOLGV
+            WRITE(s%fort94unit,REC=global_here%IGVP+5) 2
             global_here%IGVP=global_here%IGVP+5
-            CLOSE(94)                    ! DO THIS TO FLUSH THE WRITE BUFFER
-            OPEN(94,FILE=S%DIRNAME//'/'//'fort.94',&
+            CLOSE(s%fort94unit)                    ! DO THIS TO FLUSH THE WRITE BUFFER
+            OPEN(s%fort94unit,FILE=S%DIRNAME//'/'//'fort.94',&
          ACCESS='DIRECT',RECL=NBYTE)
           ENDIF
           
@@ -1266,51 +1258,51 @@
           global_here%IGVP=0
 
           IF(ABS(global_here%NOUTGV).EQ.1) THEN
-            OPEN(96,FILE=S%DIRNAME//'/'//'fort.96')
-            WRITE(96,3220) global_here%RUNDES,global_here%RUNID,global_here%AGRID
-            WRITE(96,3645) global_here%NDSETSV,global_here%NP,global_here%DTDP*global_here%NSPOOLGV,global_here%NSPOOLGV,2
+            OPEN(s%fort96unit,FILE=S%DIRNAME//'/'//'fort.96')
+            WRITE(s%fort96unit,3220) global_here%RUNDES,global_here%RUNID,global_here%AGRID
+            WRITE(s%fort96unit,3645) global_here%NDSETSV,global_here%NP,global_here%DTDP*global_here%NSPOOLGV,global_here%NSPOOLGV,2
             global_here%IGVP=2
           ENDIF
 
           IF(ABS(global_here%NOUTGV).EQ.2) THEN
-            OPEN(96,FILE=S%DIRNAME//'/'//'fort.96',&
+            OPEN(s%fort96unit,FILE=S%DIRNAME//'/'//'fort.96',&
           ACCESS='DIRECT',RECL=NBYTE)
             IF(NBYTE.EQ.4) THEN
               DO I=1,8
-                WRITE(96,REC=global_here%IGVP+I) global_here%RDES4(I)
+                WRITE(s%fort96unit,REC=global_here%IGVP+I) global_here%RDES4(I)
               ENDDO
               global_here%IGVP=global_here%IGVP+8
               DO I=1,6
-                WRITE(96,REC=global_here%IGVP+I) global_here%RID4(I)
+                WRITE(s%fort96unit,REC=global_here%IGVP+I) global_here%RID4(I)
               ENDDO
               global_here%IGVP=global_here%IGVP+6
               DO I=1,6
-                WRITE(96,REC=global_here%IGVP+I) global_here%AID4(I)
+                WRITE(s%fort96unit,REC=global_here%IGVP+I) global_here%AID4(I)
               ENDDO
               global_here%IGVP=global_here%IGVP+6
             ENDIF
             IF(NBYTE.EQ.8) THEN
               DO I=1,4
-                WRITE(96,REC=global_here%IGVP+I) global_here%RDES8(I)
+                WRITE(s%fort96unit,REC=global_here%IGVP+I) global_here%RDES8(I)
               ENDDO
               global_here%IGVP=global_here%IGVP+4
               DO I=1,3
-                WRITE(96,REC=global_here%IGVP+I) global_here%RID8(I)
+                WRITE(s%fort96unit,REC=global_here%IGVP+I) global_here%RID8(I)
               ENDDO
               global_here%IGVP=global_here%IGVP+3
               DO I=1,3
-                WRITE(96,REC=global_here%IGVP+I) global_here%AID8(I)
+                WRITE(s%fort96unit,REC=global_here%IGVP+I) global_here%AID8(I)
               ENDDO
               global_here%IGVP=global_here%IGVP+3
             ENDIF
-            WRITE(96,REC=global_here%IGVP+1) global_here%NDSETSV
-            WRITE(96,REC=global_here%IGVP+2) global_here%NP
-            WRITE(96,REC=global_here%IGVP+3) global_here%DT*global_here%NSPOOLGV
-            WRITE(96,REC=global_here%IGVP+4) global_here%NSPOOLGV
-            WRITE(96,REC=global_here%IGVP+5) 2
+            WRITE(s%fort96unit,REC=global_here%IGVP+1) global_here%NDSETSV
+            WRITE(s%fort96unit,REC=global_here%IGVP+2) global_here%NP
+            WRITE(s%fort96unit,REC=global_here%IGVP+3) global_here%DT*global_here%NSPOOLGV
+            WRITE(s%fort96unit,REC=global_here%IGVP+4) global_here%NSPOOLGV
+            WRITE(s%fort96unit,REC=global_here%IGVP+5) 2
             global_here%IGVP=global_here%IGVP+5
-            CLOSE(96)                    ! DO THIS TO FLUSH THE WRITE BUFFER
-            OPEN(96,FILE=S%DIRNAME//'/'//'fort.96',&
+            CLOSE(s%fort96unit)                    ! DO THIS TO FLUSH THE WRITE BUFFER
+            OPEN(s%fort96unit,FILE=S%DIRNAME//'/'//'fort.96',&
          ACCESS='DIRECT',RECL=NBYTE)
           ENDIF
 

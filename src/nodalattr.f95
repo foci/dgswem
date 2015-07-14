@@ -363,19 +363,19 @@
       CHARACTER(len=80) AGRID2 ! users comment/description line
       REAL(SZ) DUM1, DUM2  ! data that we want to skip
 
-      OPEN(12,FILE=TRIM(s%INPUTDIR)//'/'//'fort.12')
+      OPEN(s%fort12unit,FILE=TRIM(s%INPUTDIR)//'/'//'fort.12')
 !
 !...  READ nodalattr_here%STARTDRY INFORMATION FROM UNIT 12 
-      READ(12,'(A80)') AGRID2
-      WRITE(16,2038) AGRID2
+      READ(s%fort12unit,'(A80)') AGRID2
+      WRITE(s%fort16unit,2038) AGRID2
 2038  FORMAT(5X,'nodalattr_here%STARTDRY FILE IDENTIFICATION : ',A80,/)
-      READ(12,*) NE2,NP2
+      READ(s%fort12unit,*) NE2,NP2
 !
 !...  CHECK THAT NE2 AND NP2 MATCH WITH GRID FILE 
 !      IF((NE2.NE.NE).OR.(NP2.NE.NP)) THEN
        IF(NP2.NE.NP) THEN
          IF(NSCREEN.NE.0.AND.MYPROC.EQ.0) WRITE(ScreenUnit,9900)
-         WRITE(16,9900)
+         WRITE(s%fort16unit,9900)
  9900    FORMAT(////,1X,'!!!!!!!!!!  FATAL ERROR  !!!!!!!!!',&
              //,1X,'THE PARAMETER NE2 AND NP2 MUST MATCH NE AND NP ',&
              /,1X,'USER MUST CHECK FORT.12 INPUT FILE ',&
@@ -385,10 +385,10 @@
 !
 !...  READ IN nodalattr_here%STARTDRY CODE VALUES
       DO I=1,NP
-         READ(12,*) JKI,DUM1,DUM2,nodalattr_here%STARTDRY(JKI)
+         READ(s%fort12unit,*) JKI,DUM1,DUM2,nodalattr_here%STARTDRY(JKI)
          IF(JKI.NE.I) THEN
             IF(NSCREEN.NE.0.AND.MYPROC.EQ.0) WRITE(ScreenUnit,99805)
-            WRITE(16,99805)
+            WRITE(s%fort16unit,99805)
 99805       FORMAT(////,1X,'!!!!!!!!!!  WARNING - NONFATAL ',&
                 'INPUT ERROR  !!!!!!!!!',&
                 //,1X,'YOUR NODE NUMBERING IS NOT SEQUENTIAL ',&
@@ -397,7 +397,7 @@
       END DO
 !     
 !...  CLOSE UNIT 12 FILE       
-      CLOSE(12)     
+      CLOSE(s%fort12unit)     
 !
       RETURN
 !     ----------------------------------------------------------------
@@ -430,13 +430,13 @@
       CHARACTER(len=80) AFRIC  ! user's comment/description line
       INTEGER NHG    ! node number from file
 
-      OPEN(21,FILE=TRIM(s%INPUTDIR)//'/'//'fort.21')
-      READ(21,'(A80)') AFRIC
+      OPEN(s%fort21unit,FILE=TRIM(s%INPUTDIR)//'/'//'fort.21')
+      READ(s%fort21unit,'(A80)') AFRIC
       DO I=1,NP
-         READ(21,*) NHG,nodalattr_here%FRIC(NHG)
+         READ(s%fort21unit,*) NHG,nodalattr_here%FRIC(NHG)
          IF(NHG.NE.I) THEN
             IF(NSCREEN.NE.0.AND.MYPROC.EQ.0) WRITE(ScreenUnit,99803)
-            WRITE(16,99803)
+            WRITE(s%fort16unit,99803)
 99803       FORMAT(////,1X,'!!!!!!!!!!  WARNING - FATAL ',&
                 'INPUT ERROR  !!!!!!!!!',//,1X,&
                 'YOUR NODAL FRICTION NUMBERING IS NOT SEQUENTIAL ',&
@@ -445,17 +445,17 @@
             STOP
          ENDIF
       END DO
-      WRITE(16,3601) AFRIC
+      WRITE(s%fort16unit,3601) AFRIC
  3601 FORMAT(/,5X,'FRICTION FILE IDENTIFICATN : ',A80,/)
       IF(NABOUT.NE.1) THEN
-         WRITE(16,2080)
+         WRITE(s%fort16unit,2080)
  2080    FORMAT(/,10X,'NODE',5X,'BOTTOM FRICTION nodalattr_here%FRIC',5X,/)
          DO I=1,NP
-            WRITE(16,2087) I,nodalattr_here%FRIC(I)
+            WRITE(s%fort16unit,2087) I,nodalattr_here%FRIC(I)
  2087       FORMAT(7X,I6,6X,E17.10)
          END DO
       ELSE
-         WRITE(16,3504)
+         WRITE(s%fort16unit,3504)
  3504    FORMAT(/,5X,'NODAL BOTTOM FRICTION VALUES ARE AVAILABLE',&
              /,6X,' IN UNIT 21 INPUT FILE')
       ENDIF
