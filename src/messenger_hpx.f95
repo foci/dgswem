@@ -1,7 +1,6 @@
 #ifdef HPX
        subroutine HPX_GET_ELEMS(dg_here,neighbor,volume,sendbuf)     
        
-       use global
        use dg
        use sizes
        
@@ -14,8 +13,8 @@
        integer :: neighbor
        integer :: volume
        
-       real(sz) :: sendbuf(volume)
-       
+!       real(sz) :: sendbuf(volume)
+       real(sz) :: sendbuf(MAX_BUFFER_SIZE)       
       
        ncount = 0
        DO el=1,dg_here%NELEMSEND(neighbor)
@@ -48,7 +47,6 @@
 
        subroutine HPX_PUT_ELEMS(dg_here,neighbor,volume,recvbuf)
        
-       use global
        use dg
        use sizes
        
@@ -61,7 +59,8 @@
        integer :: neighbor
        integer :: volume
        
-       real(sz) :: recvbuf(volume)      
+!       real(sz) :: recvbuf(volume)
+       real(sz) :: recvbuf(MAX_BUFFER_SIZE)
        
              
        

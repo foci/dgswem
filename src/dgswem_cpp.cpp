@@ -14,6 +14,7 @@
 #endif
 
 #define MAX_DOMAIN_NEIGHBORS 10
+#define MAX_BUFFER_SIZE 1000
 
 extern"C" {
   void FNAME(dgswem_init_fort)(void** sizes,
@@ -32,7 +33,16 @@ extern"C" {
 				 void** dg,
 				 void** global,
 				 int neighbors[MAX_DOMAIN_NEIGHBORS],
-				 int* num_neighbors);				 
+				 int* num_neighbors);	
+  void FNAME(hpx_get_elems_fort)(void** dg,
+				 int* neighbor,
+				 int* volume,
+				 int* sendbuf);
+  void FNAME(hpx_put_elems_fort)(void** dg,
+				 int* neighbor,
+				 int* volume,
+				 int* recvbuf);
+
 }
 
 
@@ -169,6 +179,36 @@ int hpx_main(
 #ifdef HPX
     wait_all(updates);
 #endif
+
+
+    // Boundary exchange
+    // Loop over domains   
+    for (int domain=0; domain<ids.size(); domain++) {
+      std::vector<int> neighbors_here = neighbors[domain];
+
+      //Loop over neighbors
+      for (int neighbor=0; neighbor<numneighbors[domain]; neighbor++) {	
+	int neighbor_here = neighbors_here[neighbor];
+	int volume;
+	int buffer[MAX_BUFFER_SIZE];
+
+	// Get outgoing boundarys from the neighbors
+	FNAME(hpx_get_elems_fort)(&dgs[neighbor_here],
+				       &domain,
+				       &volume,
+				       buffer);
+
+	// Put those arrays inside current domain
+	FNAME(hpx_put_elems_fort)(&dgs[domain],
+				       &neighbor_here,
+				       &volume,
+				       buffer);	
+
+      }// end loop over neighbors
+      
+    }// end loop over domains
+
+
 
   } // End timestep loop
   
