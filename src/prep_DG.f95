@@ -156,6 +156,10 @@
       
 !.....Initilization for parallel DG run
 
+#ifdef HPX
+      call msg_table_hpx(s, dg_here)
+#endif
+
 #ifdef CMPI
 
       CALL MSG_TYPES_ELEM()     ! Determine Word Sizes for Message-Passing

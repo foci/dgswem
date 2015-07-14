@@ -228,6 +228,15 @@
       Real(SZ),Allocatable :: iotaconst(:,:),iota2const(:,:)
 #endif
 
+#ifdef HPX
+      INTEGER :: NELEMLOC(:)
+      INTEGER :: IBELONGTO(:)
+      INTEGER :: RESELEM(:)
+      INTEGER :: NEIGHPROC_R, NEIGHPROC_S
+      INTEGER :: IPROC_R(:), NELEMRECV(:), IRECVLOC(:,:)
+      INTEGER :: IPROC_S(:), NELEMSEND(:), ISENDLOC(:,:)
+#endif
+
    end type dg_type
     
 !**********************END OF DATA DECLARATIONS ***********************

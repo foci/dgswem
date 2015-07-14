@@ -46,4 +46,8 @@ subroutine init_fileunits(s)
 
   s%rads64unit = s%myproc*1000+164
 
+#ifdef HPX
+  s%fortdgunit = s%myproc*1000+18
+#endif
+
 end subroutine init_fileunits
