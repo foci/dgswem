@@ -7,12 +7,12 @@
        
        implicit none       
 
-       type (sizes_type) :: s
        type (dg_type) :: dg_here
-       type (global_type) :: global_here
        
-       integer :: el,k
+       integer :: el,dof
        integer :: ncount
+       integer :: neighbor
+       integer :: volume
        
        real(sz) :: sendbuf(volume)
        
@@ -56,7 +56,7 @@
        
        type (dg_type) :: dg_here
        
-       integer :: i,k
+       integer :: el,dof
        integer :: ncount
        integer :: neighbor
        integer :: volume
