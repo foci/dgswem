@@ -17,6 +17,8 @@ SUBROUTINE DGSWEM_INIT(s,dg_here,global_here,nodalattr_here,NT)
   
   print*,"@@@@@@@@@@@@ myproc =",s%myproc
 
+  call init_fileunits(s)
+
   CALL MAKE_DIRNAME(s)       ! Establish Working Directory Name
   CALL READ_INPUT(s,dg_here,global_here,nodalattr_here)         ! Establish sizes by reading fort.14 and fort.15
 

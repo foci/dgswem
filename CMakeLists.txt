@@ -45,6 +45,7 @@ add_executable(
   ../src/fort_dg_module.f95
   ../src/wind.f95  
   ../src/dgswem.f95
+  ../src/init_fileunits.f95
   ../src/read_input.f95
   ../src/cstart.f95
   ../src/hstart.f95
