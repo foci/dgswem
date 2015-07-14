@@ -373,90 +373,90 @@
          SELECT CASE (TRIM(ADJUSTL(AttrName)))
          CASE("primitive_weighting_in_continuity_equation")
             IF (nodalattr_here%LoadTau0) THEN
-               CALL LoadAttrVec(nodalattr_here%TAU0VAR, nodalattr_here%Tau0DefVal,&
-                   NumNodesNotDefault, NScreen, MyProc, NAbOut,nodalattr_here%NumOfNodes, fort13unit)
+               CALL LoadAttrVec(s,nodalattr_here%TAU0VAR, nodalattr_here%Tau0DefVal,&
+                   NumNodesNotDefault, NScreen, MyProc, NAbOut,nodalattr_here%NumOfNodes)
             ELSE
                SkipDataSet = .True.
             ENDIF
          CASE("surface_submergence_state")
             IF (nodalattr_here%LoadStartDry) THEN
-               CALL LoadAttrVec(nodalattr_here%STARTDRY, nodalattr_here%StartDryDefVal, &
-                    NumNodesNotDefault, NScreen, MyProc, NAbOut,nodalattr_here%NumOfNodes, fort13unit)
+               CALL LoadAttrVec(s,nodalattr_here%STARTDRY, nodalattr_here%StartDryDefVal, &
+                    NumNodesNotDefault, NScreen, MyProc, NAbOut,nodalattr_here%NumOfNodes)
             ELSE
                SkipDataSet = .True.
             ENDIF
          CASE("quadratic_friction_coefficient_at_sea_floor")
             IF (nodalattr_here%LoadQuadraticFric) THEN
-               CALL LoadAttrVec(nodalattr_here%FRIC, nodalattr_here%QuadraticFricDefVal, &
-                   NumNodesNotDefault, NScreen, MyProc, NAbOut,nodalattr_here%NumOfNodes, fort13unit)
+               CALL LoadAttrVec(s,nodalattr_here%FRIC, nodalattr_here%QuadraticFricDefVal, &
+                   NumNodesNotDefault, NScreen, MyProc, NAbOut,nodalattr_here%NumOfNodes)
             ELSE
                SkipDataSet = .True.
             ENDIF
          CASE("surface_directional_effective_roughness_length") 
             IF (nodalattr_here%LoadDirEffRLen) THEN
-               CALL LoadAttrMat(nodalattr_here%z0land, nodalattr_here%DirEffRLenNoOfVals,  &
+               CALL LoadAttrMat(s,nodalattr_here%z0land, nodalattr_here%DirEffRLenNoOfVals,  &
                    nodalattr_here%DirEffRLenDefVal, NumNodesNotDefault,  &
-                   NScreen, MyProc, NAbOut,nodalattr_here%NumOfNodes, fort13unit)
+                   NScreen, MyProc, NAbOut,nodalattr_here%NumOfNodes)
             ELSE
                SkipDataSet = .True.
             ENDIF
          CASE("surface_canopy_coefficient") 
             IF (nodalattr_here%LoadCanopyCoef) THEN
-               CALL LoadAttrVec(nodalattr_here%vcanopy, nodalattr_here%CanopyCoefDefVal,&
-                    NumNodesNotDefault, NScreen, MyProc, NAbOut,nodalattr_here%NumOfNodes, fort13unit)
+               CALL LoadAttrVec(s,nodalattr_here%vcanopy, nodalattr_here%CanopyCoefDefVal,&
+                    NumNodesNotDefault, NScreen, MyProc, NAbOut,nodalattr_here%NumOfNodes)
             ELSE
                SkipDataSet = .True.
             ENDIF
          CASE("bridge_pilings_friction_parameters") 
             IF (nodalattr_here%LoadBridgePilings) THEN
-               CALL LoadAttrMat(nodalattr_here%BridgePilings, nodalattr_here%BridgePilingsNoOfVals, &
+               CALL LoadAttrMat(s,nodalattr_here%BridgePilings, nodalattr_here%BridgePilingsNoOfVals, &
                    nodalattr_here%BridgePilingsDefVal,  NumNodesNotDefault, &
-                   NScreen, MyProc, NAbOut,nodalattr_here%NumOfNodes, fort13unit)
+                   NScreen, MyProc, NAbOut,nodalattr_here%NumOfNodes)
             ELSE
                SkipDataSet = .True.
             ENDIF
          CASE("mannings_n_at_sea_floor")
             IF (nodalattr_here%LoadManningsN) THEN
-               CALL LoadAttrVec(nodalattr_here%ManningsN, nodalattr_here%ManningsNDefVal, &
-                   NumNodesNotDefault, NScreen, MyProc, NAbOut,nodalattr_here%NumOfNodes, fort13unit)
+               CALL LoadAttrVec(s,nodalattr_here%ManningsN, nodalattr_here%ManningsNDefVal, &
+                   NumNodesNotDefault, NScreen, MyProc, NAbOut,nodalattr_here%NumOfNodes)
             ELSE
                SkipDataSet = .True.
             ENDIF
          CASE("chezy_friction_coefficient_at_sea_floor")
             IF (nodalattr_here%LoadChezy) THEN
-               CALL LoadAttrVec(nodalattr_here%Chezy, nodalattr_here%ChezyDefVal, &
-                    NumNodesNotDefault, NScreen, MyProc, NAbOut,nodalattr_here%NumOfNodes, fort13unit)
+               CALL LoadAttrVec(s,nodalattr_here%Chezy, nodalattr_here%ChezyDefVal, &
+                    NumNodesNotDefault, NScreen, MyProc, NAbOut,nodalattr_here%NumOfNodes)
             ELSE
                SkipDataSet = .True.
             ENDIF
          CASE("sea_surface_height_above_geoid")
             IF (nodalattr_here%LoadGeoidOffset) THEN
-               CALL LoadAttrVec(nodalattr_here%GeoidOffset, nodalattr_here%GeoidOffsetDefVal, &
-                    NumNodesNotDefault, NScreen, MyProc, NAbOut,nodalattr_here%NumOfNodes, fort13unit)
+               CALL LoadAttrVec(s,nodalattr_here%GeoidOffset, nodalattr_here%GeoidOffsetDefVal, &
+                    NumNodesNotDefault, NScreen, MyProc, NAbOut,nodalattr_here%NumOfNodes)
             ELSE
                SkipDataSet = .True.
             ENDIF
          CASE&
         ("average_horizontal_eddy_viscosity_in_sea_water_wrt_depth")
             IF (nodalattr_here%LoadEVM) THEN
-               CALL LoadAttrVec(nodalattr_here%EVM, nodalattr_here%EVMDefVal, &
-                    NumNodesNotDefault, NScreen, MyProc, NAbOut,nodalattr_here%NumOfNodes, fort13unit)
+               CALL LoadAttrVec(s,nodalattr_here%EVM, nodalattr_here%EVMDefVal, &
+                    NumNodesNotDefault, NScreen, MyProc, NAbOut,nodalattr_here%NumOfNodes)
             ELSE
                SkipDataSet = .True.
             ENDIF
          CASE&
         ("average_horizontal_eddy_diffusivity_in_sea_water_wrt_depth")
             IF (nodalattr_here%LoadEVC) THEN
-               CALL LoadAttrVec(nodalattr_here%EVC, nodalattr_here%EVCDefVal, &
-                    NumNodesNotDefault, NScreen, MyProc, NAbOut,nodalattr_here%NumOfNodes, fort13unit)
+               CALL LoadAttrVec(s,nodalattr_here%EVC, nodalattr_here%EVCDefVal, &
+                    NumNodesNotDefault, NScreen, MyProc, NAbOut,nodalattr_here%NumOfNodes)
             ELSE
                SkipDataSet = .True.
             ENDIF
 !asey 101118: Allow SWAN to handle wave refraction as a nodal attribute.
          CASE("wave_refraction_in_swan")
             IF (nodalattr_here%LoadSwanWaveRefrac) THEN
-               CALL LoadAttrVec(nodalattr_here%SwanWaveRefrac, nodalattr_here%SwanWaveRefracDefVal,&
-                   NumNodesNotDefault, NScreen, MyProc, NAbOut,nodalattr_here%NumOfNodes, fort13unit)
+               CALL LoadAttrVec(s,nodalattr_here%SwanWaveRefrac, nodalattr_here%SwanWaveRefracDefVal,&
+                   NumNodesNotDefault, NScreen, MyProc, NAbOut,nodalattr_here%NumOfNodes)
             ELSE
                SkipDataSet = .TRUE.
             ENDIF
@@ -603,8 +603,8 @@
 !     the suffix "vec" in the name.
 !
 !     ----------------------------------------------------------------
-      SUBROUTINE LoadAttrVec(AttributeData, Default, NumNodesNotDef,NScreen, MyProc, NAbOut,NumOfNodes,fort13unit)
-        USE SIZES, ONLY: SZ
+      SUBROUTINE LoadAttrVec(s, AttributeData, Default, NumNodesNotDef,NScreen, MyProc, NAbOut,NumOfNodes)
+        USE SIZES
       IMPLICIT NONE
       REAL(SZ), intent(out), dimension(NumOfNodes) :: AttributeData
       REAL(SZ), intent(in):: Default ! default value for all nodes
@@ -616,7 +616,8 @@
       integer :: i,j,k
       INTEGER NodeNum            ! node number listed in the file
       integer :: NumOfNodes
-      integer :: fort13unit
+
+      type (sizes_type) :: s
 !
 !     Set all values to user-specified default values.
       IF (NABOUT.EQ.0) WRITE(s%fort16unit,1001) Default 
@@ -650,9 +651,12 @@
 !     value per node.
 !
 !     ----------------------------------------------------------------
-      SUBROUTINE LoadAttrMat(AttributeData, NumCol, Default,NumNodesNotDef, NScreen, MyProc, NAbOut, NumOfNodes, fort13unit)
-        USE SIZES, ONLY: SZ
+      SUBROUTINE LoadAttrMat(s, AttributeData, NumCol, Default,NumNodesNotDef, NScreen, MyProc, NAbOut, NumOfNodes)
+        USE SIZES
       IMPLICIT NONE
+
+      type (sizes_type) :: s
+
       INTEGER, intent(in) :: NumCol  ! number of columns in the matrix 
       REAL(SZ), intent(out), &
           dimension(NumOfNodes,NumCol) :: AttributeData
@@ -701,12 +705,13 @@
 !     attributes read in from the Nodal Attributes File (unit 13).
 !
 !     ----------------------------------------------------------------
-      SUBROUTINE InitNodalAttr(global_here,nodalattr_here,DP, NP, G, NScreen, ScreenUnit,MyProc, NAbOut)
+      SUBROUTINE InitNodalAttr(s, global_here,nodalattr_here,DP, NP, G, NScreen, ScreenUnit,MyProc, NAbOut)
       USE GLOBAL
-      USE SIZES, ONLY: SZ
+      USE SIZES
       USE NodalAttributes
       IMPLICIT NONE
 
+      type (sizes_type) :: s
       type (global_type) :: global_here
       type (nodalattr_type) :: nodalattr_here
 

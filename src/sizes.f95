@@ -95,7 +95,8 @@ MODULE SIZES
      integer :: fort23unit
      integer :: fort24unit
 
-     integer :: fort41unit !4441
+     integer :: fort4lunit
+!     integer :: fort41unit !4441
      ! 42 slopelimiter?
 
      integer :: fort55unit ! output

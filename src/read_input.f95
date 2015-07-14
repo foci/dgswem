@@ -132,7 +132,6 @@
 
 !.....Open statement for unit 16 output file
       
-      fort16unit = 16*100+s%myproc
       OPEN(s%fort16unit,FILE=s%DIRNAME//'/'//'fort.16')
 
 !.....General purpose format statements
@@ -1427,7 +1426,6 @@
 
 !.....Open unit 12 file
          
-         fort12unit = 12*100+s%myproc
          OPEN(s%fort12unit,FILE=S%DIRNAME//'/'//'fort.12')
 
 !.....Read nodalattr_here%startdry info from unit 12
@@ -1781,7 +1779,7 @@
 !     in from unit 14 file.
 
       IF (nodalattr_here%NWP.GT.0)&
-     CALL InitNodalAttr(global_here,nodalattr_here,global_here%DP, global_here%NP, global_here%G, global_here%NScreen, global_here%ScreenUnit,S%MYPROC,global_here%NAbOut)
+     CALL InitNodalAttr(s,global_here,nodalattr_here,global_here%DP, global_here%NP, global_here%G, global_here%NScreen, global_here%ScreenUnit,S%MYPROC,global_here%NAbOut)
       
 
 
@@ -1852,7 +1850,6 @@
 
       CALL ALLOC_MAIN4b(s,global_here)
       IF(global_here%NTIP.EQ.2) THEN
-         fort24unit = 24*100+s%myproc               
          OPEN(s%fort24unit,FILE='fort.24')
          DO I=1,global_here%NTIF
             READ(s%fort24unit,9930)
