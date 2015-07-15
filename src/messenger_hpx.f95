@@ -8,36 +8,59 @@
 
        type (dg_type) :: dg_here
        
+       logical :: neighbor_found
+       integer :: i,index
        integer :: el,dof
        integer :: ncount
        integer :: neighbor
        integer :: volume
        
 !       real(sz) :: sendbuf(volume)
-       real(sz) :: sendbuf(MAX_BUFFER_SIZE)       
-      
-       ncount = 0
-       DO el=1,dg_here%NELEMSEND(neighbor)
-          DO dof=1,dg_here%DOFH
-            ncount = ncount+1
-            sendbuf(ncount)=dg_here%ZE(dof,dg_here%ISENDLOC(el,neighbor),dg_here%IRK)
-          ENDDO
-       ENDDO
+       real(sz) :: sendbuf(MAX_BUFFER_SIZE)   
        
-       DO el=1,dg_here%NELEMSEND(neighbor)
-         DO dof=1,dg_here%DOFH
-           ncount = ncount+1
-           sendbuf(ncount)=dg_here%QX(dof,dg_here%ISENDLOC(el,neighbor),dg_here%IRK)
+       
+       neighbor_found = .false.
+       DO i=1,dg_here%NEIGHPROC_S
+
+         IF (dg_here%IPROC_S(i) == neighbor+1) THEN
+           index = i
+           neighbor_found = .true.
+           EXIT
+         ENDIF
+      
+       ENDDO     
+       
+       IF (neighbor_found) THEN
+      
+         ncount = 0
+         DO el=1,dg_here%NELEMSEND(index)
+            DO dof=1,dg_here%DOFH
+              ncount = ncount+1
+              sendbuf(ncount)=dg_here%ZE(dof,dg_here%ISENDLOC(el,index),dg_here%IRK)
+            ENDDO
          ENDDO
-       ENDDO
+       
+         DO el=1,dg_here%NELEMSEND(index)
+           DO dof=1,dg_here%DOFH
+             ncount = ncount+1
+             sendbuf(ncount)=dg_here%QX(dof,dg_here%ISENDLOC(el,index),dg_here%IRK)
+           ENDDO
+         ENDDO
           
-       DO el=1,dg_here%NELEMSEND(neighbor)
-         DO dof=1,dg_here%DOFH
-           ncount = ncount+1
-           sendbuf(ncount)=dg_here%QY(dof,dg_here%ISENDLOC(el,neighbor),dg_here%IRK)
+         DO el=1,dg_here%NELEMSEND(index)
+           DO dof=1,dg_here%DOFH
+             ncount = ncount+1
+             sendbuf(ncount)=dg_here%QY(dof,dg_here%ISENDLOC(el,index),dg_here%IRK)
+           ENDDO
          ENDDO
-       ENDDO
+       
+       ELSE 
+       
+         PRINT*, "FORTRAN ERROR: neighbor not found"
+         STOP             
     
+       ENDIF
+       
        
        
        end subroutine HPX_GET_ELEMS
@@ -54,6 +77,8 @@
        
        type (dg_type) :: dg_here
        
+       logical :: neighbor_found
+       integer :: i,index       
        integer :: el,dof
        integer :: ncount
        integer :: neighbor
@@ -61,30 +86,49 @@
        
 !       real(sz) :: recvbuf(volume)
        real(sz) :: recvbuf(MAX_BUFFER_SIZE)
+        
        
+       neighbor_found = .false.
+       DO i=1,dg_here%NEIGHPROC_R
+
+         IF (dg_here%IPROC_R(i) == neighbor+1) THEN
+           index = i
+           neighbor_found = .true.
+           EXIT
+         ENDIF
+      
+       ENDDO           
              
+       IF (neighbor_found) THEN             
        
-       ncount = 0
-       DO el=1,dg_here%NELEMRECV(neighbor)
-         DO dof=1,dg_here%DOFH
-           ncount = ncount+1
-           dg_here%ZE(dof,dg_here%IRECVLOC(el,neighbor),dg_here%IRK) = recvbuf(ncount)
+         ncount = 0
+         DO el=1,dg_here%NELEMRECV(index)
+           DO dof=1,dg_here%DOFH
+             ncount = ncount+1
+             dg_here%ZE(dof,dg_here%IRECVLOC(el,index),dg_here%IRK) = recvbuf(ncount)
+           ENDDO
          ENDDO
-       ENDDO
        
-       DO el=1,dg_here%NELEMRECV(neighbor)
-         DO dof=1,dg_here%DOFH
-           ncount = ncount+1
-           dg_here%QX(dof,dg_here%IRECVLOC(el,neighbor),dg_here%IRK) = recvbuf(ncount)
+         DO el=1,dg_here%NELEMRECV(index)
+           DO dof=1,dg_here%DOFH
+             ncount = ncount+1
+             dg_here%QX(dof,dg_here%IRECVLOC(el,index),dg_here%IRK) = recvbuf(ncount)
+           ENDDO
          ENDDO
-       ENDDO
        
-       DO el=1,dg_here%NELEMRECV(neighbor)
-         DO dof=1,dg_here%DOFH
-           ncount = ncount+1
-           dg_here%QY(dof,dg_here%IRECVLOC(el,neighbor),dg_here%IRK) = recvbuf(ncount)
-         ENDDO
-       ENDDO         
+         DO el=1,dg_here%NELEMRECV(index)
+           DO dof=1,dg_here%DOFH
+             ncount = ncount+1
+             dg_here%QY(dof,dg_here%IRECVLOC(el,index),dg_here%IRK) = recvbuf(ncount)
+           ENDDO
+         ENDDO    
+       
+       ELSE
+       
+         PRINT*, "FORTRAN ERROR: neighbor not found"
+         STOP       
+         
+       ENDIF
          
 
      
