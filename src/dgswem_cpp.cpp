@@ -203,11 +203,14 @@ int hpx_main(
 				       &neighbor_here,
 				       &volume,
 				       buffer);	
+	
+
 
       }// end loop over neighbors
       
     }// end loop over domains
 
+    return 0;  // stop after one timestep for debugging
 
 
   } // End timestep loop

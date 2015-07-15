@@ -19,6 +19,7 @@
        real(sz) :: sendbuf(MAX_BUFFER_SIZE)   
        
        
+       
        neighbor_found = .false.
        DO i=1,dg_here%NEIGHPROC_S
 
@@ -31,6 +32,10 @@
        ENDDO     
        
        IF (neighbor_found) THEN
+       
+         PRINT*, " PROC: ", dg_here%IDPROC, " SENDING ", dg_here%NELEMSEND(index) ," ELEMENTS TO: ", dg_here%IPROC_S(index)       
+         PRINT*, (dg_here%ISENDLOC(el,index), el = 1,dg_here%NELEMSEND(index))
+         PRINT*, "" 
       
          ncount = 0
          DO el=1,dg_here%NELEMSEND(index)
@@ -99,8 +104,12 @@
       
        ENDDO           
              
-       IF (neighbor_found) THEN             
+       IF (neighbor_found) THEN  
        
+         PRINT*, " PROC: ", dg_here%IDPROC, " RECEIVING ",dg_here%NELEMRECV(index), " ELEMENTS FROM: ", dg_here%IPROC_R(index)
+         PRINT*, (dg_here%IRECVLOC(el,index), el = 1,dg_here%NELEMRECV(index))
+         PRINT*, ""
+         
          ncount = 0
          DO el=1,dg_here%NELEMRECV(index)
            DO dof=1,dg_here%DOFH
