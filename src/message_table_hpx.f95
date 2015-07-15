@@ -86,6 +86,15 @@ SUBROUTINE MSG_TABLE_HPX (s, dg_here)
   DG_HERE%RECV_VOL = NCOMMELEM_R*DG_HERE%DOFH*3    
   
   
+  if (dg_here%send_vol .gt. MAX_BUFFER_SIZE) then
+     print*, "FORTRAN ERROR: send_vol greater than MAX_BUFFER_SIZE"
+     stop
+  endif
+  if (dg_here%recv_vol .gt. MAX_BUFFER_SIZE) then
+     print*, "FORTRAN ERROR: recv_vol greater than MAX_BUFFER_SIZE"
+     stop
+  endif
+
 
   RETURN
   

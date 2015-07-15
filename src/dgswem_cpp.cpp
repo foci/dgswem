@@ -37,11 +37,11 @@ extern"C" {
   void FNAME(hpx_get_elems_fort)(void** dg,
 				 int* neighbor,
 				 int* volume,
-				 int* sendbuf);
+				 double* sendbuf);
   void FNAME(hpx_put_elems_fort)(void** dg,
 				 int* neighbor,
 				 int* volume,
-				 int* recvbuf);
+				 double* recvbuf);
 
 }
 
@@ -190,7 +190,7 @@ int hpx_main(
       for (int neighbor=0; neighbor<numneighbors[domain]; neighbor++) {	
 	int neighbor_here = neighbors_here[neighbor];
 	int volume;
-	int buffer[MAX_BUFFER_SIZE];
+	double buffer[MAX_BUFFER_SIZE];
 
 	// Get outgoing boundarys from the neighbors
 	FNAME(hpx_get_elems_fort)(&dgs[neighbor_here],
