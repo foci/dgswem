@@ -22,7 +22,7 @@
        neighbor_found = .false.
        DO i=1,dg_here%NEIGHPROC_S
 
-         IF (dg_here%IPROC_S(i) == neighbor+1) THEN
+         IF (dg_here%IPROC_S(i) == neighbor) THEN
            index = i
            neighbor_found = .true.
            EXIT
@@ -91,7 +91,7 @@
        neighbor_found = .false.
        DO i=1,dg_here%NEIGHPROC_R
 
-         IF (dg_here%IPROC_R(i) == neighbor+1) THEN
+         IF (dg_here%IPROC_R(i) == neighbor) THEN
            index = i
            neighbor_found = .true.
            EXIT
