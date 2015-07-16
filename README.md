@@ -70,3 +70,28 @@ irritating problem: there is a variable named "NE" in the global module, and `.N
 
 ## File unit number uniqueness
 For each file unit, multiply unit number times 100 and add the domain number.
+
+# DG_hydro_timestep pseudocode
+
+``` fortran
+SUBROUTINE DG_HYDRO_TIMESTEP(s,dg_here,global_here,nodalattr_here,IT,IRK)
+
+L27-58
+
+IF (first_rk_step) THEN
+
+L60-72
+
+END IF
+
+! remove RK loop (just the do loop itself not the code inside!), L76
+
+L76-557
+
+IF (last_rk_step) THEN
+
+L559-683
+
+END SUBROUTINE DG_HYDRO_TIMESTEP
+
+```
