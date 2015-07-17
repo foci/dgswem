@@ -33,29 +33,29 @@
        
        IF (neighbor_found) THEN
        
-         PRINT*, " PROC: ", dg_here%IDPROC, " SENDING ", dg_here%NELEMSEND(index) ," ELEMENTS TO: ", dg_here%IPROC_S(index)       
-         PRINT*, (dg_here%ISENDLOC(el,index), el = 1,dg_here%NELEMSEND(index))
-         PRINT*, "" 
+!          PRINT*, " PROC: ", dg_here%IDPROC, " SENDING ", dg_here%NELEMSEND(index) ," ELEMENTS TO: ", dg_here%IPROC_S(index)       
+!          PRINT*, (dg_here%ISENDLOC(el,index), el = 1,dg_here%NELEMSEND(index))
+!          PRINT*, "" 
       
          ncount = 0
          DO el=1,dg_here%NELEMSEND(index)
             DO dof=1,dg_here%DOFH
               ncount = ncount+1
-              sendbuf(ncount)=dg_here%ZE(dof,dg_here%ISENDLOC(el,index),dg_here%IRK)
+              sendbuf(ncount)=dg_here%ZE(dof,dg_here%ISENDLOC(el,index),dg_here%IRK+1)
             ENDDO
          ENDDO
        
          DO el=1,dg_here%NELEMSEND(index)
            DO dof=1,dg_here%DOFH
              ncount = ncount+1
-             sendbuf(ncount)=dg_here%QX(dof,dg_here%ISENDLOC(el,index),dg_here%IRK)
+             sendbuf(ncount)=dg_here%QX(dof,dg_here%ISENDLOC(el,index),dg_here%IRK+1)
            ENDDO
          ENDDO
           
          DO el=1,dg_here%NELEMSEND(index)
            DO dof=1,dg_here%DOFH
              ncount = ncount+1
-             sendbuf(ncount)=dg_here%QY(dof,dg_here%ISENDLOC(el,index),dg_here%IRK)
+             sendbuf(ncount)=dg_here%QY(dof,dg_here%ISENDLOC(el,index),dg_here%IRK+1)
            ENDDO
          ENDDO
        
@@ -106,29 +106,29 @@
              
        IF (neighbor_found) THEN  
        
-         PRINT*, " PROC: ", dg_here%IDPROC, " RECEIVING ",dg_here%NELEMRECV(index), " ELEMENTS FROM: ", dg_here%IPROC_R(index)
-         PRINT*, (dg_here%IRECVLOC(el,index), el = 1,dg_here%NELEMRECV(index))
-         PRINT*, ""
+!          PRINT*, " PROC: ", dg_here%IDPROC, " RECEIVING ",dg_here%NELEMRECV(index), " ELEMENTS FROM: ", dg_here%IPROC_R(index)
+!          PRINT*, (dg_here%IRECVLOC(el,index), el = 1,dg_here%NELEMRECV(index))
+!          PRINT*, ""
          
          ncount = 0
          DO el=1,dg_here%NELEMRECV(index)
            DO dof=1,dg_here%DOFH
              ncount = ncount+1
-             dg_here%ZE(dof,dg_here%IRECVLOC(el,index),dg_here%IRK) = recvbuf(ncount)
+             dg_here%ZE(dof,dg_here%IRECVLOC(el,index),dg_here%IRK+1) = recvbuf(ncount)
            ENDDO
          ENDDO
        
          DO el=1,dg_here%NELEMRECV(index)
            DO dof=1,dg_here%DOFH
              ncount = ncount+1
-             dg_here%QX(dof,dg_here%IRECVLOC(el,index),dg_here%IRK) = recvbuf(ncount)
+             dg_here%QX(dof,dg_here%IRECVLOC(el,index),dg_here%IRK+1) = recvbuf(ncount)
            ENDDO
          ENDDO
        
          DO el=1,dg_here%NELEMRECV(index)
            DO dof=1,dg_here%DOFH
              ncount = ncount+1
-             dg_here%QY(dof,dg_here%IRECVLOC(el,index),dg_here%IRK) = recvbuf(ncount)
+             dg_here%QY(dof,dg_here%IRECVLOC(el,index),dg_here%IRK+1) = recvbuf(ncount)
            ENDDO
          ENDDO    
        
