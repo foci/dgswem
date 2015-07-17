@@ -8,7 +8,7 @@
 !     
 !***********************************************************************
 
-      SUBROUTINE DG_TIMESTEP(s,dg_here,global_here,nodalattr_here,IT)
+      SUBROUTINE DG_TIMESTEP(s,dg_here,global_here,nodalattr_here,IT,IRK)
 
 !.....Use appropriate modules
       
@@ -31,11 +31,14 @@
 
 !.....Declare local variables
 
-      INTEGER IT
+      INTEGER IT, IRK
       
 !.....Hydrodynamics
-
-      CALL DG_HYDRO_TIMESTEP(s,dg_here,global_here,nodalattr_here,IT)
+#ifdef HPX
+      CALL DG_HYDRO_TIMESTEP(s,dg_here,global_here,nodalattr_here,IT,IRK)
+#else
+! do the IRK loop here
+#endif
 
 !.....Write out results
 

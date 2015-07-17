@@ -23,12 +23,14 @@ extern"C" {
 			       void** nodalattr,
 			       int* n_timesteps,
 			       int* n_domains,
-			       int* id);
+			       int* id,
+			       int* n_rksteps);
   void FNAME(dg_timestep_fort)(void** sizes,
 			       void** dg,
 			       void** global,
 			       void** nodalattr,
-			       int* timestep);	
+			       int* timestep,
+			       int* rkstep);	
   void FNAME(get_neighbors_fort)(void** sizes,
 				 void** dg,
 				 void** global,
@@ -67,8 +69,32 @@ int hpx_main(
 
   int n_timesteps;
   int n_domains;
+  int n_rksteps;
+  
 
-  n_domains = 4;
+  // This is hacky and needs to be changed
+  {
+    int dummy_id = 0;
+    void *size = NULL;
+    void *dg = NULL;
+    void *global = NULL;
+    void *nodalattr = NULL;
+    // Initialize dummy domain so we can get n_domains
+    FNAME(dgswem_init_fort)(&size,
+			    &dg,
+			    &global,
+			    &nodalattr,
+			    &n_timesteps,
+			    &n_domains,
+			    &dummy_id,
+			    &n_rksteps
+			    );
+  }
+
+  std::cout << "n_timesteps = " << n_timesteps << std::endl;
+  std::cout << "n_rksteps = " << n_rksteps << std::endl;
+  std::cout << "n_domains = " << n_domains << std::endl;
+
 
   // Create vectors of fortran pointers and ids
   for (int i=0; i<n_domains; i++) {
@@ -83,6 +109,9 @@ int hpx_main(
     nodalattrs.push_back(nodalattr);
   }
 
+
+ 
+
   // Initialize all domains
   for(int i=0; i<n_domains; i++) {
 #ifdef HPX
@@ -93,7 +122,8 @@ int hpx_main(
 			       &nodalattrs[i],
 			       &n_timesteps,
 			       &n_domains,
-			       &ids[i]
+			       &ids[i],
+			       &n_rksteps
 			       ));
 #else
     FNAME(dgswem_init_fort)(&sizes[i],
@@ -102,7 +132,8 @@ int hpx_main(
 			    &nodalattrs[i],
 			    &n_timesteps,
 			    &n_domains,
-			    &ids[i]
+			    &ids[i],
+			    &n_rksteps
 			    );
 #endif
 
@@ -149,67 +180,80 @@ int hpx_main(
 
   std::cout << "*** End Grid Information ***" << std::endl;
 
-  std::cout << "c++: Starting timestep loop: n_timesteps = " << n_timesteps << std::endl;
+  std::cout << "c++: Starting timestep loop: n_timesteps = " << n_timesteps << " n_rksteps = " << n_rksteps << std::endl;
   
   
   // Start timestepping loop
   for (int timestep=1; timestep<=n_timesteps; timestep++) {
     
-#ifdef HPX
-    std::vector<hpx::future<void> > updates;    
-#endif
-    for (int j=0; j<ids.size(); j++) {
-      #ifdef HPX
-      updates.push_back(hpx::async(FNAME(dg_timestep_fort),
-				   &sizes[j],
-				   &dgs[j],
-				   &globals[j],
-				   &nodalattrs[j],
-				   &timestep
-				   ));
-#else
-      FNAME(dg_timestep_fort)(&sizes[j],
-			      &dgs[j],
-			      &globals[j],
-			      &nodalattrs[j],
-			      &timestep
-			      );
-#endif
-    } // End loop over domains
-#ifdef HPX
-    wait_all(updates);
-#endif
+    std::cout << "starting timestep loop, timestep = " << timestep << std::endl;
 
+    for (int rkstep=1; rkstep<=n_rksteps; rkstep++) {
 
-    // Boundary exchange
-    // Loop over domains   
-    for (int domain=0; domain<ids.size(); domain++) {
-      std::vector<int> neighbors_here = neighbors[domain];
-
-      //Loop over neighbors
-      for (int neighbor=0; neighbor<numneighbors[domain]; neighbor++) {	
-	int neighbor_here = neighbors_here[neighbor];
-	int volume;
-	double buffer[MAX_BUFFER_SIZE];
-
-	// Get outgoing boundarys from the neighbors
-	FNAME(hpx_get_elems_fort)(&dgs[neighbor_here],
-				       &domain,
-				       &volume,
-				       buffer);
-
-	// Put those arrays inside current domain
-	FNAME(hpx_put_elems_fort)(&dgs[domain],
-				       &neighbor_here,
-				       &volume,
-				       buffer);	
-	
-
-
-      }// end loop over neighbors
+      std::cout << "starting rk loop, rkstep = " << rkstep << std::endl;
       
-    }// end loop over domains
+#ifdef HPX
+      std::vector<hpx::future<void> > updates;    
+#endif
+      for (int j=0; j<ids.size(); j++) {
+	std::cout << "j=" << j << std::endl;
+#ifdef HPX
+	updates.push_back(hpx::async(FNAME(dg_timestep_fort),
+				     &sizes[j],
+				     &dgs[j],
+				     &globals[j],
+				     &nodalattrs[j],
+				     &timestep,
+				     &rkstep
+				     ));
+#else
+	FNAME(dg_timestep_fort)(&sizes[j],
+				&dgs[j],
+				&globals[j],
+				&nodalattrs[j],
+				&timestep,
+				&rkstep
+				);
+#endif
+      } // End loop over domains
+#ifdef HPX
+      wait_all(updates);
+#endif
+      
 
+
+
+      // Boundary exchange
+      // Loop over domains   
+      for (int domain=0; domain<ids.size(); domain++) {
+	std::vector<int> neighbors_here = neighbors[domain];
+	
+	//Loop over neighbors
+	for (int neighbor=0; neighbor<numneighbors[domain]; neighbor++) {	
+	  int neighbor_here = neighbors_here[neighbor];
+	  int volume;
+	  double buffer[MAX_BUFFER_SIZE];
+	  
+	  // Get outgoing boundarys from the neighbors
+	  FNAME(hpx_get_elems_fort)(&dgs[neighbor_here],
+				    &domain,
+				    &volume,
+				    buffer);
+	  
+	  // Put those arrays inside current domain
+	  FNAME(hpx_put_elems_fort)(&dgs[domain],
+				    &neighbor_here,
+				    &volume,
+				    buffer);	
+	  
+	  
+	  
+	}// end loop over neighbors
+	
+      }// end loop over domains
+      
+    } // end rkstep loop
+    
     return 0;  // stop after one timestep for debugging
 
 

@@ -89,27 +89,19 @@
          STOP
       ENDIF
 #endif
-!--   
 #ifdef HPX
-      OPEN(s%fort80unit,FILE='fort.80')
-      READ(s%fort80unit,'(A)') CDUM80     !Skip global_here%RUNDES
-      READ(s%fort80unit,'(A)') CDUM80     !Skip global_here%RUNID
-      READ(s%fort80unit,'(A)') CDUM80     !Skip global_here%AGRID
-      READ(s%fort80unit,*) IDUM80         !Skip NELG & NNODG
-      READ(s%fort80unit,*) IDUM80         !Read in NPROC
-      CLOSE(s%fort80unit)
-      IF(IDUM80.NE.s%MNPROC) THEN
-         IF(s%MYPROC.EQ.0) THEN
-            WRITE(*,'(A)') '*** ERROR IN PARALLEL SETUP!'
-            WRITE(*,'(2A,I4,A)') '*** Number of CPUS for submitted job ',&
-           '(NCPU = ',s%MNPROC,') is not equal to the'
-            WRITE(*,'(2A,I4,A)') '*** number of CPUS specified during',&
-           ' ADCPREP (see fort.80: NCPU = ',IDUM80,').'
-            WRITE(*,'(A)') '*** dgswem will now quit!'
-         ENDIF
-         STOP
-      ENDIF
+!     Read in number of domains from fort.80 file
+      OPEN(80,FILE='fort.80')
+      READ(80,'(A)') CDUM80     !Skip global_here%RUNDES
+      READ(80,'(A)') CDUM80     !Skip global_here%RUNID
+      READ(80,'(A)') CDUM80     !Skip global_here%AGRID
+      READ(80,*) IDUM80         !Skip NELG & NNODG
+      READ(80,*) IDUM80         !Read in NPROC
+      CLOSE(80)
+      s%MNPROC = IDUM80
 #endif
+
+!--   
       global_here%ScreenUnit = 6
 
 !.....Initialize all runtime option logicals to false
@@ -4409,7 +4401,10 @@
 !     READ(s%fort15unit,*) MNPROC
 !--   
 #else
+#ifdef HPX
+#else
       s%MNPROC = 1
+#endif
 #endif
 
 !.....INITIALIZE AVERAGING FOR INTERNAL BARRIER WATER LEVELS

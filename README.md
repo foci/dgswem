@@ -95,3 +95,8 @@ L559-683
 END SUBROUTINE DG_HYDRO_TIMESTEP
 
 ```
+
+# To do before "handover"
+integrate dgswem_init into the primary workflow of the code
+calculate maximum buffer volume at runtime instead of using parameter
+add the RK loop into DG_timestep

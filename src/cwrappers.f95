@@ -1,5 +1,5 @@
 #ifdef HPX
-subroutine dgswem_init_fort(sizes_c_ptr,dg_c_ptr,global_c_ptr,nodalattr_c_ptr,n_timesteps,n_domains,id)
+subroutine dgswem_init_fort(sizes_c_ptr,dg_c_ptr,global_c_ptr,nodalattr_c_ptr,n_timesteps,n_domains,id,n_rksteps)
   use, intrinsic :: iso_c_binding
   use sizes
   use dg
@@ -14,6 +14,7 @@ subroutine dgswem_init_fort(sizes_c_ptr,dg_c_ptr,global_c_ptr,nodalattr_c_ptr,n_
   integer :: n_timesteps
   integer :: id
   integer :: n_domains
+  integer :: n_rksteps
 
   type (sizes_type), pointer :: s
   type (dg_type), pointer :: dg_here
@@ -25,11 +26,16 @@ subroutine dgswem_init_fort(sizes_c_ptr,dg_c_ptr,global_c_ptr,nodalattr_c_ptr,n_
   allocate(global_here)
   allocate(nodalattr_here)
 
-  s%myproc = id;
-  s%mnproc = n_domains;
+  s%myproc = id ! I think this should be before the call to dgswem_init
 
-  call dgswem_init(s,dg_here,global_here,nodalattr_here,n_timesteps)
-  
+  call dgswem_init(s,dg_here,global_here,nodalattr_here)
+
+  ! Pass these variables to the c++ side
+  print*, "FORTRAN: s%mnproc = ", s%mnproc
+  n_domains = s%mnproc
+  n_rksteps = dg_here%nrk
+  n_timesteps = global_here%NT
+
   sizes_c_ptr = C_LOC(s)
   dg_c_ptr = C_LOC(dg_here)
   global_c_ptr = C_LOC(global_here)
@@ -37,7 +43,7 @@ subroutine dgswem_init_fort(sizes_c_ptr,dg_c_ptr,global_c_ptr,nodalattr_c_ptr,n_
 
 end subroutine dgswem_init_fort
 
-subroutine dg_timestep_fort(sizes_c_ptr,dg_c_ptr,global_c_ptr,nodalattr_c_ptr,timestep)
+subroutine dg_timestep_fort(sizes_c_ptr,dg_c_ptr,global_c_ptr,nodalattr_c_ptr,timestep,rkstep)
   use, intrinsic :: iso_c_binding
   use sizes
   use dg
@@ -50,6 +56,7 @@ subroutine dg_timestep_fort(sizes_c_ptr,dg_c_ptr,global_c_ptr,nodalattr_c_ptr,ti
   type (C_PTR) :: global_c_ptr
   type (C_PTR) :: nodalattr_c_ptr
   integer :: timestep
+  integer :: rkstep
 
   type (sizes_type), pointer :: s
   type (dg_type), pointer :: dg_here
@@ -61,7 +68,7 @@ subroutine dg_timestep_fort(sizes_c_ptr,dg_c_ptr,global_c_ptr,nodalattr_c_ptr,ti
   call C_F_POINTER(global_c_ptr,global_here)
   call C_F_POINTER(nodalattr_c_ptr,nodalattr_here)
 
-  call dg_timestep(s,dg_here,global_here,nodalattr_here,timestep)
+  call dg_timestep(s,dg_here,global_here,nodalattr_here,timestep,rkstep)
 
 end subroutine dg_timestep_fort
 

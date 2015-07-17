@@ -1,4 +1,4 @@
-SUBROUTINE DGSWEM_INIT(s,dg_here,global_here,nodalattr_here,NT)
+SUBROUTINE DGSWEM_INIT(s,dg_here,global_here,nodalattr_here)
   USE SIZES
   USE GLOBAL
   USE DG
@@ -9,13 +9,11 @@ SUBROUTINE DGSWEM_INIT(s,dg_here,global_here,nodalattr_here,NT)
   type (dg_type) :: dg_here
   type (global_type) :: global_here
   type (nodalattr_type) :: nodalattr_here
-  
+
   REAL(4) CPU_TIME,CPU_SEC(2)
   REAL(4) TARRAY(2)
-  INTEGER TESTFLAG,OUTITER,i,ModetoNode,time_here,ie,NT
-  character*80 tecfile, tecfile_max
-  
-  print*,"@@@@@@@@@@@@ myproc =",s%myproc
+  INTEGER TESTFLAG,OUTITER,i,ModetoNode,time_here,ie
+  character*80 tecfile, tecfile_max  
 
   call init_fileunits(s)
 
@@ -146,8 +144,6 @@ SUBROUTINE DGSWEM_INIT(s,dg_here,global_here,nodalattr_here,NT)
 
 !     sb...Write initial conditions
       CALL WRITE_DG_IC(dg_here)
-
-      NT = global_here%NT
 
  1112 FORMAT(/,1X,79('_'))
 17931 FORMAT(//,1X,'LIMITED RUNTIME INFORMATION SECTION ',//)

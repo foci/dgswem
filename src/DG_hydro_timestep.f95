@@ -59,7 +59,7 @@
 
       Allocate ( XB(S%MNE),YB(S%MNE),radial(S%MNE) )
       
-      IF (IRK == 1) THEN      
+      IF (IRK == 1) THEN
 
 !.......Compute the current time
 
