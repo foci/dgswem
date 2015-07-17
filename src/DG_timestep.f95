@@ -42,19 +42,19 @@
 
 !.....Write out results
 
-#ifdef CMPI
-#ifdef BLKOUT
-      CALL MSG_BLOCKSYNC_START()
-#endif
-#endif
-      CALL WRITE_RESULTS(s,dg_here,global_here,IT,.FALSE.)
-#ifdef CMPI
-#ifdef BLKOUT
-      CALL MSG_BLOCKSYNC_FINISH()
-#endif
-#endif
-
-      CALL SCRUTINIZE_SOLUTION(s,dg_here,global_here,IT)
+! #ifdef CMPI
+! #ifdef BLKOUT
+!       CALL MSG_BLOCKSYNC_START()
+! #endif
+! #endif
+!       CALL WRITE_RESULTS(s,dg_here,global_here,IT,.FALSE.)
+! #ifdef CMPI
+! #ifdef BLKOUT
+!       CALL MSG_BLOCKSYNC_FINISH()
+! #endif
+! #endif
+! 
+!       CALL SCRUTINIZE_SOLUTION(s,dg_here,global_here,IT)
 
       RETURN
       END SUBROUTINE
