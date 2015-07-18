@@ -142,4 +142,29 @@ subroutine hpx_put_elems_fort(dg_c_ptr,neighbor,volume,recvbuf)
 
 end subroutine hpx_put_elems_fort
 
+
+subroutine hpx_swap_elems_fort(dg_domain_c_ptr,dg_neighbor_c_ptr)
+  use, intrinsic :: iso_c_binding
+  use dg
+  use sizes
+  implicit none
+
+  type (C_PTR) :: dg_domain_c_ptr
+  type (C_PTR) :: dg_neighbor_c_ptr
+  real(sz) :: recvbuf(MAX_BUFFER_SIZE)
+  integer :: volume
+  integer :: neighbor
+
+  integer :: i
+
+  type (dg_type), pointer :: dg_here_domain
+  type (dg_type), pointer :: dg_here_neighbor
+
+  call C_F_POINTER(dg_domain_c_ptr,dg_here_domain)
+  call C_F_POINTER(dg_neighbor_c_ptr,dg_here_neighbor)
+
+  call hpx_swap_elems(dg_here_domain,dg_here_neighbor)
+
+end subroutine hpx_swap_elems_fort
+
 #endif

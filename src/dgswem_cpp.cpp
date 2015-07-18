@@ -134,11 +134,13 @@ int hpx_main(
   // Start timestepping loop
   for (int timestep=1; timestep<=n_timesteps; timestep++) {
     
-    //std::cout << "starting timestep loop, timestep = " << timestep << std::endl;
+//    std::cout << "starting timestep loop, timestep = " << timestep << std::endl;
 
     for (int rkstep=1; rkstep<=n_rksteps; rkstep++) {
-
-     // std::cout << "starting rk loop, rkstep = " << rkstep << std::endl;
+/*     std::cout << "#################################################################" << std::endl;
+     std::cout << " timestep loop, timestep = " << timestep << std::endl;     
+     std::cout << " rk loop, rkstep = " << rkstep << std::endl;
+     std::cout << "#################################################################" << std::endl;*/     
       
 #ifdef HPX
       std::vector<hpx::future<void> > updates;    
@@ -183,7 +185,7 @@ int hpx_main(
 	  double buffer[MAX_BUFFER_SIZE];
 	  
 	  // Get outgoing boundarys from the neighbors
-	  FNAME(hpx_get_elems_fort)(&dgs[neighbor_here],
+	 /* FNAME(hpx_get_elems_fort)(&dgs[neighbor_here],
 				    &domain,
 				    &volume,
 				    buffer);
@@ -192,7 +194,10 @@ int hpx_main(
 	  FNAME(hpx_put_elems_fort)(&dgs[domain],
 				    &neighbor_here,
 				    &volume,
-				    buffer);	
+				    buffer);	*/
+         
+         FNAME(hpx_swap_elems_fort)(&dgs[domain],
+                                    &dgs[neighbor_here]);
 	  
 	  
 	  
@@ -202,7 +207,9 @@ int hpx_main(
       
     } // end rkstep loop
     
-    // return 0;  // stop after one timestep for debugging
+//     if ( timestep > 2) {
+//      return 0;  // stop after one timestep for debugging
+//     }
 
 
   } // End timestep loop
