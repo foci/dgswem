@@ -13,40 +13,7 @@
 #include <hpx/include/parallel_for_each.hpp>
 #endif
 
-#define MAX_DOMAIN_NEIGHBORS 10
-#define MAX_BUFFER_SIZE 1000
-
-extern"C" {
-  void FNAME(dgswem_init_fort)(void** sizes,
-			       void** dg,
-			       void** global,
-			       void** nodalattr,
-			       int* n_timesteps,
-			       int* n_domains,
-			       int* id,
-			       int* n_rksteps);
-  void FNAME(dg_timestep_fort)(void** sizes,
-			       void** dg,
-			       void** global,
-			       void** nodalattr,
-			       int* timestep,
-			       int* rkstep);	
-  void FNAME(get_neighbors_fort)(void** sizes,
-				 void** dg,
-				 void** global,
-				 int neighbors[MAX_DOMAIN_NEIGHBORS],
-				 int* num_neighbors);	
-  void FNAME(hpx_get_elems_fort)(void** dg,
-				 int* neighbor,
-				 int* volume,
-				 double* sendbuf);
-  void FNAME(hpx_put_elems_fort)(void** dg,
-				 int* neighbor,
-				 int* volume,
-				 double* recvbuf);
-
-}
-
+#include "fortran_declarations.hpp" // This includes parameters defined
 
 int hpx_main(
 	 int argc
@@ -72,27 +39,8 @@ int hpx_main(
   int n_rksteps;
   
 
-  // This is hacky and needs to be changed
-  {
-    int dummy_id = 0;
-    void *size = NULL;
-    void *dg = NULL;
-    void *global = NULL;
-    void *nodalattr = NULL;
-    // Initialize dummy domain so we can get n_domains
-    FNAME(dgswem_init_fort)(&size,
-			    &dg,
-			    &global,
-			    &nodalattr,
-			    &n_timesteps,
-			    &n_domains,
-			    &dummy_id,
-			    &n_rksteps
-			    );
-  }
+  FNAME(hpx_read_n_domains)(&n_domains);
 
-  std::cout << "n_timesteps = " << n_timesteps << std::endl;
-  std::cout << "n_rksteps = " << n_rksteps << std::endl;
   std::cout << "n_domains = " << n_domains << std::endl;
 
 
@@ -136,7 +84,7 @@ int hpx_main(
 			    &n_rksteps
 			    );
 #endif
-
+    
     //Get a list of neighbors for each domain
 
     int numneighbors_fort;

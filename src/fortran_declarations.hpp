@@ -29,4 +29,5 @@ extern"C" {
 				 int* neighbor,
 				 int* volume,
 				 double* recvbuf);
+  void FNAME(hpx_read_n_domains)(int* n_domains);
 }

@@ -13,115 +13,101 @@
 
 #include "fortran_declarations.hpp"
 
-int hpx_main(
-	 int argc
-	 , char* argv[]
-	 )
+typedef sendbuffers std::vector<buffer[MAX_BUFFER_SIZE]>;
+
+struct dgswem_domain
 {
-  std::vector<void *> sizes;
-  std::vector<void *> dgs;
-  std::vector<void *> globals;
-  std::vector<void *> nodalattrs;
-
-  std::vector<int> ids;
-
-  std::vector<int> numneighbors;
-  std::vector<std::vector<int> > neighbors;
+  void *size = NULL;
+  void *dg = NULL;
+  void *global = NULL;
+  void *nodalattr = NULL;
+  int id = 0;
+  int numneighbors;
+  std::vector<int> neighbors;
   
-#ifdef HPX
-  std::vector<hpx::future<void> > inits;
-#endif
-
+  //I would like to get rid of these
   int n_timesteps;
   int n_domains;
   int n_rksteps;
-  
 
-  // This is hacky and needs to be changed
+  dgswem_domain(int i) // Constructor initializes the domain
   {
-    int dummy_id = 0;
-    void *size = NULL;
-    void *dg = NULL;
-    void *global = NULL;
-    void *nodalattr = NULL;
-    // Initialize dummy domain so we can get n_domains
+    id = i;
     FNAME(dgswem_init_fort)(&size,
 			    &dg,
 			    &global,
 			    &nodalattr,
 			    &n_timesteps,
 			    &n_domains,
-			    &dummy_id,
+			    i,
 			    &n_rksteps
 			    );
-  }
-
-  std::cout << "n_timesteps = " << n_timesteps << std::endl;
-  std::cout << "n_rksteps = " << n_rksteps << std::endl;
-  std::cout << "n_domains = " << n_domains << std::endl;
-
-
-  // Create vectors of fortran pointers and ids
-  for (int i=0; i<n_domains; i++) {
-    void *size = NULL;
-    void *dg = NULL;
-    void *global = NULL;
-    void *nodalattr = NULL;
-    ids.push_back(i);
-    sizes.push_back(size);
-    dgs.push_back(dg);
-    globals.push_back(global);
-    nodalattrs.push_back(nodalattr);
-  }
-
-
- 
-
-  // Initialize all domains
-  for(int i=0; i<n_domains; i++) {
-#ifdef HPX
-    inits.push_back(hpx::async(FNAME(dgswem_init_fort),
-			       &sizes[i],
-			       &dgs[i],
-			       &globals[i],
-			       &nodalattrs[i],
-			       &n_timesteps,
-			       &n_domains,
-			       &ids[i],
-			       &n_rksteps
-			       ));
-#else
-    FNAME(dgswem_init_fort)(&sizes[i],
-			    &dgs[i],
-			    &globals[i],
-			    &nodalattrs[i],
-			    &n_timesteps,
-			    &n_domains,
-			    &ids[i],
-			    &n_rksteps
-			    );
-#endif
-
     //Get a list of neighbors for each domain
 
     int numneighbors_fort;
     int neighbors_fort[MAX_DOMAIN_NEIGHBORS];
-    std::vector<int> neighbors_here;
-    FNAME(get_neighbors_fort)(&sizes[i],
-			      &dgs[i],
-			      &globals[i],
+    //    std::vector<int> neighbors_here;
+    FNAME(get_neighbors_fort)(&size,
+			      &dg,
+			      &global,
 			      neighbors_fort,
 			      &numneighbors_fort);
 
-    numneighbors.push_back(numneighbors_fort);
-    
+    numneighbors = (numneighbors_fort);    
     for (int j=0; j<numneighbors_fort; j++) {
-      std::cout << neighbors_fort[j] << " ";
-      neighbors_here.push_back(neighbors_fort[j]);
+      neighbors.push_back(neighbors_fort[j]);
     }
-    std::cout << std::endl;
+  };
 
-    neighbors.push_back(neighbors_here);
+  sendbuffers update(int timestep, int rkstep, std::vector<recvbuffers>)
+  {
+    FNAME(dg_timestep_fort)(&size,
+			    &dg,
+			    &global,
+			    &nodalattr,
+			    &timestep,
+			    &rkstep
+			    );
+    
+  };
+
+
+}
+
+/*
+struct stepper 
+{
+
+  typedef hpx::shared_future<domain> domain_future;
+
+  typedef std::vector<domain_future> space;
+*/
+  
+
+int hpx_main(
+	 int argc
+	 , char* argv[]
+	 )
+{
+
+  int n_timesteps;
+  int n_domains;
+  int n_rksteps;
+
+  
+  std::vector<dgswem_domain> domains;
+
+  FNAME(hpx_read_n_domains)(&n_domains);
+
+  std::cout << "n_timesteps = " << n_timesteps << std::endl;
+
+  for (int i=0; i<n_domains; i++) {
+    dgswem_domain domain(i); // This initializes the domain
+    domains.push_back(domain);
+  }
+ 
+
+
 
   }
 
@@ -172,13 +158,6 @@ int hpx_main(
 				     &rkstep
 				     ));
 #else
-	FNAME(dg_timestep_fort)(&sizes[j],
-				&dgs[j],
-				&globals[j],
-				&nodalattrs[j],
-				&timestep,
-				&rkstep
-				);
 #endif
       } // End loop over domains
 #ifdef HPX

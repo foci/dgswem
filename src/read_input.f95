@@ -49,11 +49,6 @@
       CHARACTER CDUM80
 #endif
 
-#ifdef HPX
-      integer :: fort80unit
-      INTEGER IDUM80
-      CHARACTER CDUM80
-#endif
       
 !--   
 !     ek...Zero out all the variables in the Nodal Attributes Module
@@ -88,17 +83,6 @@
          CALL MESSAGE_FINI(s)
          STOP
       ENDIF
-#endif
-#ifdef HPX
-!     Read in number of domains from fort.80 file
-      OPEN(80,FILE='fort.80')
-      READ(80,'(A)') CDUM80     !Skip global_here%RUNDES
-      READ(80,'(A)') CDUM80     !Skip global_here%RUNID
-      READ(80,'(A)') CDUM80     !Skip global_here%AGRID
-      READ(80,*) IDUM80         !Skip NELG & NNODG
-      READ(80,*) IDUM80         !Read in NPROC
-      CLOSE(80)
-      s%MNPROC = IDUM80
 #endif
 
 !--   
