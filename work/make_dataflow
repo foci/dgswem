@@ -1,0 +1,12 @@
+export PKG_CONFIG_PATH=/home/zbyerly/research/scripts/hpx_install_release/lib/pkgconfig/
+
+mv ./odir4/dgswem.o ./odir4/dgswem.oB
+INCLUDES=`ls -d -1 ./odir4/*.o`
+echo $INCLUDES
+mv ./odir4/dgswem.oB ./odir4/dgswem.o
+
+CMD="g++ -c ../src/dgswem_dataflow.cpp -DHPX `pkg-config --cflags --libs hpx_application`"
+$CMD 
+CMD="g++ -o dgswem_dataflow dgswem_dataflow.o $INCLUDES -DHPX `pkg-config --cflags --libs hpx_application` -lgfortran"
+echo $CMD
+$CMD

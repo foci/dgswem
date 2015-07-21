@@ -13,7 +13,8 @@
 
 #include "fortran_declarations.hpp"
 
-typedef sendbuffers std::vector<buffer[MAX_BUFFER_SIZE]>;
+typedef std::map<int, double[MAX_BUFFER_SIZE]>  sendbuffers;
+typedef std::map<int, double[MAX_BUFFER_SIZE]>  recvbuffers;
 
 struct dgswem_domain
 {
@@ -39,7 +40,7 @@ struct dgswem_domain
 			    &nodalattr,
 			    &n_timesteps,
 			    &n_domains,
-			    i,
+			    &id,
 			    &n_rksteps
 			    );
     //Get a list of neighbors for each domain
@@ -59,7 +60,7 @@ struct dgswem_domain
     }
   };
 
-  sendbuffers update(int timestep, int rkstep, std::vector<recvbuffers>)
+  sendbuffers update(int timestep, int rkstep, recvbuffers)
   {
     FNAME(dg_timestep_fort)(&size,
 			    &dg,
@@ -68,12 +69,26 @@ struct dgswem_domain
 			    &timestep,
 			    &rkstep
 			    );
+    sendbuffers sendbuffers_here; 
     
-  };
+    //Loop over neighbors
+    for (int neighbor=0; neighbor<numneighbors; neighbor++) {	
+      int neighbor_here = neighbors[neighbor];
+      int volume;
+      double buffer[MAX_BUFFER_SIZE];
+      
+      // Get outgoing boundarys from the neighbors
+      FNAME(hpx_get_elems_fort)(&dgs[neighbor_here],
+				&domain,
+				&volume,
+				buffer);
+      sendbuffers.insert(neighbor_here,buffer);      
+    };
 
 
-}
-
+  }
+  
+};
 /*
 struct stepper 
 {
@@ -105,15 +120,6 @@ int hpx_main(
     dgswem_domain domain(i); // This initializes the domain
     domains.push_back(domain);
   }
- 
-
-
-
-  }
-
-#ifdef HPX
-  wait_all(inits);
-#endif
 
   // Print out some information about the domains and their neighbors
   std::cout << "*** Grid Information ***" << std::endl;
@@ -133,7 +139,7 @@ int hpx_main(
 
   std::cout << "c++: Starting timestep loop: n_timesteps = " << n_timesteps << " n_rksteps = " << n_rksteps << std::endl;
   
-  
+  /*  
   // Start timestepping loop
   for (int timestep=1; timestep<=n_timesteps; timestep++) {
     
@@ -200,6 +206,7 @@ int hpx_main(
 
   } // End timestep loop
   
+  */
   
   return hpx::finalize();
   
