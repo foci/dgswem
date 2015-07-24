@@ -148,7 +148,7 @@ int hpx_main(
       for (int j=0; j<ids.size(); j++) {
 	//std::cout << "j=" << j << std::endl;
 #ifdef HPX
-	updates.push_back(hpx::async(FNAME(dg_timestep_fort),
+	updates.push_back(hpx::async(FNAME(dg_hydro_timestep_fort),
 				     &sizes[j],
 				     &dgs[j],
 				     &globals[j],
@@ -157,7 +157,7 @@ int hpx_main(
 				     &rkstep
 				     ));
 #else
-	FNAME(dg_timestep_fort)(&sizes[j],
+	FNAME(dg_hydro_timestep_fort)(&sizes[j],
 				&dgs[j],
 				&globals[j],
 				&nodalattrs[j],
