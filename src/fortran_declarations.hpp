@@ -6,7 +6,6 @@ extern"C" {
 			       void** dg,
 			       void** global,
 			       void** nodalattr,
-			       int* n_timesteps,
 			       int* n_domains,
 			       int* id,
 			       int* n_rksteps);

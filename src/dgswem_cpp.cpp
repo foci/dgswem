@@ -41,7 +41,6 @@ int hpx_main(
 
   FNAME(hpx_read_n_domains)(&n_domains);
 
-  std::cout << "n_domains = " << n_domains << std::endl;
 
 
   // Create vectors of fortran pointers and ids
@@ -59,18 +58,19 @@ int hpx_main(
 
 
  
+  std::cout << "n_domains = " << n_domains << std::endl;
 
   // Initialize all domains
   for(int i=0; i<n_domains; i++) {
+    std::cout << "initializing domain " << i << std::endl;
 #ifdef HPX
     inits.push_back(hpx::async(FNAME(dgswem_init_fort),
 			       &sizes[i],
 			       &dgs[i],
 			       &globals[i],
 			       &nodalattrs[i],
-			       &n_timesteps,
-			       &n_domains,
 			       &ids[i],
+			       &n_timesteps,
 			       &n_rksteps
 			       ));
 #else
@@ -78,9 +78,8 @@ int hpx_main(
 			    &dgs[i],
 			    &globals[i],
 			    &nodalattrs[i],
-			    &n_timesteps,
-			    &n_domains,
 			    &ids[i],
+			    &n_timesteps,
 			    &n_rksteps
 			    );
 #endif
@@ -106,7 +105,9 @@ int hpx_main(
 
     neighbors.push_back(neighbors_here);
 
-  }
+    std::cout << "Done initializing " << i << std::endl;
+    std::cout << "n_domains = " << n_domains << std::endl;
+  } // End loop over domains
 
 #ifdef HPX
   wait_all(inits);

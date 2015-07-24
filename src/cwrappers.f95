@@ -1,5 +1,5 @@
 #ifdef HPX
-subroutine dgswem_init_fort(sizes_c_ptr,dg_c_ptr,global_c_ptr,nodalattr_c_ptr,n_timesteps,n_domains,id,n_rksteps)
+subroutine dgswem_init_fort(sizes_c_ptr,dg_c_ptr,global_c_ptr,nodalattr_c_ptr,id,n_timesteps,n_rksteps)
   use, intrinsic :: iso_c_binding
   use sizes
   use dg
@@ -32,6 +32,9 @@ subroutine dgswem_init_fort(sizes_c_ptr,dg_c_ptr,global_c_ptr,nodalattr_c_ptr,n_
 
   ! Pass these variables to the c++ side
   print*, "FORTRAN: s%mnproc = ", s%mnproc
+  print*, "FORTRAN: dg_here%nrk = ", dg_here%nrk
+  print*, "FORTRAN: global_here%NT = ", global_here%NT
+
   n_domains = s%mnproc
   n_rksteps = dg_here%nrk
   n_timesteps = global_here%NT
