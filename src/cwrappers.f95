@@ -43,7 +43,7 @@ subroutine dgswem_init_fort(sizes_c_ptr,dg_c_ptr,global_c_ptr,nodalattr_c_ptr,n_
 
 end subroutine dgswem_init_fort
 
-subroutine dg_timestep_fort(sizes_c_ptr,dg_c_ptr,global_c_ptr,nodalattr_c_ptr,timestep,rkstep)
+subroutine dg_hydro_timestep_fort(sizes_c_ptr,dg_c_ptr,global_c_ptr,nodalattr_c_ptr,timestep,rkstep)
   use, intrinsic :: iso_c_binding
   use sizes
   use dg
@@ -68,9 +68,9 @@ subroutine dg_timestep_fort(sizes_c_ptr,dg_c_ptr,global_c_ptr,nodalattr_c_ptr,ti
   call C_F_POINTER(global_c_ptr,global_here)
   call C_F_POINTER(nodalattr_c_ptr,nodalattr_here)
 
-  call dg_timestep(s,dg_here,global_here,nodalattr_here,timestep,rkstep)
+  call dg_hydro_timestep(s,dg_here,global_here,nodalattr_here,timestep,rkstep)
 
-end subroutine dg_timestep_fort
+end subroutine dg_hydro_timestep_fort
 
 subroutine get_neighbors_fort(sizes_c_ptr,dg_c_ptr,global_c_ptr,neighbors,num_neighbors)
   use, intrinsic :: iso_c_binding

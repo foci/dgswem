@@ -10,7 +10,7 @@ extern"C" {
 			       int* n_domains,
 			       int* id,
 			       int* n_rksteps);
-  void FNAME(dg_timestep_fort)(void** sizes,
+  void FNAME(dg_hydro_timestep_fort)(void** sizes,
 			       void** dg,
 			       void** global,
 			       void** nodalattr,
