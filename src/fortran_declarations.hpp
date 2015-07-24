@@ -16,6 +16,12 @@ extern"C" {
 			       void** nodalattr,
 			       int* timestep,
 			       int* rkstep);	
+  void FNAME(dg_timestep_advance_fort)(void** sizes,
+			       void** dg,
+			       void** global,
+			       void** nodalattr,
+			       int* timestep,
+			       int* rkstep);	
   void FNAME(get_neighbors_fort)(void** sizes,
 				 void** dg,
 				 void** global,
