@@ -30,4 +30,6 @@ extern"C" {
 				 int* volume,
 				 double* recvbuf);
   void FNAME(hpx_read_n_domains)(int* n_domains);
+  void FNAME(hpx_swap_elems_fort)(void** dg_domain,
+                                  void** dg_neighbor);  
 }

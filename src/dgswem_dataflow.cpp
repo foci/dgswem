@@ -1,7 +1,9 @@
 #include <iostream>
 #include "fname.h"
 #include <vector>
+#include <map>
 
+#ifdef HPX
 #include <hpx/hpx.hpp>
 #include <hpx/hpx_start.hpp>
 #include <hpx/hpx_init.hpp>
@@ -10,11 +12,11 @@
 #include <hpx/include/async.hpp>
 #include <hpx/include/util.hpp>
 #include <hpx/include/parallel_for_each.hpp>
+#endif
 
 #include "fortran_declarations.hpp"
 
-typedef std::map<int, double[MAX_BUFFER_SIZE]>  sendbuffers;
-typedef std::map<int, double[MAX_BUFFER_SIZE]>  recvbuffers;
+typedef std::map<int, double[MAX_BUFFER_SIZE]>  buffers;
 
 struct dgswem_domain
 {
@@ -60,8 +62,23 @@ struct dgswem_domain
     }
   };
 
-  sendbuffers update(int timestep, int rkstep, recvbuffers)
+  // update returns outgoing buffers map, indexed with domain id
+  buffers update(int timestep, int rkstep, buffers recvbuffers)
   {
+
+    // Insert buffers from recvbuffers
+    // Loop over neighbors
+    for (int neighbor=0; neighbor<numneighbors; neighbor++) {	
+      int neighbor_here = neighbors[neighbor];
+      int volume;
+
+      FNAME(hpx_put_elems_fort)(&dg,
+				&neighbor_here,
+				&volume,
+				recvbuffers[neighbor_here]);
+    };
+
+    // Actual update
     FNAME(dg_timestep_fort)(&size,
 			    &dg,
 			    &global,
@@ -69,22 +86,21 @@ struct dgswem_domain
 			    &timestep,
 			    &rkstep
 			    );
-    sendbuffers sendbuffers_here; 
+    buffers sendbuffers_here; 
     
     //Loop over neighbors
     for (int neighbor=0; neighbor<numneighbors; neighbor++) {	
       int neighbor_here = neighbors[neighbor];
       int volume;
       double buffer[MAX_BUFFER_SIZE];
-      
-      // Get outgoing boundarys from the neighbors
-      FNAME(hpx_get_elems_fort)(&dgs[neighbor_here],
-				&domain,
+
+      FNAME(hpx_get_elems_fort)(&dg,
+				&neighbor_here,
 				&volume,
 				buffer);
-      sendbuffers.insert(neighbor_here,buffer);      
+            
+      sendbuffers_here.insert(neighbor_here,buffer);      
     };
-
 
   }
   
@@ -121,10 +137,11 @@ int hpx_main(
     domains.push_back(domain);
   }
 
+  /*
   // Print out some information about the domains and their neighbors
   std::cout << "*** Grid Information ***" << std::endl;
-  std::cout << "ids.size() = " << ids.size() << std::endl;
-  std::cout << "numneighbors.size() = " << numneighbors.size() << std::endl;
+  std::cout << "domains.size() = " << domains.size() << std::endl;
+  //std::cout << "numneighbors.size() = " << numneighbors.size() << std::endl;
   for (int domain=0; domain<numneighbors.size(); domain++) {
     std::cout << "numneighbors[" << domain << "] = " << numneighbors[domain] << std::endl;
     std::cout << "neighbors: ";
@@ -134,8 +151,8 @@ int hpx_main(
     }
     std::cout << std::endl;
   }
-
   std::cout << "*** End Grid Information ***" << std::endl;
+  */
 
   std::cout << "c++: Starting timestep loop: n_timesteps = " << n_timesteps << " n_rksteps = " << n_rksteps << std::endl;
   
@@ -181,21 +198,11 @@ int hpx_main(
 	  int volume;
 	  double buffer[MAX_BUFFER_SIZE];
 	  
-	  // Get outgoing boundarys from the neighbors
-	  FNAME(hpx_get_elems_fort)(&dgs[neighbor_here],
-				    &domain,
-				    &volume,
-				    buffer);
 	  
 	  // Put those arrays inside current domain
-	  FNAME(hpx_put_elems_fort)(&dgs[domain],
-				    &neighbor_here,
-				    &volume,
-				    buffer);	
 	  
-	  
-	  
-	}// end loop over neighbors
+	  	
+}// end loop over neighbors
 	
       }// end loop over domains
       
@@ -207,9 +214,12 @@ int hpx_main(
   } // End timestep loop
   
   */
-  
+#ifdef HPX  
   return hpx::finalize();
-  
+#else
+  return 0;
+#endif
+
 } // End hpx_main
 
 
@@ -220,7 +230,10 @@ int main(
 {
   // Initialize and run HPX
   
+#ifdef HPX
   hpx::init(argc,argv);
-
+#else
+  hpx_main(argc,argv);
+#endif
   return 0;
 }
