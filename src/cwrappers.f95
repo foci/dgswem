@@ -91,6 +91,8 @@ SUBROUTINE DG_TIMESTEP_ADVANCE_fort(sizes_c_ptr,dg_c_ptr,global_c_ptr,nodalattr_
   type (dg_type), pointer :: dg_here
   type (global_type), pointer :: global_here
   type (nodalattr_type), pointer :: nodalattr_here
+  integer :: it
+  integer :: irk
 
   call C_F_POINTER(sizes_c_ptr,s)
   call C_F_POINTER(dg_c_ptr,dg_here)
