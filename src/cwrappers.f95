@@ -75,7 +75,7 @@ subroutine dg_hydro_timestep_fort(sizes_c_ptr,dg_c_ptr,global_c_ptr,nodalattr_c_
 
 end subroutine dg_hydro_timestep_fort
 
-SUBROUTINE DG_TIMESTEP_ADVANCE_fort(sizes_c_ptr,dg_c_ptr,global_c_ptr,nodalattr_c_ptr,timestep,rkstep)
+SUBROUTINE DG_TIMESTEP_ADVANCE_fort(sizes_c_ptr,dg_c_ptr,global_c_ptr,nodalattr_c_ptr,timestep)
   use, intrinsic :: iso_c_binding
   use sizes
   use dg
@@ -88,21 +88,21 @@ SUBROUTINE DG_TIMESTEP_ADVANCE_fort(sizes_c_ptr,dg_c_ptr,global_c_ptr,nodalattr_
   type (C_PTR) :: global_c_ptr
   type (C_PTR) :: nodalattr_c_ptr
   integer :: timestep
-  integer :: rkstep
 
   type (sizes_type), pointer :: s
   type (dg_type), pointer :: dg_here
   type (global_type), pointer :: global_here
   type (nodalattr_type), pointer :: nodalattr_here
   integer :: it
-  integer :: irk
+
+  it = timestep
 
   call C_F_POINTER(sizes_c_ptr,s)
   call C_F_POINTER(dg_c_ptr,dg_here)
   call C_F_POINTER(global_c_ptr,global_here)
   call C_F_POINTER(nodalattr_c_ptr,nodalattr_here)
 
-  call DG_TIMESTEP_ADVANCE(s,dg_here,global_here,nodalattr_here,IT,IRK)
+  call DG_TIMESTEP_ADVANCE(s,dg_here,global_here,nodalattr_here,IT)
 
 end SUBROUTINE DG_TIMESTEP_ADVANCE_fort
 

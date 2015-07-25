@@ -1,4 +1,4 @@
-      SUBROUTINE DG_TIMESTEP_ADVANCE(s,dg_here,global_here,nodalattr_here,IT,IRK)
+      SUBROUTINE DG_TIMESTEP_ADVANCE(s,dg_here,global_here,nodalattr_here,IT)
       
 !.....Use appropriate modules
       USE SIZES
@@ -11,7 +11,6 @@
       type (global_type) :: global_here
       type (nodalattr_type) :: nodalattr_here
 
-      integer :: IRK ! defining this locally
       INTEGER IT,K,J,KK,I,MM 
       REAL(SZ) s_dg,alph,eta,seta
       Real(sz) sigma      

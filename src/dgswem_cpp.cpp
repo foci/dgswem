@@ -208,6 +208,15 @@ int hpx_main(
       
     } // end rkstep loop
     
+    for (int domain=0; domain<ids.size(); domain++) {
+      FNAME(dg_timestep_advance_fort)(&sizes[domain],
+				      &dgs[domain],
+				      &globals[domain],
+				      &nodalattrs[domain],
+				      &timestep
+				      );
+    }
+
 //     if ( timestep > 2) {
 //      return 0;  // stop after one timestep for debugging
 //     }
