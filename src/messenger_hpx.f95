@@ -34,7 +34,7 @@
        IF (neighbor_found) THEN
        
          PRINT*, " PROC: ", dg_here%IDPROC, " SENDING ", dg_here%NELEMSEND(index) ," ELEMENTS TO: ", dg_here%IPROC_S(index)       
-         PRINT*, (dg_here%ISENDLOC(el,index), el = 1,dg_here%NELEMSEND(index))
+         PRINT 180, (dg_here%ISENDLOC(el,index), el = 1,dg_here%NELEMSEND(index))
          PRINT*, "" 
       
          ncount = 0
@@ -42,7 +42,9 @@
             DO dof=1,dg_here%DOFH
               ncount = ncount+1
               sendbuf(ncount)=dg_here%ZE(dof,dg_here%ISENDLOC(el,index),dg_here%IRK+1)
-!               PRINT*, dg_here%ISENDLOC(el,index),sendbuf(ncount)
+!              IF (abs(sendbuf(ncount) ) > 1d-14) THEN              
+!               PRINT 181, dg_here%ISENDLOC(el,index),sendbuf(ncount)
+!              ENDIF
             ENDDO
          ENDDO
        
@@ -50,7 +52,9 @@
            DO dof=1,dg_here%DOFH
              ncount = ncount+1
              sendbuf(ncount)=dg_here%QX(dof,dg_here%ISENDLOC(el,index),dg_here%IRK+1)
-             PRINT*, dg_here%ISENDLOC(el,index),sendbuf(ncount)
+             IF (abs(sendbuf(ncount) ) > 1d-14) THEN
+               PRINT 181, dg_here%ISENDLOC(el,index),sendbuf(ncount)
+             ENDIF
            ENDDO
          ENDDO
           
@@ -58,9 +62,13 @@
            DO dof=1,dg_here%DOFH
              ncount = ncount+1
              sendbuf(ncount)=dg_here%QY(dof,dg_here%ISENDLOC(el,index),dg_here%IRK+1)
-!              PRINT*, dg_here%ISENDLOC(el,index),sendbuf(ncount)
+!              IF (abs(sendbuf(ncount) ) > 1d-14) THEN                      
+!                PRINT 181, dg_here%ISENDLOC(el,index),sendbuf(ncount)
+!              ENDIF
            ENDDO
          ENDDO
+         
+         PRINT*, "----------------------------------------------------------------------------------"                  
        
        ELSE 
        
@@ -69,7 +77,8 @@
     
        ENDIF
        
-       
+ 180  FORMAT(8X,9I8)    
+ 181  FORMAT(I5,2X,ES24.17)
        
        end subroutine HPX_GET_ELEMS
        
@@ -110,7 +119,7 @@
        IF (neighbor_found) THEN  
        
          PRINT*, " PROC: ", dg_here%IDPROC, " RECEIVING ",dg_here%NELEMRECV(index), " ELEMENTS FROM: ", dg_here%IPROC_R(index)
-         PRINT*, (dg_here%IRECVLOC(el,index), el = 1,dg_here%NELEMRECV(index))
+         PRINT 180, (dg_here%IRECVLOC(el,index), el = 1,dg_here%NELEMRECV(index))
          PRINT*, ""
          
          ncount = 0
@@ -118,7 +127,9 @@
            DO dof=1,dg_here%DOFH
              ncount = ncount+1
              dg_here%ZE(dof,dg_here%IRECVLOC(el,index),dg_here%IRK+1) = recvbuf(ncount)
-!              PRINT*, dg_here%IRECVLOC(el,index),recvbuf(ncount)             
+!              IF (abs(recvbuf(ncount) ) > 1d-14) THEN             
+!                PRINT 181, dg_here%IRECVLOC(el,index),recvbuf(ncount) 
+!              ENDIF
            ENDDO
          ENDDO
        
@@ -126,7 +137,9 @@
            DO dof=1,dg_here%DOFH
              ncount = ncount+1
              dg_here%QX(dof,dg_here%IRECVLOC(el,index),dg_here%IRK+1) = recvbuf(ncount)
-             PRINT*, dg_here%IRECVLOC(el,index),recvbuf(ncount)
+             IF (abs(recvbuf(ncount) ) > 1d-14) THEN
+               PRINT 181, dg_here%IRECVLOC(el,index),recvbuf(ncount)
+             ENDIF
            ENDDO
          ENDDO
        
@@ -134,9 +147,13 @@
            DO dof=1,dg_here%DOFH
              ncount = ncount+1
              dg_here%QY(dof,dg_here%IRECVLOC(el,index),dg_here%IRK+1) = recvbuf(ncount)
-!              PRINT*, dg_here%IRECVLOC(el,index),recvbuf(ncount)
+!              IF (abs(recvbuf(ncount) ) > 1d-14) THEN                
+!                PRINT 181, dg_here%IRECVLOC(el,index),recvbuf(ncount)
+!              ENDIF
            ENDDO
          ENDDO    
+         
+         PRINT*, "----------------------------------------------------------------------------------"         
        
        ELSE
        
@@ -146,7 +163,8 @@
        ENDIF
          
 
-     
+ 180  FORMAT(8X,9I8)     
+ 181  FORMAT(I5,2X,ES24.17) 
        
        end subroutine HPX_PUT_ELEMS
        
