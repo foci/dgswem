@@ -1,5 +1,5 @@
 #ifdef HPX
-       subroutine HPX_GET_ELEMS(dg_here,neighbor,volume,sendbuf)     
+       subroutine HPX_GET_ELEMS(dg_here,domain,volume,sendbuf)     
        
        use dg
        use sizes
@@ -12,7 +12,7 @@
        integer :: i,index
        integer :: el,dof
        integer :: ncount
-       integer :: neighbor
+       integer :: domain
        integer :: volume
        
 !       real(sz) :: sendbuf(volume)
@@ -23,7 +23,7 @@
        neighbor_found = .false.
        DO i=1,dg_here%NEIGHPROC_S
 
-         IF (dg_here%IPROC_S(i) == neighbor) THEN
+         IF (dg_here%IPROC_S(i) == domain) THEN
            index = i
            neighbor_found = .true.
            EXIT
@@ -33,9 +33,9 @@
        
        IF (neighbor_found) THEN
        
-         PRINT*, " PROC: ", dg_here%IDPROC, " SENDING ", dg_here%NELEMSEND(index) ," ELEMENTS TO: ", dg_here%IPROC_S(index)       
-         PRINT 180, (dg_here%ISENDLOC(el,index), el = 1,dg_here%NELEMSEND(index))
-         PRINT*, "" 
+!          PRINT*, " PROC: ", dg_here%IDPROC, " SENDING ", dg_here%NELEMSEND(index) ," ELEMENTS TO: ", dg_here%IPROC_S(index)       
+!          PRINT 180, (dg_here%ISENDLOC(el,index), el = 1,dg_here%NELEMSEND(index))
+!          PRINT*, "" 
       
          ncount = 0
          DO el=1,dg_here%NELEMSEND(index)
@@ -52,9 +52,9 @@
            DO dof=1,dg_here%DOFH
              ncount = ncount+1
              sendbuf(ncount)=dg_here%QX(dof,dg_here%ISENDLOC(el,index),dg_here%IRK+1)
-             IF (abs(sendbuf(ncount) ) > 1d-14) THEN
-               PRINT 181, dg_here%ISENDLOC(el,index),sendbuf(ncount)
-             ENDIF
+!              IF (abs(sendbuf(ncount) ) > 1d-14) THEN
+!                PRINT 181, dg_here%ISENDLOC(el,index),sendbuf(ncount)
+!              ENDIF
            ENDDO
          ENDDO
           
@@ -68,12 +68,13 @@
            ENDDO
          ENDDO
          
-         PRINT*, "----------------------------------------------------------------------------------"                  
+!          PRINT*, "----------------------------------------------------------------------------------"                  
        
        ELSE 
        
-         PRINT*, "FORTRAN ERROR: neighbor not found"
-         STOP             
+!          PRINT*, "FORTRAN ERROR: send neighbor not found"   
+!          PRINT*, "SEND PROC: ", dg_here%IDPROC, " DOMAIN: ", domain                 
+!          STOP             
     
        ENDIF
        
@@ -118,9 +119,9 @@
              
        IF (neighbor_found) THEN  
        
-         PRINT*, " PROC: ", dg_here%IDPROC, " RECEIVING ",dg_here%NELEMRECV(index), " ELEMENTS FROM: ", dg_here%IPROC_R(index)
-         PRINT 180, (dg_here%IRECVLOC(el,index), el = 1,dg_here%NELEMRECV(index))
-         PRINT*, ""
+!          PRINT*, " PROC: ", dg_here%IDPROC, " RECEIVING ",dg_here%NELEMRECV(index), " ELEMENTS FROM: ", dg_here%IPROC_R(index)
+!          PRINT 180, (dg_here%IRECVLOC(el,index), el = 1,dg_here%NELEMRECV(index))
+!          PRINT*, ""
          
          ncount = 0
          DO el=1,dg_here%NELEMRECV(index)
@@ -137,9 +138,9 @@
            DO dof=1,dg_here%DOFH
              ncount = ncount+1
              dg_here%QX(dof,dg_here%IRECVLOC(el,index),dg_here%IRK+1) = recvbuf(ncount)
-             IF (abs(recvbuf(ncount) ) > 1d-14) THEN
-               PRINT 181, dg_here%IRECVLOC(el,index),recvbuf(ncount)
-             ENDIF
+!              IF (abs(recvbuf(ncount) ) > 1d-14) THEN
+!                PRINT 181, dg_here%IRECVLOC(el,index),recvbuf(ncount)
+!              ENDIF
            ENDDO
          ENDDO
        
@@ -153,12 +154,13 @@
            ENDDO
          ENDDO    
          
-         PRINT*, "----------------------------------------------------------------------------------"         
+!          PRINT*, "----------------------------------------------------------------------------------"         
        
        ELSE
        
-         PRINT*, "FORTRAN ERROR: neighbor not found"
-         STOP       
+!          PRINT*, "FORTRAN ERROR: recieve neighbor not found"
+!          PRINT*, "RECV PROC: ", dg_here%IDPROC, " NEIGHBOR: ", neighbor 
+!          STOP       
          
        ENDIF
          

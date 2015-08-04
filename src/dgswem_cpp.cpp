@@ -138,10 +138,10 @@ int hpx_main(
 //    std::cout << "starting timestep loop, timestep = " << timestep << std::endl;
 
     for (int rkstep=1; rkstep<=n_rksteps; rkstep++) {
-     std::cout << "#################################################################" << std::endl;
+/*     std::cout << "#################################################################" << std::endl;
      std::cout << " timestep loop, timestep = " << timestep << std::endl;     
      std::cout << " rk loop, rkstep = " << rkstep << std::endl;
-     std::cout << "#################################################################" << std::endl;     
+     std::cout << "#################################################################" << std::endl;   */  
       
 #ifdef HPX
       std::vector<hpx::future<void> > updates;    
@@ -179,6 +179,10 @@ int hpx_main(
       for (int domain=0; domain<ids.size(); domain++) {
 	std::vector<int> neighbors_here = neighbors[domain];
 	
+        //std::cout << "#################################################################" << std::endl;
+        //std::cout << " domain loop, domain = " << domain << std::endl;     
+        //std::cout << "#################################################################" << std::endl;             
+        
 	//Loop over neighbors
 	for (int neighbor=0; neighbor<numneighbors[domain]; neighbor++) {	
 	  int neighbor_here = neighbors_here[neighbor];
@@ -206,6 +210,8 @@ int hpx_main(
 	
       }// end loop over domains
       
+      //return 0;
+      
     } // end rkstep loop
     
     for (int domain=0; domain<ids.size(); domain++) {
@@ -217,9 +223,9 @@ int hpx_main(
 				      );
     }
 
-    if ( timestep > 2) {
-     return 0;  // stop after one timestep for debugging
-    }
+//     if ( timestep > 2) {
+//      return 0;  // stop after one timestep for debugging
+//     }
 
 
   } // End timestep loop
