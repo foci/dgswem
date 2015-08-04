@@ -108,7 +108,7 @@
 
 !.....Open statement for unit 16 output file
       
-      OPEN(s%fort16unit,FILE=s%DIRNAME//'/'//'fort.16')
+      OPEN(s%fort16unit,FILE=s%DIRNAME//'/'//'fort.16',STATUS='REPLACE')
 
 !.....General purpose format statements
 
