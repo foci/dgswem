@@ -91,7 +91,7 @@ ADC_SRC    =  dgswem.f95 read_input.f95 cstart.f95 hstart.f95 radiation_edge_hyd
 	quad_pts_edge.f95 radiation_edge_hydro.f95 read_input.f95 rhs_dg_hydro.f95 \
 	numerical_flux.f95 tidal_potential.f95 write_results.f95 \
 	slopelimiter.f95 prep_slopelim.f95 \
-	wetdry.f95 LDG_hydro.f95 met_forcing.f95 sta_basis.f95 make_dirname.f95 nodalattr_subs.f95 dgswem_init.f95 cwrappers.f95 make_dirname.f95 read_fort_dg.f95 message_table_hpx.f95 init_fileunits.f95 get_neighbors.f95 messenger_hpx.f95 hpx_read_n_domains.f95
+	wetdry.f95 LDG_hydro.f95 met_forcing.f95 sta_basis.f95 make_dirname.f95 nodalattr_subs.f95 dgswem_init.f95 cwrappers.f95 make_dirname.f95 read_fort_dg.f95 message_table_hpx.f95 init_fileunits.f95 get_neighbors.f95 messenger_hpx.f95 hpx_read_n_domains.f95 lgd_yield_subdomain_coord.f95
 #Casey 121126: Added modal2nodal.f95 and write_output.f95 to the previous line.
 
 METIS1_OBJ:= $(patsubst %.f95, $(O_DIR)%.o, $(METIS1_SRC) )

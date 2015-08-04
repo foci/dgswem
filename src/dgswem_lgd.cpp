@@ -126,29 +126,41 @@ public:
         SimpleInitializer<FortranCell>(LibGeoDecomp::Coord<2>(), numSteps),
         numDomains(numDomains)
     {
-        std::fill(&base_path_buf[0], &base_path_buf[1024], 0);
-        std::copy(base_path.begin(), base_path.end(), base_path_buf);
+        //std::fill(&base_path_buf[0], &base_path_buf[1024], 0);
+        //std::copy(base_path.begin(), base_path.end(), base_path_buf);
 
         // Initialize domain decomposition
         std::vector<std::vector<int> > neighbors;
 
         for(int i = 0; i < numDomains ; i++) {
-	/*
-            void *domain = NULL;
-            FNAME(init_fort)(&i, &domain, base_path_buf);
 
-            FNAME(lgd_yield_subdomain_coord)(&domain, &coord[0]);
+	    // Initialize the domains temporarily to get grid information
+
+	    void *size = NULL;
+	    void *dg = NULL;
+	    void *global = NULL;
+	    void *nodalattr = NULL;
+
+	    int n_domains;
+	    int n_rksteps;
+	    
+	    LibGeoDecomp::FloatCoord<2> coord;
+
+	    FNAME(dgswem_init_fort)(&size,
+				    &dg,
+				    &global,
+				    &nodalattr,
+				    &n_domains,
+				    &i,
+				    &n_rksteps);
+
+            FNAME(lgd_yield_subdomain_coord)(&global, &coord[0]);
             domainCoords << coord;
+	    
+	    neighbors.push_back(neighboringDomainIDs(&size, &dg, &global));
 
-            neighbors.push_back(neighboringDomainIDs(domain));
-
-            FNAME(term_fort)(&domain);
-	*/
-	    neighbors.push_back(0);
-            LibGeoDecomp::FloatCoord<2> coord;
-	    coord[0] = 0.0;
-	    domainCoords << coord;
-
+	    //TODO: destroy these domains (need to write term_fort)
+	    
         }
 
         mesher = LibGeoDecomp::UnstructuredGridMesher<2>(domainCoords, neighbors);
@@ -165,11 +177,24 @@ public:
 
         for(int id = 0; id < numDomains ; id++) {
             // Create vectors of domain pointers and ids
-            void *domain = NULL;
-            FNAME(init_fort)(&id, &domain, base_path_buf);
+	    void *size = NULL;
+	    void *dg = NULL;
+	    void *global = NULL;
+	    void *nodalattr = NULL;
 
+	    int n_domains;
+	    int n_rksteps;
+
+	    FNAME(dgswem_init_fort)(&size,
+				    &dg,
+				    &global,
+				    &nodalattr,
+				    &n_domains,
+				    &id,
+				    &n_rksteps);
+	    
             LibGeoDecomp::FloatCoord<2> coord;
-            FNAME(lgd_yield_subdomain_coord)(&domain, &coord[0]);
+            FNAME(lgd_yield_subdomain_coord)(&global, &coord[0]);
             LibGeoDecomp::Coord<2> logicalCoord = mesher.positionToLogicalCoord(coord);
 
             if (box.inBounds(logicalCoord)) {
@@ -177,10 +202,11 @@ public:
                     <<  " to grid cell " << logicalCoord
                     << " (is at position " << coord << ")\n");
                 FortranCell cell = grid->get(logicalCoord);
-                cell.insert(id, DomainReference(id, domain));
+                cell.insert(id, DomainReference(id, size, global, dg, nodalattr));
                 grid->set(logicalCoord, cell);
             } else {
-                FNAME(term_fort)(&domain);
+		//TO DO: add term_fort call
+                //FNAME(term_fort)(&domain);
             }
         }
     }
