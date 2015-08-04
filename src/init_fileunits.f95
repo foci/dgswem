@@ -59,4 +59,8 @@ subroutine init_fileunits(s)
 
   s%dg18unit = s%myproc*1000+18
 
+  s%dg63unit = s%myproc*1000+631
+  s%dg64unit = s%myproc*1000+641
+  s%dg65unit = s%myproc*1000+651
+
 end subroutine init_fileunits

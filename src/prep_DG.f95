@@ -60,8 +60,6 @@
 
       integer :: myproc_here
 
-      integer :: dg63unit, dg64unit, dg65unit
-
       Allocate ( XBCbt(S%MNE),YBCbt(S%MNE),radial(S%MNE),XB(S%MNE),YB(S%MNE),l2e(S%MNE) )
       Allocate ( iota_check(S%MNE),iota_check2(S%MNE),hbo(36,S%MNE,1),ydubo(36,s%mne) ) 
       Allocate ( YELEM(dg_here%ph),YED(dg_here%ph),hb1(36,s%mne,1,dg_here%ph), zeo(36,s%mne,1) )
@@ -1135,29 +1133,26 @@
 !.....Initialize the DG.63 output file
 
       IF (ABS(global_here%NOUTGE).EQ.1) THEN
-         dg63unit=631*100+s%myproc
-         OPEN(dg63unit,FILE=S%DIRNAME//'/'//'DG.63')
-         WRITE(dg63unit,3220) global_here%RUNDES, global_here%RUNID, global_here%AGRID
-         WRITE(dg63unit,3645) global_here%NDSETSE, dg_here%dofh, global_here%DTDP*global_here%NSPOOLGE, global_here%NSPOOLGE, 1
+         OPEN(s%dg63unit,FILE=S%DIRNAME//'/'//'DG.63',STATUS='REPLACE')
+         WRITE(s%dg63unit,3220) global_here%RUNDES, global_here%RUNID, global_here%AGRID
+         WRITE(s%dg63unit,3645) global_here%NDSETSE, dg_here%dofh, global_here%DTDP*global_here%NSPOOLGE, global_here%NSPOOLGE, 1
       ENDIF
 
 !.....Initialize the DG.64 output file
 
       IF (ABS(global_here%NOUTGV).EQ.1) THEN
-         dg64unit=641*100+s%myproc
-         OPEN(dg64unit,FILE=S%DIRNAME//'/'//'DG.64')
-         WRITE(dg64unit,3220) global_here%RUNDES, global_here%RUNID, global_here%AGRID
-         WRITE(dg64unit,3645) global_here%NDSETSV, dg_here%dofh, global_here%DTDP*global_here%NSPOOLGV, global_here%NSPOOLGV, 2
+         OPEN(s%dg64unit,FILE=S%DIRNAME//'/'//'DG.64',STATUS='REPLACE')
+         WRITE(s%dg64unit,3220) global_here%RUNDES, global_here%RUNID, global_here%AGRID
+         WRITE(s%dg64unit,3645) global_here%NDSETSV, dg_here%dofh, global_here%DTDP*global_here%NSPOOLGV, global_here%NSPOOLGV, 2
       ENDIF
 
 !.....Initialize the DG.65 output file (contains elemental statuses such
 !.....as the wet/dry status.
 
       IF ((ABS(global_here%NOUTGE).EQ.1).AND.(global_here%NOLIFA.GE.2)) THEN
-         dg65unit=651*100+s%myproc
-         OPEN(dg65unit,FILE=S%DIRNAME//'/'//'DG.65')
-         WRITE(dg65unit,3220) global_here%RUNDES, global_here%RUNID, global_here%AGRID
-         WRITE(dg65unit,3645) global_here%NDSETSE, dg_here%dofh, global_here%DTDP*global_here%NSPOOLGE, global_here%NSPOOLGE, 1
+         OPEN(s%dg65unit,FILE=S%DIRNAME//'/'//'DG.65',STATUS='REPLACE')
+         WRITE(s%dg65unit,3220) global_here%RUNDES, global_here%RUNID, global_here%AGRID
+         WRITE(s%dg65unit,3645) global_here%NDSETSE, dg_here%dofh, global_here%DTDP*global_here%NSPOOLGE, global_here%NSPOOLGE, 1
       ENDIF
  3220 FORMAT(1X,A32,2X,A24,2X,A24)
  3645 FORMAT(1X,I10,1X,I10,1X,E15.7,1X,I5,1X,I5)
