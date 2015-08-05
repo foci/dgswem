@@ -21,6 +21,10 @@ subroutine dgswem_init_fort(sizes_c_ptr,dg_c_ptr,global_c_ptr,nodalattr_c_ptr,id
   type (global_type), pointer :: global_here
   type (nodalattr_type), pointer :: nodalattr_here
 
+#ifdef VERBOSE
+  print*, "FORTRAN: Entering dgswem_init_fort"
+#endif
+
   allocate(s)
   allocate(dg_here)
   allocate(global_here)
@@ -31,9 +35,11 @@ subroutine dgswem_init_fort(sizes_c_ptr,dg_c_ptr,global_c_ptr,nodalattr_c_ptr,id
   call dgswem_init(s,dg_here,global_here,nodalattr_here)
 
   ! Pass these variables to the c++ side
+#ifdef VERBOSE
   print*, "FORTRAN: s%mnproc = ", s%mnproc
   print*, "FORTRAN: dg_here%nrk = ", dg_here%nrk
   print*, "FORTRAN: global_here%NT = ", global_here%NT
+#endif
 
   n_domains = s%mnproc
   n_rksteps = dg_here%nrk
@@ -66,6 +72,10 @@ subroutine dg_hydro_timestep_fort(sizes_c_ptr,dg_c_ptr,global_c_ptr,nodalattr_c_
   type (global_type), pointer :: global_here
   type (nodalattr_type), pointer :: nodalattr_here
 
+#ifdef VERBOSE
+  print*, "FORTRAN: Entering dg_hydro_timestep_fort"
+#endif
+
   call C_F_POINTER(sizes_c_ptr,s)
   call C_F_POINTER(dg_c_ptr,dg_here)
   call C_F_POINTER(global_c_ptr,global_here)
@@ -94,6 +104,10 @@ SUBROUTINE DG_TIMESTEP_ADVANCE_fort(sizes_c_ptr,dg_c_ptr,global_c_ptr,nodalattr_
   type (global_type), pointer :: global_here
   type (nodalattr_type), pointer :: nodalattr_here
   integer :: it
+
+#ifdef VERBOSE
+  print*, "FORTRAN: Entering dgswem_timestep_advance_fort"
+#endif
 
   it = timestep
 
@@ -125,6 +139,10 @@ subroutine get_neighbors_fort(sizes_c_ptr,dg_c_ptr,global_c_ptr,neighbors,num_ne
   type (dg_type), pointer :: dg_here
   type (global_type), pointer :: global_here
 
+#ifdef VERBOSE
+  print*, "FORTRAN: Entering get_neighbors_fort"
+#endif
+
   call C_F_POINTER(sizes_c_ptr,s)
   call C_F_POINTER(dg_c_ptr,dg_here)
   call C_F_POINTER(global_c_ptr,global_here)
@@ -149,6 +167,10 @@ subroutine hpx_get_elems_fort(dg_c_ptr,neighbor,volume,sendbuf)
 
   type (dg_type), pointer :: dg_here
 
+#ifdef VERBOSE
+  print*, "FORTRAN: Entering hpx_get_elems_fort"
+#endif
+
   call C_F_POINTER(dg_c_ptr,dg_here)
 
   call hpx_get_elems(dg_here,neighbor,volume,sendbuf)
@@ -169,6 +191,10 @@ subroutine hpx_put_elems_fort(dg_c_ptr,neighbor,volume,recvbuf)
   integer :: i
 
   type (dg_type), pointer :: dg_here
+
+#ifdef VERBOSE
+  print*, "FORTRAN: Entering hpx_put_elems_fort"
+#endif
 
   call C_F_POINTER(dg_c_ptr,dg_here)
 
@@ -194,6 +220,10 @@ subroutine hpx_swap_elems_fort(dg_domain_c_ptr,dg_neighbor_c_ptr)
   type (dg_type), pointer :: dg_here_domain
   type (dg_type), pointer :: dg_here_neighbor
 
+#ifdef VERBOSE
+  print*, "FORTRAN: Entering hpx_swap_elems"
+#endif
+
   call C_F_POINTER(dg_domain_c_ptr,dg_here_domain)
   call C_F_POINTER(dg_neighbor_c_ptr,dg_here_neighbor)
 
@@ -218,6 +248,10 @@ subroutine term_fort(sizes_c_ptr,dg_c_ptr,global_c_ptr,nodalattr_c_ptr)
   type (dg_type), pointer :: dg_here
   type (global_type), pointer :: global_here
   type (nodalattr_type), pointer :: nodalattr_here
+
+#ifdef VERBOSE
+  print*, "FORTRAN: Entering term_fort"
+#endif
 
   call C_F_POINTER(sizes_c_ptr,s)
   call C_F_POINTER(dg_c_ptr,dg_here)

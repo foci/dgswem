@@ -10,7 +10,6 @@
 
 std::vector<int> neighboringDomainIDs(void *size, void *dg, void *global)
 {
-
     int numneighbors_fort;
     int neighbors_fort[MAX_DOMAIN_NEIGHBORS];
     if (!size) {
@@ -25,6 +24,11 @@ std::vector<int> neighboringDomainIDs(void *size, void *dg, void *global)
     std::vector<int> ret(numneighbors_fort);
     std::copy(neighbors_fort, neighbors_fort + numneighbors_fort, ret.begin());
 
+    std::cout << "ret: ";
+    for (int i=0; i<ret.size(); i++){
+	std::cout << ret[i] << ", ";
+    }
+    std::cout << std::endl;
     return ret;
 }
 
@@ -128,8 +132,9 @@ public:
         // Initialize domain decomposition
         std::vector<std::vector<int> > neighbors;
 
+	std::cout << "initializing domains temporarily... ";
         for(int i = 0; i < numDomains ; i++) {
-
+	    std::cout << i << "... ";
 	    // Initialize the domains temporarily to get grid information
 
 	    void *size = NULL;
@@ -150,14 +155,21 @@ public:
 				    &i,
 				    &n_rksteps);
 
+	    std::cout << "size = " << size << std::endl;
+
             FNAME(lgd_yield_subdomain_coord)(&global, &coord[0]);
             domainCoords << coord;
 	    
-	    neighbors.push_back(neighboringDomainIDs(&size, &dg, &global));
+	    std::cout << "size = " << size << std::endl;
+
+	    neighbors.push_back(neighboringDomainIDs(size, dg, global));
+
+	    std::cout << "size = " << size << std::endl;
 
 	    //destroy these domains
 	    FNAME(term_fort)(&size,&global,&dg,&nodalattr);
         }
+	std::cout << " done.";
 
         mesher = LibGeoDecomp::UnstructuredGridMesher<2>(domainCoords, neighbors);
         dimensions = mesher.logicalGridDimension();
@@ -201,7 +213,7 @@ public:
                 cell.insert(id, DomainReference(id, size, global, dg, nodalattr));
                 grid->set(logicalCoord, cell);
             } else {
-	    FNAME(term_fort)(&size,&global,&dg,&nodalattr);
+		FNAME(term_fort)(&size,&global,&dg,&nodalattr);
             }
         }
     }
@@ -216,7 +228,7 @@ private:
 int main(int argc, char* argv[])
 {
     // fixme: these should be read in via config files
-    int n_domains = 32;
+    int n_domains = 4;
     int n_timesteps = 100;
 
     LibGeoDecomp::SerialSimulator<FortranCell> sim(

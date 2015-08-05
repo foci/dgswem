@@ -10,7 +10,7 @@ CPP_OBJECT_FILE="dgswem_lgd.o"
 EXE_NAME="dgswem_lgd"
 CPPFLAGS="`pkg-config --cflags --libs libgeodecomp`"
 
-CMD="g++ -c ${CPP_SOURCE_FILE} $CPPFLAGS"
+CMD="g++ -c  ${CPP_SOURCE_FILE} $CPPFLAGS"
 echo $CMD
 $CMD 
 
