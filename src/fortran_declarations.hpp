@@ -40,4 +40,10 @@ extern"C" {
 				    void** dg_neighbor);
     void FNAME(lgd_yield_subdomain_coord)(void** global,
 					  double *coord);
+    void FNAME(term_fort)(void** sizes,
+			  void** dg,
+			  void** global,
+			  void** nodalattr);
+			  
+
 }

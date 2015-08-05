@@ -42,14 +42,10 @@ public:
 	    nodalattr(nodalattr)
         {}
       
-      /* TODO: write a destructor
-	 ~FortranPointerWrapper()
-	 {
-	 if (domain) {
-	 FNAME(term_fort)(&domain);
-	 }
-	 }
-      */
+	~FortranPointerWrapper()
+	{
+	    FNAME(term_fort)(&size,&global,&dg,&nodalattr);
+	}
       
       
 	void *size;
@@ -159,8 +155,8 @@ public:
 	    
 	    neighbors.push_back(neighboringDomainIDs(&size, &dg, &global));
 
-	    //TODO: destroy these domains (need to write term_fort)
-	    
+	    //destroy these domains
+	    FNAME(term_fort)(&size,&global,&dg,&nodalattr);
         }
 
         mesher = LibGeoDecomp::UnstructuredGridMesher<2>(domainCoords, neighbors);
@@ -205,8 +201,7 @@ public:
                 cell.insert(id, DomainReference(id, size, global, dg, nodalattr));
                 grid->set(logicalCoord, cell);
             } else {
-		//TO DO: add term_fort call
-                //FNAME(term_fort)(&domain);
+	    FNAME(term_fort)(&size,&global,&dg,&nodalattr);
             }
         }
     }
