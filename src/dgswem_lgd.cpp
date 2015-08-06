@@ -48,7 +48,9 @@ public:
       
 	~FortranPointerWrapper()
 	{
-	    FNAME(term_fort)(&size,&global,&dg,&nodalattr);
+	    if (size) {
+		FNAME(term_fort)(&size,&global,&dg,&nodalattr);
+	    }
 	}
       
       

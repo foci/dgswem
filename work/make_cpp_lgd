@@ -8,12 +8,12 @@ mv ./odir4/dgswem.oB ./odir4/dgswem.o
 CPP_SOURCE_FILE="../src/dgswem_lgd.cpp"
 CPP_OBJECT_FILE="dgswem_lgd.o"
 EXE_NAME="dgswem_lgd"
-CPPFLAGS="`pkg-config --cflags --libs libgeodecomp`"
+CPPFLAGS="-g3 -fno-inline -O0  `pkg-config --cflags --libs libgeodecomp`"
 
-CMD="g++ -c  ${CPP_SOURCE_FILE} $CPPFLAGS"
+CMD="g++ $CPPFLAGS -c  ${CPP_SOURCE_FILE}"
 echo $CMD
 $CMD 
 
-CMD="g++ -o ${EXE_NAME} ${CPP_OBJECT_FILE} $INCLUDES $CPPFLAGS -lgfortran"
+CMD="g++ $CPPFLAGS -o ${EXE_NAME} ${CPP_OBJECT_FILE} $INCLUDES -lgfortran"
 echo $CMD
 $CMD
