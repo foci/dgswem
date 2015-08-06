@@ -7,9 +7,9 @@ extern"C" {
 				 void** dg,
 				 void** global,
 				 void** nodalattr,
-				 int* n_domains,
-				 int* id,
-				 int* n_rksteps);
+				 int n_domains,
+				 int id,
+				 int n_rksteps);
     void FNAME(dg_hydro_timestep_fort)(void** size,
 				       void** dg,
 				       void** global,

@@ -12,9 +12,9 @@ subroutine dgswem_init_fort(sizes_c_ptr,dg_c_ptr,global_c_ptr,nodalattr_c_ptr,id
   type (C_PTR) :: global_c_ptr
   type (C_PTR) :: nodalattr_c_ptr
   integer :: n_timesteps
-  integer :: id
-  integer :: n_domains
-  integer :: n_rksteps
+  integer,intent(in) :: id
+!  integer,intent(out) :: n_domains
+  integer,intent(out) :: n_rksteps
 
   type (sizes_type), pointer :: s
   type (dg_type), pointer :: dg_here
@@ -23,6 +23,7 @@ subroutine dgswem_init_fort(sizes_c_ptr,dg_c_ptr,global_c_ptr,nodalattr_c_ptr,id
 
 #ifdef VERBOSE
   print*, "FORTRAN: Entering dgswem_init_fort"
+  print*, "FORTRAN: id =", id
 #endif
 
   allocate(s)
