@@ -16,7 +16,7 @@
 !     v10_sb5 - 10/05    - sb - wetting/drying algorithm is improved
 !     v10_sb5 - 10/05    - sb - Ethan's slope limiter is consolidated
 !     v21     - 11/11    - cem - major update/p_enrich/slope/rkc etc
-!     global_here%v22     -  6/12    - cem - major update/sediment/diffusion/fluxes
+!     v22     -  6/12    - cem - major update/sediment/diffusion/fluxes
 !     Moving to versioning control
 !     
 !***********************************************************************

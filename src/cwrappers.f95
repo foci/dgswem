@@ -76,6 +76,9 @@ subroutine dg_hydro_timestep_fort(sizes_c_ptr,dg_c_ptr,global_c_ptr,nodalattr_c_
 
 #ifdef VERBOSE
   print*, "FORTRAN: Entering dg_hydro_timestep_fort"
+  print*, "FORTRAN: myproc =", s%myproc
+  print*, "FORTRAN: timestep =", timestep
+  print*, "FORTRAN: rkstep =", rkstep
 #endif
 
   call C_F_POINTER(sizes_c_ptr,s)
@@ -261,7 +264,9 @@ subroutine term_fort(sizes_c_ptr,dg_c_ptr,global_c_ptr,nodalattr_c_ptr)
   call C_F_POINTER(nodalattr_c_ptr,nodalattr_here)
 
 #ifdef VERBOSE
-  print*, "FORTRAN: term_fort: about to deallocate"
+!  print*, "FORTRAN: term_fort: s%myproc =", s%myproc
+!  print*, "FORTRAN: term_fort: dg_here%mnes =", dg_here%mnes
+!  print*, "FORTRAN: term_fort: about to deallocate"
 #endif
 
 !  deallocate(s)

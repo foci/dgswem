@@ -34,14 +34,14 @@ int hpx_main(
   std::vector<hpx::future<void> > inits;
 #endif
 
-  int n_timesteps;
+  int n_timesteps = 100;
   int n_domains;
-  int n_rksteps;
+  int n_rksteps = 2;
   
 
   FNAME(hpx_read_n_domains)(&n_domains);
 
-
+  std::cout << "c++: n_domains = " << n_domains << std::endl;
 
   // Create vectors of fortran pointers and ids
   for (int i=0; i<n_domains; i++) {
@@ -79,6 +79,8 @@ int hpx_main(
 			    &ids[i]
 			    );
 #endif
+
+    std::cout << "sizes["<<i<<"] = " << sizes[i] << std::endl;
     
     //Get a list of neighbors for each domain
 
@@ -131,7 +133,7 @@ int hpx_main(
   // Start timestepping loop
   for (int timestep=1; timestep<=n_timesteps; timestep++) {
     
-//    std::cout << "starting timestep loop, timestep = " << timestep << std::endl;
+    std::cout << "starting timestep loop, timestep = " << timestep << std::endl;
 
     for (int rkstep=1; rkstep<=n_rksteps; rkstep++) {
 /*     std::cout << "#################################################################" << std::endl;
@@ -154,6 +156,8 @@ int hpx_main(
 				     &rkstep
 				     ));
 #else
+	std::cout << "about to call dg_hydro_timestep_fort" << std::endl;
+	std::cout << "sizes["<<j<<"] = " << sizes[j] << std::endl;
 	FNAME(dg_hydro_timestep_fort)(&sizes[j],
 				&dgs[j],
 				&globals[j],
@@ -225,6 +229,19 @@ int hpx_main(
 
 
   } // End timestep loop
+
+
+  
+  
+  // Destroy all domains
+  std::cout << "Destroying domains" << std::endl;
+  for (int domain=0; domain<ids.size(); domain++) {
+      FNAME(term_fort)(&sizes[domain],
+		       &dgs[domain],
+		       &globals[domain],
+		       &nodalattrs[domain]
+		       );
+  }
   
   
 #ifdef HPX
