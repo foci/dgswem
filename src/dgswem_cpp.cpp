@@ -69,18 +69,14 @@ int hpx_main(
 			       &dgs[i],
 			       &globals[i],
 			       &nodalattrs[i],
-			       &ids[i],
-			       &n_timesteps,
-			       &n_rksteps
+			       &ids[i]
 			       ));
 #else
     FNAME(dgswem_init_fort)(&sizes[i],
 			    &dgs[i],
 			    &globals[i],
 			    &nodalattrs[i],
-			    &ids[i],
-			    &n_timesteps,
-			    &n_rksteps
+			    &ids[i]
 			    );
 #endif
     

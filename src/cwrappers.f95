@@ -1,5 +1,5 @@
 #ifdef HPX
-subroutine dgswem_init_fort(sizes_c_ptr,dg_c_ptr,global_c_ptr,nodalattr_c_ptr,id,n_timesteps,n_rksteps)
+subroutine dgswem_init_fort(sizes_c_ptr,dg_c_ptr,global_c_ptr,nodalattr_c_ptr,id)
   use, intrinsic :: iso_c_binding
   use sizes
   use dg
@@ -11,10 +11,11 @@ subroutine dgswem_init_fort(sizes_c_ptr,dg_c_ptr,global_c_ptr,nodalattr_c_ptr,id
   type (C_PTR) :: dg_c_ptr
   type (C_PTR) :: global_c_ptr
   type (C_PTR) :: nodalattr_c_ptr
-  integer :: n_timesteps
   integer,intent(in) :: id
+
+!  integer :: n_timesteps
 !  integer,intent(out) :: n_domains
-  integer,intent(out) :: n_rksteps
+!  integer,intent(out) :: n_rksteps
 
   type (sizes_type), pointer :: s
   type (dg_type), pointer :: dg_here
@@ -37,14 +38,14 @@ subroutine dgswem_init_fort(sizes_c_ptr,dg_c_ptr,global_c_ptr,nodalattr_c_ptr,id
 
   ! Pass these variables to the c++ side
 #ifdef VERBOSE
-  print*, "FORTRAN: s%mnproc = ", s%mnproc
-  print*, "FORTRAN: dg_here%nrk = ", dg_here%nrk
-  print*, "FORTRAN: global_here%NT = ", global_here%NT
+!  print*, "FORTRAN: s%mnproc = ", s%mnproc
+!  print*, "FORTRAN: dg_here%nrk = ", dg_here%nrk
+!  print*, "FORTRAN: global_here%NT = ", global_here%NT
 #endif
 
-  n_domains = s%mnproc
-  n_rksteps = dg_here%nrk
-  n_timesteps = global_here%NT
+!  n_domains = s%mnproc
+!  n_rksteps = dg_here%nrk
+!  n_timesteps = global_here%NT
 
   sizes_c_ptr = C_LOC(s)
   dg_c_ptr = C_LOC(dg_here)
@@ -259,10 +260,14 @@ subroutine term_fort(sizes_c_ptr,dg_c_ptr,global_c_ptr,nodalattr_c_ptr)
   call C_F_POINTER(global_c_ptr,global_here)
   call C_F_POINTER(nodalattr_c_ptr,nodalattr_here)
 
-  deallocate(s)
-  deallocate(dg_here)
-  deallocate(global_here)
-  deallocate(nodalattr_here)
+#ifdef VERBOSE
+  print*, "FORTRAN: term_fort: about to deallocate"
+#endif
+
+!  deallocate(s)
+!  deallocate(dg_here)
+!  deallocate(global_here)
+!  deallocate(nodalattr_here)
 
 end subroutine term_fort
 

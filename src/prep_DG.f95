@@ -60,6 +60,9 @@
 
       integer :: myproc_here
 
+      logical :: file_is_open
+      integer :: file_unit
+
       Allocate ( XBCbt(S%MNE),YBCbt(S%MNE),radial(S%MNE),XB(S%MNE),YB(S%MNE),l2e(S%MNE) )
       Allocate ( iota_check(S%MNE),iota_check2(S%MNE),hbo(36,S%MNE,1),ydubo(36,s%mne) ) 
       Allocate ( YELEM(dg_here%ph),YED(dg_here%ph),hb1(36,s%mne,1,dg_here%ph), zeo(36,s%mne,1) )
@@ -1133,6 +1136,9 @@
 !.....Initialize the DG.63 output file
 
       IF (ABS(global_here%NOUTGE).EQ.1) THEN
+         file_unit = s%dg63unit
+         INQUIRE(UNIT=file_unit, OPENED=file_is_open )
+         IF ( file_is_open ) CLOSE (file_unit)      
          OPEN(s%dg63unit,FILE=S%DIRNAME//'/'//'DG.63',STATUS='REPLACE')
          WRITE(s%dg63unit,3220) global_here%RUNDES, global_here%RUNID, global_here%AGRID
          WRITE(s%dg63unit,3645) global_here%NDSETSE, dg_here%dofh, global_here%DTDP*global_here%NSPOOLGE, global_here%NSPOOLGE, 1
@@ -1141,6 +1147,9 @@
 !.....Initialize the DG.64 output file
 
       IF (ABS(global_here%NOUTGV).EQ.1) THEN
+         file_unit = s%dg64unit
+         INQUIRE(UNIT=file_unit, OPENED=file_is_open )
+         IF ( file_is_open ) CLOSE (file_unit)      
          OPEN(s%dg64unit,FILE=S%DIRNAME//'/'//'DG.64',STATUS='REPLACE')
          WRITE(s%dg64unit,3220) global_here%RUNDES, global_here%RUNID, global_here%AGRID
          WRITE(s%dg64unit,3645) global_here%NDSETSV, dg_here%dofh, global_here%DTDP*global_here%NSPOOLGV, global_here%NSPOOLGV, 2
@@ -1150,6 +1159,9 @@
 !.....as the wet/dry status.
 
       IF ((ABS(global_here%NOUTGE).EQ.1).AND.(global_here%NOLIFA.GE.2)) THEN
+         file_unit = s%dg65unit
+         INQUIRE(UNIT=file_unit, OPENED=file_is_open )
+         IF ( file_is_open ) CLOSE (file_unit)      
          OPEN(s%dg65unit,FILE=S%DIRNAME//'/'//'DG.65',STATUS='REPLACE')
          WRITE(s%dg65unit,3220) global_here%RUNDES, global_here%RUNID, global_here%AGRID
          WRITE(s%dg65unit,3645) global_here%NDSETSE, dg_here%dofh, global_here%DTDP*global_here%NSPOOLGE, global_here%NSPOOLGE, 1

@@ -155,12 +155,8 @@ public:
 				    &dg,
 				    &global,
 				    &nodalattr,
-				    n_domains_fort,
-				    domain_number,
-				    n_rksteps_fort);
+				    &domain_number);
 
-	    std::cout << "n_domains_fort = " << n_domains_fort << std::endl;
-	    std::cout << "n_rksteps_fort = " << n_rksteps_fort << std::endl;
 	    std::cout << "size = " << size << std::endl;
 
             FNAME(lgd_yield_subdomain_coord)(&global, &coord[0]);
@@ -196,16 +192,13 @@ public:
 	    void *global = NULL;
 	    void *nodalattr = NULL;
 
-	    int n_domains;
-	    int n_rksteps;
+	    int domain_number = id;
 
 	    FNAME(dgswem_init_fort)(&size,
 				    &dg,
 				    &global,
 				    &nodalattr,
-				    n_domains,
-				    id,
-				    n_rksteps);
+				    &domain_number);
 	    
             LibGeoDecomp::FloatCoord<2> coord;
             FNAME(lgd_yield_subdomain_coord)(&global, &coord[0]);

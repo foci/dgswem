@@ -49,7 +49,8 @@
       CHARACTER CDUM80
 #endif
 
-      
+      logical file_is_open
+      integer file_unit
 !--   
 !     ek...Zero out all the variables in the Nodal Attributes Module
 !     ek...Added from version 46
@@ -107,7 +108,12 @@
       OPEN(s%fortdgunit,FILE=s%DIRNAME//'/'//'fort.dg')            
 
 !.....Open statement for unit 16 output file
-      
+
+      ! Check to see if the file is open already, if it is, close it.
+      file_unit = s%fort16unit
+      INQUIRE(UNIT=file_unit, OPENED=file_is_open )
+      IF ( file_is_open ) CLOSE (file_unit)      
+
       OPEN(s%fort16unit,FILE=s%DIRNAME//'/'//'fort.16',STATUS='REPLACE')
 
 !.....General purpose format statements
