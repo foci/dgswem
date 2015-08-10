@@ -66,14 +66,17 @@ public:
         domainWrapper(new FortranPointerWrapper(size, global, dg, nodalattr)),
         neighbors_here(neighboringDomainIDs(size,dg,global)),
         id(id),
-        timestep(0)
+        timestep(0),
+	rkstep(1)
     {}
 
     template<typename HOOD>
     void update(const HOOD& hood, int nanoStep)
     {
-        std::cout << "updating...\n";
-	int rkstep = 1;
+        std::cout << "updating (domain_id = " << id
+		  << ", timestep = " << timestep
+		  << ", rkstep = " << rkstep
+		  << ")...\n";
 	FNAME(dg_hydro_timestep_fort)(&domainWrapper->size,
 				&domainWrapper->dg,
 				&domainWrapper->global,
@@ -84,30 +87,51 @@ public:
 
         std::cout << "  done\n";
 
-	// TODO: add boundary exchange
         // Boundary exchange
-	/*
         //Loop over neighbors
         for (int neighbor=0; neighbor<neighbors_here.size(); neighbor++) {
             std::cout << "  comm " << id << "<->" << neighbors_here[neighbor] << "\n";
             int neighbor_here = neighbors_here[neighbor];
-            int num_nodes;
-            int alive[MAX_BOUNDARY_SIZE];
+            int volume;
+            double buffer[MAX_BUFFER_SIZE];
 
             std::cout << "  pull\n";
             // Get outgoing boundarys from the neighbors
-            FNAME(get_outgoing_nodes_fort)(&hood[neighbor_here].domainWrapper->domain,&id,&num_nodes,alive);
+            //FNAME(get_outgoing_nodes_fort)
+	    //(&hood[neighbor_here].domainWrapper->domain,&id,&num_nodes,alive);
+	    FNAME(hpx_get_elems_fort)(&hood[neighbor_here].domainWrapper->dg,
+				      &id,
+				      &volume,
+				      buffer);
+
 
             std::cout << "  push\n";
             // Put those arrays inside current domain
-            FNAME(put_incoming_nodes_fort)(&domainWrapper->domain,&neighbor_here,&num_nodes,alive);
+            //FNAME(put_incoming_nodes_fort)
+	    //(&domainWrapper->domain,&neighbor_here,&num_nodes,alive);
+	    FNAME(hpx_put_elems_fort)(&domainWrapper->dg,
+				      &neighbor_here,
+				      &volume,
+				      buffer);
+	    
+
             std::cout << "  done\n";
         }// end loop over neighbors
-	*/
 	
 
 	// TODO add some logic for the RK_step and calling dg_timestep_advance_fort
-        ++timestep;
+	if (rkstep == 2) {
+	    FNAME(dg_timestep_advance_fort)(&domainWrapper->size,
+					   &domainWrapper->dg,
+					   &domainWrapper->global,
+					   &domainWrapper->nodalattr,
+					   &timestep
+					   );
+	    ++timestep;
+	    rkstep = 1;
+	} else {
+	    ++rkstep;
+	}
     }
 
 private:
@@ -129,9 +153,6 @@ public:
         SimpleInitializer<FortranCell>(LibGeoDecomp::Coord<2>(), numSteps),
         numDomains(numDomains)
     {
-        //std::fill(&base_path_buf[0], &base_path_buf[1024], 0);
-        //std::copy(base_path.begin(), base_path.end(), base_path_buf);
-
         // Initialize domain decomposition
         std::vector<std::vector<int> > neighbors;
 
@@ -151,23 +172,15 @@ public:
 	    LibGeoDecomp::FloatCoord<2> coord;
 
 	    int domain_number = i;
-	    std::cout << "calling dgswem_init_fort with domain_number = " << domain_number << std::endl;
 	    FNAME(dgswem_init_fort)(&size,
 				    &dg,
 				    &global,
 				    &nodalattr,
 				    &domain_number);
 
-	    std::cout << "size = " << size << std::endl;
-
             FNAME(lgd_yield_subdomain_coord)(&global, &coord[0]);
             domainCoords << coord;
-	    
-	    std::cout << "size = " << size << std::endl;
-
 	    neighbors.push_back(neighboringDomainIDs(size, dg, global));
-
-	    std::cout << "size = " << size << std::endl;
 
 	    //destroy these domains
 	    FNAME(term_fort)(&size,&global,&dg,&nodalattr);
@@ -227,12 +240,16 @@ private:
 
 int main(int argc, char* argv[])
 {
-    // fixme: these should be read in via config files
-    int n_domains = 4;
-    int n_timesteps = 100;
+    // todo: these should be read in via config files
+    int n_domains;
+    FNAME(hpx_read_n_domains)(&n_domains);
 
+    int n_timesteps = 86400; // needs to be # of timesteps time # of rk steps
+    int n_rksteps = 2;
+
+    int total_rksteps = n_timesteps*n_rksteps;
     LibGeoDecomp::SerialSimulator<FortranCell> sim(
-        new FortranInitializer(n_domains, n_timesteps));
+        new FortranInitializer(n_domains, total_rksteps));
     sim.run();
 
     return 0;
