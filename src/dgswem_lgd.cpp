@@ -73,6 +73,7 @@ public:
     void update(const HOOD& hood, int nanoStep)
     {
         std::cout << "updating...\n";
+	int rkstep = 1;
 	FNAME(dg_hydro_timestep_fort)(&domainWrapper->size,
 				&domainWrapper->dg,
 				&domainWrapper->global,

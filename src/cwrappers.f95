@@ -38,9 +38,9 @@ subroutine dgswem_init_fort(sizes_c_ptr,dg_c_ptr,global_c_ptr,nodalattr_c_ptr,id
 
   ! Pass these variables to the c++ side
 #ifdef VERBOSE
-!  print*, "FORTRAN: s%mnproc = ", s%mnproc
-!  print*, "FORTRAN: dg_here%nrk = ", dg_here%nrk
-!  print*, "FORTRAN: global_here%NT = ", global_here%NT
+  print*, "FORTRAN: s%myproc = ", s%myproc
+  print*, "FORTRAN: dg_here%nrk = ", dg_here%nrk
+  print*, "FORTRAN: global_here%NT = ", global_here%NT
 #endif
 
 !  n_domains = s%mnproc
@@ -74,17 +74,18 @@ subroutine dg_hydro_timestep_fort(sizes_c_ptr,dg_c_ptr,global_c_ptr,nodalattr_c_
   type (global_type), pointer :: global_here
   type (nodalattr_type), pointer :: nodalattr_here
 
-#ifdef VERBOSE
-  print*, "FORTRAN: Entering dg_hydro_timestep_fort"
-  print*, "FORTRAN: myproc =", s%myproc
-  print*, "FORTRAN: timestep =", timestep
-  print*, "FORTRAN: rkstep =", rkstep
-#endif
-
   call C_F_POINTER(sizes_c_ptr,s)
   call C_F_POINTER(dg_c_ptr,dg_here)
   call C_F_POINTER(global_c_ptr,global_here)
   call C_F_POINTER(nodalattr_c_ptr,nodalattr_here)
+
+#ifdef VERBOSE
+  print*, "FORTRAN: Entering dg_hydro_timestep_fort"
+  !segfaults here
+  print*, "FORTRAN: myproc =", s%myproc
+  print*, "FORTRAN: timestep =", timestep
+  print*, "FORTRAN: rkstep =", rkstep
+#endif
 
   call dg_hydro_timestep(s,dg_here,global_here,nodalattr_here,timestep,rkstep)
 
