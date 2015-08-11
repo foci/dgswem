@@ -97,88 +97,88 @@ C---------------------------------------------------------------------------
 C
       IF (PHASE(1:4).EQ.'post') THEN
 C
-        IF (NHASE.NE.0) THEN
-          print *, "Post-Processing Unit 51"
-          CALL POST51()
-        ENDIF
-C
-        IF (NHASV.NE.0) THEN
-          print *, "Post-Processing Unit 52"
-          CALL POST52()
-        ENDIF
-C
-        IF (NHAGE.NE.0) THEN
-          print *, "Post-Processing Unit 53"
-           CALL POST53()
-        ENDIF
-C
-        IF (NHAGV.NE.0) THEN
-          print *, "Post-Processing Unit 54"
-           CALL POST54()
-        ENDIF
-C
-        print *, "Post-Processing Unit 55"
-        CALL POST55()
-C
-        IF (NOUTE.NE.0) THEN
-          print *, "Post-Processing Unit 61"
-          CALL POST61()
-        ENDIF
-C
-        IF (NOUTV.NE.0) THEN
-          print *, "Post-Processing Unit 62"
-          CALL POST62()
-        ENDIF
+!         IF (NHASE.NE.0) THEN
+!           print *, "Post-Processing Unit 51"
+!           CALL POST51()
+!         ENDIF
+! C
+!         IF (NHASV.NE.0) THEN
+!           print *, "Post-Processing Unit 52"
+!           CALL POST52()
+!         ENDIF
+! C
+!         IF (NHAGE.NE.0) THEN
+!           print *, "Post-Processing Unit 53"
+!            CALL POST53()
+!         ENDIF
+! C
+!         IF (NHAGV.NE.0) THEN
+!           print *, "Post-Processing Unit 54"
+!            CALL POST54()
+!         ENDIF
+! C
+!         print *, "Post-Processing Unit 55"
+!         CALL POST55()
+! C
+!         IF (NOUTE.NE.0) THEN
+!           print *, "Post-Processing Unit 61"
+!           CALL POST61()
+!         ENDIF
+! C
+!         IF (NOUTV.NE.0) THEN
+!           print *, "Post-Processing Unit 62"
+!           CALL POST62()
+!         ENDIF
 C
         IF (NOUTGE.NE.0) THEN
           print *, "Post-Processing DG.63"
           CALL POSTDG63()
         ENDIF
 C
-        IF (NOUTGE.NE.0) THEN
-          print *, "Post-Processing DG.65"
-          CALL POSTDG65()
-        ENDIF
+!         IF (NOUTGE.NE.0) THEN
+!           print *, "Post-Processing DG.65"
+!           CALL POSTDG65()
+!         ENDIF
 C
         IF (NOUTGV.NE.0) THEN
           print *, "Post-Processing DG.64"
           CALL POSTDG64()
         ENDIF
 C
-        IF (NOUTGE.NE.0) THEN
-          print *, "Post-Processing Unit 63"
-          CALL POST63()
-        ENDIF
-C
-        IF (NOUTGE.NE.0) THEN
-          print *, "Post-Processing Unit 88"
-          CALL POST88()
-        ENDIF
-C
-        IF (NOUTGE.NE.0) THEN
-          print *, "Post-Processing Unit 89"
-          CALL POST89()
-        ENDIF
-C
-        IF (NOUTGV.NE.0) THEN
-          print *, "Post-Processing Unit 64"
-          CALL POST64()
-        ENDIF
-C
-        IF (NOUTGV.NE.0) THEN
-          print *, "Post-Processing Unit 84"
-          CALL POST84()
-        ENDIF
-Csb
-        IF (NOUTGE.NE.0) THEN
-          print *, "Post-Processing EFF 63"
-          CALL POSTEFF63()
-        ENDIF
-        IF (NOUTGE.NE.0) THEN
-           !Might cause conflicts with 3d stuff below
-          print *, "Post-Processing EFF 4*l"
-          CALL POST4l()
-        ENDIF
+!         IF (NOUTGE.NE.0) THEN
+!           print *, "Post-Processing Unit 63"
+!           CALL POST63()
+!         ENDIF
+! C
+!         IF (NOUTGE.NE.0) THEN
+!           print *, "Post-Processing Unit 88"
+!           CALL POST88()
+!         ENDIF
+! C
+!         IF (NOUTGE.NE.0) THEN
+!           print *, "Post-Processing Unit 89"
+!           CALL POST89()
+!         ENDIF
+! C
+!         IF (NOUTGV.NE.0) THEN
+!           print *, "Post-Processing Unit 64"
+!           CALL POST64()
+!         ENDIF
+! C
+!         IF (NOUTGV.NE.0) THEN
+!           print *, "Post-Processing Unit 84"
+!           CALL POST84()
+!         ENDIF
+! Csb
+!         IF (NOUTGE.NE.0) THEN
+!           print *, "Post-Processing EFF 63"
+!           CALL POSTEFF63()
+!         ENDIF
+!         IF (NOUTGE.NE.0) THEN
+!            !Might cause conflicts with 3d stuff below
+!           print *, "Post-Processing EFF 4*l"
+!           CALL POST4l()
+!         ENDIF
 C--
 
 C     <jgf> 42.06 different 'if blocks' as well as different 'if blocks'
@@ -196,49 +196,49 @@ C         print *, "Post-Processing Unit 73"
 C         CALL POST73()
 C       ENDIF
 C
-        IF (NOUTGW.NE.0) THEN
-          print *, "Post-Processing Unit 74"
-          CALL POST74()
-        ENDIF
-C
-C ***POST PROCESSING FOR 3D FILES***
-C
-        IF (I3DSD.NE.0) THEN
-          print *, "Post-Processing Unit 41"
-          CALL POST41()
-        ENDIF
-C 
-        IF (I3DSV.NE.0) THEN
-          print *, "Post-Processing Unit 42"
-          CALL POST42()
-        ENDIF
-C 
-        IF (I3DST.NE.0) THEN
-          print *, "Post-Processing Unit 43"
-          CALL POST43()
-        ENDIF
-C
-        IF (I3DGD.NE.0) THEN
-          print *, "Post-Processing Unit 44"
-          CALL POST44()
-        ENDIF
-C
-        IF (I3DGV.NE.0) THEN
-          print *, "Post-Processing Unit 45"
-          CALL POST45()
-        ENDIF
-C
-        IF (I3DGT.NE.0) THEN
-          print *, "Post-Processing Unit 46"
-          CALL POST46()
-        ENDIF
+!         IF (NOUTGW.NE.0) THEN
+!           print *, "Post-Processing Unit 74"
+!           CALL POST74()
+!         ENDIF
+! C
+! C ***POST PROCESSING FOR 3D FILES***
+! C
+!         IF (I3DSD.NE.0) THEN
+!           print *, "Post-Processing Unit 41"
+!           CALL POST41()
+!         ENDIF
+! C 
+!         IF (I3DSV.NE.0) THEN
+!           print *, "Post-Processing Unit 42"
+!           CALL POST42()
+!         ENDIF
+! C 
+!         IF (I3DST.NE.0) THEN
+!           print *, "Post-Processing Unit 43"
+!           CALL POST43()
+!         ENDIF
+! C
+!         IF (I3DGD.NE.0) THEN
+!           print *, "Post-Processing Unit 44"
+!           CALL POST44()
+!         ENDIF
+! C
+!         IF (I3DGV.NE.0) THEN
+!           print *, "Post-Processing Unit 45"
+!           CALL POST45()
+!         ENDIF
+! C
+!         IF (I3DGT.NE.0) THEN
+!           print *, "Post-Processing Unit 46"
+!           CALL POST46()
+!         ENDIF
 
-        PRINT *,"Do you want to Post-Process hotstart files? ( Y/N )"
-        READ(*,'(A1)') HOTANS
-        IF((HOTANS.EQ.'Y').OR.(HOTANS.EQ.'y')) THEN
-          print *, "Post-Processing hot start files"
-          CALL POST67_68()
-          ENDIF
+!         PRINT *,"Do you want to Post-Process hotstart files? ( Y/N )"
+!         READ(*,'(A1)') HOTANS
+!         IF((HOTANS.EQ.'Y').OR.(HOTANS.EQ.'y')) THEN
+!           print *, "Post-Processing hot start files"
+!           CALL POST67_68()
+!           ENDIF
 
 C
         GO TO 99
@@ -256,39 +256,39 @@ C
         print *, "enter error tolerance"
         READ(*,*) TOL
 C
-        IF (NHASE.NE.0) THEN
-          print *, "Comparing Unit 51 files"
-          CALL COMPARE51(DIR1,DIR2,TOL)
-        ENDIF
-C
-        IF (NHASV.NE.0) THEN
-          print *, "Comparing Unit 52 files"
-          CALL COMPARE52(DIR1,DIR2,TOL)
-        ENDIF
-C
-        IF (NHAGE.NE.0) THEN
-          print *, "Comparing Unit 53 files"
-          CALL COMPARE53(DIR1,DIR2,TOL)
-        ENDIF
-C
-        IF (NHAGV.NE.0) THEN
-          print *, "Comparing Unit 54 files"
-          CALL COMPARE54(DIR1,DIR2,TOL)
-        ENDIF
-C
-        print *, "Comparing Unit 55 files"
-        CALL COMPARE55(DIR1,DIR2,TOL)
-C
-        IF (NOUTE.NE.0) THEN
-          print *, "Comparing Unit 61 files"
-          CALL COMPARE61(DIR1,DIR2,TOL)
-        ENDIF
-C
-        IF (NOUTV.NE.0) THEN
-          print *, "Comparing Unit 62 files"
-          CALL COMPARE62(DIR1,DIR2,TOL)
-        ENDIF
-C
+!         IF (NHASE.NE.0) THEN
+!           print *, "Comparing Unit 51 files"
+!           CALL COMPARE51(DIR1,DIR2,TOL)
+!         ENDIF
+! C
+!         IF (NHASV.NE.0) THEN
+!           print *, "Comparing Unit 52 files"
+!           CALL COMPARE52(DIR1,DIR2,TOL)
+!         ENDIF
+! C
+!         IF (NHAGE.NE.0) THEN
+!           print *, "Comparing Unit 53 files"
+!           CALL COMPARE53(DIR1,DIR2,TOL)
+!         ENDIF
+! C
+!         IF (NHAGV.NE.0) THEN
+!           print *, "Comparing Unit 54 files"
+!           CALL COMPARE54(DIR1,DIR2,TOL)
+!         ENDIF
+! C
+!         print *, "Comparing Unit 55 files"
+!         CALL COMPARE55(DIR1,DIR2,TOL)
+! C
+!         IF (NOUTE.NE.0) THEN
+!           print *, "Comparing Unit 61 files"
+!           CALL COMPARE61(DIR1,DIR2,TOL)
+!         ENDIF
+! C
+!         IF (NOUTV.NE.0) THEN
+!           print *, "Comparing Unit 62 files"
+!           CALL COMPARE62(DIR1,DIR2,TOL)
+!         ENDIF
+! C
         IF (NOUTGE.NE.0) THEN
           print *, "Comparing Unit 63 files"
           CALL COMPARE63(DIR1,DIR2,TOL)
@@ -309,10 +309,10 @@ C
           CALL COMPARE64(DIR1,DIR2,TOL)
         ENDIF
 C
-        IF (NOUTGW.NE.0) THEN
-          print *, "Comparing Unit 74 files"
-          CALL COMPARE74(DIR1,DIR2,TOL)
-        ENDIF
+!         IF (NOUTGW.NE.0) THEN
+!           print *, "Comparing Unit 74 files"
+!           CALL COMPARE74(DIR1,DIR2,TOL)
+!         ENDIF
 C
         GO TO 99
 C
