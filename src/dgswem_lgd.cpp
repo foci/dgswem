@@ -244,7 +244,7 @@ int main(int argc, char* argv[])
     int n_domains;
     FNAME(hpx_read_n_domains)(&n_domains);
 
-    int n_timesteps = 86400; // needs to be # of timesteps time # of rk steps
+    int n_timesteps = 86401; // needs to be # of timesteps time # of rk steps
     int n_rksteps = 2;
 
     int total_rksteps = n_timesteps*n_rksteps;
