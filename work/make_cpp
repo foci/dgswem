@@ -1,8 +1,20 @@
+#export PKG_CONFIG_PATH=$HOME/install/libgeodecomp/lib/pkgconfig/
+
 mv ./odir4/dgswem.o ./odir4/dgswem.oB
 INCLUDES=`ls -d -1 ./odir4/*.o`
 echo $INCLUDES
 mv ./odir4/dgswem.oB ./odir4/dgswem.o
 
-CMD="g++ -g3 -fno-inline -O0 -o dgswem_hpx_cpp ../src/dgswem_cpp.cpp $INCLUDES -lgfortran"
+CPP_SOURCE_FILE="../src/dgswem_cpp.cpp"
+CPP_OBJECT_FILE="dgswem_cpp.o"
+EXE_NAME="dgswem_cpp"
+#CPPFLAGS="-g3 -fno-inline -O0  `pkg-config --cflags --libs libgeodecomp`"
+CPPFLAGS="-g3 -fno-inline -O0"
+
+CMD="g++ $CPPFLAGS -c  ${CPP_SOURCE_FILE}"
+echo $CMD
+$CMD 
+
+CMD="g++ $CPPFLAGS -o ${EXE_NAME} ${CPP_OBJECT_FILE} $INCLUDES -lgfortran"
 echo $CMD
 $CMD

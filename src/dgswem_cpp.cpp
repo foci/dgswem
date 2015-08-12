@@ -34,7 +34,8 @@ int hpx_main(
   std::vector<hpx::future<void> > inits;
 #endif
 
-  int n_timesteps = 100;
+  //  int n_timesteps = 4000;
+  int n_timesteps = 86400;
   int n_domains;
   int n_rksteps = 2;
   
@@ -79,8 +80,6 @@ int hpx_main(
 			    &ids[i]
 			    );
 #endif
-
-    std::cout << "sizes["<<i<<"] = " << sizes[i] << std::endl;
     
     //Get a list of neighbors for each domain
 
@@ -173,7 +172,7 @@ int hpx_main(
       
 
 
-
+      /*
       // Boundary exchange
       // Loop over domains   
       for (int domain=0; domain<ids.size(); domain++) {
@@ -210,6 +209,7 @@ int hpx_main(
 	
       }// end loop over domains
       
+      */
       //return 0;
       
     } // end rkstep loop

@@ -87,6 +87,7 @@ public:
 
         std::cout << "  done\n";
 
+	/*
         // Boundary exchange
         //Loop over neighbors
         for (int neighbor=0; neighbor<neighbors_here.size(); neighbor++) {
@@ -117,9 +118,8 @@ public:
 
             std::cout << "  done\n";
         }// end loop over neighbors
-	
+	*/
 
-	// TODO add some logic for the RK_step and calling dg_timestep_advance_fort
 	if (rkstep == 2) {
 	    FNAME(dg_timestep_advance_fort)(&domainWrapper->size,
 					   &domainWrapper->dg,
@@ -244,7 +244,8 @@ int main(int argc, char* argv[])
     int n_domains;
     FNAME(hpx_read_n_domains)(&n_domains);
 
-    int n_timesteps = 86401; // needs to be # of timesteps time # of rk steps
+    int n_timesteps = 86401;
+    //int n_timesteps = 4001;
     int n_rksteps = 2;
 
     int total_rksteps = n_timesteps*n_rksteps;
