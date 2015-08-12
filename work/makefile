@@ -47,6 +47,13 @@ ifeq ($(BUILDTYPE),dgswem_hpx)
   MSG_MOBJ:=
 endif
 
+ifeq ($(BUILDTYPE),adcpost)
+  CF:= $(PPFC)
+  O_DIR:=odir3/
+  FFLAGS:= $(FFLAGS1) $(DPRE) $(IMODS)$(O_DIR) 
+  VPATH :=  ../prep
+endif
+
 
 $(O_DIR):
 	mkdir -p $@
@@ -55,7 +62,7 @@ $(O_DIR):
 
 PREP_MSRC  =  presizes.f95 
 PGLO_MSRC  =  pre_global.f95  
-POST_MSRC  =  post_global.f95
+POST_MSRC  =  post_global.F
 ADC_MSRC   =  sizes.f95 diff45_41.f95 global.f95 dg.f95 nodalattr.f95 fort_dg_module.f95 
 HARM_MSRC  =  harm.f95  
 WIND_MSRC  =  wind.f95  
@@ -64,7 +71,7 @@ COUP_MSRC  =  couple2swan.f95
 
 PREP_MOBJ:= $(patsubst %.f95, $(O_DIR)%.o, $(PREP_MSRC) )
 PGLO_MOBJ:= $(patsubst %.f95, $(O_DIR)%.o, $(PGLO_MSRC) )
-POST_MOBJ:= $(patsubst %.f95, $(O_DIR)%.o, $(POST_MSRC) )
+POST_MOBJ:= $(patsubst %.F, $(O_DIR)%.o, $(POST_MSRC) )
 ADC_MOBJ := $(patsubst %.f95, $(O_DIR)%.o, $(ADC_MSRC)  )
 ADC_MOBJ := $(patsubst %.f9590, $(O_DIR)%.o, $(ADC_MOBJ)  )
 ADC_MOBJ := $(patsubst %.f95, $(O_DIR)%.o, $(ADC_MOBJ)  )
@@ -79,7 +86,7 @@ COUP_MOBJ := $(patsubst %.f95, $(O_DIR)%.o, $(COUP_MSRC)  )
 METIS1_SRC =  metis.f95
 METIS2_SRC =  metis2.f95
 PREP_SRC   =  adcprep.f95  decomp.f95   read_global.f95   prep.f95   interp.f95  machdep.f95
-POST_SRC   =  adcpost.f95    post.f95  compare.f95  diffmerge.f95
+POST_SRC   =  adcpost.F    post.F  compare.F  diffmerge.F
 ADC_SRC    =  dgswem.f95 read_input.f95 cstart.f95 hstart.f95 radiation_edge_hydro.f95 \
 	ibarrier_edge_hydro.f95 ebarrier_edge_hydro.f95  \
 	calc_normal.f95 create_edge_data.f95 \
@@ -97,7 +104,7 @@ ADC_SRC    =  dgswem.f95 read_input.f95 cstart.f95 hstart.f95 radiation_edge_hyd
 METIS1_OBJ:= $(patsubst %.f95, $(O_DIR)%.o, $(METIS1_SRC) )
 METIS2_OBJ:= $(patsubst %.f95, $(O_DIR)%.o, $(METIS2_SRC) )
 PREP_OBJ:= $(patsubst %.f95, $(O_DIR)%.o, $(PREP_SRC) )
-POST_OBJ:= $(patsubst %.f95, $(O_DIR)%.o, $(POST_SRC) )
+POST_OBJ:= $(patsubst %.F, $(O_DIR)%.o, $(POST_SRC) )
 ADC_OBJ:= $(patsubst %.f95, $(O_DIR)%.o, $(ADC_SRC) )
 
 ######################## compilation rules #####################################
@@ -206,14 +213,14 @@ $(O_DIR)picomsg.o     :  picomsg.f95
 
 #  adpost modules
 
-$(O_DIR)post_global.o :  post_global.f95 
+$(O_DIR)post_global.o :  post_global.F 
 
 #  adpost                
 
-$(O_DIR)adcpost.o     :  adcpost.f95 $(POST_MOBJ)
-$(O_DIR)post.o        :  post.f95  $(POST_MOBJ)
-$(O_DIR)compare.o     :  compare.f95  
-$(O_DIR)diffmerge.o   :  diffmerge.f95
+$(O_DIR)adcpost.o     :  adcpost.F $(POST_MOBJ)
+$(O_DIR)post.o        :  post.F  $(POST_MOBJ)
+$(O_DIR)compare.o     :  compare.F  
+$(O_DIR)diffmerge.o   :  diffmerge.F
 
 #  adcirc & padcirc modules
 
