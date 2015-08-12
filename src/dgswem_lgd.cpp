@@ -67,57 +67,80 @@ public:
         neighbors_here(neighboringDomainIDs(size,dg,global)),
         id(id),
         timestep(0),
-	rkstep(1)
+	rkstep(1),
+	update_step(true),
+	exchange_step(false),
+	advance_step(false)
     {}
 
     template<typename HOOD>
     void update(const HOOD& hood, int nanoStep)
     {
 	if (timestep != 0) {
-	    std::cout << "updating (domain_id = " << id
-		      << ", timestep = " << timestep
-		      << ", rkstep = " << rkstep
-		      << ")...\n";
-	    FNAME(dg_hydro_timestep_fort)(&domainWrapper->size,
-					  &domainWrapper->dg,
-					  &domainWrapper->global,
-					  &domainWrapper->nodalattr,
-					  &timestep,
+
+	    if (update_step) {
+		std::cout << "updating (domain_id = " << id
+			  << ", timestep = " << timestep
+			  << ", rkstep = " << rkstep
+			  << ")...\n";
+		FNAME(dg_hydro_timestep_fort)(&domainWrapper->size,
+					      &domainWrapper->dg,
+					      &domainWrapper->global,
+					      &domainWrapper->nodalattr,
+					      &timestep,
 					  &rkstep
-					  );
-	    
-	    // Boundary exchange
-	    //Loop over neighbors
-	    for (int neighbor=0; neighbor<neighbors_here.size(); neighbor++) {
-		//std::cout << "  comm " << id << "<->" << neighbors_here[neighbor] << "\n";
-		int neighbor_here = neighbors_here[neighbor];
-		int volume;
-		double buffer[MAX_BUFFER_SIZE];
+					      );
+		update_step = false;
+		exchange_step = true;
+		advance_step = false;
+	    } else if (exchange_step) {
+
+		// Boundary exchange
+		//Loop over neighbors
+		for (int neighbor=0; neighbor<neighbors_here.size(); neighbor++) {
+		    //std::cout << "  comm " << id << "<->" << neighbors_here[neighbor] << "\n";
+		    int neighbor_here = neighbors_here[neighbor];
+		    int volume;
+		    double buffer[MAX_BUFFER_SIZE];
+		    
+		    std::cout << "domain " << id << " is exchanging with " << neighbor_here
+			      << std::endl;
+		    
+		    // Get outgoing boundarys from the neighbors
+		    //FNAME(get_outgoing_nodes_fort)
+		    //(&hood[neighbor_here].domainWrapper->domain,&id,&num_nodes,alive);
+		    FNAME(hpx_get_elems_fort)(&hood[neighbor_here].domainWrapper->dg,
+					      &id,
+					      &volume,
+					      buffer);
+		    
+		    
+		    // Put those arrays inside current domain
+		    //FNAME(put_incoming_nodes_fort)
+		    //(&domainWrapper->domain,&neighbor_here,&num_nodes,alive);
+		    FNAME(hpx_put_elems_fort)(&domainWrapper->dg,
+					      &neighbor_here,
+					      &volume,
+					      buffer);
+		    
+		    
+		}// end loop over neighbors
+
+		exchange_step = false;
+
+		if (rkstep == 2) {
+		    advance_step = true;
+		    update_step = false;
+		    rkstep = 1;
+		} else {
+		    ++rkstep;
+		    update_step = true;
+		    advance_step = false;
+		}
 		
-		std::cout << "domain " << id << " is exchanging with " << neighbor_here
-			  << std::endl;
-		
-		// Get outgoing boundarys from the neighbors
-		//FNAME(get_outgoing_nodes_fort)
-		//(&hood[neighbor_here].domainWrapper->domain,&id,&num_nodes,alive);
-		FNAME(hpx_get_elems_fort)(&hood[neighbor_here].domainWrapper->dg,
-					  &id,
-					  &volume,
-					  buffer);
-		
-		
-		// Put those arrays inside current domain
-		//FNAME(put_incoming_nodes_fort)
-		//(&domainWrapper->domain,&neighbor_here,&num_nodes,alive);
-		FNAME(hpx_put_elems_fort)(&domainWrapper->dg,
-					  &neighbor_here,
-					  &volume,
-					  buffer);
-		
-		
-	    }// end loop over neighbors
-	    
-	    if (rkstep == 2) {
+		    
+	    } else if (advance_step) {	
+		std::cout << "advancing domain " << id << std::endl;
 		FNAME(dg_timestep_advance_fort)(&domainWrapper->size,
 						&domainWrapper->dg,
 						&domainWrapper->global,
@@ -125,10 +148,16 @@ public:
 						&timestep
 						);
 		++timestep;
-		rkstep = 1;
+		
+		update_step = true;
+		exchange_step = false;
+		advance_step = false;
 	    } else {
-		++rkstep;
+		std::cout << "Something went wrong!" << std::endl;
 	    }
+	    
+
+	    
 	} else {
 	    ++timestep;
 	}
@@ -140,6 +169,9 @@ private:
     int id;
     int timestep;
     int rkstep;
+    bool update_step;
+    bool exchange_step;
+    bool advance_step;
 };
 
 typedef LibGeoDecomp::ContainerCell<DomainReference, MAX_CELL_SIZE, int> FortranCell;
@@ -243,13 +275,13 @@ int main(int argc, char* argv[])
     int n_domains;
     FNAME(hpx_read_n_domains)(&n_domains);
 
-    //    int n_timesteps = 86401;
+    int n_timesteps = 86401;
     //int n_timesteps = 4001;
-    int n_timesteps = 1;
+    //int n_timesteps = 2;
 
     int n_rksteps = 2;
 
-    int total_rksteps = n_timesteps*n_rksteps+1;
+    int total_rksteps = n_timesteps*(n_rksteps*2+1)+1;
     LibGeoDecomp::SerialSimulator<FortranCell> sim(
         new FortranInitializer(n_domains, total_rksteps));
     sim.run();

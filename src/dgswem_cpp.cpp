@@ -35,8 +35,8 @@ int hpx_main(
 #endif
 
   //  int n_timesteps = 4000;
-  //int n_timesteps = 86400;
-  int n_timesteps = 1;
+  int n_timesteps = 86400;
+  //int n_timesteps = 2;
   int n_domains;
   int n_rksteps = 2;
   
@@ -215,6 +215,7 @@ int hpx_main(
     } // end rkstep loop
     
     for (int domain=0; domain<ids.size(); domain++) {
+	std::cout << "advancing domain " << ids[domain] << std::endl;
       FNAME(dg_timestep_advance_fort)(&sizes[domain],
 				      &dgs[domain],
 				      &globals[domain],
