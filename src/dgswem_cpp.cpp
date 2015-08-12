@@ -35,7 +35,8 @@ int hpx_main(
 #endif
 
   //  int n_timesteps = 4000;
-  int n_timesteps = 86400;
+  //int n_timesteps = 86400;
+  int n_timesteps = 1;
   int n_domains;
   int n_rksteps = 2;
   
@@ -155,9 +156,11 @@ int hpx_main(
 				     &rkstep
 				     ));
 #else
-	std::cout << "about to call dg_hydro_timestep_fort" << std::endl;
-	std::cout << "sizes["<<j<<"] = " << sizes[j] << std::endl;
-	FNAME(dg_hydro_timestep_fort)(&sizes[j],
+	        std::cout << "updating (domain_id = " << ids[j]
+		  << ", timestep = " << timestep
+		  << ", rkstep = " << rkstep
+		  << ")...\n";
+		FNAME(dg_hydro_timestep_fort)(&sizes[j],
 				&dgs[j],
 				&globals[j],
 				&nodalattrs[j],
@@ -172,21 +175,19 @@ int hpx_main(
       
 
 
-      /*
       // Boundary exchange
       // Loop over domains   
       for (int domain=0; domain<ids.size(); domain++) {
 	std::vector<int> neighbors_here = neighbors[domain];
-	
-        //std::cout << "#################################################################" << std::endl;
-        //std::cout << " domain loop, domain = " << domain << std::endl;     
-        //std::cout << "#################################################################" << std::endl;             
-        
+
 	//Loop over neighbors
 	for (int neighbor=0; neighbor<numneighbors[domain]; neighbor++) {	
 	  int neighbor_here = neighbors_here[neighbor];
 	  int volume;
 	  double buffer[MAX_BUFFER_SIZE];
+
+	  std::cout << "domain " << domain << " is exchanging with " << neighbor_here
+		    << std::endl;
 	  
 	  // Get outgoing boundarys from the neighbors
 	  FNAME(hpx_get_elems_fort)(&dgs[neighbor_here],
@@ -209,7 +210,6 @@ int hpx_main(
 	
       }// end loop over domains
       
-      */
       //return 0;
       
     } // end rkstep loop
@@ -234,7 +234,7 @@ int hpx_main(
   
   
   // Destroy all domains
-  std::cout << "Destroying domains" << std::endl;
+  //std::cout << "Destroying domains" << std::endl;
   for (int domain=0; domain<ids.size(); domain++) {
       FNAME(term_fort)(&sizes[domain],
 		       &dgs[domain],
