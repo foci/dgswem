@@ -24,11 +24,6 @@ std::vector<int> neighboringDomainIDs(void *size, void *dg, void *global)
     std::vector<int> ret(numneighbors_fort);
     std::copy(neighbors_fort, neighbors_fort + numneighbors_fort, ret.begin());
 
-    std::cout << "ret: ";
-    for (int i=0; i<ret.size(); i++){
-	std::cout << ret[i] << ", ";
-    }
-    std::cout << std::endl;
     return ret;
 }
 
@@ -79,10 +74,12 @@ public:
 	if (timestep != 0) {
 
 	    if (update_step) {
+		/*
 		std::cout << "updating (domain_id = " << id
 			  << ", timestep = " << timestep
 			  << ", rkstep = " << rkstep
 			  << ")...\n";
+		*/
 		FNAME(dg_hydro_timestep_fort)(&domainWrapper->size,
 					      &domainWrapper->dg,
 					      &domainWrapper->global,
@@ -98,17 +95,16 @@ public:
 		// Boundary exchange
 		//Loop over neighbors
 		for (int neighbor=0; neighbor<neighbors_here.size(); neighbor++) {
-		    //std::cout << "  comm " << id << "<->" << neighbors_here[neighbor] << "\n";
 		    int neighbor_here = neighbors_here[neighbor];
 		    int volume;
 		    double buffer[MAX_BUFFER_SIZE];
 		    
-		    std::cout << "domain " << id << " is exchanging with " << neighbor_here
-			      << std::endl;
 		    
+		    /*
+		      std::cout << "domain " << id << " is exchanging with " << neighbor_here
+			      << std::endl;
+		    */
 		    // Get outgoing boundarys from the neighbors
-		    //FNAME(get_outgoing_nodes_fort)
-		    //(&hood[neighbor_here].domainWrapper->domain,&id,&num_nodes,alive);
 		    FNAME(hpx_get_elems_fort)(&hood[neighbor_here].domainWrapper->dg,
 					      &id,
 					      &volume,
@@ -116,8 +112,6 @@ public:
 		    
 		    
 		    // Put those arrays inside current domain
-		    //FNAME(put_incoming_nodes_fort)
-		    //(&domainWrapper->domain,&neighbor_here,&num_nodes,alive);
 		    FNAME(hpx_put_elems_fort)(&domainWrapper->dg,
 					      &neighbor_here,
 					      &volume,
@@ -140,7 +134,7 @@ public:
 		
 		    
 	    } else if (advance_step) {	
-		std::cout << "advancing domain " << id << std::endl;
+		//std::cout << "advancing domain " << id << std::endl;
 		FNAME(dg_timestep_advance_fort)(&domainWrapper->size,
 						&domainWrapper->dg,
 						&domainWrapper->global,
@@ -155,9 +149,7 @@ public:
 	    } else {
 		std::cout << "Something went wrong!" << std::endl;
 	    }
-	    
-
-	    
+	    	    
 	} else {
 	    ++timestep;
 	}
@@ -188,9 +180,7 @@ public:
         // Initialize domain decomposition
         std::vector<std::vector<int> > neighbors;
 
-	std::cout << "initializing domains temporarily... ";
         for(int i = 0; i < numDomains ; i++) {
-	    std::cout << i << "... ";
 	    // Initialize the domains temporarily to get grid information
 
 	    void *size = NULL;
