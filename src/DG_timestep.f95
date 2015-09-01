@@ -8,7 +8,7 @@
 !     
 !***********************************************************************
 
-      SUBROUTINE DG_TIMESTEP(s,dg_here,global_here,nodalattr_here,IT,IRK)
+      SUBROUTINE DG_TIMESTEP(s,dg_here,global_here,nodalattr_here,IT)
 
 !.....Use appropriate modules
       
@@ -37,7 +37,14 @@
 #ifdef HPX
       CALL DG_HYDRO_TIMESTEP(s,dg_here,global_here,nodalattr_here,IT,IRK)
 #else
-! do the IRK loop here
+
+
+      DO IRK = 1,dg_here%NRK
+        CALL DG_HYDRO_TIMESTEP(s,dg_here,global_here,nodalattr_here,IT,IRK)
+      ENDDO
+      
+      CALL DG_TIMESTEP_ADVANCE(s,dg_here,global_here,nodalattr_here,IT)
+      
 #endif
 
 !.....Write out results
