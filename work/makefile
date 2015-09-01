@@ -136,6 +136,8 @@ winds :
 	python ./get_winds.py 
 
 ifeq ($(MAKELEVEL),0)
+   metis:
+	$(MAKE) -C ../metis/Lib/ CC="$(CC)"  CFLAGS="$(CFLAGS)"
    graphchk:
 	$(MAKE) -C ../metis/Programs/ CC="$(CC)"  CFLAGS="$(CFLAGS)" 
 	mv ../metis/graphchk ../work
