@@ -22,6 +22,14 @@ $(info MAKELEVEL is [${MAKELEVEL}])
 #
 ######################## Target Specific Rules ###################################
 
+ifeq ($(BUILDTYPE),adcprep)
+  CF:= $(PPFC)
+  O_DIR:=odir1/
+  FFLAGS:= $(FFLAGS1) $(DPRE) $(IMODS)$(O_DIR) 
+  VPATH :=  ../prep 
+  PMSG_OBJ:=
+endif
+
 ifeq ($(BUILDTYPE),dgswem_serial)
   CF:= $(PPFC)
   O_DIR:=odir4/
@@ -60,8 +68,8 @@ $(O_DIR):
 
 ######################### Module Source, Object, & Mod Files ######################
 
-PREP_MSRC  =  presizes.F90 
-PGLO_MSRC  =  pre_global.F90  
+PREP_MSRC  =  presizes.F 
+PGLO_MSRC  =  pre_global.F  
 POST_MSRC  =  post_global.F
 ADC_MSRC   =  sizes.F90 diff45_41.F90 global.F90 dg.F90 nodalattr.F90 fort_dg_module.F90 
 HARM_MSRC  =  harm.F90  
@@ -69,11 +77,10 @@ WIND_MSRC  =  wind.F90
 #Casey 121126: Add file for coupling to unstructured SWAN.
 COUP_MSRC  =  couple2swan.F90
 
-PREP_MOBJ:= $(patsubst %.F90, $(O_DIR)%.o, $(PREP_MSRC) )
-PGLO_MOBJ:= $(patsubst %.F90, $(O_DIR)%.o, $(PGLO_MSRC) )
+PREP_MOBJ:= $(patsubst %.F, $(O_DIR)%.o, $(PREP_MSRC) )
+PGLO_MOBJ:= $(patsubst %.F, $(O_DIR)%.o, $(PGLO_MSRC) )
 POST_MOBJ:= $(patsubst %.F, $(O_DIR)%.o, $(POST_MSRC) )
 ADC_MOBJ := $(patsubst %.F90, $(O_DIR)%.o, $(ADC_MSRC)  )
-ADC_MOBJ := $(patsubst %.F9090, $(O_DIR)%.o, $(ADC_MOBJ)  )
 ADC_MOBJ := $(patsubst %.F90, $(O_DIR)%.o, $(ADC_MOBJ)  )
 HARM_MOBJ := $(patsubst %.F90, $(O_DIR)%.o, $(HARM_MSRC)  )
 WIND_MOBJ := $(patsubst %.F90, $(O_DIR)%.o, $(WIND_MSRC)  )
@@ -83,9 +90,9 @@ COUP_MOBJ := $(patsubst %.F90, $(O_DIR)%.o, $(COUP_MSRC)  )
 
 ############################# Source & Object Files ##############################
 
-METIS1_SRC =  metis.F90
-METIS2_SRC =  metis2.F90
-PREP_SRC   =  adcprep.F90  decomp.F90   read_global.F90   prep.F90   interp.F90  machdep.F90
+METIS1_SRC =  metis.F
+METIS2_SRC =  metis2.F
+PREP_SRC   =  adcprep.F  decomp.F   read_global.F   prep.F   interp.F  machdep.F
 POST_SRC   =  adcpost.F    post.F  compare.F  diffmerge.F
 ADC_SRC    =  dgswem.F90 read_input.F90 cstart.F90 hstart.F90 radiation_edge_hydro.F90 \
 	ibarrier_edge_hydro.F90 ebarrier_edge_hydro.F90  \
@@ -101,9 +108,9 @@ ADC_SRC    =  dgswem.F90 read_input.F90 cstart.F90 hstart.F90 radiation_edge_hyd
 	wetdry.F90 LDG_hydro.F90 met_forcing.F90 sta_basis.F90 make_dirname.F90 nodalattr_subs.F90 dgswem_init.F90 cwrappers.F90 make_dirname.F90 read_fort_dg.F90 message_table_hpx.F90 init_fileunits.F90 get_neighbors.F90 messenger_hpx.F90 hpx_read_n_domains.F90 lgd_yield_subdomain_coord.F90
 #Casey 121126: Added modal2nodal.F90 and write_output.F90 to the previous line.
 
-METIS1_OBJ:= $(patsubst %.F90, $(O_DIR)%.o, $(METIS1_SRC) )
-METIS2_OBJ:= $(patsubst %.F90, $(O_DIR)%.o, $(METIS2_SRC) )
-PREP_OBJ:= $(patsubst %.F90, $(O_DIR)%.o, $(PREP_SRC) )
+METIS1_OBJ:= $(patsubst %.F, $(O_DIR)%.o, $(METIS1_SRC) )
+METIS2_OBJ:= $(patsubst %.F, $(O_DIR)%.o, $(METIS2_SRC) )
+PREP_OBJ:= $(patsubst %.F, $(O_DIR)%.o, $(PREP_SRC) )
 POST_OBJ:= $(patsubst %.F, $(O_DIR)%.o, $(POST_SRC) )
 ADC_OBJ:= $(patsubst %.F90, $(O_DIR)%.o, $(ADC_SRC) )
 
@@ -198,20 +205,20 @@ help:
 
 #  adcprep & adcprep2 modules
 
-$(O_DIR)presize.o     :  presize.F90
-$(O_DIR)pre_global.o  :  pre_global.F90  $(PREP_MOBJ)
+$(O_DIR)presize.o     :  presize.F
+$(O_DIR)pre_global.o  :  pre_global.F  $(PREP_MOBJ)
 
 #  adcprep & adcprep2 
 
-$(O_DIR)adcprep.o     :  adcprep.F90  $(PGLO_MOBJ) $(PMSG_OBJ)
-$(O_DIR)decomp.o      :  decomp.F90   $(PGLO_MOBJ)
-$(O_DIR)read_global.o :  read_global.F90  $(PGLO_MOBJ)
-$(O_DIR)prep.o        :  prep.F90   $(PGLO_MOBJ)
-$(O_DIR)interp.o      :  interp.F90  
-$(O_DIR)machdep.o     :  machdep.F90
-$(O_DIR)metis.o       :  metis.F90 $(PGLO_MOBJ)
-$(O_DIR)metis2.o      :  metis2.F90 $(PGLO_MOBJ)
-$(O_DIR)picomsg.o     :  picomsg.F90
+$(O_DIR)adcprep.o     :  adcprep.F  $(PGLO_MOBJ) $(PMSG_OBJ)
+$(O_DIR)decomp.o      :  decomp.F   $(PGLO_MOBJ)
+$(O_DIR)read_global.o :  read_global.F  $(PGLO_MOBJ)
+$(O_DIR)prep.o        :  prep.F   $(PGLO_MOBJ)
+$(O_DIR)interp.o      :  interp.F  
+$(O_DIR)machdep.o     :  machdep.F
+$(O_DIR)metis.o       :  metis.F $(PGLO_MOBJ)
+$(O_DIR)metis2.o      :  metis2.F $(PGLO_MOBJ)
+$(O_DIR)picomsg.o     :  picomsg.F
 
 #  adpost modules
 
