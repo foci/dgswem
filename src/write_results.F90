@@ -636,7 +636,8 @@
                      
                      DO J = 1,global_here%NE
                         DO K = 1,dg_here%DOFS(J)
-                           WRITE(s%dg63unit,*) J, dg_here%ZE(K,J,1)
+                           !srb: add bathymetry output to work with Dam's plotting scripts
+                           WRITE(s%dg63unit,*) J, dg_here%ZE(K,J,1), dg_here%HB(K,J,1)  
                         ENDDO
                      ENDDO
                      
