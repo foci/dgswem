@@ -1,0 +1,22 @@
+#!/bin/bash
+
+#export PKG_CONFIG_PATH=$HOME/install/libgeodecomp/lib/pkgconfig/
+
+mv ./odir4/dgswem.o ./odir4/dgswem.oB
+INCLUDES=`ls -d -1 ./odir4/*.o`
+echo $INCLUDES
+mv ./odir4/dgswem.oB ./odir4/dgswem.o
+
+CPP_SOURCE_FILE="../src/dgswem_cpp.cpp"
+CPP_OBJECT_FILE="dgswem_cpp.o"
+EXE_NAME="dgswem_cpp"
+#CPPFLAGS="-g3 -fno-inline -O0  `pkg-config --cflags --libs libgeodecomp`"
+CPPFLAGS="-g -fno-inline -O0"
+
+CMD="icc $CPPFLAGS -c  ${CPP_SOURCE_FILE}"
+echo $CMD
+$CMD 
+
+CMD="icc $CPPFLAGS -o ${EXE_NAME} ${CPP_OBJECT_FILE} $INCLUDES -lifcore"
+echo $CMD
+$CMD
