@@ -1,3 +1,5 @@
+#!/bin/bash
+
 #export PKG_CONFIG_PATH=$HOME/install/libgeodecomp/lib/pkgconfig/
 
 mv ./odir4/dgswem.o ./odir4/dgswem.oB
