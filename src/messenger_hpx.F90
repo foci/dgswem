@@ -96,7 +96,7 @@
        type (dg_type) :: dg_here
        
        logical :: neighbor_found
-       integer :: i,index       
+       integer :: i,l,index       
        integer :: el,dof
        integer :: ncount
        integer :: neighbor
@@ -244,7 +244,44 @@
              domain%QY  (dof,domain%IRECVLOC(el,nindex)  ,domain%IRK+1) = &
              neighbor%QY(dof,neighbor%ISENDLOC(el,dindex),domain%IRK+1)             
            ENDDO
-         ENDDO    
+         ENDDO 
+   
+!#ifdef SED_LAY
+!
+!	 DO el=1,domain%NELEMRECV(nindex)
+!           DO dof=1,domain%DOFH
+!	     DO l = 1,layers
+!              domain%bed (dof,domain%IRECVLOC(el,nindex)  ,domain%IRK+1,l) = &
+!              neighbor%bed(dof,neighbor%ISENDLOC(el,dindex),domain%IRK+1,l)		
+!             ENDDO
+!           ENDDO
+!         ENDDO 
+!
+!#endif 
+
+#ifdef TRACE
+         DO el=1,domain%NELEMRECV(nindex)
+           DO dof=1,domain%DOFH
+             domain%iota  (dof,domain%IRECVLOC(el,nindex)  ,domain%IRK+1) = &
+             neighbor%iota(dof,neighbor%ISENDLOC(el,dindex),domain%IRK+1)
+
+             domain%iota2  (dof,domain%IRECVLOC(el,nindex)  ,domain%IRK+1) = &
+             neighbor%iota2(dof,neighbor%ISENDLOC(el,dindex),domain%IRK+1)           
+           ENDDO
+         ENDDO 
+#endif
+
+#ifdef CHEM
+         DO el=1,domain%NELEMRECV(nindex)
+           DO dof=1,domain%DOFH
+             domain%iota  (dof,domain%IRECVLOC(el,nindex)  ,domain%IRK+1) = &
+             neighbor%iota(dof,neighbor%ISENDLOC(el,dindex),domain%IRK+1)
+
+             domain%iota2  (dof,domain%IRECVLOC(el,nindex)  ,domain%IRK+1) = &
+             neighbor%iota2(dof,neighbor%ISENDLOC(el,dindex),domain%IRK+1)           
+           ENDDO
+         ENDDO 
+#endif
        
        ELSE
        
