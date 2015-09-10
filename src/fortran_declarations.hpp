@@ -1,5 +1,5 @@
 #define MAX_DOMAIN_NEIGHBORS 100
-#define MAX_BUFFER_SIZE 1000
+#define MAX_BUFFER_SIZE 10000
 #define MAX_CELL_SIZE 20
 
 extern"C" {
