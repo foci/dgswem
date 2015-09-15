@@ -1,6 +1,8 @@
 cmake_minimum_required (VERSION 2.6)
-project (dgswem_serial)
-enable_language (Fortran)
+project (dgswem C CXX Fortran)
+#enable_language (Fortran)
+
+set(CMAKE_VERBOSE_MAKEFILE on)
 
 if (NOT CMAKE_BUILD_TYPE)
   set (CMAKE_BUILD_TYPE DEBUG CACHE STRING
@@ -30,57 +32,7 @@ if (Fortran_COMPILER_NAME MATCHES "gfortran.*")
   #  message("Ifort not enabled now")
 endif (Fortran_COMPILER_NAME MATCHES "gfortran.*")
 
-#add_library ("modules" STATIC ../src/sizes.f95 ../src/wind.f95  ../src/dg.f95  ../src/global.f95  ../src/nodalattr.f95   ../src/read_fort_dg.f95   ../src/fort_dg_module.f95)
+include(FortranCInterface)
+FortranCInterface_HEADER(FC.h MACRO_NAMESPACE "FC_")  
 
-# Uncomment to remove -rdynamic
-#SET(CMAKE_SHARED_LIBRARY_LINK_Fortran_FLAGS)
-
-  
-add_executable(
-  dgswem_serial
-  ../src/sizes.f95 
-  ../src/global.f95  
-  ../src/dg.f95  
-  ../src/nodalattr.f95   
-  ../src/fort_dg_module.f95
-  ../src/wind.f95  
-  ../src/dgswem.f95
-  ../src/init_fileunits.f95
-  ../src/read_input.f95
-  ../src/cstart.f95
-  ../src/hstart.f95
-  ../src/radiation_edge_hydro.f95
-  ../src/ibarrier_edge_hydro.f95
-  ../src/ebarrier_edge_hydro.f95
-  ../src/calc_normal.f95
-  ../src/create_edge_data.f95
-  ../src/DG_timestep.f95
-  ../src/DG_hydro_timestep.f95
-  ../src/flow_edge_hydro.f95
-  ../src/internal_edge_hydro.f95
-  ../src/land_edge_hydro.f95
-  ../src/ocean_edge_hydro.f95
-  ../src/orthobasis_area.f95
-  ../src/orthobasis_edge.f95
-  ../src/p_enrichment.f95
-  ../src/prep_DG.f95
-  ../src/quad_pts_area.f95
-  ../src/quad_pts_edge.f95
-  ../src/rhs_dg_hydro.f95
-  ../src/numerical_flux.f95
-  ../src/tidal_potential.f95
-  ../src/write_results.f95
-  ../src/slopelimiter.f95
-  ../src/prep_slopelim.f95
-  ../src/wetdry.f95
-  ../src/LDG_hydro.f95
-  ../src/met_forcing.f95
-  ../src/sta_basis.f95
-  ../src/make_dirname.f95
-  ../src/nodalattr_subs.f95
-  ../src/dgswem_init.f95
-  ../src/cwrappers.f95
-  ../src/read_fort_dg.f95
-  )
-
-#target_link_libraries(dgswem_serial modules)
+add_subdirectory(src)
