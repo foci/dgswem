@@ -1,10 +1,6 @@
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fno-inline ${ADDITIONAL_COMPILE_FLAGS}")
 
-add_executable(
-  dgswem_cpp_serial
-  dgswem_cpp.cpp
-  fname.h
-  fortran_declarations.hpp
+list(APPEND DGSWEM_FORTRAN 
   calc_normal.F90
   create_edge_data.F90
   cstart.F90
@@ -53,6 +49,14 @@ add_executable(
   wetdry.F90
   wind.F90
   write_results.F90
+)
+
+add_executable(
+  dgswem_cpp_serial
+  dgswem_cpp.cpp
+  fname.h
+  fortran_declarations.hpp
+  ${DGSWEM_FORTRAN}
 )
 
 #set_property(TARGET dgswem_cpp_serial PROPERTY LINKER_LANGUAGE Fortran)
