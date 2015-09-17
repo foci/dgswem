@@ -32,7 +32,10 @@ if (Fortran_COMPILER_NAME MATCHES "gfortran.*")
   #  message("Ifort not enabled now")
 endif (Fortran_COMPILER_NAME MATCHES "gfortran.*")
 
-include(FortranCInterface)
-FortranCInterface_HEADER(FC.h MACRO_NAMESPACE "FC_")  
+find_package(libgeodecomp REQUIRED)
+include_directories(${libgeodecomp_INCLUDE_DIRS})
+
+message("libgeodecomp_INCLUDE_DIRS:" ${libgeodecomp_INCLUDE_DIRS})
+
 
 add_subdirectory(src)
