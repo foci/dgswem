@@ -59,19 +59,19 @@ add_executable(
   ${DGSWEM_FORTRAN}
 )
 
-
-add_executable(
-  dgswem_lgd_serial
-  dgswem_lgd.cpp
-  fname.h
-  fortran_declarations.hpp
-  ${DGSWEM_FORTRAN}
-)
-
-#set_property(TARGET dgswem_cpp_serial PROPERTY LINKER_LANGUAGE Fortran)
+if(NOT NO_LGD)
+  add_executable(
+    dgswem_lgd_serial
+    dgswem_lgd.cpp
+    fname.h
+    fortran_declarations.hpp
+    ${DGSWEM_FORTRAN}
+    )
+endif(NOT NO_LGD)
 
 target_link_libraries(dgswem_cpp_serial gfortran)
-target_link_libraries(dgswem_lgd_serial gfortran)
-target_link_libraries(dgswem_lgd_serial geodecomp)
 
-#target_link_libraries(dgswem_lgd_serial libgeodecomp)
+if (NOT NO_LGD)
+  target_link_libraries(dgswem_lgd_serial gfortran)
+  target_link_libraries(dgswem_lgd_serial geodecomp)
+endif(NOT NO_LGD)

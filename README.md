@@ -6,9 +6,8 @@ to build using CMake (without libgeodecomp):
 
 mkdir build
 cd build
-cmake -Dlibgeodecomp_DIR=${PATH_TO_LGD_INSTALL}/lib/cmake/libgeodecomp ..
+cmake -DNO_LGD=true ..
 make
-
 
 to build using CMake:
 
@@ -16,7 +15,6 @@ mkdir build
 cd build
 cmake -Dlibgeodecomp_DIR=${PATH_TO_LGD_INSTALL}/lib/cmake/libgeodecomp ..
 make
-
 
 ==============
 

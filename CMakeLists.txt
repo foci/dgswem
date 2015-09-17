@@ -32,11 +32,11 @@ if (Fortran_COMPILER_NAME MATCHES "gfortran.*")
   #  message("Ifort not enabled now")
 endif (Fortran_COMPILER_NAME MATCHES "gfortran.*")
 
-find_package(libgeodecomp REQUIRED)
-#find_library(libgeodecomp REQUIRED)
-include_directories(${libgeodecomp_INCLUDE_DIRS})
-
-message("libgeodecomp_INCLUDE_DIRS:" ${libgeodecomp_INCLUDE_DIRS})
-
+if(NOT NO_LGD)
+  find_package(libgeodecomp REQUIRED)
+  include_directories(${libgeodecomp_INCLUDE_DIRS})
+  
+  message("libgeodecomp_INCLUDE_DIRS:" ${libgeodecomp_INCLUDE_DIRS})
+endif(NOT NO_LGD)
 
 add_subdirectory(src)
