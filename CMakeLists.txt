@@ -33,6 +33,7 @@ if (Fortran_COMPILER_NAME MATCHES "gfortran.*")
 endif (Fortran_COMPILER_NAME MATCHES "gfortran.*")
 
 find_package(libgeodecomp REQUIRED)
+#find_library(libgeodecomp REQUIRED)
 include_directories(${libgeodecomp_INCLUDE_DIRS})
 
 message("libgeodecomp_INCLUDE_DIRS:" ${libgeodecomp_INCLUDE_DIRS})

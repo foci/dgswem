@@ -2,6 +2,24 @@ dgswem release 11.13
 =========
 Discontinuous Galerkin Shallow Water Equation Model
 
+to build using CMake (without libgeodecomp):
+
+mkdir build
+cd build
+cmake -Dlibgeodecomp_DIR=${PATH_TO_LGD_INSTALL}/lib/cmake/libgeodecomp ..
+make
+
+
+to build using CMake:
+
+mkdir build
+cd build
+cmake -Dlibgeodecomp_DIR=${PATH_TO_LGD_INSTALL}/lib/cmake/libgeodecomp ..
+make
+
+
+==============
+
 ## Changes made
 
 1. Changed all fortran source code file endings to .f95

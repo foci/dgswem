@@ -74,7 +74,4 @@ target_link_libraries(dgswem_cpp_serial gfortran)
 target_link_libraries(dgswem_lgd_serial gfortran)
 target_link_libraries(dgswem_lgd_serial geodecomp)
 
-
-find_package(libgeodecomp)
-
-target_link_libraries(dgswem_lgd_serial libgeodecomp)
+#target_link_libraries(dgswem_lgd_serial libgeodecomp)
