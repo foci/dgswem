@@ -5,6 +5,14 @@
 #include <libgeodecomp/geometry/unstructuredgridmesher.h>
 #include <libgeodecomp/io/logger.h>
 
+// Needed by HPX
+#include <libgeodecomp/parallelization/hpxsimulator.h>
+#include <hpx/hpx.hpp>
+#include <hpx/hpx_init.hpp>
+#include <libgeodecomp/loadbalancer/tracingbalancer.h>
+#include <libgeodecomp/geometry/partitions/recursivebisectionpartition.h>
+
+
 #include "fname.h"
 #include "fortran_declarations.hpp"
 
@@ -155,6 +163,13 @@ public:
 	}
     }
 
+
+    template <class ARCHIVE>
+    void serialize(ARCHIVE& ar, unsigned)
+    {
+	ar & domainWrapper & neighbors_here & id & timestep & rkstep & update_step & exchange_step & advance_step;
+    }
+
 private:
     boost::shared_ptr<FortranPointerWrapper> domainWrapper;
     std::vector<int> neighbors_here;
@@ -164,6 +179,7 @@ private:
     bool update_step;
     bool exchange_step;
     bool advance_step;
+
 };
 
 typedef LibGeoDecomp::ContainerCell<DomainReference, MAX_CELL_SIZE, int> FortranCell;
@@ -252,12 +268,21 @@ public:
         }
     }
 
+    template <class ARCHIVE>
+    void serialize(ARCHIVE& ar, unsigned)
+    {
+	ar & boost::serialization::base_object<SimpleInitializer<FortranCell> >(*this);
+    }
+
 private:
     char base_path_buf[1024];
     LibGeoDecomp::UnstructuredGridMesher<2> mesher;
     std::size_t numDomains;
     std::vector<LibGeoDecomp::FloatCoord<2> > domainCoords;
+
 };
+
+typedef LibGeoDecomp::HpxSimulator::HpxSimulator<FortranCell, RecursiveBisectionPartition<s> > SimulatorType;
 
 int main(int argc, char* argv[])
 {
@@ -271,9 +296,19 @@ int main(int argc, char* argv[])
 
     int n_rksteps = 2;
 
+
+    // Needed by HPX simulator
+    std::vector<double> updateGroupSpeeds(1, 1.0);
+    int ghostZoneWidth = 1;
+    FortranInitializer *init = new FortranInitializer(n_domains, total_rksteps);
+
     int total_rksteps = n_timesteps*(n_rksteps*2+1)+1;
-    LibGeoDecomp::SerialSimulator<FortranCell> sim(
-        new FortranInitializer(n_domains, total_rksteps));
+    SimulatorType sim(init,
+		      updateGroupSpeeds, 
+		      new TracingBalancer(new OozeBalancer()),
+		      int loadBalancingPeriod = 10;
+		      ghostZoneWidth,
+		      "dgswem-hpx");
     sim.run();
 
     return 0;
