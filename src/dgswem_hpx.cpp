@@ -306,7 +306,7 @@ int main(int argc, char* argv[])
     SimulatorType sim(init,
 		      updateGroupSpeeds, 
 		      new TracingBalancer(new OozeBalancer()),
-		      int loadBalancingPeriod = 10;
+		      int loadBalancingPeriod = 10,
 		      ghostZoneWidth,
 		      "dgswem-hpx");
     sim.run();
