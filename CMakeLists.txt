@@ -37,6 +37,9 @@ if(NOT NO_LGD)
   include_directories(${libgeodecomp_INCLUDE_DIRS})
   
   message("libgeodecomp_INCLUDE_DIRS:" ${libgeodecomp_INCLUDE_DIRS})
+
 endif(NOT NO_LGD)
+
+set (CMAKE_CXX_FLAGS "-std=c++11")
 
 add_subdirectory(src)

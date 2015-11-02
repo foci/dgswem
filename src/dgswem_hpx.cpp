@@ -282,7 +282,7 @@ private:
 
 };
 
-typedef LibGeoDecomp::HpxSimulator::HpxSimulator<FortranCell, RecursiveBisectionPartition<s> > SimulatorType;
+typedef LibGeoDecomp::HpxSimulator::HpxSimulator<FortranCell, LibGeoDecomp::RecursiveBisectionPartition<2> > SimulatorType;
 
 int main(int argc, char* argv[])
 {
@@ -300,10 +300,11 @@ int main(int argc, char* argv[])
     // Needed by HPX simulator
     std::vector<double> updateGroupSpeeds(1, 1.0);
     int ghostZoneWidth = 1;
+    int total_rksteps = n_timesteps*(n_rksteps*2+1)+1;
     FortranInitializer *init = new FortranInitializer(n_domains, total_rksteps);
 
-    int total_rksteps = n_timesteps*(n_rksteps*2+1)+1;
-    SimulatorType sim(init,
+    SimulatorType sim(
+		      init,
 		      updateGroupSpeeds, 
 		      new TracingBalancer(new OozeBalancer()),
 		      int loadBalancingPeriod = 10,

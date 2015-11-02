@@ -52,26 +52,26 @@ list(APPEND DGSWEM_FORTRAN
 )
 
 add_executable(
-  dgswem_cpp_serial
-  dgswem_cpp.cpp
+  dgswem_hpx
+  dgswem_hpx.cpp
   fname.h
   fortran_declarations.hpp
   ${DGSWEM_FORTRAN}
 )
 
-if(NOT NO_LGD)
-  add_executable(
-    dgswem_lgd_serial
-    dgswem_lgd.cpp
-    fname.h
-    fortran_declarations.hpp
-    ${DGSWEM_FORTRAN}
-    )
-endif(NOT NO_LGD)
+#if(NOT NO_LGD)
+#  add_executable(
+#    dgswem_hpx
+#    dgswem_hpx.cpp
+#    fname.h
+#    fortran_declarations.hpp
+#    ${DGSWEM_FORTRAN}
+#    )
+#endif(NOT NO_LGD)
 
-target_link_libraries(dgswem_cpp_serial gfortran)
+#target_link_libraries(dgswem_cpp_serial gfortran)
 
-if (NOT NO_LGD)
-  target_link_libraries(dgswem_lgd_serial gfortran)
-  target_link_libraries(dgswem_lgd_serial geodecomp)
-endif(NOT NO_LGD)
+#if (NOT NO_LGD)
+  target_link_libraries(dgswem_hpx gfortran)
+  target_link_libraries(dgswem_hpx geodecomp)
+#endif(NOT NO_LGD)
