@@ -33,6 +33,14 @@ std::vector<int> neighboringDomainIDs(void *size, void *dg, void *global)
     std::copy(neighbors_fort, neighbors_fort + numneighbors_fort, ret.begin());
 
     return ret;
+
+    // Serialization function
+    template <class ARCHIVE>
+    void serialize(ARCHIVE& ar, unsigned)
+    {
+	throw std::runtime_error("no serialization yet!");
+    }
+
 }
 
 class DomainReference
@@ -163,12 +171,20 @@ public:
 	}
     }
 
+    // Serialization function
+    template <class ARCHIVE>
+    void serialize(ARCHIVE& ar, unsigned)
+    {
+	throw std::runtime_error("no serialization yet!");
+    }
 
+    /*
     template <class ARCHIVE>
     void serialize(ARCHIVE& ar, unsigned)
     {
 	ar & domainWrapper & neighbors_here & id & timestep & rkstep & update_step & exchange_step & advance_step;
     }
+    */
 
 private:
     boost::shared_ptr<FortranPointerWrapper> domainWrapper;
@@ -268,10 +284,19 @@ public:
         }
     }
 
+    /*
     template <class ARCHIVE>
     void serialize(ARCHIVE& ar, unsigned)
     {
 	ar & boost::serialization::base_object<SimpleInitializer<FortranCell> >(*this);
+    }
+    */
+
+    // Serialization function
+    template <class ARCHIVE>
+    void serialize(ARCHIVE& ar, unsigned)
+    {
+	throw std::runtime_error("no serialization yet!");
     }
 
 private:
@@ -284,7 +309,7 @@ private:
 
 typedef LibGeoDecomp::HpxSimulator::HpxSimulator<FortranCell, LibGeoDecomp::RecursiveBisectionPartition<2> > SimulatorType;
 
-int main(int argc, char* argv[])
+int hpx_main(int argc, char** argv)
 {
     // todo: these should be read in via config files
     int n_domains;
@@ -312,5 +337,17 @@ int main(int argc, char* argv[])
 		      "dgswem-hpx");
     sim.run();
 
-    return 0;
+    return hpx::finalize();
+}
+
+int main(int argc, char **argv)
+{
+
+    // We want HPX to run hpx_main() on all localities to avoid the
+    // initial overhead caused by broadcasting the work from one to
+    // all other localities:
+    std::vector<std::string> config(1, "hpx.run_hpx_main!=1");
+
+    return hpx::init(argc,argv,config);
+
 }
