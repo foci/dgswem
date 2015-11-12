@@ -13,7 +13,7 @@ to build using CMake:
 
 mkdir build
 cd build
-cmake -Dlibgeodecomp_DIR=${PATH_TO_LGD_INSTALL}/lib/cmake/libgeodecomp ..
+cmake -DCMAKE_CXX_COMPILER=/opt/gcc/5.2/bin/g++ -DCMAKE_C_COMPILER=/opt/gcc/5.2/bin/gcc -DCMAKE_PREFIX_PATH=/home/aschafer/local_install ..
 make
 
 ==============

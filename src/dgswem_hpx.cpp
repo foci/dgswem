@@ -35,11 +35,14 @@ std::vector<int> neighboringDomainIDs(void *size, void *dg, void *global)
     return ret;
 
     // Serialization function
+    /*
     template <class ARCHIVE>
     void serialize(ARCHIVE& ar, unsigned)
     {
 	throw std::runtime_error("no serialization yet!");
     }
+
+    */
 
 }
 
@@ -331,8 +334,8 @@ int hpx_main(int argc, char** argv)
     SimulatorType sim(
 		      init,
 		      updateGroupSpeeds, 
-		      new TracingBalancer(new OozeBalancer()),
-		      int loadBalancingPeriod = 10,
+		      new LibGeoDecomp::TracingBalancer(new LibGeoDecomp::OozeBalancer()),
+		      10,
 		      ghostZoneWidth,
 		      "dgswem-hpx");
     sim.run();

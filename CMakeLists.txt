@@ -40,6 +40,8 @@ if(NOT NO_LGD)
 
 endif(NOT NO_LGD)
 
-set (CMAKE_CXX_FLAGS "-std=c++11")
+set (CMAKE_CXX_FLAGS "-std=c++14")
+
+message("CMAKE_CXX_COMPILER:" ${CMAKE_CXX_COMPILER})
 
 add_subdirectory(src)
