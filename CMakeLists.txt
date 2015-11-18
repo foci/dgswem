@@ -22,7 +22,8 @@ message ("CMAKE_Fortran_COMPILER full path: " ${CMAKE_Fortran_COMPILER})
 
 if (Fortran_COMPILER_NAME MATCHES "gfortran.*")
   # gfortran
-  set (CMAKE_Fortran_FLAGS_RELEASE "-O3 -DHPX")
+  # set (CMAKE_Fortran_FLAGS_RELEASE "-O3 -DHPX")
+  set (CMAKE_Fortran_FLAGS_RELEASE   "-cpp -DHPX -DREAL8 -DCSCA -DLINUX -DRKSSP -DSLOPE5 -ffixed-line-length-none -ffree-line-length-none -Waliasing -Wno-tabs -Wline-truncation -Wsurprising -fcheck=all -g -fbacktrace -fimplicit-none -I CMakeFiles/${PROJECT_NAME}.dir/src/ -I .")
   set (CMAKE_Fortran_FLAGS_DEBUG   "-cpp -DHPX -DREAL8 -DCSCA -DLINUX -DRKSSP -DSLOPE5 -ffixed-line-length-none -ffree-line-length-none -Waliasing -Wno-tabs -Wline-truncation -Wsurprising -fcheck=all -g -fbacktrace -fimplicit-none -I CMakeFiles/${PROJECT_NAME}.dir/src/ -I .")
 #set (CMAKE_Fortran_FLAGS_DEBUG   "-O2 -cpp -DREAL8 -DCSCA -DLINUX -DRKSSP -DSLOPE5 -ffixed-line-length-none -ffree-line-length-none -Waliasing -Wno-tabs -Wline-truncation -Wsurprising -fcheck=all -g -fbacktrace -fimplicit-none")
   #elseif (Fortran_COMPILER_NAME MATCHES "ifort.*")
@@ -35,12 +36,13 @@ endif (Fortran_COMPILER_NAME MATCHES "gfortran.*")
 if(NOT NO_LGD)
   find_package(libgeodecomp REQUIRED)
   include_directories(${libgeodecomp_INCLUDE_DIRS})
-  
+  link_directories(${libgeodecomp_LIB_DIRS})
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${libgeodecomp_FLAGS} -L/home/gentryx/local_install/lib -O3")
   message("libgeodecomp_INCLUDE_DIRS:" ${libgeodecomp_INCLUDE_DIRS})
-
+  message("libgeodecomp")
 endif(NOT NO_LGD)
 
-set (CMAKE_CXX_FLAGS "-std=c++14")
+set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++14")
 
 message("CMAKE_CXX_COMPILER:" ${CMAKE_CXX_COMPILER})
 

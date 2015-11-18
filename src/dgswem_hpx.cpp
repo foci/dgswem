@@ -310,6 +310,21 @@ private:
 
 };
 
+#define LIBGEODECOMP_REGISTER_HPX_COMM_TYPE(CARGO)                      \
+    typedef LibGeoDecomp::HPXReceiver<CARGO>::receiveAction DummyReceiver_ ## CARGO ## _ReceiveAction; \
+    HPX_REGISTER_ACTION_DECLARATION(DummyReceiver_ ## CARGO ## _ReceiveAction); \
+    HPX_REGISTER_ACTION(DummyReceiver_ ## CARGO ## _ReceiveAction);     \
+    typedef hpx::components::simple_component<LibGeoDecomp::HPXReceiver<CARGO> > receiver_type_ ## CARGO; \
+    HPX_REGISTER_COMPONENT(receiver_type_ ## CARGO , DummyReceiver_ ## CARGO);
+
+LIBGEODECOMP_REGISTER_HPX_COMM_TYPE(FortranCell)
+
+typedef LibGeoDecomp::CoordBox<2> CoordBoxType;
+LIBGEODECOMP_REGISTER_HPX_COMM_TYPE(CoordBoxType)
+
+typedef std::vector<LibGeoDecomp::ContainerCell<DomainReference, 20ul, int> > ContainerCellType;
+LIBGEODECOMP_REGISTER_HPX_COMM_TYPE(ContainerCellType)
+
 typedef LibGeoDecomp::HpxSimulator::HpxSimulator<FortranCell, LibGeoDecomp::RecursiveBisectionPartition<2> > SimulatorType;
 
 int hpx_main(int argc, char** argv)

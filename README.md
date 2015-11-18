@@ -4,6 +4,10 @@ Discontinuous Galerkin Shallow Water Equation Model
 
 to build using CMake (without libgeodecomp):
 
+
+cmake -DCMAKE_C_COMPILER=/opt/gcc/5.2/bin/gcc -DCMAKE_CXX_COMPILER=/opt/gcc/5.2/bin/g++  -Dlibgeodecomp_DIR=/home/aschafer/local_install/lib/cmake/libgeodecomp/ ..
+
+
 mkdir build
 cd build
 cmake -DNO_LGD=true ..
