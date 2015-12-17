@@ -20,6 +20,19 @@ cd build
 cmake -DCMAKE_CXX_COMPILER=/opt/gcc/5.2/bin/g++ -DCMAKE_C_COMPILER=/opt/gcc/5.2/bin/gcc -DCMAKE_PREFIX_PATH=/home/aschafer/local_install ..
 make
 
+to run:
+export LD_LIBRARY_PATH=/opt/gcc/5.2/lib64:$LD_LIBRARY_PATH
+~aschafer/local_install/bin/hpxrun.py ../build/src/dgswem_hpx
+
+
+~aschafer/local_install/bin/hpxrun.py -t 4 -l 2 ../build_verbose/src/dgswem_hpx -- --hpx:ini=hpx.stacks.small_size=0x100000
+
+==============
+
+read_input.F90:215          CALL read_keyword_fort_dg(s,dg_here,global_here) ! otherwise assume keyword format                                                                  read_fort_dg.F90:111  SUBROUTINE READ_KEYWORD_FORT_DG(s,dg_here,global_here)
+                  
+ 
+
 ==============
 
 ## Changes made

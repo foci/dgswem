@@ -18,11 +18,15 @@
 
 std::vector<int> neighboringDomainIDs(void *size, void *dg, void *global)
 {
+    std::cout << "CPP: entering neighboringDomainIDs" << std::endl;
+
     int numneighbors_fort;
     int neighbors_fort[MAX_DOMAIN_NEIGHBORS];
     if (!size) {
         return std::vector<int>();
     }
+
+    std::cout << "CPP: about to call get_neighbors_fort" << std::endl;
 
     FNAME(get_neighbors_fort)(&size,
 			      &dg,
@@ -63,6 +67,7 @@ public:
 	~FortranPointerWrapper()
 	{
 	    if (size) {
+	      std::cout << "CPP: about to call term_fort" << std::endl;
 		FNAME(term_fort)(&size,&global,&dg,&nodalattr);
 	    }
 	}
@@ -90,15 +95,17 @@ public:
     template<typename HOOD>
     void update(const HOOD& hood, int nanoStep)
     {
+      std::cout << "CPP: LGD update" << std::endl;
 	if (timestep != 0) {
 
 	    if (update_step) {
-		/*
+		
 		std::cout << "updating (domain_id = " << id
 			  << ", timestep = " << timestep
 			  << ", rkstep = " << rkstep
 			  << ")...\n";
-		*/
+		
+                 std::cout << "CPP: about to call dg_hydro_timestep_fort" << std::endl;
 		FNAME(dg_hydro_timestep_fort)(&domainWrapper->size,
 					      &domainWrapper->dg,
 					      &domainWrapper->global,
@@ -123,7 +130,8 @@ public:
 		      std::cout << "domain " << id << " is exchanging with " << neighbor_here
 			      << std::endl;
 		    */
-		    // Get outgoing boundarys from the neighbors
+		    // Get outgoing boundarys from the neighbors	
+		    std::cout << "CPP: about to call hpx_get_elems_fort" << std::endl;		   
 		    FNAME(hpx_get_elems_fort)(&hood[neighbor_here].domainWrapper->dg,
 					      &id,
 					      &volume,
@@ -131,6 +139,7 @@ public:
 		    
 		    
 		    // Put those arrays inside current domain
+		    std::cout << "CPP: about to call hpx_put_elems_fort" << std::endl;
 		    FNAME(hpx_put_elems_fort)(&domainWrapper->dg,
 					      &neighbor_here,
 					      &volume,
@@ -154,6 +163,7 @@ public:
 		    
 	    } else if (advance_step) {	
 		//std::cout << "advancing domain " << id << std::endl;
+	      std::cout << "CPP: about to call dg_timestep_advance_fort" << std::endl;
 		FNAME(dg_timestep_advance_fort)(&domainWrapper->size,
 						&domainWrapper->dg,
 						&domainWrapper->global,
@@ -215,6 +225,8 @@ public:
         // Initialize domain decomposition
         std::vector<std::vector<int> > neighbors;
 
+	std::cout << "CPP: FortranInitializer: numDomains = " << numDomains << std::endl;
+
         for(int i = 0; i < numDomains ; i++) {
 	    // Initialize the domains temporarily to get grid information
 
@@ -229,19 +241,25 @@ public:
 	    LibGeoDecomp::FloatCoord<2> coord;
 
 	    int domain_number = i;
+	    std::cout << "CPP: about to call dgswem_init_fort" << std::endl;
 	    FNAME(dgswem_init_fort)(&size,
 				    &dg,
 				    &global,
 				    &nodalattr,
 				    &domain_number);
 
+	    std::cout << "CPP: about to call lgd_yield_subdomain_coord" << std::endl;
             FNAME(lgd_yield_subdomain_coord)(&global, &coord[0]);
             domainCoords << coord;
 	    neighbors.push_back(neighboringDomainIDs(size, dg, global));
 
 	    //destroy these domains
+	    std::cout << "CPP: about to call term_fort" << std::endl;
 	    FNAME(term_fort)(&size,&global,&dg,&nodalattr);
         }
+
+	std::cout << "CPP: FortranInitializer: done with loop over domains" << std::endl;
+
 
         mesher = LibGeoDecomp::UnstructuredGridMesher<2>(domainCoords, neighbors);
         dimensions = mesher.logicalGridDimension();
@@ -255,6 +273,9 @@ public:
     {
         LibGeoDecomp::CoordBox<2> box = grid->boundingBox();
 
+	std::cout << "CPP: entering LGD grid" << std::endl;
+	std::cout << "CPP: LGD grid: numDomains =" << numDomains << std::endl;
+
         for(int id = 0; id < numDomains ; id++) {
             // Create vectors of domain pointers and ids
 	    void *size = NULL;
@@ -263,14 +284,18 @@ public:
 	    void *nodalattr = NULL;
 
 	    int domain_number = id;
-
+	    
+	    std::cout << "CPP: LGD grid: about to call dgswem_init_fort, domain_number =" << domain_number << std::endl;
 	    FNAME(dgswem_init_fort)(&size,
 				    &dg,
 				    &global,
 				    &nodalattr,
 				    &domain_number);
+	    std::cout << "CPP: LGD grid: returned from dgswem_init_fort" << std::endl;
 	    
+
             LibGeoDecomp::FloatCoord<2> coord;
+	    std::cout << "CPP: about to call lgd_yield_subdomain_coord" << std::endl;
             FNAME(lgd_yield_subdomain_coord)(&global, &coord[0]);
             LibGeoDecomp::Coord<2> logicalCoord = mesher.positionToLogicalCoord(coord);
 
@@ -282,6 +307,7 @@ public:
                 cell.insert(id, DomainReference(id, size, global, dg, nodalattr));
                 grid->set(logicalCoord, cell);
             } else {
+	      std::cout << "CPP: about to call term_fort" << std::endl;
 		FNAME(term_fort)(&size,&global,&dg,&nodalattr);
             }
         }
@@ -331,9 +357,11 @@ int hpx_main(int argc, char** argv)
 {
     // todo: these should be read in via config files
     int n_domains;
+    std::cout << "CPP: about to call hpx_read_n_domains" << std::endl;
     FNAME(hpx_read_n_domains)(&n_domains);
 
-    int n_timesteps = 86401;
+    //    int n_timesteps = 86401;
+    int n_timesteps = 1000;
     //int n_timesteps = 4001;
     //int n_timesteps = 2;
 
