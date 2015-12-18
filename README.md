@@ -20,12 +20,18 @@ cd build
 cmake -DCMAKE_CXX_COMPILER=/opt/gcc/5.2/bin/g++ -DCMAKE_C_COMPILER=/opt/gcc/5.2/bin/gcc -DCMAKE_PREFIX_PATH=/home/aschafer/local_install ..
 make
 
+build in release:
+cmake -DCMAKE_CXX_COMPILER=/opt/gcc/5.2/bin/g++ -DCMAKE_C_COMPILER=/opt/gcc/5.2/bin/gcc -DCMAKE_PREFIX_PATH=/home/aschafer/local_install -DCMAKE_BUILD_TYPE=Release ..
+
 to run:
 export LD_LIBRARY_PATH=/opt/gcc/5.2/lib64:$LD_LIBRARY_PATH
 ~aschafer/local_install/bin/hpxrun.py ../build/src/dgswem_hpx
 
 
 ~aschafer/local_install/bin/hpxrun.py -t 4 -l 2 ../build_verbose/src/dgswem_hpx -- --hpx:ini=hpx.stacks.small_size=0x100000
+
+running with 2 threads:
+~/dgswem-hpx/build_marvin/src/dgswem_hpx --hpx:threads 2 --hpx:ini=hpx.stacks.small_size=0x1000000
 
 ==============
 
