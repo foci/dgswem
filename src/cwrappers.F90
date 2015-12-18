@@ -22,10 +22,12 @@ subroutine dgswem_init_fort(sizes_c_ptr,dg_c_ptr,global_c_ptr,nodalattr_c_ptr,id
   type (global_type), pointer :: global_here
   type (nodalattr_type), pointer :: nodalattr_here
 
-#ifdef VERBOSE
-!  print*, "FORTRAN: Entering dgswem_init_fort"
-!  print*, "FORTRAN: id =", id
   write(99,*) "Entering dgswem_init_fort, id =", id
+  flush(99)
+
+#ifdef VERBOSE
+  print*, "FORTRAN: Entering dgswem_init_fort"
+!  print*, "FORTRAN: id =", id
 #endif
 
   allocate(s)
