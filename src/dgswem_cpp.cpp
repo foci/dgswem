@@ -2,20 +2,9 @@
 #include "fname.h"
 #include <vector>
 
-#ifdef HPX
-#include <hpx/hpx.hpp>
-#include <hpx/hpx_start.hpp>
-#include <hpx/hpx_init.hpp>
-#include <hpx/include/actions.hpp>
-#include <hpx/include/components.hpp>
-#include <hpx/include/async.hpp>
-#include <hpx/include/util.hpp>
-#include <hpx/include/parallel_for_each.hpp>
-#endif
-
 #include "fortran_declarations.hpp" // This includes parameters defined
 
-int hpx_main(
+int main(
 	 int argc
 	 , char* argv[]
 	 )
@@ -29,10 +18,6 @@ int hpx_main(
 
   std::vector<int> numneighbors;
   std::vector<std::vector<int> > neighbors;
-  
-#ifdef HPX
-  std::vector<hpx::future<void> > inits;
-#endif
 
   //  int n_timesteps = 4000;
   int n_timesteps = 86400;
@@ -65,22 +50,12 @@ int hpx_main(
   // Initialize all domains
   for(int i=0; i<n_domains; i++) {
     std::cout << "initializing domain " << i << std::endl;
-#ifdef HPX
-    inits.push_back(hpx::async(FNAME(dgswem_init_fort),
-			       &sizes[i],
-			       &dgs[i],
-			       &globals[i],
-			       &nodalattrs[i],
-			       &ids[i]
-			       ));
-#else
     FNAME(dgswem_init_fort)(&sizes[i],
 			    &dgs[i],
 			    &globals[i],
 			    &nodalattrs[i],
 			    &ids[i]
 			    );
-#endif
     
     //Get a list of neighbors for each domain
 
@@ -107,9 +82,6 @@ int hpx_main(
     std::cout << "n_domains = " << n_domains << std::endl;
   } // End loop over domains
 
-#ifdef HPX
-  wait_all(inits);
-#endif
 
   // Print out some information about the domains and their neighbors
   std::cout << "*** Grid Information ***" << std::endl;
@@ -141,21 +113,8 @@ int hpx_main(
      std::cout << " rk loop, rkstep = " << rkstep << std::endl;
      std::cout << "#################################################################" << std::endl;   */  
       
-#ifdef HPX
-      std::vector<hpx::future<void> > updates;    
-#endif
       for (int j=0; j<ids.size(); j++) {
 	//std::cout << "j=" << j << std::endl;
-#ifdef HPX
-	updates.push_back(hpx::async(FNAME(dg_hydro_timestep_fort),
-				     &sizes[j],
-				     &dgs[j],
-				     &globals[j],
-				     &nodalattrs[j],
-				     &timestep,
-				     &rkstep
-				     ));
-#else
 	        std::cout << "updating (domain_id = " << ids[j]
 		  << ", timestep = " << timestep
 		  << ", rkstep = " << rkstep
@@ -167,11 +126,7 @@ int hpx_main(
 				&timestep,
 				&rkstep
 				);
-#endif
       } // End loop over domains
-#ifdef HPX
-      wait_all(updates);
-#endif
       
 
 
@@ -245,26 +200,5 @@ int hpx_main(
   }
   
   
-#ifdef HPX
-  return hpx::finalize();
-#else
-  return 0;
-#endif
-  
-} // End hpx_main
-
-
-int main(
-	 int argc
-	 , char* argv[]
-	 )
-{
-  // Initialize and run HPX
-  
-#ifdef HPX
-  hpx::init(argc,argv);
-#else  
-  hpx_main(argc,argv);
-#endif
-  return 0;
+  return 0;  
 }

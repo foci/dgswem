@@ -84,4 +84,7 @@ if (NOT NO_LGD)
   target_link_libraries(dgswem_hpx geodecomp hpx hpx_init)
   target_link_libraries(dgswem_hpx_nofortran gfortran)
   target_link_libraries(dgswem_hpx_nofortran geodecomp hpx hpx_init)
+  hpx_setup_target(dgswem_hpx)
+  hpx_setup_target(dgswem_hpx_nofortran)
+
 endif(NOT NO_LGD)

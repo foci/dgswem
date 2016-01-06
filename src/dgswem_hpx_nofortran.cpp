@@ -102,7 +102,7 @@ public:
       volatile double b;
       volatile double c;
       a = 23.2394908;
-      for (int i=0; i<1000; i++) {		
+      for (int i=0; i<1000000; i++) {		
 	//		for (int j=0; j<10000000; j++) {
 	b = 2.23423;
 	c = a/b;
@@ -383,7 +383,7 @@ LIBGEODECOMP_REGISTER_HPX_COMM_TYPE(CoordBoxType)
 typedef std::vector<LibGeoDecomp::ContainerCell<DomainReference, 20ul, int> > ContainerCellType;
 LIBGEODECOMP_REGISTER_HPX_COMM_TYPE(ContainerCellType)
 
-typedef LibGeoDecomp::HpxSimulator::HpxSimulator<FortranCell, LibGeoDecomp::RecursiveBisectionPartition<2> > SimulatorType;
+typedef LibGeoDecomp::HpxSimulator<FortranCell, LibGeoDecomp::RecursiveBisectionPartition<2> > SimulatorType;
 
 int hpx_main(int argc, char** argv)
 {
@@ -393,7 +393,7 @@ int hpx_main(int argc, char** argv)
     FNAME(hpx_read_n_domains)(&n_domains);
 
     //    int n_timesteps = 86401;
-    int n_timesteps = 10000;
+    int n_timesteps = 1000;
     //int n_timesteps = 4001;
     //int n_timesteps = 2;
 

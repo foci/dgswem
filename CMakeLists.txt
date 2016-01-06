@@ -35,18 +35,36 @@ if (Fortran_COMPILER_NAME MATCHES "gfortran.*")
 endif (Fortran_COMPILER_NAME MATCHES "gfortran.*")
 
 if(NOT NO_LGD)
+  
+  #LGD
   find_package(libgeodecomp REQUIRED)
   include_directories(${libgeodecomp_INCLUDE_DIRS})
   link_directories(${libgeodecomp_LIB_DIRS})
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${libgeodecomp_FLAGS} -L/home/gentryx/local_install/lib -O3")
-#  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${libgeodecomp_FLAGS} -L/home/gentryx/local_install/lib -DVERBOSE")
-  message("libgeodecomp_INCLUDE_DIRS:" ${libgeodecomp_INCLUDE_DIRS})
-  message("libgeodecomp_FLAGS:" ${libgeodecomp_FLAGS})
+
+  #HPX
+  find_package(HPX REQUIRED)
+  include_directories(${HPX_INCLUDE_DIRS})
+  link_directories(${HPX_LIBRARY_DIRS})
+  message("HPX_INCLUDE_DIRS:" ${HPX_INCLUDE_DIRS})
+  message("HPX_LIBRARY_DIR:" ${HPX_LIBRARY_DIR})
+  
+
+  #  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${libgeodecomp_FLAGS} ${HPX_FLAGS} -L/home/gentryx/local_install/lib -O3")
+
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${libgeodecomp_FLAGS} ${HPX_FLAGS}")
+  
+  #  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${libgeodecomp_FLAGS} -L/home/gentryx/local_install/lib -DVERBOSE")
+  #message("libgeodecomp_INCLUDE_DIRS:" ${libgeodecomp_INCLUDE_DIRS})
+  #message("libgeodecomp_FLAGS:" ${libgeodecomp_FLAGS})
 endif(NOT NO_LGD)
 
-set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++14")
+#set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++14")
 
 message("CMAKE_CXX_COMPILER:" ${CMAKE_CXX_COMPILER})
 message("CMAKE_BUILD_TYPE:" ${CMAKE_BUILD_TYPE})
+
+message("CMAKE_CXX_FLAGS:" ${CMAKE_CXX_FLAGS})
+message("CMAKE_INCLUDE_DIRECTORIES:" ${CMAKE_INCLUDE_DIRECTORIES})
+
 
 add_subdirectory(src)
