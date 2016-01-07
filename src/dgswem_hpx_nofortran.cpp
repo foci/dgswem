@@ -2,8 +2,9 @@
 #include <limits>
 #include <vector>
 #include <libgeodecomp.h>
-#include <libgeodecomp/geometry/unstructuredgridmesher.h>
 #include <libgeodecomp/io/logger.h>
+#include <libgeodecomp/storage/unstructuredgrid.h>
+#include <libgeodecomp/misc/apitraits.h>
 
 // Needed by HPX
 #include <libgeodecomp/parallelization/hpxsimulator.h>
@@ -12,22 +13,21 @@
 #include <libgeodecomp/loadbalancer/tracingbalancer.h>
 #include <libgeodecomp/geometry/partitions/recursivebisectionpartition.h>
 
-
 #include "fname.h"
 #include "fortran_declarations.hpp"
 
+//Defining settings for SELL-C-q
+static const std::size_t MATRICES = 1;
+static const int C = 4;
+static const int SIGMA = 1;
+
 std::vector<int> neighboringDomainIDs(void *size, void *dg, void *global)
 {
-  
-  //    std::cout << "CPP: entering neighboringDomainIDs" << std::endl;
-
     int numneighbors_fort;
     int neighbors_fort[MAX_DOMAIN_NEIGHBORS];
     if (!size) {
         return std::vector<int>();
     }
-
-    //    std::cout << "CPP: about to call get_neighbors_fort" << std::endl;
 
     FNAME(get_neighbors_fort)(&size,
 			      &dg,
@@ -38,22 +38,19 @@ std::vector<int> neighboringDomainIDs(void *size, void *dg, void *global)
     std::copy(neighbors_fort, neighbors_fort + numneighbors_fort, ret.begin());
 
     return ret;
-
-    // Serialization function
-    /*
-    template <class ARCHIVE>
-    void serialize(ARCHIVE& ar, unsigned)
-    {
-	throw std::runtime_error("no serialization yet!");
-    }
-
-    */
-
 }
 
 class DomainReference
 {
 public:
+    class API :
+        public LibGeoDecomp::APITraits::HasUnstructuredTopology,
+	public LibGeoDecomp::APITraits::HasSellType<double>,
+        public LibGeoDecomp::APITraits::HasSellMatrices<MATRICES>,
+        public LibGeoDecomp::APITraits::HasSellC<C>,
+        public LibGeoDecomp::APITraits::HasSellSigma<SIGMA>
+    {};
+
     class FortranPointerWrapper
     {
     public:
@@ -102,7 +99,8 @@ public:
       volatile double b;
       volatile double c;
       a = 23.2394908;
-      for (int i=0; i<1000000; i++) {		
+      std::cout << "timestep = " << timestep << " domainID = " << id << std::endl;
+      for (int i=0; i<1000000; i++) {
 	//		for (int j=0; j<10000000; j++) {
 	b = 2.23423;
 	c = a/b;
@@ -215,6 +213,7 @@ public:
   ++timestep;
  }
 */
+  ++timestep;
     }
 
     // Serialization function
@@ -244,73 +243,26 @@ private:
 
 };
 
-typedef LibGeoDecomp::ContainerCell<DomainReference, MAX_CELL_SIZE, int> FortranCell;
+//typedef LibGeoDecomp::ContainerCell<DomainReference, MAX_CELL_SIZE, int> FortranCell;
 
-class FortranInitializer : public LibGeoDecomp::SimpleInitializer<FortranCell>
+class FortranInitializer : public LibGeoDecomp::SimpleInitializer<DomainReference>
 {
 public:
-    using SimpleInitializer<FortranCell>::dimensions;
+    //using SimpleInitializer<DomainReference>::dimensions;
+
+    typedef LibGeoDecomp::UnstructuredGrid<DomainReference, MATRICES, double, C, SIGMA> Grid;
 
     FortranInitializer(std::size_t numDomains, std::size_t numSteps) :
-        SimpleInitializer<FortranCell>(LibGeoDecomp::Coord<2>(), numSteps),
+        SimpleInitializer<DomainReference>(LibGeoDecomp::Coord<1>(numDomains), numSteps),
         numDomains(numDomains)
     {
-        // Initialize domain decomposition
-        std::vector<std::vector<int> > neighbors;
-
-	//	std::cout << "CPP: FortranInitializer: numDomains = " << numDomains << std::endl;
-
-        for(int i = 0; i < numDomains ; i++) {
-	    // Initialize the domains temporarily to get grid information
-
-	    void *size = NULL;
-	    void *dg = NULL;
-	    void *global = NULL;
-	    void *nodalattr = NULL;
-
-	    int n_domains_fort;
-	    int n_rksteps_fort;
-	    
-	    LibGeoDecomp::FloatCoord<2> coord;
-
-	    int domain_number = i;
-	    //	    std::cout << "CPP: about to call dgswem_init_fort" << std::endl;
-	    FNAME(dgswem_init_fort)(&size,
-				    &dg,
-				    &global,
-				    &nodalattr,
-				    &domain_number);
-
-	    //	    std::cout << "CPP: about to call lgd_yield_subdomain_coord" << std::endl;
-            FNAME(lgd_yield_subdomain_coord)(&global, &coord[0]);
-            domainCoords << coord;
-	    neighbors.push_back(neighboringDomainIDs(size, dg, global));
-
-	    //destroy these domains
-	    //	    std::cout << "CPP: about to call term_fort" << std::endl;
-	    FNAME(term_fort)(&size,&global,&dg,&nodalattr);
-        }
-
-	//	std::cout << "CPP: FortranInitializer: done with loop over domains" << std::endl;
-
-
-        mesher = LibGeoDecomp::UnstructuredGridMesher<2>(domainCoords, neighbors);
-        dimensions = mesher.logicalGridDimension();
-
-        LOG(INFO, "FortranInitializer(\n"
-            << "  dimensions: " << dimensions << "\n"
-            << "  cellDimensions: " << mesher.cellDimension() << ")\n");
+	// Empty
     }
 
-    void grid(LibGeoDecomp::GridBase<FortranCell, 2> *grid)
+    LibGeoDecomp::Adjacency getAdjacency() const
     {
-        LibGeoDecomp::CoordBox<2> box = grid->boundingBox();
-
-	//	std::cout << "CPP: entering LGD grid" << std::endl;
-	//	std::cout << "CPP: LGD grid: numDomains =" << numDomains << std::endl;
-
+	LibGeoDecomp::Adjacency adjacency;
         for(int id = 0; id < numDomains ; id++) {
-            // Create vectors of domain pointers and ids
 	    void *size = NULL;
 	    void *dg = NULL;
 	    void *global = NULL;
@@ -318,40 +270,62 @@ public:
 
 	    int domain_number = id;
 	    
-	    //	    std::cout << "CPP: LGD grid: about to call dgswem_init_fort, domain_number =" << domain_number << std::endl;
 	    FNAME(dgswem_init_fort)(&size,
 				    &dg,
 				    &global,
 				    &nodalattr,
 				    &domain_number);
-	    //	    std::cout << "CPP: LGD grid: returned from dgswem_init_fort" << std::endl;
-	   	    
-            LibGeoDecomp::FloatCoord<2> coord;
-	    //	    std::cout << "CPP: about to call lgd_yield_subdomain_coord" << std::endl;
-            FNAME(lgd_yield_subdomain_coord)(&global, &coord[0]);
-            LibGeoDecomp::Coord<2> logicalCoord = mesher.positionToLogicalCoord(coord);
 
-            if (box.inBounds(logicalCoord)) {
-                LOG(INFO, "adding domain " << id
-                    <<  " to grid cell " << logicalCoord
-                    << " (is at position " << coord << ")\n");
-                FortranCell cell = grid->get(logicalCoord);
-                cell.insert(id, DomainReference(id, size, global, dg, nodalattr));
-                grid->set(logicalCoord, cell);
-            } else {
-	      //	      std::cout << "CPP: about to call term_fort" << std::endl;
-		FNAME(term_fort)(&size,&global,&dg,&nodalattr);
-            }
-        }
+	    // Get list of neighbors for this domain
+	    std::vector<int> neighbors_here = neighboringDomainIDs(size, dg, global);
+	    // Destroy the domain
+	    FNAME(term_fort)(&size,&global,&dg,&nodalattr);
+	    adjacency[id] = neighbors_here;
+	    }
+	return adjacency;
     }
 
-    /*
-    template <class ARCHIVE>
-    void serialize(ARCHIVE& ar, unsigned)
+    void grid(LibGeoDecomp::GridBase<DomainReference, 1> *grid)
     {
-	ar & boost::serialization::base_object<SimpleInitializer<FortranCell> >(*this);
+	
+
+	// The "double" below is just the weighting, 
+	// we can ignore this for DGSWEM
+        std::map<LibGeoDecomp::Coord<2>, double> adjacency;	
+	
+	// Loop only over the domains we need to
+	int origin = grid->boundingBox().origin[0];
+	int end = origin + grid->boundingBox().dimensions[0];
+	for (int id = origin; id < end; ++id) {
+	    void *size = NULL;
+	    void *dg = NULL;
+	    void *global = NULL;
+	    void *nodalattr = NULL;
+
+	    int domain_number = id;
+	    
+	    FNAME(dgswem_init_fort)(&size,
+				    &dg,
+				    &global,
+				    &nodalattr,
+				    &domain_number);
+
+	    // Get list of neighbors for this domain
+	    std::vector<int> neighbors_here = neighboringDomainIDs(size, dg, global);
+	    
+	    // Loop over all the neighbors
+	    for (int i=0; i<neighbors_here.size(); i++) {
+		// Adding adjacency information - pairs of neighbors
+		// 1.0 is the weighting, which is unused for DGSWEM
+		adjacency[LibGeoDecomp::Coord<2>(id, neighbors_here[i])] = 1.0;
+	    }
+
+	    DomainReference cell(id, size, global, dg, nodalattr);
+	    grid->set(LibGeoDecomp::Coord<1>(id), cell);
+        }
+	Grid *unstructuredgrid = dynamic_cast<Grid *>(grid);
+	unstructuredgrid->setAdjacency(0, adjacency);
     }
-    */
 
     // Serialization function
     template <class ARCHIVE>
@@ -361,29 +335,32 @@ public:
     }
 
 private:
-    char base_path_buf[1024];
-    LibGeoDecomp::UnstructuredGridMesher<2> mesher;
     std::size_t numDomains;
-    std::vector<LibGeoDecomp::FloatCoord<2> > domainCoords;
 
 };
 
-#define LIBGEODECOMP_REGISTER_HPX_COMM_TYPE(CARGO)                      \
-    typedef LibGeoDecomp::HPXReceiver<CARGO>::receiveAction DummyReceiver_ ## CARGO ## _ReceiveAction; \
-    HPX_REGISTER_ACTION_DECLARATION(DummyReceiver_ ## CARGO ## _ReceiveAction); \
-    HPX_REGISTER_ACTION(DummyReceiver_ ## CARGO ## _ReceiveAction);     \
-    typedef hpx::components::simple_component<LibGeoDecomp::HPXReceiver<CARGO> > receiver_type_ ## CARGO; \
-    HPX_REGISTER_COMPONENT(receiver_type_ ## CARGO , DummyReceiver_ ## CARGO);
+//#define LIBGEODECOMP_REGISTER_HPX_COMM_TYPE(CARGO)			\
+//    typedef LibGeoDecomp::HPXReceiver<CARGO>::receiveAction DummyReceiver_ ## CARGO ## _ReceiveAction; \
+//    HPX_REGISTER_ACTION_DECLARATION(DummyReceiver_ ## CARGO ## _ReceiveAction); \
+//    HPX_REGISTER_ACTION(DummyReceiver_ ## CARGO ## _ReceiveAction);	\
 
-LIBGEODECOMP_REGISTER_HPX_COMM_TYPE(FortranCell)
+//    typedef hpx::components::simple_component<LibGeoDecomp::HPXReceiver<CARGO> > receiver_type_ ## CARGO; \
+//    HPX_REGISTER_COMPONENT(receiver_type_ ## CARGO , DummyReceiver_ ## CARGO);
 
-typedef LibGeoDecomp::CoordBox<2> CoordBoxType;
-LIBGEODECOMP_REGISTER_HPX_COMM_TYPE(CoordBoxType)
+LIBGEODECOMP_REGISTER_HPX_COMM_TYPE(DomainReference)
 
-typedef std::vector<LibGeoDecomp::ContainerCell<DomainReference, 20ul, int> > ContainerCellType;
-LIBGEODECOMP_REGISTER_HPX_COMM_TYPE(ContainerCellType)
+//typedef LibGeoDecomp::CoordBox<2> CoordBoxType;
+//LIBGEODECOMP_REGISTER_HPX_COMM_TYPE(CoordBoxType)
 
-typedef LibGeoDecomp::HpxSimulator<FortranCell, LibGeoDecomp::RecursiveBisectionPartition<2> > SimulatorType;
+//typedef std::vector<LibGeoDecomp::ContainerCell<DomainReference, 20ul, int> > ContainerCellType;
+//LIBGEODECOMP_REGISTER_HPX_COMM_TYPE(std::vector<DomainReference>)
+
+//This is a hack
+typedef LibGeoDecomp::CoordBox<1> CoordBox1;
+LIBGEODECOMP_REGISTER_HPX_COMM_TYPE(CoordBox1)
+
+//Change me:
+typedef LibGeoDecomp::HpxSimulator<DomainReference, LibGeoDecomp::UnstructuredStripingPartition> SimulatorType;
 
 int hpx_main(int argc, char** argv)
 {
@@ -393,7 +370,7 @@ int hpx_main(int argc, char** argv)
     FNAME(hpx_read_n_domains)(&n_domains);
 
     //    int n_timesteps = 86401;
-    int n_timesteps = 1000;
+    int n_timesteps = 100;
     //int n_timesteps = 4001;
     //int n_timesteps = 2;
 
