@@ -351,7 +351,7 @@ LIBGEODECOMP_REGISTER_HPX_COMM_TYPE(CoordBoxType)
 typedef std::vector<LibGeoDecomp::ContainerCell<DomainReference, 20ul, int> > ContainerCellType;
 LIBGEODECOMP_REGISTER_HPX_COMM_TYPE(ContainerCellType)
 
-typedef LibGeoDecomp::HpxSimulator::HpxSimulator<FortranCell, LibGeoDecomp::RecursiveBisectionPartition<2> > SimulatorType;
+typedef LibGeoDecomp::HpxSimulator<FortranCell, LibGeoDecomp::RecursiveBisectionPartition<2> > SimulatorType;
 
 int hpx_main(int argc, char** argv)
 {
@@ -376,7 +376,7 @@ int hpx_main(int argc, char** argv)
 
     SimulatorType sim(
 		      init,
-		      updateGroupSpeeds, 
+		      updateGroupSpeeds,
 		      new LibGeoDecomp::TracingBalancer(new LibGeoDecomp::OozeBalancer()),
 		      10,
 		      ghostZoneWidth,
