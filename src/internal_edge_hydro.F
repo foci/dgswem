@@ -607,24 +607,26 @@ C........Check to make sure mass flux is not coming from a dry element
             G_HAT_IN = G_HAT_IN + 0.5D0*(LZ_XX_IN*SFAC_IN + 
      &           LZ_XX_EX*SFAC_EX)*NX
      &           + 0.5D0*(LZ_XY_IN + LZ_XY_EX)*NY
-cnd try adding the penalty term in the LDG method
-      !$           +ESLM*.01D0*(QX_IN-QX_EX)
+
             H_HAT_IN = H_HAT_IN + 0.5D0*(LZ_YX_IN*SFAC_IN + 
      &           LZ_YX_EX*SFAC_EX)*NX
      &           + 0.5D0*(LZ_YY_IN + LZ_YY_EX)*NY
-cnd try adding the penalty term in the LDG method
-      !$           +ESLM*.01D0*(QY_IN-QY_EX)
+           
             G_HAT_EX = G_HAT_EX + 0.5D0*(LZ_XX_IN*SFAC_IN
      &           + LZ_XX_EX*SFAC_EX)*NX
      &           + 0.5D0*(LZ_XY_IN + LZ_XY_EX)*NY
-cnd try adding the penalty term in the LDG method
-      !$           +ESLM*.01D0*(QX_IN-QX_EX)
+
             H_HAT_EX = H_HAT_EX + 0.5D0*(LZ_YX_IN*SFAC_IN
      &           + LZ_YX_EX*SFAC_EX)*NX
      &           + 0.5D0*(LZ_YY_IN + LZ_YY_EX)*NY
-cnd try adding the penalty term in the LDG method
-      !$           +ESLM*.01D0*(QY_IN-QY_EX) 
 
+cnd try adding the penalty term in the LDG method
+#ifdef ERROR
+            G_HAT_IN = G_HAT_IN + ESLM*.01D0*(QX_IN-QX_EX)
+            H_HAT_IN = H_HAT_IN + ESLM*.01D0*(QY_IN-QY_EX)
+            G_HAT_EX = G_HAT_EX + ESLM*.01D0*(QX_IN-QX_EX)
+            H_HAT_EX = H_HAT_EX + ESLM*.01D0*(QY_IN-QY_EX) 
+#endif
 #ifdef TRACE
 
             I_HAT_O = I_HAT_O + 0.5D0*(TZ_X_IN*SFAC_IN+TZ_X_EX*SFAC_EX)*NX + 
@@ -636,6 +638,7 @@ cnd try adding the penalty term in the LDG method
 
                                 !Let us add some sediment diffusion
 #ifdef SED_LAY
+
             do ll=1,layers
                bed_HAT_IN(ll) = bed_HAT_IN(ll) + 0.5D0 * ( (MZ_X_IN(ll)+
      &              MZ_X_EX(ll))*SFAC_IN*NX+(MZ_Y_IN(ll)+MZ_Y_EX(ll))*NY)

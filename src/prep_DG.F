@@ -29,6 +29,9 @@ C.....Use appropriate modules
       USE DG
       USE NodalAttributes, ONLY : STARTDRY, FRIC, GeoidOffset,
      $     LoadGeoidOffset,LoadManningsN,ManningsN
+#ifdef ERROR
+      USE CONT_INT_TEST
+#endif
 #ifdef CMPI
       USE MESSENGER_ELEM
       USE MESSENGER
@@ -40,7 +43,7 @@ C.....Declare local variables
 
       INTEGER II, l, P_0, DOF_0,j,k,kk,jj,i,chi,ll,mm
       REAL(SZ) AREA, ANGLE_SUM, HBB(3), CASUM, DP_MIN,temp_lay
-      REAL(SZ) XI, YI, ZE1, ZE2, ZE3, l2er,l2erh2,xcen,ycen,epsl,pi_n
+      REAL(SZ) XI, YI, ZE1, ZE2, ZE3, l2er,l2erh2,xcen,ycen,epsl
       REAL(SZ) ZP(3), DHBX, ell_1,ell_2,ell_3,int_hb,int_ze,int_yd
 
       real(sz) checkarea,arint(2,2),rhsint(2),edgeint,dpsdx,psimid,
@@ -48,13 +51,13 @@ C.....Declare local variables
       integer i1,i2,sfac_flag,led
       integer ifac2max,ifac3max
 
-      real(sz) xmid,ymid,Ox,Oy,rev,C_0,sig,C_1
+      real(sz) xmid,ymid,C_0,sig,C_1
 
-      Real(SZ),allocatable :: XBCbt(:),YBCbt(:),radial(:),XB(:),YB(:),l2e(:)
+      Real(SZ),allocatable :: XB(:),YB(:),l2e(:)
       Real(SZ),allocatable :: iota_check(:),iota_check2(:),hbo(:,:,:), ydubo(:,:)
       Real(SZ),allocatable :: YELEM(:),YED(:),HB1(:,:,:,:), zeo(:,:,:)
 
-      Allocate ( XBCbt(MNE),YBCbt(MNE),radial(MNE),XB(MNE),YB(MNE),l2e(MNE) )
+      Allocate (XB(MNE),YB(MNE),l2e(MNE) )
       Allocate ( iota_check(MNE),iota_check2(MNE),hbo(36,MNE,1),ydubo(36,mne) ) 
       Allocate ( YELEM(ph),YED(ph),hb1(36,mne,1,ph), zeo(36,mne,1) )
 
@@ -479,81 +482,13 @@ C.....Do the L2-projection of the initial conditions
       ze = 0.D0
       ydub = 0.d0
       hb1 = 0.D0
-
-c$$$      do k = 1,MNE
-c$$$
-c$$$         
-c$$$         n1 = NM(k,1)
-c$$$         n2 = NM(k,2)
-c$$$         n3 = NM(k,3)
-c$$$                                !Define lagrange transform
-c$$$
-c$$$         do mm = 1,nagp(ph)     !ICs should not have higher order than ph
-c$$$
-c$$$            ell_1 = -0.5D0 * ( xagp(mm,ph) + yagp(mm,ph) )
-c$$$            ell_2 =  0.5D0 * ( xagp(mm,ph) + 1.D0 )
-c$$$            ell_3 =  0.5D0 * ( yagp(mm,ph) + 1.D0 )
-c$$$
-c$$$            XBCbt(k) = x(n1)*ell_1 + x(n2)*ell_2 + x(n3)*ell_3
-c$$$            YBCbt(k) = y(n1)*ell_1 + y(n2)*ell_2 + y(n3)*ell_3
-c$$$
-c$$$
-c$$$            rev =  3.141592653589793D0 / 4.D0
-c$$$
-c$$$            Ox = XBCbt(k)*cos(rev) - YBCbt(k)*sin(rev)
-c$$$            Oy = YBCbt(k)*cos(rev) + XBCbt(k)*sin(rev)
-c$$$
-c$$$            radial(k) = min(sqrt( Ox**2 + (Oy + 0.25D0)**2 ), 0.18D0)/0.18D0
-c$$$
-c$$$
-c$$$            do j = 1,dofh
-c$$$
-c$$$               QX(j,k,1) = QX(j,k,1) + YBCbt(k) * wagp(mm,ph) * phi_area(j,mm,ph)
-c$$$
-c$$$               QY(j,k,1) = QY(j,k,1) - XBCbt(k) * wagp(mm,ph) * phi_area(j,mm,ph)        
-c$$$
-c$$$               iota(j,k,1) = iota(j,k,1) + 0.25D0 *( 1.0D0 + cos(3.141592653589793D0*radial(k)) ) 
-c$$$     &              * wagp(mm,ph) * phi_area(j,mm,ph)  
-c$$$               
-c$$$c$$$               iota(j,k,1) = iota(j,k,1) + 0.5D0 *( exp ( - ( (XBCbt(k)+.05D0)**2 + (YBCbt(k)+.05D0)**2  ) /0.001D0 ) ) 
-c$$$c$$$     &              * wagp(mm,ph) * phi_area(j,mm,ph) 
-c$$$
-c$$$               if( ( sqrt((Ox + 0.25D0 )**2 + Oy**2)).le.0.18D0.and.(sqrt((Ox + 0.25D0 )**2 + 
-c$$$     &              Oy**2)).ge.0.025D0.and.(Ox.le.(-0.23D0) )) then
-c$$$
-c$$$                  iota(j,k,1) = iota(j,k,1) + 1.0D0 * wagp(mm,ph) * phi_area(j,mm,ph) 
-c$$$
-c$$$               elseif(sqrt( (Ox -.25D0)**2 + Oy**2 ).le.0.18D0 ) then
-c$$$
-c$$$                  iota(j,k,1) =  iota(j,k,1) + (1.D0 - ( 1.D0 / 0.18D0 ) * sqrt((Ox -0.25D0)**2 + Oy**2 ) ) 
-c$$$     &                 * wagp(mm,ph) * phi_area(j,mm,ph) 
-c$$$
-c$$$               endif
-c$$$
-c$$$               hb(j,k,1) = hb(j,k,1) + 1.D0*wagp(mm,ph) * phi_area(j,mm,ph)
-c$$$
-c$$$            enddo
-c$$$
-c$$$
-c$$$         enddo
-c$$$
-c$$$                                ! get back the coeffs in each component
-c$$$
-c$$$         do j= 1,dofh
-c$$$
-c$$$            QX(j,k,1) =  QX(j,k,1) * M_inv(j,ph)
-c$$$            QY(j,k,1) =  QY(j,k,1) * M_inv(j,ph)
-c$$$            iota(j,k,1) =  iota(j,k,1) * M_inv(j,ph)
-c$$$            hb(j,k,1) =  hb(j,k,1) * M_inv(j,ph)
-c$$$
-c$$$         enddo
-c$$$
-c$$$      enddo
-
-      !iotaa = iota
- 
+#ifdef ERROR
+      CALL INTIALIZE_MAN_SOLN(hbo,hb1,ydubo)
+#else 
       hb(1:dofh,:,1) = hbo(1:dofh,:,1)
       ze(1:dofh,:,1) = zeo(1:dofh,:,1)
+#endif
+
       ydub(1:dofh,:,1) = ydubo(1:dofh,:)
 
       do chi=pl,ph
@@ -571,6 +506,9 @@ c$$$      enddo
          bed(:,:,1,ll) = hb(:,:,1) / layers
          
       enddo
+#ifdef ERROR
+      iotaa = bed(:,:,:,1)
+#endif
 
 #endif      
 
@@ -684,7 +622,6 @@ C.......the quadrature points and compute volume of water
                      XFAC(K,I,J,chi)  = M_INV(K,chi)*WAGP(I,chi)*DPHIDX
                      YFAC(K,I,J,chi)  = M_INV(K,chi)*WAGP(I,chi)*DPHIDY
                      SRFAC(K,I,J,chi) = M_INV(K,chi)*WAGP(I,chi)*PHI_AREA(K,I,chi)
-                     BATH(I,J,chi) = BATH(I,J,chi) + HB(K,J,1)*PHI_AREA(K,I,chi)
                      YELEM(chi) = YELEM(chi) + YDUB(K,J,chi)*PHI_AREA(K,I,chi)
                      
                      IF (ICS.EQ.1) THEN
@@ -692,10 +629,17 @@ C.......the quadrature points and compute volume of water
                      ELSE
                         SFAC_ELEM(I,J,chi)=COS(SFEA0)/COS(YELEM(chi)/R)
                      ENDIF
-
+#if defined (ERROR) &&  defined (SED_LAY)
+                     BATH(I,J,chi) = BATH(I,J,chi) + HB1(K,J,1,chi)*PHI_AREA(K,I,chi)
+                     DBATHDX(I,J,chi) = DBATHDX(I,J,chi) + HB1(K,J,1,chi)*DPHIDX
+                     DBATHDY(I,J,chi) = DBATHDY(I,J,chi) + HB1(K,J,1,chi)*DPHIDY
+                     DP_VOL(J,chi) = DP_VOL(J,chi) + WAGP(I,chi)*HB1(K,J,1,chi)*PHI_AREA(K,I,chi)
+#else
+                     BATH(I,J,chi) = BATH(I,J,chi) + HB(K,J,1)*PHI_AREA(K,I,chi)
                      DBATHDX(I,J,chi) = DBATHDX(I,J,chi) + HB(K,J,1)*DPHIDX
                      DBATHDY(I,J,chi) = DBATHDY(I,J,chi) + HB(K,J,1)*DPHIDY
                      DP_VOL(J,chi) = DP_VOL(J,chi) + WAGP(I,chi)*HB(K,J,1)*PHI_AREA(K,I,chi)
+#endif
 
                   ENDDO
 
@@ -717,7 +661,6 @@ C.......the quadrature points and compute volume of water
                      XFAC(K,I,J,chi)  = M_INV(K,chi)*WAGP(I,chi)*DPHIDX
                      YFAC(K,I,J,chi)  = M_INV(K,chi)*WAGP(I,chi)*DPHIDY
                      SRFAC(K,I,J,chi) = M_INV(K,chi)*WAGP(I,chi)*PHI_AREA(K,I,chi)
-                     BATH(I,J,chi) = BATH(I,J,chi) + HB(K,J,1)*PHI_AREA(K,I,chi)
                      YELEM(chi) = YELEM(chi) + YDUB(K,J,chi)*PHI_AREA(K,I,chi)
                      
                      IF (ICS.EQ.1) THEN
@@ -725,10 +668,17 @@ C.......the quadrature points and compute volume of water
                      ELSE
                         SFAC_ELEM(I,J,chi)=COS(SFEA0)/COS(YELEM(chi)/R)
                      ENDIF
-
+#if defined (ERROR) &&  defined (SED_LAY)
+                     BATH(I,J,chi) = BATH(I,J,chi) + HBo(K,J,1)*PHI_AREA(K,I,chi)
+                     DBATHDX(I,J,chi) = DBATHDX(I,J,chi) + HBo(K,J,1)*DPHIDX
+                     DBATHDY(I,J,chi) = DBATHDY(I,J,chi) + HBo(K,J,1)*DPHIDY
+                     DP_VOL(J,chi) = DP_VOL(J,chi) + WAGP(I,chi)*HBo(K,J,1)*PHI_AREA(K,I,chi)
+#else
+                     BATH(I,J,chi) = BATH(I,J,chi) + HB(K,J,1)*PHI_AREA(K,I,chi)
                      DBATHDX(I,J,chi) = DBATHDX(I,J,chi) + HB(K,J,1)*DPHIDX
                      DBATHDY(I,J,chi) = DBATHDY(I,J,chi) + HB(K,J,1)*DPHIDY
                      DP_VOL(J,chi) = DP_VOL(J,chi) + WAGP(I,chi)*HB(K,J,1)*PHI_AREA(K,I,chi)
+#endif
 
                   ENDDO
 
@@ -753,9 +703,11 @@ C.......the quadrature points and compute volume of water
                      yed(chi) = 0.d0
 
                      DO K = 1,(chi+1)*(chi+2)/2
-                        
+#if defined (ERROR) &&  defined (SED_LAY)
+                        BATHED(I,L,J,chi) = BATHED(I,L,J,chi)+HB1(K,J,1,chi)*PHI_EDGE(K,I,L,chi)
+#else
                         BATHED(I,L,J,chi) = BATHED(I,L,J,chi)+HB(K,J,1)*PHI_EDGE(K,I,L,chi)
-
+#endif
                         YED(chi) = YED(chi) + YDUB(K,J,chi)*PHI_EDGE(K,I,L,chi)
 
                         IF (ICS.EQ.1) THEN
@@ -779,9 +731,11 @@ C.......the quadrature points and compute volume of water
                      yed(chi) = 0.d0
 
                      DO K = 1,(chi+1)*(chi+2)/2
-                        
+#if defined (ERROR) &&  defined (SED_LAY)                        
+                        BATHED(I,L,J,chi) = BATHED(I,L,J,chi)+HB1(K,J,1,chi)*PHI_EDGE(K,I,L,chi)
+#else
                         BATHED(I,L,J,chi) = BATHED(I,L,J,chi)+HB(K,J,1)*PHI_EDGE(K,I,L,chi)
-
+#endif
                         YED(chi) = YED(chi) + YDUB(K,J,chi)*PHI_EDGE(K,I,L,chi)
 
                         IF (ICS.EQ.1) THEN

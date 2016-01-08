@@ -67,6 +67,7 @@ C.....Declare real variables
       REAL(SZ) ZE_EX, ZE_IN, QMag_IN, QMag_EX
       Real(SZ) subphi_IN,subphi_EX
       Real(SZ) iota_EX, iota_IN,iota2_EX, iota2_IN
+      Real(SZ) dynP_EX, dynP_IN 
 
 C     sb...Wetting and drying
       INTEGER, ALLOCATABLE :: WDFLG(:) ! = 1 if wet, =0 if dry

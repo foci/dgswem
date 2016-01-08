@@ -38,6 +38,10 @@ Casey 101118: Add variables for coupling to SWAN.
      &                       InterpoWeight
 #endif
 
+#ifdef ERROR
+      USE CONT_INT_TEST
+#endif
+
       IMPLICIT NONE
       
 C.....Declare local variables
@@ -46,13 +50,10 @@ C.....Declare local variables
       INTEGER IT,L,GED,NBOREL,NNBORS,NDRYNBORS,Istop,k,j,kk,i,mm
       INTEGER Detected,flagger,store
       REAL(SZ) QBCT1,QBCT2,QBC1,QBC2,ZP(3),QXP(3),QXP_OLD(3),
-     $     QYP(3),QYP_OLD(3),ZP_OLD(3),ell_1,ell_2,ell_3
+     $     QYP(3),QYP_OLD(3),ZP_OLD(3),ell_1,ell_2,ell_3,pi_n
       REAL(SZ) DPAVG, ITDT, ARK, BRK, CRK, DRK, ERK,s,alph,eta,seta
-      Real(sz) tempx,tempy,rev,Ox,Oy,time_at,C_0,C_1,sig,sigma
+      Real(sz) sigma
 
-      Real(SZ),allocatable :: XB(:),YB(:),radial(:)
-
-      Allocate ( XB(MNE),YB(MNE),radial(MNE) )
 
 C.....Compute the current time
 
@@ -203,11 +204,18 @@ C.......SSP Runge-Kutta Time Scheme
 
                   ZE(K,J,IRK+1) = ZE(K,J,irk+1) + ARK*ZE(K,J,I)
      &                 + BRK*RHS_ZE(K,J,I) 
+#ifdef ERROR
+#ifdef TRACE
+                  ZE(K,J,IRK+1) = ZE(K,J,1)
+#endif
+                  QX(K,J,IRK+1) = QX(K,J,1)
+                  QY(K,J,IRK+1) = QY(K,J,1)
+#else
                   QX(K,J,IRK+1) = QX(K,J,irk+1) + ARK*QX(K,J,I)
      &                 + BRK*RHS_QX(K,J,I)
                   QY(K,J,IRK+1) = QY(K,J,irk+1) + ATVD(IRK,I)*QY(K,J,I)
      &                 + BRK*RHS_QY(K,J,I)
-
+#endif
 
 C.......Compute the transported tracer term if flagged
 
@@ -547,6 +555,13 @@ C.......p_enrich soln and update
 #endif
 
  100  CONTINUE
+
+
+            !!!Exact form
+
+#ifdef ERROR
+      CALL TRUE_MAN_SOLN()
+#endif
 
 C.....Update variables for next time step
 

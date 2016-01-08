@@ -79,7 +79,7 @@ PGLO_MSRC  =  pre_global.F
 POST_MSRC  =  post_global.F
 ADC_MSRC   =  sizes.F diff45_41.F global.F dg.F global_3dvs.F nodalattr.F fparser.F90 fparser2.F90
 HARM_MSRC  =  harm.F  
-WIND_MSRC  =  wind.F  
+WIND_MSRC  =  wind.F
 #Casey 121126: Add file for coupling to unstructured SWAN.
 COUP_MSRC  =  couple2swan.F
 
@@ -111,7 +111,8 @@ ADC_SRC    =  dgswem.F owiwind.F read_input.F cstart.F hstart.F radiation_edge_h
 	quad_pts_edge.F radiation_edge_hydro.F read_input.F rhs_dg_hydro.F \
 	numerical_flux.F tidal_potential.F write_results.F \
 	slopelimiter.F prep_slopelim.F ocean_edge_hydro_post.F ocean_flow_edge_hydro.F \
-	wetdry.F LDG_hydro.F met_forcing.F sta_basis.F modal2nodal.F write_output.F
+	wetdry.F LDG_hydro.F met_forcing.F sta_basis.F modal2nodal.F write_output.F \
+	cont_int_test.F
 #Casey 121126: Added modal2nodal.F and write_output.F to the previous line.
 
 METIS1_OBJ:= $(patsubst %.F, $(O_DIR)%.o, $(METIS1_SRC) )
@@ -151,8 +152,8 @@ SWAN_OBJ:= $(patsubst %.f90, $(O_DIR)%.o, $(SWAN_OBJ) )
 ######################## compilation rules #####################################
 
 $(O_DIR)%.o  : %.F
-#  @echo depend $<
-#  @echo target $@
+	  @echo depend $<
+	  @echo target $@
 	$(CF) -c $(FFLAGS) -o $@  $<
 	if [ "`echo *.mod`" != '*.mod' ]; then mv *.mod $(O_DIR); fi
 
@@ -217,7 +218,7 @@ else
    adcpost ::  $(POST_OBJ) 
 	$(CF) $(FFLAGS) -o $@  $(O_DIR)*.o
 
-   dgswem_serial ::  $(ADC_OBJ) 
+   dgswem_serial ::  $(ADC_OBJ)
 	$(CF) $(FFLAGS) -o $@  $(O_DIR)*.o
 
    dgswem ::  $(MSG_MOBJ) $(MSG_OBJ) $(ADC_OBJ) 
@@ -304,6 +305,7 @@ $(O_DIR)couple2swan.o                   :  couple2swan.F $(ADC_MOBJ)
 
 #  adcirc & padcirc
 
+$(O_DIR)cont_int_test.o                 :  cont_int_test.F $(O_DIR)sizes.o $(O_DIR)dg.o
 $(O_DIR)owiwind.o   			:  owiwind.F $(ADC_MOBJ)
 $(O_DIR)read_input.o  			:  read_input.F $(ADC_MOBJ) $(HARM_MOBJ) $(WIND_MOBJ)
 $(O_DIR)cstart.o      			:  cstart.F $(ADC_MOBJ)  $(HARM_MOBJ)  $(WIND_MOBJ)
@@ -313,7 +315,7 @@ $(O_DIR)calc_normal.o         	:  calc_normal.F $(ADC_MOBJ)
 $(O_DIR)create_edge_data.o    	:  create_edge_data.F $(ADC_MOBJ)
 $(O_DIR)detector.o	      	:  detector.F $(ADC_MOBJ)
 $(O_DIR)DG_timestep.o         	:  DG_timestep.F $(ADC_MOBJ)
-$(O_DIR)DG_hydro_timestep.o   	:  DG_hydro_timestep.F $(ADC_MOBJ)
+$(O_DIR)DG_hydro_timestep.o   	:  DG_hydro_timestep.F $(O_DIR)cont_int_test.o $(ADC_MOBJ)
 $(O_DIR)edge_int_hydro.o      	:  edge_int_hydro.F $(ADC_MOBJ)
 $(O_DIR)flow_edge_hydro.o     	:  flow_edge_hydro.F $(ADC_MOBJ)
 $(O_DIR)internal_edge_hydro.o 	:  internal_edge_hydro.F $(ADC_MOBJ)
@@ -322,17 +324,17 @@ $(O_DIR)ocean_edge_hydro.o    	:  ocean_edge_hydro.F $(ADC_MOBJ)
 $(O_DIR)orthobasis_area.o     	:  orthobasis_area.F $(ADC_MOBJ)
 $(O_DIR)orthobasis_edge.o     	:  orthobasis_edge.F $(ADC_MOBJ)
 $(O_DIR)p_enrichment.o     	:  p_enrichment.F $(ADC_MOBJ)
-$(O_DIR)prep_DG.o             	:  prep_DG.F $(ADC_MOBJ)
+$(O_DIR)prep_DG.o             	:  prep_DG.F $(O_DIR)cont_int_test.o $(ADC_MOBJ)
 $(O_DIR)quad_pts_area.o       	:  quad_pts_area.F $(ADC_MOBJ)
 $(O_DIR)quad_pts_edge.o       	:  quad_pts_edge.F $(ADC_MOBJ)
 $(O_DIR)read_input.o          	:  read_input.F $(ADC_MOBJ)
-$(O_DIR)rhs_dg_hydro.o        	:  rhs_dg_hydro.F $(ADC_MOBJ)
+$(O_DIR)rhs_dg_hydro.o        	:  rhs_dg_hydro.F $(O_DIR)cont_int_test.o $(ADC_MOBJ) 
 $(O_DIR)numerical_flux.o      	:  numerical_flux.F $(ADC_MOBJ)
 $(O_DIR)radiation_edge_hydro.o	:  radiation_edge_hydro.F $(ADC_MOBJ)
 $(O_DIR)tidal_potential.o     	:  tidal_potential.F $(ADC_MOBJ)
 $(O_DIR)ibarrier_edge_hydro.o 	:  ibarrier_edge_hydro.F $(ADC_MOBJ)
 $(O_DIR)ebarrier_edge_hydro.o       :  ebarrier_edge_hydro.F $(ADC_MOBJ)
-$(O_DIR)write_results.o             :  write_results.F $(ADC_MOBJ)
+$(O_DIR)write_results.o             :  write_results.F $(O_DIR)cont_int_test.o $(ADC_MOBJ)
 $(O_DIR)pdg_debug.o                 :  pdg_debug.F  $(ADC_MOBJ) $(MSG_MOBJ)
 $(O_DIR)ghost_internal_edge_hydro.o :  ghost_internal_edge_hydro.F  $(ADC_MOBJ) $(MSG_MOBJ)
 $(O_DIR)slopelimiter.o              :  slopelimiter.F  $(ADC_MOBJ)
@@ -349,7 +351,7 @@ $(O_DIR)write_output.o              :  write_output.F
 
 debug:
 	@echo $(ADC_MSRC) 
-	@echo $(ADC_MOBJ) 
+	@echo $(ADC_MOBJ)
 
 # graphchk
 

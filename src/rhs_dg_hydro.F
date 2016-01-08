@@ -25,6 +25,10 @@ C.....Use appropriate modules
      &     FGAMMA,LoadManningsN,ManningsN,CF
 
       USE sizes, ONLY: myproc,layers
+#ifdef ERROR
+      USE CONT_INT_TEST
+#endif
+
 
       IMPLICIT NONE
       
@@ -32,18 +36,14 @@ C.....Declare local variables
 
       INTEGER L,k,i,ll
       REAL(SZ) DPSIDX(3), DPSIDY(3)
-      REAL(SZ) AREA, IMASS, TKX, TKY, Xpart, Ypart,H_0,C_1
-      REAL(SZ) PHI_AREA_KI,MN_IN, MassAction1st,MassAction2nd,fx,fy
-      REAL(SZ) LZ_XX, LZ_XY, LZ_YX, LZ_YY, rate, s_mass, s_sed,b_0
+      REAL(SZ) AREA, IMASS, TKX, TKY, Xpart, Ypart
+      REAL(SZ) PHI_AREA_KI,MN_IN, MassAction1st,MassAction2nd
+      REAL(SZ) LZ_XX, LZ_XY, LZ_YX, LZ_YY, rate
       REAL(SZ) DEPTH, F1_NL, FU_NL, FV_NL, FG_NL, FH_NL, FW_NL
-      REAL(SZ) HUU, HVV, HUV, GH2,MZ_X(layers),MZ_Y(layers), fgauss, sig
+      REAL(SZ) HUU, HVV, HUV, GH2,MZ_X(layers),MZ_Y(layers)
       REAL(SZ) DEPTH_C, FH_NL_C, UX_C, UY_C, UMAG_C, DTDPH,SFACQUAD
       Real(SZ) discharge_modelX_IN,discharge_modelY_IN
-      Real(SZ) DH_X,DH_Y,phi_tot,C_0,HZ_X,HZ_Y,TZ_X,TZ_Y
-
-      Real(SZ),allocatable :: XBCbt(:),YBCbt(:)
-
-      Allocate ( XBCbt(MNE),YBCbt(MNE) )
+      Real(SZ) DH_X,DH_Y,phi_tot,HZ_X,HZ_Y,TZ_X,TZ_Y
 
       DTDPH = 1.D0/DTDP
       DO 1000 L = 1, NE
@@ -146,7 +146,11 @@ C.......Compute ZE, QX, QY, and HB at each area Gauss quadrature point
                DHB_X = DHB_X + HB(K,L,irk)*DPHIDX
                DHB_Y = DHB_Y + HB(K,L,irk)*DPHIDY
                DH_Y = DH_Y + (HB(K,L,irk)+ZE(K,L,irk))*DPHIDY
+#if defined (ERROR) && defined (SED_LAY)
+               DH_X = DH_Y + (HB(K,L,irk)+ZE(K,L,irk))*DPHIDX
+#else
                DH_X = DH_X + (HB(K,L,irk)+ZE(K,L,irk))*DPHIDX
+#endif
             enddo
 #endif
 
@@ -201,8 +205,6 @@ C.......Compute ZE, QX, QY, and HB at each area Gauss quadrature point
                dynP_IN = dynP_IN + dynP(K,L,IRK)*PHI_AREA(K,I,pa)
 #endif
 
-               DEPTH = ZE_IN + HB_IN
-
 #ifdef SED_LAY
                do ll = 1,layers
                   bed_IN(ll) = bed_IN(ll) + bed(K,L,IRK,ll)*PHI_AREA(K,I,pa)
@@ -211,18 +213,23 @@ C.......Compute ZE, QX, QY, and HB at each area Gauss quadrature point
                   MZ_X(ll) =  MZ_X(ll) + MZ(K,1,ll,L)*PHI_AREA(K,I,pa)
                   MZ_Y(ll) =  MZ_Y(ll) + MZ(K,2,ll,L)*PHI_AREA(K,I,pa)
                enddo
-               DEPTH = 0.D0
-               DEPTH = ZE_IN + HB_IN
+#endif
+            ENDDO
+ 
+            DEPTH = ZE_IN + HB_IN
+
+#ifdef SED_LAY
+
 C.........Compute sediment discharge model                                                                           
 
-               !Note that the choice of linearization can require this to be changed
-            QMag_IN = (QX_IN*QX_IN/(DEPTH**2) + QY_IN*QY_IN/(DEPTH)**2)**(1/2)
-            discharge_modelX_IN = porosity * DEPTH**(-1) * QMag_IN**(2) * QX_IN*SFACQUAD                             
-            discharge_modelY_IN = porosity * DEPTH**(-1) * QMag_IN**(2) *QY_IN  
+!Note that the choice of linearization can require this to be changed
+            QMag_IN = QX_IN*QX_IN + QY_IN*QY_IN
+            discharge_modelX_IN = porosity * DEPTH**(-3) * QMag_IN * QX_IN*SFACQUAD                             
+            discharge_modelY_IN = porosity * DEPTH**(-3) * QMag_IN *QY_IN  
 
 #endif
-               
-            ENDDO
+            
+
  
 C.........Compute continuity fluxes
 
@@ -230,13 +237,9 @@ C.........Compute continuity fluxes
 
 #ifdef WAVE_DIF 
             FX_IN = (QX_IN+HZ_X)*F1_NL*SFACQUAD
-#else
-            FX_IN = QX_IN*F1_NL*SFACQUAD
-#endif
-
-#ifdef WAVE_DIF 
             FY_IN = (QY_IN+HZ_Y)*F1_NL
 #else
+            FX_IN = QX_IN*F1_NL*SFACQUAD
             FY_IN = QY_IN*F1_NL
 #endif
 C.........Compute momentum flux terms
@@ -253,11 +256,13 @@ C.........Compute momentum flux terms
             HUV = FU_NL*V_IN
             GH2 = FG_NL*(0.5D0*ZE_IN + HB_IN) + FG_L*ZE_IN
 #ifdef SED_LAY
+#ifdef ERROR
             !Not well-balanced, be careful here!
-            !GH2 =  0.D0
-            !GH2 =  0.5D0*G*(DEPTH**2)
+            GH2 =  0.D0
+            GH2 =  0.5D0*G*(DEPTH**2)
             !GH2 =  WDFLG(L)*0.5D0*G*(DEPTH**2)
             !GH2 = FG_NL*(0.5D0*ZE_IN + 2.D0*HB_IN) + 0.5D0*FG_L* (ZE_IN**2 - DEPTH**2
+#endif
 #endif
            
 C.........Compute x momentum fluxes
@@ -407,15 +412,20 @@ C.........6) Chemical mass action
             MassAction2nd =  rate * (max(iota2_IN,0.D0)*max(iota_IN,0.D0))
 
             MassMax(L) = min(MassAction1st,MassAction2nd)
+#endif
 
 C.........Build the rhs
 
+#if defined (ERROR) && defined (SED_LAY)
+            CALL RHS_MAN_SED_LAY(I,L)
+#endif
+
+#ifdef CHEM
             RHS_iota(1,L,IRK) = RHS_iota(1,L,IRK) 
      &           + MassAction1st*SRFAC(1,I,L,pa)*FH_NL
             RHS_iota2(1,L,IRK) = RHS_iota2(1,L,IRK) 
      &           + MassAction2nd*SRFAC(1,I,L,pa)*FH_NL  
 #endif
-
 
             RHS_QX(1,L,IRK) = RHS_QX(1,L,IRK) + SRFAC(1,I,L,pa)*SOURCE_X
             RHS_QY(1,L,IRK) = RHS_QY(1,L,IRK) + SRFAC(1,I,L,pa)*SOURCE_Y
@@ -432,11 +442,15 @@ C.........Build the rhs
 #ifdef SED_LAY
 
                do ll = 1,layers !only really makes sense for single layer
-
                   RHS_bed(K,L,IRK,ll) = RHS_bed(K,L,IRK,ll) 
      &                 + XFAC(K,I,L,pa)*(discharge_modelX_IN+MZ_X(ll)*SFACQUAD)
      &                 + YFAC(K,I,L,pa)*(discharge_modelY_IN+MZ_Y(ll))
 
+#ifdef ERROR
+C.....Add contribution from manufactured solution for testcase
+                  RHS_bed(K,L,IRK,ll) = RHS_bed(K,L,IRK,ll) 
+     &                 + SRFAC(k,I,L,pa)*s_sed
+#endif
                enddo
 #endif
 

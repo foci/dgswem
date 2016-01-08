@@ -202,8 +202,14 @@ C.....Compute the x and y components of the external state flow
 
  
             DEN = 1.D0/(NX*TY - NY*TX)
+#ifdef ERROR
+            Q_N_EXT = Q_N_INT
+            QX_EX = QX_IN
+            QY_EX = QY_IN           
+#else
             QX_EX = ( TY*Q_N_EXT - NY*Q_T_EXT)*DEN
             QY_EX = (-TX*Q_N_EXT + NX*Q_T_EXT)*DEN
+#endif
 
             ZE_EX = ZE_IN
             HB_EX = HB_IN

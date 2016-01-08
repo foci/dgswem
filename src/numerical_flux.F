@@ -220,84 +220,69 @@ C.....Compute the Roe flux
       !cfl_max = max(abs(F_HAT),abs(G_HAT),abs(H_HAT),cfl_max)
 
 #ifdef SED_LAY
+#ifdef ERROR
+!.....Let us use the fully coupled system, which leads to a different eigenproblem
 
-c$$$!.....Not well-balanced, be careful here!
-c$$$
-c$$$!.....Let us use the fully coupled system, which leads to a different eigenproblem
-c$$$
-c$$$      GX_IN = 0.D0
-c$$$      GY_IN = 0.D0
-c$$$      HX_IN = 0.D0
-c$$$      HY_IN = 0.D0
-c$$$      GX_EX = 0.D0
-c$$$      GY_EX = 0.D0
-c$$$      HX_EX = 0.D0
-c$$$      HY_EX = 0.D0
-c$$$      FX_IN = 0.D0
-c$$$      FY_IN = 0.D0
-c$$$      FX_EX = 0.D0
-c$$$      Fy_EX = 0.D0
-c$$$
-c$$$      f_Hat = 0.D0
-c$$$      g_hat = 0.D0
-c$$$      h_hat = 0.D0
-c$$$      bed_hat = 0.D0
-c$$$
-c$$$      test_g = 0.D0
-c$$$
-c$$$C.....Compute continuity fluxes at interior state
-c$$$
-c$$$      FX_IN = QX_IN*SFAC_IN
-c$$$      FY_IN = QY_IN
-c$$$
-c$$$C.....Compute continuity fluxes at exterior state
-c$$$
-c$$$      FX_EX = QX_EX*SFAC_EX
-c$$$      FY_EX = QY_EX
-c$$$
-c$$$C.....Compute x momentum fluxes at interior state
-c$$$
-c$$$      GX_IN = (QX_IN*QX_IN/(HT_IN) 
-c$$$     &     + 0.5D0*G*(HT_IN**2))*SFAC_IN 
-c$$$      !&     - (HT_IN*bed_IN(1)*G)*SFAC_IN 
-c$$$      GY_IN = QX_IN*QY_IN/(HT_IN)
-c$$$
+      GX_IN = 0.D0
+      GY_IN = 0.D0
+      HX_IN = 0.D0
+      HY_IN = 0.D0
+      GX_EX = 0.D0
+      GY_EX = 0.D0
+      HX_EX = 0.D0
+      HY_EX = 0.D0
+      FX_IN = 0.D0
+      FY_IN = 0.D0
+      FX_EX = 0.D0
+      Fy_EX = 0.D0
+
+      f_Hat = 0.D0
+      g_hat = 0.D0
+      h_hat = 0.D0
+      bed_hat = 0.D0
+
+      test_g = 0.D0
+
+
+C.....Compute x momentum fluxes at interior state
+
+      GX_IN = (QX_IN*QX_IN/(HT_IN) 
+     &     + 0.5D0*G*(HT_IN**2))*SFAC_IN 
+      GY_IN = QX_IN*QY_IN/(HT_IN)
+
 c$$$C.....Compute y momentum fluxes at interior state
-c$$$
-c$$$      HX_IN = (QX_IN*QY_IN/(HT_IN))*SFAC_IN
-c$$$      HY_IN = (QY_IN*QY_IN/(HT_IN) +
-c$$$     &     0.5D0*G*(HT_IN**2))
-c$$$      !&     - (HT_IN*bed_IN(1)*G)
-c$$$
-c$$$C.....Compute x momentum fluxes at exterior state
-c$$$
-c$$$      GX_EX = (QX_EX*QX_EX/(HT_EX) 
-c$$$     &     + 0.5D0*G*(HT_EX**2))*SFAC_EX
-c$$$      !&     - (HT_EX*bed_EX(1)*G)*SFAC_EX
-c$$$      GY_EX = QX_EX*QY_EX/(HT_EX)
-c$$$
-c$$$C.....Compute y momentum fluxes at exterior state
-c$$$
-c$$$      HX_EX = (QX_EX*QY_EX/(HT_EX))*SFAC_EX
-c$$$      HY_EX = (QY_EX*QY_EX/(HT_EX) +
-c$$$     &     0.5D0*G*(HT_EX**2))
-c$$$      !&     - (HT_EX*bed_EX(1)*G)
-c$$$
-c$$$
-c$$$C.....Compute the average flux in the normal direction
-c$$$
-c$$$      F_AVG = 0.5D0*((FX_IN + FX_EX)*NX + (FY_IN + FY_EX)*NY)
-c$$$      G_AVG = 0.5D0*((GX_IN + GX_EX)*NX + (GY_IN + GY_EX)*NY)
-c$$$      H_AVG = 0.5D0*((HX_IN + HX_EX)*NX + (HY_IN + HY_EX)*NY)
 
-      QMag_IN = (QX_IN*QX_IN/(HT_IN**2) + QY_IN*QY_IN/(HT_IN**2) )**(1/2)
-      QMag_EX = (QX_EX*QX_EX/(HT_EX**2) + QY_EX*QY_EX/(HT_EX**2) )**(1/2)
+      HX_IN = (QX_IN*QY_IN/(HT_IN))*SFAC_IN
+      HY_IN = (QY_IN*QY_IN/(HT_IN) +
+     &     0.5D0*G*(HT_IN**2))
+
+c$$$C.....Compute x momentum fluxes at exterior state
+
+      GX_EX = (QX_EX*QX_EX/(HT_EX) 
+     &     + 0.5D0*G*(HT_EX**2))*SFAC_EX
+
+      GY_EX = QX_EX*QY_EX/(HT_EX)
+
+c$$$C.....Compute y momentum fluxes at exterior state
+
+      HX_EX = (QX_EX*QY_EX/(HT_EX))*SFAC_EX
+      HY_EX = (QY_EX*QY_EX/(HT_EX) +
+     &     0.5D0*G*(HT_EX**2))
+
+c$$$C.....Compute the average flux in the normal direction
+
+      G_AVG = 0.5D0*((GX_IN + GX_EX)*NX + (GY_IN + GY_EX)*NY)
+      H_AVG = 0.5D0*((HX_IN + HX_EX)*NX + (HY_IN + HY_EX)*NY)
+#endif
+
+      QMag_IN = QX_IN*QX_IN + QY_IN*QY_IN 
+      QMag_EX = QX_EX*QX_EX + QY_EX*QY_EX 
 
       !Note that the choice of linearization can cause this to need updating....
-      bedX_IN =  porosity*HT_IN**(-1) * QMag_IN**(2) *QX_IN *SFAC_IN
-      bedX_EX =  porosity*HT_EX**(-1) * QMag_EX**(2) *QX_EX *SFAC_EX
-      bedY_IN =  porosity*HT_IN**(-1) * QMag_IN**(2) *QY_IN 
-      bedY_EX =  porosity*HT_EX**(-1) * QMag_EX**(2) *QY_EX
+      bedX_IN =  porosity*HT_IN**(-3) * QMag_IN *QX_IN *SFAC_IN
+      bedX_EX =  porosity*HT_EX**(-3) * QMag_EX *QX_EX *SFAC_EX
+      bedY_IN =  porosity*HT_IN**(-3) * QMag_IN *QY_IN 
+      bedY_EX =  porosity*HT_EX**(-3) * QMag_EX *QY_EX
 
 C.....Compute the remaining Roe averaged variables
 
@@ -348,8 +333,17 @@ C.....Compute the remaining Roe averaged variables
       dtildeQx = 0.0
       dtildeQy = 0.0
       do w=1,4
-         dtildeQx(w) = porosity * evalf (w, valx)  *( QMag_IN**(2) + QMag_EX**(2) ) / 2.D0 ! Interprete bytecode representation of w-th function
-         dtildeQy(w) = porosity*evalf2 (w, valy) *( QMag_IN**(2) + QMag_EX**(2) ) / 2.D0 ! Interprete bytecode representation of w-th function
+#ifdef ERROR
+         dtildeQx(w) = porosity*evalf (w, valx)* !CRAIG: PLEASE CHECK
+     &  ( QMag_IN + QMag_EX ) / 2.D0 ! Interprete bytecode representation of w-th function
+         dtildeQy(w) = porosity*evalf2 (w, valy)*
+     &  ( QMag_IN + QMag_EX ) / 2.D0               ! Interprete bytecode representation of w-th function
+#else
+         dtildeQx(w) = porosity * evalf (w, valx) *
+     &  ( QMag_IN/(HT_IN**2) + QMag_EX/(HT_EX**2 ) / 2.D0 ! Interprete bytecode representation of w-th function
+         dtildeQy(w) = porosity*evalf2 (w, valy) *
+     &  ( QMag_IN/(HT_IN**2) + QMag_EX/(HT_EX**2) ) / 2.D0 ! Interprete bytecode representation of w-th function
+#endif
 c$$$         if (EvalErrType > 0.or.EvalErrType2 > 0) then
 c$$$            if(porosity*((3*QX_ROE**2 + QX_ROE*QY_ROE + QY_ROE**2/2)/(ZE_ROE + bed_ROE)**3).ne.dtildeQx(w)) then
 c$$$               write(*,*)'That was foolish on timestep', it
@@ -367,8 +361,6 @@ c$$$               write(*,*)'Ya shoulda known bettah!'
 c$$$            endif
 c$$$         endif
       enddo
-
-
       
       EIGVAL(4) = 0.D0
       do w=1,4
@@ -376,6 +368,7 @@ c$$$         endif
       enddo
 
 C.....A bunch of functions
+
 
       epsilon = 0.D0 !1.0e-12
 
@@ -455,11 +448,12 @@ C.....A bunch of functions
      &     *J9-gamma2*EIGVAL(3)*NY*J8+(-EIGVAL(1)*gamma3*J7-EIGVAL(3)*gamma3*J7+EIGVAL(1)
      &     *gamma4*J7-EIGVAL(3)*gamma4*J7)*(NY**2)-NX*EIGVAL(1)*gamma3*iot5-NX*EIGVAL(3)
      &     *gamma3*iot5+NX*EIGVAL(1)*gamma4*iot5-NX*EIGVAL(3)*gamma4*iot5+iot*iot5
+  
 
       RI = 0.D0
       LE = 0.D0
       A_ROE = 0.D0
-    
+
 C.....Evaluate right eigenvectors at Roe averaged variables
 
       if (abs(EIGVAL(1)*alpha_0*gamma1).le.epsilon) then
@@ -471,6 +465,7 @@ C.....Evaluate right eigenvectors at Roe averaged variables
          RI(1,1) = ( -C_ROE*(EIGVAL(2)**2) + (C_ROE**3) ) * ( EIGVAL(2) + C_ROE - EIGVAL(4) ) 
      &        *((NY**2) * xi - (V_ROE**2) ) / (EIGVAL(1)*alpha_0*gamma1)
 
+
       endif
 
       if (abs(alpha_0*gamma1).le.epsilon) then
@@ -481,6 +476,7 @@ C.....Evaluate right eigenvectors at Roe averaged variables
 
          RI(2,1) = ((NY**2) * xi - (V_ROE**2)) * ( EIGVAL(2) + C_ROE - EIGVAL(4) )
      &        *( -gamma4 + gamma3 ) / (alpha_0*gamma1)
+
 
       endif
 
@@ -540,9 +536,9 @@ C.....Evaluate right eigenvectors at Roe averaged variables
          RI(3,3) = 0.D0
       
       else
-         
+      
          RI(3,3) = (EIGVAL(2)-C_ROE-EIGVAL(4))*((NY**2) * xi - V_ROE**2) / beta_0
-         
+       
       endif
 
       RI(4,3) = 1.D0
@@ -746,61 +742,6 @@ C.....Compute the Roe matrix
 
          endif
       enddo
-
-
-! Compute correction (this is not set by default)
-
-c$$$      lambda1_IN = 0.D0
-c$$$      lambda1_EX = 0.D0
-c$$$      lambda2_IN = 0.D0
-c$$$      lambda2_EX = 0.D0
-c$$$      lambda3_IN = 0.D0
-c$$$      lambda3_EX = 0.D0
-c$$$
-c$$$      lambda2_IN = (U_IN*NX+V_IN*NY)
-c$$$      lambda2_EX = (U_EX*NX+V_EX*NY)
-c$$$
-c$$$      lambda1_IN = lambda2_IN + sqrt(g*HT_IN)
-c$$$      lambda1_EX = lambda2_EX + sqrt(g*HT_EX)
-c$$$
-c$$$      lambda3_IN = lambda2_IN - sqrt(g*HT_IN)
-c$$$      lambda3_EX = lambda2_EX - sqrt(g*HT_EX)
-c$$$
-c$$$      lambda4_IN = 0.D0
-c$$$      lambda4_EX = 0.D0
-c$$$
-c$$$      lambda4_IN = (-3.D0*QX_IN/(ZE_IN + bed_IN(1))**4 + (ZE_IN + bed_IN(1))**(-3)
-c$$$     &     -3.D0*QX_IN/(ZE_IN + bed_IN(1))**4)*QMag_IN*NX 
-c$$$     &     + (-3.D0*QY_IN/(ZE_IN + bed_IN(1))**4 + (ZE_IN + bed_IN(1))**(-3)
-c$$$     &     -3.D0*QY_IN/(ZE_IN + bed_IN(1))**4)*QMag_IN*NY 
-c$$$
-c$$$      lambda4_EX = (-3.D0*QX_EX/(ZE_EX + bed_EX(1))**4 + (ZE_EX + bed_EX(1))**(-3)
-c$$$     &     -3.D0*QX_EX/(ZE_EX + bed_EX(1))**4)*QMag_EX*NX 
-c$$$     &     + (-3.D0*QY_EX/(ZE_EX + bed_EX(1))**4 + (ZE_EX + bed_EX(1))**(-3)
-c$$$     &     -3.D0*QY_EX/(ZE_EX + bed_EX(1))**4)*QMag_EX*NY 
-c$$$
-c$$$
-c$$$
-c$$$      Select_IN = min(min(lambda1_IN,lambda2_IN,lambda3_IN,lambda4_IN),
-c$$$     &                min(lambda1_EX,lambda2_EX,lambda3_EX,lambda4_EX))
-c$$$      Select_EX = max(max(lambda1_IN,lambda2_IN,lambda3_IN,lambda4_IN),
-c$$$     &                max(lambda1_EX,lambda2_EX,lambda3_EX,lambda4_EX))
-c$$$
-c$$$      rVncU = 0.D0
-c$$$      rVncV = 0.D0
-c$$$
-c$$$      do ll=1,layers !should be fixed for multiple layers
-c$$$
-c$$$         rVncU =  rVncU + 0.5D0*G*(HT_IN+HT_EX) 
-c$$$     &        *(bed_EX(ll)-bed_IN(ll))*NX
-c$$$         rVncV =  rVncV + 0.5D0*G*(HT_IN+HT_EX) 
-c$$$     &        *(bed_EX(ll)-bed_IN(ll))*NY
-c$$$         
-c$$$        ! print*,  rVncU, rVncV
-c$$$
-c$$$      enddo
-c$$$
-
 
 
 C.....Compute the Roe flux (only formed for one sediment layer!) !Can add path conservative contribution
@@ -1031,8 +972,8 @@ C.....Compute the Local Lax Friedrichs Fluxes
 
                                 !Compute the magnitudes of the velocities for sediment
 
-      QMag_IN = (QX_IN*QX_IN/(HT_IN**2) + QY_IN*QY_IN/(HT_IN**2) )**(1/2)
-      QMag_EX = (QX_EX*QX_EX/(HT_EX**2) + QY_EX*QY_EX/(HT_EX**2) )**(1/2)
+      QMag_IN = QX_IN*QX_IN/(HT_IN**2) + QY_IN*QY_IN/(HT_IN**2) 
+      QMag_EX = QX_EX*QX_EX/(HT_EX**2) + QY_EX*QY_EX/(HT_EX**2) 
 
       rVncU = 0.D0
       rVncV = 0.D0
@@ -1053,11 +994,11 @@ C.....Compute the Local Lax Friedrichs Fluxes
       lambda1_IN = U_IN*NX + V_IN*NY
       lambda1_EX = U_EX*NX + V_EX*NY
 
-      lambda2_IN = lambda1_IN - (g*HT_IN)**(1/2)
-      lambda2_EX = lambda1_EX - (g*HT_EX)**(1/2)
+      lambda2_IN = lambda1_IN - (g*HT_IN)**(0.5d0)
+      lambda2_EX = lambda1_EX - (g*HT_EX)**(0.5d0)
 
-      lambda3_IN = lambda1_IN + (g*HT_IN)**(1/2)
-      lambda3_EX = lambda1_EX + (g*HT_EX)**(1/2)
+      lambda3_IN = lambda1_IN + (g*HT_IN)**(0.5d0)
+      lambda3_EX = lambda1_EX + (g*HT_EX)**(0.5d0)
 
       Select_IN = min(lambda2_IN,lambda2_EX)
       Select_EX = max(lambda3_IN,lambda3_EX)
@@ -1066,10 +1007,10 @@ C.....Compute the Local Lax Friedrichs Fluxes
 !.....developed by Camenen and Larson, so $\tilde{q} = A_g*H^{-3}|q|^{2}q$
 !.....which clearly makes sense only for a single layer
 
-      discharge_modelX_IN =  porosity*HT_IN**(-1)*QMag_IN**(2)*QX_IN *SFAC_IN
-      discharge_modelX_EX =  porosity*HT_EX**(-1)*QMag_EX**(2)*QX_EX *SFAC_EX
-      discharge_modelY_IN =  porosity*HT_IN**(-1)*QMag_IN**(2)*QY_IN 
-      discharge_modelY_EX =  porosity*HT_EX**(-1)*QMag_EX**(2)*QY_EX
+      discharge_modelX_IN =  porosity*HT_IN**(-1)*QMag_IN*QX_IN *SFAC_IN
+      discharge_modelX_EX =  porosity*HT_EX**(-1)*QMag_EX*QX_EX *SFAC_EX
+      discharge_modelY_IN =  porosity*HT_IN**(-1)*QMag_IN*QY_IN 
+      discharge_modelY_EX =  porosity*HT_EX**(-1)*QMag_EX*QY_EX
 
 
 
@@ -1391,8 +1332,8 @@ C.......Set the numerical fluxes equal to the exterior fluxes
 
                                 !Compute the magnitudes of the velocities for sediment
 
-      QMag_IN = (QX_IN*QX_IN/(HT_IN**2) + QY_IN*QY_IN/(HT_IN**2) )**(1/2)
-      QMag_EX = (QX_EX*QX_EX/(HT_EX**2) + QY_EX*QY_EX/(HT_EX**2) )**(1/2)
+      QMag_IN = QX_IN*QX_IN/(HT_IN**2) + QY_IN*QY_IN/(HT_IN**2) 
+      QMag_EX = QX_EX*QX_EX/(HT_EX**2) + QY_EX*QY_EX/(HT_EX**2) 
 
       rVncU = 0.D0
       rVncV = 0.D0
@@ -1413,11 +1354,11 @@ C.......Set the numerical fluxes equal to the exterior fluxes
       lambda1_IN = U_IN*NX + V_IN*NY
       lambda1_EX = U_EX*NX + V_EX*NY
 
-      lambda2_IN = lambda1_IN - (g*HT_IN)**(1/2)
-      lambda2_EX = lambda1_EX - (g*HT_EX)**(1/2)
+      lambda2_IN = lambda1_IN - (g*HT_IN)**(0.5d0)
+      lambda2_EX = lambda1_EX - (g*HT_EX)**(0.5d0)
 
-      lambda3_IN = lambda1_IN + (g*HT_IN)**(1/2)
-      lambda3_EX = lambda1_EX + (g*HT_EX)**(1/2)
+      lambda3_IN = lambda1_IN + (g*HT_IN)**(0.5d0)
+      lambda3_EX = lambda1_EX + (g*HT_EX)**(0.5d0)
 
       Select_IN = min(lambda2_IN,lambda2_EX)
       Select_EX = max(lambda3_IN,lambda3_EX)
@@ -1449,10 +1390,10 @@ C.......Set the numerical fluxes equal to the exterior fluxes
 !.....developed by Camenen and Larson, so $\tilde{q} = A_g*H^{-3}|q|^{2}q$
 !.....which clearly makes sense only for a single layer
 
-      discharge_modelX_IN =  porosity*HT_IN**(-1)*QMag_IN**(2)*QX_IN*SFAC_IN
-      discharge_modelX_EX =  porosity*HT_EX**(-1)*QMag_EX**(2)*QX_EX*SFAC_EX
-      discharge_modelY_IN =  porosity*HT_IN**(-1)*QMag_IN**(2)*QY_IN 
-      discharge_modelY_EX =  porosity*HT_EX**(-1)*QMag_EX**(2)*QY_EX
+      discharge_modelX_IN =  porosity*HT_IN**(-1)*QMag_IN*QX_IN*SFAC_IN
+      discharge_modelX_EX =  porosity*HT_EX**(-1)*QMag_EX*QX_EX*SFAC_EX
+      discharge_modelY_IN =  porosity*HT_IN**(-1)*QMag_IN*QY_IN 
+      discharge_modelY_EX =  porosity*HT_EX**(-1)*QMag_EX*QY_EX
 
 
       q_RoeX = ( QX_IN*(HT_IN)**0.5D0  
@@ -1578,13 +1519,13 @@ C.....Compute the interior and exterior normal velocities
  
 C.....Compute the interior and exterior discharge rates
 
-      QMag_IN = (QX_IN*QX_IN/(HT_IN**2) + QY_IN*QY_IN/(HT_IN**2) )**(1/2)
-      QMag_EX = (QX_EX*QX_EX/(HT_EX**2) + QY_EX*QY_EX/(HT_EX**2) )**(1/2)
+      QMag_IN = QX_IN*QX_IN/(HT_IN**2) + QY_IN*QY_IN/(HT_IN**2) 
+      QMag_EX = QX_EX*QX_EX/(HT_EX**2) + QY_EX*QY_EX/(HT_EX**2) 
 
-      discharge_modelX_IN =  porosity*HT_IN**(-1)*QMag_IN**(2)*(QX_IN) *SFAC_IN
-      discharge_modelX_EX =  porosity*HT_EX**(-1)*QMag_EX**(2)*(QX_EX) *SFAC_EX
-      discharge_modelY_IN =  porosity*HT_IN**(-1)*QMag_IN**(2)*(QX_IN) 
-      discharge_modelY_EX =  porosity*HT_EX**(-1)*QMag_EX**(2)*(QY_EX)
+      discharge_modelX_IN =  porosity*HT_IN**(-1)*QMag_IN*(QX_IN) *SFAC_IN
+      discharge_modelX_EX =  porosity*HT_EX**(-1)*QMag_EX*(QX_EX) *SFAC_EX
+      discharge_modelY_IN =  porosity*HT_IN**(-1)*QMag_IN*(QX_IN) 
+      discharge_modelY_EX =  porosity*HT_EX**(-1)*QMag_EX*(QY_EX)
 
 C.....Compute the eigenvalues and aux variables of interior states
 
@@ -1598,11 +1539,11 @@ C.....Compute the eigenvalues and aux variables of interior states
       rB = -2.D0*lambda1_IN !hardwired for \tilde{q} independent of b!
 
       rC = (1.D0 - 2.D0*rAlph*G/(kappa2) )* lambda1_IN**2 
-     & - G*HT_IN*(HT_IN**(-3)*( QMag_IN * rAlph/kappa2) + 1.D0)
+     & - G*HT_IN*(HT_IN**(-3)*( sqrt(QMag_IN) * rAlph/kappa2) + 1.D0)
 
 
       rD = rAlph*G*lambda1_IN/kappa2  
-     & * (3.D0*HT_IN**(-2)*QMag_IN - 2.D0*lambda1_IN**2)
+     & * (3.D0*HT_IN**(-2)*sqrt(QMag_IN) - 2.D0*lambda1_IN**2)
 
 
       rQ = (3.D0*rC - rB**2) / 9.D0
@@ -1626,10 +1567,10 @@ C.....Compute the eigenvalues and aux vairables of exterior states
       rB = -2.D0*lambda1_EX !hardwired for \tilde{q} independent of b!
 
       rC = (1.D0 - 2.D0*rAlph*G/(kappa2) )* lambda1_EX**2 
-     & - G*HT_EX*(rAlph*HT_EX**(-3)*( QMag_EX * rAlph/kappa2) + 1.D0)
+     & - G*HT_EX*(rAlph*HT_EX**(-3)*( sqrt(QMag_EX) * rAlph/kappa2) + 1.D0)
 
       rD = rAlph*G*lambda1_EX/kappa2  
-     & * (3.D0*HT_EX**(-2)*QMag_EX - 2.D0*lambda1_EX**2)
+     & * (3.D0*HT_EX**(-2)*sqrt(QMag_EX) - 2.D0*lambda1_EX**2)
 
       rQ = (3.D0*rC - rB**2) / 9.D0
 

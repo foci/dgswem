@@ -23,21 +23,19 @@ C.....Use appropriate modules
 #ifdef CMPI
       USE MESSENGER_ELEM 
 #endif
+
+#ifdef ERROR
+      USE CONT_INT_TEST
+#endif
       
 C.....Declare local variables
 
       INTEGER IT,I,K,Maxp(0:8),Minp(0:8)
       REAL(SZ) AREA, DEPTH, ANGLE_SUM, FH_NL, DP1, DP2, DP3, DP00, ZE00
       LOGICAL FORCE_WRITE
-      real(sz) qmaxe,elmaxe,tempx,tempy,rev,Ox,Oy,iota_error,iota_int
-      real(sz) iota2_int,iota3_int,iota2_error,iota3_error
+      real(sz) qmaxe,elmaxe,tempx,tempy,rev,Ox,Oy
       integer imaxze,imaxq, ModetoNode
 
-      Real(SZ),allocatable :: XBCbt(:),YBCbt(:),radial(:),temper(:)
-
-      Allocate ( XBCbt(MNE),YBCbt(MNE),radial(MNE) )
-      Allocate ( temper(mne) )
-      
 C.....Transform from modal coordinates to nodal coordinates and average
 C.....to single nodal values 
 
@@ -216,7 +214,7 @@ C.....to single nodal values
                      
                   enddo
 
-                  tracer2(J) = tracer2(J) +  WAGP(I,pa) * PHI_AREA(K,I,pa) * iotaa2(K,j,1) * 0.5D0*AREAS(j)
+                  tracer2(J) = tracer2(J) +  WAGP(I,pa) * PHI_AREA(K,I,pa) * iotaa(K,j,1) * 0.5D0*AREAS(j)
 #else
 
                   DPe(j)  = DPe(j) + WAGP(I,pa) * PHI_AREA(K,I,pa) * HB(K,j,1) * 0.5D0 *AREAS(j)
@@ -239,6 +237,7 @@ C.....to single nodal values
             do l=1,layers
                bed_int(j,l) = bed_int(j,l)/(AREAS(J))
             enddo
+            tracer2(J) = tracer2(J) / (AREAS(J))
 #endif
 
 #ifdef TRACE            
@@ -259,25 +258,10 @@ C.....to single nodal values
 
       endif
 
-      iota_int = 0.D0
-      
-      do j = 1,ne
-         
-         DO I = 1,NAGP(pa)
-            
-            iota_error = 0.D0
-            
-            do k = 1,dofs(j)
-               
-               iota_error = iota_error + (iota(k,j,1)- iotaa(k,j,1)) * PHI_AREA(k,I,pa) 
-               
-            ENDDO
-            
-            iota_int = iota_int + iota_error**2.D0 * WAGP(I,pa)*AREAS(J)
-            
-         ENDDO
-         
-      enddo
+C.....Compute L2 and Linf errors and output to terminal
+#ifdef ERROR
+      CALL COMPUTE_ERROR(IT)
+#endif
 
 C...  
 C...  OUTPUT ELEVATION RECORDING STATION INFORMATION IF NOUTE<>0 AND THE
