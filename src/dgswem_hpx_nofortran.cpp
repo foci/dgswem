@@ -98,17 +98,18 @@ public:
       volatile double a;
       volatile double b;
       volatile double c;
-      a = 23.2394908;
+      a = id;
       std::cout << "timestep = " << timestep << " domainID = " << id << std::endl;
-      for (int i=0; i<1000000; i++) {
+      for (int i=0; i<10000000; i++) {
 	//		for (int j=0; j<10000000; j++) {
 	b = 2.23423;
 	c = a/b;
 	c = a*(b+0.000001);
-	a = c;		  
+	a = c;
 	//		}
       }
 
+      id = a;
       /*
 	      /*
       //      std::cout << "CPP: LGD update" << std::endl;
