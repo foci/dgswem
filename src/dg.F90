@@ -18,18 +18,21 @@
 !     
 !***********************************************************************
 
-      MODULE DG
-      
-!.....Use appropriate modules
 
-      USE SIZES
-
-      CHARACTER (LEN=7), DIMENSION(4), PARAMETER :: varx = [ CHARACTER(7) :: &
-           'ZE_ROE', 'QX_ROE','QY_ROE','bed_ROE']
-      CHARACTER (LEN=7), DIMENSION(4), PARAMETER :: vary = [ CHARACTER(7) :: &
-           'ZE_ROE', 'QX_ROE','QY_ROE','bed_ROE']
-
-      type dg_type
+MODULE DG
+  
+  !.....Use appropriate modules
+	  
+  USE SIZES
+  
+  CHARACTER (LEN=7), DIMENSION(4), PARAMETER :: varx = [ CHARACTER(7) :: &
+       'ZE_ROE', 'QX_ROE','QY_ROE','bed_ROE']
+  CHARACTER (LEN=7), DIMENSION(4), PARAMETER :: vary = [ CHARACTER(7) :: &
+       'ZE_ROE', 'QX_ROE','QY_ROE','bed_ROE']
+  
+  integer, parameter :: MAX_DOFH = 12
+  
+  type dg_type
 
 !.....Declare integer variables
          

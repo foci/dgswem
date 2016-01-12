@@ -4,7 +4,7 @@
 !     
 !     This subroutine does the following:
 !     
-!     1.  Calculates the values of the necessary variables at the global_here%edge
+!     1.  Calculates the values of the necessary variables at the edge
 !     gauss points for INTERNAL edges
 !     2.  Calls the appropriate subroutine to compute the flux at
 !     these points.
@@ -48,21 +48,19 @@
       REAL(SZ) EDFAC_IN, EDFAC_EX, DEN
       REAL(SZ) XLEN_EL_IN, XLEN_EL_EX,MZ_X_EX(s%layers),MZ_Y_EX(s%layers)
       REAL(SZ) MASS_EL_IN, MASS_EL_EX,MZ_X_IN(s%layers),MZ_Y_IN(s%layers)
-      REAL(SZ), SAVE, ALLOCATABLE :: &
-     RHS_ZE_IN(:), RHS_QX_IN(:), RHS_QY_IN(:),&
-     RHS_ZE_EX(:), RHS_QX_EX(:), RHS_QY_EX(:)
+
+      REAL(SZ) :: RHS_ZE_IN(MAX_DOFH), RHS_QX_IN(MAX_DOFH), RHS_QY_IN(MAX_DOFH)
+      REAL(SZ) :: RHS_ZE_EX(MAX_DOFH), RHS_QX_EX(MAX_DOFH), RHS_QY_EX(MAX_DOFH)
+
 #ifdef TRACE     
-      REAL(SZ), SAVE, ALLOCATABLE :: &
-     ,RHS_iota_IN(:), RHS_iota_EX(:)
+      REAL(SZ) :: RHS_iota_IN(MAX_DOFH), RHS_iota_EX(MAX_DOFH)
 #endif
 #ifdef CHEM
-      REAL(SZ), SAVE, ALLOCATABLE :: &
-     ,RHS_iota_IN(:), RHS_iota_EX(:)&
-     ,RHS_iota2_IN(:), RHS_iota2_EX(:)
+      REAL(SZ) :: RHS_iota_IN(MAX_DOFH), RHS_iota_EX(MAX_DOFH)
+      REAL(SZ) :: RHS_iota2_IN(MAX_DOFH), RHS_iota2_EX(MAX_DOFH)
 #endif
 #ifdef dynp     
-      REAL(SZ), SAVE, ALLOCATABLE :: &
-     ,RHS_dynP_IN(:), RHS_dynP_EX(:)
+      REAL(SZ) :: RHS_dynP_IN(MAX_DOFH), RHS_dynP_EX(MAX_DOFH)
 #endif
 
       REAL(SZ) ARK, BRK
@@ -75,20 +73,9 @@
       Real(SZ) bed_HAT_IN(s%layers),bed_HAT_EX(s%layers)
 !     
 
-      IF(.NOT.ALLOCATED(RHS_ZE_IN)) THEN
-         ALLOCATE ( RHS_ZE_IN(dg_here%DOFH),RHS_QX_IN(dg_here%DOFH),RHS_QY_IN(dg_here%DOFH) )
-         ALLOCATE ( RHS_ZE_EX(dg_here%DOFH),RHS_QX_EX(dg_here%DOFH),RHS_QY_EX(dg_here%DOFH) )
-#ifdef TRACE
-         Allocate ( rhs_iota_in(dg_here%dofh),rhs_iota_ex(dg_here%dofh) )
-#endif
-#ifdef CHEM
-         Allocate ( rhs_iota_in(dg_here%dofh),rhs_iota2_in(dg_here%dofh) )
-         Allocate ( rhs_iota_ex(dg_here%dofh),rhs_iota2_ex(dg_here%dofh) )
-#endif
-#ifdef dynp
-         Allocate ( rhs_dynP_IN(dg_here%dofh),rhs_dynP_EX(dg_here%dofh) )
-#endif
-      ENDIF
+      if (dg_here%DOFH.gt.MAX_DOFH) then
+         !FIXME: add exception 
+      endif
 
       dg_here%test_el = 0
       DO 1000 L = 1,dg_here%NIEDS
