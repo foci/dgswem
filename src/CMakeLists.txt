@@ -1,3 +1,17 @@
+if (Fortran_COMPILER_NAME MATCHES "gfortran.*")
+  # gfortran
+  # set (CMAKE_Fortran_FLAGS_RELEASE "-O3 -DHPX")
+#  set (CMAKE_Fortran_FLAGS_RELEASE   "-cpp -O3 -DHPX -DREAL8 -DCSCA -DLINUX -DRKSSP -DSLOPE5 -ffixed-line-length-none -ffree-line-length-none -Waliasing -Wno-tabs -Wline-truncation -fimplicit-none -frecursive -I CMakeFiles/${PROJECT_NAME}.dir/src/ -I .")
+  set (CMAKE_Fortran_FLAGS_RELEASE   "-cpp -O0 -DHPX -DREAL8 -DCSCA -DLINUX -DRKSSP -DSLOPE5 -ffixed-line-length-none -ffree-line-length-none -Waliasing -Wno-tabs -Wline-truncation -fimplicit-none -frecursive -I CMakeFiles/${PROJECT_NAME}.dir/src/ -I .")
+  set (CMAKE_Fortran_FLAGS_DEBUG   "-cpp -DVERBOSE -DHPX -DREAL8 -DCSCA -DLINUX -DRKSSP -DSLOPE5 -ffixed-line-length-none -ffree-line-length-none -Waliasing -Wno-tabs -Wline-truncation -Wsurprising -fcheck=all -g -fbacktrace -fimplicit-none -frecursive -I CMakeFiles/${PROJECT_NAME}.dir/src/ -I .")
+#set (CMAKE_Fortran_FLAGS_DEBUG   "-O2 -cpp -DREAL8 -DCSCA -DLINUX -DRKSSP -DSLOPE5 -ffixed-line-length-none -ffree-line-length-none -Waliasing -Wno-tabs -Wline-truncation -Wsurprising -fcheck=all -g -fbacktrace -fimplicit-none")
+  #elseif (Fortran_COMPILER_NAME MATCHES "ifort.*")
+  # ifort (untested)
+  #  set (CMAKE_Fortran_FLAGS_RELEASE "-f77rtl -O3")
+  #  set (CMAKE_Fortran_FLAGS_DEBUG   "-f77rtl -O0 -g")
+  #  message("Ifort not enabled now")
+endif (Fortran_COMPILER_NAME MATCHES "gfortran.*")
+
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fno-inline ${ADDITIONAL_COMPILE_FLAGS}")
 
 list(APPEND DGSWEM_FORTRAN 
@@ -52,10 +66,17 @@ list(APPEND DGSWEM_FORTRAN
 )
 
 add_executable(
-  dgswem_serial
+  dgswem_cpp_serial
   dgswem_cpp.cpp
   fname.h
   fortran_declarations.hpp
+  ${DGSWEM_FORTRAN}
+)
+
+add_executable(
+  dgswem_fortran_serial
+  dgswem.F90
+  DG_timestep.F90
   ${DGSWEM_FORTRAN}
 )
 
@@ -77,7 +98,7 @@ if(NOT NO_LGD)
 
 endif(NOT NO_LGD)
 
-target_link_libraries(dgswem_serial gfortran)
+target_link_libraries(dgswem_cpp_serial gfortran)
 
 if (NOT NO_LGD)
   target_link_libraries(dgswem_hpx gfortran)
