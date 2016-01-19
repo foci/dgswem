@@ -22,7 +22,7 @@
     allocate(global_here)
     allocate(nodalattr_here)
 
-    print*,"HPX defined"
+    !print*,"HPX defined"
     CALL DGSWEM_INIT(s,dg_here,global_here,nodalattr_here,NT)
 
     DO timestep = global_here%ITHS+1,global_here%NT

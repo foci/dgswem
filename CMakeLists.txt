@@ -20,20 +20,6 @@ get_filename_component (Fortran_COMPILER_NAME ${CMAKE_Fortran_COMPILER} NAME)
 
 message ("CMAKE_Fortran_COMPILER full path: " ${CMAKE_Fortran_COMPILER})
 
-if (Fortran_COMPILER_NAME MATCHES "gfortran.*")
-  # gfortran
-  # set (CMAKE_Fortran_FLAGS_RELEASE "-O3 -DHPX")
-#  set (CMAKE_Fortran_FLAGS_RELEASE   "-cpp -O3 -DHPX -DREAL8 -DCSCA -DLINUX -DRKSSP -DSLOPE5 -ffixed-line-length-none -ffree-line-length-none -Waliasing -Wno-tabs -Wline-truncation -fimplicit-none -frecursive -I CMakeFiles/${PROJECT_NAME}.dir/src/ -I .")
-  set (CMAKE_Fortran_FLAGS_RELEASE   "-cpp -O0 -DHPX -DREAL8 -DCSCA -DLINUX -DRKSSP -DSLOPE5 -ffixed-line-length-none -ffree-line-length-none -Waliasing -Wno-tabs -Wline-truncation -fimplicit-none -frecursive -I CMakeFiles/${PROJECT_NAME}.dir/src/ -I .")
-  set (CMAKE_Fortran_FLAGS_DEBUG   "-cpp -DVERBOSE -DHPX -DREAL8 -DCSCA -DLINUX -DRKSSP -DSLOPE5 -ffixed-line-length-none -ffree-line-length-none -Waliasing -Wno-tabs -Wline-truncation -Wsurprising -fcheck=all -g -fbacktrace -fimplicit-none -frecursive -I CMakeFiles/${PROJECT_NAME}.dir/src/ -I .")
-#set (CMAKE_Fortran_FLAGS_DEBUG   "-O2 -cpp -DREAL8 -DCSCA -DLINUX -DRKSSP -DSLOPE5 -ffixed-line-length-none -ffree-line-length-none -Waliasing -Wno-tabs -Wline-truncation -Wsurprising -fcheck=all -g -fbacktrace -fimplicit-none")
-  #elseif (Fortran_COMPILER_NAME MATCHES "ifort.*")
-  # ifort (untested)
-  #  set (CMAKE_Fortran_FLAGS_RELEASE "-f77rtl -O3")
-  #  set (CMAKE_Fortran_FLAGS_DEBUG   "-f77rtl -O0 -g")
-  #  message("Ifort not enabled now")
-endif (Fortran_COMPILER_NAME MATCHES "gfortran.*")
-
 if(NOT NO_LGD)
   
   #LGD
@@ -69,3 +55,4 @@ message("CMAKE_INCLUDE_DIRECTORIES:" ${CMAKE_INCLUDE_DIRECTORIES})
 
 add_subdirectory(src)
 add_subdirectory(prep)
+add_subdirectory(error)

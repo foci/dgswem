@@ -19,8 +19,8 @@ int main(
   std::vector<int> numneighbors;
   std::vector<std::vector<int> > neighbors;
 
-  //  int n_timesteps = 4000;
-  int n_timesteps = 86400;
+  int n_timesteps = 8000;
+  //int n_timesteps = 2000;
   //int n_timesteps = 2;
   int n_domains;
   int n_rksteps = 2;
@@ -141,8 +141,7 @@ int main(
 	  int volume;
 	  double buffer[MAX_BUFFER_SIZE];
 
-	  std::cout << "domain " << domain << " is exchanging with " << neighbor_here
-		    << std::endl;
+	  std::cout << "domain " << domain << " is exchanging with " << neighbor_here << " at timestep " << timestep << std::endl;
 	  
 	  // Get outgoing boundarys from the neighbors
 	  FNAME(hpx_get_elems_fort)(&dgs[neighbor_here],
@@ -170,8 +169,7 @@ int main(
     } // end rkstep loop
     
     for (int domain=0; domain<ids.size(); domain++) {
-	std::cout << "advancing domain " << ids[domain] << std::endl;
-      FNAME(dg_timestep_advance_fort)(&sizes[domain],
+	std::cout << "advancing domain " << domain << " at timestep " << timestep <<std::endl;      FNAME(dg_timestep_advance_fort)(&sizes[domain],
 				      &dgs[domain],
 				      &globals[domain],
 				      &nodalattrs[domain],

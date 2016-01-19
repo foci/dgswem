@@ -34,18 +34,11 @@
       INTEGER IT, IRK
       
 !.....Hydrodynamics
-#ifdef HPX
-      CALL DG_HYDRO_TIMESTEP(s,dg_here,global_here,nodalattr_here,IT,IRK)
-#else
-
-
       DO IRK = 1,dg_here%NRK
         CALL DG_HYDRO_TIMESTEP(s,dg_here,global_here,nodalattr_here,IT,IRK)
       ENDDO
       
       CALL DG_TIMESTEP_ADVANCE(s,dg_here,global_here,nodalattr_here,IT)
-      
-#endif
 
 !.....Write out results
 

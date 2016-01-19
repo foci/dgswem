@@ -94,6 +94,7 @@ public:
     void update(const HOOD& hood, int nanoStep)
     {
 
+	*this = hood[hood.index()];
 	/*
       // Adding some busy work FIXME
       volatile double a;
@@ -116,12 +117,12 @@ public:
 
 	    if (update_step) {
 
-	      /*
+	      
 		std::cout << "updating (domain_id = " << id
 			  << ", timestep = " << timestep
 			  << ", rkstep = " << rkstep
 			  << ")...\n";
-	      */
+	      
 
 		//                 std::cout << "CPP: about to call dg_hydro_timestep_fort" << std::endl;
 		FNAME(dg_hydro_timestep_fort)(&domainWrapper->size,
@@ -147,10 +148,8 @@ public:
 		    double buffer[MAX_BUFFER_SIZE];
 		    
 
-		    /*
-		      std::cout << "domain " << id << " is exchanging with " << neighbor_here
-				<< std::endl;
-		    */
+		    
+		    std::cout << "domain " << id << " is exchanging with " << neighbor_here << " at timestep " << timestep << std::endl;
 
 		    // Get outgoing boundarys from the neighbors	
 		    //		    std::cout << "CPP: about to call hpx_get_elems_fort" << std::endl;		   
@@ -182,7 +181,7 @@ public:
 		
 		    
 	    } else if (advance_step) {	
-		//std::cout << "advancing domain " << id << std::endl;
+		std::cout << "advancing domain " << id << " at timestep " << timestep <<std::endl;
 	      //	      std::cout << "CPP: about to call dg_timestep_advance_fort" << std::endl;
 		FNAME(dg_timestep_advance_fort)(&domainWrapper->size,
 						&domainWrapper->dg,
@@ -347,12 +346,9 @@ LIBGEODECOMP_REGISTER_HPX_COMM_TYPE(DomainReference)
 typedef LibGeoDecomp::CoordBox<1> CoordBox1;
 LIBGEODECOMP_REGISTER_HPX_COMM_TYPE(CoordBox1)
 
-<<<<<<< HEAD
 //Change me:
 typedef LibGeoDecomp::HpxSimulator<DomainReference, LibGeoDecomp::UnstructuredStripingPartition> SimulatorType;
-=======
-typedef LibGeoDecomp::HpxSimulator<FortranCell, LibGeoDecomp::RecursiveBisectionPartition<2> > SimulatorType;
->>>>>>> 5a9dbbd4608fed323ca7fe5f6ca413a0c6d1d99a
+//typedef LibGeoDecomp::HpxSimulator<FortranCell, LibGeoDecomp::RecursiveBisectionPartition<2> > SimulatorType;
 
 int hpx_main(int argc, char** argv)
 {
@@ -362,8 +358,8 @@ int hpx_main(int argc, char** argv)
     FNAME(hpx_read_n_domains)(&n_domains);
 
     //    int n_timesteps = 86401;
-    int n_timesteps = 100;
-    //int n_timesteps = 4001;
+    //int n_timesteps = 2000;
+    int n_timesteps = 8000;
     //int n_timesteps = 2;
 
     int n_rksteps = 2;
@@ -373,6 +369,9 @@ int hpx_main(int argc, char** argv)
     std::vector<double> updateGroupSpeeds(1, 1.0);
     int ghostZoneWidth = 1;
     int total_rksteps = n_timesteps*(n_rksteps*2+1)+1;
+    std::cout << "total_rksteps = " << total_rksteps << std::endl;
+    //    std::exit(1);
+    //total_rksteps = 12;
     FortranInitializer *init = new FortranInitializer(n_domains, total_rksteps);
 
     SimulatorType sim(

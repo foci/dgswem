@@ -1,0 +1,14 @@
+/home/sbrus/Codes/dgswem/work/fort.14                                                                         ! coarse grid file
+/home/sbrus/Codes/dgswem/work/dgswem_hpx_fortran/np4/                                                         ! coarse output directory
+1                                                                                                             ! p - coarse polynomial order
+1                                                                                                             ! ctp - coarse parametric coordinate transformation order
+.5d0                                                                                                          ! dt - coarse timestep
+/home/sbrus/Codes/dgswem/work/fort.14                                                                         ! fine grid file
+/home/sbrus/Codes/dgswem/work/dgswem_master/                                                                  ! fine output directory
+1                                                                                                             ! p - fine polynomial order
+1                                                                                                             ! ctp - fine parametric coordinate transformation order
+.25d0                                                                                                         ! dt - fine timestep
+1d0                                                                                                           ! tf - final time (days)
+12                                                                                                            ! lines - timesnap to compare output
+/home/sbrus/Codes/dgswem/work/fort.14                                                                         ! base grid file
+1                                                                                                             ! ctp - base grid arametric coordinate transformation order
