@@ -117,12 +117,13 @@ public:
 
 	    if (update_step) {
 
-	      
+
+	      /*
 		std::cout << "updating (domain_id = " << id
 			  << ", timestep = " << timestep
 			  << ", rkstep = " << rkstep
 			  << ")...\n";
-	      
+	      */
 
 		//                 std::cout << "CPP: about to call dg_hydro_timestep_fort" << std::endl;
 		FNAME(dg_hydro_timestep_fort)(&domainWrapper->size,
@@ -149,7 +150,7 @@ public:
 		    
 
 		    
-		    std::cout << "domain " << id << " is exchanging with " << neighbor_here << " at timestep " << timestep << std::endl;
+		    //std::cout << "domain " << id << " is exchanging with " << neighbor_here << " at timestep " << timestep << std::endl;
 
 		    // Get outgoing boundarys from the neighbors	
 		    //		    std::cout << "CPP: about to call hpx_get_elems_fort" << std::endl;		   
@@ -181,7 +182,7 @@ public:
 		
 		    
 	    } else if (advance_step) {	
-		std::cout << "advancing domain " << id << " at timestep " << timestep <<std::endl;
+	      //std::cout << "advancing domain " << id << " at timestep " << timestep <<std::endl;
 	      //	      std::cout << "CPP: about to call dg_timestep_advance_fort" << std::endl;
 		FNAME(dg_timestep_advance_fort)(&domainWrapper->size,
 						&domainWrapper->dg,
