@@ -348,7 +348,6 @@ LIBGEODECOMP_REGISTER_HPX_COMM_TYPE(CoordBox1)
 
 //Change me:
 typedef LibGeoDecomp::HpxSimulator<DomainReference, LibGeoDecomp::UnstructuredStripingPartition> SimulatorType;
-//typedef LibGeoDecomp::HpxSimulator<FortranCell, LibGeoDecomp::RecursiveBisectionPartition<2> > SimulatorType;
 
 int hpx_main(int argc, char** argv)
 {
