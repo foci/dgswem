@@ -84,7 +84,7 @@ public:
     };
 
     explicit
-    DomainReference(int id = 0, void *size = 0, void *global = 0, void *dg = 0, void *nodalattr = 0) :
+    DomainReference(int id = 0, void *size = 0, void *global = 0, void *dg = 0, void *nodalattr = 0, bool busywork = false) :
         domainWrapper(new FortranPointerWrapper(size, global, dg, nodalattr)),
         neighbors_here(neighboringDomainIDs(size,dg,global)),
         id(id),
@@ -92,8 +92,9 @@ public:
 	rkstep(1),
 	update_step(true),
 	exchange_step(false),
-	advance_step(false)
-    {}
+	advance_step(false),
+	busywork(busywork)
+  {}
 
     template<typename HOOD>
     void update(const HOOD& hood, int nanoStep)
@@ -101,7 +102,9 @@ public:
       
       //*this = hood[hood.index()];
 
-      bool only_busywork = false;
+      bool only_busywork = this->busywork;
+
+      std::cout << "only_busywork = " << only_busywork << std::endl;
       
       if (only_busywork) {
 	
@@ -243,7 +246,7 @@ private:
     bool update_step;
     bool exchange_step;
     bool advance_step;
-
+  bool busywork;
 };
 
 //typedef LibGeoDecomp::ContainerCell<DomainReference, MAX_CELL_SIZE, int> FortranCell;
@@ -255,9 +258,10 @@ public:
 
     typedef LibGeoDecomp::UnstructuredGrid<DomainReference, MATRICES, double, C, SIGMA> Grid;
 
-    FortranInitializer(std::size_t numDomains, std::size_t numSteps) :
+  FortranInitializer(std::size_t numDomains, std::size_t numSteps, bool busywork) :
         SimpleInitializer<DomainReference>(LibGeoDecomp::Coord<1>(numDomains), numSteps),
-        numDomains(numDomains)
+        numDomains(numDomains),
+	busywork(busywork)
     {
 	// Empty
     }
@@ -323,7 +327,10 @@ public:
 		adjacency[LibGeoDecomp::Coord<2>(id, neighbors_here[i])] = 1.0;
 	    }
 
-	    DomainReference cell(id, size, global, dg, nodalattr);
+	    std::cout << "busywork before creating DomainReference = " << busywork << std::endl;
+	    //std::exit(1);
+	    
+	    DomainReference cell(id, size, global, dg, nodalattr, busywork);
 	    grid->set(LibGeoDecomp::Coord<1>(id), cell);
         }
 	Grid *unstructuredgrid = dynamic_cast<Grid *>(grid);
@@ -339,7 +346,7 @@ public:
 
 private:
     std::size_t numDomains;
-
+  bool busywork;
 };
 
 //#define LIBGEODECOMP_REGISTER_HPX_COMM_TYPE(CARGO)			\
@@ -383,8 +390,10 @@ int hpx_main(variables_map & vm)
     //int n_timesteps = 2;
 
     int n_timesteps = vm["n_timesteps"].as<std::size_t>();
+    bool busywork = vm["busywork"].as<bool>();
 
     std::cout << "n_timesteps from cmd line = " << n_timesteps << std::endl;
+    std::cout << "busywork from cmd line = " << busywork << std::endl;
 
     int n_rksteps = 2;
 
@@ -397,7 +406,7 @@ int hpx_main(variables_map & vm)
     //std::exit(1);
     //total_rksteps = 12;
 
-    FortranInitializer *init = new FortranInitializer(n_domains, total_rksteps);
+    FortranInitializer *init = new FortranInitializer(n_domains, total_rksteps, busywork);
 
     SimulatorType sim(
 		      init,
