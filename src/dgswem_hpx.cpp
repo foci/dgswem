@@ -10,8 +10,13 @@
 #include <libgeodecomp/parallelization/hpxsimulator.h>
 #include <hpx/hpx.hpp>
 #include <hpx/hpx_init.hpp>
+#include <hpx/include/iostreams.hpp>
 #include <libgeodecomp/loadbalancer/tracingbalancer.h>
 #include <libgeodecomp/geometry/partitions/recursivebisectionpartition.h>
+
+using boost::program_options::variables_map;
+using boost::program_options::options_description;
+using boost::program_options::value;
 
 #include "fname.h"
 #include "fortran_declarations.hpp"
@@ -93,33 +98,40 @@ public:
     template<typename HOOD>
     void update(const HOOD& hood, int nanoStep)
     {
+      
+      //*this = hood[hood.index()];
 
-	*this = hood[hood.index()];
-	/*
-      // Adding some busy work FIXME
-      volatile double a;
-      volatile double b;
-      volatile double c;
-      a = 23.2394908;
-      std::cout << "timestep = " << timestep << " domainID = " << id << std::endl;
-      for (int i=0; i<1000000; i++) {
-	//		for (int j=0; j<10000000; j++) {
-	b = 2.23423;
-	c = a/b;
-	c = a*(b+0.000001);
-	a = c;		  
-	//		}
-      }
-	*/
+      bool only_busywork = false;
+      
+      if (only_busywork) {
+	
+	// Adding some busy work FIXME
+	volatile double a;
+	volatile double b;
+	volatile double c;
+	a = 23.2394908;
+	std::cout << "timestep = " << timestep << " domainID = " << id << std::endl;
+	for (int i=0; i<1000000; i++) {
+	  //		for (int j=0; j<10000000; j++) {
+	  b = 2.23423;
+	  c = a/b;
+	  c = a*(b+0.000001);
+	  a = c;		  
+	  //		}
 
-      //      std::cout << "CPP: LGD update" << std::endl;
+	}
+	timestep++;
+      
+      } else {
+	
+	//      std::cout << "CPP: LGD update" << std::endl;
 	if (timestep != 0) {
-
-	    if (update_step) {
-
-
-	      /*
-		std::cout << "updating (domain_id = " << id
+	  
+	  if (update_step) {
+	    
+	    
+	    /*
+	      std::cout << "updating (domain_id = " << id
 			  << ", timestep = " << timestep
 			  << ", rkstep = " << rkstep
 			  << ")...\n";
@@ -202,6 +214,9 @@ public:
 	} else {
 	    ++timestep;
 	}
+
+      } // else busywork
+
     }
 
     // Serialization function
@@ -349,18 +364,27 @@ LIBGEODECOMP_REGISTER_HPX_COMM_TYPE(CoordBox1)
 
 //Change me:
 typedef LibGeoDecomp::HpxSimulator<DomainReference, LibGeoDecomp::UnstructuredStripingPartition> SimulatorType;
+//typedef LibGeoDecomp::HpxSimulator<DomainReference, LibGeoDecomp::RecursiveBisectionPartition<2> > SimulatorType;
 
-int hpx_main(int argc, char** argv)
+int hpx_main(variables_map & vm)
 {
-    // todo: these should be read in via config files
+
+  
+  
+  // number of domains read from config file
     int n_domains;
     //    std::cout << "CPP: about to call hpx_read_n_domains" << std::endl;
     FNAME(hpx_read_n_domains)(&n_domains);
 
     //    int n_timesteps = 86401;
     //int n_timesteps = 2000;
-    int n_timesteps = 8000;
+    //int n_timesteps = 8000;
+    //int n_timesteps = 100;
     //int n_timesteps = 2;
+
+    int n_timesteps = vm["n_timesteps"].as<std::size_t>();
+
+    std::cout << "n_timesteps from cmd line = " << n_timesteps << std::endl;
 
     int n_rksteps = 2;
 
@@ -370,8 +394,9 @@ int hpx_main(int argc, char** argv)
     int ghostZoneWidth = 1;
     int total_rksteps = n_timesteps*(n_rksteps*2+1)+1;
     std::cout << "total_rksteps = " << total_rksteps << std::endl;
-    //    std::exit(1);
+    //std::exit(1);
     //total_rksteps = 12;
+
     FortranInitializer *init = new FortranInitializer(n_domains, total_rksteps);
 
     SimulatorType sim(
@@ -389,11 +414,30 @@ int hpx_main(int argc, char** argv)
 int main(int argc, char **argv)
 {
 
+  // Parse command line options
+  options_description
+    desc_commandline("usage: " HPX_APPLICATION_STRING " [options]");
+
+  desc_commandline.add_options()
+    (
+            "n_timesteps"
+	    , value<std::size_t>()->default_value(100)
+	    , "Number of timesteps"
+     )
+    (
+            "busywork"
+	    , value<bool>()->default_value(false)
+	    , "Option to use busywork instead of calling fortran subroutines"
+     )
+    ;
+
     // We want HPX to run hpx_main() on all localities to avoid the
     // initial overhead caused by broadcasting the work from one to
     // all other localities:
     std::vector<std::string> config(1, "hpx.run_hpx_main!=1");
 
-    return hpx::init(argc,argv,config);
+
+    // fixme: I'm not sure that config is being used by hpx_main
+    return hpx::init(desc_commandline,argc,argv,config);
 
 }

@@ -88,14 +88,6 @@ if(NOT NO_LGD)
     fortran_declarations.hpp
     ${DGSWEM_FORTRAN}
     )
-  add_executable(
-    dgswem_hpx_nofortran
-    dgswem_hpx_nofortran.cpp
-    fname.h
-    fortran_declarations.hpp
-    ${DGSWEM_FORTRAN}
-    )
-
 endif(NOT NO_LGD)
 
 target_link_libraries(dgswem_cpp_serial gfortran)
@@ -103,9 +95,9 @@ target_link_libraries(dgswem_cpp_serial gfortran)
 if (NOT NO_LGD)
   target_link_libraries(dgswem_hpx gfortran)
   target_link_libraries(dgswem_hpx geodecomp hpx hpx_init)
-  target_link_libraries(dgswem_hpx_nofortran gfortran)
-  target_link_libraries(dgswem_hpx_nofortran geodecomp hpx hpx_init)
-  hpx_setup_target(dgswem_hpx)
-  hpx_setup_target(dgswem_hpx_nofortran)
+  hpx_setup_target(
+    dgswem_hpx
+    COMPONENT_DEPENDENCIES iostreams
+    )    
 
 endif(NOT NO_LGD)
