@@ -1,6 +1,7 @@
 #include <iostream>
 #include "fname.h"
 #include <vector>
+#include <cstdlib>
 
 #include "fortran_declarations.hpp" // This includes parameters defined
 
@@ -9,6 +10,37 @@ int main(
 	 , char* argv[]
 	 )
 {
+
+    int n_timesteps = 100;  
+
+    std::vector <std::string> args;
+    int n_timesteps_cmdline;
+    
+    for (int i=1; i<argc; ++i) {
+	std::string arg = argv[i];
+	if((arg == "-h") || (arg == "--help")) {
+	    std::cerr << "Usage: " << argv[0] 
+		      << " --n_timesteps <number of timesteps>" << std::endl;
+	    return 1;
+	} else if  ((arg == "-n") || (arg == "--n_timesteps")) {		
+	    if (i+1 < argc) { // make sure there's one more argument
+		
+		//std::cout << "arg is " << std::atoi(argv[i+1]) << std::endl;
+		const char *str = argv[++i];
+		//std::cout << "argv[i++] = " << argv[i++] << std::endl;
+		//std::cout << "str = " << str << std::endl;
+		n_timesteps_cmdline = std::atoi(str);
+		n_timesteps = n_timesteps_cmdline;
+	    } else { // no argument
+		std::cerr << "--n_timesteps requires one argument" << std::endl;
+		return 1;
+	    } 
+	} else {
+	    std::cerr << "Unknown argument" << argv[i] <<std::endl;
+	}
+    }
+
+
   std::vector<void *> sizes;
   std::vector<void *> dgs;
   std::vector<void *> globals;
@@ -19,9 +51,6 @@ int main(
   std::vector<int> numneighbors;
   std::vector<std::vector<int> > neighbors;
 
-  int n_timesteps = 8000;
-  //int n_timesteps = 2000;
-  //int n_timesteps = 2;
   int n_domains;
   int n_rksteps = 2;
   
