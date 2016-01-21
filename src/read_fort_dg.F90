@@ -17,10 +17,12 @@
 
       OPEN(s%fortdgunit,FILE=s%DIRNAME//'/'//'fort.dg',POSITION="rewind")       
 
-      PRINT*, ""
-      PRINT("(A)"), "READING FIXED FORMAT FORT.DG..."
-      PRINT*, ""      
-      
+      if (s%myproc.eq.0) then
+         PRINT*, ""
+         PRINT("(A)"), "READING FIXED FORMAT FORT.DG..."
+         PRINT*, ""      
+      end if
+
       READ(s%fortdgunit,*) global_here%DGSWE
       READ(s%fortdgunit,*) dg_here%padapt,dg_here%pflag
       READ(s%fortdgunit,*) dg_here%gflag,dg_here%diorism
@@ -271,9 +273,11 @@
         ENDIF
       ENDDO
       
-       PRINT*, "Number of options = ", nopt
-       PRINT*, "Number of pointer associations = ", ncheck
-      
+      if (s%myproc.eq.0) then
+         PRINT*, "Number of options = ", nopt
+         PRINT*, "Number of pointer associations = ", ncheck
+      end if
+
       ! ensure user has associated each keyword pointer
       IF (nopt /= ncheck) THEN
         PRINT("(A)"), "*** ERROR: fort.dg option pointer association error ***"
@@ -286,16 +290,17 @@
       comment = 0 
       blank = 0
 
-      print*,"fortdgunit = ", s%fortdgunit
-      print*,"DIRNAME = ", s%DIRNAME
-      print*,"FILE=",s%DIRNAME//'/'//'fort.dg'
+!      print*,"fortdgunit = ", s%fortdgunit
+!      print*,"DIRNAME = ", s%DIRNAME
+!      print*,"FILE=",s%DIRNAME//'/'//'fort.dg'
       
       OPEN(s%fortdgunit,FILE=s%DIRNAME//'/'//'fort.dg',POSITION="rewind")   
-      
-      PRINT*, ""
-      PRINT("(A)"), "READING KEYWORD FORMAT FORT.DG..."
-      PRINT*, ""
-     
+
+      if (s%myproc.eq.0) then      
+         PRINT*, ""
+         PRINT("(A)"), "READING KEYWORD FORMAT FORT.DG..."
+         PRINT*, ""
+      end if
       
       DO WHILE (opt_read < nopt)
       
@@ -337,14 +342,20 @@
               ! Set variables equal to value from fort.dg through pointer using an internal read
               SELECT CASE (fortdg(i)%vartype) 
                 CASE(1)
-                  READ(test_val,*) fortdg(i)%iptr
-                  PRINT("(A,A,I8)"), test_opt," = ",fortdg(i)%iptr
+                   READ(test_val,*) fortdg(i)%iptr
+                   if (s%myproc.eq.0) then                      
+                      PRINT("(A,A,I8)"), test_opt," = ",fortdg(i)%iptr
+                   end if
                 CASE(2)
                   READ(test_val,*) fortdg(i)%rptr
-                  PRINT("(A,A,E21.8)"), test_opt," = ",fortdg(i)%rptr                  
+                  if (s%myproc.eq.0) then
+                     PRINT("(A,A,E21.8)"), test_opt," = ",fortdg(i)%rptr                  
+                  end if
                 CASE(3)
                   fortdg(i)%cptr = TRIM(test_val)
-                  PRINT("(A,A,A)"), test_opt," = ",fortdg(i)%cptr                  
+                  if (s%myproc.eq.0) then
+                     PRINT("(A,A,A)"), test_opt," = ",fortdg(i)%cptr                  
+                  end if
               END SELECT
 
               found = .true.          ! flag match
@@ -357,18 +368,25 @@
           ENDDO test
                     
           IF (found .eqv. .false. .and. eqind > 0) THEN
-            ! unmatched lines with an equal sign are either incorrect or no longer supported
-            PRINT("(3A)"),"*** WARNING: ",test_opt, " is an incorrect or depreciated value ***"            
+            ! unmatched lines with an equal sign are either incorrect or no longer supported 
+             if (s%myproc.eq.0) then
+                PRINT("(3A)"),"*** WARNING: ",test_opt, " is an incorrect or depreciated value ***" 
+             end if
+                
           ELSE IF (found .eqv. .false.) THEN
             ! unmatched lines without an equal sign are ignored
-            PRINT("(A)"), "*** WARNING: non-comment line does not contain a keyword assignment***"           
+             if (s%myproc.eq.0) then
+                PRINT("(A)"), "*** WARNING: non-comment line does not contain a keyword assignment***"
+             end if
           ENDIF
           
         ENDIF
       ENDDO 
       
-      PRINT*, ""
-     
+      if (s%myproc.eq.0) then
+         PRINT*, ""
+      end if
+
 !      CALL CHECK_ERRORS(opt_read,fortdg,fortdg_ind,nopt)
 
 
@@ -410,8 +428,9 @@
       global_here%dgswe=dgswe_target
       global_here%reaction_rate = reaction_rate_target
 
-      
-      PRINT*, ""
+      if (s%myproc.eq.0) then      
+         PRINT*, ""
+      end if
       CLOSE(s%fortdgunit)
             
       END SUBROUTINE READ_KEYWORD_FORT_DG
