@@ -100,11 +100,9 @@ public:
     void update(const HOOD& hood, int nanoStep)
     {
       
-      //*this = hood[hood.index()];
+      *this = hood[hood.index()];
 
       bool only_busywork = this->busywork;
-
-      std::cout << "only_busywork = " << only_busywork << std::endl;
       
       if (only_busywork) {
 	
