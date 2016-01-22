@@ -12,3 +12,22 @@ add_executable(
   diffmerge.F
   post_global.F
 )
+
+#METIS1_OBJ PREP_SRC -L ../metis -lmetis -lU77
+
+#file(GLOB SOURCES RELATIVE "metis/Lib/*" )
+#message("METIS_SOURCES:" ${SOURCES})
+#add_library(metis SHARED ${SOURCES})
+
+#add_executable(
+#  adcprep
+#  adcprep.F
+#  decomp.F
+#  read_global.F
+#  prep.F
+#  interp.F
+#  machdep.F
+#  metis.F
+#  pre_global.F
+#  presizes.F
+#)
