@@ -149,6 +149,35 @@ public:
 	      
 	      //std::cout << "a=" << a << std::endl;
 
+		
+		// Fill output buffer
+		//Loop over neighbor domains
+		for (int neighbor=0; neighbor<neighbors_here.size(); neighbor++) {
+		    int neighbor_here = neighbors_here[neighbor];
+		    int volume;
+		    double buffer[MAX_BUFFER_SIZE];
+		    FNAME(hpx_get_elems_fort)(&domainWrapper->dg, //pointer to current domain
+					      &neighbor_here, // pointer to neighbor to send to
+					      &volume,
+					      buffer);
+		    
+		    std::cout << "volume = " << volume << std::endl;
+
+		    // Pack buffer into std vector
+		    std::vector<double> buffer_vector;		    
+		    for (int i=0; i<volume; i++) {
+			buffer_vector.push_back(buffer[i]);
+		    }
+		    std::cout << "buffer_vector.size() = " << buffer_vector.size() << std::endl;
+
+		    output_buffer.insert( std::make_pair(neighbor_here,buffer_vector) );
+		    std::cout << "output_buffer.at(neighbor_here).size() = " << output_buffer.at(neighbor_here).size() << std::endl;
+		    std::vector<double> temp = output_buffer.at(neighbor_here);
+		    std::cout << "temp.size() = " << temp.size() << std::endl;
+		}
+
+		std::cout << "output_buffer.size() = " << output_buffer.size() << std::endl;
+
 		update_step = false;
 		exchange_step = true;
 		advance_step = false;
@@ -161,24 +190,28 @@ public:
 		    int volume;
 		    double buffer[MAX_BUFFER_SIZE];
 		    
+		    // Unpack buffer from neighbor
+		    //std::vector<double> buffer_vector = &hood[neighbor_here].output_buffer[id];
 
+		    // Put elements into our own subdomain
+		    FNAME(hpx_put_elems_fort)(&domainWrapper->dg,
+					      &neighbor_here,
+					      &volume,
+					      buffer);
 		    
 		    //std::cout << "domain " << id << " is exchanging with " << neighbor_here << " at timestep " << timestep << std::endl;
 
 		    // Get outgoing boundarys from the neighbors	
 		    //		    std::cout << "CPP: about to call hpx_get_elems_fort" << std::endl;		   
+		    /*
 		    FNAME(hpx_get_elems_fort)(&hood[neighbor_here].domainWrapper->dg,
 					      &id,
 					      &volume,
 					      buffer);
-		    
+		    */
 		    
 		    // Put those arrays inside current domain
 		    //		    std::cout << "CPP: about to call hpx_put_elems_fort" << std::endl;
-		    FNAME(hpx_put_elems_fort)(&domainWrapper->dg,
-					      &neighbor_here,
-					      &volume,
-					      buffer);
 		}// end loop over neighbors
 
 		exchange_step = false;
@@ -238,6 +271,7 @@ public:
 private:
     boost::shared_ptr<FortranPointerWrapper> domainWrapper;
     std::vector<int> neighbors_here;
+    std::map<int,std::vector<double> > output_buffer;
     int id;
     int timestep;
     int rkstep;
