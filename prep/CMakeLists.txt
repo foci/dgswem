@@ -15,7 +15,9 @@ add_executable(
 
 #METIS1_OBJ PREP_SRC -L ../metis -lmetis -lU77
 
+include_directories(../metis/Lib)
 add_library(metis SHARED
+../metis/Lib/metis.h
 ../metis/Lib/balance.c
 ../metis/Lib/bucketsort.c
 ../metis/Lib/ccgraph.c
@@ -44,7 +46,6 @@ add_library(metis SHARED
 ../metis/Lib/memory.c
 ../metis/Lib/mesh.c
 ../metis/Lib/meshpart.c
-../metis/Lib/metis.h
 ../metis/Lib/mfm2.c
 ../metis/Lib/mfm.c
 ../metis/Lib/mincover.c
