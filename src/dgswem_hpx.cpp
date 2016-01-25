@@ -133,7 +133,7 @@ public:
 	      // Clear output buffer map
 	      output_buffer.clear();
 	    
-	      std::cout << "********* update step ************" << std::endl;
+	      //std::cout << "********* update step ************" << std::endl;
 
 	      /*
 	      std::cout << "updating (domain_id = " << id
@@ -195,7 +195,7 @@ public:
 		    		   
 		    std::pair<std::_Rb_tree_iterator<std::pair<const int, std::vector<double> > >, bool> outval = output_buffer.insert(std::map<int, std::vector<double> >::value_type(neighbor_here, buffer_vector));
 		    if (std::get<1>(outval)) {
-			std::cout << "Insert successful!" << std::endl;
+			//std::cout << "Insert successful!" << std::endl;
 		    } else {
 			std::cout << "Insert not successful!" << std::endl;
 		    }
@@ -232,14 +232,17 @@ public:
 		    double buffer[MAX_BUFFER_SIZE];
 
 		    // Unpack buffer from neighbor
-		    std::cout << "id here:" << id << ", unpacking buffer from " << neighbor_here << std::endl;
-		    std::vector<double> buffer_vector = &hood[neighbor_here].output_buffer.at(id);
+		    //std::cout << "id here:" << id << ", unpacking buffer from " << neighbor_here << std::endl;
+		    //const std::vector<double>*  buffer_vector = &hood[neighbor_here].output_buffer.at(id);
+		    //std::vector<double> buffer_vector = &hood[neighbor_here].output_buffer.at(id);
+		    std::vector<double> buffer_vector = hood[neighbor_here].output_buffer.at(id);
 		    //std::vector<double> buffer_vector = output_buffer.at(neighbor_here);
+		    //for (int i=0; i<buffer_vector->size(); i++) {
 		    for (int i=0; i<buffer_vector.size(); i++) {
 			buffer[i] = buffer_vector[i];
-			std::cout << "buffer[" << i << "] = " << buffer[i] << " "; 
+			//std::cout << "buffer[" << i << "] = " << buffer[i] << " "; 
 		    }
-		    std::cout << std::endl;
+		    //std::cout << std::endl;
 
 		    // Put elements into our own subdomain
 		    FNAME(hpx_put_elems_fort)(&domainWrapper->dg,
@@ -305,7 +308,8 @@ public:
     template <class ARCHIVE>
     void serialize(ARCHIVE& ar, unsigned)
     {
-	throw std::runtime_error("no serialization yet!");
+	//throw std::runtime_error("no serialization yet!");
+	ar & neighbors_here & id & timestep & rkstep & update_step & exchange_step & advance_step & output_buffer & busywork;
     }
 
     /*
@@ -407,9 +411,6 @@ public:
 		// 1.0 is the weighting, which is unused for DGSWEM
 		adjacency[LibGeoDecomp::Coord<2>(id, neighbors_here[i])] = 1.0;
 	    }
-
-	    std::cout << "busywork before creating DomainReference = " << busywork << std::endl;
-	    //std::exit(1);
 	    
 	    DomainReference cell(id, size, global, dg, nodalattr, busywork);
 	    grid->set(LibGeoDecomp::Coord<1>(id), cell);
