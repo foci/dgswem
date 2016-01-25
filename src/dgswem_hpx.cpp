@@ -129,9 +129,13 @@ public:
 	if (timestep != 0) {
 	  
 	  if (update_step) {
+
+	      // Clear output buffer map
+	      output_buffer.clear();
 	    
 	      std::cout << "********* update step ************" << std::endl;
-	    /*
+
+	      /*
 	      std::cout << "updating (domain_id = " << id
 			  << ", timestep = " << timestep
 			  << ", rkstep = " << rkstep
@@ -163,44 +167,49 @@ public:
 		    
 		    //std::cout << "volume = " << volume << std::endl;
 
-		    std::cout << "******************************************************" << std::endl;
+		    //std::cout << "******************************************************" << std::endl;
 
 		    //std::map<int,std::vector<double> > output_buffer;
-		    std::map<int,std::vector<double> > test_map;
+		    //std::map<int,std::vector<double> > test_map;
 
-
-		    std::cout << "Buffer from " << id << ", for " << neighbor_here << std::endl;
-		    std::cout << "volume = " << volume << std::endl;
+		    
+		    //std::cout << "Buffer from " << id << ", for " << neighbor_here << std::endl;
+		    //std::cout << "volume = " << volume << std::endl;
 		    // Pack buffer into std vector
 		    std::vector<double> buffer_vector;
 		    for (int i=0; i<volume; i++) {
-			std::cout << "buffer[" << i << "] = " << buffer[i] << " ";
+			//std::cout << "buffer[" << i << "] = " << buffer[i] << " ";
 			buffer_vector.push_back(buffer[i]);
 			
 		    }
-		    std::cout << std::endl;
+		    //std::cout << std::endl;
 
+		    /*
 		    std::cout << "Buffer Vector:" << std::endl;
 		    std::cout << "buffer_vector.size() = " << buffer_vector.size() << std::endl;
 		    for (int i=0; i<buffer_vector.size(); i++) {
 			std::cout << "buffer_vector[" << i << "] = " << buffer_vector[i] << " ";
 		    }
 		    std::cout << std::endl;
+		    */
+		    		   
+		    std::pair<std::_Rb_tree_iterator<std::pair<const int, std::vector<double> > >, bool> outval = output_buffer.insert(std::map<int, std::vector<double> >::value_type(neighbor_here, buffer_vector));
+		    if (std::get<1>(outval)) {
+			std::cout << "Insert successful!" << std::endl;
+		    } else {
+			std::cout << "Insert not successful!" << std::endl;
+		    }
 
-		    //output_buffer.insert( std::make_pair(neighbor_here,buffer_vector) );
-		    output_buffer.insert(std::map<int, std::vector<double> >::value_type(neighbor_here, buffer_vector));
-		    test_map.insert(std::map<int, std::vector<double> >::value_type(neighbor_here, buffer_vector));
-		    
-
-		    std::cout << "Vector retrieved from map:" << std::endl;
-		    std::vector<double> temp = output_buffer.at(neighbor_here);
-		    //std::vector<double> temp = test_map.at(neighbor_here);
+		    //std::cout << "Vector retrieved from map:" << std::endl;
+		    //std::vector<double> temp = output_buffer.at(neighbor_here);
+		    /*
 		    std::cout << "temp.size() = " << temp.size() << std::endl;
 		    for (int i=0; i<temp.size(); i++) {	
 			std::cout << "temp[" << i << "] = " << temp[i] << " "; 
 		    }
 		    std::cout << std::endl;
 		    std::cout << "******************************************************" << std::endl;
+		    */
 
 		    //std::cout << "output_buffer.at(neighbor_here).size() = " << output_buffer.at(neighbor_here).size() << std::endl;
 		    //std::cout << "temp.size() = " << temp.size() << std::endl;
@@ -222,18 +231,15 @@ public:
 		    int volume;
 		    double buffer[MAX_BUFFER_SIZE];
 
-		    /*
 		    // Unpack buffer from neighbor
-		    //std::vector<double> buffer_vector = &hood[neighbor_here].output_buffer[id];
-		    std::vector<double> buffer_vector = output_buffer.at(neighbor_here);
 		    std::cout << "id here:" << id << ", unpacking buffer from " << neighbor_here << std::endl;
-		    //std::cout << "neighbor_here = " <<  << std::endl;
+		    std::vector<double> buffer_vector = &hood[neighbor_here].output_buffer.at(id);
+		    //std::vector<double> buffer_vector = output_buffer.at(neighbor_here);
 		    for (int i=0; i<buffer_vector.size(); i++) {
 			buffer[i] = buffer_vector[i];
 			std::cout << "buffer[" << i << "] = " << buffer[i] << " "; 
 		    }
 		    std::cout << std::endl;
-		    */
 
 		    // Put elements into our own subdomain
 		    FNAME(hpx_put_elems_fort)(&domainWrapper->dg,
@@ -310,11 +316,11 @@ public:
     }
     */
 
-    std::map<int,std::vector<double> > output_buffer;
 
 private:
     boost::shared_ptr<FortranPointerWrapper> domainWrapper;
     std::vector<int> neighbors_here;
+    std::map<int,std::vector<double> > output_buffer;
     int id;
     int timestep;
     int rkstep;
