@@ -135,12 +135,12 @@ public:
 	    
 	      //std::cout << "********* update step ************" << std::endl;
 
-	      /*
+	      
 	      std::cout << "updating (domain_id = " << id
 			  << ", timestep = " << timestep
 			  << ", rkstep = " << rkstep
 			  << ")...\n";
-	      */
+	      
 
 		//                 std::cout << "CPP: about to call dg_hydro_timestep_fort" << std::endl;
 		FNAME(dg_hydro_timestep_fort)(&domainWrapper->size,
@@ -279,7 +279,7 @@ public:
 		
 		    
 	    } else if (advance_step) {	
-	      //std::cout << "advancing domain " << id << " at timestep " << timestep <<std::endl;
+	      std::cout << "advancing domain " << id << " at timestep " << timestep <<std::endl;
 	      //	      std::cout << "CPP: about to call dg_timestep_advance_fort" << std::endl;
 		FNAME(dg_timestep_advance_fort)(&domainWrapper->size,
 						&domainWrapper->dg,
@@ -372,8 +372,9 @@ public:
 	    std::vector<int> neighbors_here = neighboringDomainIDs(size, dg, global);
 	    // Destroy the domain
 	    FNAME(term_fort)(&size,&global,&dg,&nodalattr);
-	    adjacency[id] = neighbors_here;
-	    }
+	    //adjacency[id] = neighbors_here;
+	    adjacency.insert(id, neighbors_here);
+	}
 	return adjacency;
     }
 
@@ -416,7 +417,7 @@ public:
 	    grid->set(LibGeoDecomp::Coord<1>(id), cell);
         }
 	Grid *unstructuredgrid = dynamic_cast<Grid *>(grid);
-	unstructuredgrid->setAdjacency(0, adjacency);
+	unstructuredgrid->setWeights(0, adjacency);
     }
 
     // Serialization function
@@ -525,10 +526,12 @@ int main(int argc, char **argv)
     // We want HPX to run hpx_main() on all localities to avoid the
     // initial overhead caused by broadcasting the work from one to
     // all other localities:
-    std::vector<std::string> config(1, "hpx.run_hpx_main!=1");
+  std::vector<std::string> config(1, "hpx.run_hpx_main!=1");
 
+  //config.push_back("hpx:ini=hpx.stacks.small_size=0x20000");
 
     // fixme: I'm not sure that config is being used by hpx_main
-    return hpx::init(desc_commandline,argc,argv,config);
+  return hpx::init(desc_commandline,argc,argv,config);
+  //return hpx::init(desc_commandline,argc,argv);
 
 }
