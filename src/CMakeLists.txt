@@ -13,8 +13,8 @@ if (Fortran_COMPILER_NAME MATCHES "gfortran.*")
 endif (Fortran_COMPILER_NAME MATCHES "gfortran.*")
 
 if (Fortran_COMPILER_NAME MATCHES "ifort.*")
-  set (CMAKE_Fortran_FLAGS_RELEASE   "-cpp -O0X -DREAL8 -DCSCA -DLINUX -DRKSSP -DSLOPE5 -ffixed-line-length-none -ffree-line-length-none -Waliasing -Wno-tabs -Wline-truncation -fimplicit-none -frecursive -I CMakeFiles/${PROJECT_NAME}.dir/src/ -I .")
-  set (CMAKE_Fortran_FLAGS_DEBUG   "-cpp -DVERBOSE -DREAL8 -DCSCA -DLINUX -DRKSSP -DSLOPE5 -ffixed-line-length-none -ffree-line-length-none -Waliasing -Wno-tabs -Wline-truncation -Wsurprising -fcheck=all -g -fbacktrace -fimplicit-none -frecursive -I CMakeFiles/${PROJECT_NAME}.dir/src/ -I .")
+  set (CMAKE_Fortran_FLAGS_RELEASE   "-cpp -O3 -DREAL8 -DCSCA -DLINUX -DRKSSP -DSLOPE5 -implicitnone -frecursive -I CMakeFiles/${PROJECT_NAME}.dir/src/ -I .")
+  set (CMAKE_Fortran_FLAGS_DEBUG   "-cpp -DVERBOSE -DREAL8 -DCSCA -DLINUX -DRKSSP -DSLOPE5 -O0 -g -traceback -check all -implicitnone -I CMakeFiles/${PROJECT_NAME}.dir/src/ -I .")
 endif (Fortran_COMPILER_NAME MATCHES "ifort.*")
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fno-inline ${ADDITIONAL_COMPILE_FLAGS}")
