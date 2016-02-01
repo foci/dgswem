@@ -20,9 +20,6 @@
       USE DG
       USE NodalAttributes
 !      USE fort_dg, ONLY: read_keyword_fort_dg,read_fixed_fort_dg
-#ifdef CMPI
-      USE MESSENGER_ELEM
-#endif
 #ifdef SWAN
 !asey 101118: Enable hot-start file generation by SWAN.
       USE Couple2Swan, ONLY: SwanHotStartUnit
@@ -55,38 +52,12 @@
 !     ek...Zero out all the variables in the Nodal Attributes Module
 !     ek...Added from version 46
 
+      print*, "s%DIRNAME = ", s%DIRNAME
+
       CALL InitNAModule(nodalattr_here)
 
 !     sb-PDG1 added
-#ifdef CMPI
-!     
-!     When running in parallel check to make sure that the number of
-!     processors (MNPROC - obtained from the job control script via a call
-!     to the messenger module) is the same as that used in ADCPREP and written
-!     in the fort.80 file
-!     
-      OPEN(80,FILE='fort.80')
-      READ(80,'(A)') CDUM80     !Skip global_here%RUNDES
-      READ(80,'(A)') CDUM80     !Skip global_here%RUNID
-      READ(80,'(A)') CDUM80     !Skip global_here%AGRID
-      READ(80,*) IDUM80         !Skip NELG & NNODG
-      READ(80,*) IDUM80         !Read in NPROC
-      CLOSE(80)
-      IF(IDUM80.NE.s%MNPROC) THEN
-         IF(s%MYPROC.EQ.0) THEN
-            WRITE(*,'(A)') '*** ERROR IN PARALLEL SETUP!'
-            WRITE(*,'(2A,I4,A)') '*** Number of CPUS for submitted job ',&
-           '(NCPU = ',s%MNPROC,') is not equal to the'
-            WRITE(*,'(2A,I4,A)') '*** number of CPUS specified during',&
-           ' ADCPREP (see fort.80: NCPU = ',IDUM80,').'
-            WRITE(*,'(A)') '*** dgswem will now quit!'
-         ENDIF
-         CALL MESSAGE_FINI(s)
-         STOP
-      ENDIF
-#endif
 
-!--   
       global_here%ScreenUnit = 6
 
 !.....Initialize all runtime option logicals to false

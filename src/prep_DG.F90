@@ -28,10 +28,6 @@
       USE GLOBAL
       USE DG
       USE NodalAttributes
-#ifdef CMPI
-      USE MESSENGER_ELEM
-      USE MESSENGER
-#endif
 
       IMPLICIT NONE
       
@@ -72,14 +68,10 @@
       dg_here%C16 = 1.D0/6.D0
       R = 6378206.4d0
 
-#ifdef CMPI
-      myproc_here = s%myproc
-#else
 #ifdef HPX
       myproc_here = s%myproc
 #else
       myproc_here = 0
-#endif
 #endif
 
 
@@ -161,18 +153,6 @@
       call msg_table_hpx(s, dg_here)
 #endif
 
-#ifdef CMPI
-
-      CALL MSG_TYPES_ELEM()     ! Determine Word Sizes for Message-Passing
-      CALL MSG_TABLE_ELEM(s)     ! Read Message-Passing Tables
-
-      IF (dg_here%SLOPEFLAG.ge.4) THEN
-         CALL MSG_TYPES()
-         CALL MSG_TABLE(s)
-      ENDIF
-
-#endif
-
 !.....Create the global_here%edge based data
 
       IF(MYPROC_HERE.EQ.0) THEN
@@ -184,11 +164,6 @@
          print *, 'CREATING global_here%EDGE DATA DONE'
          print *, ''
       ENDIF
-
-#ifdef CMPI
-      CALL MESSAGE_START_ELEM(dg_here,s) ! Startup persistent message passing
-      IF (dg_here%SLOPEFLAG.ge.4) CALL MESSAGE_START(s)
-#endif
 
 !.....Re-arrange elevation specified boundary segment data for DG
 
@@ -504,76 +479,6 @@
       dg_here%ze = 0.D0
       global_here%ydub = 0.d0
       hb1 = 0.D0
-
-!$$$      do k = 1,S%MNE
-!$$$
-!$$$         
-!$$$         global_here%n1 = global_here%NM(k,1)
-!$$$         global_here%n2 = global_here%NM(k,2)
-!$$$         global_here%n3 = global_here%NM(k,3)
-!$$$                                !Define lagrange transform
-!$$$
-!$$$         do mm = 1,dg_here%nagp(dg_here%ph)     !global_here%ICs should not have higher order than dg_here%ph
-!$$$
-!$$$            ell_1 = -0.5D0 * ( dg_here%xagp(mm,dg_here%ph) + dg_here%yagp(mm,dg_here%ph) )
-!$$$            ell_2 =  0.5D0 * ( dg_here%xagp(mm,dg_here%ph) + 1.D0 )
-!$$$            ell_3 =  0.5D0 * ( dg_here%yagp(mm,dg_here%ph) + 1.D0 )
-!$$$
-!$$$            XBCbt(k) = global_here%x(global_here%n1)*ell_1 + global_here%x(global_here%n2)*ell_2 + global_here%x(global_here%n3)*ell_3
-!$$$            YBCbt(k) = global_here%y(global_here%n1)*ell_1 + global_here%y(global_here%n2)*ell_2 + global_here%y(global_here%n3)*ell_3
-!$$$
-!$$$
-!$$$            rev =  3.141592653589793D0 / 4.D0
-!$$$
-!$$$            Ox = XBCbt(k)*cos(rev) - YBCbt(k)*sin(rev)
-!$$$            Oy = YBCbt(k)*cos(rev) + XBCbt(k)*sin(rev)
-!$$$
-!$$$            radial(k) = min(sqrt( Ox**2 + (Oy + 0.25D0)**2 ), 0.18D0)/0.18D0
-!$$$
-!$$$
-!$$$            do j = 1,dg_here%dofh
-!$$$
-!$$$               dg_here%QX(j,k,1) = dg_here%QX(j,k,1) + YBCbt(k) * dg_here%wagp(mm,dg_here%ph) * dg_here%phi_area(j,mm,dg_here%ph)
-!$$$
-!$$$               dg_here%QY(j,k,1) = dg_here%QY(j,k,1) - XBCbt(k) * dg_here%wagp(mm,dg_here%ph) * dg_here%phi_area(j,mm,dg_here%ph)        
-!$$$
-!$$$               dg_here%iota(j,k,1) = dg_here%iota(j,k,1) + 0.25D0 *( 1.0D0 + cos(3.141592653589793D0*radial(k)) ) 
-!$$$     &              * dg_here%wagp(mm,dg_here%ph) * dg_here%phi_area(j,mm,dg_here%ph)  
-!$$$               
-!$$$c$$$               dg_here%iota(j,k,1) = dg_here%iota(j,k,1) + 0.5D0 *( exp ( - ( (XBCbt(k)+.05D0)**2 + (YBCbt(k)+.05D0)**2  ) /0.001D0 ) ) 
-!$$$c$$$     &              * dg_here%wagp(mm,dg_here%ph) * dg_here%phi_area(j,mm,dg_here%ph) 
-!$$$
-!$$$               if( ( sqrt((Ox + 0.25D0 )**2 + Oy**2)).le.0.18D0.and.(sqrt((Ox + 0.25D0 )**2 + 
-!$$$     &              Oy**2)).ge.0.025D0.and.(Ox.le.(-0.23D0) )) then
-!$$$
-!$$$                  dg_here%iota(j,k,1) = dg_here%iota(j,k,1) + 1.0D0 * dg_here%wagp(mm,dg_here%ph) * dg_here%phi_area(j,mm,dg_here%ph) 
-!$$$
-!$$$               elseif(sqrt( (Ox -.25D0)**2 + Oy**2 ).le.0.18D0 ) then
-!$$$
-!$$$                  dg_here%iota(j,k,1) =  dg_here%iota(j,k,1) + (1.D0 - ( 1.D0 / 0.18D0 ) * sqrt((Ox -0.25D0)**2 + Oy**2 ) ) 
-!$$$     &                 * dg_here%wagp(mm,dg_here%ph) * dg_here%phi_area(j,mm,dg_here%ph) 
-!$$$
-!$$$               endif
-!$$$
-!$$$               dg_here%hb(j,k,1) = dg_here%hb(j,k,1) + 1.D0*dg_here%wagp(mm,dg_here%ph) * dg_here%phi_area(j,mm,dg_here%ph)
-!$$$
-!$$$            enddo
-!$$$
-!$$$
-!$$$         enddo
-!$$$
-!$$$                                ! get back the coeffs in each component
-!$$$
-!$$$         do j= 1,dg_here%dofh
-!$$$
-!$$$            dg_here%QX(j,k,1) =  dg_here%QX(j,k,1) * dg_here%M_inv(j,dg_here%ph)
-!$$$            dg_here%QY(j,k,1) =  dg_here%QY(j,k,1) * dg_here%M_inv(j,dg_here%ph)
-!$$$            dg_here%iota(j,k,1) =  dg_here%iota(j,k,1) * dg_here%M_inv(j,dg_here%ph)
-!$$$            dg_here%hb(j,k,1) =  dg_here%hb(j,k,1) * dg_here%M_inv(j,dg_here%ph)
-!$$$
-!$$$         enddo
-!$$$
-!$$$      enddo
 
       !dg_here%iotaa = dg_here%iota
  
