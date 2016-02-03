@@ -75,7 +75,7 @@ public:
 	    }
 	}
       
-      
+
 	void *size;
 	void *global;
 	void *dg;
@@ -102,6 +102,19 @@ public:
       
       *this = hood[hood.index()];
 
+      std::cout << "LGD update timestep =  " << timestep << " id = " << id << " busywork = " << busywork << " ";
+
+      if (update_step) {
+	std::cout << "update_step" << std::endl;
+      } else if (exchange_step) {
+	std::cout << "exchange_step" << std::endl;
+      } else if (advance_step) {
+	std::cout << "advance_step" << std::endl;
+      } else {
+	std::cout << "LGD update, error! timestep = " << timestep << std::endl;
+      }
+
+      /*
       bool only_busywork = this->busywork;
       
       if (only_busywork) {
@@ -122,8 +135,8 @@ public:
 
 	}
 	timestep++;
-      
       } else {
+      */      
 	
 	//      std::cout << "CPP: LGD update" << std::endl;
 	if (timestep != 0) {
@@ -222,9 +235,10 @@ public:
 		update_step = false;
 		exchange_step = true;
 		advance_step = false;
-	    } else if (exchange_step) {
-
-		// Boundary exchange
+	  } else if (exchange_step) {
+	    std::cout << "exchange step stuff being called" << std::endl;
+	    
+	    // Boundary exchange
 		//Loop over neighbors
 		for (int neighbor=0; neighbor<neighbors_here.size(); neighbor++) {
 		    int neighbor_here = neighbors_here[neighbor];
@@ -265,6 +279,7 @@ public:
 		    //		    std::cout << "CPP: about to call hpx_put_elems_fort" << std::endl;
 		}// end loop over neighbors
 
+		std::cout << "about to set exchange_step to false" << std::endl;
 		exchange_step = false;
 
 		if (rkstep == 2) {
@@ -300,7 +315,7 @@ public:
 	    ++timestep;
 	}
 
-      } // else busywork
+	//} // else busywork
 
     }
 
@@ -309,7 +324,7 @@ public:
     void serialize(ARCHIVE& ar, unsigned)
     {
 	//throw std::runtime_error("no serialization yet!");
-	ar & neighbors_here & id & timestep & rkstep & update_step & exchange_step & advance_step & output_buffer & busywork;
+	ar & neighbors_here & output_buffer & id & timestep & rkstep & update_step & exchange_step & advance_step & busywork;
     }
 
     /*
