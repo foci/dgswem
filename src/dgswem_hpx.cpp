@@ -75,7 +75,7 @@ public:
 	    }
 	}
       
-      
+
 	void *size;
 	void *global;
 	void *dg;
@@ -102,6 +102,19 @@ public:
       
       *this = hood[hood.index()];
 
+      std::cout << "LGD update timestep =  " << timestep << " id = " << id << " busywork = " << busywork << " ";
+
+      if (update_step) {
+	std::cout << "update_step" << std::endl;
+      } else if (exchange_step) {
+	std::cout << "exchange_step" << std::endl;
+      } else if (advance_step) {
+	std::cout << "advance_step" << std::endl;
+      } else {
+	std::cout << "LGD update, error! timestep = " << timestep << std::endl;
+      }
+
+      /*
       bool only_busywork = this->busywork;
       
       if (only_busywork) {
@@ -122,8 +135,8 @@ public:
 
 	}
 	timestep++;
-      
       } else {
+      */      
 	
 	//      std::cout << "CPP: LGD update" << std::endl;
 	if (timestep != 0) {
@@ -135,12 +148,12 @@ public:
 	    
 	      //std::cout << "********* update step ************" << std::endl;
 
-	      /*
+	      
 	      std::cout << "updating (domain_id = " << id
 			  << ", timestep = " << timestep
 			  << ", rkstep = " << rkstep
 			  << ")...\n";
-	      */
+	      
 
 		//                 std::cout << "CPP: about to call dg_hydro_timestep_fort" << std::endl;
 		FNAME(dg_hydro_timestep_fort)(&domainWrapper->size,
@@ -222,9 +235,10 @@ public:
 		update_step = false;
 		exchange_step = true;
 		advance_step = false;
-	    } else if (exchange_step) {
-
-		// Boundary exchange
+	  } else if (exchange_step) {
+	    std::cout << "exchange step stuff being called" << std::endl;
+	    
+	    // Boundary exchange
 		//Loop over neighbors
 		for (int neighbor=0; neighbor<neighbors_here.size(); neighbor++) {
 		    int neighbor_here = neighbors_here[neighbor];
@@ -265,6 +279,7 @@ public:
 		    //		    std::cout << "CPP: about to call hpx_put_elems_fort" << std::endl;
 		}// end loop over neighbors
 
+		std::cout << "about to set exchange_step to false" << std::endl;
 		exchange_step = false;
 
 		if (rkstep == 2) {
@@ -279,7 +294,7 @@ public:
 		
 		    
 	    } else if (advance_step) {	
-	      //std::cout << "advancing domain " << id << " at timestep " << timestep <<std::endl;
+	      std::cout << "advancing domain " << id << " at timestep " << timestep <<std::endl;
 	      //	      std::cout << "CPP: about to call dg_timestep_advance_fort" << std::endl;
 		FNAME(dg_timestep_advance_fort)(&domainWrapper->size,
 						&domainWrapper->dg,
@@ -300,7 +315,7 @@ public:
 	    ++timestep;
 	}
 
-      } // else busywork
+	//} // else busywork
 
     }
 
@@ -309,7 +324,7 @@ public:
     void serialize(ARCHIVE& ar, unsigned)
     {
 	//throw std::runtime_error("no serialization yet!");
-	ar & neighbors_here & id & timestep & rkstep & update_step & exchange_step & advance_step & output_buffer & busywork;
+	ar & neighbors_here & output_buffer & id & timestep & rkstep & update_step & exchange_step & advance_step & busywork;
     }
 
     /*
@@ -372,8 +387,9 @@ public:
 	    std::vector<int> neighbors_here = neighboringDomainIDs(size, dg, global);
 	    // Destroy the domain
 	    FNAME(term_fort)(&size,&global,&dg,&nodalattr);
-	    adjacency[id] = neighbors_here;
-	    }
+	    //adjacency[id] = neighbors_here;
+	    adjacency.insert(id, neighbors_here);
+	}
 	return adjacency;
     }
 
@@ -416,7 +432,7 @@ public:
 	    grid->set(LibGeoDecomp::Coord<1>(id), cell);
         }
 	Grid *unstructuredgrid = dynamic_cast<Grid *>(grid);
-	unstructuredgrid->setAdjacency(0, adjacency);
+	unstructuredgrid->setWeights(0, adjacency);
     }
 
     // Serialization function
@@ -525,10 +541,12 @@ int main(int argc, char **argv)
     // We want HPX to run hpx_main() on all localities to avoid the
     // initial overhead caused by broadcasting the work from one to
     // all other localities:
-    std::vector<std::string> config(1, "hpx.run_hpx_main!=1");
+  std::vector<std::string> config(1, "hpx.run_hpx_main!=1");
 
+  //config.push_back("hpx:ini=hpx.stacks.small_size=0x20000");
 
     // fixme: I'm not sure that config is being used by hpx_main
-    return hpx::init(desc_commandline,argc,argv,config);
+  return hpx::init(desc_commandline,argc,argv,config);
+  //return hpx::init(desc_commandline,argc,argv);
 
 }
