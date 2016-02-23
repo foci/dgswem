@@ -20,6 +20,17 @@ get_filename_component (Fortran_COMPILER_NAME ${CMAKE_Fortran_COMPILER} NAME)
 
 message ("CMAKE_Fortran_COMPILER full path: " ${CMAKE_Fortran_COMPILER})
 
+if(HPX_NOLGD)
+  #HPX
+  message ("HPX_NOLGD = true")
+  cmake_minimum_required(VERSION 2.8.4 FATAL_ERROR)
+  find_package(HPX REQUIRED)
+  include_directories(${HPX_INCLUDE_DIRS})
+  link_directories(${HPX_LIBRARY_DIRS})
+  message("HPX_INCLUDE_DIRS:" ${HPX_INCLUDE_DIRS})
+  message("HPX_LIBRARY_DIR:" ${HPX_LIBRARY_DIR})
+endif(HPX_NOLGD)
+
 if(NOT NO_LGD)
   
   #LGD
