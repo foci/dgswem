@@ -81,6 +81,14 @@ add_executable(
   ${DGSWEM_FORTRAN}
 )
 
+add_executable(
+  dgswem_hpx_dataflow
+  dgswem_hpx_dataflow.cpp
+  fname.h
+  fortran_declarations.hpp
+  ${DGSWEM_FORTRAN}
+)
+
 if(NOT NO_LGD)
   add_executable(
     dgswem_hpx
@@ -100,5 +108,11 @@ if (NOT NO_LGD)
     dgswem_hpx
     COMPONENT_DEPENDENCIES iostreams
     )    
+
+  target_link_libraries(dgswem_hpx_dataflow hpx hpx_init)
+  hpx_setup_target(
+    dgswem_hpx
+    COMPONENT_DEPENDENCIES iostreams
+    )
 
 endif(NOT NO_LGD)
