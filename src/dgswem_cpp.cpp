@@ -1,4 +1,5 @@
 #include <iostream>
+#include <fstream>
 #include "fname.h"
 #include <vector>
 #include <cstdlib>
@@ -16,6 +17,10 @@ int main(
     std::vector <std::string> args;
     int n_timesteps_cmdline;
     
+    std::ofstream fortran_calls;
+    fortran_calls.open("fortran_calls.txt");
+
+
     for (int i=1; i<argc; ++i) {
 	std::string arg = argv[i];
 	if((arg == "-h") || (arg == "--help")) {
@@ -79,6 +84,7 @@ int main(
   // Initialize all domains
   for(int i=0; i<n_domains; i++) {
     std::cout << "initializing domain " << i << std::endl;
+    fortran_calls << "calling dgswem_init_fort, domain = "<< i <<std::endl;	    
     FNAME(dgswem_init_fort)(&sizes[i],
 			    &dgs[i],
 			    &globals[i],
@@ -91,6 +97,7 @@ int main(
     int numneighbors_fort;
     int neighbors_fort[MAX_DOMAIN_NEIGHBORS];
     std::vector<int> neighbors_here;
+    fortran_calls << "Calling get_neighbors_fort" << std::endl;
     FNAME(get_neighbors_fort)(&sizes[i],
 			      &dgs[i],
 			      &globals[i],
@@ -148,6 +155,8 @@ int main(
 		  << ", timestep = " << timestep
 		  << ", rkstep = " << rkstep
 		  << ")...\n";
+		fortran_calls << "calling dg_hydro_timestep_fort, timestep = " << timestep << " rkstep = "
+			      << rkstep << " domain = "<< j << std::endl;
 		FNAME(dg_hydro_timestep_fort)(&sizes[j],
 				&dgs[j],
 				&globals[j],
@@ -173,12 +182,16 @@ int main(
 	  std::cout << "domain " << domain << " is exchanging with " << neighbor_here << " at timestep " << timestep << std::endl;
 	  
 	  // Get outgoing boundarys from the neighbors
+	  fortran_calls << "calling hpx_get_elems_fort, timestep = " << timestep << " rkstep = "
+			<< rkstep << " domain = "<< domain << " neighbor = " << neighbor_here << std::endl;
 	  FNAME(hpx_get_elems_fort)(&dgs[neighbor_here],
 				    &domain,
 				    &volume,
 				    buffer);
 	  
 	  // Put those arrays inside current domain
+	  fortran_calls << "calling hpx_put_elems_fort, timestep = " << timestep << " rkstep = "
+			<< rkstep << " domain = "<< domain << " neighbor = " << neighbor_here << std::endl;	  
 	  FNAME(hpx_put_elems_fort)(&dgs[domain],
 				    &neighbor_here,
 				    &volume,
@@ -198,7 +211,9 @@ int main(
     } // end rkstep loop
     
     for (int domain=0; domain<ids.size(); domain++) {
-	std::cout << "advancing domain " << domain << " at timestep " << timestep <<std::endl;      FNAME(dg_timestep_advance_fort)(&sizes[domain],
+	std::cout << "advancing domain " << domain << " at timestep " << timestep <<std::endl;  
+	fortran_calls << "calling dg_timestep_advance_fort, timestep = " << timestep << " domain = "<< domain << std::endl;
+	FNAME(dg_timestep_advance_fort)(&sizes[domain],
 				      &dgs[domain],
 				      &globals[domain],
 				      &nodalattrs[domain],
@@ -219,6 +234,7 @@ int main(
   // Destroy all domains
   //std::cout << "Destroying domains" << std::endl;
   for (int domain=0; domain<ids.size(); domain++) {
+      fortran_calls << "calling term_fort" << std::endl;
       FNAME(term_fort)(&sizes[domain],
 		       &dgs[domain],
 		       &globals[domain],
@@ -226,6 +242,6 @@ int main(
 		       );
   }
   
-  
+  fortran_calls.close();
   return 0;  
 }
