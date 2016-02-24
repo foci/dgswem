@@ -2,10 +2,14 @@
 #include <fstream>
 #include <vector>
 #include <cstdlib>
+#include <string>
 
 #include <hpx/hpx.hpp>
 #include <hpx/hpx_init.hpp>
 #include <hpx/include/iostreams.hpp>
+
+#include <boost/format.hpp>
+#include <boost/cstdint.hpp>
 
 #include "fname.h"
 #include "fortran_declarations.hpp" // This includes parameters defined
@@ -389,7 +393,7 @@ struct stepper
 		//pack futures into an array
 		std::vector<hpx::shared_future<buffer_map> > output_buffer_future_vector; //uncomment me to futurize
 		//std::vector<buffer_map> output_buffer_future_vector; //comment me out to futurize
-		//loop over neighbors current[ ] is a shared future of a buffer_map
+		//loop over neighbors current[ ] is a future of a buffer_map
 		for (int neighbor=0; neighbor<domains[i].neighbors_here.size(); neighbor++) {		    
 		    int neighbor_here = domains[i].neighbors_here[neighbor];
 		    //std::cout << "packing domains, domain = " << i << " neighbor = " << neighbor << " current[neighbor_here].size() = " << current[neighbor_here].size() << std::endl; // DEBUG
@@ -415,6 +419,8 @@ struct stepper
 	    }
 	}
 
+	std::cout << " &&&&&&& Done building tree &&&&&& " << std::endl;
+	
 	return hpx::when_all(U[total_substeps % 2]); // uncomment to futurize
     }
 
@@ -440,9 +446,9 @@ int hpx_main(variables_map & vm)
     // Open file for debugging output
     //    fortran_calls.open("fortran_calls.txt");
 
-
+    boost::uint64_t t = hpx::util::high_resolution_clock::now();
     
-    step.do_work(total_substeps, n_domains);
+    //    step.do_work(total_substeps, n_domains);
 
     // Uncomment to futurize
     hpx::future<stepper::space> result = step.do_work(total_substeps, n_domains);
@@ -450,9 +456,16 @@ int hpx_main(variables_map & vm)
     stepper::space solution = result.get();
     hpx::wait_all(solution);
         
+    boost::uint64_t elapsed = hpx::util::high_resolution_clock::now() - t;    
+
+    boost::uint64_t const num_os_threads = hpx::get_os_thread_count();
 
     // Close debug output file
     //   fortran_calls.close();
+
+    std::string const threads_str = boost::str(boost::format("%lu,") % num_os_threads);
+    std::cout << ( boost::format("%-21s %.14g\n")
+		   % threads_str % (elapsed / 1e9) ) << std::flush;
 
     return hpx::finalize();
 }
@@ -480,10 +493,10 @@ int main(int argc, char **argv)
     // We want HPX to run hpx_main() on all localities to avoid the
     // initial overhead caused by broadcasting the work from one to
     // all other localities:
-    std::vector<std::string> config(1, "hpx.run_hpx_main!=1");
+  //std::vector<std::string> config(1, "hpx.run_hpx_main!=1");
 
 
-    // fixme: I'm not sure that config is being used by hpx_main
-    return hpx::init(desc_commandline,argc,argv,config);
+  //return hpx::init(desc_commandline,argc,argv,config);
+    return hpx::init(desc_commandline,argc,argv);
 
 }
