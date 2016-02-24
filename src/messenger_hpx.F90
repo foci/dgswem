@@ -1,5 +1,5 @@
 #ifdef HPX
-       subroutine HPX_GET_ELEMS(dg_here,domain,volume,sendbuf)     
+       subroutine HPX_GET_ELEMS(dg_here,domain,volume,sendbuf,rkindex)     
        
        use dg
        use sizes
@@ -14,11 +14,16 @@
        integer :: ncount
        integer :: domain
        integer :: volume
+       integer :: rkindex
        
 !       real(sz) :: sendbuf(volume)
        real(sz) :: sendbuf(MAX_BUFFER_SIZE)   
+
+       if (rkindex.eq.0) then
+          rkindex = dg_here%irk+1
+       endif
        
-       
+       PRINT*, "HPX_GET_ELEMS, rkindex = ", rkindex
        
        neighbor_found = .false.
        DO i=1,dg_here%NEIGHPROC_S
@@ -41,7 +46,7 @@
          DO el=1,dg_here%NELEMSEND(index)
             DO dof=1,dg_here%DOFH
               ncount = ncount+1
-              sendbuf(ncount)=dg_here%ZE(dof,dg_here%ISENDLOC(el,index),dg_here%IRK+1)
+              sendbuf(ncount)=dg_here%ZE(dof,dg_here%ISENDLOC(el,index),rkindex)
 !              IF (abs(sendbuf(ncount) ) > 1d-14) THEN              
 !               PRINT 181, dg_here%ISENDLOC(el,index),sendbuf(ncount)
 !              ENDIF
@@ -51,7 +56,7 @@
          DO el=1,dg_here%NELEMSEND(index)
            DO dof=1,dg_here%DOFH
              ncount = ncount+1
-             sendbuf(ncount)=dg_here%QX(dof,dg_here%ISENDLOC(el,index),dg_here%IRK+1)
+             sendbuf(ncount)=dg_here%QX(dof,dg_here%ISENDLOC(el,index),rkindex)
 !              IF (abs(sendbuf(ncount) ) > 1d-14) THEN
 !                PRINT 181, dg_here%ISENDLOC(el,index),sendbuf(ncount)
 !              ENDIF
@@ -61,7 +66,7 @@
          DO el=1,dg_here%NELEMSEND(index)
            DO dof=1,dg_here%DOFH
              ncount = ncount+1
-             sendbuf(ncount)=dg_here%QY(dof,dg_here%ISENDLOC(el,index),dg_here%IRK+1)
+             sendbuf(ncount)=dg_here%QY(dof,dg_here%ISENDLOC(el,index),rkindex)
 !              IF (abs(sendbuf(ncount) ) > 1d-14) THEN                      
 !                PRINT 181, dg_here%ISENDLOC(el,index),sendbuf(ncount)
 !              ENDIF
@@ -88,7 +93,7 @@
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!           
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!       
 
-       subroutine HPX_PUT_ELEMS(dg_here,neighbor,volume,recvbuf)
+       subroutine HPX_PUT_ELEMS(dg_here,neighbor,volume,recvbuf,rkindex)
        
        use dg
        use sizes
@@ -103,10 +108,16 @@
        integer :: ncount
        integer :: neighbor
        integer :: volume
+       integer :: rkindex
        
 !       real(sz) :: recvbuf(volume)
        real(sz) :: recvbuf(MAX_BUFFER_SIZE)
         
+       if (rkindex.eq.0) then
+          rkindex = dg_here%irk+1
+       endif
+
+       PRINT*, "HPX_PUT_ELEMS, rkindex = ", rkindex
        
        neighbor_found = .false.
        DO i=1,dg_here%NEIGHPROC_R
@@ -129,7 +140,7 @@
          DO el=1,dg_here%NELEMRECV(index)
            DO dof=1,dg_here%DOFH
              ncount = ncount+1
-             dg_here%ZE(dof,dg_here%IRECVLOC(el,index),dg_here%IRK+1) = recvbuf(ncount)
+             dg_here%ZE(dof,dg_here%IRECVLOC(el,index),rkindex) = recvbuf(ncount)
 !              IF (abs(recvbuf(ncount) ) > 1d-14) THEN             
 !                PRINT 181, dg_here%IRECVLOC(el,index),recvbuf(ncount) 
 !              ENDIF
@@ -139,7 +150,7 @@
          DO el=1,dg_here%NELEMRECV(index)
            DO dof=1,dg_here%DOFH
              ncount = ncount+1
-             dg_here%QX(dof,dg_here%IRECVLOC(el,index),dg_here%IRK+1) = recvbuf(ncount)
+             dg_here%QX(dof,dg_here%IRECVLOC(el,index),rkindex) = recvbuf(ncount)
 !              IF (abs(recvbuf(ncount) ) > 1d-14) THEN
 !                PRINT 181, dg_here%IRECVLOC(el,index),recvbuf(ncount)
 !              ENDIF
@@ -149,7 +160,7 @@
          DO el=1,dg_here%NELEMRECV(index)
            DO dof=1,dg_here%DOFH
              ncount = ncount+1
-             dg_here%QY(dof,dg_here%IRECVLOC(el,index),dg_here%IRK+1) = recvbuf(ncount)
+             dg_here%QY(dof,dg_here%IRECVLOC(el,index),rkindex) = recvbuf(ncount)
 !              IF (abs(recvbuf(ncount) ) > 1d-14) THEN                
 !                PRINT 181, dg_here%IRECVLOC(el,index),recvbuf(ncount)
 !              ENDIF

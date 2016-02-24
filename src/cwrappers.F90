@@ -164,7 +164,7 @@ subroutine get_neighbors_fort(sizes_c_ptr,dg_c_ptr,global_c_ptr,neighbors,num_ne
 end subroutine get_neighbors_fort
 
 
-subroutine hpx_get_elems_fort(dg_c_ptr,neighbor,volume,sendbuf)
+subroutine hpx_get_elems_fort(dg_c_ptr,neighbor,volume,sendbuf,rkindex)
   use, intrinsic :: iso_c_binding
   use dg
   use sizes
@@ -174,6 +174,7 @@ subroutine hpx_get_elems_fort(dg_c_ptr,neighbor,volume,sendbuf)
   real(sz) :: sendbuf(MAX_BUFFER_SIZE)
   integer :: volume
   integer :: neighbor
+  integer :: rkindex
 
   integer :: i
 
@@ -185,11 +186,11 @@ subroutine hpx_get_elems_fort(dg_c_ptr,neighbor,volume,sendbuf)
   write(99,*) "Entering hpx_get_elems_fort"
 #endif
 
-  call hpx_get_elems(dg_here,neighbor,volume,sendbuf)
+  call hpx_get_elems(dg_here,neighbor,volume,sendbuf,rkindex)
 
 end subroutine hpx_get_elems_fort
 
-subroutine hpx_put_elems_fort(dg_c_ptr,neighbor,volume,recvbuf)
+subroutine hpx_put_elems_fort(dg_c_ptr,neighbor,volume,recvbuf,rkindex)
   use, intrinsic :: iso_c_binding
   use dg
   use sizes
@@ -199,6 +200,7 @@ subroutine hpx_put_elems_fort(dg_c_ptr,neighbor,volume,recvbuf)
   real(sz) :: recvbuf(MAX_BUFFER_SIZE)
   integer :: volume
   integer :: neighbor
+  integer :: rkindex
 
   integer :: i
 
@@ -211,7 +213,7 @@ subroutine hpx_put_elems_fort(dg_c_ptr,neighbor,volume,recvbuf)
   write(99,*) "Entering hpx_put_elems_fort"
 #endif
 
-  call hpx_put_elems(dg_here,neighbor,volume,recvbuf)
+  call hpx_put_elems(dg_here,neighbor,volume,recvbuf,rkindex)
 
 end subroutine hpx_put_elems_fort
 

@@ -28,11 +28,13 @@ extern"C" {
     void FNAME(hpx_get_elems_fort)(void** dg,
 				   int* neighbor,
 				   int* volume,
-				   double* sendbuf);
+				   double* sendbuf,
+				   int* rkindex);
     void FNAME(hpx_put_elems_fort)(void** dg,
 				   int* neighbor,
 				   int* volume,
-				   double* recvbuf);
+				   double* recvbuf,
+				   int* rkindex);
     void FNAME(hpx_read_n_domains)(int* n_domains);
     void FNAME(hpx_swap_elems_fort)(void** dg_domain,
 				    void** dg_neighbor);

@@ -184,11 +184,15 @@ int main(
 	  // Get outgoing boundarys from the neighbors
 	  fortran_calls << "calling hpx_get_elems_fort, timestep = " << timestep << " rkstep = "
 			<< rkstep << " domain = "<< domain << " neighbor = " << neighbor_here << std::endl;
+	  int rkindex = 0;
 	  FNAME(hpx_get_elems_fort)(&dgs[neighbor_here],
 				    &domain,
 				    &volume,
-				    buffer);
-	  /* DEBUG
+				    buffer,
+				    &rkindex);
+	  // DEBUG
+	  fortran_calls << "volume = " << volume << std::endl; // DEBUG
+	  /*
 	  fortran_calls << "buffer = ";
 	  for (int i=0; i<volume; i++) {
 	      fortran_calls << buffer[i] << " ";
@@ -206,10 +210,12 @@ int main(
 	  }
 	  fortran_calls << std::endl;	  
 	  */
+	  //fortran_calls << "buffer_vector.size() = " << buffer_vector.size() << std::endl;
 	  FNAME(hpx_put_elems_fort)(&dgs[domain],
 				    &neighbor_here,
 				    &volume,
-				    buffer);	
+				    buffer,
+				    &rkindex);	
          
 //          FNAME(hpx_swap_elems_fort)(&dgs[domain],
 //                                     &dgs[neighbor_here]);
