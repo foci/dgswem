@@ -188,10 +188,24 @@ int main(
 				    &domain,
 				    &volume,
 				    buffer);
-	  
+	  /* DEBUG
+	  fortran_calls << "buffer = ";
+	  for (int i=0; i<volume; i++) {
+	      fortran_calls << buffer[i] << " ";
+	  }
+	  fortran_calls << std::endl;
+	  */
+
 	  // Put those arrays inside current domain
 	  fortran_calls << "calling hpx_put_elems_fort, timestep = " << timestep << " rkstep = "
 			<< rkstep << " domain = "<< domain << " neighbor = " << neighbor_here << std::endl;	  
+	  /*
+	  fortran_calls << "buffer = ";
+	  for (int i=0; i<MAX_BUFFER_SIZE; i++) {
+	      fortran_calls << buffer[i] << " ";
+	  }
+	  fortran_calls << std::endl;	  
+	  */
 	  FNAME(hpx_put_elems_fort)(&dgs[domain],
 				    &neighbor_here,
 				    &volume,
