@@ -129,6 +129,8 @@ public:
 			    int neighbor_here = neighbors_here[neighbor];
 			    int volume;
 			    double buffer[MAX_BUFFER_SIZE];
+
+			    int rkindex = 0;
 			    
 			    // Unpack buffer from neighbor
 			    std::cout << "Unpacking buffer from neighbor: " << neighbor_here << " incoming_maps.size() = " << incoming_maps.size() << std::endl;
@@ -160,7 +162,8 @@ public:
 				FNAME(hpx_put_elems_fort)(&domainWrapper->dg,
 							  &neighbor_here,
 							  &volume,
-							  buffer);
+							  buffer,
+							  &rkindex);
 			    } else {
 				std::cout << "Buffer map is empty!" << std::endl;
 			    }
@@ -187,7 +190,20 @@ public:
 				      &rkstep
 				      );
 	// #################################################################
-	
+
+	if (rkstep == 2) {	
+	    //std::cout << "advancing domain " << id << " at timestep " << timestep <<std::endl;
+	    //	      std::cout << "CPP: about to call dg_timestep_advance_fort" << std::endl;
+	    
+	    fortran_calls << "calling dg_timestep_advance_fort, timestep = " << timestep << " domain = "<< id << std::endl;			
+	    FNAME(dg_timestep_advance_fort)(&domainWrapper->size,
+					    &domainWrapper->dg,
+					    &domainWrapper->global,
+					    &domainWrapper->nodalattr,
+					    &timestep
+					    );
+	    
+	}	
 
 	// ###################### Pack ghost zones to transfer to neigbors ####################
 	// Clear output buffer map
@@ -202,10 +218,18 @@ public:
 	
 	    fortran_calls << "calling hpx_get_elems_fort, timestep = " << timestep << " rkstep = "
 			  << rkstep << " domain = "<< id << " neighbor = " << neighbor_here << " ";    
+	    int rkindex = 0;
+	    if (rkstep == 2) {
+		rkindex = 1;
+	    } else {
+		rkindex = 3;
+	    }
+	    std::cout << "cpp: rkindex = " << rkindex << std::endl;
 	    FNAME(hpx_get_elems_fort)(&domainWrapper->dg, //pointer to current domain
 				      &neighbor_here, // pointer to neighbor to send to
 				      &volume,
-				      buffer);
+				      buffer,
+				      &rkindex);
 	     std::cout << "volume = " << volume << std::endl; // DEBUG
 	     //DEBUG	     
 	     fortran_calls << "volume = " << volume << std::endl; // DEBUG
@@ -247,19 +271,6 @@ public:
 
 	//##################### Advance domain at end of 2nd RK step ############################
 
-	if (rkstep == 2) {	
-	    //std::cout << "advancing domain " << id << " at timestep " << timestep <<std::endl;
-	    //	      std::cout << "CPP: about to call dg_timestep_advance_fort" << std::endl;
-	    
-	    fortran_calls << "calling dg_timestep_advance_fort, timestep = " << timestep << " domain = "<< id << std::endl;			
-	    FNAME(dg_timestep_advance_fort)(&domainWrapper->size,
-					    &domainWrapper->dg,
-					    &domainWrapper->global,
-					    &domainWrapper->nodalattr,
-					    &timestep
-					    );
-	    
-	}
 
 
 	if (rkstep == 2) {		    
