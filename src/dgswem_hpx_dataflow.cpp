@@ -132,6 +132,13 @@ public:
 
 			    int rkindex = 0;
 			    
+			    if (rkstep == 2) {
+				rkindex = 3;
+			    } else {
+				rkindex = 2;
+			    }
+			    
+			    
 			    // Unpack buffer from neighbor
 			    std::cout << "Unpacking buffer from neighbor: " << neighbor_here << " incoming_maps.size() = " << incoming_maps.size() << std::endl;
 			    //const std::vector<double>*  buffer_vector = &hood[neighbor_here].output_buffer.at(id);
@@ -191,19 +198,6 @@ public:
 				      );
 	// #################################################################
 
-	if (rkstep == 2) {	
-	    //std::cout << "advancing domain " << id << " at timestep " << timestep <<std::endl;
-	    //	      std::cout << "CPP: about to call dg_timestep_advance_fort" << std::endl;
-	    
-	    fortran_calls << "calling dg_timestep_advance_fort, timestep = " << timestep << " domain = "<< id << std::endl;			
-	    FNAME(dg_timestep_advance_fort)(&domainWrapper->size,
-					    &domainWrapper->dg,
-					    &domainWrapper->global,
-					    &domainWrapper->nodalattr,
-					    &timestep
-					    );
-	    
-	}	
 
 	// ###################### Pack ghost zones to transfer to neigbors ####################
 	// Clear output buffer map
@@ -271,6 +265,19 @@ public:
 
 	//##################### Advance domain at end of 2nd RK step ############################
 
+	if (rkstep == 2) {	
+	    //std::cout << "advancing domain " << id << " at timestep " << timestep <<std::endl;
+	    //	      std::cout << "CPP: about to call dg_timestep_advance_fort" << std::endl;
+	    
+	    fortran_calls << "calling dg_timestep_advance_fort, timestep = " << timestep << " domain = "<< id << std::endl;			
+	    FNAME(dg_timestep_advance_fort)(&domainWrapper->size,
+					    &domainWrapper->dg,
+					    &domainWrapper->global,
+					    &domainWrapper->nodalattr,
+					    &timestep
+					    );
+	    
+	}	
 
 
 	if (rkstep == 2) {		    
