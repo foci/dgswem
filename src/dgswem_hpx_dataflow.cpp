@@ -130,13 +130,10 @@ public:
 			    int volume;
 			    double buffer[MAX_BUFFER_SIZE];
 
-			    int rkindex = 0;
-			    
-			    if (rkstep == 2) {
-				rkindex = 3;
-			    } else {
-				rkindex = 2;
-			    }
+			    // put rk indices
+			    int rkindex;
+			    if (rkstep == 1) rkindex = 1;
+			    if (rkstep == 2) rkindex = 2;
 			    
 			    
 			    // Unpack buffer from neighbor
@@ -199,6 +196,7 @@ public:
 	// #################################################################
 
 
+
 	// ###################### Pack ghost zones to transfer to neigbors ####################
 	// Clear output buffer map
 	output_buffer.clear();
@@ -212,12 +210,12 @@ public:
 	
 	    fortran_calls << "calling hpx_get_elems_fort, timestep = " << timestep << " rkstep = "
 			  << rkstep << " domain = "<< id << " neighbor = " << neighbor_here << " ";    
-	    int rkindex = 0;
-	    if (rkstep == 2) {
-		rkindex = 1;
-	    } else {
-		rkindex = 3;
-	    }
+
+	    // get rk indices
+	    int rkindex;
+	    if (rkstep == 1) rkindex = 2;
+	    if (rkstep == 2) rkindex = 3;
+
 	    std::cout << "cpp: rkindex = " << rkindex << std::endl;
 	    FNAME(hpx_get_elems_fort)(&domainWrapper->dg, //pointer to current domain
 				      &neighbor_here, // pointer to neighbor to send to
