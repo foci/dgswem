@@ -71,7 +71,7 @@ public:
 	~FortranPointerWrapper()
 	{
 	    if (size) {
-		//std::cout << "CPP: about to call term_fort" << std::endl; // DEBUG
+		std::cout << "CPP: about to call term_fort" << std::endl; // DEBUG
 		//fortran_calls << "calling term_fort" << std::endl;
 		FNAME(term_fort)(&size,&global,&dg,&nodalattr);
 	    }
@@ -102,6 +102,7 @@ public:
     //hpx::future<buffer_map> update(std::vector<buffer_map>)
     //DomainReference* update(std::vector<buffer_map>)
     //buffer_map update(std::vector<buffer_map> incoming_maps)
+
   buffer_map update(std::vector<hpx::shared_future<buffer_map> > incoming_maps_futures)
   {
 	if (timestep == 0) {
@@ -331,12 +332,12 @@ struct stepper
     hpx::future<space> do_work(int total_substeps, int n_domains) // uncomment me to futurize
     {
 	using hpx::dataflow;
-	using hpx::util::unwrapped; 
+	//using hpx::util::unwrapped; 
 
 	// U[t][i] is state of domain i at time t
 	std::vector<space> U(2);
-	//	for (space& s : U)
-	//	    s.resize(n_domains);
+	for (space& s : U)
+	    s.resize(n_domains);
 
 	// Initialize Domains
 	for (int i=0; i<n_domains; i++) {
@@ -370,7 +371,8 @@ struct stepper
 	   
 	    buffer_map empty_buffer;
 	    //U[0].push_back(empty_buffer); // comment me out to futurize
-	    U[0].push_back(hpx::make_ready_future(empty_buffer)); // uncomment me to futurize
+	    //U[0].push_back(hpx::make_ready_future(empty_buffer)); // uncomment me to futurize
+	    U[0][i]=hpx::make_ready_future(empty_buffer); // uncomment me to futurize
 	}
 
 	std::cout << "***** Done initializing domains ******" << std::endl;
@@ -400,14 +402,13 @@ struct stepper
 		    //output_buffer_future_vector.push_back(current[neighbor_here]);
 		}
 
-		//next[i] = domains[i].update(output_buffer_future_vector);
-		
-		//auto Op = unwrapped(boost::bind(&DomainReference::update,&domains[i]));
-		
-		auto Op = boost::bind(&DomainReference::update,&domains[i],_1);
+		//Define Op
 		//auto Op = &domains[i].update();
-
+		//auto Op = unwrapped(boost::bind(&DomainReference::update,&domains[i]));		
+		//auto Op = unwrapped(boost::bind(&DomainReference::update,&domains[i],_1));
+		auto Op = boost::bind(&DomainReference::update,&domains[i],_1);
 		
+		std::cout << "Calling dataflow" << std::endl;
 		next[i] = dataflow(hpx::launch::async, Op,
 				   output_buffer_future_vector
 				   );
