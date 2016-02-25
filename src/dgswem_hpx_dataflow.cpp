@@ -102,8 +102,8 @@ public:
     //hpx::future<buffer_map> update(std::vector<buffer_map>)
     //DomainReference* update(std::vector<buffer_map>)
     //buffer_map update(std::vector<buffer_map> incoming_maps)
-    hpx::shared_future<buffer_map> update(std::vector<hpx::shared_future<buffer_map> > incoming_maps_futures)
-    {
+  buffer_map update(std::vector<hpx::shared_future<buffer_map> > incoming_maps_futures)
+  {
 	if (timestep == 0) {
 	    timestep++;
 
@@ -115,8 +115,7 @@ public:
 	    fortran_calls << std::endl;
 	    */
 
-	    //return output_buffer;
-	    return hpx::make_ready_future(output_buffer);
+	    return output_buffer;
 	}
 	
 	//std::cout << "update call, timestep = " << timestep << " rkstep = " << rkstep << " domain = " << id << std::endl; // DEBUG
@@ -170,7 +169,7 @@ public:
 				
 				fortran_calls << "buffer_vector.size() = " << buffer_vector.size() << std::endl;
 				*/
-				FNAME(hpx_put_elems_fort)(&domainWrapper->dg,
+   				FNAME(hpx_put_elems_fort)(&domainWrapper->dg,
 							  &neighbor_here,
 							  &volume,
 							  buffer,
@@ -296,7 +295,7 @@ public:
 
 	// Return output buffer
 	//	return hpx::make_ready_future(output_buffer);
-	return hpx::make_ready_future(output_buffer);
+	return output_buffer;
 	
     } // End update()
 
@@ -336,8 +335,8 @@ struct stepper
 
 	// U[t][i] is state of domain i at time t
 	std::vector<space> U(2);
-	for (space& s : U)
-	    s.resize(n_domains);
+	//	for (space& s : U)
+	//	    s.resize(n_domains);
 
 	// Initialize Domains
 	for (int i=0; i<n_domains; i++) {
@@ -348,7 +347,7 @@ struct stepper
 	    void *global = NULL;
 	    void *nodalattr = NULL;
 
-	    int domain_number = i;
+	    //int domain_number = i;
 
 
 	    //fortran_calls << "calling dgswem_init_fort, domain = "<< i <<std::endl;	    
@@ -397,17 +396,23 @@ struct stepper
 		for (int neighbor=0; neighbor<domains[i].neighbors_here.size(); neighbor++) {		    
 		    int neighbor_here = domains[i].neighbors_here[neighbor];
 		    //std::cout << "packing domains, domain = " << i << " neighbor = " << neighbor << " current[neighbor_here].size() = " << current[neighbor_here].size() << std::endl; // DEBUG
-		    output_buffer_future_vector.push_back(hpx::make_ready_future(current[neighbor_here]));
+		    output_buffer_future_vector.push_back(current[neighbor_here]);
 		    //output_buffer_future_vector.push_back(current[neighbor_here]);
 		}
 
-		next[i] = domains[i].update(output_buffer_future_vector);
+		//next[i] = domains[i].update(output_buffer_future_vector);
 		
-		/*
-		next[i] = dataflow(hpx::launch::async, boost::bind(&DomainReference::update,domains[i]),
+		//auto Op = unwrapped(boost::bind(&DomainReference::update,&domains[i]));
+		
+		auto Op = boost::bind(&DomainReference::update,&domains[i],_1);
+		//auto Op = &domains[i].update();
+
+		
+		next[i] = dataflow(hpx::launch::async, Op,
 				   output_buffer_future_vector
 				   );
-		
+	
+		/*
 		next[i] = dataflow(hpx::launch::async, boost::bind(Op,domains[i]),
 				   output_buffer_future_vector
 				   );
