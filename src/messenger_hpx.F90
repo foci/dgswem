@@ -23,7 +23,7 @@
           rkindex = dg_here%irk+1
        endif
        
-       PRINT*, "HPX_GET_ELEMS, rkindex = ", rkindex
+!       PRINT*, "HPX_GET_ELEMS, rkindex = ", rkindex
        
        neighbor_found = .false.
        DO i=1,dg_here%NEIGHPROC_S
@@ -117,7 +117,7 @@
           rkindex = dg_here%irk+1
        endif
 
-       PRINT*, "HPX_PUT_ELEMS, rkindex = ", rkindex
+!       PRINT*, "HPX_PUT_ELEMS, rkindex = ", rkindex
        
        neighbor_found = .false.
        DO i=1,dg_here%NEIGHPROC_R

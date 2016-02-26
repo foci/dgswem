@@ -182,6 +182,8 @@ subroutine hpx_get_elems_fort(dg_c_ptr,neighbor,volume,sendbuf,rkindex)
 
   call C_F_POINTER(dg_c_ptr,dg_here)
 
+  print*,'rkindex=',rkindex
+
 #ifdef VERBOSE
   write(99,*) "Entering hpx_get_elems_fort"
 #endif
@@ -207,6 +209,8 @@ subroutine hpx_put_elems_fort(dg_c_ptr,neighbor,volume,recvbuf,rkindex)
   type (dg_type), pointer :: dg_here
 
   call C_F_POINTER(dg_c_ptr,dg_here)
+
+  print*,'rkindex=',rkindex
 
 #ifdef VERBOSE
 !  print*, "FORTRAN: Entering hpx_put_elems_fort"

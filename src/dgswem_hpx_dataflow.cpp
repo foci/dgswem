@@ -30,7 +30,7 @@ std::vector<int> neighboringDomainIDs(void *size, void *dg, void *global)
     //std::cout << "calling neighboringDomainIDs" << std::endl;
     
     if (!size) {
-	std::cout << "no size, so returning empty vector" << std::endl; // DEBUG
+	hpx::cout << "no size, so returning empty vector" << std::endl; // DEBUG
         return std::vector<int>();
     }
     
@@ -85,16 +85,12 @@ public:
     };
 
     explicit
-    DomainReference(int id = 0, void *size = 0, void *global = 0, void *dg = 0, void *nodalattr = 0, bool busywork = false) :
+    DomainReference(int id = 0, void *size = 0, void *global = 0, void *dg = 0, void *nodalattr = 0) :
         domainWrapper(new FortranPointerWrapper(size, global, dg, nodalattr)),
         neighbors_here(neighboringDomainIDs(size,dg,global)),
         id(id),
         timestep(0),
-	rkstep(1),
-	update_step(true),
-	exchange_step(false),
-	advance_step(false),
-	busywork(busywork)
+	rkstep(1)
   {
       //std::cout << "Calling Domain Reference Constructor" << std::endl; // DEBUG
   }
@@ -105,6 +101,9 @@ public:
 
   buffer_map update(std::vector<hpx::shared_future<buffer_map> > incoming_maps_futures)
   {
+
+      hpx::cout << "Update step, timestep = " << timestep << " rkstep = " << rkstep << " domain = " << id << " size = " << &domainWrapper->size << std::endl;
+
 	if (timestep == 0) {
 	    timestep++;
 
@@ -308,10 +307,6 @@ private:
     int id;
     int timestep;
     int rkstep;
-    bool update_step;
-    bool exchange_step;
-    bool advance_step;
-    bool busywork;
 }; // End class DomainReference
   
 struct stepper
@@ -329,7 +324,8 @@ struct stepper
     //    typedef std::vector<buffer_map> space; //comment me out to futurize
 
     //void do_work(int total_substeps, int n_domains) // comment me out to futurize
-    hpx::future<space> do_work(int total_substeps, int n_domains) // uncomment me to futurize
+    //    hpx::future<space> do_work(int total_substeps, int n_domains) // uncomment me to futurize
+    void do_work(int total_substeps, int n_domains)
     {
 	using hpx::dataflow;
 	//using hpx::util::unwrapped; 
@@ -347,9 +343,6 @@ struct stepper
 	    void *dg = NULL;
 	    void *global = NULL;
 	    void *nodalattr = NULL;
-
-	    //int domain_number = i;
-
 
 	    //fortran_calls << "calling dgswem_init_fort, domain = "<< i <<std::endl;	    
 	    FNAME(dgswem_init_fort)(&size,
@@ -373,7 +366,7 @@ struct stepper
 	    //U[0].push_back(empty_buffer); // comment me out to futurize
 	    //U[0].push_back(hpx::make_ready_future(empty_buffer)); // uncomment me to futurize
 	    U[0][i]=hpx::make_ready_future(empty_buffer); // uncomment me to futurize
-	}
+	} //end domain initialize
 
 	std::cout << "***** Done initializing domains ******" << std::endl;
 
@@ -383,12 +376,12 @@ struct stepper
 	for (int substep = 0; substep != total_substeps; ++substep) {
 	    space const& current = U[substep % 2];
 	    space& next = U[(substep + 1) % 2];
-
-	    std::cout << "Timestep loop: substep = " << substep << std::endl;
+	    
+	    //std::cout << "Timestep loop: substep = " << substep << std::endl;
 	    //fortran_calls << "substep = " << substep << std::endl;
 	    // Domain loop
 	    for (int i=0; i<n_domains; i++) {
-		std::cout << "Domain loop: substep = " << substep << " domain = " << i << std::endl;
+		//std::cout << "Domain loop: substep = " << substep << " domain = " << i << std::endl;
 		//std::cout << "current[i].size() = " << current[i].size();
 		
 		//pack futures into an array
@@ -403,12 +396,14 @@ struct stepper
 		}
 
 		//Define Op
-		//auto Op = &domains[i].update();
-		//auto Op = unwrapped(boost::bind(&DomainReference::update,&domains[i]));		
-		//auto Op = unwrapped(boost::bind(&DomainReference::update,&domains[i],_1));
+
+		// Passing by reference:
 		auto Op = boost::bind(&DomainReference::update,&domains[i],_1);
+
+		// Passing by copying:
+		//auto Op = boost::bind(&DomainReference::update,domains[i],_1);
 		
-		std::cout << "Calling dataflow" << std::endl;
+		//std::cout << "Calling dataflow" << std::endl;
 		next[i] = dataflow(hpx::launch::async, Op,
 				   output_buffer_future_vector
 				   );
@@ -422,13 +417,17 @@ struct stepper
 				   output_buffer_future_vector
 				   );
 		*/
+		//hpx::wait_all(next);
 	    }
-	}
+	} //end timestep loop
 
 	std::cout << " &&&&&&& Done building tree &&&&&& " << std::endl;
 	
-	return hpx::when_all(U[total_substeps % 2]); // uncomment to futurize
-    }
+	//return hpx::when_all(U[total_substeps % 2]); // uncomment to futurize
+	//	hpx::wait_all(U[total_substeps % 2]); // uncomment to futurize
+	hpx::wait_all(U[total_substeps]); // uncomment to futurize
+	
+    }// end do_work()
 
 };
 
@@ -454,14 +453,17 @@ int hpx_main(variables_map & vm)
 
     boost::uint64_t t = hpx::util::high_resolution_clock::now();
     
-    //    step.do_work(total_substeps, n_domains);
+    step.do_work(total_substeps, n_domains);
 
     // Uncomment to futurize
-    hpx::future<stepper::space> result = step.do_work(total_substeps, n_domains);
+    //hpx::future<stepper::space> result = step.do_work(total_substeps, n_domains);
+    //stepper::space result = step.do_work(total_substeps, n_domains);
     
-    stepper::space solution = result.get();
-    hpx::wait_all(solution);
-        
+    //    stepper::space solution = result.get();
+    //    hpx::wait_all(solution);
+    
+    
+    
     boost::uint64_t elapsed = hpx::util::high_resolution_clock::now() - t;    
 
     boost::uint64_t const num_os_threads = hpx::get_os_thread_count();
