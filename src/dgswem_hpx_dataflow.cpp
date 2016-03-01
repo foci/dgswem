@@ -98,7 +98,7 @@ public:
     }
     
     DomainReference(const DomainReference&) {
-	std::cout << "Calling copy constructor" << std::endl;
+	std::cout << "Calling copy constructor, id = " << id << std::endl;
     }
     
     ~DomainReference () {
@@ -347,6 +347,8 @@ struct stepper
 	for (space& s : U)
 	    s.resize(n_domains);
 
+	domains.resize(n_domains); // resize to number of domains
+
 	// Initialize Domains
 	for (int i=0; i<n_domains; i++) {
 	    std::cout << "about to initialize domain i=" << i << std::endl;
@@ -372,8 +374,9 @@ struct stepper
 	    }
 	    */
 	    DomainReference dr_here = DomainReference(i, size, global, dg, nodalattr);
-	    domains.push_back(dr_here);
-	   
+	    //domains.push_back(dr_here);
+	    domains[i] = dr_here;
+
 	    buffer_map empty_buffer;
 	    //U[0].push_back(empty_buffer); // comment me out to futurize
 	    //U[0].push_back(hpx::make_ready_future(empty_buffer)); // uncomment me to futurize
