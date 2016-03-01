@@ -48,12 +48,13 @@ std::vector<int> neighboringDomainIDs(void *size, void *dg, void *global)
 
     return ret;
 
-}
+} // end neighboringDomainIDs
 
 
 class DomainReference
 {
 public:
+    
     class FortranPointerWrapper
     {
     public:
@@ -81,9 +82,10 @@ public:
 	void *global;
 	void *dg;
 	void *nodalattr;
-           
-    };
-
+	
+    }; //end FortranPointerWrapper
+    
+    
     explicit
     DomainReference(int id = 0, void *size = 0, void *global = 0, void *dg = 0, void *nodalattr = 0) :
         domainWrapper(new FortranPointerWrapper(size, global, dg, nodalattr)),
@@ -91,38 +93,46 @@ public:
         id(id),
         timestep(0),
 	rkstep(1)
-  {
-      //std::cout << "Calling Domain Reference Constructor" << std::endl; // DEBUG
-  }
+    {
+	std::cout << "Calling DomainReference Constructor" << std::endl; // DEBUG
+    }
+    
+    DomainReference(const DomainReference&) {
+	std::cout << "Calling copy constructor" << std::endl;
+    }
+    
+    ~DomainReference () {
+	std::cout << "Calling DomainReference destructor" << std::endl;
+    }
 
     //hpx::future<buffer_map> update(std::vector<buffer_map>)
     //DomainReference* update(std::vector<buffer_map>)
     //buffer_map update(std::vector<buffer_map> incoming_maps)
-
-  buffer_map update(std::vector<hpx::shared_future<buffer_map> > incoming_maps_futures)
-  {
-
-      hpx::cout << "Update step, timestep = " << timestep << " rkstep = " << rkstep << " domain = " << id << " size = " << &domainWrapper->size << std::endl;
-
+    
+    buffer_map update(std::vector<hpx::shared_future<buffer_map> > incoming_maps_futures)
+    {
+	
+	hpx::cout << "Update step, timestep = " << timestep << " rkstep = " << rkstep << " domain = " << id << " size = " << &domainWrapper->size << std::endl;
+	
 	if (timestep == 0) {
 	    timestep++;
-
+	    
 	    /*
-	    fortran_calls << "domain " << id << " has " << neighbors_here.size() << " neighbors who are ";
-	    for (int i=0; i<neighbors_here.size(); i++) {
-		fortran_calls << neighbors_here[i] << " ";
-	    }
-	    fortran_calls << std::endl;
+	      fortran_calls << "domain " << id << " has " << neighbors_here.size() << " neighbors who are ";
+	      for (int i=0; i<neighbors_here.size(); i++) {
+	      fortran_calls << neighbors_here[i] << " ";
+	      }
+	      fortran_calls << std::endl;
 	    */
-
+	    
 	    return output_buffer;
-	}
+	} // end if timestep == 0
 	
 	//std::cout << "update call, timestep = " << timestep << " rkstep = " << rkstep << " domain = " << id << std::endl; // DEBUG
 	//std::cout << "incoming_maps.size() = " << incoming_maps.size() << std::endl; // DEBUG
 	//std::cout << "neighbors_here.size() = " << neighbors_here.size() << std::endl; // DEBUG
-
-
+	
+	
 	//#############  Place ghost zones from neighboring cells into this domain  ################
 	// Check size of incoming buffer, should be equal to number of neighbors
 	if ( (timestep !=1 && rkstep == 1) || (rkstep == 2) )
@@ -135,7 +145,7 @@ public:
 			    int neighbor_here = neighbors_here[neighbor];
 			    int volume;
 			    double buffer[MAX_BUFFER_SIZE];
-
+			    
 			    // put rk indices
 			    int rkindex;
 			    if (rkstep == 1) rkindex = 1;
@@ -158,16 +168,16 @@ public:
 				
 				// Put elements into our own subdomain
 				/*
-				fortran_calls << "calling hpx_put_elems_fort, timestep = " << timestep << " rkstep = "
-					      << rkstep << " domain = "<< id << " neighbor = " << neighbor_here << " rkindex = " << rkindex << " " ;
-				
+				  fortran_calls << "calling hpx_put_elems_fort, timestep = " << timestep << " rkstep = "
+				  << rkstep << " domain = "<< id << " neighbor = " << neighbor_here << " rkindex = " << rkindex << " " ;
+				  
 				  fortran_calls << "buffer = ";
 				  for (int i=0; i<MAX_BUFFER_SIZE; i++) {
 				  fortran_calls << buffer[i] << " ";
 				  }
 				  fortran_calls << std::endl;
 				
-				fortran_calls << "buffer_vector.size() = " << buffer_vector.size() << std::endl;
+				  fortran_calls << "buffer_vector.size() = " << buffer_vector.size() << std::endl;
 				*/
    				FNAME(hpx_put_elems_fort)(&domainWrapper->dg,
 							  &neighbor_here,
@@ -186,8 +196,8 @@ public:
 	    } //end if timestep !=1
 	//  #########################################################################################
 	
-
-
+	
+	
 	// ######################### Hydro timestep ########################
 	//	fortran_calls << "calling dg_hydro_timestep_fort, timestep = " << timestep << " rkstep = "
 	//  << rkstep << " domain = "<< id << std::endl;
@@ -199,9 +209,9 @@ public:
 				      &rkstep
 				      );
 	// #################################################################
-
-
-
+	
+	
+	
 	// ###################### Pack ghost zones to transfer to neigbors ####################
 	// Clear output buffer map
 	output_buffer.clear();
@@ -212,7 +222,7 @@ public:
 	    int neighbor_here = neighbors_here[neighbor];
 	    int volume;
 	    double buffer[MAX_BUFFER_SIZE];
-
+	    
 	    // get rk indices
 	    int rkindex;
 	    if (rkstep == 1) rkindex = 2;
@@ -268,7 +278,7 @@ public:
 	
 
 	//##################### Advance domain at end of 2nd RK step ############################
-
+	
 	if (rkstep == 2) {	
 	    //std::cout << "advancing domain " << id << " at timestep " << timestep <<std::endl;
 	    //	      std::cout << "CPP: about to call dg_timestep_advance_fort" << std::endl;
@@ -281,34 +291,36 @@ public:
 					    &timestep
 					    );
 	    
-	}	
-
-
+	} // end if rkstep == 2	
+	
+	
 	if (rkstep == 2) {		    
 	    ++timestep;
 	    --rkstep;
 	} else {
 	    ++rkstep;
-	}
+	} // end if else rkstep == 2
+	
 	//########################################################################################
 	
-
+	
 	// Return output buffer
 	//	return hpx::make_ready_future(output_buffer);
 	return output_buffer;
 	
     } // End update()
-
-
+    
+    
     std::vector<int> neighbors_here;
     buffer_map output_buffer;
+    
 private:
     boost::shared_ptr<FortranPointerWrapper> domainWrapper;
     int id;
     int timestep;
     int rkstep;
 }; // End class DomainReference
-  
+
 struct stepper
 {
     // Domains
@@ -377,7 +389,7 @@ struct stepper
 	    space const& current = U[substep % 2];
 	    space& next = U[(substep + 1) % 2];
 	    
-	    //std::cout << "Timestep loop: substep = " << substep << std::endl;
+	    std::cout << "Timestep loop: substep = " << substep << std::endl;
 	    //fortran_calls << "substep = " << substep << std::endl;
 	    // Domain loop
 	    for (int i=0; i<n_domains; i++) {
@@ -398,6 +410,7 @@ struct stepper
 		//Define Op
 
 		// Passing by reference:
+		std::cout << "&domains[i] = " << &domains[i] << std::endl;
 		auto Op = boost::bind(&DomainReference::update,&domains[i],_1);
 
 		// Passing by copying:
