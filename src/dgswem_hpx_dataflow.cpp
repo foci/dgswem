@@ -3,6 +3,7 @@
 #include <vector>
 #include <cstdlib>
 #include <string>
+#include <cassert>
 
 #include <hpx/hpx.hpp>
 #include <hpx/hpx_init.hpp>
@@ -27,14 +28,14 @@ std::vector<int> neighboringDomainIDs(void *size, void *dg, void *global)
     int numneighbors_fort;
     int neighbors_fort[MAX_DOMAIN_NEIGHBORS];
     
-    //std::cout << "calling neighboringDomainIDs" << std::endl;
+    //hpx::cout << "calling neighboringDomainIDs" << std::endl;
     
     if (!size) {
 	hpx::cout << "no size, so returning empty vector" << std::endl; // DEBUG
         return std::vector<int>();
     }
     
-    //    std::cout << "size = " << &size << std::endl;   // DEBUG
+    //    hpx::cout << "size = " << &size << std::endl;   // DEBUG
 
     //    fortran_calls << "Calling get_neighbors_fort" << std::endl;
     FNAME(get_neighbors_fort)(&size,
@@ -65,14 +66,14 @@ public:
 	    dg(dg),
 	    nodalattr(nodalattr)
 	{
-	    //std::cout << "Calling FortranPointerWrapper Constructor" << std::endl; // DEBUG
+	    //hpx::cout << "Calling FortranPointerWrapper Constructor" << std::endl; // DEBUG
 	}
 
 
 	~FortranPointerWrapper()
 	{
 	    if (size) {
-		std::cout << "CPP: about to call term_fort" << std::endl; // DEBUG
+		hpx::cout << "CPP: about to call term_fort" << std::endl; // DEBUG
 		//fortran_calls << "calling term_fort" << std::endl;
 		FNAME(term_fort)(&size,&global,&dg,&nodalattr);
 	    }
@@ -94,16 +95,22 @@ public:
         timestep(0),
 	rkstep(1)
     {
-	std::cout << "Calling DomainReference Constructor" << std::endl; // DEBUG
+	hpx::cout << "Calling DomainReference Constructor" << std::endl; // DEBUG
     }
+
     
+    //FIXME: manually copy everything if I want to use this
+    /*
     DomainReference(const DomainReference&) {
-	std::cout << "Calling copy constructor, id = " << id << std::endl;
+	hpx::cout << "Calling copy constructor, id = " << id << std::endl;
     }
+    */
     
     ~DomainReference () {
-	std::cout << "Calling DomainReference destructor" << std::endl;
+	hpx::cout << "Calling DomainReference destructor" << std::endl;
     }
+    
+
 
     //hpx::future<buffer_map> update(std::vector<buffer_map>)
     //DomainReference* update(std::vector<buffer_map>)
@@ -111,8 +118,24 @@ public:
     
     buffer_map update(std::vector<hpx::shared_future<buffer_map> > incoming_maps_futures)
     {
-	
-	hpx::cout << "Update step, timestep = " << timestep << " rkstep = " << rkstep << " domain = " << id << " size = " << &domainWrapper->size << std::endl;
+
+	// Retrieve state variables (timestep, rkstep) in fortran data structure
+	std::cout << "About to call cpp_vars_from_fort" << std::endl;
+	/*
+	int timestep_fort;
+	int rkstep_fort;
+	FNAME(cpp_vars_from_fort)(&domainWrapper->size,&rkstep_fort,&timestep_fort);
+	*/ 
+
+	FNAME(cpp_vars_from_fort)(&domainWrapper->size,&rkstep,&timestep);
+	std::cout << "after calling cpp_vars_from_fort, timestep = " << timestep << " rkstep = " << rkstep << std::endl << std::flush;
+
+	/*
+	std::cout << "after calling cpp_vars_from_fort, timestep_fort = " << timestep_fort << " rkstep_fort = " << rkstep_fort << std::endl << std::flush;
+	timestep = timestep_fort;
+	rkstep = rkstep_fort;
+	*/
+	std::cout << "Update step, timestep = " << timestep << " rkstep = " << rkstep << " domain = " << id << " size = " << &domainWrapper->size << std::endl << std::flush;
 	
 	if (timestep == 0) {
 	    timestep++;
@@ -122,15 +145,19 @@ public:
 	      for (int i=0; i<neighbors_here.size(); i++) {
 	      fortran_calls << neighbors_here[i] << " ";
 	      }
-	      fortran_calls << std::endl;
+	      fortran_calls << std::endl << std::flush;
 	    */
+
+	    FNAME(cpp_vars_to_fort)(&domainWrapper->size,&rkstep,&timestep);		
 	    
 	    return output_buffer;
 	} // end if timestep == 0
 	
-	//std::cout << "update call, timestep = " << timestep << " rkstep = " << rkstep << " domain = " << id << std::endl; // DEBUG
-	//std::cout << "incoming_maps.size() = " << incoming_maps.size() << std::endl; // DEBUG
-	//std::cout << "neighbors_here.size() = " << neighbors_here.size() << std::endl; // DEBUG
+
+
+	//hpx::cout << "update call, timestep = " << timestep << " rkstep = " << rkstep << " domain = " << id << std::endl << std::flush; // DEBUG
+	//hpx::cout << "incoming_maps.size() = " << incoming_maps.size() << std::endl << std::flush; // DEBUG
+	//hpx::cout << "neighbors_here.size() = " << neighbors_here.size() << std::endl << std::flush; // DEBUG
 	
 	
 	//#############  Place ghost zones from neighboring cells into this domain  ################
@@ -139,7 +166,7 @@ public:
 	    {
 		if (incoming_maps_futures.size() == neighbors_here.size())
 		    {
-			//std::cout << "trying to put ghost zones in domain " << id << std::endl; // DEBUG
+			//hpx::cout << "trying to put ghost zones in domain " << id << std::endl << std::flush; // DEBUG
 			//Loop over neighbors
 			for (int neighbor=0; neighbor<neighbors_here.size(); neighbor++) {
 			    int neighbor_here = neighbors_here[neighbor];
@@ -153,17 +180,17 @@ public:
 			    
 			    
 			    // Unpack buffer from neighbor
-			    //std::cout << "Unpacking buffer from neighbor: " << neighbor_here << " incoming_maps.size() = " << incoming_maps.size() << std::endl;
+			    //hpx::cout << "Unpacking buffer from neighbor: " << neighbor_here << " incoming_maps.size() = " << incoming_maps.size() << std::endl << std::flush;
 			    buffer_map buffer_map_here = incoming_maps_futures[neighbor].get(); // This needs to be "neighbor" and NOT "neighbor_here"
 			    // because this is a vector not a map!
 			    
-			    //std::cout << "pair from buffer: id =" << id << " buffer_map_here.size() = " << buffer_map_here.size() << std::endl;
+			    //hpx::cout << "pair from buffer: id =" << id << " buffer_map_here.size() = " << buffer_map_here.size() << std::endl << std::flush;
 			    if (buffer_map_here.size() != 0) {  // Make sure the buffer isn't empty (like it always will be at the first timestep)
 				std::vector<double> buffer_vector = buffer_map_here.at(id);
 				// Unpack Buffer Vector
 				for (int i=0; i<buffer_vector.size(); i++) {
 				    buffer[i] = buffer_vector[i];
-				    // std::cout << "buffer[" << i << "] = " << buffer[i] << " "; // DEBUG
+				    // hpx::cout << "buffer[" << i << "] = " << buffer[i] << " "; // DEBUG
 				}
 				
 				// Put elements into our own subdomain
@@ -175,9 +202,9 @@ public:
 				  for (int i=0; i<MAX_BUFFER_SIZE; i++) {
 				  fortran_calls << buffer[i] << " ";
 				  }
-				  fortran_calls << std::endl;
+				  fortran_calls << std::endl << std::flush;
 				
-				  fortran_calls << "buffer_vector.size() = " << buffer_vector.size() << std::endl;
+				  fortran_calls << "buffer_vector.size() = " << buffer_vector.size() << std::endl << std::flush;
 				*/
    				FNAME(hpx_put_elems_fort)(&domainWrapper->dg,
 							  &neighbor_here,
@@ -185,13 +212,13 @@ public:
 							  buffer,
 							  &rkindex);
 			    } else {
-				std::cout << "Buffer map is empty!" << std::endl;
+				hpx::cout << "Buffer map is empty!" << std::endl << std::flush;
 			    }
 			}// end loop over neighbors
 		    }
 		else {
-		    std::cout << "size of incoming buffer not equal to number of neighbors";
-		    std::cout << " skipping placing boundary zones " << std::endl;
+		    hpx::cout << "size of incoming buffer not equal to number of neighbors";
+		    hpx::cout << " skipping placing boundary zones " << std::endl << std::flush;
 		}
 	    } //end if timestep !=1
 	//  #########################################################################################
@@ -200,7 +227,10 @@ public:
 	
 	// ######################### Hydro timestep ########################
 	//	fortran_calls << "calling dg_hydro_timestep_fort, timestep = " << timestep << " rkstep = "
-	//  << rkstep << " domain = "<< id << std::endl;
+	//  << rkstep << " domain = "<< id << std::endl << std::flush;
+	// ASSERT that rkstep != 0
+	assert(rkstep != 0);
+	std::cout << "calling hydro timestep, rkstep = " << rkstep << " timestep = " << timestep << std::endl << std::flush;
 	FNAME(dg_hydro_timestep_fort)(&domainWrapper->size,
 				      &domainWrapper->dg,
 				      &domainWrapper->global,
@@ -232,41 +262,41 @@ public:
 	    //		  << rkstep << " domain = "<< id << " neighbor = " << neighbor_here << " rkindex = " << rkindex << " ";    
 
 
-	    //std::cout << "cpp: rkindex = " << rkindex << std::endl; // DEBUG
+	    //hpx::cout << "cpp: rkindex = " << rkindex << std::endl << std::flush; // DEBUG
 	    FNAME(hpx_get_elems_fort)(&domainWrapper->dg, //pointer to current domain
 				      &neighbor_here, // pointer to neighbor to send to
 				      &volume,
 				      buffer,
 				      &rkindex);
-	    //std::cout << "volume = " << volume << std::endl; // DEBUG
+	    //hpx::cout << "volume = " << volume << std::endl << std::flush; // DEBUG
 	     //DEBUG	     
-	    //fortran_calls << "volume = " << volume << std::endl; // DEBUG
+	    //fortran_calls << "volume = " << volume << std::endl << std::flush; // DEBUG
 	     /*
 	    fortran_calls << "buffer = ";
 	    for (int i=0; i<volume; i++) {
 		fortran_calls << buffer[i] << " ";
 	    }
-	    fortran_calls << std::endl;
+	    fortran_calls << std::endl << std::flush;
 	     */
 	    
 	    // Pack buffer into std vector
 	    
 	    std::vector<double> buffer_vector;
 	    for (int i=0; i<volume; i++) {
-		//std::cout << "buffer[" << i << "] = " << buffer[i] << " "; //DEBUG
-		buffer_vector.push_back(buffer[i]);		   
+		//hpx::cout << "buffer[" << i << "] = " << buffer[i] << " "; //DEBUG
+		buffer_vector.push_back(buffer[i]);
 	    }
 	    
-	    // std::cout << "after calling hpx_get_elems: buffer_vector.size() = " << buffer_vector.size() << std::endl; // DEBUG
+	    // hpx::cout << "after calling hpx_get_elems: buffer_vector.size() = " << buffer_vector.size() << std::endl << std::flush; // DEBUG
 	    
-	    //std::cout << "pair inserted into buffer:  neighbor_here = " << neighbor_here << " buffer_vector.size() = " << buffer_vector.size() << std::endl; //DEBUG
+	    //hpx::cout << "pair inserted into buffer:  neighbor_here = " << neighbor_here << " buffer_vector.size() = " << buffer_vector.size() << std::endl << std::flush; //DEBUG
 
 	    // Insert pair into map
 	    std::pair<std::_Rb_tree_iterator<std::pair<const int, std::vector<double> > >, bool> outval = output_buffer.insert(std::map<int, std::vector<double> >::value_type(neighbor_here, buffer_vector));
 	    if (std::get<1>(outval)) {
-		// std::cout << "Insert successful!" << std::endl; // DEBUG
+		// hpx::cout << "Insert successful!" << std::endl << std::flush; // DEBUG
 	    } else {
-		std::cout << "Insert not successful!" << std::endl; // DEBUG - EXCEPTION
+		hpx::cout << "Insert not successful!" << std::endl << std::flush; // DEBUG - EXCEPTION
 	    }
 	    
 	} // end loop over neighbors
@@ -274,16 +304,16 @@ public:
 	
 	
 	
-	//std::cout << "output_buffer.size() = " << output_buffer.size() << std::endl;
+	//hpx::cout << "output_buffer.size() = " << output_buffer.size() << std::endl << std::flush;
 	
-
+	
 	//##################### Advance domain at end of 2nd RK step ############################
 	
 	if (rkstep == 2) {	
-	    //std::cout << "advancing domain " << id << " at timestep " << timestep <<std::endl;
-	    //	      std::cout << "CPP: about to call dg_timestep_advance_fort" << std::endl;
+	    //hpx::cout << "advancing domain " << id << " at timestep " << timestep <<std::endl << std::flush;
+	    //	      hpx::cout << "CPP: about to call dg_timestep_advance_fort" << std::endl << std::flush;
 	    
-	    //fortran_calls << "calling dg_timestep_advance_fort, timestep = " << timestep << " domain = "<< id << std::endl;			
+	    //fortran_calls << "calling dg_timestep_advance_fort, timestep = " << timestep << " domain = "<< id << std::endl << std::flush;			
 	    FNAME(dg_timestep_advance_fort)(&domainWrapper->size,
 					    &domainWrapper->dg,
 					    &domainWrapper->global,
@@ -302,7 +332,8 @@ public:
 	} // end if else rkstep == 2
 	
 	//########################################################################################
-	
+
+	FNAME(cpp_vars_to_fort)(&domainWrapper->size,&rkstep,&timestep);
 	
 	// Return output buffer
 	//	return hpx::make_ready_future(output_buffer);
@@ -336,8 +367,8 @@ struct stepper
     //    typedef std::vector<buffer_map> space; //comment me out to futurize
 
     //void do_work(int total_substeps, int n_domains) // comment me out to futurize
-    //    hpx::future<space> do_work(int total_substeps, int n_domains) // uncomment me to futurize
-    void do_work(int total_substeps, int n_domains)
+    //    void do_work(int total_substeps, int n_domains)
+    hpx::future<space> do_work(int total_substeps, int n_domains) // uncomment me to futurize
     {
 	using hpx::dataflow;
 	//using hpx::util::unwrapped; 
@@ -347,18 +378,18 @@ struct stepper
 	for (space& s : U)
 	    s.resize(n_domains);
 
-	domains.resize(n_domains); // resize to number of domains
+	//domains.resize(n_domains); // resize to number of domains
 
 	// Initialize Domains
 	for (int i=0; i<n_domains; i++) {
-	    std::cout << "about to initialize domain i=" << i << std::endl;
+	    hpx::cout << "about to initialize domain i=" << i << std::endl << std::flush;
 
       	    void *size = NULL;
 	    void *dg = NULL;
 	    void *global = NULL;
 	    void *nodalattr = NULL;
 
-	    //fortran_calls << "calling dgswem_init_fort, domain = "<< i <<std::endl;	    
+	    //fortran_calls << "calling dgswem_init_fort, domain = "<< i <<std::endl << std::flush;	    
 	    FNAME(dgswem_init_fort)(&size,
 				    &dg,
 				    &global,
@@ -369,13 +400,13 @@ struct stepper
 	    // Get list of neighbors for this domain
 	    std::vector<int> neighbors_here = neighboringDomainIDs(size, dg, global);      
 
-	    std::cout << "neighbors_here.size() = " << neighbors_here.size() << std::endl;
+	    hpx::cout << "neighbors_here.size() = " << neighbors_here.size() << std::endl << std::flush;
 	    if (neighbors_here.size() == 0) {
 	    }
 	    */
 	    DomainReference dr_here = DomainReference(i, size, global, dg, nodalattr);
-	    //domains.push_back(dr_here);
-	    domains[i] = dr_here;
+	    domains.push_back(dr_here);
+	    //domains[i] = dr_here;
 
 	    buffer_map empty_buffer;
 	    //U[0].push_back(empty_buffer); // comment me out to futurize
@@ -383,65 +414,58 @@ struct stepper
 	    U[0][i]=hpx::make_ready_future(empty_buffer); // uncomment me to futurize
 	} //end domain initialize
 
-	std::cout << "***** Done initializing domains ******" << std::endl;
+	hpx::cout << "***** Done initializing domains ******" << std::endl << std::flush;
 
 	//	auto Op = unwrapped(&DomainReference::update);
-	
+
 	// Timestep loop
 	for (int substep = 0; substep != total_substeps; ++substep) {
 	    space const& current = U[substep % 2];
 	    space& next = U[(substep + 1) % 2];
 	    
-	    std::cout << "Timestep loop: substep = " << substep << std::endl;
-	    //fortran_calls << "substep = " << substep << std::endl;
+	    hpx::cout << "Timestep loop: substep = " << substep << std::endl << std::flush;
+	    //fortran_calls << "substep = " << substep << std::endl << std::flush;
 	    // Domain loop
 	    for (int i=0; i<n_domains; i++) {
-		//std::cout << "Domain loop: substep = " << substep << " domain = " << i << std::endl;
-		//std::cout << "current[i].size() = " << current[i].size();
+		//hpx::cout << "Domain loop: substep = " << substep << " domain = " << i << std::endl << std::flush;
+		//hpx::cout << "current[i].size() = " << current[i].size();
 		
 		//pack futures into an array
 		std::vector<hpx::shared_future<buffer_map> > output_buffer_future_vector; //uncomment me to futurize
 		//std::vector<buffer_map> output_buffer_future_vector; //comment me out to futurize
 		//loop over neighbors current[ ] is a future of a buffer_map
-		for (int neighbor=0; neighbor<domains[i].neighbors_here.size(); neighbor++) {		    
+		for (int neighbor=0; neighbor<domains[i].neighbors_here.size(); neighbor++) {
 		    int neighbor_here = domains[i].neighbors_here[neighbor];
-		    //std::cout << "packing domains, domain = " << i << " neighbor = " << neighbor << " current[neighbor_here].size() = " << current[neighbor_here].size() << std::endl; // DEBUG
+		    //hpx::cout << "packing domains, domain = " << i << " neighbor = " << neighbor << " current[neighbor_here].size() = " << current[neighbor_here].size() << std::endl << std::flush; // DEBUG
 		    output_buffer_future_vector.push_back(current[neighbor_here]);
 		    //output_buffer_future_vector.push_back(current[neighbor_here]);
 		}
+		//output_buffer_future_vector.push_back(current[i]);
 
 		//Define Op
 
 		// Passing by reference:
-		std::cout << "&domains[i] = " << &domains[i] << std::endl;
+		hpx::cout << "&domains[i] = " << &domains[i] << std::endl << std::flush;
 		auto Op = boost::bind(&DomainReference::update,&domains[i],_1);
 
-		// Passing by copying:
+		// Passing by copying:    and should this be outside of the loops? I don't think it can be 
 		//auto Op = boost::bind(&DomainReference::update,domains[i],_1);
 		
-		//std::cout << "Calling dataflow" << std::endl;
+		//hpx::cout << "Calling dataflow" << std::endl << std::flush;
 		next[i] = dataflow(hpx::launch::async, Op,
-				   output_buffer_future_vector
+				   output_buffer_future_vector,
+				   current[i]
 				   );
 	
-		/*
-		next[i] = dataflow(hpx::launch::async, boost::bind(Op,domains[i]),
-				   output_buffer_future_vector
-				   );
-		
-		next[i] = dataflow(hpx::launch::async, Op , domains[i],
-				   output_buffer_future_vector
-				   );
-		*/
 		//hpx::wait_all(next);
 	    }
 	} //end timestep loop
-
-	std::cout << " &&&&&&& Done building tree &&&&&& " << std::endl;
 	
-	//return hpx::when_all(U[total_substeps % 2]); // uncomment to futurize
+	hpx::cout << " &&&&&&& Done building tree &&&&&& " << std::endl << std::flush;
+	
+	return hpx::when_all(U[total_substeps % 2]); // uncomment to futurize
 	//	hpx::wait_all(U[total_substeps % 2]); // uncomment to futurize
-	hpx::wait_all(U[total_substeps]); // uncomment to futurize
+	//hpx::wait_all(U[total_substeps]); // uncomment to futurize
 	
     }// end do_work()
 
@@ -469,16 +493,14 @@ int hpx_main(variables_map & vm)
 
     boost::uint64_t t = hpx::util::high_resolution_clock::now();
     
-    step.do_work(total_substeps, n_domains);
+    //step.do_work(total_substeps, n_domains);
 
     // Uncomment to futurize
-    //hpx::future<stepper::space> result = step.do_work(total_substeps, n_domains);
-    //stepper::space result = step.do_work(total_substeps, n_domains);
-    
-    //    stepper::space solution = result.get();
-    //    hpx::wait_all(solution);
-    
-    
+    hpx::future<stepper::space> result = step.do_work(total_substeps, n_domains);
+
+    //stepper::space result = step.do_work(total_substeps, n_domains);    
+    stepper::space solution = result.get();
+    hpx::wait_all(solution);       
     
     boost::uint64_t elapsed = hpx::util::high_resolution_clock::now() - t;    
 
@@ -488,7 +510,7 @@ int hpx_main(variables_map & vm)
     //   fortran_calls.close();
 
     std::string const threads_str = boost::str(boost::format("%lu,") % num_os_threads);
-    std::cout << ( boost::format("%-21s %.14g\n")
+    hpx::cout << ( boost::format("%-21s %.14g\n")
 		   % threads_str % (elapsed / 1e9) ) << std::flush;
 
     return hpx::finalize();

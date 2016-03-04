@@ -44,4 +44,10 @@ extern"C" {
 			  void** dg,
 			  void** global,
 			  void** nodalattr);			  
+    void FNAME(cpp_vars_from_fort)(void** size,				   
+				   int* rkstep,
+				   int* timestep);
+    void FNAME(cpp_vars_to_fort)(void** size,
+				   int* rkstep,
+				   int* timestep);
 }

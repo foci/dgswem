@@ -36,6 +36,8 @@ subroutine dgswem_init_fort(sizes_c_ptr,dg_c_ptr,global_c_ptr,nodalattr_c_ptr,id
   allocate(nodalattr_here)
 
   s%myproc = id ! I think this should be before the call to dgswem_init
+  s%cpp_timestep = 0
+  s%cpp_rkstep = 1
 
   call dgswem_init(s,dg_here,global_here,nodalattr_here)
 
@@ -54,6 +56,9 @@ subroutine dgswem_init_fort(sizes_c_ptr,dg_c_ptr,global_c_ptr,nodalattr_c_ptr,id
   dg_c_ptr = C_LOC(dg_here)
   global_c_ptr = C_LOC(global_here)
   nodalattr_c_ptr = C_LOC(nodalattr_here)
+
+  print*, "FORTRAN dgswem_init, cpp_rkstep = ", s%cpp_rkstep
+  print*, "FORTRAN dgswem_init, cpp_timestep = ", s%cpp_timestep
 
 end subroutine dgswem_init_fort
 
@@ -285,4 +290,47 @@ subroutine term_fort(sizes_c_ptr,dg_c_ptr,global_c_ptr,nodalattr_c_ptr)
 
 end subroutine term_fort
 
+
+subroutine cpp_vars_to_fort(sizes_c_ptr,cpp_rkstep,cpp_timestep)
+
+  use, intrinsic :: iso_c_binding
+  use sizes
+
+  implicit none
+  
+  type (C_PTR) :: sizes_c_ptr
+  integer :: cpp_rkstep, cpp_timestep
+  type (sizes_type), pointer :: s
+
+  call C_F_POINTER(sizes_c_ptr,s)
+
+  print*, "FORTRAN: cpp_vars_to_fort: rkstep = ", cpp_rkstep, " timestep = ", cpp_timestep
+  
+  s%cpp_rkstep = cpp_rkstep
+  s%cpp_timestep = cpp_timestep  
+
+end subroutine cpp_vars_to_fort
+
+subroutine cpp_vars_from_fort(sizes_c_ptr,cpp_rkstep,cpp_timestep)
+
+  use, intrinsic :: iso_c_binding
+  use sizes
+
+  implicit none
+  
+  type (C_PTR) :: sizes_c_ptr
+  integer :: cpp_rkstep, cpp_timestep
+  type (sizes_type), pointer :: s
+
+  call C_F_POINTER(sizes_c_ptr,s)
+  
+  cpp_rkstep = s%cpp_rkstep
+  cpp_timestep = s%cpp_timestep
+
+  print*, "FORTRAN: cpp_vars_from_fort: rkstep = ", cpp_rkstep, " timestep = ", cpp_timestep
+
+end subroutine cpp_vars_from_fort
+
 #endif
+
+

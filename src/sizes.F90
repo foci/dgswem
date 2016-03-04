@@ -81,7 +81,9 @@ MODULE SIZES
      CHARACTER(2048) :: INPUTDIR, GLOBALDIR, LOCALDIR
      CHARACTER(2048) :: GBLINPUTDIR, HOTSTARTDIR
 
-
+#ifdef HPX
+     integer :: cpp_timestep, cpp_rkstep     
+#endif
 
      ! file unit numbers
      ! 
