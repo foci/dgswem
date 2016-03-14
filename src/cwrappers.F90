@@ -26,7 +26,7 @@ subroutine dgswem_init_fort(sizes_c_ptr,dg_c_ptr,global_c_ptr,nodalattr_c_ptr,id
   flush(99)
 
 #ifdef VERBOSE
-  print*, "FORTRAN: Entering dgswem_init_fort"
+!  print*, "FORTRAN: Entering dgswem_init_fort"
 !  print*, "FORTRAN: id =", id
 #endif
 
@@ -57,8 +57,8 @@ subroutine dgswem_init_fort(sizes_c_ptr,dg_c_ptr,global_c_ptr,nodalattr_c_ptr,id
   global_c_ptr = C_LOC(global_here)
   nodalattr_c_ptr = C_LOC(nodalattr_here)
 
-  print*, "FORTRAN dgswem_init, cpp_rkstep = ", s%cpp_rkstep
-  print*, "FORTRAN dgswem_init, cpp_timestep = ", s%cpp_timestep
+!  print*, "FORTRAN dgswem_init, cpp_rkstep = ", s%cpp_rkstep
+!  print*, "FORTRAN dgswem_init, cpp_timestep = ", s%cpp_timestep
 
 end subroutine dgswem_init_fort
 
@@ -187,7 +187,7 @@ subroutine hpx_get_elems_fort(dg_c_ptr,neighbor,volume,sendbuf,rkindex)
 
   call C_F_POINTER(dg_c_ptr,dg_here)
 
-  print*,'rkindex=',rkindex
+!  print*,'rkindex=',rkindex
 
 #ifdef VERBOSE
   write(99,*) "Entering hpx_get_elems_fort"
@@ -215,7 +215,7 @@ subroutine hpx_put_elems_fort(dg_c_ptr,neighbor,volume,recvbuf,rkindex)
 
   call C_F_POINTER(dg_c_ptr,dg_here)
 
-  print*,'rkindex=',rkindex
+!  print*,'rkindex=',rkindex
 
 #ifdef VERBOSE
 !  print*, "FORTRAN: Entering hpx_put_elems_fort"
@@ -304,7 +304,7 @@ subroutine cpp_vars_to_fort(sizes_c_ptr,cpp_rkstep,cpp_timestep)
 
   call C_F_POINTER(sizes_c_ptr,s)
 
-  print*, "FORTRAN: cpp_vars_to_fort: rkstep = ", cpp_rkstep, " timestep = ", cpp_timestep
+!  print*, "FORTRAN: cpp_vars_to_fort: rkstep = ", cpp_rkstep, " timestep = ", cpp_timestep
   
   s%cpp_rkstep = cpp_rkstep
   s%cpp_timestep = cpp_timestep  
@@ -327,7 +327,7 @@ subroutine cpp_vars_from_fort(sizes_c_ptr,cpp_rkstep,cpp_timestep)
   cpp_rkstep = s%cpp_rkstep
   cpp_timestep = s%cpp_timestep
 
-  print*, "FORTRAN: cpp_vars_from_fort: rkstep = ", cpp_rkstep, " timestep = ", cpp_timestep
+!  print*, "FORTRAN: cpp_vars_from_fort: rkstep = ", cpp_rkstep, " timestep = ", cpp_timestep
 
 end subroutine cpp_vars_from_fort
 
