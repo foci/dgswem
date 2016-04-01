@@ -403,7 +403,10 @@ struct stepper
 	hpx::cout << "***** Done initializing domains ******" << std::endl << std::flush;
 #endif
 
+	// Start time variable
 	t = hpx::util::high_resolution_clock::now();    
+	// Reset counters
+	hpx::reset_active_counters();
 
 	// Timestep loop
 	for (int substep = 0; substep != total_substeps; ++substep) {

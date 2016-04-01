@@ -158,16 +158,16 @@
 
 !.....Print out the global_here%edge-to-node and global_here%edge-to-element connectivity
 
-      WRITE(17,*)dg_here%NEDGES
+      WRITE(s%fort17unit,*)dg_here%NEDGES
       DO IED = 1,dg_here%NEDGES
-        WRITE(17,*)IED,dg_here%NEDNO(1,IED),dg_here%NEDNO(2,IED),dg_here%NEDEL(1,IED),&
+        WRITE(s%fort17unit,*)IED,dg_here%NEDNO(1,IED),dg_here%NEDNO(2,IED),dg_here%NEDEL(1,IED),&
              dg_here%NEDEL(2,IED)
       ENDDO
         
 !.....Print out the element-to-global_here%edge connectivity
 
       DO IEL = 1,global_here%NE
-        WRITE(17,*)IEL, global_here%NELED(1,IEL), global_here%NELED(2,IEL), global_here%NELED(3,IEL)
+        WRITE(s%fort17unit,*)IEL, global_here%NELED(1,IEL), global_here%NELED(2,IEL), global_here%NELED(3,IEL)
       ENDDO
 
 !.....An index to keep track of the edges
@@ -540,53 +540,53 @@
       
 !.....Print out the interior edges
 
-      WRITE(17,*) dg_here%NIEDS,'       ! NUMBER OF INTERNAL EDGES'
+      WRITE(s%fort17unit,*) dg_here%NIEDS,'       ! NUMBER OF INTERNAL EDGES'
       DO I = 1,dg_here%NIEDS
-        WRITE(17,*) I,dg_here%NIEDN(I),dg_here%nedno(1,dg_here%niedn(i)),dg_here%nedno(2,dg_here%niedn(i))
+        WRITE(s%fort17unit,*) I,dg_here%NIEDN(I),dg_here%nedno(1,dg_here%niedn(i)),dg_here%nedno(2,dg_here%niedn(i))
       ENDDO
 
 !.....Prin out land edges info.
 
-      WRITE(17,*) dg_here%NLEDS,'       ! NUMBER OF NO-NORMAL FLOW EDGES'
+      WRITE(s%fort17unit,*) dg_here%NLEDS,'       ! NUMBER OF NO-NORMAL FLOW EDGES'
       IF (dg_here%NLEDS.GT.0) THEN
         DO I = 1,dg_here%NLEDS
-          WRITE(17,*) I, dg_here%NLEDN(I),dg_here%nedno(1,dg_here%nledn(i)),          dg_here%nedno(2,dg_here%nledn(i))
+          WRITE(s%fort17unit,*) I, dg_here%NLEDN(I),dg_here%nedno(1,dg_here%nledn(i)),          dg_here%nedno(2,dg_here%nledn(i))
         ENDDO
       ENDIF
       
 !.....Print out elevation specified global_here%edge info.
 
-      WRITE(17,*) dg_here%NEEDS,'       ! NUMBER OF ELEVATION SPECIFIED EDGES'
+      WRITE(s%fort17unit,*) dg_here%NEEDS,'       ! NUMBER OF ELEVATION SPECIFIED EDGES'
       IF (dg_here%NEEDS.GT.0) THEN
         DO I = 1,dg_here%NEEDS
-          WRITE(17,*) I, dg_here%NEEDN(I)
+          WRITE(s%fort17unit,*) I, dg_here%NEEDN(I)
         ENDDO
       ENDIF
 
 !.....Print out non-zero flow edges info.
 
-      WRITE(17,*) dg_here%NFEDS,'       ! NUMBER OF FLOW SPECIFIED EDGES'
+      WRITE(s%fort17unit,*) dg_here%NFEDS,'       ! NUMBER OF FLOW SPECIFIED EDGES'
       IF (dg_here%NFEDS.GT.0) THEN
         DO I = 1,dg_here%NFEDS
-          WRITE(17,*) I, dg_here%NFEDN(I)
+          WRITE(s%fort17unit,*) I, dg_here%NFEDN(I)
         ENDDO
       ENDIF
       
 !.....Print out external barrier global_here%edge info.
 
-      WRITE(17,*) dg_here%NEBEDS,'       ! NUMBER OF EXTERNAL BARRIER EDGES'
+      WRITE(s%fort17unit,*) dg_here%NEBEDS,'       ! NUMBER OF EXTERNAL BARRIER EDGES'
       IF (dg_here%NEEDS.GT.0) THEN
         DO I = 1,dg_here%NEBEDS
-          WRITE(17,*) I, dg_here%NEBEDN(I),dg_here%nedno(1,dg_here%nebedn(i)),          dg_here%nedno(2,dg_here%nebedn(i))
+          WRITE(s%fort17unit,*) I, dg_here%NEBEDN(I),dg_here%nedno(1,dg_here%nebedn(i)),          dg_here%nedno(2,dg_here%nebedn(i))
         ENDDO
       ENDIF
       
 !.....Print out internal barrier global_here%edge info.
 
-      WRITE(17,*) dg_here%NIBEDS,'       ! NUMBER OF INTERNAL BARRIER EDGES'
+      WRITE(s%fort17unit,*) dg_here%NIBEDS,'       ! NUMBER OF INTERNAL BARRIER EDGES'
       IF (dg_here%NIBEDS.GT.0) THEN
         DO I = 1,dg_here%NIBEDS
-          WRITE(17,*) I, dg_here%NIBEDN(I),dg_here%nedno(1,dg_here%nibedn(i)),          dg_here%nedno(2,dg_here%nibedn(i))
+          WRITE(s%fort17unit,*) I, dg_here%NIBEDN(I),dg_here%nedno(1,dg_here%nibedn(i)),          dg_here%nedno(2,dg_here%nibedn(i))
 !          PRINT*,'INTERNAL BARRIER global_here%EDGE =',I
 !          PRINT*,'IS MADE UP OF NODES',dg_here%NEDNO(1,dg_here%NIBEDN(I)),'AND',
 !     &                                 dg_here%NEDNO(2,dg_here%NIBEDN(I))
@@ -595,10 +595,10 @@
 
 !.....Print out radiation edges info.
 
-      WRITE(17,*) dg_here%NREDS, '      ! NUMBER OF RADIATION EDGES'
+      WRITE(s%fort17unit,*) dg_here%NREDS, '      ! NUMBER OF RADIATION EDGES'
       IF (dg_here%NREDS.GT.0) THEN
         DO I = 1,dg_here%NREDS
-          WRITE(17,*) I, dg_here%NREDN(I)
+          WRITE(s%fort17unit,*) I, dg_here%NREDN(I)
         ENDDO
       ENDIF
       

@@ -92,6 +92,7 @@
           END DO
           global_here%ETIME1 = global_here%STATIM*86400.D0
           global_here%ETIME2 = global_here%ETIME1 + global_here%ETIMINC
+          close(s%fort19unit)
         ENDIF
 
 !....INITIALIZE THE NORMAL FLOW BOUNDARY CONDITION
@@ -124,7 +125,8 @@
             END DO
           global_here%QTIME1 = global_here%STATIM*86400.D0
           global_here%QTIME2 = global_here%QTIME1 + global_here%FTIMINC
-          ENDIF
+          close(s%fort20unit)
+       ENDIF
 
 !...INPUT METEOROLOGICAL INFORMATION FROM UNIT 22 OR UNIT 200 SERIES
 !....IF FLEET NUMERIC WIND DATA IS USED, FIND BEGINNING TIME IN FILE,
@@ -151,7 +153,8 @@
 
         IF(global_here%NWS.EQ.1) THEN
           OPEN(s%fort22unit,FILE=S%DIRNAME//'/'//'fort.22')
-          ENDIF
+          
+       ENDIF
 
         IF(ABS(global_here%NWS).EQ.2) THEN
           OPEN(s%fort22unit,FILE=S%DIRNAME//'/'//'fort.22')
@@ -159,7 +162,8 @@
           READ(s%fort22unit,*) (global_here%NHG,global_here%WVNX2(I),global_here%WVNY2(I),global_here%PRN2(I),I=1,global_here%NP)
           global_here%WTIME1 = global_here%STATIM*86400.D0
           global_here%WTIME2 = global_here%WTIME1 + global_here%WTIMINC
-          ENDIF
+          
+       ENDIF
 
         IF(global_here%NWS.EQ.3) THEN
           OPEN(s%fort22unit,FILE=S%DIRNAME//'/'//'fort.22')
@@ -190,7 +194,9 @@
           WRITE(s%fort16unit,*) 'FOUND WIND DATA AT TIME= ',global_here%IWTIME
           global_here%WTIME2=global_here%WTIMED-global_here%WREFTIM                  !CAST INTO MODEL TIME REFRENCE
           global_here%WTIME1=global_here%WTIME2-global_here%WTIMINC
-          ENDIF
+          
+         
+       ENDIF
 
         IF(ABS(global_here%NWS).EQ.4) THEN
           OPEN(s%fort22unit,FILE=S%DIRNAME//'/'//'fort.22')
@@ -198,7 +204,8 @@
           global_here%WTIME2=global_here%WTIME1+global_here%WTIMINC
           CALL NWS4GET(global_here%WVNX1,global_here%WVNY1,global_here%PRN1,global_here%NP,global_here%RHOWAT0,global_here%G)
           CALL NWS4GET(global_here%WVNX2,global_here%WVNY2,global_here%PRN2,global_here%NP,global_here%RHOWAT0,global_here%G)
-          ENDIF
+          
+       ENDIF
 
         IF(ABS(global_here%NWS).EQ.5) THEN
           OPEN(s%fort22unit,FILE=S%DIRNAME//'/'//'fort.22')
@@ -206,7 +213,8 @@
           READ(s%fort22unit,*) (global_here%NHG,global_here%WVNX2(I),global_here%WVNY2(I),global_here%PRN2(I),I=1,global_here%NP)
           global_here%WTIME1 = global_here%STATIM*86400.D0
           global_here%WTIME2 = global_here%WTIME1 + global_here%WTIMINC
-          ENDIF
+          
+       ENDIF
 
         IF(global_here%NWS.EQ.6) THEN
           OPEN(s%fort22unit,FILE=S%DIRNAME//'/'//'fort.22')
@@ -216,7 +224,8 @@
                  global_here%WLATMAX,global_here%WLONMIN,global_here%WLATINC,global_here%WLONINC,global_here%ICS,global_here%RHOWAT0,global_here%G)
           global_here%WTIME1 = global_here%STATIM*86400.D0
           global_here%WTIME2 = global_here%WTIME1 + global_here%WTIMINC
-          ENDIF
+          
+       ENDIF
 
         IF(global_here%NWS.EQ.10) THEN
           global_here%WTIME1=global_here%STATIM*86400.D0
@@ -616,9 +625,9 @@
         global_here%IWSTP=0
 
         IF(ABS(global_here%NOUTM).EQ.1) THEN
-          OPEN(s%fort17unit,FILE=S%DIRNAME//'/'//'fort.71')
-          WRITE(s%fort17unit,3220) global_here%RUNDES,global_here%RUNID,global_here%AGRID
-          WRITE(s%fort17unit,3645) global_here%NTRSPM,global_here%NSTAM,global_here%DTDP*global_here%NSPOOLM,global_here%NSPOOLM,1
+          OPEN(s%fort71unit,FILE=S%DIRNAME//'/'//'fort.71')
+          WRITE(s%fort71unit,3220) global_here%RUNDES,global_here%RUNID,global_here%AGRID
+          WRITE(s%fort71unit,3645) global_here%NTRSPM,global_here%NSTAM,global_here%DTDP*global_here%NSPOOLM,global_here%NSPOOLM,1
           global_here%IPSTP=2
           OPEN(s%fort72unit,FILE=S%DIRNAME//'/'//'fort.72')
           WRITE(s%fort72unit,3220) global_here%RUNDES,global_here%RUNID,global_here%AGRID
@@ -627,25 +636,25 @@
           ENDIF
 
         IF(ABS(global_here%NOUTM).EQ.2) THEN
-          OPEN(s%fort17unit,FILE=S%DIRNAME//'/'//'fort.71',&
+          OPEN(s%fort71unit,FILE=S%DIRNAME//'/'//'fort.71',&
           ACCESS='DIRECT',RECL=NBYTE)
           OPEN(s%fort72unit,FILE=S%DIRNAME//'/'//'fort.72',&
           ACCESS='DIRECT',RECL=NBYTE)
           IF(NBYTE.EQ.4) THEN
             DO I=1,8
-              WRITE(s%fort17unit,REC=global_here%IPSTP+I) global_here%RDES4(I)
+              WRITE(s%fort71unit,REC=global_here%IPSTP+I) global_here%RDES4(I)
               WRITE(s%fort72unit,REC=global_here%IWSTP+I) global_here%RDES4(I)
               ENDDO
             global_here%IPSTP=global_here%IPSTP+8
             global_here%IWSTP=global_here%IWSTP+8
             DO I=1,6
-              WRITE(s%fort17unit,REC=global_here%IPSTP+I) global_here%RID4(I)
+              WRITE(s%fort71unit,REC=global_here%IPSTP+I) global_here%RID4(I)
               WRITE(s%fort72unit,REC=global_here%IWSTP+I) global_here%RID4(I)
               ENDDO
             global_here%IPSTP=global_here%IPSTP+6
             global_here%IWSTP=global_here%IWSTP+6
             DO I=1,6
-              WRITE(s%fort17unit,REC=global_here%IPSTP+I) global_here%AID4(I)
+              WRITE(s%fort71unit,REC=global_here%IPSTP+I) global_here%AID4(I)
               WRITE(s%fort72unit,REC=global_here%IWSTP+I) global_here%AID4(I)
               ENDDO
             global_here%IPSTP=global_here%IPSTP+6
@@ -653,29 +662,29 @@
             ENDIF
           IF(NBYTE.EQ.8) THEN
             DO I=1,4
-              WRITE(s%fort17unit,REC=global_here%IPSTP+I) global_here%RDES8(I)
+              WRITE(s%fort71unit,REC=global_here%IPSTP+I) global_here%RDES8(I)
               WRITE(s%fort72unit,REC=global_here%IWSTP+I) global_here%RDES8(I)
               ENDDO
             global_here%IPSTP=global_here%IPSTP+4
             global_here%IWSTP=global_here%IWSTP+4
             DO I=1,3
-              WRITE(s%fort17unit,REC=global_here%IPSTP+I) global_here%RID8(I)
+              WRITE(s%fort71unit,REC=global_here%IPSTP+I) global_here%RID8(I)
               WRITE(s%fort72unit,REC=global_here%IWSTP+I) global_here%RID8(I)
               ENDDO
             global_here%IPSTP=global_here%IPSTP+3
             global_here%IWSTP=global_here%IWSTP+3
             DO I=1,3
-              WRITE(s%fort17unit,REC=global_here%IPSTP+I) global_here%AID8(I)
+              WRITE(s%fort71unit,REC=global_here%IPSTP+I) global_here%AID8(I)
               WRITE(s%fort72unit,REC=global_here%IWSTP+I) global_here%AID8(I)
               ENDDO
             global_here%IPSTP=global_here%IPSTP+3
             global_here%IWSTP=global_here%IWSTP+3
             ENDIF
-          WRITE(s%fort17unit,REC=global_here%IPSTP+1) global_here%NTRSPM
-          WRITE(s%fort17unit,REC=global_here%IPSTP+2) global_here%NSTAM
-          WRITE(s%fort17unit,REC=global_here%IPSTP+3) global_here%DT*global_here%NSPOOLM
-          WRITE(s%fort17unit,REC=global_here%IPSTP+4) global_here%NSPOOLM
-          WRITE(s%fort17unit,REC=global_here%IPSTP+5) 1
+          WRITE(s%fort71unit,REC=global_here%IPSTP+1) global_here%NTRSPM
+          WRITE(s%fort71unit,REC=global_here%IPSTP+2) global_here%NSTAM
+          WRITE(s%fort71unit,REC=global_here%IPSTP+3) global_here%DT*global_here%NSPOOLM
+          WRITE(s%fort71unit,REC=global_here%IPSTP+4) global_here%NSPOOLM
+          WRITE(s%fort71unit,REC=global_here%IPSTP+5) 1
           WRITE(s%fort72unit,REC=global_here%IWSTP+1) global_here%NTRSPM
           WRITE(s%fort72unit,REC=global_here%IWSTP+2) global_here%NSTAM
           WRITE(s%fort72unit,REC=global_here%IWSTP+3) global_here%DT*global_here%NSPOOLM
@@ -683,9 +692,9 @@
           WRITE(s%fort72unit,REC=global_here%IWSTP+5) 2
           global_here%IPSTP=global_here%IPSTP+5
           global_here%IWSTP=global_here%IWSTP+5
-          CLOSE(s%fort17unit)                    ! DO THIS TO FLUSH THE WRITE BUFFER
+          CLOSE(s%fort71unit)                    ! DO THIS TO FLUSH THE WRITE BUFFER
           CLOSE(s%fort72unit)                    ! DO THIS TO FLUSH THE WRITE BUFFER
-          OPEN(s%fort17unit,FILE=S%DIRNAME//'/'//'fort.71',&
+          OPEN(s%fort71unit,FILE=S%DIRNAME//'/'//'fort.71',&
          ACCESS='DIRECT',RECL=NBYTE)
           OPEN(s%fort72unit,FILE=S%DIRNAME//'/'//'fort.72',&
          ACCESS='DIRECT',RECL=NBYTE)
