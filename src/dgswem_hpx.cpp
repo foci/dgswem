@@ -150,9 +150,10 @@ public:
 
 	      
 	      std::cout << "updating (domain_id = " << id
-			  << ", timestep = " << timestep
-			  << ", rkstep = " << rkstep
-			  << ")...\n";
+			<< ", timestep = " << timestep
+			<< ", rkstep = " << rkstep
+			<< ", locality = " << hpx::find_here()
+			<< ")...\n";
 	      
 
 		//                 std::cout << "CPP: about to call dg_hydro_timestep_fort" << std::endl;
@@ -173,10 +174,12 @@ public:
 		    int neighbor_here = neighbors_here[neighbor];
 		    int volume;
 		    double buffer[MAX_BUFFER_SIZE];
+		    int rkstep_fort = 0;
 		    FNAME(hpx_get_elems_fort)(&domainWrapper->dg, //pointer to current domain
 					      &neighbor_here, // pointer to neighbor to send to
 					      &volume,
-					      buffer);
+					      buffer,
+					      &rkstep_fort);
 		    
 		    //std::cout << "volume = " << volume << std::endl;
 
@@ -258,11 +261,13 @@ public:
 		    }
 		    //std::cout << std::endl;
 
-		    // Put elements into our own subdomain
+		    // Put elements into our own subdomain	
+		    int rkstep_fort = 0;
 		    FNAME(hpx_put_elems_fort)(&domainWrapper->dg,
 					      &neighbor_here,
 					      &volume,
-					      buffer);
+					      buffer,
+					      &rkstep_fort);
 		    
 		    //std::cout << "domain " << id << " is exchanging with " << neighbor_here << " at timestep " << timestep << std::endl;
 
@@ -366,9 +371,10 @@ public:
 	// Empty
     }
 
-    LibGeoDecomp::Adjacency getAdjacency() const
+    //LibGeoDecomp::Adjacency getAdjacency() const
+    boost::shared_ptr<LibGeoDecomp::Adjacency>  getAdjacency() const
     {
-	LibGeoDecomp::Adjacency adjacency;
+	boost::shared_ptr<LibGeoDecomp::Adjacency> adjacency;
         for(int id = 0; id < numDomains ; id++) {
 	    void *size = NULL;
 	    void *dg = NULL;
@@ -388,7 +394,9 @@ public:
 	    // Destroy the domain
 	    FNAME(term_fort)(&size,&global,&dg,&nodalattr);
 	    //adjacency[id] = neighbors_here;
-	    adjacency.insert(id, neighbors_here);
+	    for (int i=0; i < neighbors_here.size(); i++) {
+		adjacency->insert(id, neighbors_here[i]);
+	    }
 	}
 	return adjacency;
     }
