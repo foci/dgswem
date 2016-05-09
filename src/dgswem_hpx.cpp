@@ -374,6 +374,7 @@ public:
     boost::shared_ptr<LibGeoDecomp::Adjacency>  getAdjacency(const LibGeoDecomp::Region<1>& /* unused */ ) const
     {
 	boost::shared_ptr<LibGeoDecomp::Adjacency> adjacency(new LibGeoDecomp::RegionBasedAdjacency());
+
         for(int id = 0; id < numDomains ; id++) {
 	    void *size = NULL;
 	    void *dg = NULL;
@@ -381,7 +382,7 @@ public:
 	    void *nodalattr = NULL;
 
 	    int domain_number = id;
-	    
+	    	    
 	    FNAME(dgswem_init_fort)(&size,
 				    &dg,
 				    &global,
@@ -418,6 +419,10 @@ public:
 	    void *nodalattr = NULL;
 
 	    int domain_number = id;
+
+	    std::cout << "initializing (domain_id = " << id
+		      << ", locality = " << hpx::find_here()
+		      << ")...\n";
 	    
 	    FNAME(dgswem_init_fort)(&size,
 				    &dg,
