@@ -371,10 +371,9 @@ public:
 	// Empty
     }
 
-    //LibGeoDecomp::Adjacency getAdjacency() const
-    boost::shared_ptr<LibGeoDecomp::Adjacency>  getAdjacency() const
+    boost::shared_ptr<LibGeoDecomp::Adjacency>  getAdjacency(const LibGeoDecomp::Region<1>& /* unused */ ) const
     {
-	boost::shared_ptr<LibGeoDecomp::Adjacency> adjacency;
+	boost::shared_ptr<LibGeoDecomp::Adjacency> adjacency(new LibGeoDecomp::RegionBasedAdjacency());
         for(int id = 0; id < numDomains ; id++) {
 	    void *size = NULL;
 	    void *dg = NULL;
