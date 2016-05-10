@@ -1,6 +1,7 @@
 #include <iostream>
 #include <limits>
 #include <vector>
+#include <exception>
 #include <libgeodecomp.h>
 #include <libgeodecomp/io/logger.h>
 #include <libgeodecomp/storage/unstructuredgrid.h>
@@ -148,12 +149,21 @@ public:
 	    
 	      //std::cout << "********* update step ************" << std::endl;
 
-	      
+	      //auto locality = hpx::find_here();  locality.get_msb()
+
 	      std::cout << "updating (domain_id = " << id
 			<< ", timestep = " << timestep
 			<< ", rkstep = " << rkstep
 			<< ", locality = " << hpx::find_here()
 			<< ")...\n";
+	      
+	      
+	      std::cout << "domainWrapper->size = " << domainWrapper->size << std::endl;
+	      //int ret_val;
+	      //	      FNAME(check_c_ptr)(&domainWrapper->size,&ret_val);
+	      if (domainWrapper->size == 0) {
+		      throw std::logic_error("bad domain pointer!");
+	      }
 	      
 
 		//                 std::cout << "CPP: about to call dg_hydro_timestep_fort" << std::endl;

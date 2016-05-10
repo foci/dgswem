@@ -86,7 +86,9 @@ subroutine dg_hydro_timestep_fort(sizes_c_ptr,dg_c_ptr,global_c_ptr,nodalattr_c_
   call C_F_POINTER(dg_c_ptr,dg_here)
   call C_F_POINTER(global_c_ptr,global_here)
   call C_F_POINTER(nodalattr_c_ptr,nodalattr_here)
-
+  
+  print*, "FORTRAN: sizes_c_ptr = ", sizes_c_ptr
+  
 #ifdef VERBOSE
   write(99,*) "Entering dg_hydro_timestep_fort, id =", s%myproc, " timestep = ", timestep, " rkstep = ", rkstep
 !  print*, "FORTRAN: Entering dg_hydro_timestep_fort"
@@ -330,6 +332,26 @@ subroutine cpp_vars_from_fort(sizes_c_ptr,cpp_rkstep,cpp_timestep)
 !  print*, "FORTRAN: cpp_vars_from_fort: rkstep = ", cpp_rkstep, " timestep = ", cpp_timestep
 
 end subroutine cpp_vars_from_fort
+
+subroutine check_c_ptr(cptr,ret_val)
+ 
+  use, intrinsic :: iso_c_binding
+  use sizes
+
+  implicit none
+
+  type (C_PTR) :: cptr
+  integer :: ret_val
+
+  print*, "FORTRAN: check_c_ptr: cptr = ", cptr
+
+!  if (s.eq.0) then
+!     ret_val = 0
+!  else
+!     ret_val = 1
+!  end if
+
+end subroutine check_c_ptr
 
 #endif
 

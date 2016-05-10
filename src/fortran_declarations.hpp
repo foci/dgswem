@@ -50,4 +50,6 @@ extern"C" {
     void FNAME(cpp_vars_to_fort)(void** size,
 				   int* rkstep,
 				   int* timestep);
+    void FNAME(check_c_ptr)(void** cptr,
+			    int* retval);
 }
