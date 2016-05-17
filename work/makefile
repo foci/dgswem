@@ -78,7 +78,7 @@ PREP_MSRC  =  presizes.F
 PGLO_MSRC  =  pre_global.F  
 POST_MSRC  =  post_global.F
 ADC_MSRC   =  sizes.F diff45_41.F global.F dg.F global_3dvs.F nodalattr.F fparser.F90 fparser2.F90 \
-              read_fort_dg.F90              
+              read_fort_dg.F90 rdsvnetcdf.F90
 HARM_MSRC  =  harm.F  
 WIND_MSRC  =  wind.F  
 #Casey 121126: Add file for coupling to unstructured SWAN.
@@ -154,12 +154,14 @@ SWAN_OBJ:= $(patsubst %.f90, $(O_DIR)%.o, $(SWAN_OBJ) )
 $(O_DIR)%.o  : %.F
 #  @echo depend $<
 #  @echo target $@
-	$(CF) -c $(FFLAGS) -o $@  $<
+#$(CF) -c $(FFLAGS) -o $@  $<
+	$(CF) -I$(TACC_NETCDF_INC)  -c $(FFLAGS) $< -o $@  -lnetcdf -lnetcdff
 	if [ "`echo *.mod`" != '*.mod' ]; then mv *.mod $(O_DIR); fi
 
 #Casey 121126: Changed the f90 files to F90 extension to avoid conflict with SWAN.
 $(O_DIR)%.o  : %.F90
-	$(CF) -c $(FFLAGS) -o $@  $<
+#$(CF) -c $(FFLAGS) -o $@  $<
+	$(CF) -I${TACC_NETCDF_INC} -c $(FFLAGS) $< -o $@  -lnetcdf -lnetcdff
 	if [ "`echo *.mod`" != '*.mod' ]; then mv *.mod $(O_DIR); fi
 
 #Casey 121126: Added the following rules for the unstructured SWAN.
@@ -219,10 +221,12 @@ else
 	$(CF) $(FFLAGS) -o $@  $(O_DIR)*.o
 
    dgswem_serial ::  $(ADC_OBJ) 
-	$(CF) $(FFLAGS) -o $@  $(O_DIR)*.o
+#$(CF) $(FFLAGS) -o $@  $(O_DIR)*.o
+	$(CF) $(FFLAGS) -o $@  $(O_DIR)*.o -I$(TACC_NETCDF_INC) -L$(TACC_NETCDF_LIB) -lnetcdf -lnetcdff
 
    dgswem ::  $(MSG_MOBJ) $(MSG_OBJ) $(ADC_OBJ) 
-	$(CF) $(FFLAGS) -o $@  $(O_DIR)*.o  $(MSGLIBS)
+#$(CF) $(FFLAGS) -o $@  $(O_DIR)*.o  $(MSGLIBS)
+	$(CF) $(FFLAGS) -o $@  $(O_DIR)*.o  $(MSGLIBS) -I$(TACC_NETCDF_INC) -L$(TACC_NETCDF_LIB) -lnetcdf -lnetcdff
 
 #Casey 121126: Added the following lines for coupling to unstructured SWAN.
    swemswan :: $(O_DIR)
@@ -291,6 +295,7 @@ $(O_DIR)sizes.o       			:  sizes.F
 $(O_DIR)fparser.o	                :  fparser.F90 $(O_DIR)sizes.o
 $(O_DIR)fparser2.o	                :  fparser2.F90 $(O_DIR)sizes.o
 $(O_DIR)global.o      			:  global.F  $(O_DIR)sizes.o
+$(O_DIR)rdsvnetcdf.o                    :  rdsvnetcdf.F90
 $(O_DIR)messenger.o   			:  messenger.F  $(ADC_MOBJ)
 $(O_DIR)messenger_elem.o		:  messenger_elem.F  $(ADC_MOBJ)
 $(O_DIR)harm.o        			:  harm.F
