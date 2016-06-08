@@ -147,6 +147,7 @@
 #endif
 #endif
 
+!        PRINT*, "dg_here%RK_stage = ", dg_here%RK_stage, " IT = ", IT
         CALL WRITE_RESULTS(s,dg_here,global_here,IT,.FALSE.)
         
 #ifdef CMPI

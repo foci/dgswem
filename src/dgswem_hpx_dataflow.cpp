@@ -22,7 +22,7 @@ using boost::program_options::value;
 typedef std::map<int,std::vector<double> > buffer_map;
 
 boost::uint64_t t;
-//std::ofstream fortran_calls
+std::ofstream fortran_calls;
 
 std::vector<int> neighboringDomainIDs(void *size, void *dg, void *global)
 {
@@ -115,7 +115,8 @@ public:
     
     buffer_map update(std::vector<hpx::shared_future<buffer_map> > incoming_maps_futures)
     {
-
+	if (id == 0) 
+	    fortran_calls << "-------- new substep ----------\n";
 	// Retrieve state variables (timestep, rkstep) in fortran data structure
 #ifdef VERBOSE
 	std::cout << "About to call cpp_vars_from_fort" << std::endl;
@@ -124,7 +125,10 @@ public:
 	FNAME(cpp_vars_from_fort)(&domainWrapper->size,&rkstep,&timestep);
 #ifdef VERBOSE
 	std::cout << "after calling cpp_vars_from_fort, timestep = " << timestep << " rkstep = " << rkstep << std::endl << std::flush;
-	std::cout << "Update step, timestep = " << timestep << " rkstep = " << rkstep << " domain = " << id << " size = " << &domainWrapper->size << std::endl << std::flush;
+
+	if (id == 0) 
+	    std::cout << "Update step, timestep = " << timestep << " rkstep = " << rkstep << " domain = " << id << " size = " << &domainWrapper->size << std::endl << std::flush;
+
 #endif	
 
 	if (timestep == 0) {
@@ -134,7 +138,7 @@ public:
 	    
 	    return output_buffer;
 	} // end if timestep == 0
-	
+
 
 #ifdef VERBOSE
 	//hpx::cout << "update call, timestep = " << timestep << " rkstep = " << rkstep << " domain = " << id << std::endl << std::flush; // DEBUG
@@ -146,7 +150,7 @@ public:
 	// Check size of incoming buffer, should be equal to number of neighbors
 	if ( (timestep !=1 && rkstep == 1) || (rkstep == 2) )
 	    {
-		if (incoming_maps_futures.size() == neighbors_here.size())
+		if (incoming_maps_futures.size() == neighbors_here.size()) // Replace with assert
 		    {
 			//hpx::cout << "trying to put ghost zones in domain " << id << std::endl << std::flush; // DEBUG
 			//Loop over neighbors
@@ -176,11 +180,11 @@ public:
 				}
 				
 				// Put elements into our own subdomain
-				/*
-				  fortran_calls << "calling hpx_put_elems_fort, timestep = " << timestep << " rkstep = "
-				  << rkstep << " domain = "<< id << " neighbor = " << neighbor_here << " rkindex = " << rkindex << " " ;
-				  
-				  fortran_calls << "buffer = ";
+				if (id == 0)
+				    fortran_calls << "calling hpx_put_elems_fort, timestep = " << timestep << " rkstep = "
+						  << rkstep << " domain = "<< id << " neighbor = " << neighbor_here << " rkindex = " << rkindex << "\n" ;
+				  /*  
+				      fortran_calls << "buffer = ";
 				  for (int i=0; i<MAX_BUFFER_SIZE; i++) {
 				  fortran_calls << buffer[i] << " ";
 				  }
@@ -199,17 +203,33 @@ public:
 			}// end loop over neighbors
 		    }
 		else {
-		    hpx::cout << "size of incoming buffer not equal to number of neighbors";
+		    hpx::cout << "size of incoming buffer not equal to number of neighbors"; //FIXME replace with error
 		    hpx::cout << " skipping placing boundary zones " << std::endl << std::flush;
 		}
 	    } //end if timestep !=1
 	//  #########################################################################################
 	
+	if ( (rkstep == 1) && (timestep > 1) ) { 
+
+	    int timestep_minus = timestep-1; // notusing this now?
+
+	    if (id == 0)
+		fortran_calls << "calling dg_timestep_advance_fort, timestep = " << timestep_minus << " domain = "<< id << std::endl << std::flush;			
+
+
+	    FNAME(dg_timestep_advance_fort)(&domainWrapper->size,
+					    &domainWrapper->dg,
+					    &domainWrapper->global,
+					    &domainWrapper->nodalattr,
+					    &timestep_minus
+					    );
+	}
 	
 	
 	// ######################### Hydro timestep ########################
-	//	fortran_calls << "calling dg_hydro_timestep_fort, timestep = " << timestep << " rkstep = "
-	//  << rkstep << " domain = "<< id << std::endl << std::flush;
+	if (id == 0) 
+	    fortran_calls << "calling dg_hydro_timestep_fort, timestep = " << timestep << " rkstep = "
+			  << rkstep << " domain = "<< id << std::endl << std::flush;
 	// ASSERT that rkstep != 0
 	assert(rkstep != 0);
 #ifdef VERBOSE
@@ -242,8 +262,9 @@ public:
 	    if (rkstep == 1) rkindex = 2;
 	    if (rkstep == 2) rkindex = 3;
 	
-	    //	    fortran_calls << "calling hpx_get_elems_fort, timestep = " << timestep << " rkstep = "
-	    //		  << rkstep << " domain = "<< id << " neighbor = " << neighbor_here << " rkindex = " << rkindex << " ";    
+	    if (id == 0)
+		fortran_calls << "calling hpx_get_elems_fort, timestep = " << timestep << " rkstep = "
+			      << rkstep << " domain = "<< id << " neighbor = " << neighbor_here << " rkindex = " << rkindex << "\n";    
 
 
 	    //hpx::cout << "cpp: rkindex = " << rkindex << std::endl << std::flush; // DEBUG
@@ -297,13 +318,6 @@ public:
 	    //hpx::cout << "advancing domain " << id << " at timestep " << timestep <<std::endl << std::flush;
 	    //	      hpx::cout << "CPP: about to call dg_timestep_advance_fort" << std::endl << std::flush;
 	    
-	    //fortran_calls << "calling dg_timestep_advance_fort, timestep = " << timestep << " domain = "<< id << std::endl << std::flush;			
-	    FNAME(dg_timestep_advance_fort)(&domainWrapper->size,
-					    &domainWrapper->dg,
-					    &domainWrapper->global,
-					    &domainWrapper->nodalattr,
-					    &timestep
-					    );
 	    
 	} // end if rkstep == 2	
 	
@@ -335,6 +349,8 @@ private:
     int timestep;
     int rkstep;
 }; // End class DomainReference
+
+// *********************** stepper ************************
 
 struct stepper
 {
@@ -480,6 +496,7 @@ int hpx_main(variables_map & vm)
    
     stepper step;
 
+    fortran_calls.open("fortran_calls.txt");
 
     // Uncomment to futurize
     hpx::future<stepper::space> result = step.do_work(total_substeps, n_domains);
@@ -493,7 +510,7 @@ int hpx_main(variables_map & vm)
     boost::uint64_t const num_os_threads = hpx::get_os_thread_count();
 
     // Close debug output file
-    //   fortran_calls.close();
+    fortran_calls.close();
 
     std::string const threads_str = boost::str(boost::format("%lu,") % num_os_threads);
     hpx::cout << ( boost::format("%-21s %.14g\n")
