@@ -83,8 +83,8 @@ add_executable(
 
 if(NOT NO_LGD)
   add_executable(
-    dgswem_hpx
-    dgswem_hpx.cpp
+    dgswem_lgd_dataflow
+    dgswem_lgd_dataflow.cpp
     fname.h
     fortran_declarations.hpp
     ${DGSWEM_FORTRAN}
@@ -94,10 +94,10 @@ endif(NOT NO_LGD)
 target_link_libraries(dgswem_cpp_serial gfortran)
 
 if (NOT NO_LGD)
-  target_link_libraries(dgswem_hpx gfortran)
-  target_link_libraries(dgswem_hpx geodecomp hpx hpx_init)
+  target_link_libraries(dgswem_lgd_dataflow gfortran)
+  target_link_libraries(dgswem_lgd_dataflow geodecomp hpx hpx_init)
   hpx_setup_target(
-    dgswem_hpx
+    dgswem_lgd_dataflow
     COMPONENT_DEPENDENCIES iostreams
     )    
 
