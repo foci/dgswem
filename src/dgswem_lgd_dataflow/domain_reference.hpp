@@ -110,6 +110,7 @@ public:
 		    buffer[i] = buffer_vector[i];
 		}
 
+		rkindex = 0;
 		FNAME(hpx_put_elems_fort)(&domainWrapper->dg,
 					  &neighbor,
 					  &volume,

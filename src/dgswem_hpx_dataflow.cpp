@@ -192,11 +192,14 @@ public:
 				
 				  fortran_calls << "buffer_vector.size() = " << buffer_vector.size() << std::endl << std::flush;
 				*/
-   				FNAME(hpx_put_elems_fort)(&domainWrapper->dg,
+
+				rkindex = 0;
+				FNAME(hpx_put_elems_fort)(&domainWrapper->dg,
 							  &neighbor_here,
 							  &volume,
 							  buffer,
 							  &rkindex);
+				
 			    } else {
 				hpx::cout << "Buffer map is empty!" << std::endl << std::flush;
 			    }
