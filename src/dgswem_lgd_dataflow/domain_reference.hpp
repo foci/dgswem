@@ -26,8 +26,11 @@ std::vector<int> neighboringDomainIDs(void *size, void *dg, void *global)
 class DomainReference
 {
 public:
+    const static int NANO_STEPS = 1;
+
     class API :
         public LibGeoDecomp::APITraits::HasUnstructuredTopology,
+        public LibGeoDecomp::APITraits::HasNanoSteps<NANO_STEPS>,
 	public LibGeoDecomp::APITraits::HasCustomMessageType<std::vector<double> >
     {};
 
@@ -73,10 +76,12 @@ public:
     {}
 	
     template<typename HOOD>
-    void update(const HOOD& hood, int nanoStep)
+    void update(const HOOD& hood, int nanoStep, int step)
     {		
+        int globalNanoStep = step * NANO_STEPS + nanoStep;
+
 	// Retrieve variables 
-	if (timestep > 1) {
+	if (globalNanoStep > 1) {
 	    // FNAME(cpp_vars_from_fort)(&domainWrapper->size,&rkstep,&timestep);
 	    
 	    // Place incoming buffers into our cell 
@@ -164,7 +169,7 @@ public:
 		send_buffer.push_back(buffer[i]);
 	    }
 	    
-	    hood.send(neighbor, send_buffer, nanoStep);
+	    hood.send(neighbor, send_buffer);
 	}
 	    
 	if (rkstep == 2) {
