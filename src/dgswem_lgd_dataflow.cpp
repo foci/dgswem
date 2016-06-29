@@ -50,7 +50,7 @@ int hpx_main(variables_map & vm)
     
     FortranInitializer *init = new FortranInitializer(n_domains, total_rksteps);
     
-    SimulatorType sim(init);
+    SimulatorType sim(init, "dgswem_lgd_hpx");
     sim.run();
     
 
