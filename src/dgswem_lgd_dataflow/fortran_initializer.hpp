@@ -25,6 +25,8 @@ public:
     {
 	boost::shared_ptr<LibGeoDecomp::Adjacency> adjacency(new LibGeoDecomp::RegionBasedAdjacency());
 
+	hpx::cout << "calling Adjacency" << std::endl;
+
         for(int id = 0; id < numDomains ; id++) {
 	    /*
 	    void *size = NULL;

@@ -80,6 +80,11 @@ public:
     {		
         int globalNanoStep = step * NANO_STEPS + nanoStep;
 
+	
+	if (id == 0)
+	    hpx::cout << "globalNanoStep = " << globalNanoStep << " timestep = " << timestep << std::endl;
+	
+
 	// Retrieve variables 
 	if (timestep > 1) {
 	    // FNAME(cpp_vars_from_fort)(&domainWrapper->size,&rkstep,&timestep);
@@ -116,6 +121,10 @@ public:
 		}
 
 		rkindex = 0;
+		/*
+		  if (id==0)
+		    hpx::cout << "hpx_put_elems" << std::endl;
+		*/
 		FNAME(hpx_put_elems_fort)(&domainWrapper->dg,
 					  &neighbor,
 					  &volume,
@@ -130,7 +139,10 @@ public:
 		int timestep_minus = timestep-1; // Because we are
 		// actually calling advance for the *previous*
 		// timestep.
-	
+		/*
+		if (id==0)
+		    hpx::cout << "dg_timestep_advance" << std::endl;
+		*/
 		FNAME(dg_timestep_advance_fort)(&domainWrapper->size,
 						&domainWrapper->dg,
 						&domainWrapper->global,
@@ -141,7 +153,10 @@ public:
 	}
 	    
 	// Call dg_hydro_timestep_fort
-
+	/*
+		if (id==0)
+		    hpx::cout << "dg_hydro_timestep, rkstep = " << rkstep << std::endl;
+	*/
 	FNAME(dg_hydro_timestep_fort)(&domainWrapper->size,
 				      &domainWrapper->dg,
 				      &domainWrapper->global,
@@ -158,7 +173,11 @@ public:
 	    int rkindex;
 	    if (rkstep == 1) rkindex = 2;
 	    if (rkstep == 2) rkindex = 3;
-	    
+	   
+	    /*
+		if (id==0)
+		    hpx::cout << "hpx_get_elems" << std::endl;
+	    */
 	    FNAME(hpx_get_elems_fort)(&domainWrapper->dg, //pointer to current domain
 				      &neighbor, // pointer to neighbor to send to
 				      &volume,
