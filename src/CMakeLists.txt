@@ -105,7 +105,6 @@ if (NOT NO_LGD)
 endif(NOT NO_LGD)
 
 if(HPX_NOLGD)
-endif(HPX_NOLGD)
 
 add_executable(
     dgswem_hpx_dataflow
@@ -120,3 +119,5 @@ hpx_setup_target(
     dgswem_hpx_dataflow
     COMPONENT_DEPENDENCIES iostreams
     )
+
+endif(HPX_NOLGD)
