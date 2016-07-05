@@ -2,13 +2,13 @@ if (Fortran_COMPILER_NAME MATCHES "gfortran.*")
   # gfortran
   # set (CMAKE_Fortran_FLAGS_RELEASE "-O3 -DHPX")
 #  set (CMAKE_Fortran_FLAGS_RELEASE   "-cpp -O3 -DHPX -DREAL8 -DCSCA -DLINUX -DRKSSP -DSLOPE5 -ffixed-line-length-none -ffree-line-length-none -Waliasing -Wno-tabs -Wline-truncation -fimplicit-none -frecursive -I CMakeFiles/${PROJECT_NAME}.dir/src/ -I .")
-  set (CMAKE_Fortran_FLAGS_RELEASE   "-cpp -O3 -DHPX -DREAL8 -DCSCA -DLINUX -DRKSSP -DSLOPE5 -ffixed-line-length-none -ffree-line-length-none -Waliasing -Wno-tabs -Wline-truncation -fimplicit-none -frecursive -I CMakeFiles/${PROJECT_NAME}.dir/src/ -I .")
+  set (CMAKE_Fortran_FLAGS_RELEASE   "-cpp -O2 -msse3 -DHPX -DREAL8 -DCSCA -DLINUX -DRKSSP -DSLOPE5 -ffixed-line-length-none -ffree-line-length-none -Waliasing -Wno-tabs -Wline-truncation -fimplicit-none -frecursive -I CMakeFiles/${PROJECT_NAME}.dir/src/ -I .")
   set (CMAKE_Fortran_FLAGS_DEBUG   "-cpp -DVERBOSE -DHPX -DREAL8 -DCSCA -DLINUX -DRKSSP -DSLOPE5 -ffixed-line-length-none -ffree-line-length-none -Waliasing -Wno-tabs -Wline-truncation -Wsurprising -fcheck=all -g -fbacktrace -fimplicit-none -frecursive -I CMakeFiles/${PROJECT_NAME}.dir/src/ -I .")
 #set (CMAKE_Fortran_FLAGS_DEBUG   "-O2 -cpp -DREAL8 -DCSCA -DLINUX -DRKSSP -DSLOPE5 -ffixed-line-length-none -ffree-line-length-none -Waliasing -Wno-tabs -Wline-truncation -Wsurprising -fcheck=all -g -fbacktrace -fimplicit-none")
   elseif (Fortran_COMPILER_NAME MATCHES "ifort.*")
   # ifort (untested)
 #    set (CMAKE_Fortran_FLAGS_RELEASE "-DHPX -DREAL8 -DCSCA -DLINUX -DRKSSP -DSLOPE5 -f77rtl -O3")
-    set (CMAKE_Fortran_FLAGS_RELEASE "-DHPX -DREAL8 -DCSCA -DLINUX -DRKSSP -DSLOPE5 -recursive -f77rtl -O3 -g -p")
+    set (CMAKE_Fortran_FLAGS_RELEASE "-DHPX -DREAL8 -DCSCA -DLINUX -DRKSSP -DSLOPE5 -recursive -f77rtl -O2 -msse3 -132")
     set (CMAKE_Fortran_FLAGS_DEBUG   "-DHPX -DREAL8 -DCSCA -DLINUX -DRKSSP -DSLOPE5 -recursive -f77rtl -O0 -g")
   #  message("Ifort not enabled now")
 endif (Fortran_COMPILER_NAME MATCHES "gfortran.*")
@@ -105,7 +105,6 @@ if (NOT NO_LGD)
 endif(NOT NO_LGD)
 
 if(HPX_NOLGD)
-endif(HPX_NOLGD)
 
 add_executable(
     dgswem_hpx_dataflow
@@ -120,3 +119,4 @@ hpx_setup_target(
     dgswem_hpx_dataflow
     COMPONENT_DEPENDENCIES iostreams
     )
+endif(HPX_NOLGD)
