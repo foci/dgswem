@@ -81,7 +81,7 @@ public:
         int globalNanoStep = step * NANO_STEPS + nanoStep;
 
 	// Retrieve variables 
-	if (globalNanoStep > 1) {
+	if (timestep > 1) {
 	    // FNAME(cpp_vars_from_fort)(&domainWrapper->size,&rkstep,&timestep);
 	    
 	    // Place incoming buffers into our cell 

@@ -55,7 +55,7 @@ public:
 	    std::ostringstream filenamess;
 	    filenamess << std::setw(4) << std::setfill('0') << id;
 	    std::string filename = "PE"+filenamess.str()+"/DG.18";
-	    std::cout << "filename = " << filename << std::endl;
+	    //std::cout << "filename = " << filename << std::endl;
 	    dg18file.open(filename);
 	    std::string line;
 	    int line_num = 1;
