@@ -76,7 +76,7 @@ public:
     {}
 	
     template<typename HOOD>
-    void update(const HOOD& hood, int nanoStep, int step)
+    void update(HOOD& hood, int nanoStep, int step)
     {		
         int globalNanoStep = step * NANO_STEPS + nanoStep;
 
