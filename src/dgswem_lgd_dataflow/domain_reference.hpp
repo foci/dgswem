@@ -81,8 +81,9 @@ public:
         int globalNanoStep = step * NANO_STEPS + nanoStep;
 
 	
-	if (id == 0)
-	    hpx::cout << "globalNanoStep = " << globalNanoStep << " timestep = " << timestep << std::endl;
+	//	if (id == 0)
+	//hpx::cout << "globalNanoStep = " << globalNanoStep << " timestep = " << timestep << std::endl;
+	hpx::cout << "globalNanoStep = " << globalNanoStep << " timestep = " << timestep << " id = " << id << std::endl;
 	
 
 	// Retrieve variables 

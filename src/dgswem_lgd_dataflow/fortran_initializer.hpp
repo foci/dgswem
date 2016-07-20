@@ -28,7 +28,9 @@ public:
 	hpx::cout << "calling Adjacency" << std::endl;
 
         for(int id = 0; id < numDomains ; id++) {
+
 	    /*
+
 	    void *size = NULL;
 	    void *dg = NULL;
 	    void *global = NULL;
@@ -89,18 +91,50 @@ public:
 	    std::cout << "num_send_neighbors = " << num_send_neighbors << std::endl;
 	    */
 
-	    int num_neighbors = std::max(num_recv_neighbors,num_send_neighbors);
+	    if (num_recv_neighbors != recv_neighbors.size()) 
+		hpx::cout << "ERROR! num_recv_neighbors not equal to recv_neighbors.size()" << std::endl;
+
+	    if (num_send_neighbors != send_neighbors.size()) 
+		hpx::cout << "ERROR! num_send_neighbors not equal to send_neighbors.size()" << std::endl;
+
+	    std::sort(recv_neighbors.begin(),recv_neighbors.end());
+	    std::sort(send_neighbors.begin(),send_neighbors.end());
+
+	    /*
+	    if (neighbors_here.size() != send_neighbors.size()) {		
+		hpx::cout << "******* Fortran getAdjacency disagrees with lightweight getAdjacency *****" << std::endl;
+		hpx::cout << "neighbors_here.size() = " << neighbors_here.size() << ", neighbors are: ";
+		for (auto&& neighbor: neighbors_here) 
+		    hpx::cout << neighbor << " ";
+		hpx::cout << std::endl;
+
+	    }
+	    */
+
+	    if (recv_neighbors.size() != send_neighbors.size() || (std::equal(recv_neighbors.begin(),recv_neighbors.end(),send_neighbors.begin()) == false) ) {
+		hpx::cout << "*************** ASYMMETRIC MATRIX (recv size != send size) ID = " << id << "*************" << std::endl;
+		hpx::cout << "send_neighbors.size() = " << send_neighbors.size() << ", neighbors are: ";
+		for (auto&& neighbor: send_neighbors) 
+		    hpx::cout << neighbor << " ";
+		hpx::cout << std::endl;
+		
+		hpx::cout << "recv_neighbors.size() = " << recv_neighbors.size() << ", neighbors are: ";
+		for (auto&& neighbor: recv_neighbors) 
+		    hpx::cout << neighbor << " ";
+		hpx::cout << std::endl;
+	    }
 
 	    for (auto&& send_neighbor: send_neighbors) {
 		if(std::find(recv_neighbors.begin(), 
 			     recv_neighbors.end(), 
 			     send_neighbor) != recv_neighbors.end()) {
-		    /* already there */
+		    // already there 
 		} else {
 		    recv_neighbors.push_back(send_neighbor);
 		}
 	    }
-
+	    
+    
 	    /*
 
 	    // Debugging output
