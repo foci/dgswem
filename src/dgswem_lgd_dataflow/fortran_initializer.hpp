@@ -124,6 +124,7 @@ public:
 		hpx::cout << std::endl;
 	    }
 
+	    
 	    for (auto&& send_neighbor: send_neighbors) {
 		if(std::find(recv_neighbors.begin(), 
 			     recv_neighbors.end(), 
@@ -133,10 +134,7 @@ public:
 		    recv_neighbors.push_back(send_neighbor);
 		}
 	    }
-	    
-    
-	    /*
-
+		    /*
 	    // Debugging output
 	    std::cout << "From FORTRAN:\n";
 	    std::cout << "number of neighbors = " << neighbors_here.size() << std::endl;
