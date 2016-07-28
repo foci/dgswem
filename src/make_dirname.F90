@@ -19,14 +19,10 @@ SUBROUTINE MAKE_DIRNAME(s)
   s%WRITE_LOCAL_FILES = .FALSE.
   s%WRITE_LOCAL_HOT_START_FILES = .TRUE.
   
-#ifdef CMPI
-  WRITE(s%DIRNAME(3:6),'(I4.4)') s%MYPROC
-#else
 #ifdef HPX
   WRITE(s%DIRNAME(3:6),'(I4.4)') s%MYPROC
 #else
   s%MYPROC=0
-#endif
 #endif
 
 

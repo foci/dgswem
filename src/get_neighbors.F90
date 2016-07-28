@@ -1,6 +1,6 @@
 #ifdef HPX
 subroutine get_neighbors(s,dg_here,global_here,neighbors,num_neighbors)
-use sizes
+Use sizes
 use global
 use dg
 implicit none

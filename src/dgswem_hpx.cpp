@@ -285,8 +285,8 @@ public:
 	    std::vector<int> neighbors_here = neighboringDomainIDs(size, dg, global);
 	    // Destroy the domain
 	    FNAME(term_fort)(&size,&global,&dg,&nodalattr);
-	    adjacency[id] = neighbors_here;
-	    }
+	    adjacency.insert(id, neighbors_here);
+	}
 	return adjacency;
     }
 
@@ -332,7 +332,7 @@ public:
 	    grid->set(LibGeoDecomp::Coord<1>(id), cell);
         }
 	Grid *unstructuredgrid = dynamic_cast<Grid *>(grid);
-	unstructuredgrid->setAdjacency(0, adjacency);
+	unstructuredgrid->setWeights(0, adjacency);
     }
 
     // Serialization function
