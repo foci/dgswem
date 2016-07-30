@@ -13,6 +13,7 @@
 class FortranInitializer : public LibGeoDecomp::SimpleInitializer<DomainReference>
 {
 public:
+    typedef LibGeoDecomp::SimpleInitializer<DomainReference>::AdjacencyPtr AdjacencyPtr;
 
   FortranInitializer(std::size_t numDomains, std::size_t numSteps) :
         SimpleInitializer<DomainReference>(LibGeoDecomp::Coord<1>(numDomains), numSteps),
@@ -21,9 +22,9 @@ public:
 	// Empty
     }
 
-    boost::shared_ptr<LibGeoDecomp::Adjacency>  getAdjacency(const LibGeoDecomp::Region<1>& /* unused */ ) const
+    AdjacencyPtr getAdjacency(const LibGeoDecomp::Region<1>& /* unused */ ) const
     {
-	boost::shared_ptr<LibGeoDecomp::Adjacency> adjacency(new LibGeoDecomp::RegionBasedAdjacency());
+	AdjacencyPtr adjacency(new LibGeoDecomp::RegionBasedAdjacency());
 
 	hpx::cout << "calling Adjacency" << std::endl;
 
