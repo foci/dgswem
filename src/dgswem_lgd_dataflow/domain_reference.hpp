@@ -69,10 +69,10 @@ public:
 		    void *nodalattr = 0, 
 		    const std::vector<int>& neighbors_here = std::vector<int>()) :
         domainWrapper(new FortranPointerWrapper(size, global, dg, nodalattr)),
-        neighbors(neighbors_here),
         id(id),
         timestep(1),
-	rkstep(1)
+	rkstep(1),
+        neighbors(neighbors_here)
     {}
 	
     template<typename HOOD>
