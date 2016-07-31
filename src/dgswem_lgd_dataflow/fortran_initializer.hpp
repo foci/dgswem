@@ -13,6 +13,7 @@
 class FortranInitializer : public LibGeoDecomp::SimpleInitializer<DomainReference>
 {
 public:
+    typedef LibGeoDecomp::SimpleInitializer<DomainReference>::AdjacencyPtr AdjacencyPtr;
 
   FortranInitializer(std::size_t numDomains, std::size_t numSteps) :
         SimpleInitializer<DomainReference>(LibGeoDecomp::Coord<1>(numDomains), numSteps),
@@ -21,13 +22,13 @@ public:
 	// Empty
     }
 
-    boost::shared_ptr<LibGeoDecomp::Adjacency>  getAdjacency(const LibGeoDecomp::Region<1>& /* unused */ ) const
+    AdjacencyPtr getAdjacency(const LibGeoDecomp::Region<1>& /* unused */ ) const
     {
-	boost::shared_ptr<LibGeoDecomp::Adjacency> adjacency(new LibGeoDecomp::RegionBasedAdjacency());
+	AdjacencyPtr adjacency(new LibGeoDecomp::RegionBasedAdjacency());
 
 	hpx::cout << "calling Adjacency" << std::endl;
 
-        for(int id = 0; id < numDomains ; id++) {
+        for(std::size_t id = 0; id < numDomains ; id++) {
 
 	    /*
 
@@ -91,10 +92,10 @@ public:
 	    std::cout << "num_send_neighbors = " << num_send_neighbors << std::endl;
 	    */
 
-	    if (num_recv_neighbors != recv_neighbors.size()) 
+	    if (std::size_t(num_recv_neighbors) != recv_neighbors.size()) 
 		hpx::cout << "ERROR! num_recv_neighbors not equal to recv_neighbors.size()" << std::endl;
 
-	    if (num_send_neighbors != send_neighbors.size()) 
+	    if (std::size_t(num_send_neighbors) != send_neighbors.size()) 
 		hpx::cout << "ERROR! num_send_neighbors not equal to send_neighbors.size()" << std::endl;
 
 	    std::sort(recv_neighbors.begin(),recv_neighbors.end());

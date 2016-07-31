@@ -63,6 +63,9 @@ message("CMAKE_BUILD_TYPE:" ${CMAKE_BUILD_TYPE})
 message("CMAKE_CXX_FLAGS:" ${CMAKE_CXX_FLAGS})
 message("CMAKE_INCLUDE_DIRECTORIES:" ${CMAKE_INCLUDE_DIRECTORIES})
 
+if(NOT (CMAKE_BUILD_TYPE STREQUAL HPX_BUILD_TYPE))
+  message(FATAL_ERROR "CMAKE_BUILD_TYPE doesn't match HPX_BUILD_TYPE (${HPX_BUILD_TYPE})")
+endif()
 
 add_subdirectory(src)
 add_subdirectory(prep)

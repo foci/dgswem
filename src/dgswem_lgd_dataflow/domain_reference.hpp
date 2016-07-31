@@ -69,16 +69,16 @@ public:
 		    void *nodalattr = 0, 
 		    const std::vector<int>& neighbors_here = std::vector<int>()) :
         domainWrapper(new FortranPointerWrapper(size, global, dg, nodalattr)),
-        neighbors(neighbors_here),
         id(id),
         timestep(1),
-	rkstep(1)
+	rkstep(1),
+        neighbors(neighbors_here)
     {}
 	
-    template<typename HOOD>
-    void update(HOOD& hood, int nanoStep, int step)
+    template<typename HOOD, typename EVENT>
+    void update(HOOD& hood, const EVENT& event)
     {		
-        int globalNanoStep = step * NANO_STEPS + nanoStep;
+        int globalNanoStep = event.step() * NANO_STEPS + event.nanoStep();
 
 	
 	//	if (id == 0)
