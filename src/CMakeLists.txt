@@ -8,12 +8,14 @@ if (Fortran_COMPILER_NAME MATCHES "gfortran.*")
   elseif (Fortran_COMPILER_NAME MATCHES "ifort.*")
   # ifort (untested)
 #    set (CMAKE_Fortran_FLAGS_RELEASE "-DHPX -DREAL8 -DCSCA -DLINUX -DRKSSP -DSLOPE5 -f77rtl -O3")
-    set (CMAKE_Fortran_FLAGS_RELEASE "-DHPX -DREAL8 -DCSCA -DLINUX -DRKSSP -DSLOPE5 -recursive -f77rtl -O2 -msse3 -132")
-    set (CMAKE_Fortran_FLAGS_DEBUG   "-DHPX -DREAL8 -DCSCA -DLINUX -DRKSSP -DSLOPE5 -recursive -f77rtl -O0 -g")
+    set (CMAKE_Fortran_FLAGS_RELEASE "-DHPX -DREAL8 -DCSCA -DLINUX -DRKSSP -DSLOPE5 -recursive -threads -f77rtl -O2 -msse3 -132")
+    set (CMAKE_Fortran_FLAGS_DEBUG   "-DHPX -DREAL8 -DCSCA -DLINUX -DRKSSP -DSLOPE5 -recursive -threads -f77rtl -O0 -g")
   #  message("Ifort not enabled now")
 endif (Fortran_COMPILER_NAME MATCHES "gfortran.*")
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fno-inline ${ADDITIONAL_COMPILE_FLAGS}")
+
+set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -lifcoremt")
 
 list(APPEND DGSWEM_FORTRAN 
   calc_normal.F90
