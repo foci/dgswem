@@ -63,4 +63,6 @@ subroutine init_fileunits(s)
   s%dg64unit = s%myproc*1000+641
   s%dg65unit = s%myproc*1000+651
 
+  s%maxele63unit = s%myproc*1000+963
+
 end subroutine init_fileunits

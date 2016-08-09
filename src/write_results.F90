@@ -329,22 +329,22 @@
                END DO
                IF(ABS(global_here%NOUTE).EQ.1) THEN
                   WRITE(s%fort61unit,2120) global_here%time_A,IT
-                  WRITE(82,2120) global_here%time_A,IT
+                  WRITE(S%FORT82UNIT,2120) global_here%time_A,IT
                   DO I=1,global_here%NSTAE
                      WRITE(s%fort61unit,2453) I,global_here%ET00(I)
-                     WRITE(82,2453) I,global_here%BT00(I)
+                     WRITE(S%FORT82UNIT,2453) I,global_here%BT00(I)
                   END DO
                   global_here%IESTP = global_here%IESTP+1+global_here%NSTAE
                ENDIF
                IF(ABS(global_here%NOUTE).EQ.2) THEN
                   WRITE(s%fort61unit,REC=global_here%IESTP+1) global_here%time_A
                   WRITE(s%fort61unit,REC=global_here%IESTP+2) IT
-                  WRITE(82,REC=global_here%IESTP+1) global_here%time_A
-                  WRITE(82,REC=global_here%IESTP+2) IT
+                  WRITE(S%FORT82UNIT,REC=global_here%IESTP+1) global_here%time_A
+                  WRITE(S%FORT82UNIT,REC=global_here%IESTP+2) IT
                   global_here%IESTP = global_here%IESTP + 2
                   DO I=1,global_here%NSTAE
                      WRITE(s%fort61unit,REC=global_here%IESTP+I) global_here%ET00(I)
-                     WRITE(82,REC=global_here%IESTP+I) global_here%BT00(I)
+                     WRITE(S%FORT82UNIT,REC=global_here%IESTP+I) global_here%BT00(I)
                   END DO
                   global_here%IESTP = global_here%IESTP + global_here%NSTAE
                ENDIF
@@ -352,7 +352,7 @@
             ENDIF
          ENDIF
          IF(IT.EQ.global_here%NTCYFE) CLOSE(s%fort61unit)
-         IF(IT.EQ.global_here%NTCYFE) CLOSE(82)
+         IF(IT.EQ.global_here%NTCYFE) CLOSE(s%fort82unit)
       ENDIF
 
 !...  
@@ -428,25 +428,25 @@
                   IF(global_here%NCELE.EQ.0) global_here%CC00(I)=-99999.
                END DO
                IF(ABS(global_here%NOUTC).EQ.1) THEN
-                  WRITE(81,2120) global_here%time_A,IT
+                  WRITE(S%FORT81UNIT,2120) global_here%time_A,IT
                   DO I=1,global_here%NSTAC
-                     WRITE(81,2453) I,global_here%CC00(I)
+                     WRITE(S%FORT81UNIT,2453) I,global_here%CC00(I)
                   END DO
                   global_here%ICSTP = global_here%ICSTP+1+global_here%NSTAC
                ENDIF
                IF(ABS(global_here%NOUTC).EQ.2) THEN
-                  WRITE(81,REC=global_here%ICSTP+1) global_here%time_A
-                  WRITE(81,REC=global_here%ICSTP+2) IT
+                  WRITE(S%FORT81UNIT,REC=global_here%ICSTP+1) global_here%time_A
+                  WRITE(S%FORT81UNIT,REC=global_here%ICSTP+2) IT
                   global_here%ICSTP = global_here%ICSTP + 2
                   DO I=1,global_here%NSTAC
-                     WRITE(81,REC=global_here%ICSTP+I) global_here%CC00(I)
+                     WRITE(S%FORT81UNIT,REC=global_here%ICSTP+I) global_here%CC00(I)
                   END DO
                   global_here%ICSTP = global_here%ICSTP + global_here%NSTAC
                ENDIF
                global_here%NSCOUC=0
             ENDIF
          ENDIF
-         IF(IT.EQ.global_here%NTCYFC) CLOSE(81)
+         IF(IT.EQ.global_here%NTCYFC) CLOSE(s%fort81unit)
       ENDIF
 
 !...  
@@ -477,26 +477,26 @@
                   global_here%RMP00(I)=global_here%P11*global_here%STAIM1(I)+global_here%P22*global_here%STAIM2(I)+global_here%P33*global_here%STAIM3(I)
                END DO
                IF(ABS(global_here%NOUTM).EQ.1) THEN
-                  WRITE(71,2120) global_here%time_A,IT
-                  WRITE(72,2120) global_here%time_A,IT
+                  WRITE(S%FORT71UNIT,2120) global_here%time_A,IT
+                  WRITE(S%FORT72UNIT,2120) global_here%time_A,IT
                   DO I=1,global_here%NSTAM
-                     WRITE(71,2453) I,global_here%RMP00(I)
-                     WRITE(72,2454) I,global_here%RMU00(I),global_here%RMV00(I)
+                     WRITE(S%FORT71UNIT,2453) I,global_here%RMP00(I)
+                     WRITE(S%FORT72UNIT,2454) I,global_here%RMU00(I),global_here%RMV00(I)
                   END DO
                   global_here%IPSTP=global_here%IPSTP+1+global_here%NSTAM
                   global_here%IWSTP=global_here%IWSTP+1+global_here%NSTAM
                ENDIF
                IF(ABS(global_here%NOUTM).EQ.2) THEN
-                  WRITE(71,REC=global_here%IPSTP+1) global_here%time_A
-                  WRITE(71,REC=global_here%IPSTP+2) IT
-                  WRITE(72,REC=global_here%IWSTP+1) global_here%time_A
-                  WRITE(72,REC=global_here%IWSTP+2) IT
+                  WRITE(S%FORT71UNIT,REC=global_here%IPSTP+1) global_here%time_A
+                  WRITE(S%FORT71UNIT,REC=global_here%IPSTP+2) IT
+                  WRITE(S%FORT72UNIT,REC=global_here%IWSTP+1) global_here%time_A
+                  WRITE(S%FORT72UNIT,REC=global_here%IWSTP+2) IT
                   global_here%IPSTP=global_here%IPSTP+2
                   global_here%IWSTP=global_here%IWSTP+2
                   DO I=1,global_here%NSTAM
-                     WRITE(71,REC=global_here%IPSTP+I) global_here%RMP00(I)
-                     WRITE(72,REC=global_here%IWSTP+2*I-1) global_here%RMU00(I)
-                     WRITE(72,REC=global_here%IWSTP+2*I) global_here%RMV00(I)
+                     WRITE(S%FORT71UNIT,REC=global_here%IPSTP+I) global_here%RMP00(I)
+                     WRITE(S%FORT72UNIT,REC=global_here%IWSTP+2*I-1) global_here%RMU00(I)
+                     WRITE(S%FORT72UNIT,REC=global_here%IWSTP+2*I) global_here%RMV00(I)
                   END DO
                   global_here%IPSTP=global_here%IPSTP+global_here%NSTAM
                   global_here%IWSTP=global_here%IWSTP+2*global_here%NSTAM
@@ -505,8 +505,8 @@
             ENDIF
          ENDIF
          IF(IT.EQ.global_here%NTCYFM) THEN
-            CLOSE(71)
-            CLOSE(72)
+            CLOSE(s%fort71unit)
+            CLOSE(s%fort72unit)
          ENDIF
       ENDIF
 
@@ -519,9 +519,9 @@
             IF (global_here%NSCOUGE.EQ.global_here%NSPOOLGE.OR.FORCE_WRITE) THEN
                IF (ABS(global_here%NOUTGE).EQ.1) THEN
                   WRITE(s%fort63unit,2120) global_here%TIME_A, IT
-                  WRITE(88,2120) global_here%TIME_A, IT
-                  WRITE(89,2120) global_here%TIME_A, IT
-                  WRITE(4441,2120) global_here%TIME_A, IT
+                  WRITE(S%FORT88UNIT,2120) global_here%TIME_A, IT
+                  WRITE(S%FORT89UNIT,2120) global_here%TIME_A, IT
+!                  WRITE(4441,2120) global_here%TIME_A, IT
                                 !WRITE(895,21 20) global_here%TIME_A, IT
                   WRITE(s%dg63unit,2120) global_here%TIME_A, IT
  2120             FORMAT(2X,E20.10,5X,I10)
@@ -530,13 +530,13 @@
                      WRITE(s%fort63unit,2453) I,global_here%ETA2(I)
                                 !IF (global_here%NODECODE(I).EQ.0) WRITE(63,2453) I,-99999.
                      IF (ABS(global_here%tracer(I)).LE.(10.0**(-30))) global_here%tracer(I) = 0.D0
-                     WRITE(88,2453) I,global_here%tracer(I)
-                                !IF (global_here%NODECODE(I).EQ.0) WRITE(88,2453) I,.
+                     WRITE(S%FORT88UNIT,2453) I,global_here%tracer(I)
+                                !IF (global_here%NODECODE(I).EQ.0) WRITE(S%FORT88UNIT,2453) I,.
                      IF (ABS(global_here%tracer2(I)).LE.(10.0**(-30))) global_here%tracer2(I) = 0.D0
-                     WRITE(89,2453) I,global_here%tracer2(I)
-                                !IF (global_here%NODECODE(I).EQ.0) WRITE(89,2453) I,0.\
+                     WRITE(S%FORT89UNIT,2453) I,global_here%tracer2(I)
+                                !IF (global_here%NODECODE(I).EQ.0) WRITE(S%FORT89UNIT,2453) I,0.\
                      IF (ABS(global_here%dpe(I)).LE.(10.0**(-30))) global_here%dpe(I) = 0.D0
-                     write(4441,2453) I,global_here%dpe(I)
+ !                    write(4441,2453) I,global_here%dpe(I)
  2453                FORMAT(2X,I8,2X,E16.8E3)
                   ENDDO
  
@@ -662,10 +662,10 @@
                                 !IF (global_here%NODECODE(I).EQ.0) WRITE(63,REC=global_here%IGEP+I) -99999.
                      ENDDO
                      IF(global_here%SEDFLAG.GE.2) THEN
-                        WRITE(84,REC=global_here%IGEP+1) global_here%TIME_A
-                        WRITE(84,REC=global_here%IGEP+2) IT
+                        WRITE(S%FORT84UNIT,REC=global_here%IGEP+1) global_here%TIME_A
+                        WRITE(S%FORT84UNIT,REC=global_here%IGEP+2) IT
                         DO I = 1,global_here%NP
-                           WRITE(84,REC=global_here%IGEP+I) global_here%DP(I)
+                           WRITE(S%FORT84UNIT,REC=global_here%IGEP+I) global_here%DP(I)
                         ENDDO
                      ENDIF
                      global_here%IGEP = global_here%IGEP + global_here%NP
@@ -676,7 +676,7 @@
             IF (IT.EQ.global_here%NTCYFGE) CLOSE(s%fort63unit)
             IF (IT.EQ.global_here%NTCYFGE) CLOSE(s%dg63unit)
             IF (IT.EQ.global_here%NTCYFGE.AND.global_here%NOLIFA.GE.2) CLOSE(s%dg65unit)
-            IF (IT.EQ.global_here%NTCYFGE.AND.global_here%SEDFLAG.GE.1) CLOSE(84)
+            IF (IT.EQ.global_here%NTCYFGE.AND.global_here%SEDFLAG.GE.1) CLOSE(s%fort84unit)
 
          endif
       ENDIF
@@ -736,26 +736,26 @@
             global_here%NSCOUGW=global_here%NSCOUGW+1
             IF(global_here%NSCOUGW.EQ.global_here%NSPOOLGW.OR.FORCE_WRITE) THEN
                IF(ABS(global_here%NOUTGW).EQ.1) THEN
-                  write(73,2120) global_here%time_A,it
-                  WRITE(74,2120) global_here%time_A,IT
+                  write(s%fort73unit,2120) global_here%time_A,it
+                  WRITE(S%FORT74UNIT,2120) global_here%time_A,IT
                   DO I=1,global_here%NP
-                     write(73,2453) i,global_here%pr2(i)
-                     WRITE(74,2454) i,global_here%wvnxout(i),global_here%wvnyout(i)
+                     write(s%fort73unit,2453) i,global_here%pr2(i)
+                     WRITE(S%FORT74UNIT,2454) i,global_here%wvnxout(i),global_here%wvnyout(i)
                   ENDDO
                   global_here%igpp = global_here%igpp+1+global_here%np
                   global_here%IGWP = global_here%IGWP+1+global_here%NP
                ENDIF
                IF(ABS(global_here%NOUTGW).EQ.2) THEN
-                  WRITE(73,REC=global_here%igpp+1) global_here%time_A
-                  WRITE(73,REC=global_here%igpp+2) IT
-                  WRITE(74,REC=global_here%IGWP+1) global_here%time_A
-                  WRITE(74,REC=global_here%IGWP+2) IT
+                  WRITE(S%FORT73UNIT,REC=global_here%igpp+1) global_here%time_A
+                  WRITE(S%FORT73UNIT,REC=global_here%igpp+2) IT
+                  WRITE(S%FORT74UNIT,REC=global_here%IGWP+1) global_here%time_A
+                  WRITE(S%FORT74UNIT,REC=global_here%IGWP+2) IT
                   global_here%igpp = global_here%igpp + 2
                   global_here%IGWP = global_here%IGWP + 2
                   DO I=1,global_here%NP
-                     write(73,rec=global_here%igpp+i) global_here%pr2(i)
-                     WRITE(74,REC=global_here%IGWP+2*I-1) global_here%wvnxout(i)
-                     WRITE(74,REC=global_here%IGWP+2*I) global_here%wvnyout(i)
+                     write(s%fort73unit,rec=global_here%igpp+i) global_here%pr2(i)
+                     WRITE(S%FORT74UNIT,REC=global_here%IGWP+2*I-1) global_here%wvnxout(i)
+                     WRITE(S%FORT74UNIT,REC=global_here%IGWP+2*I) global_here%wvnyout(i)
                   END DO
                   global_here%igpp = global_here%igpp + global_here%np
                   global_here%IGWP = global_here%IGWP + 2*global_here%NP
@@ -764,19 +764,19 @@
             ENDIF
          ENDIF
          IF(IT.EQ.global_here%NTCYFGW) then
-            close(73)
-            close(74)
+            close(s%fort73unit)
+            close(s%fort74unit)
          ENDIF
       endif
 
       if (it.eq.global_here%nt) then
-         open(963,FILE=S%DIRNAME//'/'//'maxele.63')
-         write(963,*) global_here%np
+         open(maxele63unit,FILE=S%DIRNAME//'/'//'maxele.63')
+         write(maxele63unit,*) global_here%np
          do i=1,global_here%np
-            write(963,9633) global_here%etamax(i)
+            write(maxele63unit,9633) global_here%etamax(i)
          enddo
  9633    format(f20.8)
-         close(963)
+         close(maxele63unit)
 #ifdef OUT_TEC
          if (ModetoNode.eq.1) then
             write(778,*) 'TITLE = "dgswem output"'
@@ -808,31 +808,31 @@
             global_here%NSCOUGC=global_here%NSCOUGC+1
             IF(global_here%NSCOUGC.EQ.global_here%NSPOOLGC.OR.FORCE_WRITE) THEN
                IF(ABS(global_here%NOUTGC).EQ.1) THEN
-                  WRITE(83,2120) global_here%time_A,IT
+                  WRITE(s%fort83unit,2120) global_here%time_A,IT
                   DO I=1,global_here%NP
                      global_here%HH2=global_here%DP(I)+global_here%IFNLFA*global_here%ETA2(I)
                      global_here%C1=global_here%CH1(I)/global_here%HH2
-                     IF(global_here%NODECODE(I).EQ.1) WRITE(83,2453) I,global_here%C1
-                     IF(global_here%NODECODE(I).EQ.0) WRITE(83,2453) I,-99999.
+                     IF(global_here%NODECODE(I).EQ.1) WRITE(s%fort83unit,2453) I,global_here%C1
+                     IF(global_here%NODECODE(I).EQ.0) WRITE(s%fort83unit,2453) I,-99999.
                   ENDDO
                   global_here%IGCP=global_here%IGCP+1+global_here%NP
                ENDIF
                IF(ABS(global_here%NOUTGC).EQ.2) THEN
-                  WRITE(83,REC=global_here%IGEP+1) global_here%time_A
-                  WRITE(83,REC=global_here%IGEP+2) IT
+                  WRITE(s%fort83unit,REC=global_here%IGEP+1) global_here%time_A
+                  WRITE(s%fort83unit,REC=global_here%IGEP+2) IT
                   global_here%IGCP = global_here%IGCP + 2
                   DO I=1,global_here%NP
                      global_here%HH2=global_here%DP(I)+global_here%IFNLFA*global_here%ETA2(I)
                      global_here%C1=global_here%CH1(I)/global_here%HH2
-                     IF(global_here%NODECODE(I).EQ.1) WRITE(83,REC=global_here%IGCP+I) global_here%C1
-                     IF(global_here%NODECODE(I).EQ.0) WRITE(83,REC=global_here%IGCP+I) -99999.
+                     IF(global_here%NODECODE(I).EQ.1) WRITE(s%fort83unit,REC=global_here%IGCP+I) global_here%C1
+                     IF(global_here%NODECODE(I).EQ.0) WRITE(s%fort83unit,REC=global_here%IGCP+I) -99999.
                   ENDDO
                   global_here%IGCP=global_here%IGCP+global_here%NP
                ENDIF
                global_here%NSCOUGC=0
             ENDIF
          ENDIF
-         IF(IT.EQ.global_here%NTCYFGC) CLOSE(83)
+         IF(IT.EQ.global_here%NTCYFGC) CLOSE(s%fort83unit)
       ENDIF
 
 !...  
@@ -1042,7 +1042,7 @@
             IF(global_here%NSCREEN.EQ.1.AND.s%MYPROC.EQ.0) THEN
                WRITE(6,24541) global_here%IHSFIL,IT,global_here%TIME_A
             ENDIF
-            WRITE(16,24541) global_here%IHSFIL,IT,global_here%TIME_A
+            WRITE(s%fort16unit,24541) global_here%IHSFIL,IT,global_here%TIME_A
 24541       FORMAT(1X,'HOT START OUTPUT WRITTEN TO UNIT ',I2,&
            ' AT TIME STEP = ',I9,' TIME = ',E15.8)
             IF(global_here%IHSFIL.EQ.67) THEN
@@ -1096,7 +1096,7 @@
             endif
          enddo
          
-         global_here%VELMAX=global_here%VELMAX**0.5d0
+!         global_here%VELMAX=global_here%VELMAX**0.5d0
          
 #ifdef CMPI
 !     sb
@@ -1174,7 +1174,7 @@
             endif
             WRITE(6,1993) IT,global_here%NUMITR,global_here%ETA2(global_here%KEMAX),global_here%KEMAX,global_here%VELMAX,global_here%KVMAX,&
            s%MYPROC
-            WRITE(16,1993) IT,global_here%NUMITR,global_here%ETA2(global_here%KEMAX),global_here%KEMAX,global_here%VELMAX,global_here%KVMAX,&
+            WRITE(s%fort16unit,1993) IT,global_here%NUMITR,global_here%ETA2(global_here%KEMAX),global_here%KEMAX,global_here%VELMAX,global_here%KVMAX,&
            s%MYPROC
  1993       FORMAT(1X,'TIME STEP =',I8,6X,'ITERATIONS =',I5,&
       /,2X,'global_here%ELMAX = ', E11.4,' AT NODE',I7,&
@@ -1252,7 +1252,7 @@
 !     IF(global_here%ELMAX.GT.200.0.AND.global_here%KEMAX.GT.0) THEN
          IF(global_here%ELMAX.GT.200.0) THEN
           WRITE(6,1994) IT,global_here%NUMITR,global_here%ETA2(global_here%KEMAX),global_here%KEMAX,global_here%VELMAX,global_here%KVMAX
-          WRITE(16,1994) IT,global_here%NUMITR,global_here%ETA2(global_here%KEMAX),global_here%KEMAX,global_here%VELMAX,global_here%KVMAX
+          WRITE(s%fort16unit,1994) IT,global_here%NUMITR,global_here%ETA2(global_here%KEMAX),global_here%KEMAX,global_here%VELMAX,global_here%KVMAX
  1994       FORMAT(1X,'TIME STEP =',I8,6X,'ITERATIONS =',I5,&
            /,2X,'global_here%ELMAX = ', E11.4,' AT NODE',I7,&
            2X,'SPEEDMAX = ',E11.4,' AT NODE',I7,&
@@ -1329,8 +1329,8 @@
 
 !     IF (IT.EQ.global_here%NT) THEN
 !     dg_here%H_TRI = SQRT((global_here%X(1)-global_here%X(2))**2 + (global_here%Y(1)-global_here%Y(2))**2)
-!     WRITE(88,*) dg_here%H_TRI,P,0
-!     WRITE(89,*) dg_here%H_TRI,P,0
+!     WRITE(S%FORT88UNIT,*) dg_here%H_TRI,P,0
+!     WRITE(S%FORT89UNIT,*) dg_here%H_TRI,P,0
 !     IF (MYPROC == 0) THEN
 !     PRINT*,'T FINAL =',global_here%NT*global_here%DTDP
 !     PRINT*,'global_here%DT =',global_here%DTDP
@@ -1347,11 +1347,11 @@
 !     global_here%QX_DG(1) = global_here%QX_DG(1) + dg_here%PHI_CENTER(K)*dg_here%QX(K,J,1)
 !     global_here%QY_DG(1) = global_here%QY_DG(1) + dg_here%PHI_CENTER(K)*dg_here%QY(K,J,1)
 !     
-!     WRITE(88,*) dg_here%ZE(K,J,1),dg_here%QX(K,J,1),dg_here%QY(K,J,1)
+!     WRITE(S%FORT88UNIT,*) dg_here%ZE(K,J,1),dg_here%QX(K,J,1),dg_here%QY(K,J,1)
 !     
 !     ENDDO
 !     
-!     WRITE(89,*) global_here%ZE_DG(1),global_here%QX_DG(1),global_here%QY_DG(1)
+!     WRITE(S%FORT89UNIT,*) global_here%ZE_DG(1),global_here%QX_DG(1),global_here%QY_DG(1)
 !     
 !     ENDDO
 !     ENDIF
