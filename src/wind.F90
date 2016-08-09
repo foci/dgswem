@@ -1717,10 +1717,6 @@
       INTEGER, intent(in) :: NSCREEN
       INTEGER, intent(in) :: ScreenUnit
       INTEGER I, J
-      REAL(SZ),SAVE,ALLOCATABLE :: RAD(:),DX(:),DY(:)
-      REAL(SZ),SAVE,ALLOCATABLE :: XCOOR(:),YCOOR(:) !lat and lon of nodes
-      REAL(SZ),SAVE,ALLOCATABLE :: V_r(:)            !wind sp. as fn. of dist
-      REAL(SZ),SAVE,ALLOCATABLE :: THETA(:)
       REAL(SZ) :: TVX,TVY,RRP,RMW,A,B,WTRATIO
       REAL(SZ) :: TransSpdX, TransSpdY
       REAL(SZ) :: TM, cpress, lon, lat, spd
@@ -1737,22 +1733,21 @@
       REAL(8) :: pi,omega, coriolis
       REAL(8) :: mperdeg,DEG2RAD
 
-      LOGICAL, SAVE :: FIRSTCALL = .True.
 !
       pi = 4.0d0 * atan(1.0d0)
       mperdeg  = re * pi / 180.0d0
       DEG2RAD = pi / 180.0d0
       omega = 2.0d0*pi / 86164.2d0
 !
-      IF (FIRSTCALL) THEN
-         FIRSTCALL = .False.
-         ALLOCATE (RAD(NP),DX(NP),DY(NP),XCOOR(NP),YCOOR(NP))
-         ALLOCATE (V_r(NP),THETA(NP))
+      IF (s%FIRSTCALL) THEN
+         s%FIRSTCALL = .False.
+         ALLOCATE (S%RAD(NP),s%DX(NP),s%DY(NP),s%XCOOR(NP),s%YCOOR(NP))
+         ALLOCATE (s%V_r(NP),s%THETA(NP))
 !
 !     The subroutine only works for ICS=2 (spherical coordinates)
          DO I=1,NP
-            XCOOR(I)=SLAM(I)*RAD2DEG
-            YCOOR(I)=SFEA(I)*RAD2DEG
+            s%XCOOR(I)=SLAM(I)*RAD2DEG
+            s%YCOOR(I)=SFEA(I)*RAD2DEG
          END DO
       ENDIF
 !
@@ -1804,51 +1799,51 @@
 !     Calculate wind velocity and pressure at each node.
       DO I=1,NP
 
-!         DX(I)=XCOOR(I)-lon
-!         DY(I)=YCOOR(I)-lat
+!         s%DX(I)=s%XCOOR(I)-lon
+!         s%DY(I)=s%YCOOR(I)-lat
 
-        DX(I)=(XCOOR(I)-lon)*DEG2RAD
-        DY(I)=(YCOOR(I)-lat)*DEG2RAD
+        s%DX(I)=(s%XCOOR(I)-lon)*DEG2RAD
+        s%DY(I)=(s%YCOOR(I)-lat)*DEG2RAD
 
-         THETA(I)=ATAN2(DY(I),DX(I))
+         s%THETA(I)=ATAN2(s%DY(I),s%DX(I))
 !   RJW v48.45
 !     compute the distances based on haversine formula for distance along a sphere
-         Rad(i)=re*(2.0d0*ASIN(sqrt(sin(DY(I)/2.0d0)**2.0d0+&
-      cos(lat*DEG2RAD)*cos(YCOOR(i)*DEG2RAD)*sin(DX(I)/2.0d0)**2.0d0)))
+         S%rad(i)=re*(2.0d0*ASIN(sqrt(sin(s%DY(I)/2.0d0)**2.0d0+&
+      cos(lat*DEG2RAD)*cos(s%YCOOR(i)*DEG2RAD)*sin(s%DX(I)/2.0d0)**2.0d0)))
 ! calculate the coriolis at YCOOR
-         coriolis = 2.0d0 * omega * sin(YCOOR(I)*DEG2RAD)
+         coriolis = 2.0d0 * omega * sin(s%YCOOR(I)*DEG2RAD)
 
-!        RAD(I)=SQRT(DX(I)*DX(I)+DY(I)*DY(I))*100.d0*1000.d0 ! into meters!!
+!        S%RAD(I)=SQRT(s%DX(I)*s%DX(I)+s%DY(I)*s%DY(I))*100.d0*1000.d0 ! into meters!!
 !
-!         PRESS(I)=(cpress+(Ambient_Pressure-cpress)*EXP(-A/RAD(I)**B))
+!         PRESS(I)=(cpress+(Ambient_Pressure-cpress)*EXP(-A/S%RAD(I)**B))
 !    &        / (RHOWAT0*G) ! jgf46.32jgf4 commented out
          PRESS(I)=(cpress+(centralPressureDeficit)*&
-             EXP(-(RMW*1000.d0/RAD(I))**B)) / (RHOWAT0*G)
-!         V_r(I) = sqrt(
+             EXP(-(RMW*1000.d0/S%RAD(I))**B)) / (RHOWAT0*G)
+!         s%V_r(I) = sqrt(
 !     &        A*B*(Ambient_Pressure-cpress)*EXP(-A/RAD(I)**B)
 !     &        / ( Rho_Air*RAD(I)**B )
-!     &        + (RAD(I)**2.d0)*(CORIOLIS**2.d0)/4.d0
+!     &        + (S%RAD(I)**2.d0)*(CORIOLIS**2.d0)/4.d0
 !     &        )
-!     &        - RAD(I)*CORIOLIS/2.d0 ! jgf46.32jgf4 commented out
-         V_r(I) = sqrt(&
-             (RMW*1000.d0/RAD(I))**B *&
-             EXP(1.d0-(RMW*1000.d0/RAD(I))**B)*spd**2.d0&
-             + (RAD(I)**2.d0)*(CORIOLIS**2.d0)/4.d0&
+!     &        - S%RAD(I)*CORIOLIS/2.d0 ! jgf46.32jgf4 commented out
+         s%V_r(I) = sqrt(&
+             (RMW*1000.d0/S%RAD(I))**B *&
+             EXP(1.d0-(RMW*1000.d0/S%RAD(I))**B)*spd**2.d0&
+             + (S%RAD(I)**2.d0)*(CORIOLIS**2.d0)/4.d0&
              )&
-             - RAD(I)*CORIOLIS/2.d0
+             - S%RAD(I)*CORIOLIS/2.d0
 !
 !     jgf46.31 Determine translation speed that should be added to final
 !     storm wind speed. This is tapered to zero as the storm wind tapers
 !     to zero toward the eye of the storm and at long distances from the
 !     storm.
-         TransSpdX = (abs(V_r(I))/spd)*TVX
-         TransSpdY = (abs(V_r(I))/spd)*TVY
+         TransSpdX = (abs(s%V_r(I))/spd)*TVX
+         TransSpdY = (abs(s%V_r(I))/spd)*TVY
 !     Apply mutliplier for Storm2 in LPFS ensemble.
-         V_r(I) = V_r(I) * WindMultiplier
+         s%V_r(I) = s%V_r(I) * WindMultiplier
 !
 !     Find the velocity components.
-         WVNX(I)=-V_r(I)*SIN(THETA(I))
-         WVNY(I)= V_r(I)*COS(THETA(I))
+         WVNX(I)=-s%V_r(I)*SIN(s%THETA(I))
+         WVNY(I)= s%V_r(I)*COS(s%THETA(I))
 !
 !     jgf46.19 Convert wind velocity from top of atmospheric boundary
 !     layer (which is what the Holland curve fit produces) to wind
@@ -1868,7 +1863,7 @@
 !
 !     jgf46.31 Set the wind velocities to zero outside the last closed
 !     isobar.
-!         IF (RAD(I).gt.rrp) THEN
+!         IF (S%RAD(I).gt.rrp) THEN
 !            WVNX(I)=0.0d0
 !            WVNY(I)=0.0d0
 !         ENDIF
@@ -1914,7 +1909,6 @@
       REAL(SZ),SAVE :: WTRATIO          !time ratio used for interpolation
       REAL(8), ALLOCATABLE, SAVE :: CastTime(:) ! seconds since start of year
       INTEGER,SAVE :: iNowcastCPress, iNowcastRRP, iNowcastRMW
-      LOGICAL,SAVE :: FIRSTCALL = .True.
       INTEGER,SAVE :: i  ! Current array counter for fort.22 file
       INTEGER,SAVE :: nl ! Number of lines in the fort.22 file
       INTEGER,SAVE :: pl ! populated length of Holland Data array
@@ -1929,7 +1923,7 @@
 !     ------------------------------------------------------
 !     BEGIN Code executed upon first call to this subroutine
 !     ------------------------------------------------------
-      IF (FIRSTCALL) THEN
+      IF (S%FIRSTCALL_STORMDATA) THEN
 !
 !     Determine the number of lines in the file.
          nl=0
@@ -2144,7 +2138,7 @@
             ENDIF
          ENDDO
 !
-         FIRSTCALL = .False.
+         S%FIRSTCALL_STORMDATA = .False.
       ENDIF
 !     ----------------------------------------------------------
 !     END Code executed only upon first call to this subroutine

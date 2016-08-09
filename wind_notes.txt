@@ -1,0 +1,56 @@
+Holland wind stuff:
+in wind.F90:  subroutine getholland( ... ) -> calls GetHollandStormData 
+which calls TimeConv
+called by met_forcing.F90:495        <--- met_forcing seems to be done
+calls ApplyDirectionalWindReduction( ... ) in nodalattr_subs.F90:510
+
+DG_hydro_timestep.F90:110 calls met_forcing
+if NWS=8, met_forcing.F90:495 calls HollandGet( ... )
+    HollandGet, at wind.F90:1708
+        calls GetHollandStormData (wind.F90:1761)
+            calls TimeConv (wind.F90:78)
+    if LoadDirEffRLen for any node, then calls
+    ApplyDirectionalWindReduction (nodalattr_subs.F90:510)
+
+
+
+
+HollandGet subroutine needs to be modularized
+GetHollandStormData needs to be modularized
+ApplyDirectionalWindReduction needs to be modularized
+
+HollandGet:
+    Arguments:
+        in: np, ics
+        in: X, Y, SLAM, SFEA
+        out: WVNX, WVNY, PRESS
+        in: nscreen, screenunit
+    Non-Persistent:
+        i, j
+        pi, mperdeg, deg2rad, omega, mperdeg, coriolis
+        tvx, tvy, rrp, rmw, a, b, wtratio (not even used!)
+        transspdx, transspdy, 
+        tm (not used), cpress
+        spd
+        ts
+        windmultiplier
+        centralPressureDeficit
+
+    Persistent:
+        RAD, DX, DY, XCOOR, YCOOR, V_r, THETA        
+        firstcall
+        
+        
+        
+
+time
+nscreen
+screenunit
+latout
+lonout
+cpressout
+spdout
+rrpout
+rmwout
+tvxout
+tvyout

@@ -147,6 +147,8 @@ MODULE SIZES
      integer :: dg64unit
      integer :: dg65unit
 
+     integer :: maxele63unit
+
      ! 263, 264, 214, 288, 289, 290, 291 ! Hot starts, opened in write_results
 
      ! 333 wind.f95
@@ -165,6 +167,18 @@ MODULE SIZES
      ! 963 ! maxele.63 opened in write_results
      
      ! 4441 ?
+
+
+
+     ! Holland wind model stuff
+     
+     real(sz), allocatable :: RAD(:),DX(:),DY(:)
+     real(sz), allocatable :: XCOOR(:), YCOOR(:)
+     real(sz), allocatable :: V_r(:)
+     real(sz), allocatable :: THETA(:)
+     logical :: firstcall = .true.
+     logical :: firstcall_stormdata = .true.
+
 
   end type sizes_type
   
