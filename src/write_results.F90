@@ -770,13 +770,13 @@
       endif
 
       if (it.eq.global_here%nt) then
-         open(maxele63unit,FILE=S%DIRNAME//'/'//'maxele.63')
-         write(maxele63unit,*) global_here%np
+         open(s%maxele63unit,FILE=S%DIRNAME//'/'//'maxele.63')
+         write(s%maxele63unit,*) global_here%np
          do i=1,global_here%np
-            write(maxele63unit,9633) global_here%etamax(i)
+            write(s%maxele63unit,9633) global_here%etamax(i)
          enddo
  9633    format(f20.8)
-         close(maxele63unit)
+         close(s%maxele63unit)
 #ifdef OUT_TEC
          if (ModetoNode.eq.1) then
             write(778,*) 'TITLE = "dgswem output"'

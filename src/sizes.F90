@@ -168,6 +168,35 @@ MODULE SIZES
      
      ! 4441 ?
 
+
+
+     ! Holland wind model stuff
+     
+     real(sz), allocatable :: RAD(:),DX(:),DY(:)
+     real(sz), allocatable :: XCOOR(:), YCOOR(:)
+     real(sz), allocatable :: V_r(:)
+     real(sz), allocatable :: THETA(:)
+     logical :: firstcall = .true.
+
+     ! GetHolland stuff
+
+     logical :: firstcall_stormdata = .true.
+     INTEGER, ALLOCATABLE :: iYear(:),iMth(:),iDay(:),iHr(:)
+     INTEGER, ALLOCATABLE :: iLat(:),iLon(:)
+     INTEGER, ALLOCATABLE :: iSpd(:),iCPress(:),iRRP(:),iRMW(:)
+     REAL(SZ), ALLOCATABLE :: Lat(:),Lon(:),Spd(:)
+     REAL(SZ), ALLOCATABLE :: CPress(:),RRP(:),RMW(:)
+     REAL(SZ), ALLOCATABLE :: TVX(:), TVY(:)      ! jgf46.32jgf9
+     CHARACTER(len=4), ALLOCATABLE :: CastType(:) !hindcast,forecast
+     INTEGER, ALLOCATABLE :: iFcstInc(:) ! hours
+     REAL(SZ), ALLOCATABLE :: FcstInc(:) ! seconds
+     REAL(SZ) :: WTRATIO          !time ratio used for interpolation
+     REAL(8), ALLOCATABLE :: CastTime(:) ! seconds since start of year
+     INTEGER :: iNowcastCPress, iNowcastRRP, iNowcastRMW
+     INTEGER :: i  ! Current array counter for fort.22 file
+     INTEGER :: nl ! Number of lines in the fort.22 file
+     INTEGER :: pl ! populated length of Holland Data array
+
   end type sizes_type
   
 END MODULE SIZES

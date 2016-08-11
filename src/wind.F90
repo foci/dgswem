@@ -1717,10 +1717,6 @@
       INTEGER, intent(in) :: NSCREEN
       INTEGER, intent(in) :: ScreenUnit
       INTEGER I, J
-      REAL(SZ),SAVE,ALLOCATABLE :: RAD(:),DX(:),DY(:)
-      REAL(SZ),SAVE,ALLOCATABLE :: XCOOR(:),YCOOR(:) !lat and lon of nodes
-      REAL(SZ),SAVE,ALLOCATABLE :: V_r(:)            !wind sp. as fn. of dist
-      REAL(SZ),SAVE,ALLOCATABLE :: THETA(:)
       REAL(SZ) :: TVX,TVY,RRP,RMW,A,B,WTRATIO
       REAL(SZ) :: TransSpdX, TransSpdY
       REAL(SZ) :: TM, cpress, lon, lat, spd
@@ -1737,22 +1733,21 @@
       REAL(8) :: pi,omega, coriolis
       REAL(8) :: mperdeg,DEG2RAD
 
-      LOGICAL, SAVE :: FIRSTCALL = .True.
 !
       pi = 4.0d0 * atan(1.0d0)
       mperdeg  = re * pi / 180.0d0
       DEG2RAD = pi / 180.0d0
       omega = 2.0d0*pi / 86164.2d0
 !
-      IF (FIRSTCALL) THEN
-         FIRSTCALL = .False.
-         ALLOCATE (RAD(NP),DX(NP),DY(NP),XCOOR(NP),YCOOR(NP))
-         ALLOCATE (V_r(NP),THETA(NP))
+      IF (s%FIRSTCALL) THEN
+         s%FIRSTCALL = .False.
+         ALLOCATE (S%RAD(NP),s%DX(NP),s%DY(NP),s%XCOOR(NP),s%YCOOR(NP))
+         ALLOCATE (s%V_r(NP),s%THETA(NP))
 !
 !     The subroutine only works for ICS=2 (spherical coordinates)
          DO I=1,NP
-            XCOOR(I)=SLAM(I)*RAD2DEG
-            YCOOR(I)=SFEA(I)*RAD2DEG
+            s%XCOOR(I)=SLAM(I)*RAD2DEG
+            s%YCOOR(I)=SFEA(I)*RAD2DEG
          END DO
       ENDIF
 !
@@ -1804,51 +1799,51 @@
 !     Calculate wind velocity and pressure at each node.
       DO I=1,NP
 
-!         DX(I)=XCOOR(I)-lon
-!         DY(I)=YCOOR(I)-lat
+!         s%DX(I)=s%XCOOR(I)-lon
+!         s%DY(I)=s%YCOOR(I)-lat
 
-        DX(I)=(XCOOR(I)-lon)*DEG2RAD
-        DY(I)=(YCOOR(I)-lat)*DEG2RAD
+        s%DX(I)=(s%XCOOR(I)-lon)*DEG2RAD
+        s%DY(I)=(s%YCOOR(I)-lat)*DEG2RAD
 
-         THETA(I)=ATAN2(DY(I),DX(I))
+         s%THETA(I)=ATAN2(s%DY(I),s%DX(I))
 !   RJW v48.45
 !     compute the distances based on haversine formula for distance along a sphere
-         Rad(i)=re*(2.0d0*ASIN(sqrt(sin(DY(I)/2.0d0)**2.0d0+&
-      cos(lat*DEG2RAD)*cos(YCOOR(i)*DEG2RAD)*sin(DX(I)/2.0d0)**2.0d0)))
+         S%rad(i)=re*(2.0d0*ASIN(sqrt(sin(s%DY(I)/2.0d0)**2.0d0+&
+      cos(lat*DEG2RAD)*cos(s%YCOOR(i)*DEG2RAD)*sin(s%DX(I)/2.0d0)**2.0d0)))
 ! calculate the coriolis at YCOOR
-         coriolis = 2.0d0 * omega * sin(YCOOR(I)*DEG2RAD)
+         coriolis = 2.0d0 * omega * sin(s%YCOOR(I)*DEG2RAD)
 
-!        RAD(I)=SQRT(DX(I)*DX(I)+DY(I)*DY(I))*100.d0*1000.d0 ! into meters!!
+!        S%RAD(I)=SQRT(s%DX(I)*s%DX(I)+s%DY(I)*s%DY(I))*100.d0*1000.d0 ! into meters!!
 !
-!         PRESS(I)=(cpress+(Ambient_Pressure-cpress)*EXP(-A/RAD(I)**B))
+!         PRESS(I)=(cpress+(Ambient_Pressure-cpress)*EXP(-A/S%RAD(I)**B))
 !    &        / (RHOWAT0*G) ! jgf46.32jgf4 commented out
          PRESS(I)=(cpress+(centralPressureDeficit)*&
-             EXP(-(RMW*1000.d0/RAD(I))**B)) / (RHOWAT0*G)
-!         V_r(I) = sqrt(
+             EXP(-(RMW*1000.d0/S%RAD(I))**B)) / (RHOWAT0*G)
+!         s%V_r(I) = sqrt(
 !     &        A*B*(Ambient_Pressure-cpress)*EXP(-A/RAD(I)**B)
 !     &        / ( Rho_Air*RAD(I)**B )
-!     &        + (RAD(I)**2.d0)*(CORIOLIS**2.d0)/4.d0
+!     &        + (S%RAD(I)**2.d0)*(CORIOLIS**2.d0)/4.d0
 !     &        )
-!     &        - RAD(I)*CORIOLIS/2.d0 ! jgf46.32jgf4 commented out
-         V_r(I) = sqrt(&
-             (RMW*1000.d0/RAD(I))**B *&
-             EXP(1.d0-(RMW*1000.d0/RAD(I))**B)*spd**2.d0&
-             + (RAD(I)**2.d0)*(CORIOLIS**2.d0)/4.d0&
+!     &        - S%RAD(I)*CORIOLIS/2.d0 ! jgf46.32jgf4 commented out
+         s%V_r(I) = sqrt(&
+             (RMW*1000.d0/S%RAD(I))**B *&
+             EXP(1.d0-(RMW*1000.d0/S%RAD(I))**B)*spd**2.d0&
+             + (S%RAD(I)**2.d0)*(CORIOLIS**2.d0)/4.d0&
              )&
-             - RAD(I)*CORIOLIS/2.d0
+             - S%RAD(I)*CORIOLIS/2.d0
 !
 !     jgf46.31 Determine translation speed that should be added to final
 !     storm wind speed. This is tapered to zero as the storm wind tapers
 !     to zero toward the eye of the storm and at long distances from the
 !     storm.
-         TransSpdX = (abs(V_r(I))/spd)*TVX
-         TransSpdY = (abs(V_r(I))/spd)*TVY
+         TransSpdX = (abs(s%V_r(I))/spd)*TVX
+         TransSpdY = (abs(s%V_r(I))/spd)*TVY
 !     Apply mutliplier for Storm2 in LPFS ensemble.
-         V_r(I) = V_r(I) * WindMultiplier
+         s%V_r(I) = s%V_r(I) * WindMultiplier
 !
 !     Find the velocity components.
-         WVNX(I)=-V_r(I)*SIN(THETA(I))
-         WVNY(I)= V_r(I)*COS(THETA(I))
+         WVNX(I)=-s%V_r(I)*SIN(s%THETA(I))
+         WVNY(I)= s%V_r(I)*COS(s%THETA(I))
 !
 !     jgf46.19 Convert wind velocity from top of atmospheric boundary
 !     layer (which is what the Holland curve fit produces) to wind
@@ -1868,7 +1863,7 @@
 !
 !     jgf46.31 Set the wind velocities to zero outside the last closed
 !     isobar.
-!         IF (RAD(I).gt.rrp) THEN
+!         IF (S%RAD(I).gt.rrp) THEN
 !            WVNX(I)=0.0d0
 !            WVNY(I)=0.0d0
 !         ENDIF
@@ -1901,23 +1896,9 @@
       INTEGER,intent(in) :: nscreen, screenunit
       REAL(SZ),intent(out) :: LatOut, LonOut, CPressOut
       REAL(SZ),intent(out) :: SpdOut, RRPOut, RMWOut, TVXOut, TVYOut
-!
-      INTEGER, ALLOCATABLE, SAVE :: iYear(:),iMth(:),iDay(:),iHr(:)
-      INTEGER, ALLOCATABLE, SAVE :: iLat(:),iLon(:)
-      INTEGER, ALLOCATABLE, SAVE :: iSpd(:),iCPress(:),iRRP(:),iRMW(:)
-      REAL(SZ), ALLOCATABLE, SAVE :: Lat(:),Lon(:),Spd(:)
-      REAL(SZ), ALLOCATABLE, SAVE :: CPress(:),RRP(:),RMW(:)
-      REAL(SZ), ALLOCATABLE, SAVE :: TVX(:), TVY(:)      ! jgf46.32jgf9
-      CHARACTER(len=4), ALLOCATABLE, SAVE :: CastType(:) !hindcast,forecast
-      INTEGER, ALLOCATABLE, SAVE :: iFcstInc(:) ! hours
-      REAL(SZ), ALLOCATABLE, SAVE :: FcstInc(:) ! seconds
-      REAL(SZ),SAVE :: WTRATIO          !time ratio used for interpolation
-      REAL(8), ALLOCATABLE, SAVE :: CastTime(:) ! seconds since start of year
-      INTEGER,SAVE :: iNowcastCPress, iNowcastRRP, iNowcastRMW
-      LOGICAL,SAVE :: FIRSTCALL = .True.
-      INTEGER,SAVE :: i  ! Current array counter for fort.22 file
-      INTEGER,SAVE :: nl ! Number of lines in the fort.22 file
-      INTEGER,SAVE :: pl ! populated length of Holland Data array
+
+      integer :: i_local
+
       REAL(8), PARAMETER :: re=6378206.4d0
       REAL(8) :: pi
       REAL(8) :: mperdeg,DEG2RAD
@@ -1929,28 +1910,28 @@
 !     ------------------------------------------------------
 !     BEGIN Code executed upon first call to this subroutine
 !     ------------------------------------------------------
-      IF (FIRSTCALL) THEN
+      IF (S%FIRSTCALL_STORMDATA) THEN
 !
 !     Determine the number of lines in the file.
-         nl=0
+         s%nl=0
 !         OPEN(22,FILE=TRIM(LOCALDIR)//'/'//'fort.22')
          DO
             READ(UNIT=22,FMT='(A170)',END=8888)
-            nl=nl+1
+            s%nl=s%nl+1
          ENDDO
  8888    CLOSE(22)
 !
 !     Dimension the arrays according to the number of lines in the file,
 !     this will be greater than or equal to the size of the array we need
 !     (probably greater because of the repeated lines that we throw away)
-         ALLOCATE(iYear(nl),iMth(nl),iDay(nl),iHr(nl),iLat(nl),iLon(nl),iSpd(nl),iCpress(nl),iRRP(nl),iRMW(nl),iFcstInc(nl))
-         ALLOCATE(Lat(nl),Lon(nl),Spd(nl),CPress(nl),RRP(nl),RMW(nl),FcstInc(nl),TVX(nl),TVY(nl))
-         ALLOCATE(CastType(nl))
-         ALLOCATE(CastTime(nl))
+         ALLOCATE(s%iYear(s%nl),s%iMth(s%nl),s%iDay(s%nl),s%iHr(s%nl),s%iLat(s%nl),s%iLon(s%nl),s%iSpd(s%nl),s%iCpress(s%nl),s%iRRP(s%nl),s%iRMW(s%nl),s%iFcstInc(s%nl))
+         ALLOCATE(s%Lat(s%nl),s%Lon(s%nl),s%Spd(s%nl),s%CPress(s%nl),s%RRP(s%nl),s%RMW(s%nl),s%FcstInc(s%nl),s%TVX(s%nl),s%TVY(s%nl))
+         ALLOCATE(s%CastType(s%nl))
+         ALLOCATE(S%casttime(s%nl))
 !
 !     Now reopen the file and read the data into the arrays. The first
 !     line must be a hindcast/nowcast.
-         i=1
+         s%i=1
 !         OPEN(22,FILE=TRIM(LOCALDIR)//'/'//'fort.22')
 !
          DO
@@ -1963,41 +1944,41 @@
 !     was made. The important parameter in the forecast file is the
 !     forecast increment.
             READ(UNIT=22,FMT=14,END=9999)&
-                iYear(i),iMth(i),iDay(i),iHr(i),&
-                CastType(i),iFcstInc(i),iLat(i),iLon(i),iSpd(i),&
-                iCPress(i),iRRP(i),iRMW(i)
+                s%iYear(s%i),s%iMth(s%i),s%iDay(s%i),s%iHr(s%i),&
+                s%CastType(s%i),s%iFcstInc(s%i),s%iLat(s%i),s%iLon(s%i),s%iSpd(s%i),&
+                s%iCPress(s%i),s%iRRP(s%i),s%iRMW(s%i)
             write(16,*)&
-                iYear(i),iMth(i),iDay(i),iHr(i),&
-                CastType(i),iFcstInc(i),iLat(i),iLon(i),iSpd(i),&
-                iCPress(i),iRRP(i),iRMW(i)
+                s%iYear(s%i),s%iMth(s%i),s%iDay(s%i),s%iHr(s%i),&
+                s%CastType(s%i),s%iFcstInc(s%i),s%iLat(s%i),s%iLon(s%i),s%iSpd(s%i),&
+                s%iCPress(s%i),s%iRRP(s%i),s%iRMW(s%i)
 !
 !
-            SELECT CASE(CastType(i))
+            SELECT CASE(s%CastType(s%i))
 !           ------------
             CASE("BEST")     ! nowcast/hindcast
 !           ------------
 !     Check to see if this is a repeated line. If so, go directly to the
 !     next line without any processing.
-               IF (i.gt.1.and.&
-                   iYear(i).eq.iYear(i-1).and.iMth(i).eq.iMth(i-1).and.&
-                   iDay(i).eq.iDay(i-1).and.iHr(i).eq.iHr(i-1)) THEN
+               IF (s%i.gt.1.and.&
+                   s%iYear(s%i).eq.s%iYear(s%i-1).and.s%iMth(s%i).eq.s%iMth(s%i-1).and.&
+                   s%iDay(s%i).eq.s%iDay(s%i-1).and.s%iHr(s%i).eq.s%iHr(s%i-1)) THEN
                   CYCLE
                ENDIF
 !
 !     Save the central pressure, radius of last closed isobar, and
 !     radius to max wind for use in forecasts
-               iNowcastCPress=iCPress(i)
-               iNowcastRMW=iRMW(i)
-               iNowcastRRP=iRRP(i)
+               s%inowcastcpress=s%iCPress(s%i)
+               s%iNowcastRMW=s%iRMW(s%i)
+               s%iNowcastRRP=s%iRRP(s%i)
 !
 !     Determine the time of this hindcast in seconds since the beginning
 !     of the year.
-               CALL TimeConv(iYear(i),iMth(i),iDay(i),iHr(i),0,0.d0,&
-                   CastTime(i),s%MyProc,NScreen,ScreenUnit)
+               CALL TimeConv(s%iYear(s%i),s%iMth(s%i),s%iDay(s%i),s%iHr(s%i),0,0.d0,&
+                   S%casttime(s%i),s%MyProc,NScreen,ScreenUnit)
 !
 !     Determine the CastTime in seconds since the beginning of the simulation.
-               CastTime(i)=CastTime(i)-WindRefTime
-               FcstInc(i)=iFcstInc(i)
+               S%casttime(s%i)=S%casttime(s%i)-WindRefTime
+               s%FcstInc(s%i)=s%iFcstInc(s%i)
 !
 !           ------------
             CASE("OFCL")        ! forecast
@@ -2005,42 +1986,42 @@
 !     Check to see if this is a repeated line (i.e., a forecast that
 !     coincides with the nowcast, or a repeated forecast). If so, go
 !     directly to the next line without any processing.
-               IF ( (iFcstInc(i).eq.0.and.&
-                   (iYear(i).eq.iYear(i-1).and.iMth(i).eq.iMth(i-1)&
-                   .and.iDay(i).eq.iDay(i-1).and.iHr(i).eq.iHr(i-1)))&
+               IF ( (s%iFcstInc(s%i).eq.0.and.&
+                   (s%iYear(s%i).eq.s%iYear(s%i-1).and.s%iMth(s%i).eq.s%iMth(s%i-1)&
+                   .and.s%iDay(s%i).eq.s%iDay(s%i-1).and.s%iHr(s%i).eq.s%iHr(s%i-1)))&
                    .or.&
-                  (iFcstInc(i).ne.0.and.iFcstInc(i).eq.iFcstInc(i-1)))&
+                  (s%iFcstInc(s%i).ne.0.and.s%iFcstInc(s%i).eq.s%iFcstInc(s%i-1)))&
                    THEN
                   CYCLE
                ENDIF
-               FcstInc(i) = iFcstInc(i)
+               s%FcstInc(s%i) = s%iFcstInc(s%i)
 !
 !     Determine the time of this forecast in seconds since the beginning
 !     of the year.
-               IF ( iFcstInc(i).eq.0 ) THEN
-                  CALL TimeConv(iYear(i),iMth(i),iDay(i),iHr(i),0,0.d0,&
-                      CastTime(i),s%MyProc,NScreen,ScreenUnit)
-                  CastTime(i)=CastTime(i)-WindRefTime
+               IF ( s%iFcstInc(s%i).eq.0 ) THEN
+                  CALL TimeConv(s%iYear(s%i),s%iMth(s%i),s%iDay(s%i),s%iHr(s%i),0,0.d0,&
+                      S%casttime(s%i),s%MyProc,NScreen,ScreenUnit)
+                  S%casttime(s%i)=S%casttime(s%i)-WindRefTime
                ELSE
-                  FcstInc(i) = FcstInc(i) * 3600.d0 ! convert hours to seconds
-                  CastTime(i) = CastTime(i-1) +&
-                      ( FcstInc(i) - FcstInc(i-1) )
+                  s%FcstInc(s%i) = s%FcstInc(s%i) * 3600.d0 ! convert hours to seconds
+                  S%casttime(s%i) = S%casttime(s%i-1) +&
+                      ( s%FcstInc(s%i) - s%FcstInc(s%i-1) )
                ENDIF
 !
 !     Set the central pressure and the radius to max wind to whatever
 !     the nowcast values were.
-               iCPress(i)=iNowcastCPress
-               iRMW(i)=iNowcastRMW
-               iRRP(i)=iNowcastRRP
+               s%iCPress(s%i)=s%inowcastcpress
+               s%iRMW(s%i)=s%iNowcastRMW
+               s%iRRP(s%i)=s%iNowcastRRP
 !
             CASE DEFAULT        ! unrecognized
                WRITE(16,1000)   ! unit 22 Holland Storm File
-               WRITE(16,1021) CastType(i),s%MyProc ! contains invalid name
+               WRITE(16,1021) s%CastType(s%i),s%MyProc ! contains invalid name
                WRITE(16,1031)   ! describe valid input
                WRITE(16,1041)   ! tell which column failed
                IF (NScreen.ne.0.and.s%MyProc.eq.0) THEN
                   WRITE(ScreenUnit,1000) ! unit 22 Holland Storm File
-                  WRITE(ScreenUnit,1025) CastType(i) ! contains invalid name
+                  WRITE(ScreenUnit,1025) s%CastType(s%i) ! contains invalid name
                   WRITE(ScreenUnit,1031) ! describe valid input
                   WRITE(ScreenUnit,1041) ! tell which column failed
                ENDIF
@@ -2048,31 +2029,31 @@
             END SELECT
 !
 !     Convert integers to reals.
-            Lat(i) = iLat(i)
-            Lon(i) = iLon(i)
-            Spd(i) = iSpd(i)
-            CPress(i) = iCPress(i)
-            RRP(i) = iRRP(i)
-            RMW(i) = iRMW(i)
+            s%Lat(s%i) = s%iLat(s%i)
+            s%Lon(s%i) = s%iLon(s%i)
+            s%Spd(s%i) = s%iSpd(s%i)
+            s%CPress(s%i) = s%iCPress(s%i)
+            s%RRP(s%i) = s%iRRP(s%i)
+            s%RMW(s%i) = s%iRMW(s%i)
 !
 !     Convert units.
-            Lat(i) = Lat(i) / 10.d0 ! convert 10ths of degs to degs
-            Lon(i) = Lon(i) / 10.d0 ! convert 10ths of degs to degs
-            Lon(i) = -1.d0 * Lon(i) ! negative b/c WEST longitude
-            CPress(i) = CPress(i) * 100.d0 ! convert mbar to Pa
-            RRP(i) = RRP(i) * 1.852000003180799d0 * 1000.0d0 ! convert nm to m
-            RMW(i) = RMW(i) * 1.852000003180799d0 ! convert nm to km
-            Spd(i) = Spd(i) * 0.51444444d0 ! convert kts to m/s
+            s%Lat(s%i) = s%Lat(s%i) / 10.d0 ! convert 10ths of degs to degs
+            s%Lon(s%i) = s%Lon(s%i) / 10.d0 ! convert 10ths of degs to degs
+            s%Lon(s%i) = -1.d0 * s%Lon(s%i) ! negative b/c WEST longitude
+            s%CPress(s%i) = s%CPress(s%i) * 100.d0 ! convert mbar to Pa
+            s%RRP(s%i) = s%RRP(s%i) * 1.852000003180799d0 * 1000.0d0 ! convert nm to m
+            s%RMW(s%i) = s%RMW(s%i) * 1.852000003180799d0 ! convert nm to km
+            s%Spd(s%i) = s%Spd(s%i) * 0.51444444d0 ! convert kts to m/s
 !
 #ifdef DEBUG_HOLLAND
-            WRITE(16,1244) CastTime(i),Lat(i),Lon(i),&
-                Spd(i),CPress(i),RRP(i),RMW(i),WindRefTime
-            if ( i.gt.1 ) then
-               write(16,2355) FcstInc(i-1)
+            WRITE(16,1244) s%CastTime(s%i),s%Lat(s%i),s%Lon(s%i),&
+                s%Spd(s%i),s%CPress(s%i),s%RRP(s%i),s%RMW(s%i),WindRefTime
+            if ( s%i.gt.1 ) then
+               write(16,2355) s%FcstInc(s%i-1)
             endif
             IF (NScreen.ne.0.and.s%MyProc.eq.0) THEN
-               WRITE(ScreenUnit,1244) CastTime(i),Lat(i),Lon(i),&
-                   Spd(i),CPress(i),RRP(i),RMW(i),WindRefTime
+               WRITE(ScreenUnit,1244) s%CastTime(s%i),s%Lat(s%i),s%Lon(s%i),&
+                   s%Spd(s%i),s%CPress(s%i),s%RRP(s%i),s%RMW(s%i),WindRefTime
             ENDIF
  1244       FORMAT('CastTime ',e16.8,' Lat ',f6.2,' Lon ',f6.2,&
                 /,'Spd ',f8.2,' CPress ',f10.2,' RRP ',f12.2,&
@@ -2082,53 +2063,54 @@
 !
 !     Save the number of non-repeated lines from the fort.22 file, this
 !     is the populated length of the array.
-            pl=i
+            s%pl=s%i
 !
 !     Increment array counter
-            i=i+1
+            s%i=s%i+1
 !
          ENDDO
  9999    CLOSE(22)
 !
 !     Calculate storm translation velocities based on change in position, then
 !     convert degrees/time to m/s
-         DO i=2, pl
+         i_local=s%i
+         DO i_local=2, s%pl
 ! RJW  05.08.2009
 !     use the formula haversine formula for distances along a sphere.
-!         dist(i)=re*(2*ASIN(sqrt(sin(DY(I)/2)**2+
-!     &  cos(lat*DEG2RAD)*cos(YCOOR(i)*DEG2RAD)*sin(DX(I)/2)**2) ) )
+!         dist(s%i)=re*(2*ASIN(sqrt(sin(DY(s%i)/2)**2+
+!     &  cos(lat*DEG2RAD)*cos(YCOOR(s%i)*DEG2RAD)*sin(DX(s%i)/2)**2) ) )
 
 !     Calculate storm translation velocities based on change in position,
 
-            TVX(i)=SIGN( (re*(2.0d0*ASIN(sqrt(cos(LAT(I)*DEG2RAD)&
-      * cos(LAT(I-1)*DEG2RAD)&
-      * sin((LON(I)*DEG2RAD-LON(I-1)*DEG2RAD)/2.0d0)**2.0d0) ) ) )&
-                   /(CastTime(i)-CastTime(i-1))&
-      ,(Lon(i)-Lon(i-1))  )  ! get correct sign
+            s%TVX(i_local)=SIGN( (re*(2.0d0*ASIN(sqrt(cos(s%LAT(i_local)*DEG2RAD)&
+      * cos(s%LAT(i_local-1)*DEG2RAD)&
+      * sin((s%LON(i_local)*DEG2RAD-s%LON(i_local-1)*DEG2RAD)/2.0d0)**2.0d0) ) ) )&
+                   /(S%casttime(i_local)-S%casttime(i_local-1))&
+      ,(s%Lon(i_local)-s%Lon(i_local-1))  )  ! get correct sign
 !
-            TVY(i)=SIGN( (re*(2.0d0*ASIN(sqrt(&
-       sin( (LAT(I)*DEG2RAD-LAT(I-1)*DEG2RAD)/2.0d0)**2.0d0))) )&
-                   /(CastTime(i)-CastTime(i-1))&
-      ,(Lat(i)-Lat(i-1))  )  ! get correct sign
+            s%TVY(i_local)=SIGN( (re*(2.0d0*ASIN(sqrt(&
+       sin( (s%LAT(i_local)*DEG2RAD-s%LAT(i_local-1)*DEG2RAD)/2.0d0)**2.0d0))) )&
+                   /(S%casttime(i_local)-S%casttime(i_local-1))&
+      ,(s%Lat(i_local)-s%Lat(i_local-1))  )  ! get correct sign
 
 
-!            TVX(i)=(Lon(i)-Lon(i-1))*100.d0*1000.d0
-!     &              /(CastTime(i)-CastTime(i-1))
-!            TVY(i)=(Lat(i)-Lat(i-1))*100.d0*1000.d0
-!     &              /(CastTime(i)-CastTime(i-1))
+!            s%TVX(i_local)=(Lon(i_local)-Lon(i_local-1))*100.d0*1000.d0
+!     &              /(S%casttime(i_local)-S%casttime(i_local-1))
+!            TVY(i_local)=(Lat(i_local)-Lat(i_local-1))*100.d0*1000.d0
+!     &              /(S%casttime(i_local)-S%casttime(i_local-1))
          ENDDO
-         TVX(1)=TVX(2)
-         TVY(1)=TVY(2)
+         s%TVX(1)=s%TVX(2)
+         s%TVY(1)=s%TVY(2)
 !
 !     Determine the correspondence between the current simulation time and
 !     the fort.22 file.
-         i=2
+         s%i=2
          DO
-            IF (Time.ge.CastTime(i-1).and.Time.lt.CastTime(i)) THEN
+            IF (Time.ge.S%casttime(s%i-1).and.Time.lt.S%casttime(s%i)) THEN
                EXIT
             ELSE
-               i=i+1
-               IF (i.gt.pl) THEN
+               s%i=s%i+1
+               IF (s%i.gt.s%pl) THEN
                   WRITE(16,1000) ! unit 22 Holland Storm File
                   WRITE(16,1051)
                   WRITE(16,1061)
@@ -2144,7 +2126,7 @@
             ENDIF
          ENDDO
 !
-         FIRSTCALL = .False.
+         S%FIRSTCALL_STORMDATA = .False.
       ENDIF
 !     ----------------------------------------------------------
 !     END Code executed only upon first call to this subroutine
@@ -2157,21 +2139,21 @@
 !
 !     If time exceeds the next hindcast/nowcast/forecast time, increment the
 !     array counter.
-      IF (Time.ge.CastTime(i)) THEN
-         i=i+1
+      IF (Time.ge.S%casttime(s%i)) THEN
+         s%i=s%i+1
       ENDIF
 !
 !     Interpolate w.r.t. time
-!      write(*,*) Time,CastTime(i-1),CastTime(i)
-      WTRATIO=(Time-CastTime(i-1))/(CastTime(i)-CastTime(i-1))
-      CPressOut = CPress(i-1) + WTRATIO*(CPress(i)-CPress(i-1))
-      LonOut = Lon(i-1) + WTRATIO*(Lon(i)-lon(i-1))
-      LatOut = Lat(i-1) + WTRATIO*(Lat(i)-lat(i-1))
-      SpdOut = Spd(i-1) + WTRATIO*(Spd(i)-Spd(i-1))
-      RRPOut = RRP(i-1) + WTRATIO*(RRP(i)-RRP(i-1))
-      RMWOut = RMW(i-1) + WTRATIO*(RMW(i)-RMW(i-1))
-      TVXOut = TVX(i-1) + WTRATIO*(TVX(i)-TVX(i-1))
-      TVYOut = TVY(i-1) + WTRATIO*(TVY(i)-TVY(i-1))
+!      write(*,*) Time,S%casttime(s%i-1),S%casttime(s%i)
+      S%WTRATIO=(Time-S%casttime(s%i-1))/(S%casttime(s%i)-S%casttime(s%i-1))
+      CPressOut = s%CPress(s%i-1) + S%WTRATIO*(s%CPress(s%i)-s%CPress(s%i-1))
+      LonOut = s%Lon(s%i-1) + S%WTRATIO*(s%Lon(s%i)-s%lon(s%i-1))
+      LatOut = s%Lat(s%i-1) + S%WTRATIO*(s%Lat(s%i)-s%lat(s%i-1))
+      SpdOut = s%Spd(s%i-1) + S%WTRATIO*(s%Spd(s%i)-s%Spd(s%i-1))
+      RRPOut = s%RRP(s%i-1) + S%WTRATIO*(s%RRP(s%i)-s%RRP(s%i-1))
+      RMWOut = s%RMW(s%i-1) + S%WTRATIO*(s%RMW(s%i)-s%RMW(s%i-1))
+      TVXOut = s%TVX(s%i-1) + S%WTRATIO*(s%TVX(s%i)-s%TVX(s%i-1))
+      TVYOut = s%TVY(s%i-1) + S%WTRATIO*(s%TVY(s%i)-s%TVY(s%i-1))
 !
 !     ----------------------------------------------------------
 !     END Code executed on every call to this subroutine
