@@ -15,8 +15,13 @@ C
       PUBLIC
       REAL(SZ),allocatable :: XBCbt(:),YBCbt(:),radial(:)
       REAL(SZ) :: s_sed
-
-
+#ifdef WETDR 
+C.....Set wetting and drying parameters for parabolic bowl
+      REAL(SZ),parameter :: Xpb = 1.d0 !X
+      REAL(SZ),parameter :: Ypb = -0.41884d0 !Y
+      REAL(SZ),parameter :: alphapb = 1.6D-7
+      REAL(SZ) :: omegapb = sqrt( 80.d0 * alphapb ) !g=10 is hardcoded here
+#endif
       CONTAINS
 
       SUBROUTINE INTIALIZE_MAN_SOLN(hbo,hb1,ydubo)
@@ -245,15 +250,18 @@ C.....Use appropriate modules
 C.....Declare local variables
       REAL(SZ) pi_n,rev,Ox,Oy
       REAL(SZ) C_0,C_1,ell_1,ell_2,ell_3
-      REAL(SZ) tempx,tempy
+      REAL(SZ) tempx,tempy,rex2
 
       INTEGER k,mm,j
 
+#ifdef WETDR 
+      rex2 = (Xpb + Ypb * cos(omegapb * time_a) ) / (alphapb * (Xpb**2 - Ypb**2))
+#endif
 
       do k = 1,MNE
 
          iotaa(:,k,1) = 0.D0
-#ifdef SED_LAY
+#if defined (SED_LAY) || defined (WETDR)
          iotaa2(:,k,1) = 0.D0
          iotaa3(:,k,1) = 0.D0
 
@@ -315,7 +323,72 @@ C.....Declare local variables
              iotaa(j,k,1) = iotaa(j,k,1) + 0.5D0 *( exp ( - ( (tempx+.05D0)**2 + (tempy+.05D0)**2  )
      &            /0.001D0 ) ) * wagp(mm,ph) * phi_area(j,mm,ph) *  (0.5D0 *AREAS(K))
             enddo    
-#endif     
+#endif
+
+#ifdef WETDR
+            if (XBCbt(k)**2 + YBCbt(k)**2 .LE. rex2) then
+            do j = 1,dofh
+C.....Compute ze
+               iotaa(j,k,1) = iotaa(j,k,1) +  (1.d0/(Xpb + Ypb * cos(omegapb* time_a))
+     &              + alphapb *(Ypb**2 - Xpb**2)* (XBCbt(k)**2 + YBCbt(k)**2)
+     &              /(Xpb + Ypb* cos(omegapb*time_a)) - alphapb * (XBCbt(k)**2 + YBCbt(k)**2))  
+     &              * wagp(mm,ph) * phi_area(j,mm,ph)
+     &              *0.5D0 *AREAS(K)
+C.....Compute uH
+               iotaa2(j,k,1) = iotaa2(j,k,1) +  (-Ypb * omegapb * sin(omegapb *time_a)
+     &              /(Xpb + Ypb * cos( omegapb * time_a)) * XBCbt(k) * 0.5d0 )
+     &              * (1.d0/(Xpb + Ypb * cos(omegapb* time_a))                                                                                                                
+     &              + alphapb *(Ypb**2 - Xpb**2)* (XBCbt(k)**2 + YBCbt(k)**2)                
+     &              /(Xpb + Ypb* cos(omegapb*time_a)))
+     &              * wagp(mm,ph) * phi_area(j,mm,ph)
+     &              *0.5D0 *AREAS(K)
+C.....Compute vH
+               iotaa3(j,k,1) = iotaa3(j,k,1) +  (-Ypb * omegapb * sin(omegapb *time_a)
+     &              /(Xpb + Ypb * cos( omegapb * time_a)) * YBCbt(k) * 0.5d0 )
+     &              * (1.d0/(Xpb + Ypb * cos(omegapb* time_a))
+     &              + alphapb *(Ypb**2 - Xpb**2)* (XBCbt(k)**2 + YBCbt(k)**2)
+     &              /(Xpb + Ypb* cos(omegapb*time_a)))
+     &              * wagp(mm,ph) * phi_area(j,mm,ph)
+     &              *0.5D0 *AREAS(K)
+            enddo
+            else
+               do j = 1,dofh
+C.....Compute ze                                                                                                                                                                                     
+               iotaa(j,k,1) = iotaa(j,k,1) +  H0                                                                                                       
+     &              * wagp(mm,ph) * phi_area(j,mm,ph)
+     &              *0.5D0 *AREAS(K)
+C.....Compute uH                                                                                                                                                  
+               iotaa2(j,k,1) = 0.d0
+C.....Compute vH                                                                                                                                                                                    
+               iotaa3(j,k,1) = 0.d0
+               enddo
+            endif
+
+#endif
+
+#ifdef SED_LAY
+            do j = 1,dofh
+
+
+               iotaa(j,k,1) = iotaa(j,k,1) +  (1.0D0 + ( 0.2D0
+     &              *exp(-( ( XBCbt(k))**2 / 0.01D0 + ( YBCbt(k))**2 / 0.01D0 ) ) * cos(time_a) \
+) )                                                                                              
+     &              * wagp(mm,ph) * phi_area(j,mm,ph)
+     &              *0.5D0 *AREAS(K)
+
+               iotaa2(j,k,1) = iotaa2(j,k,1) +  (2.D0 - (1.0D0 + ( 0.2D0
+     &              *exp(-( ( XBCbt(k))**2 / 0.01D0 + ( YBCbt(k))**2 / 0.01D0 ) ) * cos(time_a) \
+) ))                                                                                             
+     &              * wagp(mm,ph) * phi_area(j,mm,ph)
+     &              *0.5D0 *AREAS(K)
+
+
+               iotaa3(j,k,1) = iotaa3(j,k,1) +  0.001D0* YBCbt(k)
+     &              * wagp(mm,ph) * phi_area(j,mm,ph)
+     &              *0.5D0 *AREAS(K)
+
+            enddo
+#endif
 
          enddo
 
@@ -324,7 +397,7 @@ C.....Declare local variables
          do j= 1,dofh
 
             iotaa(j,k,1)  =  iotaa(j,k,1) * M_inv(j,ph) / (0.5D0 *AREAS(K))
-#ifdef SED_LAY
+#if defined (SED_LAY) || defined (WETDR)
             iotaa2(j,k,1) =  iotaa2(j,k,1) * M_inv(j,ph) / (0.5D0 *AREAS(K))
             iotaa3(j,k,1) =  iotaa3(j,k,1) * M_inv(j,ph) / (0.5D0 *AREAS(K))
 #endif
@@ -366,7 +439,9 @@ C.....Declare local variables
 #ifdef SED_LAY
                iota_error = iota_error + (bed(k,j,1,1)- iotaa(k,j,1)) * PHI_AREA(k,I,pa)*AREAS(J)*0.5D0
 #elif TRACE
-               iota_error = iota_error + (iota(k,j,1)- iotaa(k,j,1)) * PHI_AREA(k,I,pa) 
+               iota_error = iota_error + (iota(k,j,1)- iotaa(k,j,1)) * PHI_AREA(k,I,pa)
+#elif WETDR
+               iota_error = iota_error + (ze(k,j,1) - iotaa(k,j,1)) * PHI_AREA(k,I,pa)
 #endif
             enddo
 
@@ -374,6 +449,29 @@ C.....Declare local variables
 
          ENDDO
       enddo
+
+#ifdef WETDR
+      iota2_int = 0.D0
+      iota3_int = 0.D0
+
+      do j = 1,ne
+         DO I = 1,NAGP(pa)
+            iota2_error = 0.D0
+            iota3_error = 0.D0
+            do k = 1,dofs(j)
+               iota2_error = iota2_error + (qx(k,J,1)- iotaa2(k,j,1)) * PHI_AREA(k,I,pa)*AREAS(J)*0.5D0                                                                                               
+               iota3_error = iota3_error + (qy(k,J,1)- iotaa3(k,j,1)) * PHI_AREA(k,I,pa)*AREAS(J)*0.5D0                                                                                               
+            enddo
+
+            iota2_int = iota2_int + iota2_error**2 * WAGP(I,pa)*AREAS(J)
+            iota3_int = iota3_int + iota3_error**2 * WAGP(I,pa)*AREAS(J)
+
+         ENDDO
+
+      enddo
+
+      temper =  0.d0 !abs(dpe - tracer2)
+#endif
 
 #ifdef SED_LAY
       iota2_int = 0.D0
@@ -414,7 +512,7 @@ C.....Write errors into console
          write(*,*) 'L2nerror('') = ',  sqrt( iota_int ) , it 
          write(*,*) 'linferror('') = ',  temperg , it
       ENDIF
-#ifdef SED_LAY
+#if defined (SED_LAY) || defined (WETDR)
 #ifdef CMPI
       Call para_sum(iota2_int)
       Call para_sum(iota3_int)
