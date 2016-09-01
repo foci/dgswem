@@ -479,11 +479,11 @@
 
 
 !.......Apply the wet-dry algorithm if appropriate
-
+#ifndef HPX
       IF (global_here%NOLIFA .GE. 2) THEN
          CALL WETDRY(dg_here,global_here)
       ENDIF
-
+#endif
 !$$$C.......Apply the slopelimiter again if auxiliary variable is being used
 !$$$
 !$$$         if (global_here%EVMSUM.global_here%NE.0.D0.or.dg_here%artdif.eq.1) then
