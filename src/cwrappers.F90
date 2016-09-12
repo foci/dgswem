@@ -119,7 +119,7 @@ subroutine wetdry_fort(dg_c_ptr,global_c_ptr)
 !  print*, "FORTRAN: sizes_c_ptr = ", sizes_c_ptr
   
 #ifdef VERBOSE
-  write(99,*) "Entering wetdry_fort, id =", s%myproc, " timestep = ", timestep, " rkstep = ", rkstep
+!  write(99,*) "Entering wetdry_fort, id =", s%myproc, " timestep = ", timestep, " rkstep = ", rkstep
 !  print*, "FORTRAN: Entering dg_hydro_timestep_fort"
 !  print*, "FORTRAN: myproc =", s%myproc
 !  print*, "FORTRAN: timestep =", timestep

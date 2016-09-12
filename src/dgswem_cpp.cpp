@@ -167,7 +167,7 @@ int main(
       } // End loop over domains
       
 
-
+      /*
       // Boundary exchange
       // Loop over domains   
       for (int domain=0; domain<ids.size(); domain++) {
@@ -199,8 +199,8 @@ int main(
 	  }
 	  fortran_calls << std::endl;
 	  */
-
-	  // Put those arrays inside current domain
+	  /*
+	  // Put those arrays inside current domain 
 	  fortran_calls << "calling hpx_put_elems_fort, timestep = " << timestep << " rkstep = "
 			<< rkstep << " domain = "<< domain << " neighbor = " << neighbor_here << std::endl;	  
 	  /*
@@ -209,7 +209,7 @@ int main(
 	      fortran_calls << buffer[i] << " ";
 	  }
 	  fortran_calls << std::endl;	  
-	  */
+	  */ /*
 	  //fortran_calls << "buffer_vector.size() = " << buffer_vector.size() << std::endl;
 	  FNAME(hpx_put_elems_fort)(&dgs[domain],
 				    &neighbor_here,
@@ -224,7 +224,7 @@ int main(
 	  
 	}// end loop over neighbors
 	
-      }// end loop over domains
+      }// end loop over domains*/
       //end first boundary exchange
 
       for (int j=0; j<ids.size(); j++) {
@@ -239,7 +239,7 @@ int main(
 				   &globals[j]);
       } // End loop over domains
 
-
+      /*
       // Boundary exchange
       // Loop over domains   
       for (int domain=0; domain<ids.size(); domain++) {
@@ -271,7 +271,7 @@ int main(
 	  }
 	  fortran_calls << std::endl;
 	  */
-
+      /*
 	  // Put those arrays inside current domain
 	  fortran_calls << "calling hpx_put_elems_fort, timestep = " << timestep << " rkstep = "
 			<< rkstep << " domain = "<< domain << " neighbor = " << neighbor_here << std::endl;	  
@@ -281,7 +281,7 @@ int main(
 	      fortran_calls << buffer[i] << " ";
 	  }
 	  fortran_calls << std::endl;	  
-	  */
+	  */ /*
 	  //fortran_calls << "buffer_vector.size() = " << buffer_vector.size() << std::endl;
 	  FNAME(hpx_put_elems_fort)(&dgs[domain],
 				    &neighbor_here,
@@ -295,9 +295,9 @@ int main(
 	  
 	  
 	}// end loop over neighbors
-	
+       
       }// end loop over domains
-      
+	     */
       //return 0;
       
     } // end rkstep loop
