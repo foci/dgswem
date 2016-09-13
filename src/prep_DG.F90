@@ -1205,7 +1205,7 @@
          IF(MYPROC_HERE.EQ.0)THEN
             print *, 'Slope limiting prep begins, "kshanti"'
          ENDIF
-         CALL ALLOC_SLOPELIM(s,dg_here)
+         CALL ALLOC_SLOPELIM(s,dg_here,global_here)
          CALL PREP_SLOPELIM(s,dg_here,global_here)
          IF(MYPROC_HERE.EQ.0)THEN
             print *, 'Finished'
