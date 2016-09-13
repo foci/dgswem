@@ -158,7 +158,7 @@
 !.....Initilization for parallel DG run
 
 #ifdef HPX
-!      call msg_table_hpx(s, dg_here)
+      call msg_table_hpx(s, dg_here)
 #endif
 
 #ifdef CMPI
