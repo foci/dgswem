@@ -39,16 +39,16 @@
        IF (neighbor_found) THEN
        
 !          PRINT*, " PROC: ", dg_here%IDPROC, " SENDING ", dg_here%NELEMSEND(index) ," ELEMENTS TO: ", dg_here%IPROC_S(index)       
-!          PRINT 180, (dg_here%ISENDLOC(el,index), el = 1,dg_here%NELEMSEND(index))
+!          PRINT 180, (dg_here%ISENDLOC_ELEM(el,index), el = 1,dg_here%NELEMSEND(index))
 !          PRINT*, "" 
       
          ncount = 0
          DO el=1,dg_here%NELEMSEND(index)
             DO dof=1,dg_here%DOFH
               ncount = ncount+1
-              sendbuf(ncount)=dg_here%ZE(dof,dg_here%ISENDLOC(el,index),rkindex)
+              sendbuf(ncount)=dg_here%ZE(dof,dg_here%ISENDLOC_ELEM(el,index),rkindex)
 !              IF (abs(sendbuf(ncount) ) > 1d-14) THEN              
-!               PRINT 181, dg_here%ISENDLOC(el,index),sendbuf(ncount)
+!               PRINT 181, dg_here%ISENDLOC_ELEM(el,index),sendbuf(ncount)
 !              ENDIF
             ENDDO
          ENDDO
@@ -56,9 +56,9 @@
          DO el=1,dg_here%NELEMSEND(index)
            DO dof=1,dg_here%DOFH
              ncount = ncount+1
-             sendbuf(ncount)=dg_here%QX(dof,dg_here%ISENDLOC(el,index),rkindex)
+             sendbuf(ncount)=dg_here%QX(dof,dg_here%ISENDLOC_ELEM(el,index),rkindex)
 !              IF (abs(sendbuf(ncount) ) > 1d-14) THEN
-!                PRINT 181, dg_here%ISENDLOC(el,index),sendbuf(ncount)
+!                PRINT 181, dg_here%ISENDLOC_ELEM(el,index),sendbuf(ncount)
 !              ENDIF
            ENDDO
          ENDDO
@@ -66,9 +66,9 @@
          DO el=1,dg_here%NELEMSEND(index)
            DO dof=1,dg_here%DOFH
              ncount = ncount+1
-             sendbuf(ncount)=dg_here%QY(dof,dg_here%ISENDLOC(el,index),rkindex)
+             sendbuf(ncount)=dg_here%QY(dof,dg_here%ISENDLOC_ELEM(el,index),rkindex)
 !              IF (abs(sendbuf(ncount) ) > 1d-14) THEN                      
-!                PRINT 181, dg_here%ISENDLOC(el,index),sendbuf(ncount)
+!                PRINT 181, dg_here%ISENDLOC_ELEM(el,index),sendbuf(ncount)
 !              ENDIF
            ENDDO
          ENDDO
@@ -133,16 +133,16 @@
        IF (neighbor_found) THEN  
        
 !          PRINT*, " PROC: ", dg_here%IDPROC, " RECEIVING ",dg_here%NELEMRECV(index), " ELEMENTS FROM: ", dg_here%IPROC_R(index)
-!          PRINT 180, (dg_here%IRECVLOC(el,index), el = 1,dg_here%NELEMRECV(index))
+!          PRINT 180, (dg_here%IRECVLOC_ELEM(el,index), el = 1,dg_here%NELEMRECV(index))
 !          PRINT*, ""
          
          ncount = 0
          DO el=1,dg_here%NELEMRECV(index)
            DO dof=1,dg_here%DOFH
              ncount = ncount+1
-             dg_here%ZE(dof,dg_here%IRECVLOC(el,index),rkindex) = recvbuf(ncount)
+             dg_here%ZE(dof,dg_here%IRECVLOC_ELEM(el,index),rkindex) = recvbuf(ncount)
 !              IF (abs(recvbuf(ncount) ) > 1d-14) THEN             
-!                PRINT 181, dg_here%IRECVLOC(el,index),recvbuf(ncount) 
+!                PRINT 181, dg_here%IRECVLOC_ELEM(el,index),recvbuf(ncount) 
 !              ENDIF
            ENDDO
          ENDDO
@@ -150,9 +150,9 @@
          DO el=1,dg_here%NELEMRECV(index)
            DO dof=1,dg_here%DOFH
              ncount = ncount+1
-             dg_here%QX(dof,dg_here%IRECVLOC(el,index),rkindex) = recvbuf(ncount)
+             dg_here%QX(dof,dg_here%IRECVLOC_ELEM(el,index),rkindex) = recvbuf(ncount)
 !              IF (abs(recvbuf(ncount) ) > 1d-14) THEN
-!                PRINT 181, dg_here%IRECVLOC(el,index),recvbuf(ncount)
+!                PRINT 181, dg_here%IRECVLOC_ELEM(el,index),recvbuf(ncount)
 !              ENDIF
            ENDDO
          ENDDO
@@ -160,9 +160,9 @@
          DO el=1,dg_here%NELEMRECV(index)
            DO dof=1,dg_here%DOFH
              ncount = ncount+1
-             dg_here%QY(dof,dg_here%IRECVLOC(el,index),rkindex) = recvbuf(ncount)
+             dg_here%QY(dof,dg_here%IRECVLOC_ELEM(el,index),rkindex) = recvbuf(ncount)
 !              IF (abs(recvbuf(ncount) ) > 1d-14) THEN                
-!                PRINT 181, dg_here%IRECVLOC(el,index),recvbuf(ncount)
+!                PRINT 181, dg_here%IRECVLOC_ELEM(el,index),recvbuf(ncount)
 !              ENDIF
            ENDDO
          ENDDO    
@@ -185,7 +185,30 @@
        
        
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!           
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!       
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!  
+
+      subroutine HPX_GET_NODES()
+
+      implicit none
+
+
+
+      return
+      end subroutine HPX_GET_NODES()
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!           
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! 
+
+       subroutine HPX_PUT_NODES()
+
+       implicit none
+
+
+       return
+       end subroutine HPX_PUT_NODES()
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!           
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!      
 
        subroutine HPX_SWAP_ELEMS(domain,neighbor)
        

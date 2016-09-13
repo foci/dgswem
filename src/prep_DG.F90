@@ -158,7 +158,8 @@
 !.....Initilization for parallel DG run
 
 #ifdef HPX
-      call msg_table_hpx(s, dg_here)
+      call elem_msg_table_hpx(s, dg_here)
+      call node_msg_table_hpx(s, dg_here)
 #endif
 
 #ifdef CMPI
