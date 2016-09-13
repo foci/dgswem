@@ -413,10 +413,9 @@ MODULE DG
 !.....Set sizes for the arrays for the slope limiter
 !.....slopelim arrays
 
-      SUBROUTINE ALLOC_SLOPELIM(s,dg_here,global_here)
+      SUBROUTINE ALLOC_SLOPELIM(s,dg_here)
         type (sizes_type) :: s
         type (dg_type) :: dg_here
-        type (global_type) :: global_here
       ALLOCATE ( dg_here%XBC(S%MNE), dg_here%YBC(S%MNE) )
       ALLOCATE ( dg_here%EL_NBORS(4,S%MNE) )
       ALLOCATE ( dg_here%SL3(3,S%MNE) )
@@ -447,11 +446,11 @@ MODULE DG
       Allocate ( dg_here%iota2min(S%MNP,dg_here%dofh),dg_here%iota2max(S%MNP,dg_here%dofh) )
       
 #ifdef SLOPE5
-      Allocate ( dg_here%ZE_MIN1(global_here%NP),dg_here%ZE_MAX1(global_here%NP),dg_here%QX_MIN1(global_here%NP) )
-      Allocate ( dg_here%QY_MIN1(global_here%NP),dg_here%QY_MAX1(global_here%NP),dg_here%QX_MAX1(global_here%NP) )
-!       Allocate ( iota_MIN1(global_here%NP),iota_MAX1(global_here%NP) )
-!       Allocate ( iota2_MIN1(global_here%NP),iota2_MAX1(global_here%NP) )
-!       Allocate ( bed_MIN1(global_here%NP,s%layers),bed_MAX1(global_here%NP,s%layers) )
+      Allocate ( dg_here%ZE_MIN1(s%MNP),dg_here%ZE_MAX1(s%MNP),dg_here%QX_MIN1(s%MNP) )
+      Allocate ( dg_here%QY_MIN1(s%MNP),dg_here%QY_MAX1(s%MNP),dg_here%QX_MAX1(s%MNP) )
+!       Allocate ( iota_MIN1(s%MNP),iota_MAX1(s%MNP) )
+!       Allocate ( iota2_MIN1(s%MNP),iota2_MAX1(s%MNP) )
+!       Allocate ( bed_MIN1(s%MNP,s%layers),bed_MAX1(s%MNP,s%layers) )
 #endif
 
 #ifdef SLOPEALL
