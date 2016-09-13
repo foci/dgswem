@@ -101,7 +101,7 @@ subroutine dg_hydro_timestep_fort(sizes_c_ptr,dg_c_ptr,global_c_ptr,nodalattr_c_
 
 end subroutine dg_hydro_timestep_fort
 
-subroutine slopelimiter_part1_fort(sizes_c_ptr,dg_c_ptr,global_c_ptr)
+subroutine slopelimiter_partA_fort(sizes_c_ptr,dg_c_ptr,global_c_ptr)
   use, intrinsic :: iso_c_binding
   use sizes
   use dg
@@ -130,11 +130,12 @@ subroutine slopelimiter_part1_fort(sizes_c_ptr,dg_c_ptr,global_c_ptr)
 !  print*, "FORTRAN: rkstep =", rkstep
 #endif
 
-  call slopelimiter(s,dg_here,global_here)
+#ifdef SLOPE5
+  call slopelimiter5_partA(s,dg_here,global_here)
+#endif
+end subroutine slopelimiter_partA_fort
 
-end subroutine slopelimiter_part1_fort
-
-subroutine slopelimiter_part2_fort(sizes_c_ptr,dg_c_ptr,global_c_ptr)
+subroutine slopelimiter_partB_fort(sizes_c_ptr,dg_c_ptr,global_c_ptr)
   use, intrinsic :: iso_c_binding
   use sizes
   use dg
@@ -163,13 +164,14 @@ subroutine slopelimiter_part2_fort(sizes_c_ptr,dg_c_ptr,global_c_ptr)
 !  print*, "FORTRAN: rkstep =", rkstep
 #endif
 
-  call slopelimiter5part2(s,dg_here,global_here)
-
+#ifdef SLOPE5
+  call slopelimiter5_partB(s,dg_here,global_here)
+#endif
   IF (global_here%NOLIFA .GE. 2) THEN
      call wetdry(dg_here,global_here)
   ENDIF
 
-end subroutine slopelimiter_part2_fort
+end subroutine slopelimiter_partB_fort
 
 
 SUBROUTINE DG_TIMESTEP_ADVANCE_fort(sizes_c_ptr,dg_c_ptr,global_c_ptr,nodalattr_c_ptr,timestep)
