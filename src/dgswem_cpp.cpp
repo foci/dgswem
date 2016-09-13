@@ -238,26 +238,11 @@ int main(
 		   << " domain = " << domain << std::endl;
       }
       // &&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&& Slopelimiter_part2 &&&&&&&&&&&&&&&&&
-      fortran_calls << "calling SL part 2, timestep = " << timestep << " rkstep = " << rkstep 
-		   << " domain = " << domain << std::endl;
-
-
-      // &&&&&&&&&&&&&&&&&&&&&&&& wetting and drying &&&&&&&&&&&&&&&&&&&&&&&&&
-      for (int j=0; j<ids.size(); j++) {
-	//std::cout << "j=" << j << std::endl;
-	        std::cout << "calling wetdry() (domain_id = " << ids[j]
-		  << ", timestep = " << timestep
-		  << ", rkstep = " << rkstep
-		  << ")...\n";
-		fortran_calls << "calling dg_wetdry_timestep_fort, timestep = " << timestep << " rkstep = "
-			      << rkstep << " domain = "<< j << std::endl;
-		FNAME(wetdry_fort)(&dgs[j],
-				   &globals[j]);
-      } // End loop over domains
-
-      // &&&&&&&&&&&&&&&&&&&&& end wetting and drying &&&&&&&&&&&&&&&&&&&&&&&
+      for (int domain=0; domain<ids.size(); domain++) {
+	  fortran_calls << "calling SL part 2, timestep = " << timestep << " rkstep = " << rkstep 
+			<< " domain = " << domain << std::endl;
+      }    
        
-      }// end loop over domains
       //return 0;
       
     } // end rkstep loop
@@ -270,16 +255,14 @@ int main(
 				      &globals[domain],
 				      &nodalattrs[domain],
 				      &timestep
-				      );
+					);
+    } 
+    
+    if ( timestep > 2) {
+	return 0;  // stop after one timestep for debugging
     }
-
-     if ( timestep > 2) {
-      return 0;  // stop after one timestep for debugging
-     }
-
-
+    
   } // End timestep loop
-
 
   
   
