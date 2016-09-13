@@ -302,6 +302,60 @@ subroutine hpx_put_elems_fort(dg_c_ptr,neighbor,volume,recvbuf,rkindex)
 end subroutine hpx_put_elems_fort
 
 
+
+subroutine hpx_get_nodes_fort(dg_c_ptr,neighbor,volume,sendbuf)
+  use, intrinsic :: iso_c_binding
+  use dg
+  use sizes
+  implicit none
+
+  type (C_PTR) :: dg_c_ptr
+  real(sz) :: sendbuf(MAX_BUFFER_SIZE)
+  integer :: volume
+  integer :: neighbor
+
+  integer :: i
+
+  type (dg_type), pointer :: dg_here
+
+  call C_F_POINTER(dg_c_ptr,dg_here)
+
+
+#ifdef VERBOSE
+  write(99,*) "Entering hpx_get_nodes_fort"
+#endif
+
+  call hpx_get_nodes(dg_here,neighbor,volume,sendbuf)
+
+end subroutine hpx_get_nodes_fort
+
+subroutine hpx_put_nodes_fort(dg_c_ptr,neighbor,volume,recvbuf)
+  use, intrinsic :: iso_c_binding
+  use dg
+  use sizes
+  implicit none
+
+  type (C_PTR) :: dg_c_ptr
+  real(sz) :: recvbuf(MAX_BUFFER_SIZE)
+  integer :: volume
+  integer :: neighbor
+
+  integer :: i
+
+  type (dg_type), pointer :: dg_here
+
+  call C_F_POINTER(dg_c_ptr,dg_here)
+
+#ifdef VERBOSE
+!  print*, "FORTRAN: Entering hpx_put_nodes_fort"
+  write(99,*) "Entering hpx_put_nodes_fort"
+#endif
+
+  call hpx_put_nodes(dg_here,neighbor,volume,recvbuf)
+
+end subroutine hpx_put_nodes_fort
+
+
 subroutine hpx_swap_elems_fort(dg_domain_c_ptr,dg_neighbor_c_ptr)
   use, intrinsic :: iso_c_binding
   use dg

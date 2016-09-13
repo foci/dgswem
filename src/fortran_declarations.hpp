@@ -41,6 +41,14 @@ extern"C" {
 				   int* volume,
 				   double* recvbuf,
 				   int* rkindex);
+    void FNAME(hpx_get_nodes_fort)(void** dg,
+				   int* neighbor,
+				   int* volume,
+				   double* sendbuf); 
+    void FNAME(hpx_put_nodes_fort)(void** dg,
+				   int* neighbor,
+				   int* volume,
+				   double* recvbuf);    
     void FNAME(hpx_read_n_domains)(int* n_domains);
     void FNAME(hpx_swap_elems_fort)(void** dg_domain,
 				    void** dg_neighbor);
