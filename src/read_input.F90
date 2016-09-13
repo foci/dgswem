@@ -212,7 +212,7 @@
 !      IF (LINE2(1:1) .EQ. "1") THEN
 !        CALL read_fixed_fort_dg(s,dg_here,global_here)   ! first line of old fort.dg is a 1 for the global_here%dgswe option
 !      ELSE
-         write(*,*) "calling read_keyword_fort_dg"
+!         write(*,*) "calling read_keyword_fort_dg"
         CALL read_keyword_fort_dg(s,dg_here,global_here) ! otherwise assume keyword format
 !      ENDIF     
       
