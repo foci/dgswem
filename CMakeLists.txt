@@ -29,6 +29,11 @@ if(HPX_NOLGD)
   link_directories(${HPX_LIBRARY_DIRS})
   message("HPX_INCLUDE_DIRS:" ${HPX_INCLUDE_DIRS})
   message("HPX_LIBRARY_DIR:" ${HPX_LIBRARY_DIR})
+
+  if(NOT (CMAKE_BUILD_TYPE STREQUAL HPX_BUILD_TYPE))
+    message(FATAL_ERROR "CMAKE_BUILD_TYPE doesn't match HPX_BUILD_TYPE (${HPX_BUILD_TYPE})")
+  endif()
+
 endif(HPX_NOLGD)
 
 if(NOT NO_LGD)
@@ -44,7 +49,11 @@ if(NOT NO_LGD)
   link_directories(${HPX_LIBRARY_DIRS})
   message("HPX_INCLUDE_DIRS:" ${HPX_INCLUDE_DIRS})
   message("HPX_LIBRARY_DIR:" ${HPX_LIBRARY_DIR})
-  
+ 
+  if(NOT (CMAKE_BUILD_TYPE STREQUAL HPX_BUILD_TYPE))
+    message(FATAL_ERROR "CMAKE_BUILD_TYPE doesn't match HPX_BUILD_TYPE (${HPX_BUILD_TYPE})")
+  endif()
+
 
   #  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${libgeodecomp_FLAGS} ${HPX_FLAGS} -L/home/gentryx/local_install/lib -O3")
 
@@ -62,10 +71,6 @@ message("CMAKE_BUILD_TYPE:" ${CMAKE_BUILD_TYPE})
 
 message("CMAKE_CXX_FLAGS:" ${CMAKE_CXX_FLAGS})
 message("CMAKE_INCLUDE_DIRECTORIES:" ${CMAKE_INCLUDE_DIRECTORIES})
-
-if(NOT (CMAKE_BUILD_TYPE STREQUAL HPX_BUILD_TYPE))
-  message(FATAL_ERROR "CMAKE_BUILD_TYPE doesn't match HPX_BUILD_TYPE (${HPX_BUILD_TYPE})")
-endif()
 
 add_subdirectory(src)
 add_subdirectory(prep)
