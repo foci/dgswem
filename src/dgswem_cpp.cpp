@@ -226,21 +226,63 @@ int main(
       for (int domain=0; domain<ids.size(); domain++) {
 	  fortran_calls << "calling SL part 1, timestep = " << timestep << " rkstep = " << rkstep 
 			<< " domain = " << domain << std::endl;
+	  
+		FNAME(slopelimiter_partA_fort)(&sizes[domain],
+				&dgs[domain],
+				&globals[domain]);	  
       }
       // &&&&&&&&&&&&&&&&&&&&&&& Slopelimiter boundary exchange &&&&&&&&&&&&&&
       for (int domain=0; domain<ids.size(); domain++) {
       fortran_calls << "calling SL boundary exchange GET, timestep = " << timestep << " rkstep = " << rkstep 
 		   << " domain = " << domain << std::endl;
+      
+       std::vector<int> neighbors_here = neighbors[domain];
+
+	//Loop over neighbors
+	for (int neighbor=0; neighbor<numneighbors[domain]; neighbor++) {	
+	  int neighbor_here = neighbors_here[neighbor];
+	  int volume;
+	  double buffer[MAX_BUFFER_SIZE];
+
+	  std::cout << "domain " << domain << " is exchanging with " << neighbor_here << " at timestep " << timestep << std::endl;
+	  
+
+	  FNAME(hpx_get_nodes_fort)(&dgs[neighbor_here],
+				    &domain,
+				    &volume,
+				    buffer);   
+	}
       }
 
       for (int domain=0; domain<ids.size(); domain++) {
       fortran_calls << "calling SL boundary exchange PUT, timestep = " << timestep << " rkstep = " << rkstep 
 		   << " domain = " << domain << std::endl;
+      
+       std::vector<int> neighbors_here = neighbors[domain];
+
+	//Loop over neighbors
+	for (int neighbor=0; neighbor<numneighbors[domain]; neighbor++) {	
+	  int neighbor_here = neighbors_here[neighbor];
+	  int volume;
+	  double buffer[MAX_BUFFER_SIZE];
+
+	  std::cout << "domain " << domain << " is exchanging with " << neighbor_here << " at timestep " << timestep << std::endl;
+	  
+
+	  FNAME(hpx_put_nodes_fort)(&dgs[neighbor_here],
+				    &domain,
+				    &volume,
+				    buffer);   
+	}      
       }
       // &&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&& Slopelimiter_part2 &&&&&&&&&&&&&&&&&
       for (int domain=0; domain<ids.size(); domain++) {
 	  fortran_calls << "calling SL part 2, timestep = " << timestep << " rkstep = " << rkstep 
 			<< " domain = " << domain << std::endl;
+	  
+		FNAME(slopelimiter_partB_fort)(&sizes[domain],
+				&dgs[domain],
+				&globals[domain]);	  
       }    
        
       //return 0;
