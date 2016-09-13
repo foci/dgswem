@@ -101,36 +101,76 @@ subroutine dg_hydro_timestep_fort(sizes_c_ptr,dg_c_ptr,global_c_ptr,nodalattr_c_
 
 end subroutine dg_hydro_timestep_fort
 
-subroutine wetdry_fort(dg_c_ptr,global_c_ptr)
+subroutine slopelimiter_part1_fort(sizes_c_ptr,dg_c_ptr,global_c_ptr)
   use, intrinsic :: iso_c_binding
+  use sizes
   use dg
   use global
   implicit none
 
+  type (C_PTR) :: sizes_c_ptr
   type (C_PTR) :: dg_c_ptr
   type (C_PTR) :: global_c_ptr
 
+  type (sizes_type), pointer :: s
   type (dg_type), pointer :: dg_here
   type (global_type), pointer :: global_here
 
+  call C_F_POINTER(sizes_c_ptr,s)
   call C_F_POINTER(dg_c_ptr,dg_here)
   call C_F_POINTER(global_c_ptr,global_here)
   
 !  print*, "FORTRAN: sizes_c_ptr = ", sizes_c_ptr
   
 #ifdef VERBOSE
-!  write(99,*) "Entering wetdry_fort, id =", s%myproc, " timestep = ", timestep, " rkstep = ", rkstep
+  write(99,*) "Entering slopelimiter_fort"
 !  print*, "FORTRAN: Entering dg_hydro_timestep_fort"
 !  print*, "FORTRAN: myproc =", s%myproc
 !  print*, "FORTRAN: timestep =", timestep
 !  print*, "FORTRAN: rkstep =", rkstep
 #endif
 
+  call slopelimiter(s,dg_here,global_here)
+
+end subroutine slopelimiter_part1_fort
+
+subroutine slopelimiter_part2_fort(sizes_c_ptr,dg_c_ptr,global_c_ptr)
+  use, intrinsic :: iso_c_binding
+  use sizes
+  use dg
+  use global
+  implicit none
+
+  type (C_PTR) :: sizes_c_ptr
+  type (C_PTR) :: dg_c_ptr
+  type (C_PTR) :: global_c_ptr
+
+  type (sizes_type), pointer :: s
+  type (dg_type), pointer :: dg_here
+  type (global_type), pointer :: global_here
+
+  call C_F_POINTER(sizes_c_ptr,s)
+  call C_F_POINTER(dg_c_ptr,dg_here)
+  call C_F_POINTER(global_c_ptr,global_here)
+  
+!  print*, "FORTRAN: sizes_c_ptr = ", sizes_c_ptr
+  
+#ifdef VERBOSE
+  write(99,*) "Entering slopelimiter_fort"
+!  print*, "FORTRAN: Entering dg_hydro_timestep_fort"
+!  print*, "FORTRAN: myproc =", s%myproc
+!  print*, "FORTRAN: timestep =", timestep
+!  print*, "FORTRAN: rkstep =", rkstep
+#endif
+
+  call slopelimiter5part2(s,dg_here,global_here)
+
   IF (global_here%NOLIFA .GE. 2) THEN
      call wetdry(dg_here,global_here)
   ENDIF
 
-end subroutine wetdry_fort
+end subroutine slopelimiter_part2_fort
+
 
 SUBROUTINE DG_TIMESTEP_ADVANCE_fort(sizes_c_ptr,dg_c_ptr,global_c_ptr,nodalattr_c_ptr,timestep)
   use, intrinsic :: iso_c_binding

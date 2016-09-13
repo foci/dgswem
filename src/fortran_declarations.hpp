@@ -14,8 +14,12 @@ extern"C" {
 				       void** nodalattr,
 				       int* timestep,
 				       int* rkstep);	
-    void FNAME(wetdry_fort)(void** dg,
-			    void** global);
+   void FNAME(slopelimiter_part1_fort)(void** size,
+				       void** dg,
+				       void** global);
+   void FNAME(slopelimiter_part2_fort)(void** size,
+				       void** dg,
+				       void** global);
     void FNAME(dg_timestep_advance_fort)(void** size,
 					 void** dg,
 					 void** global,
