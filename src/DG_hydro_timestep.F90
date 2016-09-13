@@ -462,20 +462,13 @@
 
 !.......Apply the slopelimiter if appropriate
 
-#ifdef SLOPEALL
-         CALL SLOPELIMITER(s,dg_here,global_here)
-#endif
 
 #ifdef SLOPE5
-         CALL SLOPELIMITER(s,dg_here,global_here) 
+      IF (DG_HERE%SLOPEFLAG .NE. 0) THEN
+        CALL SLOPELIMITER5(s,dg_here,global_here)
+      ENDIF
 #endif
 
-#ifdef STBLZR
-         if (.not.dg_here%stblzr) then
-            CALL SLOPELIMITER(s,dg_here,global_here)
-            dg_here%stblzr = .true.
-         endif
-#endif
 
 
 !.......Apply the wet-dry algorithm if appropriate

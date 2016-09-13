@@ -209,6 +209,14 @@ MODULE DG
       Real(SZ),Allocatable :: iotamin(:,:),iotamax(:,:)
       Real(SZ),Allocatable :: iota2min(:,:),iota2max(:,:)
 
+#ifdef SLOPE5
+      Real(SZ), Allocatable :: ZE_MIN1(:),ZE_MAX1(:),QX_MIN1(:),QX_MAX1(:)
+      Real(SZ), Allocatable :: QY_MIN1(:),QY_MAX1(:)
+!       Real(SZ), Allocatable :: iota_MIN1(:),iota_MAX1(:)
+!       Real(SZ), Allocatable :: iota2_MIN1(:),iota2_MAX1(:)
+!       Real(SZ), Allocatable, target :: bed_min1(:,:), bed_max1(:,:)
+#endif
+
 #ifdef SLOPEALL
       Real(SZ),Allocatable :: ZEtaylor(:,:,:),QXtaylor(:,:,:),QYtaylor(:,:,:)
       Real(SZ),Allocatable :: iotataylor(:,:,:),iota2taylor(:,:,:)
@@ -405,9 +413,10 @@ MODULE DG
 !.....Set sizes for the arrays for the slope limiter
 !.....slopelim arrays
 
-      SUBROUTINE ALLOC_SLOPELIM(s,dg_here)
+      SUBROUTINE ALLOC_SLOPELIM(s,dg_here,global_here)
         type (sizes_type) :: s
         type (dg_type) :: dg_here
+        type (global_type) :: global_here
       ALLOCATE ( dg_here%XBC(S%MNE), dg_here%YBC(S%MNE) )
       ALLOCATE ( dg_here%EL_NBORS(4,S%MNE) )
       ALLOCATE ( dg_here%SL3(3,S%MNE) )
@@ -436,6 +445,14 @@ MODULE DG
       Allocate ( dg_here%QXmax(S%MNP,dg_here%dofh),dg_here%QYmin(S%MNP,dg_here%dofh),dg_here%QYmax(S%MNP,dg_here%dofh) )
       Allocate ( dg_here%iotamin(S%MNP,dg_here%dofh),dg_here%iotamax(S%MNP,dg_here%dofh) )
       Allocate ( dg_here%iota2min(S%MNP,dg_here%dofh),dg_here%iota2max(S%MNP,dg_here%dofh) )
+      
+#ifdef SLOPE5
+      Allocate ( dg_here%ZE_MIN1(global_here%NP),dg_here%ZE_MAX1(global_here%NP),dg_here%QX_MIN1(global_here%NP) )
+      Allocate ( dg_here%QY_MIN1(global_here%NP),dg_here%QY_MAX1(global_here%NP),dg_here%QX_MAX1(global_here%NP) )
+!       Allocate ( iota_MIN1(global_here%NP),iota_MAX1(global_here%NP) )
+!       Allocate ( iota2_MIN1(global_here%NP),iota2_MAX1(global_here%NP) )
+!       Allocate ( bed_MIN1(global_here%NP,s%layers),bed_MAX1(global_here%NP,s%layers) )
+#endif
 
 #ifdef SLOPEALL
       Allocate ( dg_here%ZEtaylor(S%MNE,dg_here%dofh,1),dg_here%QXtaylor(S%MNE,dg_here%dofh,1) )
