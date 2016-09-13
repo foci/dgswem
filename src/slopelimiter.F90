@@ -30,27 +30,22 @@
 
 !.....Declare local variables
 
-      INTEGER L, LL, INC1,INC2,INC3,KDP,NN,IVAR,I,J,kk,k,varnum,bb,varnum_prev
-      REAL(SZ) ZEC(3),ZEVERTEX(3),DIF(3),SUMLOC,SUMDIF,SIGNDIF
-      REAL(SZ)    DIV,REDFAC,REDMAX,tmp1,tmp2,tmp3,bound
-      Real(SZ) ZEMIN1(3),ZEMAX1(3),QXMIN1(3),QXMAX1(3)
-      Real(SZ) QYMIN1(3),QYMAX1(3)
-      Real(SZ) iotaMIN1(3),iotaMAX1(3)
-      Real(SZ) iota2MIN1(3),iota2MAX1(3)
-      Real(SZ), pointer:: arraymin(:),arraymax(:)
+      INTEGER :: I,J
+
+
 
 !     FIND THE MAXIMUM AND MINIMUM OF EACH VARIABLE OVER ALL ELEMENTS 
 !     SHARING A NODE
 
-      bound = 0.0D0
+
 
       DO I = 1,global_here%NP
-         ZE_MIN1(I)=99999.
-         ZE_MAX1(I)=-99999.
-         QX_MIN1(I)=99999.
-         QX_MAX1(I)=-99999.
-         QY_MIN1(I)=99999.
-         QY_MAX1(I)=-99999.
+         dg_here%ZE_MIN1(I)=99999.
+         dg_here%ZE_MAX1(I)=-99999.
+         dg_here%QX_MIN1(I)=99999.
+         dg_here%QX_MAX1(I)=-99999.
+         dg_here%QY_MIN1(I)=99999.
+         dg_here%QY_MAX1(I)=-99999.
 
 
          global_here%NO_NBORS = global_here%EL_COUNT(I)
@@ -67,28 +62,29 @@
 
 
 !     
-            IF (global_here%ZE_DG(J).LT.ZE_MIN1(I))THEN
-               ZE_MIN1(I)=global_here%ZE_DG(J)
+            IF (global_here%ZE_DG(J).LT.dg_here%ZE_MIN1(I))THEN
+               dg_here%ZE_MIN1(I)=global_here%ZE_DG(J)
             ENDIF
-            IF (global_here%ZE_DG(J).GT.ZE_MAX1(I)) THEN
-               ZE_MAX1(I)=global_here%ZE_DG(J)
+            IF (global_here%ZE_DG(J).GT.dg_here%ZE_MAX1(I)) THEN
+               Zdg_here%E_MAX1(I)=global_here%ZE_DG(J)
             ENDIF
-            IF (global_here%QX_DG(J).LT.QX_MIN1(I))THEN
-               QX_MIN1(I)=global_here%QX_DG(J)
+            IF (global_here%QX_DG(J).LT.dg_here%QX_MIN1(I))THEN
+               dg_here%QX_MIN1(I)=global_here%QX_DG(J)
             ENDIF
-            IF (global_here%QX_DG(J).GT.QX_MAX1(I)) THEN
-               QX_MAX1(I)=global_here%QX_DG(J)
+            IF (global_here%QX_DG(J).GT.dg_here%QX_MAX1(I)) THEN
+               dg_here%QX_MAX1(I)=global_here%QX_DG(J)
             ENDIF
-            IF (global_here%QY_DG(J).LT.QY_MIN1(I))THEN
-               QY_MIN1(I)=global_here%QY_DG(J)
+            IF (global_here%QY_DG(J).LT.dg_here%QY_MIN1(I))THEN
+               dg_here%QY_MIN1(I)=global_here%QY_DG(J)
             ENDIF
-            IF (global_here%QY_DG(J).GT.QY_MAX1(I)) THEN
-               QY_MAX1(I)=global_here%QY_DG(J)
+            IF (global_here%QY_DG(J).GT.dg_here%QY_MAX1(I)) THEN
+               dg_here%QY_MAX1(I)=global_here%QY_DG(J)
             ENDIF
 
 
          ENDDO
       ENDDO
+
 ! #ifdef CMPI
 ! 
 !       CALL UPDATER(ZE_MIN1,ZE_MAX1,QX_MIN1,3)
@@ -98,6 +94,11 @@
 
       RETURN
       END SUBROUTINE 
+
+
+!*********************************************************************** 
+!***********************************************************************
+
 
       SUBROUTINE SLOPELIMITER5_PARTB(s,dg_here,global_here)
 
@@ -133,6 +134,8 @@
 !     LOOP OVER ELEMENTS TO CALCULATE NEW VERTEX VALUES
 !     
 
+      bound = 0.0D0
+
       bb = 1
 
       DO I=1,global_here%NE 
@@ -151,36 +154,36 @@
                ZEC(1)=dg_here%ZE(1,I,dg_here%IRK+1)
                ZEC(2)=dg_here%ZE(2,I,dg_here%IRK+1)
                ZEC(3)=dg_here%ZE(3,I,dg_here%IRK+1)
-               ZEMAX1(1)=ZE_MAX1(global_here%N1)
-               ZEMIN1(1)=ZE_MIN1(global_here%N1)
-               ZEMAX1(2)=ZE_MAX1(global_here%N2)
-               ZEMIN1(2)=ZE_MIN1(global_here%N2)
-               ZEMAX1(3)=ZE_MAX1(global_here%N3)
-               ZEMIN1(3)=ZE_MIN1(global_here%N3)
+               ZEMAX1(1)=dg_here%ZE_MAX1(global_here%N1)
+               ZEMIN1(1)=dg_here%ZE_MIN1(global_here%N1)
+               ZEMAX1(2)=dg_here%ZE_MAX1(global_here%N2)
+               ZEMIN1(2)=dg_here%ZE_MIN1(global_here%N2)
+               ZEMAX1(3)=dg_here%ZE_MAX1(global_here%N3)
+               ZEMIN1(3)=dg_here%ZE_MIN1(global_here%N3)
             ENDIF
 
             IF (IVAR.EQ.2) THEN
                ZEC(1)=dg_here%QX(1,I,dg_here%IRK+1)
                ZEC(2)=dg_here%QX(2,I,dg_here%IRK+1)
                ZEC(3)=dg_here%QX(3,I,dg_here%IRK+1)
-               ZEMAX1(1)=QX_MAX1(global_here%N1)
-               ZEMIN1(1)=QX_MIN1(global_here%N1)
-               ZEMAX1(2)=QX_MAX1(global_here%N2)
-               ZEMIN1(2)=QX_MIN1(global_here%N2)
-               ZEMAX1(3)=QX_MAX1(global_here%N3)
-               ZEMIN1(3)=QX_MIN1(global_here%N3)
+               ZEMAX1(1)=dg_here%QX_MAX1(global_here%N1)
+               ZEMIN1(1)=dg_here%QX_MIN1(global_here%N1)
+               ZEMAX1(2)=dg_here%QX_MAX1(global_here%N2)
+               ZEMIN1(2)=dg_here%QX_MIN1(global_here%N2)
+               ZEMAX1(3)=dg_here%QX_MAX1(global_here%N3)
+               ZEMIN1(3)=dg_here%QX_MIN1(global_here%N3)
             ENDIF
 
             IF (IVAR.EQ.3) THEN
                ZEC(1)=dg_here%QY(1,I,dg_here%IRK+1)
                ZEC(2)=dg_here%QY(2,I,dg_here%IRK+1)
                ZEC(3)=dg_here%QY(3,I,dg_here%IRK+1)
-               ZEMAX1(1)=QY_MAX1(global_here%N1)
-               ZEMIN1(1)=QY_MIN1(global_here%N1)
-               ZEMAX1(2)=QY_MAX1(global_here%N2)
-               ZEMIN1(2)=QY_MIN1(global_here%N2)
-               ZEMAX1(3)=QY_MAX1(global_here%N3)
-               ZEMIN1(3)=QY_MIN1(global_here%N3)
+               ZEMAX1(1)=dg_here%QY_MAX1(global_here%N1)
+               ZEMIN1(1)=dg_here%QY_MIN1(global_here%N1)
+               ZEMAX1(2)=dg_here%QY_MAX1(global_here%N2)
+               ZEMIN1(2)=dg_here%QY_MIN1(global_here%N2)
+               ZEMAX1(3)=dg_here%QY_MAX1(global_here%N3)
+               ZEMIN1(3)=dg_here%QY_MIN1(global_here%N3)
             ENDIF
 
             
