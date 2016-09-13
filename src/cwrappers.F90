@@ -356,33 +356,7 @@ subroutine hpx_put_nodes_fort(dg_c_ptr,neighbor,volume,recvbuf)
 end subroutine hpx_put_nodes_fort
 
 
-subroutine hpx_swap_elems_fort(dg_domain_c_ptr,dg_neighbor_c_ptr)
-  use, intrinsic :: iso_c_binding
-  use dg
-  use sizes
-  implicit none
 
-  type (C_PTR) :: dg_domain_c_ptr
-  type (C_PTR) :: dg_neighbor_c_ptr
-  real(sz) :: recvbuf(MAX_BUFFER_SIZE)
-  integer :: volume
-  integer :: neighbor
-
-  integer :: i
-
-  type (dg_type), pointer :: dg_here_domain
-  type (dg_type), pointer :: dg_here_neighbor
-
-#ifdef VERBOSE
-!  print*, "FORTRAN: Entering hpx_swap_elems"
-#endif
-
-  call C_F_POINTER(dg_domain_c_ptr,dg_here_domain)
-  call C_F_POINTER(dg_neighbor_c_ptr,dg_here_neighbor)
-
-  call hpx_swap_elems(dg_here_domain,dg_here_neighbor)
-
-end subroutine hpx_swap_elems_fort
 
 subroutine term_fort(sizes_c_ptr,dg_c_ptr,global_c_ptr,nodalattr_c_ptr)
   use, intrinsic :: iso_c_binding

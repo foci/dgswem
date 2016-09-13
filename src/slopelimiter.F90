@@ -66,7 +66,7 @@
                dg_here%ZE_MIN1(I)=global_here%ZE_DG(J)
             ENDIF
             IF (global_here%ZE_DG(J).GT.dg_here%ZE_MAX1(I)) THEN
-               Zdg_here%E_MAX1(I)=global_here%ZE_DG(J)
+               dg_here%ZE_MAX1(I)=global_here%ZE_DG(J)
             ENDIF
             IF (global_here%QX_DG(J).LT.dg_here%QX_MIN1(I))THEN
                dg_here%QX_MIN1(I)=global_here%QX_DG(J)
@@ -272,7 +272,7 @@
                dg_here%QY(3,I,dg_here%IRK+1)=-.5d0*ZEVERTEX(1)+.5d0*ZEVERTEX(2)
             ENDIF
 
-
+        ENDDO
 
       ENDDO
       RETURN

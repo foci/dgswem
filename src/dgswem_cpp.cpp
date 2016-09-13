@@ -227,7 +227,7 @@ int main(
 	  fortran_calls << "calling SL part 1, timestep = " << timestep << " rkstep = " << rkstep 
 			<< " domain = " << domain << std::endl;
 	  
-		FNAME(slopelimiter_partA_fort)(&sizes[domain],
+		FNAME(slopelimiter_parta_fort)(&sizes[domain],
 				&dgs[domain],
 				&globals[domain]);	  
       }
@@ -280,7 +280,7 @@ int main(
 	  fortran_calls << "calling SL part 2, timestep = " << timestep << " rkstep = " << rkstep 
 			<< " domain = " << domain << std::endl;
 	  
-		FNAME(slopelimiter_partB_fort)(&sizes[domain],
+		FNAME(slopelimiter_partb_fort)(&sizes[domain],
 				&dgs[domain],
 				&globals[domain]);	  
       }    

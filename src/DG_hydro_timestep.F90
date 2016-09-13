@@ -464,9 +464,9 @@
 
 
 #ifdef SLOPE5
-      IF (DG_HERE%SLOPEFLAG .NE. 0) THEN
-        CALL SLOPELIMITER5(s,dg_here,global_here)
-      ENDIF
+!       IF (DG_HERE%SLOPEFLAG .NE. 0) THEN
+!         CALL SLOPELIMITER5(s,dg_here,global_here)
+!       ENDIF
 #endif
 
 
