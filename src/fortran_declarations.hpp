@@ -14,8 +14,12 @@ extern"C" {
 				       void** nodalattr,
 				       int* timestep,
 				       int* rkstep);	
-    void FNAME(wetdry_fort)(void** dg,
-			    void** global);
+   void FNAME(slopelimiter_parta_fort)(void** size,
+				       void** dg,
+				       void** global);
+   void FNAME(slopelimiter_partb_fort)(void** size,
+				       void** dg,
+				       void** global);
     void FNAME(dg_timestep_advance_fort)(void** size,
 					 void** dg,
 					 void** global,
@@ -37,9 +41,15 @@ extern"C" {
 				   int* volume,
 				   double* recvbuf,
 				   int* rkindex);
-    void FNAME(hpx_read_n_domains)(int* n_domains);
-    void FNAME(hpx_swap_elems_fort)(void** dg_domain,
-				    void** dg_neighbor);
+    void FNAME(hpx_get_nodes_fort)(void** dg,
+				   int* neighbor,
+				   int* volume,
+				   double* sendbuf); 
+    void FNAME(hpx_put_nodes_fort)(void** dg,
+				   int* neighbor,
+				   int* volume,
+				   double* recvbuf);    
+    void FNAME(hpx_read_n_domains)(int* n_domains);   
     void FNAME(lgd_yield_subdomain_coord)(void** global,
 					  double *coord);
     void FNAME(term_fort)(void** size,

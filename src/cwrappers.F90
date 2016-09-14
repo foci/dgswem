@@ -101,36 +101,78 @@ subroutine dg_hydro_timestep_fort(sizes_c_ptr,dg_c_ptr,global_c_ptr,nodalattr_c_
 
 end subroutine dg_hydro_timestep_fort
 
-subroutine wetdry_fort(dg_c_ptr,global_c_ptr)
+subroutine slopelimiter_partA_fort(sizes_c_ptr,dg_c_ptr,global_c_ptr)
   use, intrinsic :: iso_c_binding
+  use sizes
   use dg
   use global
   implicit none
 
+  type (C_PTR) :: sizes_c_ptr
   type (C_PTR) :: dg_c_ptr
   type (C_PTR) :: global_c_ptr
 
+  type (sizes_type), pointer :: s
   type (dg_type), pointer :: dg_here
   type (global_type), pointer :: global_here
 
+  call C_F_POINTER(sizes_c_ptr,s)
   call C_F_POINTER(dg_c_ptr,dg_here)
   call C_F_POINTER(global_c_ptr,global_here)
   
 !  print*, "FORTRAN: sizes_c_ptr = ", sizes_c_ptr
   
 #ifdef VERBOSE
-!  write(99,*) "Entering wetdry_fort, id =", s%myproc, " timestep = ", timestep, " rkstep = ", rkstep
+  write(99,*) "Entering slopelimiter_fort"
 !  print*, "FORTRAN: Entering dg_hydro_timestep_fort"
 !  print*, "FORTRAN: myproc =", s%myproc
 !  print*, "FORTRAN: timestep =", timestep
 !  print*, "FORTRAN: rkstep =", rkstep
 #endif
 
+#ifdef SLOPE5
+  call slopelimiter5_partA(s,dg_here,global_here)
+#endif
+end subroutine slopelimiter_partA_fort
+
+subroutine slopelimiter_partB_fort(sizes_c_ptr,dg_c_ptr,global_c_ptr)
+  use, intrinsic :: iso_c_binding
+  use sizes
+  use dg
+  use global
+  implicit none
+
+  type (C_PTR) :: sizes_c_ptr
+  type (C_PTR) :: dg_c_ptr
+  type (C_PTR) :: global_c_ptr
+
+  type (sizes_type), pointer :: s
+  type (dg_type), pointer :: dg_here
+  type (global_type), pointer :: global_here
+
+  call C_F_POINTER(sizes_c_ptr,s)
+  call C_F_POINTER(dg_c_ptr,dg_here)
+  call C_F_POINTER(global_c_ptr,global_here)
+  
+!  print*, "FORTRAN: sizes_c_ptr = ", sizes_c_ptr
+  
+#ifdef VERBOSE
+  write(99,*) "Entering slopelimiter_fort"
+!  print*, "FORTRAN: Entering dg_hydro_timestep_fort"
+!  print*, "FORTRAN: myproc =", s%myproc
+!  print*, "FORTRAN: timestep =", timestep
+!  print*, "FORTRAN: rkstep =", rkstep
+#endif
+
+#ifdef SLOPE5
+  call slopelimiter5_partB(s,dg_here,global_here)
+#endif
   IF (global_here%NOLIFA .GE. 2) THEN
      call wetdry(dg_here,global_here)
   ENDIF
 
-end subroutine wetdry_fort
+end subroutine slopelimiter_partB_fort
+
 
 SUBROUTINE DG_TIMESTEP_ADVANCE_fort(sizes_c_ptr,dg_c_ptr,global_c_ptr,nodalattr_c_ptr,timestep)
   use, intrinsic :: iso_c_binding
@@ -260,33 +302,61 @@ subroutine hpx_put_elems_fort(dg_c_ptr,neighbor,volume,recvbuf,rkindex)
 end subroutine hpx_put_elems_fort
 
 
-subroutine hpx_swap_elems_fort(dg_domain_c_ptr,dg_neighbor_c_ptr)
+
+subroutine hpx_get_nodes_fort(dg_c_ptr,neighbor,volume,sendbuf)
   use, intrinsic :: iso_c_binding
   use dg
   use sizes
   implicit none
 
-  type (C_PTR) :: dg_domain_c_ptr
-  type (C_PTR) :: dg_neighbor_c_ptr
+  type (C_PTR) :: dg_c_ptr
+  real(sz) :: sendbuf(MAX_BUFFER_SIZE)
+  integer :: volume
+  integer :: neighbor
+
+  integer :: i
+
+  type (dg_type), pointer :: dg_here
+
+  call C_F_POINTER(dg_c_ptr,dg_here)
+
+
+#ifdef VERBOSE
+  write(99,*) "Entering hpx_get_nodes_fort"
+#endif
+
+  call hpx_get_nodes(dg_here,neighbor,volume,sendbuf)
+
+end subroutine hpx_get_nodes_fort
+
+subroutine hpx_put_nodes_fort(dg_c_ptr,neighbor,volume,recvbuf)
+  use, intrinsic :: iso_c_binding
+  use dg
+  use sizes
+  implicit none
+
+  type (C_PTR) :: dg_c_ptr
   real(sz) :: recvbuf(MAX_BUFFER_SIZE)
   integer :: volume
   integer :: neighbor
 
   integer :: i
 
-  type (dg_type), pointer :: dg_here_domain
-  type (dg_type), pointer :: dg_here_neighbor
+  type (dg_type), pointer :: dg_here
+
+  call C_F_POINTER(dg_c_ptr,dg_here)
 
 #ifdef VERBOSE
-!  print*, "FORTRAN: Entering hpx_swap_elems"
+!  print*, "FORTRAN: Entering hpx_put_nodes_fort"
+  write(99,*) "Entering hpx_put_nodes_fort"
 #endif
 
-  call C_F_POINTER(dg_domain_c_ptr,dg_here_domain)
-  call C_F_POINTER(dg_neighbor_c_ptr,dg_here_neighbor)
+  call hpx_put_nodes(dg_here,neighbor,volume,recvbuf)
 
-  call hpx_swap_elems(dg_here_domain,dg_here_neighbor)
+end subroutine hpx_put_nodes_fort
 
-end subroutine hpx_swap_elems_fort
+
+
 
 subroutine term_fort(sizes_c_ptr,dg_c_ptr,global_c_ptr,nodalattr_c_ptr)
   use, intrinsic :: iso_c_binding

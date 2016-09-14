@@ -167,8 +167,7 @@ int main(
       } // End loop over domains
       
 
-      /*
-      // Boundary exchange
+      // Element Boundary exchange
       // Loop over domains   
       for (int domain=0; domain<ids.size(); domain++) {
 	std::vector<int> neighbors_here = neighbors[domain];
@@ -191,7 +190,7 @@ int main(
 				    buffer,
 				    &rkindex);
 	  // DEBUG
-	  fortran_calls << "volume = " << volume << std::endl; // DEBUG
+	  //	  fortran_calls << "volume = " << volume << std::endl; // DEBUG
 	  /*
 	  fortran_calls << "buffer = ";
 	  for (int i=0; i<volume; i++) {
@@ -199,7 +198,6 @@ int main(
 	  }
 	  fortran_calls << std::endl;
 	  */
-	  /*
 	  // Put those arrays inside current domain 
 	  fortran_calls << "calling hpx_put_elems_fort, timestep = " << timestep << " rkstep = "
 			<< rkstep << " domain = "<< domain << " neighbor = " << neighbor_here << std::endl;	  
@@ -209,41 +207,36 @@ int main(
 	      fortran_calls << buffer[i] << " ";
 	  }
 	  fortran_calls << std::endl;	  
-	  */ /*
-	  //fortran_calls << "buffer_vector.size() = " << buffer_vector.size() << std::endl;
+	  */ 	  //fortran_calls << "buffer_vector.size() = " << buffer_vector.size() << std::endl;
 	  FNAME(hpx_put_elems_fort)(&dgs[domain],
 				    &neighbor_here,
 				    &volume,
 				    buffer,
 				    &rkindex);	
-         
-//          FNAME(hpx_swap_elems_fort)(&dgs[domain],
-//                                     &dgs[neighbor_here]);
-	  
 	  
 	  
 	}// end loop over neighbors
 	
-      }// end loop over domains*/
-      //end first boundary exchange
+      }// end loop over domains
 
-      for (int j=0; j<ids.size(); j++) {
-	//std::cout << "j=" << j << std::endl;
-	        std::cout << "calling wetdry() (domain_id = " << ids[j]
-		  << ", timestep = " << timestep
-		  << ", rkstep = " << rkstep
-		  << ")...\n";
-		fortran_calls << "calling dg_wetdry_timestep_fort, timestep = " << timestep << " rkstep = "
-			      << rkstep << " domain = "<< j << std::endl;
-		FNAME(wetdry_fort)(&dgs[j],
-				   &globals[j]);
-      } // End loop over domains
+      //end boundary exchange
 
-      /*
-      // Boundary exchange
-      // Loop over domains   
+
+      // &&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&& Slopelimiter_part1 &&&&&&&&&&&&&&&&&
       for (int domain=0; domain<ids.size(); domain++) {
-	std::vector<int> neighbors_here = neighbors[domain];
+	  fortran_calls << "calling SL part 1, timestep = " << timestep << " rkstep = " << rkstep 
+			<< " domain = " << domain << std::endl;
+	  
+		FNAME(slopelimiter_parta_fort)(&sizes[domain],
+				&dgs[domain],
+				&globals[domain]);	  
+      }
+      // &&&&&&&&&&&&&&&&&&&&&&& Slopelimiter boundary exchange &&&&&&&&&&&&&&
+      for (int domain=0; domain<ids.size(); domain++) {
+      fortran_calls << "calling SL boundary exchange GET, timestep = " << timestep << " rkstep = " << rkstep 
+		   << " domain = " << domain << std::endl;
+      
+       std::vector<int> neighbors_here = neighbors[domain];
 
 	//Loop over neighbors
 	for (int neighbor=0; neighbor<numneighbors[domain]; neighbor++) {	
@@ -253,51 +246,45 @@ int main(
 
 	  std::cout << "domain " << domain << " is exchanging with " << neighbor_here << " at timestep " << timestep << std::endl;
 	  
-	  // Get outgoing boundarys from the neighbors
-	  fortran_calls << "calling hpx_get_elems_fort, timestep = " << timestep << " rkstep = "
-			<< rkstep << " domain = "<< domain << " neighbor = " << neighbor_here << std::endl;
-	  int rkindex = 0;
-	  FNAME(hpx_get_elems_fort)(&dgs[neighbor_here],
+
+	  FNAME(hpx_get_nodes_fort)(&dgs[neighbor_here],
 				    &domain,
 				    &volume,
-				    buffer,
-				    &rkindex);
-	  // DEBUG
-	  fortran_calls << "volume = " << volume << std::endl; // DEBUG
-	  /*
-	  fortran_calls << "buffer = ";
-	  for (int i=0; i<volume; i++) {
-	      fortran_calls << buffer[i] << " ";
-	  }
-	  fortran_calls << std::endl;
-	  */
-      /*
-	  // Put those arrays inside current domain
-	  fortran_calls << "calling hpx_put_elems_fort, timestep = " << timestep << " rkstep = "
-			<< rkstep << " domain = "<< domain << " neighbor = " << neighbor_here << std::endl;	  
-	  /*
-	  fortran_calls << "buffer = ";
-	  for (int i=0; i<MAX_BUFFER_SIZE; i++) {
-	      fortran_calls << buffer[i] << " ";
-	  }
-	  fortran_calls << std::endl;	  
-	  */ /*
-	  //fortran_calls << "buffer_vector.size() = " << buffer_vector.size() << std::endl;
-	  FNAME(hpx_put_elems_fort)(&dgs[domain],
-				    &neighbor_here,
+				    buffer);   
+	}
+      }
+
+      for (int domain=0; domain<ids.size(); domain++) {
+      fortran_calls << "calling SL boundary exchange PUT, timestep = " << timestep << " rkstep = " << rkstep 
+		   << " domain = " << domain << std::endl;
+      
+       std::vector<int> neighbors_here = neighbors[domain];
+
+	//Loop over neighbors
+	for (int neighbor=0; neighbor<numneighbors[domain]; neighbor++) {	
+	  int neighbor_here = neighbors_here[neighbor];
+	  int volume;
+	  double buffer[MAX_BUFFER_SIZE];
+
+	  std::cout << "domain " << domain << " is exchanging with " << neighbor_here << " at timestep " << timestep << std::endl;
+	  
+
+	  FNAME(hpx_put_nodes_fort)(&dgs[neighbor_here],
+				    &domain,
 				    &volume,
-				    buffer,
-				    &rkindex);	
-         
-//          FNAME(hpx_swap_elems_fort)(&dgs[domain],
-//                                     &dgs[neighbor_here]);
+				    buffer);   
+	}      
+      }
+      // &&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&& Slopelimiter_part2 &&&&&&&&&&&&&&&&&
+      for (int domain=0; domain<ids.size(); domain++) {
+	  fortran_calls << "calling SL part 2, timestep = " << timestep << " rkstep = " << rkstep 
+			<< " domain = " << domain << std::endl;
 	  
-	  
-	  
-	}// end loop over neighbors
+		FNAME(slopelimiter_partb_fort)(&sizes[domain],
+				&dgs[domain],
+				&globals[domain]);	  
+      }    
        
-      }// end loop over domains
-	     */
       //return 0;
       
     } // end rkstep loop
@@ -310,16 +297,14 @@ int main(
 				      &globals[domain],
 				      &nodalattrs[domain],
 				      &timestep
-				      );
+					);
+    } 
+    
+    if ( timestep > 2) {
+	return 0;  // stop after one timestep for debugging
     }
-
-//     if ( timestep > 2) {
-//      return 0;  // stop after one timestep for debugging
-//     }
-
-
+    
   } // End timestep loop
-
 
   
   
