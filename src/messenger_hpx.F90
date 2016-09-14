@@ -325,7 +325,6 @@
            dg_here%ZE_MAX1(dg_here%IRECVLOC_NODE(nd,index)) = recvbuf(ncount)
          ENDDO
 
-         ncount = 0
          DO nd=1,dg_here%NNODRECV(index)
            ncount = ncount+1
            dg_here%QX_MIN1(dg_here%IRECVLOC_NODE(nd,index)) = recvbuf(ncount)
@@ -336,7 +335,6 @@
            dg_here%QX_MAX1(dg_here%IRECVLOC_NODE(nd,index)) = recvbuf(ncount)
          ENDDO
 
-         ncount = 0
          DO nd=1,dg_here%NNODRECV(index)
            ncount = ncount+1
            dg_here%QY_MIN1(dg_here%IRECVLOC_NODE(nd,index)) = recvbuf(ncount)
