@@ -1,5 +1,5 @@
 #ifdef HPX
-subroutine dgswem_init_fort(sizes_c_ptr,dg_c_ptr,global_c_ptr,nodalattr_c_ptr,id)
+subroutine dgswem_init_fort(sizes_c_ptr,dg_c_ptr,global_c_ptr,nodalattr_c_ptr,id,single_domain)
   use, intrinsic :: iso_c_binding
   use sizes
   use dg
@@ -12,6 +12,7 @@ subroutine dgswem_init_fort(sizes_c_ptr,dg_c_ptr,global_c_ptr,nodalattr_c_ptr,id
   type (C_PTR) :: global_c_ptr
   type (C_PTR) :: nodalattr_c_ptr
   integer,intent(in) :: id
+  logical,intent(in) :: single_domain
 
 !  integer :: n_timesteps
 !  integer,intent(out) :: n_domains
@@ -38,6 +39,8 @@ subroutine dgswem_init_fort(sizes_c_ptr,dg_c_ptr,global_c_ptr,nodalattr_c_ptr,id
   s%myproc = id ! I think this should be before the call to dgswem_init
   s%cpp_timestep = 0
   s%cpp_rkstep = 1
+  
+  s%cpp_single_domain = single_domain
 
   call dgswem_init(s,dg_here,global_here,nodalattr_here)
 

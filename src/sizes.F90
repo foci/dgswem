@@ -62,6 +62,8 @@ MODULE SIZES
      !
      INTEGER :: MYPROC
      
+     LOGICAL :: CPP_SINGLE_DOMAIN
+     
 #ifdef CMPI
      INTEGER :: LNAME = 6
      CHARACTER*6 :: DIRNAME = 'PE0000'

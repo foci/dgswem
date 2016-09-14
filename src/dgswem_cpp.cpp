@@ -20,6 +20,7 @@ int main(
     std::ofstream fortran_calls;
     fortran_calls.open("fortran_calls.txt");
 
+    bool single_domain = true;
 
     for (int i=1; i<argc; ++i) {
 	std::string arg = argv[i];
@@ -59,8 +60,11 @@ int main(
   int n_domains;
   int n_rksteps = 2;
   
-
-  FNAME(hpx_read_n_domains)(&n_domains);
+  if ( single_domain ) {
+    n_domains = 1;
+  } else {
+    FNAME(hpx_read_n_domains)(&n_domains);
+  }
 
   std::cout << "c++: n_domains = " << n_domains << std::endl;
 
@@ -89,7 +93,8 @@ int main(
 			    &dgs[i],
 			    &globals[i],
 			    &nodalattrs[i],
-			    &ids[i]
+			    &ids[i],
+			    &single_domain
 			    );
     
     //Get a list of neighbors for each domain
@@ -169,6 +174,7 @@ int main(
 
       // Element Boundary exchange
       // Loop over domains   
+      if (!single_domain) {
       for (int domain=0; domain<ids.size(); domain++) {
 	std::vector<int> neighbors_here = neighbors[domain];
 
@@ -218,6 +224,7 @@ int main(
 	}// end loop over neighbors
 	
       }// end loop over domains
+      }//end if(!single_domain)
 
       //end boundary exchange
 
@@ -232,6 +239,7 @@ int main(
 				&globals[domain]);	  
       }
       // &&&&&&&&&&&&&&&&&&&&&&& Slopelimiter boundary exchange &&&&&&&&&&&&&&
+      if (!single_domain) {
       for (int domain=0; domain<ids.size(); domain++) {
       fortran_calls << "calling SL boundary exchange GET, timestep = " << timestep << " rkstep = " << rkstep 
 		   << " domain = " << domain << std::endl;
@@ -258,6 +266,7 @@ int main(
 				    buffer);   
 	}      
       }
+      } //end if(!single_domain)
       // &&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&& Slopelimiter_part2 &&&&&&&&&&&&&&&&&
       for (int domain=0; domain<ids.size(); domain++) {
 	  fortran_calls << "calling SL part 2, timestep = " << timestep << " rkstep = " << rkstep 

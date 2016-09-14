@@ -158,8 +158,10 @@
 !.....Initilization for parallel DG run
 
 #ifdef HPX
+if (s%cpp_single_domain .EQV. .FALSE.) then
       call elem_msg_table_hpx(s, dg_here)
       call node_msg_table_hpx(s, dg_here)
+endif
 #endif
 
 #ifdef CMPI
