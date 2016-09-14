@@ -220,14 +220,14 @@
        
        IF (neighbor_found) THEN
        
-!          PRINT*, " PROC: ", dg_here%IDPROC, " SENDING ", dg_here%NNODESEND(index) ," NODES TO: ", dg_here%IPROC(index)       
-!          PRINT 180, (dg_here%ISENDLOC_NODE(nd,index), nd = 1,dg_here%NNODESEND(index))
+!          PRINT*, " PROC: ", dg_here%IDPROC, " SENDING ", dg_here%NNODSEND(index) ," NODES TO: ", dg_here%IPROC(index)       
+!          PRINT 180, (dg_here%ISENDLOC_NODE(nd,index), nd = 1,dg_here%NNODSEND(index))
 !          PRINT*, "" 
       
          ncount = 0
          DO nd=1,dg_here%NNODSEND(index)
             ncount = ncount+1
-            sendbuf(ncount)=dg_here%ZE_MIN1(dg_here%ISENDLOC_NODE(nd,index))
+            sendbuf(ncount)=dg_here%ZE_MIN1(dg_here%ISENDLOC_NODE(nd,index))            
          ENDDO
 
          DO nd=1,dg_here%NNODSEND(index)
@@ -310,8 +310,8 @@
              
        IF (neighbor_found) THEN  
        
-!          PRINT*, " PROC: ", dg_here%IDPROC, " RECEIVING ",dg_here%NNODERECV(index), " NODES FROM: ", dg_here%IPROC(index)
-!          PRINT 180, (dg_here%IRECVLOC_NODE(el,index), el = 1,dg_here%NNODERECV(index))
+!          PRINT*, " PROC: ", dg_here%IDPROC, " RECEIVING ",dg_here%NNODRECV(index), " NODES FROM: ", dg_here%IPROC(index)
+!          PRINT 180, (dg_here%IRECVLOC_NODE(nd,index), nd = 1,dg_here%NNODRECV(index))
 !          PRINT*, ""
          
          ncount = 0
@@ -325,7 +325,6 @@
            dg_here%ZE_MAX1(dg_here%IRECVLOC_NODE(nd,index)) = recvbuf(ncount)
          ENDDO
 
-         ncount = 0
          DO nd=1,dg_here%NNODRECV(index)
            ncount = ncount+1
            dg_here%QX_MIN1(dg_here%IRECVLOC_NODE(nd,index)) = recvbuf(ncount)
@@ -336,7 +335,6 @@
            dg_here%QX_MAX1(dg_here%IRECVLOC_NODE(nd,index)) = recvbuf(ncount)
          ENDDO
 
-         ncount = 0
          DO nd=1,dg_here%NNODRECV(index)
            ncount = ncount+1
            dg_here%QY_MIN1(dg_here%IRECVLOC_NODE(nd,index)) = recvbuf(ncount)

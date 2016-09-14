@@ -251,26 +251,9 @@ int main(
 				    &domain,
 				    &volume,
 				    buffer);   
-	}
-      }
 
-      for (int domain=0; domain<ids.size(); domain++) {
-      fortran_calls << "calling SL boundary exchange PUT, timestep = " << timestep << " rkstep = " << rkstep 
-		   << " domain = " << domain << std::endl;
-      
-       std::vector<int> neighbors_here = neighbors[domain];
-
-	//Loop over neighbors
-	for (int neighbor=0; neighbor<numneighbors[domain]; neighbor++) {	
-	  int neighbor_here = neighbors_here[neighbor];
-	  int volume;
-	  double buffer[MAX_BUFFER_SIZE];
-
-	  std::cout << "domain " << domain << " is exchanging with " << neighbor_here << " at timestep " << timestep << std::endl;
-	  
-
-	  FNAME(hpx_put_nodes_fort)(&dgs[neighbor_here],
-				    &domain,
+	  FNAME(hpx_put_nodes_fort)(&dgs[domain],
+				    &neighbor_here,
 				    &volume,
 				    buffer);   
 	}      
@@ -300,9 +283,9 @@ int main(
 					);
     } 
     
-    if ( timestep > 2) {
-	return 0;  // stop after one timestep for debugging
-    }
+//     if ( timestep > 2) {
+// 	return 0;  // stop after one timestep for debugging
+//     }
     
   } // End timestep loop
 
