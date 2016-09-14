@@ -300,9 +300,9 @@ int main(
 					);
     } 
     
-    if ( timestep > 2) {
-	return 0;  // stop after one timestep for debugging
-    }
+//     if ( timestep > 2) {
+// 	return 0;  // stop after one timestep for debugging
+//     }
     
   } // End timestep loop
 
