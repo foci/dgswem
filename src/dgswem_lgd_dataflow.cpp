@@ -42,7 +42,6 @@ int hpx_main(variables_map & vm)
     int n_substeps = 4;
 
     // Needed by HPX simulator
-    std::vector<double> updateGroupSpeeds(1, 1.0);
     int total_rksteps = n_timesteps*n_substeps+1;
     std::cout << "total_rksteps = " << total_rksteps << std::endl;
 
