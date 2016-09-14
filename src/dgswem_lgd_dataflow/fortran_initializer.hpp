@@ -178,6 +178,8 @@ public:
 	    void *global = NULL;
 	    void *nodalattr = NULL;
 
+	    bool single_domain {false};
+
 	    int domain_number = id;
 
 	    std::cout << "initializing (domain_id = " << id
@@ -188,7 +190,9 @@ public:
 				    &dg,
 				    &global,
 				    &nodalattr,
-				    &domain_number);
+				    &domain_number,
+				    &single_domain
+				    );
 
 	    // Get list of neighbors for this domain
 	    std::vector<int> neighbors_here = neighboringDomainIDs(size, dg, global);
