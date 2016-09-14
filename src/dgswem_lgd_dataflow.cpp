@@ -39,11 +39,11 @@ int hpx_main(variables_map & vm)
 
     std::cout << "n_timesteps from cmd line = " << n_timesteps << std::endl;
 
-    int n_rksteps = 2;
+    int n_substeps = 4;
 
     // Needed by HPX simulator
     std::vector<double> updateGroupSpeeds(1, 1.0);
-    int total_rksteps = n_timesteps*2+1;
+    int total_rksteps = n_timesteps*n_substeps+1;
     std::cout << "total_rksteps = " << total_rksteps << std::endl;
 
     

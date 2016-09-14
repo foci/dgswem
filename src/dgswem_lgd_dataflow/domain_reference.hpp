@@ -12,6 +12,7 @@ std::vector<int> neighboringDomainIDs(void *size, void *dg, void *global)
         return std::vector<int>();
     }
 
+    
     FNAME(get_neighbors_fort)(&size,
 			      &dg,
 			      &global,
@@ -49,7 +50,7 @@ public:
 	{
 	    if (size) {
 		//	      std::cout << "CPP: about to call term_fort" << std::endl;
-		FNAME(term_fort)(&size,&global,&dg,&nodalattr);
+	      FNAME(term_fort)(&size,&global,&dg,&nodalattr);
 	    }
 	}
       
@@ -84,7 +85,8 @@ public:
 	
 	//	if (id == 0)
 	//hpx::cout << "globalNanoStep = " << globalNanoStep << " timestep = " << timestep << std::endl;
-	hpx::cout << "globalNanoStep = " << globalNanoStep << " timestep = " << timestep << " id = " << id << std::endl;
+	hpx::cout << "globalNanoStep = " << globalNanoStep << " timestep = " << timestep << " id = " << id << 
+	  " rkstep = " << rkstep << " slopelimiter = " << slopelimiter << std::endl;
 	
 
 	// Retrieve variables 
@@ -123,16 +125,17 @@ public:
 		}
 		
 		rkindex = 0;
-		/*
-		  if (id==0)
+		
+		if (id==0)
 		  hpx::cout << "hpx_put_elems" << std::endl;
-		*/
+		
+		/*
 		FNAME(hpx_put_elems_fort)(&domainWrapper->dg,
 					  &neighbor,
 					  &volume,
 					  buffer,
 					  &rkindex);
-		
+		*/
 	    } // End loop over neighbors
 	    
 	    if (slopelimiter) {
@@ -149,13 +152,15 @@ public:
 		    
 		    if (id==0)
 			hpx::cout << "dg_timestep_advance" << std::endl;
-		    
+
+		    /*
 		    FNAME(dg_timestep_advance_fort)(&domainWrapper->size,
 						    &domainWrapper->dg,
 						    &domainWrapper->global,
 						    &domainWrapper->nodalattr,
 						    &timestep_minus
 						    );
+		    */
 		}
 		
 		// Call dg_hydro_timestep_fort
@@ -165,6 +170,7 @@ public:
 		
 		
 		// Do hydro
+		/*
 		FNAME(dg_hydro_timestep_fort)(&domainWrapper->size,
 					      &domainWrapper->dg,
 					      &domainWrapper->global,
@@ -172,6 +178,7 @@ public:
 					      &timestep,
 					      &rkstep
 					      );
+		*/
 	    }
 	} // end if timestep > 1
 	
@@ -187,13 +194,14 @@ public:
 	    
 	    if (id==0)
 		hpx::cout << "hpx_get_elems" << std::endl;
-	    
+	
+	    /*
 	    FNAME(hpx_get_elems_fort)(&domainWrapper->dg, //pointer to current domain
 				      &neighbor, // pointer to neighbor to send to
 				      &volume,
 				      buffer,
 				      &rkindex);
-
+	    */
 	    for (int i=0; i<volume; i++) {
 		send_buffer.push_back(buffer[i]);
 	    }
