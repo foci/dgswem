@@ -24,7 +24,8 @@
       REAL(8),PRIVATE,PARAMETER :: RAD2DEG = 180.D0/PI
       REAL(8),PRIVATE,PARAMETER :: DEG2RAD = PI/180.D0
       INTEGER StormNumber !jgf46.28 For Holland Wind model wind multiplier
-      REAL(8) WindRefTime !jgf46.29 seconds since beginning of year, this
+!     WindRefTime has been moved to sizes.F90
+!      REAL(8) WindRefTime !jgf46.29 seconds since beginning of year, this  
                           !corresponds to time=0 of the simulation 
       REAL(8) BLAdj       !jgf46.32 boundary layer adjustment for Holland model
 
@@ -1741,6 +1742,7 @@
 !
       IF (s%FIRSTCALL) THEN
          s%FIRSTCALL = .False.
+         print*, 'firstcall to hollandget, about to allocate, NP = ', NP
          ALLOCATE (S%RAD(NP),s%DX(NP),s%DY(NP),s%XCOOR(NP),s%YCOOR(NP))
          ALLOCATE (s%V_r(NP),s%THETA(NP))
 !
@@ -1920,6 +1922,9 @@
             s%nl=s%nl+1
          ENDDO
  8888    CLOSE(22)
+
+
+         print*, 'firstcall to gethollandwinddata, about to allocate, s%nl = ', s%nl
 !
 !     Dimension the arrays according to the number of lines in the file,
 !     this will be greater than or equal to the size of the array we need
@@ -1977,7 +1982,7 @@
                    S%casttime(s%i),s%MyProc,NScreen,ScreenUnit)
 !
 !     Determine the CastTime in seconds since the beginning of the simulation.
-               S%casttime(s%i)=S%casttime(s%i)-WindRefTime
+               S%casttime(s%i)=S%casttime(s%i)-s%WindRefTime
                s%FcstInc(s%i)=s%iFcstInc(s%i)
 !
 !           ------------
@@ -2001,7 +2006,7 @@
                IF ( s%iFcstInc(s%i).eq.0 ) THEN
                   CALL TimeConv(s%iYear(s%i),s%iMth(s%i),s%iDay(s%i),s%iHr(s%i),0,0.d0,&
                       S%casttime(s%i),s%MyProc,NScreen,ScreenUnit)
-                  S%casttime(s%i)=S%casttime(s%i)-WindRefTime
+                  S%casttime(s%i)=S%casttime(s%i)-s%WindRefTime
                ELSE
                   s%FcstInc(s%i) = s%FcstInc(s%i) * 3600.d0 ! convert hours to seconds
                   S%casttime(s%i) = S%casttime(s%i-1) +&
@@ -2047,13 +2052,13 @@
 !
 #ifdef DEBUG_HOLLAND
             WRITE(16,1244) s%CastTime(s%i),s%Lat(s%i),s%Lon(s%i),&
-                s%Spd(s%i),s%CPress(s%i),s%RRP(s%i),s%RMW(s%i),WindRefTime
+                s%Spd(s%i),s%CPress(s%i),s%RRP(s%i),s%RMW(s%i),s%WindRefTime
             if ( s%i.gt.1 ) then
                write(16,2355) s%FcstInc(s%i-1)
             endif
             IF (NScreen.ne.0.and.s%MyProc.eq.0) THEN
                WRITE(ScreenUnit,1244) s%CastTime(s%i),s%Lat(s%i),s%Lon(s%i),&
-                   s%Spd(s%i),s%CPress(s%i),s%RRP(s%i),s%RMW(s%i),WindRefTime
+                   s%Spd(s%i),s%CPress(s%i),s%RRP(s%i),s%RMW(s%i),s%WindRefTime
             ENDIF
  1244       FORMAT('CastTime ',e16.8,' Lat ',f6.2,' Lon ',f6.2,&
                 /,'Spd ',f8.2,' CPress ',f10.2,' RRP ',f12.2,&

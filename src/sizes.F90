@@ -199,6 +199,8 @@ MODULE SIZES
      INTEGER :: nl ! Number of lines in the fort.22 file
      INTEGER :: pl ! populated length of Holland Data array
 
+     real(sz) :: WindRefTime
+
   end type sizes_type
   
 END MODULE SIZES

@@ -1066,8 +1066,12 @@
  6111       FORMAT(5X,'WIND REFERENCE TIME FOR SIMULATION = ',&
            I2,'/',I2,'/',I2,'  ',I2,'H',/)
          ENDIF
+         print*, 'timeconv at read_input'
+            WRITE(*,6112) global_here%IREFMO,global_here%IREFDAY,global_here%IREFYR,global_here%IREFHR
+ 6112       FORMAT(5X,'WIND REFERENCE TIME FOR SIMULATION = ',&
+           I2,'/',I2,'/',I4,'  ',I2,'H',/)
          CALL TIMECONV(global_here%IREFYR,global_here%IREFMO,global_here%IREFDAY,global_here%IREFHR,0,0.0d0,&
-        WindRefTime, S%MYPROC, global_here%NScreen, global_here%ScreenUnit)
+        s%WindRefTime, S%MYPROC, global_here%NScreen, global_here%ScreenUnit)
       ENDIF
 
       IF (global_here%NWS.EQ.10) THEN
