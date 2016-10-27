@@ -39,6 +39,7 @@
 
       INTEGER NIBP, IBN1, IK, NDISC, NBBN, NVEL2, II, i,j,jj,k,IPRBI_here,ICK_here
       CHARACTER(256) LINE,LINE2
+
 #ifndef HARM
       integer nfreq_dummy
 #endif
@@ -1070,6 +1071,7 @@
             WRITE(*,6112) global_here%IREFMO,global_here%IREFDAY,global_here%IREFYR,global_here%IREFHR
  6112       FORMAT(5X,'WIND REFERENCE TIME FOR SIMULATION = ',&
            I2,'/',I2,'/',I4,'  ',I2,'H',/)
+            s%WindRefTime = 0.0;
          CALL TIMECONV(global_here%IREFYR,global_here%IREFMO,global_here%IREFDAY,global_here%IREFHR,0,0.0d0,&
         s%WindRefTime, S%MYPROC, global_here%NScreen, global_here%ScreenUnit)
       ENDIF
@@ -3739,6 +3741,9 @@
          WRITE(S%FORT16UNIT,3217) global_here%NSTAM
  3217    FORMAT(///,5X,'NUMBER OF INPUT METEOROLOGICAL RECORDING ',&
         'STATIONS = ',I5)
+
+         !initialize this to zero
+         s%mnstam = 0
 
          IF(global_here%NSTAM.GT.0) THEN
             IF(global_here%ICS.EQ.1) WRITE(S%FORT16UNIT,3218)
