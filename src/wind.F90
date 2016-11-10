@@ -149,7 +149,7 @@
          ALLOCATE ( WVXFN(NWLAT,NWLON),WVYFN(NWLAT,NWLON),PRN(NWLAT,NWLON) )
       ENDIF
 !
-      READ(22,*) IWTIME
+      READ(s%fort22unit,*) IWTIME
       IWYR = IWTIME/1000000
       IWMO = IWTIME/10000 - IWYR*100
       IWDAY = IWTIME/100 - IWYR*10000 - IWMO*100
@@ -157,10 +157,10 @@
       CALL TIMECONV(IWYR,IWMO,IWDAY,IWHR,0,0.0D0,WTIMED,s%MyProc,NScreen,ScreenUnit)
 !
       DO I=1,NWLAT
-         READ(22,*) (WVXFN(I,J),J=1,NWLON)
+         READ(s%fort22unit,*) (WVXFN(I,J),J=1,NWLON)
       END DO
       DO I=1,NWLAT
-         READ(22,*) (WVYFN(I,J),J=1,NWLON)
+         READ(s%fort22unit,*) (WVYFN(I,J),J=1,NWLON)
       END DO
 !
       DO I=1,NWLAT              !CONVERT TO X AND Y COMPONENTS
@@ -1754,9 +1754,9 @@
       ENDIF
 !
 !     Get data for this time step.
-!      write(*,*) 'calling GetHolland',Firstcall
+      write(*,*) 'calling GetHolland', s%fort22unit
       CALL GetHollandStormData(s,lat,lon,cpress,spd,rrp,rmw,tvx,tvy,time,nscreen,screenunit)
-!
+      write(*,*) 'end GetHolland'
 !     Calculate and limit central pressure deficit; some track files
 !     (e.g., Charley 2004) may have a central pressure greater than the
 !     ambient pressure that this subroutine assumes
@@ -1916,12 +1916,14 @@
 !
 !     Determine the number of lines in the file.
          s%nl=0
-!         OPEN(22,FILE=TRIM(LOCALDIR)//'/'//'fort.22')
+         OPEN(s%fort22unit,FILE=S%DIRNAME//'/'//'fort.22')
+         Print *,"opening fort.22 in ", s%dirname
          DO
-            READ(UNIT=22,FMT='(A170)',END=8888)
+            READ(UNIT=s%fort22unit,FMT='(A170)',END=8888)
             s%nl=s%nl+1
          ENDDO
- 8888    CLOSE(22)
+ 8888    CONTINUE
+         CLOSE(s%fort22unit)
 
 
          print*, 'firstcall to gethollandwinddata, about to allocate, s%nl = ', s%nl
@@ -1948,7 +1950,7 @@
 !     forecast because the time data is just the time that the forecast
 !     was made. The important parameter in the forecast file is the
 !     forecast increment.
-            READ(UNIT=22,FMT=14,END=9999)&
+            READ(UNIT=s%fort22unit,FMT=14,END=9999)&
                 s%iYear(s%i),s%iMth(s%i),s%iDay(s%i),s%iHr(s%i),&
                 s%CastType(s%i),s%iFcstInc(s%i),s%iLat(s%i),s%iLon(s%i),s%iSpd(s%i),&
                 s%iCPress(s%i),s%iRRP(s%i),s%iRMW(s%i)
@@ -2074,7 +2076,7 @@
             s%i=s%i+1
 !
          ENDDO
- 9999    CLOSE(22)
+ 9999    CLOSE(s%fort22unit)
 !
 !     Calculate storm translation velocities based on change in position, then
 !     convert degrees/time to m/s
