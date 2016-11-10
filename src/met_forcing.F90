@@ -1,3 +1,4 @@
+
 !***********************************************************************
 !
 !     SUBROUTINE MET_FORCING()
@@ -61,9 +62,9 @@
          DO II= 1,global_here%NP
          
 !..........Read in the data
-         
-           READ(22,*) global_here%NHG, global_here%WSX2(II), global_here%WSY2(II), global_here%PR2(II)
-           
+
+           READ(s%fort22unit,*) global_here%NHG, global_here%WSX2(II), global_here%WSY2(II), global_here%PR2(II)
+
 !..........Apply the met global_here%ramp function
 
 !           global_here%RampMete = dg_here%RAMPDG
@@ -103,8 +104,8 @@
             global_here%PRN1(II)  = global_here%PRN2(II)
             
 !...........Read in data
-            
-            READ(22,*) global_here%NHG, global_here%WVNX2(II), global_here%WVNY2(II), global_here%PRN2(II)
+
+            READ(s%fort22unit,*) global_here%NHG, global_here%WVNX2(II), global_here%WVNY2(II), global_here%PRN2(II)
           ENDDO
           PRINT*,'READING IN WIND DATA SET AT TIMESTEP',IT
         ENDIF
@@ -301,8 +302,8 @@
             global_here%PRN1(II)  = global_here%PRN2(II)
             
 !...........Read in the meteorological forcing data
-            
-            READ(22,*) global_here%NHG, global_here%WVNX2(II), global_here%WVNY2(II), global_here%PRN2(II)
+
+            READ(s%fort22unit,*) global_here%NHG, global_here%WVNX2(II), global_here%WVNY2(II), global_here%PRN2(II)
           ENDDO
         ENDIF
         
