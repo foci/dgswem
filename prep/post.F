@@ -166,7 +166,7 @@ C
       INTEGER,ALLOCATABLE :: LOC(:),IREC(:)
       REAL,ALLOCATABLE ::   ETBIN(:),ETBINP(:)
       CHARACTER*80,ALLOCATABLE ::  ETASC(:),ETASCP(:)
-      CHARACTER*14,ALLOCATABLE ::  LOCNAME(:)
+      CHARACTER*16,ALLOCATABLE ::  LOCNAME(:)
 
       ALLOCATE ( LOC(MNPROC),IREC(MNPROC) )
       ALLOCATE ( ETBIN(MNSTAE),ETBINP(MNSTAE))
@@ -759,18 +759,18 @@ C
       INTEGER, ALLOCATABLE  ::  LOC(:),IREC(:)
       REAL, ALLOCATABLE  ::  ETBIN(:),ETBINP(:)
       CHARACTER*80, ALLOCATABLE  ::  ETASC(:),ETASCP(:)
-      CHARACTER*14, ALLOCATABLE  ::  LOCNAME(:)
+      CHARACTER*16, ALLOCATABLE  ::  LOCNAME(:)
 
       ALLOCATE (LOC(MNPROC),IREC(MNPROC))
-      ALLOCATE (ETBIN(MNE),ETBINP(MNEP))
-      ALLOCATE (ETASC(MNE),ETASCP(MNEP))
+      ALLOCATE (ETBIN(MNP),ETBINP(MNPP))
+      ALLOCATE (ETASC(MNP),ETASCP(MNPP))
       ALLOCATE (LOCNAME(MNPROC))
 
 C
 C--Determine whether Unit 63 is Sequential Formatted or Direct Access Binary
 C
       IF (ABS(NOUTGE).EQ.1) THEN
-        GO TO 1000
+        GO TO 12345
       ELSE
         GO TO 2000
       ENDIF
@@ -788,7 +788,7 @@ C
            OPEN(LOC(IPROC),FILE=LOCNAME(IPROC))
          ELSE
            print *, "No Local fort.63 files found"
-           RETURN
+           go to 12345
          ENDIF
          READ(LOC(IPROC),'(A85)')  INLINE
          READ(LOC(IPROC),3645)  NDSETGE,NE,DTE,NSTEMP,ITEMPE
@@ -825,6 +825,7 @@ c        ENDDO
          ENDDO 
 C              
       ENDDO
+
       GO TO 9999
 
 
@@ -844,7 +845,7 @@ C
      &       RECL=NBYTE)
          ELSE
            print *, "No Local fort.63 files found"
-           RETURN
+           go to 12345
          ENDIF
       ENDDO
       OPEN(63,FILE='fort.63',ACCESS='DIRECT',RECL=NBYTE)
@@ -976,8 +977,63 @@ C
       DO IPROC = 1,NPROC
          CLOSE(LOC(IPROC))
       ENDDO
+12345 continue
+c  post-process maxele file
+      DO IPROC = 1,NPROC
+         LOCNAME(IPROC) = 'PE0000/maxele.63'
+         WRITE(LOCNAME(IPROC)(3:6),'(I4.4)') (IPROC-1)
+         write(*,*) 'locname ',locname(iproc)
+         LOC(IPROC) = 105 + (IPROC-1)
+         INQUIRE(FILE=LOCNAME(IPROC),EXIST=FOUND)
+         IF (FOUND) THEN
+           OPEN(LOC(IPROC),FILE=LOCNAME(IPROC))
+         ELSE
+            print *, "No Local maxele.63 files found"
+            RETURN
+         ENDIF
+         READ(LOC(IPROC),*)  NP
+         IF (NP.NE.NNODP(IPROC)) THEN
+            print *, "NE = ",NP," NNODP = ",NNODP(IPROC)
+            STOP 'Inconsistency in number of local elems'
+         ENDIF
+      ENDDO
+      OPEN(UNIT=63,FILE='maxele.63')
+C
+      WRITE(63,'(A85)') INLINE
+      WRITE(63,3645) NNODG
+      write(63,*) timeoute
+C
+      DO IPROC=1,NPROC
+         write(*,*) iproc,nnodp(iproc),mnpp
+         DO K = 1,NNODP(IPROC)
+            READ(LOC(IPROC),80,END=9999,ERR=9999) ETASCP(K)
+            INDEX = IMAP_NOD_LG(K,IPROC) !IMAP_NOD_LG(K,IPROC)
+               !IF (IMAP_EL_LG(1,INDEX).EQ.IPROC) THEN
+            if (index.gt.mnp) then
+               write(*,*) 'error ',index,mnp
+            endif
+            ETASC(INDEX) = ETASCP(K)
+                !ENDIF
+         ENDDO  
+      ENDDO 
+c        DO I = 1,NELG
+c           READ(ETASC(I),*) IDUM, ETA
+c           WRITE(63,2453) I, ETA
+c        ENDDO
+      DO I = 1,NNODG
+c         CALL NEWINDEX(ETASC(I),OUTMSG,I)
+c         WRITE(63,80) OUTMSG
+c         WRITE(*,80) OUTMSG
+         write(63,888) i,etasc(i)
+      ENDDO 
+C              
+      CLOSE(63)
+      DO IPROC = 1,NPROC
+         CLOSE(LOC(IPROC))
+      ENDDO
 C
    80 FORMAT(A80)
+ 888  FORMAT(I10,A80)
  2120 FORMAT(2X,E20.10,5X,I10)
  2453 FORMAT(2X,I8,2X,E15.8)
  3645 FORMAT(1X,I10,1X,I10,1X,E15.7,1X,I5,1X,I5)
