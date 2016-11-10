@@ -15,9 +15,15 @@ SUBROUTINE DGSWEM_INIT(s,dg_here,global_here,nodalattr_here)
   INTEGER TESTFLAG,OUTITER,i,ModetoNode,time_here,ie
   character*80 tecfile, tecfile_max  
 
+!  print*, 'init fileunits'
+
   call init_fileunits(s)
 
+  
+!  print*, 'make_dirname'
+
   CALL MAKE_DIRNAME(s)       ! Establish Working Directory Name
+!  print*, 'read_input'
   CALL READ_INPUT(s,dg_here,global_here,nodalattr_here)         ! Establish sizes by reading fort.14 and fort.15
 
   
@@ -26,6 +32,7 @@ SUBROUTINE DGSWEM_INIT(s,dg_here,global_here,nodalattr_here)
   !...  
   !     
       IF (global_here%IHOT.EQ.0) THEN
+!         print*, 'coldstart'
          CALL COLDSTART(s,global_here)
       ELSE
 #ifdef HOTSTART
@@ -133,7 +140,9 @@ SUBROUTINE DGSWEM_INIT(s,dg_here,global_here,nodalattr_here)
       global_here%SADVDTO3=global_here%IFNLCT*global_here%DT/3.D0
 
       
+!      print*, 'prep_dg'
       CALL PREP_DG(s,dg_here,global_here,nodalattr_here)
+!      print*, 'write_results'
       CALL WRITE_RESULTS(s,dg_here,global_here,0,.FALSE.)
 
 !.....Write heading to unit 16
@@ -143,6 +152,7 @@ SUBROUTINE DGSWEM_INIT(s,dg_here,global_here,nodalattr_here)
       IF (global_here%NSCREEN.EQ.1) WRITE(6,17931)
 
 !     sb...Write initial conditions
+!      print*, 'write_dg_ic'
       CALL WRITE_DG_IC(dg_here)
 
  1112 FORMAT(/,1X,79('_'))

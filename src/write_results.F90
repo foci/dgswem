@@ -50,9 +50,11 @@
 
 
 
-      ModetoNode = 0
+      ModetoNode = 1
 
       if (ModetoNode.eq.1) then
+         
+         print*, 'modetonode is 1, entering those loops'
 
          DO I = 1,S%MNP
 

@@ -642,7 +642,7 @@
       use sizes
       implicit none
       type (sizes_type) :: s
-      type (global_type) :: global_here
+      type (global_type) :: global_here      
 
       ALLOCATE ( global_here%XEM(s%MNSTAM),global_here%YEM(s%MNSTAM),global_here%SLEM(s%MNSTAM),global_here%SFEM(s%MNSTAM))
       ALLOCATE ( global_here%NNM(s%MNSTAM))

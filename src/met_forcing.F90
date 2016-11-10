@@ -492,42 +492,35 @@
 !.......Obtain the meteorological forcing data
 !         write(*,*) 'calling HollandGet ',global_here%time_a
 
-        CALL HollandGet(s, global_here%X, global_here%Y, global_here%SLAM, global_here%SFEA, global_here%WVNX2, global_here%WVNY2, global_here%PRN2, global_here%NP, global_here%ICS,&
-                   global_here%RHOWAT0, global_here%G, global_here%TIME_A, global_here%NSCREEN, global_here%ScreenUnit )
-        DO II= 1,global_here%NP
-          global_here%WINDX = global_here%WVNX2(II)
-          global_here%WINDY = global_here%WVNY2(II)
-          
-!.........Compute wind drag
-          
-          global_here%WINDMAG = SQRT(global_here%WINDX*global_here%WINDX+global_here%WINDY*global_here%WINDY)
-          global_here%WDRAGCO = WindDrag( global_here%WINDMAG, WindDragLimit, "Garratt   " )
-          
-!.........Apply directional wind reductions
-          
-          IF (nodalattr_here%LoadDirEffRLen) THEN
-            CALL ApplyDirectionalWindReduction(nodalattr_here, II, global_here%WDRAGCO, global_here%WINDMAG,&
-                                          global_here%DP(II), global_here%ETA2(II), global_here%H0, global_here%G,&
-                                          global_here%WINDX, global_here%WINDY )
-            global_here%WINDMAG = SQRT(global_here%WINDX*global_here%WINDX + global_here%WINDY*global_here%WINDY)
+         CALL HollandGet(s, global_here%X, global_here%Y, global_here%SLAM, global_here%SFEA, global_here%WVNX2, global_here%WVNY2, global_here%PRN2, global_here%NP, global_here%ICS,&
+              global_here%RHOWAT0, global_here%G, global_here%TIME_A, global_here%NSCREEN, global_here%ScreenUnit )
+         DO II= 1,global_here%NP
+            global_here%WINDX = global_here%WVNX2(II)
+            global_here%WINDY = global_here%WVNY2(II)
+            
+            !.........Compute wind drag
+            
+            global_here%WINDMAG = SQRT(global_here%WINDX*global_here%WINDX+global_here%WINDY*global_here%WINDY)
             global_here%WDRAGCO = WindDrag( global_here%WINDMAG, WindDragLimit, "Garratt   " )
-          ENDIF
             
-!.........Apply met global_here%ramp
+            !.........Apply directional wind reductions
             
-          global_here%WSX2(II)    = global_here%RampMete*0.001293d0*global_here%WDRAGCO*global_here%WINDX*global_here%WINDMAG
-          global_here%WSY2(II)    = global_here%RampMete*0.001293d0*global_here%WDRAGCO*global_here%WINDY*global_here%WINDMAG
-          global_here%PR2(II)     = global_here%RampMete*global_here%PRN2(II)
-          global_here%WVNXOUT(II) = global_here%RampMete*global_here%WINDX
-          global_here%WVNYOUT(II) = global_here%RampMete*global_here%WINDY
-#ifdef SWAN
-!asey 101118: Added these lines for coupling winds to SWAN.
-          IF(COUPWIND)THEN
-            SWAN_WX2(II,2) = global_here%WINDX
-            SWAN_WY2(II,2) = global_here%WINDY
-          ENDIF
-#endif
-        ENDDO
+            IF (nodalattr_here%LoadDirEffRLen) THEN
+               CALL ApplyDirectionalWindReduction(nodalattr_here, II, global_here%WDRAGCO, global_here%WINDMAG,&
+                    global_here%DP(II), global_here%ETA2(II), global_here%H0, global_here%G,&
+                    global_here%WINDX, global_here%WINDY )
+               global_here%WINDMAG = SQRT(global_here%WINDX*global_here%WINDX + global_here%WINDY*global_here%WINDY)
+               global_here%WDRAGCO = WindDrag( global_here%WINDMAG, WindDragLimit, "Garratt   " )
+            ENDIF
+            
+            !.........Apply met global_here%ramp
+            
+            global_here%WSX2(II)    = global_here%RampMete*0.001293d0*global_here%WDRAGCO*global_here%WINDX*global_here%WINDMAG
+            global_here%WSY2(II)    = global_here%RampMete*0.001293d0*global_here%WDRAGCO*global_here%WINDY*global_here%WINDMAG
+            global_here%PR2(II)     = global_here%RampMete*global_here%PRN2(II)
+            global_here%WVNXOUT(II) = global_here%RampMete*global_here%WINDX
+            global_here%WVNYOUT(II) = global_here%RampMete*global_here%WINDY
+         ENDDO
       ENDIF
       
 !-----------------------------------------------------------------------

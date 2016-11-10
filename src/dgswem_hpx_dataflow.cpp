@@ -214,7 +214,7 @@ public:
 	
 	if ( (rkstep == 1) && (timestep > 1) ) { 
 
-	    int timestep_minus = timestep-1; // notusing this now?
+	    int timestep_minus = timestep-1;
 
 	    if (id == 0)
 		fortran_calls << "calling dg_timestep_advance_fort, timestep = " << timestep_minus << " domain = "<< id << std::endl << std::flush;			

@@ -463,6 +463,7 @@ MODULE DG
       Allocate ( dg_here%iota2min(S%MNP,dg_here%dofh),dg_here%iota2max(S%MNP,dg_here%dofh) )
       
 #ifdef SLOPE5
+      !print*,'allocating ze_min, etc, s%MNP = ', s%MNP
       Allocate ( dg_here%ZE_MIN1(s%MNP),dg_here%ZE_MAX1(s%MNP),dg_here%QX_MIN1(s%MNP) )
       Allocate ( dg_here%QY_MIN1(s%MNP),dg_here%QY_MAX1(s%MNP),dg_here%QX_MAX1(s%MNP) )
 !       Allocate ( iota_MIN1(s%MNP),iota_MAX1(s%MNP) )

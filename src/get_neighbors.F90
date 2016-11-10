@@ -20,6 +20,8 @@ integer :: flag
 
 num_send = dg_here%NEIGHPROC_S
 
+!print* ,'dg_here%NEIGHPROC_S = ', dg_here%NEIGHPROC_S
+
 do i=1,num_send
    neighbors(i) = dg_here%IPROC_S(i)
 end do
@@ -27,6 +29,8 @@ end do
 num_neighbors = num_send
 
 num_recv = dg_here%NEIGHPROC_R
+
+!print* ,'dg_here%NEIGHPROC_R = ', dg_here%NEIGHPROC_R
 
 do i=1,num_recv
 

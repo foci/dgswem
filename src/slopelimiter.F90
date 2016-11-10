@@ -37,7 +37,8 @@
 !     FIND THE MAXIMUM AND MINIMUM OF EACH VARIABLE OVER ALL ELEMENTS 
 !     SHARING A NODE
 
-
+!      print*, 'slopelimiter part a'
+!      print*, 'global_here%NP=', global_here%NP
 
       DO I = 1,global_here%NP
          dg_here%ZE_MIN1(I)=99999.
