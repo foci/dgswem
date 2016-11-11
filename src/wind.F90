@@ -1754,9 +1754,9 @@
       ENDIF
 !
 !     Get data for this time step.
-      write(*,*) 'calling GetHolland', s%fort22unit
+
       CALL GetHollandStormData(s,lat,lon,cpress,spd,rrp,rmw,tvx,tvy,time,nscreen,screenunit)
-      write(*,*) 'end GetHolland'
+
 !     Calculate and limit central pressure deficit; some track files
 !     (e.g., Charley 2004) may have a central pressure greater than the
 !     ambient pressure that this subroutine assumes
