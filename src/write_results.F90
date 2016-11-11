@@ -50,7 +50,7 @@
 
 
 
-      ModetoNode = 0
+      ModetoNode = 1
 
       if (ModetoNode.eq.1) then
 

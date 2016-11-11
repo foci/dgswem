@@ -1922,8 +1922,7 @@
             READ(UNIT=s%fort22unit,FMT='(A170)',END=8888)
             s%nl=s%nl+1
          ENDDO
- 8888    CONTINUE
-         CLOSE(s%fort22unit)
+ 8888    CLOSE(s%fort22unit)
 
 
          print*, 'firstcall to gethollandwinddata, about to allocate, s%nl = ', s%nl
@@ -1939,7 +1938,7 @@
 !     Now reopen the file and read the data into the arrays. The first
 !     line must be a hindcast/nowcast.
          s%i=1
-!         OPEN(22,FILE=TRIM(LOCALDIR)//'/'//'fort.22')
+         OPEN(s%fort22unit,FILE=S%DIRNAME//'/'//'fort.22')
 !
          DO
 !     Get another line of data from the file and check to see if the
