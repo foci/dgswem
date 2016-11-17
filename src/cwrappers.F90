@@ -40,10 +40,9 @@ subroutine dgswem_init_fort(sizes_c_ptr,dg_c_ptr,global_c_ptr,nodalattr_c_ptr,id
   s%cpp_timestep = 0
   s%cpp_rkstep = 1
   
-  ! s%cpp_single_domain = single_domain
-  s%cpp_single_domain = .false.
-
-  print*, "Hardcoding this to false, for now: cpp_single_domain = ", s%cpp_single_domain
+   s%cpp_single_domain = single_domain
+!  s%cpp_single_domain = .false.
+  print*, "cpp_single_domain (from cwrappers)= ", s%cpp_single_domain
 
   call dgswem_init(s,dg_here,global_here,nodalattr_here)
 
