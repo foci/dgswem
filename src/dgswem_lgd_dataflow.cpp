@@ -5,9 +5,11 @@
 
 #include <libgeodecomp.h>
 //#include <libgeodecomp/io/logger.h>
-//#include <libgeodecomp/storage/unstructuredgrid.h>
-//#include <libgeodecomp/misc/apitraits.h>
+#include <libgeodecomp/storage/unstructuredgrid.h>
+#include <libgeodecomp/misc/apitraits.h>
 #include <libgeodecomp/parallelization/hpxdataflowsimulator.h>
+#include <libgeodecomp/geometry/partitions/ptscotchunstructuredpartition.h>
+#include <libgeodecomp/io/initializer.h>
 
 #include <hpx/hpx.hpp>
 #include <hpx/hpx_init.hpp>
@@ -24,9 +26,8 @@ using boost::program_options::value;
 #include "dgswem_lgd_dataflow/domain_reference.hpp"
 #include "dgswem_lgd_dataflow/fortran_initializer.hpp"
 
-//typedef LibGeoDecomp::HPXDataflowSimulator<DomainReference, LibGeoDecomp::PTScotchUnstructuredPartition> SimulatorType;
-typedef LibGeoDecomp::HPXDataflowSimulator<DomainReference> SimulatorType;
-
+typedef LibGeoDecomp::HPXDataflowSimulator<DomainReference, LibGeoDecomp::PTScotchUnstructuredPartition<1> > SimulatorType;
+//typedef LibGeoDecomp::HPXDataflowSimulator<DomainReference> SimulatorType;
 
 int hpx_main(variables_map & vm)
 {

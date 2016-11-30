@@ -111,6 +111,11 @@ public:
 	if (id == 0) {
 	  hpx::cout << " * globalNanoStep = " << globalNanoStep << " timestep = " << timestep << " substep = " << substep << 
 	    " rkstep = " << rkstep << " slopelimiter = " << slopelimiter << std::endl;
+	      /*
+		if (timestep % 100 == 0)
+		{
+		}
+	      */
 	}
 	
 	if (slopelimiter) {

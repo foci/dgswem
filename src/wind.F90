@@ -1943,6 +1943,7 @@
 !     Now reopen the file and read the data into the arrays. The first
 !     line must be a hindcast/nowcast.
          s%i=1
+         OPEN(s%fort22unit,FILE=S%DIRNAME//'/'//'fort.22')
 !         OPEN(22,FILE=TRIM(LOCALDIR)//'/'//'fort.22')
 !
          DO

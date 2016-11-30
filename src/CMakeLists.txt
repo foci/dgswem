@@ -1,7 +1,7 @@
 if (Fortran_COMPILER_NAME MATCHES "gfortran.*")
   # gfortran
   # set (CMAKE_Fortran_FLAGS_RELEASE "-O3 -DHPX")
-  set (CMAKE_Fortran_FLAGS_RELEASE   "-cpp -O3 -DHPX -DREAL8 -DCSCA -DLINUX -DRKSSP -ffixed-line-length-none -ffree-line-length-none -Waliasing -Wno-tabs -Wline-truncation -fimplicit-none -frecursive -I CMakeFiles/${PROJECT_NAME}.dir/src/ -I .")
+  set (CMAKE_Fortran_FLAGS_RELEASE   "-cpp -g -O3 -msse3 -DHPX -DREAL8 -DCSCA -DLINUX -DRKSSP -DSLOPE5 -ffixed-line-length-none -ffree-line-length-none -Waliasing -Wno-tabs -Wline-truncation -fimplicit-none -frecursive -I CMakeFiles/${PROJECT_NAME}.dir/src/ -I .")
 #  set (CMAKE_Fortran_FLAGS_RELEASE   "-cpp -g -Og -msse3 -DHPX -DREAL8 -DCSCA -DLINUX -DRKSSP -DSLOPE5 -ffixed-line-length-none -ffree-line-length-none -Waliasing -Wno-tabs -Wline-truncation -fimplicit-none -frecursive -I CMakeFiles/${PROJECT_NAME}.dir/src/ -I .")
 #  set (CMAKE_Fortran_FLAGS_DEBUG   "-cpp -DVERBOSE -DHPX -DREAL8 -DCSCA -DLINUX -DRKSSP -DSLOPE5 -fsanitize=address -lasan -ffixed-line-length-none -ffree-line-length-none -Waliasing -Wno-tabs -Wline-truncation -Wsurprising -g -fbacktrace -fimplicit-none -frecursive -I CMakeFiles/${PROJECT_NAME}.dir/src/ -I .")
   set (CMAKE_Fortran_FLAGS_DEBUG   "-cpp -DVERBOSE -DHPX -DREAL8 -DCSCA -DLINUX -DRKSSP -DSLOPE5 -ffixed-line-length-none -ffree-line-length-none -Wuninitialized -Waliasing -Wno-tabs -Wline-truncation -Wsurprising -g -fbacktrace -fimplicit-none -frecursive -I CMakeFiles/${PROJECT_NAME}.dir/src/ -I .")
