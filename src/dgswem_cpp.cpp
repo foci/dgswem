@@ -12,7 +12,7 @@ int main(
 	 )
 {
 
-    int n_timesteps = 100;  
+    int n_timesteps = 10000;  
 
     std::vector <std::string> args;
     int n_timesteps_cmdline;

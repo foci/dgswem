@@ -4,7 +4,7 @@ if (Fortran_COMPILER_NAME MATCHES "gfortran.*")
   set (CMAKE_Fortran_FLAGS_RELEASE   "-cpp -g -O3 -msse3 -DHPX -DREAL8 -DCSCA -DLINUX -DRKSSP -DSLOPE5 -ffixed-line-length-none -ffree-line-length-none -Waliasing -Wno-tabs -Wline-truncation -fimplicit-none -frecursive -I CMakeFiles/${PROJECT_NAME}.dir/src/ -I .")
 #  set (CMAKE_Fortran_FLAGS_RELEASE   "-cpp -g -Og -msse3 -DHPX -DREAL8 -DCSCA -DLINUX -DRKSSP -DSLOPE5 -ffixed-line-length-none -ffree-line-length-none -Waliasing -Wno-tabs -Wline-truncation -fimplicit-none -frecursive -I CMakeFiles/${PROJECT_NAME}.dir/src/ -I .")
 #  set (CMAKE_Fortran_FLAGS_DEBUG   "-cpp -DVERBOSE -DHPX -DREAL8 -DCSCA -DLINUX -DRKSSP -DSLOPE5 -fsanitize=address -lasan -ffixed-line-length-none -ffree-line-length-none -Waliasing -Wno-tabs -Wline-truncation -Wsurprising -g -fbacktrace -fimplicit-none -frecursive -I CMakeFiles/${PROJECT_NAME}.dir/src/ -I .")
-  set (CMAKE_Fortran_FLAGS_DEBUG   "-cpp -DVERBOSE -DHPX -DREAL8 -DCSCA -DLINUX -DRKSSP -DSLOPE5 -ffixed-line-length-none -ffree-line-length-none -Wuninitialized -Waliasing -Wno-tabs -Wline-truncation -Wsurprising -g -fbacktrace -fimplicit-none -frecursive -I CMakeFiles/${PROJECT_NAME}.dir/src/ -I .")
+  set (CMAKE_Fortran_FLAGS_DEBUG   "-g -O0 -cpp -DVERBOSE -DHPX -DREAL8 -DCSCA -DLINUX -DRKSSP -DSLOPE5 -ffixed-line-length-none -ffree-line-length-none -Wuninitialized -Waliasing -Wno-tabs -Wline-truncation -Wsurprising -pg -fbacktrace -fimplicit-none -frecursive -I CMakeFiles/${PROJECT_NAME}.dir/src/ -I .")
 #set (CMAKE_Fortran_FLAGS_DEBUG   "-O2 -cpp -DREAL8 -DCSCA -DLINUX -DRKSSP -DSLOPE5 -ffixed-line-length-none -ffree-line-length-none -Waliasing -Wno-tabs -Wline-truncation -Wsurprising -fcheck=all -g -fbacktrace -fimplicit-none")
 
 #  set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -lasan")
@@ -21,6 +21,12 @@ if (Fortran_COMPILER_NAME MATCHES "gfortran.*")
 endif (Fortran_COMPILER_NAME MATCHES "gfortran.*")
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fno-inline ${ADDITIONAL_COMPILE_FLAGS}")
+
+IF(CMAKE_BUILD_TYPE STREQUAL "Debug")
+  message("Debug mode")
+  set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -pg")
+ENDIF(CMAKE_BUILD_TYPE STREQUAL "Debug")
+
 
 list(APPEND DGSWEM_FORTRAN 
   calc_normal.F90
