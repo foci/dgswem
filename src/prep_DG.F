@@ -413,26 +413,6 @@ C--
       IF(MYPROC.EQ.0) THEN
          print *, 'PREP FOR WET/DRY BEGINS...'
       ENDIF
-
-C.....1. Set initial surface elevation above the bed elevation
-C.....if wetting-and-drying is enabled and the initial water depth is
-C.....not specified by fort.12
-C.....2. Set wet-and-dry elemental flags
-C.....3. Set the DOF at dry elements = 1
-
-      NCHECK(1) = 3
-      if (ph.gt.1) then
-         do chi = 2,ph
-            NCHECK(chi) = NCHECK(1) + 3*negp(chi)
-         enddo
-      endif
-      
-      CALL ALLOC_DG_WETDRY()
-      PHI_CHECK = 0.D0
-      PSI_CHECK = 0.D0
-      H0L = H0
-      H0H = H0 * 1.0
-      HABSMIN = H0 * 1.0
             
 C.....Retrieve the normals to the edges
 
@@ -470,6 +450,26 @@ C.....Evaluate the orthogonal basis at the edge gauss quadrature points
          CALL ORTHOBASIS_EDGE(j,j)
 
       enddo
+
+C.....1. Set initial surface elevation above the bed elevation
+C.....if wetting-and-drying is enabled and the initial water depth is
+C.....not specified by fort.12
+C.....2. Set wet-and-dry elemental flags
+C.....3. Set the DOF at dry elements = 1
+
+      NCHECK(1) = 3
+      if (ph.gt.1) then
+         do chi = 2,ph
+            NCHECK(chi) = NCHECK(1) + 3*negp(chi) + nagp(chi)
+         enddo
+      endif
+      
+      CALL ALLOC_DG_WETDRY()
+      PHI_CHECK = 0.D0
+      PSI_CHECK = 0.D0
+      H0L = H0
+      H0H = H0 * 1.0
+      HABSMIN = H0 * 1.0
 
 C.....Do the L2-projection of the initial conditions
 
@@ -856,6 +856,20 @@ C........
                   ENDDO
                   II = II + 1
                ENDDO
+            ENDDO
+         ENDIF
+      enddo
+
+      do chi =1,ph
+         IF (NCHECK(chi).GT.3) THEN
+            II = 4 + 3*NEGP(chi)
+            DO I = 1,NAGP(chi)
+               DO K = 1,(chi+1)*(chi+2)/2
+                     
+                  PHI_CHECK(K,II,chi) = PHI_AREA(K,I,chi)
+                  
+               ENDDO
+               II = II + 1
             ENDDO
          ENDIF
       enddo

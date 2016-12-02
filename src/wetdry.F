@@ -507,17 +507,17 @@ C     End of cases
 C-----------------------------------------------------------------------
 
 C.......Element check:
-C.......Not clear to me what Shintaro is checking here (EJK)
+C.......Check if the element is dam-break-type or flood-type
 C.......Setting the lower bound
          
          IF (ELEMENT_CHECK.EQ.1) THEN
 
 !Now test to see if the water column at the min vertex is wet
-            IF (MINVAL(ZE_HAT(:,pa)+DP_NODE(:,J,pa)).GT.H0 ) THEN  ! cem fix
-!            IF (ZE_HAT(HT_MAX_I,pa).GT.(-DPE_MIN(J)+H0)) THEN     ! Shintaro's criteria 
+!            IF (MINVAL(ZE_HAT(:,pa)+DP_NODE(:,J,pa)).GT.H0 ) THEN  ! cem fix
+            IF (ZE_HAT(HT_MAX_I,pa).GT.(-DPE_MIN(J)+H0)) THEN     ! Shintaro's criteria 
 
 C.........Make no adjustments and set element and node flags to wet
-
+C.........Element is dam-break-type (MHB)
                WDFLG(J) = 1
                NODECODE(No1) = 1
                NODECODE(No2) = 1
@@ -526,7 +526,7 @@ C.........Make no adjustments and set element and node flags to wet
             ELSE
 
 C...........Make adjustments and set element node codes to dry
-
+C...........Element is flood-type (MHB)
                QX(:,J,IRK+1) = 0.D0
                QY(:,J,IRK+1) = 0.D0
 

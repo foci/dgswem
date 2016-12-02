@@ -143,9 +143,9 @@ C.....the inverse of the mass matrix (diagonal)
             ENDDO
             IF (P.GT.1) THEN
                IF (Q.LT.(NEGP(L)+1)) THEN
-                  PSI_CHECK(1,III) = -1.D0/2.D0*(XGP + YGP )
-                  PSI_CHECK(2,III) =  1.D0/2.D0*(XGP + 1.D0)
-                  PSI_CHECK(3,III) =  1.D0/2.D0*(YGP + 1.D0)
+               !   PSI_CHECK(1,III) = -1.D0/2.D0*(XGP + YGP )
+               !   PSI_CHECK(2,III) =  1.D0/2.D0*(XGP + 1.D0)
+               !   PSI_CHECK(3,III) =  1.D0/2.D0*(YGP + 1.D0)
                   III = III + 1
                ENDIF
             ENDIF
