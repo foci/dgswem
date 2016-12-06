@@ -324,13 +324,13 @@ ifeq ($(compiler),intel-lonestar)
   FC            :=  ifort
   PFC           :=  mpif90
   CC            :=  icc
-  FFLAGS1       :=  $(INCDIRS) -O2 -msse3 -132  #-traceback -g -check all #-prof-gen -prof-dir /bevo2/michoski/v21/work -pg -prof-use
+  FFLAGS1       :=  $(INCDIRS) -g -O0 -msse3 -132  -traceback -g -check all #-prof-gen -prof-dir /bevo2/michoski/v21/work -pg -prof-use
   FFLAGS2       :=  $(FFLAGS1)
   FFLAGS3       :=  $(FFLAGS1)
   FFLAGS4       :=  $(FFLAGS1)
-  DA            :=  -DREAL8 -DLINUX -DCSCA -DRKSSP -DOUT_TEC -DSLOPE5 #-DARTDIF  #  -DWETDR -DSLOPE5 # -DSED_LAY -DOUT_TEC #-DRKC -DTRACE -DSED_LAY -DCHEM -DP0 -DP_AD -DSLOPEALL -DFILTER
-  DP            :=  -DREAL8 -DLINUX -DCSCA -DCMPI -DRKSSP -DOUT_TEC -DSLOPE5 #-DARTDIF #-DWETDR -DSLOPE5 # -DSED_LAY -DRKC -DTRACE -DSED_LAY -DCHEM -DP0 -DP_AD -DSLOPEALL
-  DPRE          :=  -DREAL8 -DLINUX -DRKSSP -DOUT_TEC -DSLOPE5 #-DSWAN #-DARTDIF  # -DWETDR -DSLOPE5 #-DSED_LAY -DSWAN #-DOUT_TEC #-DSWAN #-DSLOPE5 -DRKC -DTRACE -DSED_LAY -DCHEM -DP0 -DP_AD -DSLOPEALL
+  DA            :=  -DREAL8 -DLINUX -DCSCA -DRKSSP -DOUT_TEC -DFILTER #-DARTDIF  -DSLOPE5 # -DSED_LAY -DOUT_TEC #-DRKC -DTRACE -DSED_LAY -DCHEM -DP0 -DP_AD -DSLOPEALL -DFILTER
+  DP            :=  -DREAL8 -DLINUX -DCSCA -DCMPI -DRKSSP -DOUT_TEC -DFILTER #-DARTDIF -DSLOPE5 # -DSED_LAY -DRKC -DTRACE -DSED_LAY -DCHEM -DP0 -DP_AD -DSLOPEALL
+  DPRE          :=  -DREAL8 -DLINUX -DRKSSP -DOUT_TEC -DSLOPE5 #-DSWAN #-DARTDIF -DSLOPE5 #-DSED_LAY -DSWAN #-DOUT_TEC #-DSWAN -DRKC -DTRACE -DSED_LAY -DCHEM -DP0 -DP_AD -DSLOPEALL
   DPRE2         :=  -DREAL8 -DLINUX -DCMPI 
   CFLAGS        :=  -O3 -xSSSE3 -I.
   IMODS         :=  -I
