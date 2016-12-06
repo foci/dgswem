@@ -801,11 +801,11 @@ C.......the quadrature points and compute volume of water
          enddo
 
 C........Store bathymetry at triangular vertices and edge gauss points for wet-dry
-C........
+C........(MHB): For higher order we also include interior quadrature points
 
 
          do chi = 1,ph
-
+            
             DO I = 1,3
                DP_NODE(I,J,chi) = DP(NM(J,I))
             ENDDO
@@ -818,6 +818,11 @@ C........
                      DP_NODE(II,J,chi) = BATHED(I,L,J,chi)
                      II = II + 1
                   ENDDO
+               ENDDO
+               
+               DO I = 1,NAGP(chi)
+                  DP_NODE(II,J,chi) = BATH(I,J,chi)
+                  II = II + 1
                ENDDO
             ENDIF
          enddo
