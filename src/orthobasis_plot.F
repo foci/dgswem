@@ -10,6 +10,7 @@ C
 C***********************************************************************
 
       SUBROUTINE ORTHOBASIS_PLOT(XPNP, YPNP, PHI_PLOT,P)
+      use sizes, only : sz
       IMPLICIT NONE
 C.....Input variables
       REAL(SZ), allocatable, intent(in) :: XPNP(:), YPNP(:)
