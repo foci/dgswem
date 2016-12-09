@@ -9,20 +9,20 @@ C     Written by Ethan Kubatko (06-08-2004)
 C
 C***********************************************************************
 
-      SUBROUTINE ORTHOBASIS_PLOT(XPNP, YPNP, PHI_PLOT,P)
+      SUBROUTINE ORTHOBASIS_PLOT(XPNP, YPNP, PHI_PLOT,P,NPNP)
       use sizes, only : sz
       IMPLICIT NONE
 C.....Input variables
       REAL(SZ), allocatable, intent(in) :: XPNP(:), YPNP(:)
       REAL(SZ), allocatable, intent(inout) :: PHI_PLOT(:,:)
       INTEGER, intent(in) :: P
+      INTEGER, intent(inout) :: NPNP
       
-
 C.....Declare local variables
 
       INTEGER Q,A,B,M,k,i,jj,j
       REAL(SZ) COEFF1,COEFF2,POLY1,POLY2,NUM,DEN,NUM1,DEN1,DEN2,DEN3,Z
-      REAL(SZ) XP,YP,NPNP
+      REAL(SZ) XP,YP
       REAL(SZ), allocatable ::  JACOBI(:,:,:,:)
       REAL(SZ), allocatable ::  PHI2(:,:,:) 
 
@@ -31,6 +31,7 @@ C.....area integral gauss points and the barycenter of the element
       
       NPNP = SIZE(XP)
       ALLOCATE(JACOBI(p+1,2*p+3,2,NAGP+1), PHI2(p+1,p+1,NAGP+1) )
+      ALLOCATE(PHI_PLOT((p+1)*(p+2)/2,NPNP))
 
       DO Q=1,NPNP
          DO A=0,2*P+2
@@ -101,7 +102,7 @@ C.....Re-order the basis functions into hierarchical order
             DO I=0,J
                JJ = J - I
 
-               PHI_AREA(M,Q) = PHI2(I+1,JJ+1,Q)
+               PHI_PLOT(M,Q) = PHI2(I+1,JJ+1,Q)
                
                M = M+1            
             ENDDO
