@@ -33,6 +33,9 @@ C.....Use appropriate modules
       USE MESSENGER_ELEM
       USE MESSENGER
 #endif
+#ifdef PARAVIEW
+      USE paraview_plotter
+#endif
 
       IMPLICIT NONE
       
@@ -1198,6 +1201,9 @@ C.....Prep the slopelimiter
       ENDIF
 C--   
 
+#ifdef PARAVIEW
+      call INIT_PARAVIEW_PLOTTER(ph)
+#endif
 C.....Close files
 
       CLOSE(115)

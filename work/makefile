@@ -326,7 +326,7 @@ $(O_DIR)ocean_edge_hydro.o    	:  ocean_edge_hydro.F $(ADC_MOBJ)
 $(O_DIR)orthobasis_area.o     	:  orthobasis_area.F $(ADC_MOBJ)
 $(O_DIR)orthobasis_edge.o     	:  orthobasis_edge.F $(ADC_MOBJ)
 $(O_DIR)p_enrichment.o     	:  p_enrichment.F $(ADC_MOBJ)
-$(O_DIR)prep_DG.o             	:  prep_DG.F $(ADC_MOBJ)
+$(O_DIR)prep_DG.o             	:  prep_DG.F $(ADC_MOBJ) $(O_DIR)paraview_plotter.o
 $(O_DIR)quad_pts_area.o       	:  quad_pts_area.F $(ADC_MOBJ)
 $(O_DIR)quad_pts_edge.o       	:  quad_pts_edge.F $(ADC_MOBJ)
 $(O_DIR)read_input.o          	:  read_input.F $(ADC_MOBJ)
@@ -336,7 +336,7 @@ $(O_DIR)radiation_edge_hydro.o	:  radiation_edge_hydro.F $(ADC_MOBJ)
 $(O_DIR)tidal_potential.o     	:  tidal_potential.F $(ADC_MOBJ)
 $(O_DIR)ibarrier_edge_hydro.o 	:  ibarrier_edge_hydro.F $(ADC_MOBJ)
 $(O_DIR)ebarrier_edge_hydro.o       :  ebarrier_edge_hydro.F $(ADC_MOBJ)
-$(O_DIR)write_results.o             :  write_results.F $(ADC_MOBJ)
+$(O_DIR)write_results.o             :  write_results.F $(ADC_MOBJ)  $(O_DIR)paraview_plotter.o
 $(O_DIR)pdg_debug.o                 :  pdg_debug.F  $(ADC_MOBJ) $(MSG_MOBJ)
 $(O_DIR)ghost_internal_edge_hydro.o :  ghost_internal_edge_hydro.F  $(ADC_MOBJ) $(MSG_MOBJ)
 $(O_DIR)slopelimiter.o              :  slopelimiter.F  $(ADC_MOBJ)
@@ -351,7 +351,7 @@ $(O_DIR)modal2nodal.o               :  modal2nodal.F  $(ADC_MOBJ)
 $(O_DIR)write_output.o              :  write_output.F
 $(O_DIR)plot_var_funcs.o               :  plot_var_funcs.F90  $(ADC_MOBJ)
 $(O_DIR)orthobasis_plot.o                 :  orthobasis_plot.F  $(ADC_MOBJ)
-$(O_DIR)paraview_plotter.o               :  paraview_plotter.F90  $(ADC_MOBJ)
+$(O_DIR)paraview_plotter.o               :  paraview_plotter.F90  $(ADC_MOBJ) $(O_DIR)plot_var_funcs.o $(O_DIR)orthobasis_plot.o
 
 
 #Casey 121126: Added the previous lines for modal2nodal.F and write_output.F.

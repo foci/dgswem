@@ -23,6 +23,10 @@ C.....Use appropriate modules
 #ifdef CMPI
       USE MESSENGER_ELEM 
 #endif
+#ifdef PARAVIEW
+      use paraview_plotter
+#endif
+
       
 C.....Declare local variables
 
@@ -537,6 +541,11 @@ C.....time step falls within the specified window
                   
                   if (mod(it,NSPOOLGE).eq.0) then
 !Casey 120813: Begin the OUT_TEC conditional.
+
+#ifdef PARAVIEW
+                  call paraview_plot(ze(:,:,1),hb(:,:,1),qx(:,:,1),qy(:,:,1))
+#endif 
+
 
 #ifdef OUT_TEC
                      

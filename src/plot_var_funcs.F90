@@ -12,6 +12,15 @@ contains
     return
   end function ze_o
 
+  pure function h_o(ze,b,qx,qy)
+    real(sz) h_o
+    real(sz), intent(in) :: ze,b,qx,qy
+    
+    h_o = ze + b
+
+    return
+  end function h_o
+
   pure function b_o(ze,b,qx,qy)
     real(sz) b_o
     real(sz), intent(in) :: ze,b,qx,qy
@@ -43,7 +52,7 @@ contains
     real(sz) u_o
     real(sz), intent(in) :: ze,b,qx,qy
       
-    IF ( ABS(ZE + B) < 10*MAX(ABS(ZE),ABS(B))*epsilon() ) THEN
+    IF ( ABS(ZE + B) < 10*MAX(ABS(ZE),ABS(B))*epsilon(1.D0) ) THEN
        u_o = 0.D0
     ELSE
        u_o = qx/(ze + b)
@@ -56,7 +65,7 @@ contains
     real(sz) v_o
     real(sz), intent(in) :: ze,b,qx,qy
       
-    IF ( ABS(ZE + B) < 10*MAX(ABS(ZE),ABS(B))*epsilon() ) THEN
+    IF ( ABS(ZE + B) < 10*MAX(ABS(ZE),ABS(B))*epsilon(1.D0) ) THEN
        v_o = 0.D0
     ELSE
        v_o = qy/(ze + b)

@@ -31,7 +31,7 @@ C.....area integral gauss points and the barycenter of the element
       
       NPNP = SIZE(XPNP)
       ALLOCATE(JACOBI(p+1,2*p+3,2,NPNP+1), PHI2(p+1,p+1,NPNP+1) )
-      ALLOCATE(PHI_PLOT((p+1)*(p+2)/2,NPNP))
+
 
       DO Q=1,NPNP
          DO A=0,2*P+2
