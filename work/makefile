@@ -78,7 +78,7 @@ PREP_MSRC  =  presizes.F
 PGLO_MSRC  =  pre_global.F  
 POST_MSRC  =  post_global.F
 ADC_MSRC   =  sizes.F diff45_41.F global.F dg.F global_3dvs.F nodalattr.F fparser.F90 fparser2.F90 \
-              read_fort_dg.F90              
+              read_fort_dg.F90
 HARM_MSRC  =  harm.F  
 WIND_MSRC  =  wind.F  
 #Casey 121126: Add file for coupling to unstructured SWAN.
@@ -112,7 +112,8 @@ ADC_SRC    =  dgswem.F owiwind.F read_input.F cstart.F hstart.F radiation_edge_h
 	quad_pts_edge.F radiation_edge_hydro.F read_input.F rhs_dg_hydro.F \
 	numerical_flux.F tidal_potential.F write_results.F \
 	slopelimiter.F prep_slopelim.F ocean_edge_hydro_post.F ocean_flow_edge_hydro.F \
-	wetdry.F LDG_hydro.F met_forcing.F sta_basis.F modal2nodal.F write_output.F
+	wetdry.F LDG_hydro.F met_forcing.F sta_basis.F modal2nodal.F write_output.F \
+	paraview_plotter.F90 orthobasis_plot.F plot_var_funcs.F90
 #Casey 121126: Added modal2nodal.F and write_output.F to the previous line.
 
 METIS1_OBJ:= $(patsubst %.F, $(O_DIR)%.o, $(METIS1_SRC) )
@@ -348,6 +349,11 @@ $(O_DIR)met_forcing.o               :  met_forcing.F  $(ADC_MOBJ)
 $(O_DIR)sta_basis.o                 :  sta_basis.F  $(ADC_MOBJ)
 $(O_DIR)modal2nodal.o               :  modal2nodal.F  $(ADC_MOBJ)
 $(O_DIR)write_output.o              :  write_output.F
+$(O_DIR)plot_var_funcs.o               :  plot_var_funcs.F90  $(ADC_MOBJ)
+$(O_DIR)orthobasis_plot.o                 :  orthobasis_plot.F  $(ADC_MOBJ)
+$(O_DIR)paraview_plotter.o               :  paraview_plotter.F90  $(ADC_MOBJ)
+
+
 #Casey 121126: Added the previous lines for modal2nodal.F and write_output.F.
 
 debug:

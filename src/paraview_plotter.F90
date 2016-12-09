@@ -17,10 +17,10 @@ contains
     implicit none
     integer, intent(in) :: p
     !......Obtain the nodal points for plotting
-    GET_INTERP_PTS(XPNP, YPNP, triangulation, p)
+    GET_INTERP_PTS( p )
 
     !......Compute modal values at (XPNP,YPNP)
-    ORTHOBASIS_PLOT(XPNP,YPNP,PHI_PLOT,p)
+    ORTHOBASIS_PLOT(XPNP,YPNP,PHI_PLOT,p, npnp)
 
     RETURN
   END SUBROUTINE INIT_PARAVIEW_PLOTTER
@@ -195,10 +195,8 @@ contains
   !
   !CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
 
-SUBROUTINE GET_INTERP_PTS(XPNP, YPNP, triangulation, p )
+SUBROUTINE GET_INTERP_PTS( p )
   implicit none
-  real(sz), allocatable, intent(inout) :: XPNP(:), YPNP(:)
-  integer, allocatable, intent(inout) :: triangulation
   integer, intent(in) :: p
   
       SELECT CASE (p)

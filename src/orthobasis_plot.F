@@ -29,8 +29,8 @@ C.....Declare local variables
 C.....Construct and evaluate the necessary Jacobi polynomials at the
 C.....area integral gauss points and the barycenter of the element
       
-      NPNP = SIZE(XP)
-      ALLOCATE(JACOBI(p+1,2*p+3,2,NAGP+1), PHI2(p+1,p+1,NAGP+1) )
+      NPNP = SIZE(XPNP)
+      ALLOCATE(JACOBI(p+1,2*p+3,2,NPNP+1), PHI2(p+1,p+1,NPNP+1) )
       ALLOCATE(PHI_PLOT((p+1)*(p+2)/2,NPNP))
 
       DO Q=1,NPNP
@@ -38,8 +38,8 @@ C.....area integral gauss points and the barycenter of the element
             DO B=0,1
                DO J=0,P
                   
-                  XP = XAGP(Q)
-                  YP = YAGP(Q)  
+                  XP = XPNP(Q)
+                  YP = YPNP(Q)  
                   
                   IF ((A.EQ.0).OR.((A.EQ.1).AND.(B.EQ.1))) THEN
                      Z = 2.D0*(1.D0 + XP)/(1.D0 - YP) - 1.D0
@@ -84,8 +84,8 @@ C.....the area integral gauss points
          DO I=0,P
             DO J=0,P-I
                
-               XP = XAGP(Q)
-               YP = YAGP(Q)
+               XP = XPNP(Q)
+               YP = YPNP(Q)
                
                PHI2(I+1,J+1,Q) = JACOBI(I+1,1,1,Q)*((1.D0-YP)/2.D0)**I
      &              *JACOBI(J+1,2*I+2,1,Q)
