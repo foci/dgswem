@@ -10,6 +10,7 @@ module paraview_plot
   !.....Declare local variables
   real(sz), allocatable :: XPNP(:), YPNP(:)
   integer, allocatable :: triangulation(:,:)
+  integer :: plt_iter = 0
 
 contains
 
@@ -25,7 +26,7 @@ contains
     RETURN
   END SUBROUTINE INIT_PARAVIEW_PLOTTER
 
-  SUBROUTINE PARAVIEW_PLOT(ZE,B,QX,QY,iter,plot_var)
+  SUBROUTINE PARAVIEW_PLOT(ZE,B,QX,QY,plot_var)
     use plot_var_funcs
     use dg, only : 
     use global, only : NE,X,Y
@@ -49,7 +50,15 @@ contains
     integer n_interp_pts, n_interp_tri
     real(sz) ell_1,ell_2, ell_3
     real(sz) ze_val, b_val, qx_val, qy_val
-    
+    character*25 :: fname = "dgswem____00000.00000.vtu"
+
+    plt_iter = plt_iter + 1
+    fname(:9) = plot_var
+    fname(:15) = plt_iter
+    fname(:21) = MYPROC
+    open(877,file= fname, action="write")
+
+
     n_interp_pts = size(xpnp)
     n_interp_tri = size(triangulation,1)
 
@@ -71,7 +80,6 @@ contains
     CASE DEFAULT
        print *, "ERROR:: BAD plot_var in paraview_plotter.F90"
     END SELECT
-
 
     write(877,*) "<?xml version=\"1.0\" ?>"
     write(877,*) "<!--"
