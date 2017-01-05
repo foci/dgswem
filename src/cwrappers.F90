@@ -12,7 +12,7 @@ subroutine dgswem_init_fort(sizes_c_ptr,dg_c_ptr,global_c_ptr,nodalattr_c_ptr,id
   type (C_PTR) :: global_c_ptr
   type (C_PTR) :: nodalattr_c_ptr
   integer,intent(in) :: id
-  logical,intent(in) :: single_domain
+  logical*1,intent(in) :: single_domain
 
 !  integer :: n_timesteps
 !  integer,intent(out) :: n_domains
