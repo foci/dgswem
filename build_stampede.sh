@@ -16,7 +16,7 @@ REPO_PATH=".."
 CXX_COMPILER="/opt/apps/gcc/4.9.1/bin/g++"
 C_COMPILER="/opt/apps/gcc/4.9.1/bin/gcc"
 Fortran_COMPILER="/opt/apps/gcc/4.9.1/bin/gfortran"
-PREFIX_PATH="$WORK/local_install"
+PREFIX_PATH="/work/02482/byerly/local_install"
 CMAKE="cmake"
 
 echo "Build type: ${BUILD_TYPE}"
