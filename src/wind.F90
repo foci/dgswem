@@ -83,7 +83,7 @@
       REAL*8 TIMESEC,SEC
 !
 !      print*, "starting timeconv, imo =", imo
-      print*, "starting timeconv"
+!      print*, "starting timeconv"
 
       TIMESEC = (IDAY-1)*86400 + IHR*3600 + IMIN*60 + SEC
       IF(IMO.GE.2)  TIMESEC = TIMESEC + 31*86400
@@ -109,7 +109,7 @@
 #endif
          STOP
       ENDIF
-      print*, 'done with timeconv'
+!      print*, 'done with timeconv'
       RETURN
       END SUBROUTINE TIMECONV
 
