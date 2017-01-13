@@ -5,15 +5,34 @@ SHELL:=/bin/sh
 ########################################################################
 #  Get Canonical Machine NAME from config.guess
 #1
-NAME     := $(shell ./config.guess)
-LIST     := $(subst -, ,$(NAME))
-MACHINE  := $(word 1, $(LIST))
-VENDOR   := $(word 2, $(LIST))
-OS       := $(subst  $(MACHINE)-$(VENDOR)-,,$(strip $(NAME)))
+#NAME     := x86_64-unknown-linux-gnu #$(shell ./config.guess)
+#LIST     := $(subst -, ,$(NAME))
+#MACHINE  := $(word 1, $(LIST))
+#VENDOR   := $(word 2, $(LIST))
+#OS       := $(subst  $(MACHINE)-$(VENDOR)-,,$(strip $(NAME)))
 
-include cmplrflags.mk
+#include cmplrflags.mk
 #Casey 121126: Include variables/flags from SWAN.
-include ../swan/macros.inc
+#include ../swan/macros.inc
+
+
+  PPFC          :=  ifort
+  FC            :=  ifort
+  PFC           :=  mpif90
+  CC            :=  icc
+  FFLAGS1       :=  $(INCDIRS) -O2 -132  #-traceback -g -check all #-prof-gen -prof-dir /bevo2/michoski/v21/work -pg -prof-use                                                                     
+  FFLAGS2       :=  $(FFLAGS1)
+  FFLAGS3       :=  $(FFLAGS1)
+  FFLAGS4       :=  $(FFLAGS1)
+  DA            :=  -DREAL8 -DLINUX -DCSCA -DRKSSP -DSLOPE5 #-DARTDIF  #  -DWETDR -DSLOPE5 # -DSED_LAY -DOUT_TEC #-DRKC -DTRACE -DSED_LAY -DCHEM -DP0 -DP_AD -DSLOPEALL -DFILTER                            
+  DP            :=  -DREAL8 -DLINUX -DCSCA -DCMPI -DRKSSP -DSLOPE5 #-DARTDIF #-DWETDR -DSLOPE5 # -DSED_LAY -DRKC -DTRACE -DSED_LAY -DCHEM -DP0 -DP_AD -DSLOPEALL                                            
+  DPRE          :=  -DREAL8 -DLINUX -DRKSSP -DSLOPE5 #-DSWAN #-DARTDIF  # -DWETDR -DSLOPE5 #-DSED_LAY -DSWAN #-DOUT_TEC #-DSWAN #-DSLOPE5 -DRKC -DTRACE -DSED_LAY -DCHEM -DP0 -DP_AD -DSLOPEALL   
+  DPRE2         :=  -DREAL8 -DLINUX -DCMPI
+  CFLAGS        :=  -O3 -xSSSE3 -I.
+  IMODS         :=  -I
+  LIBS          :=  -L ../metis -lmetis
+  MSGLIBS       :=
+
 
 ######################## Target Specific Rules ###################################
 
@@ -78,7 +97,7 @@ PREP_MSRC  =  presizes.F
 PGLO_MSRC  =  pre_global.F  
 POST_MSRC  =  post_global.F
 ADC_MSRC   =  sizes.F diff45_41.F global.F dg.F global_3dvs.F nodalattr.F fparser.F90 fparser2.F90 \
-              read_fort_dg.F90              
+              read_fort_dg.F90 timer.F90              
 HARM_MSRC  =  harm.F  
 WIND_MSRC  =  wind.F  
 #Casey 121126: Add file for coupling to unstructured SWAN.
@@ -302,7 +321,7 @@ $(O_DIR)nodalattr.o   			:  nodalattr.F
 #Casey 121126: Added the next line.
 $(O_DIR)globalio.o                      :  globalio.F $(ADC_MOBJ)
 $(O_DIR)couple2swan.o                   :  couple2swan.F $(ADC_MOBJ)
-
+$(O_DIR)timer.o	                        :  timer.F90 $(ADC_MOBJ)
 $(ODIR)read_fort_dg.o                   :  read_fort_dg.F90 $(O_DIR)sizes.o $(O_DIR)dg.o $(O_DIR)global.o
 
 #  adcirc & padcirc

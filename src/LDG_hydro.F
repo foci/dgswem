@@ -20,6 +20,8 @@ C.....Use appropriate modules
       USE DG
       USE NodalAttributes, ONLY : EVM
 
+      USE TIMER
+
 #ifdef CMPI
       USE MESSENGER_ELEM,ONLY : UPDATELZ_ELEM,UPDATEMZ_ELEM
 #endif
@@ -197,6 +199,8 @@ C.....Loop over interior elements
       enddo
 C********************************************
 
+      CALL TOC_COMPUT() !mhb: timer
+      CALL TIC()
 #ifdef CMPI
 #ifdef WAVE_DIF
       CALL UPDATELZ_ELEM(HZ)
@@ -213,7 +217,8 @@ C********************************************
       enddo
 #endif
 #endif
-
+      CALL TOC_COMM()
+      CALL TIC() !mhb: timer
       RETURN
       END SUBROUTINE
 

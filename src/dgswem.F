@@ -9,6 +9,7 @@ C     sb-disabled for Linux&Intel compiler
 #ifdef VF
       USE DFPORT
 #endif
+      USE TIMER !mhb: timer
       USE GLOBAL
       USE HARM
       USE DG
@@ -28,8 +29,15 @@ Casey 101118: We need the following information to couple to unstructured SWAN.
 #endif
 #ifdef CMPI
       USE MESSENGER_ELEM
-C--   
+#ifdef HAVE_MPI_MOD
+      USE MPI
+#endif
       IMPLICIT NONE
+#ifndef HAVE_MPI_MOD
+      include 'mpif.h'
+#endif
+
+C--   
       
       INTEGER TESTFLAG,OUTITER,istop,i,ModetoNode
 C     sb-PDG1
@@ -314,6 +322,7 @@ C     sb...Write initial conditions
 !     stop
 !     endif
 #endif
+      CALL BEGIN_TIME() !mhb:timer
 C.....Begin time stepping
       DO 200 ITIME_A = ITHS+1,NT
 c$$$         if (mod(itime_a,1000).eq.1) then
@@ -321,6 +330,10 @@ c$$$            if (myproc.eq.0) write(*,*) 'timestep ',itime_a
 c$$$c     write(200+myproc,*) 'timestep ',itime_a,myproc
 c$$$         endif
          CALL DG_TIMESTEP(ITIME_A)
+
+         IF ( ITIME_A .EQ. CURR_STORE * IT_PER_STORE ) THEN
+            CALL CLOCK_RESET() 
+         ENDIF
 #ifdef SWAN
 Casey 090302: If it is time, then call the following subroutine
 C             to then call the SWAN time-stepping subroutine.
@@ -345,6 +358,16 @@ Casey 121126: DEBUG.
 C...  
 C...  ****************** TIME STEPPING LOOP ENDS HERE ********************
 C...  
+#ifdef CMPI
+      !call mpi barrier
+      IF( MYPROC .EQ. 0) THEN
+      PRINT *,'%&%&%&%&%&%&%&%&%&%&%&%&%&%&%&%&%&%&%&%&%&%&%&%&%'
+      ENDIF
+      CALL MPI_BARRIER(MPI_COMM_WORLD,ERR_MSG)
+#endif
+      CALL CLOCK_RESET() !mhb: timer
+      CALL WRITE_TIME( MYPROC )
+
 C...  
 C...  IF IHARIND=1 SOLVE THE HARMONIC ANALYSIS PROBLEM AND WRITE OUTPUT
 C...  
@@ -403,9 +426,9 @@ C     CPU_TIME = TARRAY(1) + TARRAY(2)
 C     PRINT*,'CPU_TIME = ',CPU_TIME
 #endif
 
-      CALL ETIME(TARRAY)
-      CPU_TIME = TARRAY(1) + TARRAY(2)
-      PRINT*,'CPU_TIME = ',CPU_TIME
+!      CALL ETIME(TARRAY)
+!      CPU_TIME = TARRAY(1) + TARRAY(2)
+!      PRINT*,'CPU_TIME = ',CPU_TIME
       STOP
       END
 

@@ -28,6 +28,8 @@ C.....Use appropriate modules
       USE GLOBAL
       USE DG
 
+      USE TIMER
+
 #ifdef CMPI
       USE MESSENGER_ELEM 
 #endif
@@ -424,7 +426,8 @@ C.......Compute the dynamic pressure if flagged
          endif
 
 #endif
-
+         CALL TOC_COMPUT()
+         CALL TIC() !mhb: timer
 #ifdef CMPI
          CALL UPDATER_ELEM_MOD(ZE,QX,QY,IRK+1,3)
 #ifdef TRACE
@@ -447,6 +450,8 @@ C.......Compute the dynamic pressure if flagged
 #endif
 
 #endif
+         CALL TOC_COMM() !mhb: timer
+         CALL TIC() 
 
 C.......Apply the slopelimiter if appropriate
 
@@ -463,6 +468,68 @@ C.......Apply the slopelimiter if appropriate
             CALL SLOPELIMITER()
             stblzr = .true.
          endif
+#endif
+         CALL TOC_SLOPE_LIM()
+         CALL TIC()
+#ifdef FILTER 
+      !Stabilization filtering 
+      DO J = 1,NE
+         DO K = 2,DOFS(J)
+
+            alph = 10.D0
+            s = RK_stage
+
+            if (k.le.3) then
+               eta = 1.D0 / ( pdg_el(j)+1.D0 )
+            elseif (k.gt.3.and.k.le.6) then
+               eta = 2.D0 / ( pdg_el(j)+1.D0 )
+            elseif (k.gt.6.and.k.le.10) then
+               eta = 3.D0 / ( pdg_el(j)+1.D0 )
+            elseif (k.gt.11.and.k.le.15) then
+               eta = 4.D0 / ( pdg_el(j)+1.D0 )
+            elseif (k.gt.16.and.k.le.21) then
+               eta = 5.D0 / ( pdg_el(j)+1.D0 )       
+            elseif (k.gt.22.and.k.le.28) then
+               eta = 6.D0 / ( pdg_el(j)+1.D0 )   
+            elseif (k.gt.29.and.k.le.36) then
+               eta = 7.D0 / ( pdg_el(j)+1.D0 )               
+            endif
+
+            seta = eta**s
+            sigma = exp(-alph*seta)
+            sigma = 1.D0
+C.......Filter the layers if flagged
+
+#ifdef SED_LAY
+            do l = 1,layers
+               
+               bed(K,J,IRK+1,l) = sigma * bed(K,J,irk+1,l) 
+               
+            enddo
+#endif
+
+            ZE(K,J,IRK+1) = sigma*ZE(K,J,irk+1) 
+            QX(K,J,IRK+1) = sigma*QX(K,J,irk+1)
+            QY(K,J,IRK+1) = sigma*QY(K,J,irk+1)
+
+
+C.......Filter the transported tracer term if flagged
+
+#ifdef TRACE
+            iota(K,J,IRK+1) = sigma*iota(K,J,irk+1)
+
+#endif
+
+C......Filter chemistry transported terms if flagged
+
+#ifdef CHEM
+            iota(K,J,IRK+1) =  sigma*iota(K,J,irk+1) 
+            iota2(K,J,IRK+1) = sigma*iota2(K,J,irk+1) 
+
+#endif
+
+         ENDDO
+      ENDDO
 #endif
 
 
@@ -486,7 +553,8 @@ c$$$         endif
 
 C.......For parallel run update for dofs if slope limiter and/or wetting and
 C.......drying is being used
-
+      CALL TOC_COMPUT()
+      CALL TIC() !mhb: timer
 #ifdef CMPI
          if (SLOPEFLAG.NE.0.OR.NOLIFA.GE.2) THEN
             CALL UPDATER_ELEM_MOD(ZE,QX,QY,IRK+1,3)
@@ -512,6 +580,8 @@ C.......drying is being used
 #endif
          endif
 #endif
+         CALL TOC_COMM()
+         CALL TIC()
 
 C.......p_enrich soln and update
 
@@ -549,67 +619,6 @@ C.......p_enrich soln and update
  100  CONTINUE
 
 C.....Update variables for next time step
-
-#ifdef FILTER 
-      !Stabilization filtering 
-      DO J = 1,NE
-         DO K = 2,DOFS(J)
-
-            alph = 10.D0
-            s = RK_stage
-
-            if (k.le.3) then
-               eta = 1.D0 / ( pdg_el(j)+1.D0 )
-            elseif (k.gt.3.and.k.le.6) then
-               eta = 2.D0 / ( pdg_el(j)+1.D0 )
-            elseif (k.gt.6.and.k.le.10) then
-               eta = 3.D0 / ( pdg_el(j)+1.D0 )
-            elseif (k.gt.11.and.k.le.15) then
-               eta = 4.D0 / ( pdg_el(j)+1.D0 )
-            elseif (k.gt.16.and.k.le.21) then
-               eta = 5.D0 / ( pdg_el(j)+1.D0 )       
-            elseif (k.gt.22.and.k.le.28) then
-               eta = 6.D0 / ( pdg_el(j)+1.D0 )   
-            elseif (k.gt.29.and.k.le.36) then
-               eta = 7.D0 / ( pdg_el(j)+1.D0 )               
-            endif
-
-            seta = eta**s
-            sigma = exp(-alph*seta)
-
-C.......Filter the layers if flagged
-
-#ifdef SED_LAY
-            do l = 1,layers
-               
-               bed(K,J,NRK+1,l) = sigma * bed(K,J,nrk+1,l) 
-               
-            enddo
-#endif
-
-            ZE(K,J,NRK+1) = sigma*ZE(K,J,nrk+1) 
-            QX(K,J,NRK+1) = sigma*QX(K,J,nrk+1)
-            QY(K,J,NRK+1) = sigma*QY(K,J,nrk+1)
-
-
-C.......Filter the transported tracer term if flagged
-
-#ifdef TRACE
-            iota(K,J,NRK+1) = sigma*iota(K,J,nrk+1)
-
-#endif
-
-C......Filter chemistry transported terms if flagged
-
-#ifdef CHEM
-            iota(K,J,NRK+1) =  sigma*iota(K,J,nrk+1) 
-            iota2(K,J,NRK+1) = sigma*iota2(K,J,nrk+1) 
-
-#endif
-
-         ENDDO
-      ENDDO
-#endif
       
 
       DO J = 1,MNE

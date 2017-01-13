@@ -12,7 +12,7 @@ C
       USE DG, ONLY: DOFH
       USE DIFF45_41,ONLY : MNODES
 
-
+      USE TIMER !mhb :timer
 #ifdef HAVE_MPI_MOD
       use mpi  
       IMPLICIT NONE
@@ -704,7 +704,10 @@ C
         DO N=1, RDIM
           INDEX(N) = 0
         ENDDO
+        CALL TOC_COMM() !mhb: timer
         CALL MPI_WAITSOME( RDIM,REQ_LZ,NFINI,INDEX,STAT_LZ,IERR )
+        CALL TIC() !mhb:timer
+
         TOT = TOT + NFINI
         DO N=1, NFINI
           IF (INDEX(N).GT.0.AND.INDEX(N).LE.RDIM)  THEN
@@ -865,7 +868,10 @@ C
            DO N=1, RDIM
               INDEX(N) = 0
            ENDDO
+
+           CALL TOC_COMM() !mhb: timer
            CALL MPI_WAITSOME( RDIM,REQ_R1,NFINI,INDEX,STAT_R1,IERR )
+           CALL TIC() !mhb: timer
            TOT = TOT + NFINI
            DO N=1, NFINI
               IF (INDEX(N).GT.0.AND.INDEX(N).LE.RDIM)  THEN
