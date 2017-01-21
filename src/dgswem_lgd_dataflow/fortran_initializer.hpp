@@ -113,6 +113,7 @@ public:
 	    */
 
 	    if (recv_neighbors.size() != send_neighbors.size() || (std::equal(recv_neighbors.begin(),recv_neighbors.end(),send_neighbors.begin()) == false) ) {
+	      /*
 		hpx::cout << "*************** ASYMMETRIC MATRIX (recv size != send size) ID = " << id << "*************" << std::endl;
 		hpx::cout << "send_neighbors.size() = " << send_neighbors.size() << ", neighbors are: ";
 		for (auto&& neighbor: send_neighbors) 
@@ -123,6 +124,7 @@ public:
 		for (auto&& neighbor: recv_neighbors) 
 		    hpx::cout << neighbor << " ";
 		hpx::cout << std::endl;
+	      */
 	    }
 
 	    
