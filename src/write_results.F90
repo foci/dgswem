@@ -1190,7 +1190,8 @@
 !     sb
 !     IF(global_here%ELMAX.LT.200.0.AND.global_here%KEMAX.GT.0) THEN
 
-         IF(global_here%ELMAX.LT.200.0.and.(MOD(IT,global_here%NSCREEN_INC).EQ.0) ) THEN
+         IF(global_here%ELMAX.LT.200.0.and.(MOD(IT,global_here%NSCREEN_INC).EQ.0).AND.&
+            (s%MYPROC.EQ.0)) THEN
             if (global_here%kemax.eq.0) then 
                global_here%kemax = 1 
             endif

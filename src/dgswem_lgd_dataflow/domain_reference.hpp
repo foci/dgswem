@@ -84,7 +84,7 @@ public:
       	
 	if (timestep == 0) {
 	  timestep++;
-	  hpx::cout << "skipping timestep 0" << std::endl;
+	  // hpx::cout << "skipping timestep 0" << std::endl;
 	  return;
 	} // skip timestep = 0
 
@@ -108,20 +108,20 @@ public:
 		   
 
 
-	if (id == 0) {
+	/*if (id == 0) {
 	  hpx::cout << " * globalNanoStep = " << globalNanoStep << " timestep = " << timestep << " substep = " << substep << 
 	    " rkstep = " << rkstep << " slopelimiter = " << slopelimiter << std::endl;
-	      /*
+	      
 		if (timestep % 100 == 0)
 		{
 		}
-	      */
-	}
+	      
+		}*/
 	
 	if (slopelimiter) {
 	  
-	  if (id==0)
-	    hpx::cout << "put element boundaries, timestep = " << timestep << std::endl;
+	  //  if (id==0)
+	  //  hpx::cout << "put element boundaries, timestep = " << timestep << std::endl;
 	// Place incoming buffers into our cell 
 	// Loop over neighbors
 	  for (auto&& neighbor: neighbors) {
@@ -154,15 +154,15 @@ public:
 	  
 	  } // End loop over neighbors  
 	  
-	  if (id==0)
-	    hpx::cout << "call slopelimiter_parta, timestep = " << timestep << std::endl;
+	  //if (id==0)
+	    //  hpx::cout << "call slopelimiter_parta, timestep = " << timestep << std::endl;
 	  FNAME(slopelimiter_parta_fort)(&domainWrapper->size,
 					 &domainWrapper->dg,
 					 &domainWrapper->global);
 	  
 
-	  if (id==0)
-	    hpx::cout << "get node boundaries, timestep = " << timestep << std::endl;
+	  //if (id==0)
+	    // hpx::cout << "get node boundaries, timestep = " << timestep << std::endl;
 	  for (auto&& neighbor: neighbors) {
 	    std::vector<double> send_buffer;
 	    int volume;
@@ -195,8 +195,8 @@ public:
 	  if ( (timestep > 1) || (rkstep == 2) ){	  
 
 	    // Put node boundaries
-	    if (id==0)
-	      hpx::cout << "put node boundaries, timestep = " << timestep_here << std::endl;	      	      
+	    //if (id==0)
+	      //hpx::cout << "put node boundaries, timestep = " << timestep_here << std::endl;	      	      
 	    
 	    for (auto&& neighbor: neighbors) {
 	      std::vector<double> buffer_vector = hood[neighbor];
@@ -226,8 +226,8 @@ public:
 	    
 	    
 	    // Call slopelimiter_part2
-	    if (id==0)
-	      hpx::cout << "Call slopelimiter_partb (with w/d), timestep = " << timestep_here << std::endl;	      	      
+	    //if (id==0)
+	      //hpx::cout << "Call slopelimiter_partb (with w/d), timestep = " << timestep_here << std::endl;	      	      
 	    FNAME(slopelimiter_partb_fort)(&domainWrapper->size,
 					   &domainWrapper->dg,
 					   &domainWrapper->global);
@@ -235,8 +235,8 @@ public:
 	    	    	    
 	    // if rkstep == 1, call dg_timestep_advance
 	    if (rkstep == 1) {
-	      if (id==0)
-		hpx::cout << "dg_timestep_advance, timestep = " << timestep_here << std::endl;
+	      //if (id==0)
+		//hpx::cout << "dg_timestep_advance, timestep = " << timestep_here << std::endl;
 	      
 	      
 		FNAME(dg_timestep_advance_fort)(&domainWrapper->size,
@@ -250,8 +250,8 @@ public:
 	    
 	  } // end if timestep > 1 || rkstep == 2 
 	  
-	  if (id==0)
-	    hpx::cout << "dg_hydro_timestep, rkstep = " << rkstep << " timestep = " << timestep << std::endl;
+	  // if (id==0)
+	  //  hpx::cout << "dg_hydro_timestep, rkstep = " << rkstep << " timestep = " << timestep << std::endl;
 	  // Do hydro
 	  
 	  FNAME(dg_hydro_timestep_fort)(&domainWrapper->size,
@@ -265,8 +265,8 @@ public:
 	  
 	  
 	  
-	  if (id==0)
-	    hpx::cout << "Get element boundaries, timestep = " << timestep << std::endl;
+	  //	  if (id==0)
+	  //  hpx::cout << "Get element boundaries, timestep = " << timestep << std::endl;
 	  
 	  // Get element boundaries
 	  for (auto&& neighbor: neighbors) {

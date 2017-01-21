@@ -216,8 +216,8 @@ public:
 
 	    int timestep_minus = timestep-1;
 
-	    if (id == 0)
-		fortran_calls << "calling dg_timestep_advance_fort, timestep = " << timestep_minus << " domain = "<< id << std::endl << std::flush;			
+	    //if (id == 0)
+	    //	fortran_calls << "calling dg_timestep_advance_fort, timestep = " << timestep_minus << " domain = "<< id << std::endl << std::flush;			
 
 
 	    FNAME(dg_timestep_advance_fort)(&domainWrapper->size,
@@ -230,9 +230,9 @@ public:
 	
 	
 	// ######################### Hydro timestep ########################
-	if (id == 0) 
-	    fortran_calls << "calling dg_hydro_timestep_fort, timestep = " << timestep << " rkstep = "
-			  << rkstep << " domain = "<< id << std::endl << std::flush;
+	//	if (id == 0) 
+	//	    fortran_calls << "calling dg_hydro_timestep_fort, timestep = " << timestep << " rkstep = "
+	      //		  << rkstep << " domain = "<< id << std::endl << std::flush;
 	// ASSERT that rkstep != 0
 	assert(rkstep != 0);
 #ifdef VERBOSE
