@@ -543,7 +543,7 @@ C.....time step falls within the specified window
 !Casey 120813: Begin the OUT_TEC conditional.
 
 #ifdef PARAVIEW
-                  call paraview_plot(ze(:,:,1),hb(:,:,1),qx(:,:,1),qy(:,:,1))
+                  call paraview_plot(ze(:,:,1),hb(:,:,1),qx(:,:,1),qy(:,:,1),"ze")
 #endif 
 
 

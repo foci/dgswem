@@ -28,7 +28,7 @@ contains
     RETURN
   END SUBROUTINE INIT_PARAVIEW_PLOTTER
 
-  SUBROUTINE PARAVIEW_PLOT(ZE,B,QX,QY)!add plt_str here later
+  SUBROUTINE PARAVIEW_PLOT(ZE,B,QX,QY,plot_str)!add plt_str here later
     use plot_var_funcs
  !   use dg, only : 
     use global, only : NE,X,Y, NM
@@ -46,7 +46,7 @@ contains
     !.....declare arguments
     real(sz), intent(in) :: ZE(:,:), QX(:,:), QY(:,:)
     real(sz), intent(in) :: b(:,:)
-    character*2 :: plot_str = "ze"
+    character(len=*), intent(in) :: plot_str
 
     !.....declare internal variables
     procedure (plot_var), pointer :: f_ptr => null ()
@@ -56,6 +56,7 @@ contains
     integer n1,n2,n3
     real(sz) ze_val, b_val, qx_val, qy_val
     character*25 :: fname = "dgswem____00000.00000.vtu"
+    character(len=35) :: plt_var_str
 
     plt_iter = plt_iter + 1
     write(fname(8:9),"(A)") plot_str
@@ -70,20 +71,28 @@ contains
     SELECT CASE (plot_str)
     CASE ("ze")
        f_ptr => ze_o
+       plt_var_str = "Surface Elevation"
     CASE ("h")
        f_ptr => h_o
+       plt_var_str = "Water Column Height"
     CASE ("b")
        f_ptr => b_o
+       plt_var_str = "Bathymetry"
     CASE ("qx")
        f_ptr => qx_o
+       plt_var_str = "Discharge in x-direction"
     CASE ("qy")
        f_ptr => qy_o
+       plt_var_str = "Discharge in y-direction"
     CASE ("u")
        f_ptr => u_o
+       plt_var_str = "u velocity"
     CASE ("v")
        f_ptr => v_o
+       plt_var_str = "v velocity"
     CASE DEFAULT
        print *, "ERROR:: BAD plot_var in paraview_plotter.F90"
+       STOP
     END SELECT
 
     write(877,fmt="(a)") "<?xml version=""1.0"" ?>"
@@ -161,7 +170,7 @@ contains
     write(877,*) "        </DataArray>"
     write(877,*) "      </Cells>"
     write(877,*) "      <PointData Scalars=""scalars"">"
-    write(877,*) "        <DataArray type=""Float64"" Name=""Pressure"" Format=""&
+    write(877,*) "        <DataArray type=""Float64"" Name=""",trim(plt_var_str) ,""" Format=""&
          &ascii"">"
 
     !.....For fully discontinuous output
