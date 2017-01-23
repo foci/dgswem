@@ -66,7 +66,10 @@ endif(NOT NO_LGD)
 
 #set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++14")
 
-#set (CMAKE_CXX_FLAGS "-g ${CMAKE_CXX_FLAGS}")
+if(PROFILE)
+	set (CMAKE_CXX_FLAGS "-pg ${CMAKE_CXX_FLAGS}")
+	message("CXX Profiling flags enabled")
+endif()
 
 message("CMAKE_CXX_COMPILER:" ${CMAKE_CXX_COMPILER})
 message("CMAKE_BUILD_TYPE:" ${CMAKE_BUILD_TYPE})
