@@ -1,0 +1,34 @@
+./                                                                                                   ! dgswe.inp file path 
+0                                                                                                    ! dgswe.inp path substitution 
+1,0,1                                                                                                ! zeta plot options 
+1,0,1                                                                                                ! velocity plot options 
+1,0,1                                                                                                ! bathymetry plot options 
+1                                                                                                    ! mesh plot option 
+0                                                                                                    ! mesh plot stations option
+off                                                                                                  ! mesh plot element labels 
+off                                                                                                  ! mesh plot node lables 
+1,30,2                                                                                               ! order of nodal set for plotting straight elements 
+2                                                                                                    ! order of nodal set for plotting curved elements 
+1d-1,1d-1                                                                                            ! zeta error tolerances: absolute, relative
+1d-1,1d-1                                                                                            ! velocity error tolerances: absolute, relative
+1d-1,1d-1                                                                                            ! bathymetry error tolerance: absolute, relative
+1                                                                                                    ! adaptive plotting option
+all                                                                                                  ! zoom box 
+7                                                                                                    ! figure width 
+1,50                                                                                                 ! timesnap range 
+/home/sbrus/Codes/dgswe/plot/work/default2.cmap                                                      ! colormap path 
+auto-snap                                                                                            ! zeta colorscale limits 
+auto-all                                                                                             ! velocity colorscale limits 
+auto-snap                                                                                            ! bathymetry colorscale limits
+11                                                                                                   ! font size 
+cm                                                                                                   ! font
+10                                                                                                   ! number of x ticks 
+auto                                                                                                 ! number of y ticks 
+10                                                                                                   ! number of c ticks 
+0                                                                                                    ! number of x decimal places 
+0                                                                                                    ! number of y decimal places 
+3                                                                                                    ! number of c decimal places 
+3                                                                                                    ! number of t decimal places 
+jpg,1                                                                                                ! additional file format, remove ps file option 
+250                                                                                                  ! raster density 
+0                                                                                                    ! movie flag 
