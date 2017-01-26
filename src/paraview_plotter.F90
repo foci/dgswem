@@ -59,9 +59,9 @@ contains
     character(len=35) :: plt_var_str
 
     plt_iter = plt_iter + 1
-    write(fname(8:9),"(A)") plot_str
-    write(fname(11:15),"(I0.5)") plt_iter
-    write(fname(17:21),"(I0.5)") MYPROC
+    write(fname(10-len(plot_str):9),"(A)") plot_str
+    write(fname(11:15),"(I0.5)") MYPROC
+    write(fname(17:21),"(I0.5)") plt_iter
     open(877,file= fname, action="write")
 
 
