@@ -1,7 +1,7 @@
 if (Fortran_COMPILER_NAME MATCHES "gfortran.*")
   # gfortran
   # set (CMAKE_Fortran_FLAGS_RELEASE "-O3 -DHPX")
-
+  message ("Using gcc...")
   set (CMAKE_Fortran_FLAGS_RELEASE   "-cpp -O3 -msse3 -DHPX -DREAL8 -DCSCA -DLINUX -DRKSSP -DSLOPE5 -ffixed-line-length-none -ffree-line-length-none -Waliasing -Wno-tabs -Wline-truncation -fimplicit-none -frecursive -I CMakeFiles/${PROJECT_NAME}.dir/src/ -I .")
 
   set (CMAKE_Fortran_FLAGS_DEBUG   "-g -O0 -cpp -DVERBOSE -DHPX -DREAL8 -DCSCA -DLINUX -DRKSSP -DSLOPE5 -ffixed-line-length-none -ffree-line-length-none -Wuninitialized -Waliasing -Wno-tabs -Wline-truncation -Wsurprising -pg -fbacktrace -fimplicit-none -frecursive -I CMakeFiles/${PROJECT_NAME}.dir/src/ -I .")
@@ -15,6 +15,7 @@ if (Fortran_COMPILER_NAME MATCHES "gfortran.*")
 
   elseif (Fortran_COMPILER_NAME MATCHES "ifort.*")
   # ifort (untested)
+  message ("Using ifort...")
 #    set (CMAKE_Fortran_FLAGS_RELEASE "-DHPX -DREAL8 -DCSCA -DLINUX -DRKSSP -DSLOPE5 -f77rtl -O3")
 
     set (CMAKE_Fortran_FLAGS_RELEASE "-DHPX -DREAL8 -DCSCA -DLINUX -DRKSSP -DSLOPE5 -recursive -threads -f77rtl -O2 -msse3 -132")
@@ -27,7 +28,7 @@ if (Fortran_COMPILER_NAME MATCHES "gfortran.*")
 endif (Fortran_COMPILER_NAME MATCHES "gfortran.*")
 
 if(PROFILE)
-	set (CMAKE_Fortran_FLAGS_RELEASE "-pg")
+	set (CMAKE_Fortran_FLAGS_RELEASE "${CMAKE_Fortran_FLAGS_RELEASE} -p -g")
 	message ("Fortran profiling flags enabled")
 endif()
 
