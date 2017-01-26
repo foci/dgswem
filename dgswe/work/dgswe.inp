@@ -1,0 +1,69 @@
+grid_file = ../grids/inlet1.grd                                ! grid file
+forcing_file = ../grids/inlet1.bfr                              ! forcing file
+!curve_file = ../grids/inlet1_ctp3.cb                           ! curve_file
+p = 3                                                          ! polynomial order
+ctp = 1                                                         ! parametric coordinate transformation order
+hbp = 1                                                        ! bathymetry order
+rk = 22                                                        ! rk order
+dt = .5d0                                                      ! timestep 
+tf = 1d0                                                       ! final time (days)
+dramp = .5d0                                                   ! ramping parameter (days)
+cf = .003d0                                                    ! friction coefficient 
+sol_opt = 1
+sol_snap = 50d0
+out_direc = ./                                                 ! output director
+npart = 1
+esl = 5d0
+
+!grid_file = ../grids/converge1_dble.grd
+!forcing_file = ../grids/converge1_dble.bfr  
+!bathy_file = ../grids/converge1_dble_hbp3_interp.hb
+! curve_file = ../grids/converge1_dble_ctp3.cb
+!p = 3
+! ctp = 3
+!hbp = 3
+!rk = 22
+!dt = 0.125d0
+!tf = 1d0
+!dramp = 0.08d0 
+! cf = .0025d0
+!lines = 10d0
+!out_direc = ./
+!npart = 1
+
+!grid_file = /home/sbrus/data-drive/galveston_spline_flux_fix/grids/galveston_tri.grd
+!forcing_file = /home/sbrus/data-drive/galveston_spline_flux_fix/grids/galveston_tri.bfr
+!bathy_file = /home/sbrus/data-drive/galveston_spline_flux_fix/grids/galveston_tri_hbp1_rimls.hb
+!curve_file = /home/sbrus/data-drive/galveston_spline_flux_fix/grids/galveston_tri_ctp2.cb
+!p = 1
+!ctp = 2
+!hbp = 1
+!rk = 22
+!dt = 1.5d0
+!tf = 4d0
+!dramp = 0.5d0
+!cf = .003d0
+!h0 = .3d0
+!sol_opt = 1
+!sol_snap = 48d0
+!sta_opt = 1
+!sta_snap = 576d0
+!sta_file = /home/sbrus/data-drive/galveston_spline_flux_fix/grids/stations.d
+!out_direc = ./
+!npart = 1
+
+
+!../grids/beaufort.grd                                     ! grid file
+!../grids/beaufort.bfr                                     ! forcing file
+!1                                                         ! p - polynomial order
+!1                                                         ! ctp - parametric coordinate transformation order
+!1                                                         ! hbp - bathymetry order
+!.5d0                                                      ! dt - timestep
+!1d0                                                       ! tf - final time (days)
+!2d0                                                       ! dramp - ramping parameter (days)
+!.0025d0                                                   ! cf - friction coefficient
+!10d0                                                      ! lines - lines in output files
+!../output/                                                ! output directory
+!1                                                         ! npart - edge blocking parameter
+
+
