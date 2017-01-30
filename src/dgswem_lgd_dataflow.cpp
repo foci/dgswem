@@ -38,7 +38,10 @@ int hpx_main(variables_map & vm)
 
     int n_timesteps = vm["n_timesteps"].as<std::size_t>();
 
+    int Chunksize = vm["chunksize"].as<std::size_t>();
+
     std::cout << "n_timesteps from cmd line = " << n_timesteps << std::endl;
+    std::cout << "chunksize from cmd line = " << Chunksize << std::endl;
 
     int n_substeps = 4;
 
@@ -49,7 +52,7 @@ int hpx_main(variables_map & vm)
     
     FortranInitializer *init = new FortranInitializer(n_domains, total_rksteps);
     
-    SimulatorType sim(init, "dgswem_lgd_hpx");
+    SimulatorType sim(init, "dgswem_lgd_hpx", Chunksize);
     sim.run();
     
 
@@ -66,8 +69,16 @@ int main(int argc, char **argv)
   desc_commandline.add_options()
     (
             "n_timesteps"
-	    , value<std::size_t>()->default_value(100)
+	    , value<std::size_t>()->default_value(1000)
 	    , "Number of timesteps"
+     )
+    ;
+
+  desc_commandline.add_options()
+    (
+            "chunksize"
+	    , value<std::size_t>()->default_value(10)
+	    , "Chunksize"
      )
     ;
 
@@ -77,7 +88,7 @@ int main(int argc, char **argv)
     // "small" stack.
   std::vector<std::string> config;
   config.push_back("hpx.run_hpx_main!=1");
-  config.push_back("hpx.stacks.small_size!=0x20000");
+  //  config.push_back("hpx.stacks.small_size!=0x20000");
 
   return hpx::init(desc_commandline,argc,argv,config);
 }

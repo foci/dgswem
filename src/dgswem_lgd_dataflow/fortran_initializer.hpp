@@ -170,7 +170,7 @@ public:
 
     void grid(LibGeoDecomp::GridBase<DomainReference, 1> *grid)
     {
-	
+
 	// Loop only over the domains we need to
 	int origin = grid->boundingBox().origin[0];
 	int end = origin + grid->boundingBox().dimensions[0];
@@ -183,6 +183,14 @@ public:
 	    bool single_domain {false};
 
 	    int domain_number = id;
+
+	    std::ostringstream outfile;
+	    outfile << std::setw(4) << std::setfill('0') << id;
+	    std::string filename = "PE"+outfile.str()+"/locality.dat";
+	    std::ofstream locfile;
+	    locfile.open("filename");
+	      
+	    locfile << hpx::find_here();
 
 	    std::cout << "initializing (domain_id = " << id
 		      << ", locality = " << hpx::find_here()
