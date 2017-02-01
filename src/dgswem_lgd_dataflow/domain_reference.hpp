@@ -1,6 +1,9 @@
 #ifndef DOMAIN_REFERENCE 
 #define DOMAIN_REFERENCE
 
+#include <hpx/config.hpp>
+#include <hpx/util/itt_notify.hpp>
+
 #include "../fname.h"
 #include "../fortran_declarations.hpp"
 
@@ -76,10 +79,34 @@ public:
 	substep(1),
         neighbors(neighbors_here)
     {}
-	
+
+#if defined(HPX_HAVE_ITTNOTIFY)
+    char* get_function_name()
+    {
+	char* name = new char[120];
+	std::strcpy(name, "update#");
+	char buffer[33];
+	itoa(id, buffer, 10);
+	std::strcat(name, buffer);
+	std::strcat(name, "#");
+	itoa(timestep, buffer, 10);
+	std::strcat(name, buffer);
+	std::strcat(name, "#");
+	itoa(substep, buffer, 10);
+	std::strcat(name, buffer);
+	return name;
+    }
+#endif
+    
     template<typename HOOD, typename EVENT>
     void update(HOOD& hood, const EVENT& event)
     {
+#if defined(HPX_HAVE_ITTNOTIFY)
+	std::unique_ptr<char> name(get_function_name());
+	static hpx::util::itt::domain d(hpx::get_thread_nameitt());
+	hpx::util::itt::task t(d, name.get());
+#endif
+	
         int globalNanoStep = event.step() * NANO_STEPS + event.nanoStep();
       	
 	if (timestep == 0) {
