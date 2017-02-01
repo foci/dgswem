@@ -86,13 +86,16 @@ public:
 	char* name = new char[120];
 	std::strcpy(name, "update#");
 	char buffer[33];
-	itoa(id, buffer, 10);
+	//itoa(id, buffer, 10);
+	snprintf(buffer, sizeof(buffer), "%d", id);
 	std::strcat(name, buffer);
 	std::strcat(name, "#");
-	itoa(timestep, buffer, 10);
+	//itoa(timestep, buffer, 10);
+	snprintf(buffer, sizeof(buffer), "%d", timestep);
 	std::strcat(name, buffer);
 	std::strcat(name, "#");
-	itoa(substep, buffer, 10);
+	//itoa(substep, buffer, 10);
+	snprintf(buffer, sizeof(buffer), "%d", substep);
 	std::strcat(name, buffer);
 	return name;
     }
