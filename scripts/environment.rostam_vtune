@@ -1,0 +1,9 @@
+module load cmake/3.6.2
+module load hwloc/1.11.3
+module load boost/1.63.0-gcc6.3.0
+module load openmpi/1.10.5-gcc6.3.0 
+module load VTune/2017_update1
+module load gcc/6.3.0
+module load ifort
+
+LD_LIBRARY_PATH=$HOME/local_install_RelWithDebInfo/lib:$LD_LIBRARY_PATH

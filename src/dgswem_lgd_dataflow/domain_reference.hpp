@@ -106,7 +106,7 @@ public:
     {
 #if defined(HPX_HAVE_ITTNOTIFY)
 	std::unique_ptr<char> name(get_function_name());
-	static hpx::util::itt::domain d(hpx::get_thread_nameitt());
+	static hpx::util::itt::domain d(hpx::get_thread_name().data());
 	hpx::util::itt::task t(d, name.get());
 #endif
 	

@@ -9,7 +9,7 @@ dgswem_serial
 work/fort.*
 dgswem_hpx
 dgswem_hpx_cpp
-build/
+builds/
 \#*#
 PE*/
 DG*
