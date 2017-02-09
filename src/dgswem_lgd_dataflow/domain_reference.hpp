@@ -81,8 +81,98 @@ public:
         neighbors(neighbors_here),
 	avg_slopelim_update(0.0),
 	avg_rk_update(0.0)
+<<<<<<< HEAD
+=======
     {
     }
+
+#if defined(HPX_HAVE_ITTNOTIFY)
+    char* get_function_name()
+>>>>>>> b74386911e65ab0faa654ddfa1a9160d3b9631a3
+    {
+    }
+<<<<<<< HEAD
+=======
+
+    char* get_comm_name()
+    {
+	char* name = new char[120];
+	std::strcpy(name, "comm#");
+	char buffer[33];
+	//itoa(id, buffer, 10);
+	snprintf(buffer, sizeof(buffer), "%d", id);
+	std::strcat(name, buffer);
+	std::strcat(name, "#");
+	//itoa(timestep, buffer, 10);
+	snprintf(buffer, sizeof(buffer), "%d", timestep);
+	std::strcat(name, buffer);
+	std::strcat(name, "#");
+	//itoa(substep, buffer, 10);
+	snprintf(buffer, sizeof(buffer), "%d", substep);
+	std::strcat(name, buffer);
+	return name;
+    }
+#endif
+    
+  // //HPX Performance counter
+  // boost::atomic<std::int64_t> counter_rk;
+  // boost::atomic<std::int64_t> counter_slopelim;
+  // boost::atomic<std::int64_t> rk_time_int;
+  // boost::atomic<std::int64_t> slopelim_time_int;
+
+  // //  std::int64_t rk_update_perf_data(double rk_time)
+  // std::int64_t rk_update_perf_data(bool reset)
+  // {
+  //   std::int64_t counter = ++counter_rk;
+  //   rk_time_int+=rk_time*1000000000;
+  //   std::int64_t rk_time_int_now = rk_time_int;
+
+  //   // return average time in nanoseconds
+  //   return rk_time_int_now/counter;
+  // }
+
+  // //  std::int64_t slopelim_update_perf_data(double slopelim_time)
+  // std::int64_t slopelim_update_perf_data(bool reset)
+  // {
+  //   std::int64_t counter = ++counter_rk;
+  //   slopelim_time_int+=slopelim_time*1000000000;
+  //   std::int64_t slopelim_time_int_now = slopelim_time_int;
+
+  //   // return average time in nanoseconds
+  //   return slopelim_time_int_now/counter;
+  // }
+
+
+
+  // void register_counter_type()
+  // {
+  //   hpx::performance_counters::install_counter_type(
+  // 						    "/dgswem/rk_update_time",
+  // 						    &DomainReference::rk_update_perf_data,
+  // 						    "returns average time of rk update step"
+  // 						    "ns"
+  // 						    );
+  //   hpx::performance_counters::install_counter_type(
+  // 						    "/dgswem/slopelim_update_time",
+  // 						    &DomainReference::slopelim_update_perf_data,
+  // 						    "returns average time of rk update step"
+  // 						    "ns"
+  // 						    );
+  // }
+    
+    template<typename HOOD, typename EVENT>
+    void update(HOOD& hood, const EVENT& event)
+    {
+
+	
+        int globalNanoStep = event.step() * NANO_STEPS + event.nanoStep();
+      	
+	if (timestep == 0) {
+	  timestep++;
+	  // hpx::cout << "skipping timestep 0" << std::endl;
+	  return;
+	} // skip timestep = 0
+>>>>>>> b74386911e65ab0faa654ddfa1a9160d3b9631a3
 
   template<typename HOOD, typename EVENT>
   void slopelimiter(HOOD& hood, const EVENT& event, int rkstep)
@@ -101,6 +191,7 @@ public:
 	int volume; // We don't really use this right now
 	double buffer[MAX_BUFFER_SIZE];
 	
+<<<<<<< HEAD
 	// Make sure the buffer isn't empty, which it never should be
 	if (buffer_vector.size() == 0) {
 	  throw std::logic_error("Empty incoming buffer!");
@@ -114,6 +205,28 @@ public:
 	for (int i=0; i<buffer_vector.size(); i++) {
 	  buffer[i] = buffer_vector[i];
 	}
+=======
+	if (slopelimiter) {
+	  
+	  { // Open "update" code block (slopelimiter)
+#if defined(HPX_HAVE_ITTNOTIFY)
+	    std::unique_ptr<char> name(get_function_name());
+	    static hpx::util::itt::domain d(hpx::get_thread_name().data());
+	    //hpx::util::itt::task t(d, hpx::util::itt::string_handle(name.get()));
+	    hpx::util::itt::task t(d, hpx::util::string_handle(name.get()));
+#endif
+
+	    hpx::util::high_resolution_timer slopelim_update_timer;
+	    
+	    //  if (id==0)
+	  //  hpx::cout << "put element boundaries, timestep = " << timestep << std::endl;
+	// Place incoming buffers into our cell 
+	// Loop over neighbors
+	  for (auto&& neighbor: neighbors) {
+	    std::vector<double> buffer_vector = hood[neighbor];
+	    int volume; // We don't really use this right now
+	    double buffer[MAX_BUFFER_SIZE];
+>>>>>>> b74386911e65ab0faa654ddfa1a9160d3b9631a3
 	    
 	    
 	int rkindex = 0;
@@ -124,6 +237,7 @@ public:
 				  buffer,
 				  &rkindex);
 	    
+<<<<<<< HEAD
       } // End loop over neighbors  
       
       //if (id==0)
@@ -145,10 +259,49 @@ public:
     
     
     {// begin "comm" code block (slopelimiter)
+=======
+	    FNAME(hpx_put_elems_fort)(&domainWrapper->dg,
+				      &neighbor,
+				      &volume,
+				      buffer,
+				      &rkindex);
+	  
+	  } // End loop over neighbors  
+	  
+	  //if (id==0)
+	    //  hpx::cout << "call slopelimiter_parta, timestep = " << timestep << std::endl;
+	  FNAME(slopelimiter_parta_fort)(&domainWrapper->size,
+					 &domainWrapper->dg,
+					 &domainWrapper->global);
+	  
+	  double elapsed = slopelim_update_timer.elapsed();
+	  double total = avg_slopelim_update*total_slopelim_updates;
+	  total_slopelim_updates++;
+	  avg_slopelim_update = (elapsed + total)/total_slopelim_updates;
+
+	}// end "update" code block (slopelimiter)
+
+
+	{// begin "comm" code block (slopelimiter)
+
+#if defined(HPX_HAVE_ITTNOTIFY)
+	  std::unique_ptr<char> name(get_comm_name());
+	  static hpx::util::itt::domain d(hpx::get_thread_name().data());
+	  //hpx::util::itt::task t(d, hpx::util::itt::string_handle(name.get()));
+	  hpx::util::itt::task t(d, hpx::util::string_handle(name.get()));
+#endif
+	  //if (id==0)
+	    // hpx::cout << "get node boundaries, timestep = " << timestep << std::endl;
+	  for (auto&& neighbor: neighbors) {
+	    std::vector<double> send_buffer;
+	    int volume;
+	    double buffer[MAX_BUFFER_SIZE];
+>>>>>>> b74386911e65ab0faa654ddfa1a9160d3b9631a3
 
       //if (id==0)
       // hpx::cout << "get node boundaries, timestep = " << timestep << std::endl;
 
+<<<<<<< HEAD
       for (auto&& neighbor: neighbors) {
 	std::vector<double> send_buffer;
 	int volume;
@@ -170,6 +323,37 @@ public:
 	  
   }
   
+=======
+	    for (int i=0; i<volume; i++) {
+	      send_buffer.push_back(buffer[i]);
+	    }
+	    
+	    hood.send(neighbor, send_buffer);
+	  } // End get node boundaries
+	}// end "comm" code block (slopelimiter)
+	  
+	} else { // RK hydro step
+
+
+	  {//begin "update" code block (rk step)
+	    
+#if defined(HPX_HAVE_ITTNOTIFY)
+	    std::unique_ptr<char> name(get_function_name());
+	    static hpx::util::itt::domain d(hpx::get_thread_name().data());
+	    //hpx::util::itt::task t(d, hpx::util::itt::string_handle(name.get()));
+	    hpx::util::itt::task t(d, hpx::util::string_handle(name.get()));
+#endif
+
+	    
+	    hpx::util::high_resolution_timer rk_update_timer;
+	 
+	  int timestep_here;
+	  if (rkstep == 1) {
+	    timestep_here=timestep-1;
+	  } else {
+	    timestep_here=timestep;
+	  }
+>>>>>>> b74386911e65ab0faa654ddfa1a9160d3b9631a3
 
   template<typename HOOD, typename EVENT>
   void rkstep(HOOD& hood, const EVENT& event, int rkstep)
@@ -245,6 +429,7 @@ public:
 	    
       } // end if timestep > 1 || rkstep == 2 
 	  
+<<<<<<< HEAD
       // if (id==0)
       //  hpx::cout << "dg_hydro_timestep, rkstep = " << rkstep << " timestep = " << timestep << std::endl;
       // Do hydro
@@ -280,6 +465,27 @@ public:
 
       //	  if (id==0)
       //  hpx::cout << "Get element boundaries, timestep = " << timestep << std::endl;
+=======
+	  double elapsed = rk_update_timer.elapsed();
+	  double total = avg_rk_update*total_rk_updates;
+	  total_rk_updates++;
+	  avg_rk_update = (elapsed + total)/total_rk_updates;
+	  
+	}//end "update" code block (rk step)
+
+	  {// begin "comm" code block (rk step)	  
+	  
+#if defined(HPX_HAVE_ITTNOTIFY)
+	    std::unique_ptr<char> name(get_function_name());
+	    static hpx::util::itt::domain d(hpx::get_thread_name().data());
+	    //	    hpx::util::itt::task t(d, hpx::util::itt::string_handle(name.get()));
+	    hpx::util::itt::task t(d, hpx::util::string_handle(name.get()));
+#endif
+
+
+	  //	  if (id==0)
+	  //  hpx::cout << "Get element boundaries, timestep = " << timestep << std::endl;
+>>>>>>> b74386911e65ab0faa654ddfa1a9160d3b9631a3
 	  
       // Get element boundaries
       for (auto&& neighbor: neighbors) {
@@ -361,7 +567,14 @@ public:
 	  timestep++;
 	} else {
 	  substep++;
+<<<<<<< HEAD
 	}	
+=======
+	}
+	
+	}// end "comm" code block (rk step)
+	
+>>>>>>> b74386911e65ab0faa654ddfa1a9160d3b9631a3
     } // End of update() ------------------------------------------------------------------
   
   
