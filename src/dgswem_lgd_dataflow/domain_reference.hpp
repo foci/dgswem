@@ -3,6 +3,7 @@
 
 #include <hpx/config.hpp>
 #include <hpx/util/itt_notify.hpp>
+#include <hpx/include/performance_counters.hpp>
 
 #include "../fname.h"
 #include "../fortran_declarations.hpp"
@@ -77,38 +78,242 @@ public:
 	rkstep(1),
 	slopelimiter(false),
 	substep(1),
-        neighbors(neighbors_here)
-    {}
-
-#if defined(HPX_HAVE_ITTNOTIFY)
-    char* get_function_name()
+        neighbors(neighbors_here),
+	avg_slopelim_update(0.0),
+	avg_rk_update(0.0)
     {
-	char* name = new char[120];
-	std::strcpy(name, "update#");
-	char buffer[33];
-	//itoa(id, buffer, 10);
-	snprintf(buffer, sizeof(buffer), "%d", id);
-	std::strcat(name, buffer);
-	std::strcat(name, "#");
-	//itoa(timestep, buffer, 10);
-	snprintf(buffer, sizeof(buffer), "%d", timestep);
-	std::strcat(name, buffer);
-	std::strcat(name, "#");
-	//itoa(substep, buffer, 10);
-	snprintf(buffer, sizeof(buffer), "%d", substep);
-	std::strcat(name, buffer);
-	return name;
     }
-#endif
+
+  template<typename HOOD, typename EVENT>
+  void slopelimiter(HOOD& hood, const EVENT& event, int rkstep)
+  {
     
-    template<typename HOOD, typename EVENT>
-    void update(HOOD& hood, const EVENT& event)
-    {
-#if defined(HPX_HAVE_ITTNOTIFY)
+    { // Open "update" code block (slopelimiter)
+      hpx::util::high_resolution_timer slopelim_update_timer;
+
+      //  if (id==0)
+      //  hpx::cout << "put element boundaries, timestep = " << timestep << std::endl;
+
+      // Place incoming buffers into our cell 
+      // Loop over neighbors
+      for (auto&& neighbor: neighbors) {
+	std::vector<double> buffer_vector = hood[neighbor];
+	int volume; // We don't really use this right now
+	double buffer[MAX_BUFFER_SIZE];
+	
+	// Make sure the buffer isn't empty, which it never should be
+	if (buffer_vector.size() == 0) {
+	  throw std::logic_error("Empty incoming buffer!");
+	}	
+	// Make sure buffer isn't larger than MAX_BUFFER_SIZE
+	if (buffer_vector.size() > MAX_BUFFER_SIZE) {
+	  throw std::logic_error("buffer_vector > MAX_BUFFER_SIZE!");
+	}
+	
+	// Load buffer into c-style array
+	for (int i=0; i<buffer_vector.size(); i++) {
+	  buffer[i] = buffer_vector[i];
+	}
+	    
+	    
+	int rkindex = 0;
+	    
+	FNAME(hpx_put_elems_fort)(&domainWrapper->dg,
+				  &neighbor,
+				  &volume,
+				  buffer,
+				  &rkindex);
+	    
+      } // End loop over neighbors  
+      
+      //if (id==0)
+      //  hpx::cout << "call slopelimiter_parta, timestep = " << timestep << std::endl;
+      FNAME(slopelimiter_parta_fort)(&domainWrapper->size,
+				     &domainWrapper->dg,
+				     &domainWrapper->global);
+      
+      //Update timer
+      double elapsed = slopelim_update_timer.elapsed();
+      double total = avg_slopelim_update*total_slopelim_updates;
+      total_slopelim_updates++;
+      avg_slopelim_update = (elapsed + total)/total_slopelim_updates;
+      if (timestep==100) {
+	if (id==0) hpx::cout << "average slopelim update = " << avg_slopelim_update;
+      }
+
+    }// end "update" code block (slopelimiter)
+    
+    
+    {// begin "comm" code block (slopelimiter)
+
+      //if (id==0)
+      // hpx::cout << "get node boundaries, timestep = " << timestep << std::endl;
+
+      for (auto&& neighbor: neighbors) {
+	std::vector<double> send_buffer;
+	int volume;
+	double buffer[MAX_BUFFER_SIZE];
+	
+	
+	FNAME(hpx_get_nodes_fort)(&domainWrapper->dg, //pointer to current domain
+				  &neighbor, // pointer to neighbor to send to
+				  &volume,
+				  buffer);
+
+	for (int i=0; i<volume; i++) {
+	  send_buffer.push_back(buffer[i]);
+	}
+	    
+	hood.send(neighbor, send_buffer);
+      } // End get node boundaries
+    }// end "comm" code block (slopelimiter)
+	  
+  }
+  
+
+  template<typename HOOD, typename EVENT>
+  void rkstep(HOOD& hood, const EVENT& event, int rkstep)
+  {
+    
+    int timestep_here;
+
+    if (rkstep == 1) {
+      timestep_here=timestep-1;
+    } else {
+      timestep_here=timestep;
+    }
+
+    {//begin "update" code block (rk step)
+	    
+      hpx::util::high_resolution_timer rk_update_timer;	 
+      
+      if ( (timestep > 1) || (rkstep == 2) ){	  
+	
+	// Put node boundaries
+	//if (id==0)
+	//hpx::cout << "put node boundaries, timestep = " << timestep_here << std::endl;	      	      
+	    
+	for (auto&& neighbor: neighbors) {
+	  std::vector<double> buffer_vector = hood[neighbor];
+	  int volume; // We don't really use this right now
+	  double buffer[MAX_BUFFER_SIZE];
+	      
+	  // Make sure the buffer isn't empty, which it never should be
+	  if (buffer_vector.size() == 0) {
+	    throw std::logic_error("Empty incoming buffer!");
+	  }	
+	  // Make sure buffer isn't larger than MAX_BUFFER_SIZE
+	  if (buffer_vector.size() > MAX_BUFFER_SIZE) {
+	    throw std::logic_error("buffer_vector > MAX_BUFFER_SIZE!");
+	  }
+	      
+	  // Load buffer into c-style array
+	  for (int i=0; i<buffer_vector.size(); i++) {
+	    buffer[i] = buffer_vector[i];
+	  }
+	      
+	  FNAME(hpx_put_nodes_fort)(&domainWrapper->dg,
+				    &neighbor,
+				    &volume,
+				    buffer);
+	      
+	} // End put node boundaries
+	    
+	    
+	// Call slopelimiter_part2
+	//if (id==0)
+	//hpx::cout << "Call slopelimiter_partb (with w/d), timestep = " << timestep_here << std::endl;	      	      
+	FNAME(slopelimiter_partb_fort)(&domainWrapper->size,
+				       &domainWrapper->dg,
+				       &domainWrapper->global);
+
+	    	    	    
+	// if rkstep == 1, call dg_timestep_advance
+	if (rkstep == 1) {
+	  //if (id==0)
+	  //hpx::cout << "dg_timestep_advance, timestep = " << timestep_here << std::endl;
+	      
+	      
+	  FNAME(dg_timestep_advance_fort)(&domainWrapper->size,
+					  &domainWrapper->dg,
+					  &domainWrapper->global,
+					  &domainWrapper->nodalattr,
+					  &timestep_here
+					  );
+	      
+	}
+	    
+      } // end if timestep > 1 || rkstep == 2 
+	  
+      // if (id==0)
+      //  hpx::cout << "dg_hydro_timestep, rkstep = " << rkstep << " timestep = " << timestep << std::endl;
+      // Do hydro
+	  
+      FNAME(dg_hydro_timestep_fort)(&domainWrapper->size,
+				    &domainWrapper->dg,
+				    &domainWrapper->global,
+				    &domainWrapper->nodalattr,
+				    &timestep,
+				    &rkstep
+				    );
+	  
+      double elapsed = rk_update_timer.elapsed();
+      double total = avg_rk_update*total_rk_updates;
+      total_rk_updates++;
+      avg_rk_update = (elapsed + total)/total_rk_updates;
+      if (timestep==100) {
+	if (id==0) hpx::cout << "average rk update = " << avg_rk_update;
+      }
+
+    }//end "update" code block (rk step)
+
+    {// begin "comm" code block (rk step)	  
+	  
+      /*
+	#if defined(HPX_HAVE_ITTNOTIFY)
 	std::unique_ptr<char> name(get_function_name());
 	static hpx::util::itt::domain d(hpx::get_thread_name().data());
-	hpx::util::itt::task t(d, name.get());
-#endif
+	//	    hpx::util::itt::task t(d, hpx::util::itt::string_handle(name.get()));
+	hpx::util::itt::task t(d, hpx::util::string_handle(name.get()));
+	#endif
+      */
+
+      //	  if (id==0)
+      //  hpx::cout << "Get element boundaries, timestep = " << timestep << std::endl;
+	  
+      // Get element boundaries
+      for (auto&& neighbor: neighbors) {
+	std::vector<double> send_buffer;
+	int volume;
+	double buffer[MAX_BUFFER_SIZE];
+	int rkindex;
+	//if (rkstep == 1) rkindex = 2;
+	//if (rkstep == 2) rkindex = 3;
+	rkindex = 0;
+
+	    
+	FNAME(hpx_get_elems_fort)(&domainWrapper->dg, //pointer to current domain
+				  &neighbor, // pointer to neighbor to send to
+				  &volume,
+				  buffer,
+				  &rkindex);
+	    
+	for (int i=0; i<volume; i++) {
+	  send_buffer.push_back(buffer[i]);
+	}
+	    
+	hood.send(neighbor, send_buffer);
+      } // End get element boundaries
+
+    }// end "comm" code block (rk step)
+  }
+
+
+  template<typename HOOD, typename EVENT>
+  void update(HOOD& hood, const EVENT& event)
+  {
+
+      int timestep_here;
 	
         int globalNanoStep = event.step() * NANO_STEPS + event.nanoStep();
       	
@@ -135,204 +340,28 @@ public:
 	  hpx::cout << "ERROR!" << std::endl;
 	}
 
-		   
-
-
-	/*if (id == 0) {
+	if (id == 0) {
 	  hpx::cout << " * globalNanoStep = " << globalNanoStep << " timestep = " << timestep << " substep = " << substep << 
 	    " rkstep = " << rkstep << " slopelimiter = " << slopelimiter << std::endl;
-	      
-		if (timestep % 100 == 0)
-		{
-		}
-	      
-		}*/
+	}
 	
 	if (slopelimiter) {
-	  
-	  //  if (id==0)
-	  //  hpx::cout << "put element boundaries, timestep = " << timestep << std::endl;
-	// Place incoming buffers into our cell 
-	// Loop over neighbors
-	  for (auto&& neighbor: neighbors) {
-	    std::vector<double> buffer_vector = hood[neighbor];
-	    int volume; // We don't really use this right now
-	    double buffer[MAX_BUFFER_SIZE];
-	    
-	    // Make sure the buffer isn't empty, which it never should be
-	    if (buffer_vector.size() == 0) {
-	      throw std::logic_error("Empty incoming buffer!");
-	    }	
-	    // Make sure buffer isn't larger than MAX_BUFFER_SIZE
-	    if (buffer_vector.size() > MAX_BUFFER_SIZE) {
-	      throw std::logic_error("buffer_vector > MAX_BUFFER_SIZE!");
-	    }
-	    
-	    // Load buffer into c-style array
-	    for (int i=0; i<buffer_vector.size(); i++) {
-	      buffer[i] = buffer_vector[i];
-	    }
-	    
 
-	    int rkindex = 0;
-	    
-	    FNAME(hpx_put_elems_fort)(&domainWrapper->dg,
-				      &neighbor,
-				      &volume,
-				      buffer,
-				      &rkindex);
-	  
-	  } // End loop over neighbors  
-	  
-	  //if (id==0)
-	    //  hpx::cout << "call slopelimiter_parta, timestep = " << timestep << std::endl;
-	  FNAME(slopelimiter_parta_fort)(&domainWrapper->size,
-					 &domainWrapper->dg,
-					 &domainWrapper->global);
-	  
+	  slopelimiter();
 
-	  //if (id==0)
-	    // hpx::cout << "get node boundaries, timestep = " << timestep << std::endl;
-	  for (auto&& neighbor: neighbors) {
-	    std::vector<double> send_buffer;
-	    int volume;
-	    double buffer[MAX_BUFFER_SIZE];
-
-	    
-	    FNAME(hpx_get_nodes_fort)(&domainWrapper->dg, //pointer to current domain
-				      &neighbor, // pointer to neighbor to send to
-				      &volume,
-				      buffer);
-
-	    for (int i=0; i<volume; i++) {
-	      send_buffer.push_back(buffer[i]);
-	    }
-	    
-	    hood.send(neighbor, send_buffer);
-	  } // End get node boundaries
-
-	  
 	} else { // RK hydro step
-	 
-	  int timestep_here;
-	  if (rkstep == 1) {
-	    timestep_here=timestep-1;
-	  } else {
-	    timestep_here=timestep;
-	  }
 
+	  rkstep();
 
-	  if ( (timestep > 1) || (rkstep == 2) ){	  
-
-	    // Put node boundaries
-	    //if (id==0)
-	      //hpx::cout << "put node boundaries, timestep = " << timestep_here << std::endl;	      	      
-	    
-	    for (auto&& neighbor: neighbors) {
-	      std::vector<double> buffer_vector = hood[neighbor];
-	      int volume; // We don't really use this right now
-	      double buffer[MAX_BUFFER_SIZE];
-	      
-	      // Make sure the buffer isn't empty, which it never should be
-	      if (buffer_vector.size() == 0) {
-		throw std::logic_error("Empty incoming buffer!");
-	      }	
-	      // Make sure buffer isn't larger than MAX_BUFFER_SIZE
-	      if (buffer_vector.size() > MAX_BUFFER_SIZE) {
-		throw std::logic_error("buffer_vector > MAX_BUFFER_SIZE!");
-	      }
-	      
-	      // Load buffer into c-style array
-	      for (int i=0; i<buffer_vector.size(); i++) {
-		buffer[i] = buffer_vector[i];
-	      }
-	      
-	      FNAME(hpx_put_nodes_fort)(&domainWrapper->dg,
-					&neighbor,
-					&volume,
-					buffer);
-	      
-	    } // End put node boundaries
-	    
-	    
-	    // Call slopelimiter_part2
-	    //if (id==0)
-	      //hpx::cout << "Call slopelimiter_partb (with w/d), timestep = " << timestep_here << std::endl;	      	      
-	    FNAME(slopelimiter_partb_fort)(&domainWrapper->size,
-					   &domainWrapper->dg,
-					   &domainWrapper->global);
-
-	    	    	    
-	    // if rkstep == 1, call dg_timestep_advance
-	    if (rkstep == 1) {
-	      //if (id==0)
-		//hpx::cout << "dg_timestep_advance, timestep = " << timestep_here << std::endl;
-	      
-	      
-		FNAME(dg_timestep_advance_fort)(&domainWrapper->size,
-						&domainWrapper->dg,
-						&domainWrapper->global,
-						&domainWrapper->nodalattr,
-						&timestep_here
-						);
-	      
-	    }
-	    
-	  } // end if timestep > 1 || rkstep == 2 
+	}// end slopelimiter == false	(RK step)
 	  
-	  // if (id==0)
-	  //  hpx::cout << "dg_hydro_timestep, rkstep = " << rkstep << " timestep = " << timestep << std::endl;
-	  // Do hydro
-	  
-	  FNAME(dg_hydro_timestep_fort)(&domainWrapper->size,
-					&domainWrapper->dg,
-					&domainWrapper->global,
-					&domainWrapper->nodalattr,
-					&timestep,
-					&rkstep
-					);
-	  
-	  
-	  
-	  
-	  //	  if (id==0)
-	  //  hpx::cout << "Get element boundaries, timestep = " << timestep << std::endl;
-	  
-	  // Get element boundaries
-	  for (auto&& neighbor: neighbors) {
-	    std::vector<double> send_buffer;
-	    int volume;
-	    double buffer[MAX_BUFFER_SIZE];
-	    int rkindex;
-	    //if (rkstep == 1) rkindex = 2;
-	    //if (rkstep == 2) rkindex = 3;
-	    rkindex = 0;
-
-	    
-	    FNAME(hpx_get_elems_fort)(&domainWrapper->dg, //pointer to current domain
-				      &neighbor, // pointer to neighbor to send to
-				      &volume,
-				      buffer,
-				      &rkindex);
-	    
-	    for (int i=0; i<volume; i++) {
-	      send_buffer.push_back(buffer[i]);
-	    }
-	    
-	    hood.send(neighbor, send_buffer);
-	  } // End get element boundaries
-
-	} // end slopelimiter == false	(RK step)
-	
-	  // Control flow
+	// Control flow
 	if (substep == 4) {
 	  substep = 1;
 	  timestep++;
 	} else {
 	  substep++;
-	}
-	
-	
+	}	
     } // End of update() ------------------------------------------------------------------
   
   
@@ -350,6 +379,12 @@ private:
   bool slopelimiter;
   int substep;
   std::vector<int> neighbors;
+
+
+  int total_rk_updates;
+  double avg_rk_update;
+  int total_slopelim_updates;
+  double avg_slopelim_update;
 };
 
 LIBGEODECOMP_REGISTER_HPX_COMM_TYPE(DomainReference)

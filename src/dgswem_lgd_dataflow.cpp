@@ -82,6 +82,8 @@ int main(int argc, char **argv)
      )
     ;
 
+  //  hpx::register_startup_function(&register_counter_type);
+
     // We want HPX to run hpx_main() on all localities to avoid the
     // initial overhead caused by broadcasting the work from one to
     // all other localities, and we want to increase the size of the
