@@ -108,8 +108,8 @@ ADC_SRC    =  dgswem.F owiwind.F read_input.F cstart.F hstart.F radiation_edge_h
 	edge_int_hydro.F flow_edge_hydro.F \
 	internal_edge_hydro.F land_edge_hydro.F \
 	ocean_edge_hydro.F  \
-	orthobasis_area.F orthobasis_edge.F p_enrichment.F prep_DG.F quad_pts_area.F \
-	quad_pts_edge.F radiation_edge_hydro.F read_input.F rhs_dg_hydro.F \
+	orthogonal_basis_v1.F p_enrichment.F prep_DG.F quadrature_v1.F \
+	radiation_edge_hydro.F read_input.F rhs_dg_hydro.F quad_rules_general.F \
 	numerical_flux.F tidal_potential.F write_results.F \
 	slopelimiter.F prep_slopelim.F ocean_edge_hydro_post.F ocean_flow_edge_hydro.F \
 	wetdry.F LDG_hydro.F met_forcing.F sta_basis.F modal2nodal.F write_output.F
@@ -172,12 +172,12 @@ $(O_DIR)%.o  : %.f90
 
 ########################## Executable Targets ##################################
 
-.PHONY: all metis adcprep adcpost dgswem_serial dgswem winds
+.PHONY: all metis adcprep adcpost dgswem_serial dgswem #winds
 
-all :  metis adcprep adcpost dgswem_serial dgswem winds
+all :  metis adcprep adcpost dgswem_serial dgswem #winds
  
-winds : 
-	python ./get_winds.py 
+#winds : 
+#	python ./get_winds.py 
 
 ifeq ($(MAKELEVEL),0)
    metis:
@@ -322,12 +322,11 @@ $(O_DIR)flow_edge_hydro.o     	:  flow_edge_hydro.F $(ADC_MOBJ)
 $(O_DIR)internal_edge_hydro.o 	:  internal_edge_hydro.F $(ADC_MOBJ)
 $(O_DIR)land_edge_hydro.o     	:  land_edge_hydro.F $(ADC_MOBJ)
 $(O_DIR)ocean_edge_hydro.o    	:  ocean_edge_hydro.F $(ADC_MOBJ)
-$(O_DIR)orthobasis_area.o     	:  orthobasis_area.F $(ADC_MOBJ)
-$(O_DIR)orthobasis_edge.o     	:  orthobasis_edge.F $(ADC_MOBJ)
+$(O_DIR)orthogonal_basis_v1.o   :  orthogonal_basis_v1.F $(ADC_MOBJ)
 $(O_DIR)p_enrichment.o     	:  p_enrichment.F $(ADC_MOBJ)
 $(O_DIR)prep_DG.o             	:  prep_DG.F $(ADC_MOBJ)
-$(O_DIR)quad_pts_area.o       	:  quad_pts_area.F $(ADC_MOBJ)
-$(O_DIR)quad_pts_edge.o       	:  quad_pts_edge.F $(ADC_MOBJ)
+$(O_DIR)quadrature_v1.o         :  quadrature_v1.F $(ADC_MOBJ)
+$(O_DIR)quad_rules_general.o     :  quad_rules_general.F $(ADC_MOBJ)
 $(O_DIR)read_input.o          	:  read_input.F $(ADC_MOBJ)
 $(O_DIR)rhs_dg_hydro.o        	:  rhs_dg_hydro.F $(ADC_MOBJ)
 $(O_DIR)numerical_flux.o      	:  numerical_flux.F $(ADC_MOBJ)

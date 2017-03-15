@@ -1,56 +1,19 @@
-! dgswem fort.dg in keyword format
-
-dgswe = 1
-dg_to_cg = 1
-modal_ic = 0
-
-! p enrichment options
-padapt = 0            ! padapt(1=on,0=off)
-pflag = 2             ! pflag(1=smooth,2=shocks)
-gflag = 1             ! gflag(0=fixed,1=dioristic)
-dis_tol = 8           ! dioristic tolerance (0-100)
-pl = 1                ! low p
-ph = 1                ! high p
-px = 1                ! fixed p
-slimit = 0.00005      ! epsilon tolerance in pflag=1 p_enrichment
-plimit = 10           ! integer timestep counter for p_enrichment
-k = 1                 ! pflag=2 tolerance:log((k*p)**(-L*2))-ks
-ks = 0.5
-L = 2
-nelem = 23556         ! Number of total elements in mesh
-
-! flux option
-fluxtype = 1          ! 1=Roe, 2=LLF, 3=HLLC, 4=NCP
-
-! timestepping options
-rk_stage = 2          
-rk_order = 2
-
-! hot start options
-dghot = 0
-dghotspool = 86400
-
-! slopelimiting options
-slopeflag = 5         ! only 1,4-10 work; 5 is best/fast!
-weight = 1
-
-! sediment options
-sedflag = 0
-porosity = 0.0001
-sevdm = 0.00001  
-layers = 1            ! number of layers
-sed_equationX = (ZE_ROE+bed_ROE)**-1 *QX_ROE
-sed_equationY = (ZE_ROE+bed_ROE)**-1 *QY_ROE
-
-! chemistry options
-rxn_rate = 1          ! Reaction rate when chemistry is on (litres/(mol*days))
-
-! artificial diffusion options
-artdif = 0
-kappa = -1.0
-s0 = 0.0
-uniform_dif = 2.5e-6
-tune_by_hand = 0
-
-
-
+1                   ! DGSWE
+0,2                 ! padapt(1=on,0=off),pflag(1=smooth,2=shocks)
+1,0                 ! gflag(0=fixed,1=dioristic), dioristic tolerance (0-100)
+1,1,1               ! pl(low p), ph(high p), px(fixed p)
+0.00005             ! slimit (epsilon tolerance in pflag=1 p_enrichment)
+10                  ! plimit (integer timestep counter for p_enrichment)
+1,0.5,2             ! k,ks,L for pflag=2 tolerance:log((k*p)**(-L*2))-ks  
+2                   ! FLUXTYPE 
+2,2                 ! RK_STAGE,RK_ORDER
+1                   ! DG_TO_CG (ignore)
+1                   ! MODAL_IC
+0,86400             ! DGHOT,DGHOTSPOOL
+0 1                 ! SLOPEFLAG(only 1,4-10 work; 5 is best/fast!),weight(default 1!)
+0,0.0001000,0.00001,1 ! SEDFLAG, porosity, SEVDM, and # of layers
+1                   ! Reaction rate when chemistry is on in (litres/(mol*days))
+144                  ! Number of total elements in mesh
+0,-1.0,0.0,2.5e-6,0 ! artdif,kappa, s0, uniform_dif, tune_by_hand
+(ZE_ROE+bed_ROE)**-1 *QX_ROE
+(ZE_ROE+bed_ROE)**-1 *QY_ROE 
