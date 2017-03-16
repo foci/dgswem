@@ -205,10 +205,7 @@ C-----------------------------------------------------------------------
         ELSE
 C-----------------------------------------------------------------------
           call quad_rules_general(N, .false., 0.0, 0.0, pts, wts)
-          PRINT*,'  ******** ERROR!!! D must be 1 <= D <= 25 ********  '
-          PRINT*,'  ********        for REGION = EDGE        ********  '
-          PRINT*,'    Execution terminated in subroutine quadrature    '
-          STOP
+		  
         ENDIF
 C-----------------------------------------------------------------------
         J = MOD(N,2)
