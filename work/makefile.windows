@@ -74,9 +74,6 @@ ibarrier_edge_hydro.f: ../src/ibarrier_edge_hydro.F
 ebarrier_edge_hydro.f: ../src/ebarrier_edge_hydro.F
 	fpp $(DA) ../src/ebarrier_edge_hydro.F   ../work/ebarrier_edge_hydro.f
 
-ibarrier_fluxes.f: ../src/ibarrier_fluxes.F
-	fpp $(DA) ../src/ibarrier_fluxes.F   ../work/ibarrier_fluxes.f
-
 internal_edge_hydro.f: ../src/internal_edge_hydro.F
 	fpp $(DA) ../src/internal_edge_hydro.F   ../work/internal_edge_hydro.f
 
@@ -179,7 +176,7 @@ nodalattr.f: ../src/nodalattr.F
 #
 
 DGSWEM_MODS   =  sizes.f global.f harm.f wind.f dg.f diff45_41.f global_3dvs.f owiwind.f nodalattr.f read_fort_dg.f
-DGSWEM_MANS   =  dgswem.f calc_normal.f create_edge_data.f cstart.f detector.f DG_hydro_timestep.f edge_int_hydro.f flow_edge_hydro.f hstart.f ibarrier_edge_hydro.f ibarrier_fluxes.f internal_edge_hydro.f land_edge_hydro.f ocean_edge_hydro.f orthobasis_area.f orthobasis_edge.f p_enrichment.f prep_DG.f quad_pts_area.f quad_pts_edge.f radiation_edge_hydro.f read_input.f rhs_dg_hydro.f tidal_potential.f wind.f write_results.f slopelimiter.f prep_slopelim.f sta_basis.f LDG_hydro.f wetdry.f DG_timestep.f numerical_flux.f ocean_edge_hydro_post.f ebarrier_edge_hydro.f met_forcing.f write_output.f
+DGSWEM_MANS   =  dgswem.f calc_normal.f create_edge_data.f cstart.f detector.f DG_hydro_timestep.f edge_int_hydro.f flow_edge_hydro.f hstart.f ibarrier_edge_hydro.f internal_edge_hydro.f land_edge_hydro.f ocean_edge_hydro.f orthobasis_area.f orthobasis_edge.f p_enrichment.f prep_DG.f quad_pts_area.f quad_pts_edge.f radiation_edge_hydro.f read_input.f rhs_dg_hydro.f tidal_potential.f wind.f write_results.f slopelimiter.f prep_slopelim.f sta_basis.f LDG_hydro.f wetdry.f DG_timestep.f numerical_flux.f ocean_edge_hydro_post.f ebarrier_edge_hydro.f met_forcing.f write_output.f
 
 
 
@@ -198,7 +195,7 @@ preprocessed_mans:  $(DGSWEM_MANS)
 #
 
 DGSWEM_MODS_OBJS   =  sizes.obj global.obj harm.obj wind.obj dg.obj diff45_41.obj global_3dvs.obj owiwind.obj nodalattr.obj read_fort_dg.obj
-DGSWEM_MANS_OBJS   =  dgswem.obj calc_normal.obj create_edge_data.obj cstart.obj detector.obj DG_hydro_timestep.obj edge_int_hydro.obj flow_edge_hydro.obj hstart.obj ibarrier_edge_hydro.obj ibarrier_fluxes.obj internal_edge_hydro.obj land_edge_hydro.obj ocean_edge_hydro.obj orthobasis_area.obj orthobasis_edge.obj p_enrichment.obj prep_DG.obj quad_pts_area.obj quad_pts_edge.obj radiation_edge_hydro.obj read_input.obj rhs_dg_hydro.obj tidal_potential.obj write_results.obj slopelimiter.obj prep_slopelim.obj sta_basis.obj LDG_hydro.obj wetdry.obj DG_timestep.obj numerical_flux.obj ocean_edge_hydro_post.obj ebarrier_edge_hydro.obj met_forcing.obj write_output.obj
+DGSWEM_MANS_OBJS   =  dgswem.obj calc_normal.obj create_edge_data.obj cstart.obj detector.obj DG_hydro_timestep.obj edge_int_hydro.obj flow_edge_hydro.obj hstart.obj ibarrier_edge_hydro.obj internal_edge_hydro.obj land_edge_hydro.obj ocean_edge_hydro.obj orthobasis_area.obj orthobasis_edge.obj p_enrichment.obj prep_DG.obj quad_pts_area.obj quad_pts_edge.obj radiation_edge_hydro.obj read_input.obj rhs_dg_hydro.obj tidal_potential.obj write_results.obj slopelimiter.obj prep_slopelim.obj sta_basis.obj LDG_hydro.obj wetdry.obj DG_timestep.obj numerical_flux.obj ocean_edge_hydro_post.obj ebarrier_edge_hydro.obj met_forcing.obj write_output.obj
 
 
 
