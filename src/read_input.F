@@ -693,18 +693,18 @@ C.....Set wave radiation stress flag and adjust NWS accordingly
 Casey 101118: Had to make some changes in this section.
       NRS = 0
       FRW = 0
-      IF (ABS(NWS/100).EQ.1) THEN
+      IF (ABS(NWS/100).GE.1) THEN
         NRS=1
         NWS = (ABS(NWS) - 100)*(NWS/ABS(NWS))
       ENDIF
-      IF (ABS(NWS/100).EQ.2) THEN
+      IF (ABS(NWS/100).GE.2) THEN
         NRS = 1
         FRW = 1
         NWS = (ABS(NWS) - 200)*(NWS/ABS(NWS))
       ENDIF
 #ifdef SWAN
 Casey 101118: Added the option for coupling directly to SWAN.
-      IF(ABS(NWS/100).EQ.3) THEN
+      IF(ABS(NWS/100).GE.3) THEN
         NRS = 3
         NWS = (ABS(NWS) - 300)*(NWS/ABS(NWS))
       ENDIF
