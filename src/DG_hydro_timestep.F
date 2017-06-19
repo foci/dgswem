@@ -79,14 +79,16 @@ C.......Compute the DG time and DG ramp
          RAMPExtFlux = 1.0d0
          IF (NRAMP.GE.1) THEN
             IF (NRAMP.EQ.1) THEN
-               RAMPDG = TANH((2.D0*((IT-1) + DTVD(IRK))*DTDP/86400.D0)/DRAMP)
-               RAMPExtFlux = 
-     $              TANH((2.D0*((IT-1) + DTVD(IRK))*DTDP/86400.D0)/DRAMPExtFlux)
+               RAMPDG = TANH((2.D0*((IT-1) +
+     & DTVD(IRK))*DTDP/86400.D0)/DRAMP)
+               RAMPExtFlux = TANH((2.D0*((IT-1) +
+     & DTVD(IRK))*DTDP/86400.D0)/DRAMPExtFlux)
             ENDIF
             IF (NRAMP.EQ.2) THEN
-               RAMPDG = TANH((2.D0*((IT-1) + DTVD(IRK))*DTDP/86400.D0)/DRAMP)
-               RAMPExtFlux = 
-     $              TANH((2.D0*((IT-1) + DTVD(IRK))*DTDP/86400.D0)/DRAMPExtFlux)
+               RAMPDG = TANH((2.D0*((IT-1) +
+     & DTVD(IRK))*DTDP/86400.D0)/DRAMP)
+               RAMPExtFlux = TANH((2.D0*((IT-1) +
+     & DTVD(IRK))*DTDP/86400.D0)/DRAMPExtFlux)
             ENDIF
             IF (NRAMP.EQ.3) THEN
                WRITE(*,*) 'NRAMP = 3 not supported '
@@ -169,7 +171,7 @@ C.......Compute internal barrier edges
          
 C.......Compute external barrier edges
 
-         IF (NIBEDS.GT.0) CALL EBARRIER_EDGE_HYDRO(IT)
+         IF (NEBEDS.GT.0) CALL EBARRIER_EDGE_HYDRO(IT)
          
 C.......Compute internal edges
 
@@ -296,7 +298,7 @@ C.......Compute internal barrier edges
          
 C.......Compute external barrier edges
 
-         IF (NIBEDS.GT.0) CALL EBARRIER_EDGE_HYDRO(IT)
+         IF (NEBEDS.GT.0) CALL EBARRIER_EDGE_HYDRO(IT)
          
 C.......Compute internal edges
 

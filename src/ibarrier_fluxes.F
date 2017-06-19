@@ -27,7 +27,9 @@ C.....Use appropriate modules
       IMPLICIT NONE
       
       INTEGER i,k
-      REAL(SZ) BRAMP
+      REAL(SZ) BRAMP, PI
+      
+      PI=4.D0*DATAN(1.D0)
 
       BRAMP = 1.0
       
@@ -37,7 +39,7 @@ C.....Zero out the node code
         
 C.....Loop over the flow boundary nodes
         
-      DO 1034 I = 1,NVEL
+      DO I = 1,NVEL
         
 C.....If the node is part of an internal barrier compute the flux based
 C.....on weir formulas
@@ -77,38 +79,27 @@ C.....I want to use WDFLG(EL) here in the future. sb
           IF (RBARWL1.GT.RBARWL2) THEN
             IF((ETA2(NNBB1)+DP(NNBB1)).LT.H0) THEN
               QIB(NNBB1) = 0.0D0
-              GOTO 1034
             ENDIF
           ELSE 
             IF ((ETA2(NNBB2)+DP(NNBB2)).LT.H0) THEN
               QIB(NNBB1) = 0.0D0
-              GOTO 1034
             ENDIF
           ENDIF
-
+            
 C.....Case 1:  Water level on both sides of barrier are below barrier
 
-Csb-debug
-#if 0
           IF ((RBARWL1.LT.0.0).AND.(RBARWL2.LT.0.0)) THEN
-#else
-          IF (.TRUE.) THEN
-#endif
             QIB(NNBB1) = 0.0D0
-            GOTO 1034
-          ENDIF
 
 C.....Case 2:  Water level equal on both sides of the barrier
 
-          IF(RBARWL1.EQ.RBARWL2) THEN
+          ELSEIF(RBARWL1.EQ.RBARWL2) THEN
             QIB(NNBB1) = 0.0D0
-            GOTO 1034
-          ENDIF
-              
+
 C.....Cases 3 and 4:  Overtopping occurring and water level HIGHER on
 C.....this side of barrier
               
-          IF ((RBARWL1.GT.RBARWL2).AND.(RBARWL1.GT.BARMIN)) THEN
+          ELSEIF ((RBARWL1.GT.RBARWL2).AND.(RBARWL1.GT.BARMIN)) THEN
               
 C.....Case 3:  Outward subcritical flow
 
@@ -124,15 +115,11 @@ C.....Case 4:  Outward supercritical flow
      &                                                           **0.5D0
               NIBNODECODE(NNBB1) = 1
             ENDIF
-
-            GOTO 1034
-
-          ENDIF
               
 C.....Cases 5 and 6:  Overtopping occurring and water level LOWER on
 C.....this side of the barrier
               
-          IF ((RBARWL2.GT.RBARWL1).AND.(RBARWL2.GT.BARMIN)) THEN
+          ELSEIF ((RBARWL2.GT.RBARWL1).AND.(RBARWL2.GT.BARMIN)) THEN
 
 C.....Case 5:  Inward subcritical
 
@@ -149,11 +136,108 @@ C.....Case 6:  Inward supercritical flow
               NIBNODECODE(NNBB1) = 1
             ENDIF
                 
-            GOTO 1034
-                
           ENDIF
         ENDIF
-1034  CONTINUE
+        
+C.....If the node has a cross-barrier pipe and/or is part of a leaky
+C.....internal barrier, compute the flux based on Bernoulli's equation
+C.....as applied accross a pipe along the width of the barrier.
+        
+         IF ((LBCODEI(I).EQ.5).OR.(LBCODEI(I).EQ.25)) THEN
+         
+C.....Retrieve the global node number for the flow boundary node
+
+            NNBB1 = NBV(I)
+            
+C.....Retrieve the global node number on opposite side of the barrier
+
+            NNBB2 = IBCONN(I)
+            
+C.....Compute the water level on each side of the barrier
+
+            IF (IBPSTART.EQ.0) THEN
+               RPIPEWL1AVG(I) = ETA2(NNBB1) - PIPEHT(I)
+               RPIPEWL2AVG(I) = ETA2(NNBB2) - PIPEHT(I)
+               IBPSTART = 1
+            ELSE
+            RPIPEWL1AVG(I) = (ETA2(NNBB1) - PIPEHT(I) + BARAVGWT
+     &                                   *RPIPEWL1AVG(I))/(1 + BARAVGWT)
+            RPIPEWL2AVG(I) = (ETA2(NNBB2) - PIPEHT(I) + BARAVGWT
+     &                                   *RPIPEWL2AVG(I))/(1 + BARAVGWT)
+            !ENDIF
+            RBARWL1 = RPIPEWL1AVG(I)
+            RBARWL2 = RPIPEWL2AVG(I)
+            QN2(NNBB1) = 0.0D0
+C.....Case 0:  The side with a higher Water level is dry 
+
+            IF (RBARWL1.GT.RBARWL2) THEN
+               IF((ETA2(NNBB1)+DP(NNBB1)).LT.H0) THEN
+                  QN2(NNBB1) = 0.0D0
+               ENDIF
+            ELSE 
+               IF ((ETA2(NNBB2)+DP(NNBB2)).LT.H0) THEN
+                  QN2(NNBB1) = 0.0D0
+               ENDIF
+            ENDIF
+            
+C.....Case 1:  Water level on both sides of barrier below pipe crown
+
+            IF ((RBARWL1.LT.0.0D0).AND.(RBARWL2.LT.0.0D0)) THEN
+               QN2(NNBB1) = 0.0D0
+
+C.....Case 2:  Water level equal on both sides of the barrier
+
+            ELSEIF(RBARWL1.EQ.RBARWL2) THEN
+               QN2(NNBB1) = 0.0D0
+
+C.....Case 3: Water elevation on the front side of internal barrier
+C.....greater than water elevation on back side; water elevation on
+C.....front side above crown height of pipe; and water elevation on 
+C.....back side below crown height of the pipe
+              
+            ELSEIF ((RBARWL1.GT.RBARWL2).AND.(RBARWL1.GE.0.0D).AND.
+     &                                           (RBARWL2.LT.0.0D)) THEN
+               QN2(NNBB1) = -BRAMP*(0.25D0*PI*PIPEDIAM(I)**2.0D0)*
+     &                        (2.0D0*G*RBARWL1/(1 + PIPECOEF(I)))**0.5D0
+               NIBNODECODE(NNBB1) = 1
+
+C.....Case 4: Water elevation on the front side of internal barrier
+C.....greater than water elevation on back side; water elevation on
+C.....front side above crown height of pipe; and water elevation on
+C.....back side above crown height of the pipe
+
+            ELSEIF ((RBARWL1.GT.RBARWL2).AND.(RBARWL1.GE.0.0D).AND.
+     &                                           (RBARWL2.GE.0.0D)) THEN
+               QN2(NNBB1) = -BRAMP*(0.25D0*PI*PIPEDIAM(I)**2.0D0)*
+     &                    (2.0D0*G*(RBARWL1-RBARWL2)/PIPECOEF(I))**0.5D0
+               NIBNODECODE(NNBB1) = 1
+              
+C.....Case 5: Water elevation on the back side of internal barrier
+C.....greater than water elevation on front side; water elevation on
+C.....back side above crown height of pipe; and water elevation on 
+C.....front side below crown height of the pipe
+              
+            ELSEIF ((RBARWL2.GT.RBARWL1).AND.(RBARWL2.GE.0.0D).AND.
+     &                                           (RBARWL1.LT.0.0D)) THEN
+               QN2(NNBB1) = BRAMP*(0.25D0*PI*PIPEDIAM(I)**2.0D0)*
+     &                        (2.0D0*G*RBARWL2/(1 + PIPECOEF(I)))**0.5D0
+               NIBNODECODE(NNBB1) = 1
+
+C.....Case 6: Water elevation on the back side of internal barrier
+C.....greater than water elevation on front side; water elevation on
+C.....back side above crown height of pipe; and water elevation on
+C.....front side above crown height of the pipe
+
+            ELSEIF ((RBARWL2.GT.RBARWL1).AND.(RBARWL2.GE.0.0D).AND.
+     &                                           (RBARWL1.GE.0.0D)) THEN
+               QN2(NNBB1) = BRAMP*(0.25D0*PI*PIPEDIAM(I)**2.0D0)*
+     &                    (2.0D0*G*(RBARWL2-RBARWL1)/PIPECOEF(I))**0.5D0
+               NIBNODECODE(NNBB1) = 1
+                
+            ENDIF
+            QIB(NNBB1) = QIB(NNBB1) + QN2(NNBB1)
+         ENDIF
+      ENDDO
       
       RETURN
       END SUBROUTINE

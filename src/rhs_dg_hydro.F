@@ -121,7 +121,7 @@ C.......Compute ZE, QX, QY, and HB at each area Gauss quadrature point
             DHB_X = DBATHDX(I,L,pa)
             DHB_Y = DBATHDY(I,L,pa)
 
-#ifdef SED_LAY                  !When layered, these change
+#ifdef SED_LAY
             HB(:,L,irk) = 0.D0
             do ll = 1,layers
                HB(1,L,irk) = HB(1,L,irk) + bed(1,L,irk,ll)

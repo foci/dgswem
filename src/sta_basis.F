@@ -45,7 +45,7 @@ C.....Transform to local Z element coordinates
 
 C.....Compute the basis functions at that point and store
 
-      CALL ORTHOBASIS( Z1, Z2, PDG_EL(ELSTA), DOF, PHI, DPHIDZ1, DPHIDZ2 )
+      CALL ORTHOBASIS(Z1, Z2, PDG_EL(ELSTA), DOF, PHI, DPHIDZ1, DPHIDZ2)
       PHI_STA(:) = PHI
 
       RETURN

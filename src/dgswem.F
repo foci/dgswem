@@ -204,12 +204,12 @@ c     write(200+myproc,*) 'back from prep_dg'
 
       if (ModetoNode.eq.0) then
          write(777,*) 
-     $        'VARIABLES = "x", "y", "b", "ze", "H", "u", "v", "|v|","|w|","p","iota","iota2","sum","diff"'
+C     $        'VARIABLES = "x", "y", "b", "ze", "H", "u", "v", "|v|","|w|","p","iota","iota2","sum","diff"'
          write(777,*) 'ZONE ZONETYPE=FETRIANGLE ',
      $        'NODES=', np, 
      $        ' ELEMENTS=', ne, 
 !     $     ' DATAPACKING=POINT ','SOLUTIONTIME=',time_a
-     $        ' DATAPACKING=BLOCK ',' VARLOCATION=([3,4,5,6,7,8,10,11,12,13,14]=CELLCENTERED) ',
+C     $        ' DATAPACKING=BLOCK ',' VARLOCATION=([3,4,5,6,7,8,10,11,12,13,14]=CELLCENTERED) ',
      $        'SOLUTIONTIME=',time_a 
 
 c$$$  write(777,7777) x(i), y(i),  
@@ -225,22 +225,22 @@ c$$$  enddo
          do i=1,np
             write(777,7777)  y(i)
          enddo
-         do i=1,ne
+         do i=1,np
             write(777,7777)  dpe(i)
          enddo
-         do i=1,ne 
+         do i=1,np
             write(777,7777)  eta2(i)
          enddo
-         do i=1,ne 
+         do i=1,np 
             write(777,7777)  eta2(i)+dpe(i)
          enddo
-         do i=1,ne 
+         do i=1,np 
             write(777,7777)  uu2(i)
          enddo
-         do i=1,ne 
+         do i=1,np 
             write(777,7777)  vv2(i)
          enddo
-         do i=1,ne 
+         do i=1,np 
             write(777,7777)  sqrt(uu2(i)**2+vv2(i)**2)
          enddo
          do i=1,np 
@@ -249,16 +249,16 @@ c$$$  enddo
          do i=1,ne 
             write(777,7777)  DBLE(pdg_el(i))
          enddo
-         do i=1,ne 
+         do i=1,np 
             write(777,7777)  tracer(i)
          enddo
-         do i=1,ne 
+         do i=1,np 
             write(777,7777)  tracer2(i)
          enddo
-         do i=1,ne 
+         do i=1,np 
             write(777,7777)  abs(tracer(i)+tracer2(i))
          enddo
-         do i=1,ne 
+         do i=1,np 
             write(777,7777)  abs(tracer(i)-tracer2(i))    
          enddo
       else
@@ -272,12 +272,12 @@ c$$$  enddo
             if (ics.eq.2) then
                write(777,7777) slam(i)/deg2rad, sfea(i)/deg2rad,  
      $              dp(i), eta2(i), eta2(i)+dp(i),uu2(i),vv2(i),
-     $              sqrt(uu2(i)**2+vv2(i)**2),sqrt(wsx2(i)**2+wsy2(i)**2),
+     $            sqrt(uu2(i)**2+vv2(i)**2),sqrt(wsx2(i)**2+wsy2(i)**2),
      $              myproc
             else
                write(777,7777) x(i), y(i),
      $              dp(i), eta2(i), eta2(i)+dp(i),uu2(i),vv2(i),
-     $              sqrt(uu2(i)**2+vv2(i)**2),sqrt(wsx2(i)**2+wsy2(i)**2),
+     $            sqrt(uu2(i)**2+vv2(i)**2),sqrt(wsx2(i)**2+wsy2(i)**2),
      $              myproc
             endif
          enddo
@@ -481,21 +481,21 @@ C
  20         IF(EN2.EQ.NEIGH(EN1,J)) GOTO 25
             NNEIGH(EN1)=NNEIGH(EN1)+1
             NNEIGH(EN2)=NNEIGH(EN2)+1
-            IF((NNEIGH(EN1).GT.MNEI-1).OR.(NNEIGH(EN2).GT.MNEI-1)) GOTO 999
+         IF((NNEIGH(EN1).GT.MNEI-1).OR.(NNEIGH(EN2).GT.MNEI-1)) GOTO 999
             NEIGH(EN1,NNEIGH(EN1))=EN2
             NEIGH(EN2,NNEIGH(EN2))=EN1
  25         DO 30 J=1,NNEIGH(EN1)
  30            IF(EN3.EQ.NEIGH(EN1,J)) GOTO 35
                NNEIGH(EN1)=NNEIGH(EN1)+1
                NNEIGH(EN3)=NNEIGH(EN3)+1
-               IF((NNEIGH(EN1).GT.MNEI-1).OR.(NNEIGH(EN3).GT.MNEI-1)) GOTO 999
+         IF((NNEIGH(EN1).GT.MNEI-1).OR.(NNEIGH(EN3).GT.MNEI-1)) GOTO 999
                NEIGH(EN1,NNEIGH(EN1))=EN3
                NEIGH(EN3,NNEIGH(EN3))=EN1
  35            DO 50 J=1,NNEIGH(EN2)
  50               IF(EN3.EQ.NEIGH(EN2,J)) GOTO 10
                   NNEIGH(EN2)=NNEIGH(EN2)+1
                   NNEIGH(EN3)=NNEIGH(EN3)+1
-                  IF((NNEIGH(EN2).GT.MNEI-1).OR.(NNEIGH(EN3).GT.MNEI-1)) GOTO 999
+         IF((NNEIGH(EN2).GT.MNEI-1).OR.(NNEIGH(EN3).GT.MNEI-1)) GOTO 999
                   NEIGH(EN2,NNEIGH(EN2))=EN3
                   NEIGH(EN3,NNEIGH(EN3))=EN2
  10            CONTINUE
@@ -522,7 +522,7 @@ C
                   DO JJ=1,NNEIGH(I)
                      ANGLELOW=400.d0
                      DO J=1,NNEIGH(I)
-                        IF((ANGLE(J).LT.ANGLELOW).AND.(ANGLE(J).GT.ANGLEMORE))
+                 IF((ANGLE(J).LT.ANGLELOW).AND.(ANGLE(J).GT.ANGLEMORE))
      &                       THEN
                            ANGLELOW=ANGLE(J)
                            JLOW=J
@@ -552,19 +552,19 @@ C     TERMINATE PROGRAM IF MAXIMUM NUMBER OF NEIGHBORS SET TOO SMALL
  999           CONTINUE
                IF(NSCREEN.EQ.1.AND.MYPROC.EQ.0) WRITE(6,99311)
                WRITE(16,99311)
-99311          FORMAT(////,1X,'!!!!!!!!!!  WARNING - FATAL ERROR !!!!!!!!!',
-     &              //,1X,'THE DIMENSIONING PARAMETER MNEI IS TOO SMALL'
-     &              /,1X,'USER MUST RE-DIMENSION PROGRAM',
-     &              //,1X,'!!!!!! EXECUTION WILL NOW BE TERMINATED !!!!!!',//)
+99311      FORMAT(////,1X,'!!!!!!!!!!  WARNING - FATAL ERROR !!!!!!!!!',
+     &           //,1X,'THE DIMENSIONING PARAMETER MNEI IS TOO SMALL'
+     &           /,1X,'USER MUST RE-DIMENSION PROGRAM',
+     &        //,1X,'!!!!!! EXECUTION WILL NOW BE TERMINATED !!!!!!',//)
                STOP
 
  998           CONTINUE
-               IF(NSCREEN.EQ.1.AND.MYPROC.EQ.0) WRITE(6,99312) I,NEITEM(J)
+             IF(NSCREEN.EQ.1.AND.MYPROC.EQ.0) WRITE(6,99312) I,NEITEM(J)
                WRITE(16,99312) I,NEITEM(J)
-99312          FORMAT(////,1X,'!!!!!!!!!!  WARNING - FATAL ERROR !!!!!!!!!',
+99312      FORMAT(////,1X,'!!!!!!!!!!  WARNING - FATAL ERROR !!!!!!!!!',
      &              //,1X,'NODES ',I7,' AND ',I7,
      &         ' HAVE THE SAME COORDINATES'
-     &              //,1X,'!!!!!! EXECUTION WILL NOW BE TERMINATED !!!!!!',//)
+     &       //,1X,'!!!!!! EXECUTION WILL NOW BE TERMINATED !!!!!!',//)
 
                STOP
                END         

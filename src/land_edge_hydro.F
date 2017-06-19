@@ -101,7 +101,7 @@ C.....Compute ZE, QX, QY, and HB at each Gauss point
             dynP_IN = dynP(1,EL_IN,IRK)
 #endif
 
-#ifdef SED_LAY                  !When layered, these change
+#ifdef SED_LAY
             HB(1,EL_IN,irk) = 0.D0
             do ll=1,layers
                HB(1,EL_IN,irk) = HB(1,EL_IN,irk) + bed(1,EL_IN,irk,ll)
@@ -147,10 +147,10 @@ C.....(modified for wetting and drying)
                HZ_X_IN = HZ_X_IN + HZ(K,1,1,EL_IN)*PHI_EDGE(K,I,LED,pa)
                HZ_Y_IN = HZ_Y_IN + HZ(K,2,2,EL_IN)*PHI_EDGE(K,I,LED,pa)
 #endif
-               LZ_XX_IN = LZ_XX_IN + LZ(K,1,1,EL_IN)*PHI_EDGE(K,I,LED,pa)
-               LZ_XY_IN = LZ_XY_IN + LZ(K,1,2,EL_IN)*PHI_EDGE(K,I,LED,pa)
-               LZ_YX_IN = LZ_YX_IN + LZ(K,2,1,EL_IN)*PHI_EDGE(K,I,LED,pa)
-               LZ_YY_IN = LZ_YY_IN + LZ(K,2,2,EL_IN)*PHI_EDGE(K,I,LED,pa)
+              LZ_XX_IN = LZ_XX_IN + LZ(K,1,1,EL_IN)*PHI_EDGE(K,I,LED,pa)
+              LZ_XY_IN = LZ_XY_IN + LZ(K,1,2,EL_IN)*PHI_EDGE(K,I,LED,pa)
+              LZ_YX_IN = LZ_YX_IN + LZ(K,2,1,EL_IN)*PHI_EDGE(K,I,LED,pa)
+              LZ_YY_IN = LZ_YY_IN + LZ(K,2,2,EL_IN)*PHI_EDGE(K,I,LED,pa)
 
 #ifdef TRACE
 
@@ -162,25 +162,28 @@ C.....(modified for wetting and drying)
                                 !LDG terms for sediment diffusion
 
 #ifdef TRACE
-               iota_IN = iota_IN + iota(K,EL_IN,IRK)*PHI_EDGE(K,I,LED,pa)
+              iota_IN = iota_IN + iota(K,EL_IN,IRK)*PHI_EDGE(K,I,LED,pa)
 #endif
 
 #ifdef CHEM
-               iota_IN = iota_IN + iota(K,EL_IN,IRK)*PHI_EDGE(K,I,LED,pa)
-               iota2_IN = iota2_IN + iota2(K,EL_IN,IRK)*PHI_EDGE(K,I,LED,pa)
+             iota_IN = iota_IN + iota(K,EL_IN,IRK)*PHI_EDGE(K,I,LED,pa)
+           iota2_IN = iota2_IN + iota2(K,EL_IN,IRK)*PHI_EDGE(K,I,LED,pa)
 #endif
 
 #ifdef DYNP
-               dynP_IN = dynP_IN + dynP(K,EL_IN,IRK)*PHI_EDGE(K,I,LED,pa)
+              dynP_IN = dynP_IN + dynP(K,EL_IN,IRK)*PHI_EDGE(K,I,LED,pa)
 #endif
 
 #ifdef SED_LAY
                do ll = 1,layers
-                  bed_IN(ll) = bed_IN(ll) + bed(K,EL_IN,IRK,ll)*PHI_EDGE(K,I,LED,pa)
-                  HB_IN = HB_IN + bed(k,EL_IN,irk,ll)*PHI_EDGE(K,I,LED,pa)
+                  bed_IN(ll) = bed_IN(ll) +
+     &                  bed(K,EL_IN,IRK,ll)*PHI_EDGE(K,I,LED,pa)
+                  HB_IN=HB_IN + bed(k,EL_IN,irk,ll)*PHI_EDGE(K,I,LED,pa)
 
-                  MZ_X_IN(ll) = MZ_X_IN(ll) + MZ(K,1,ll,EL_IN)*PHI_EDGE(K,I,LED,pa)
-                  MZ_Y_IN(ll) = MZ_Y_IN(ll) + MZ(K,2,ll,EL_IN)*PHI_EDGE(K,I,LED,pa)
+                  MZ_X_IN(ll) = MZ_X_IN(ll) +
+     & MZ(K,1,ll,EL_IN)*PHI_EDGE(K,I,LED,pa)
+                  MZ_Y_IN(ll) = MZ_Y_IN(ll) +
+     & MZ(K,2,ll,EL_IN)*PHI_EDGE(K,I,LED,pa)
 
                enddo
 #endif
@@ -247,7 +250,8 @@ C.....Add LDG terms for sediment
 
 #ifdef SED_LAY
             do ll=1,layers
-               bed_HAT(ll) = bed_HAT(ll) + MZ_X_IN(ll)*NX*SFAC_IN + MZ_Y_IN(ll)*NY
+               bed_HAT(ll) = bed_HAT(ll) +
+     & MZ_X_IN(ll)*NX*SFAC_IN + MZ_Y_IN(ll)*NY
             enddo
 #endif
             
@@ -265,21 +269,22 @@ C.....Compute the edge integral
                RHS_QY(K,EL_IN,IRK) = RHS_QY(K,EL_IN,IRK) - W_IN*H_HAT
 
 #ifdef TRACE
-               RHS_iota(K,EL_IN,IRK) = RHS_iota(K,EL_IN,IRK) - W_IN*I_HAT
+               RHS_iota(K,EL_IN,IRK) = RHS_iota(K,EL_IN,IRK)-W_IN*I_HAT
 #endif
 
 #ifdef CHEM
-               RHS_iota(K,EL_IN,IRK) = RHS_iota(K,EL_IN,IRK) - W_IN*I_HAT
-               RHS_iota2(K,EL_IN,IRK) = RHS_iota2(K,EL_IN,IRK) - W_IN*J_HAT
+              RHS_iota(K,EL_IN,IRK) = RHS_iota(K,EL_IN,IRK)-W_IN*I_HAT
+             RHS_iota2(K,EL_IN,IRK) = RHS_iota2(K,EL_IN,IRK)-W_IN*J_HAT
 #endif
 
 #ifdef DYNP
-               RHS_dynP(K,EL_IN,IRK) = RHS_dynP(K,EL_IN,IRK) - W_IN*K_HAT
+               RHS_dynP(K,EL_IN,IRK) = RHS_dynP(K,EL_IN,IRK)- W_IN*K_HAT
 #endif
 
 #ifdef SED_LAY
                do ll = 1,layers
-                  RHS_bed(K,EL_IN,IRK,ll) = RHS_bed(K,EL_IN,IRK,ll) - W_IN*bed_HAT(ll)
+                  RHS_bed(K,EL_IN,IRK,ll) = RHS_bed(K,EL_IN,IRK,ll) -
+     & W_IN*bed_HAT(ll)
                enddo
 #endif
 
@@ -386,7 +391,7 @@ C.....Modify QX and QY at the end nodes
 
 C.......Node 1
 
-         IF(ABS( QXP(NOD1)*TX + QYP(NOD1)*TY ).GT.(10.D0**(-20.D0))) THEN
+         IF(ABS( QXP(NOD1)*TX + QYP(NOD1)*TY ).GT.(10.D0**(-20.D0)))THEN
             DIR = ( QXP(NOD1)*TX + QYP(NOD1)*TY )
      &           / ABS( QXP(NOD1)*TX + QYP(NOD1)*TY )
 
@@ -404,7 +409,7 @@ C.......Node 1
 
 C.......Node 2
 
-         IF(ABS( QXP(NOD2)*TX + QYP(NOD2)*TY ).GT.(10.D0**(-20.D0))) THEN
+         IF(ABS( QXP(NOD2)*TX + QYP(NOD2)*TY ).GT.(10.D0**(-20.D0)))THEN
             DIR = ( QXP(NOD2)*TX + QYP(NOD2)*TY )
      &           / ABS( QXP(NOD2)*TX + QYP(NOD2)*TY )
 
@@ -428,11 +433,11 @@ C.......Node 3
 C.....Inverse the modified QX and QY
 
          QX(1,EL_IN,IRK+1) = 1.D0/3.D0*(QXPN(1)+QXPN(2)+QXPN(3))
-         QX(2,EL_IN,IRK+1) =-1.D0/6.D0*(QXPN(1)+QXPN(2))+1.D0/3.D0*QXPN(3)
+       QX(2,EL_IN,IRK+1) =-1.D0/6.D0*(QXPN(1)+QXPN(2))+1.D0/3.D0*QXPN(3)
          QX(3,EL_IN,IRK+1) =-0.5D0*QXPN(1)+0.5D0*QXPN(2)
 
          QY(1,EL_IN,IRK+1) = 1.D0/3.D0*(QYPN(1)+QYPN(2)+QYPN(3))
-         QY(2,EL_IN,IRK+1) =-1.D0/6.D0*(QYPN(1)+QYPN(2))+1.D0/3.D0*QYPN(3)
+       QY(2,EL_IN,IRK+1) =-1.D0/6.D0*(QYPN(1)+QYPN(2))+1.D0/3.D0*QYPN(3)
          QY(3,EL_IN,IRK+1) =-0.5D0*QYPN(1)+0.5D0*QYPN(2)
 
  1000 CONTINUE

@@ -7,21 +7,17 @@ SHELL=/bin/sh
 #
 #  Options:
 #
-#  To create an adcirc executable, type:       nmake adcirc
+#  To create a dgswem executable, type:        nmake dgswem
 #  To create preprocessed module files, type:  nmake preprocessed_mods
 #  To create preprocessed source files, type:  nmake preprocessed_srcs
 #  To eliminate all partial files, type:       nmake clean
 #
-#  Written by R.A. Luettich & J.G. Fleming
-#  University of North Carolina at Chapel Hill
-#  Institute of Marine Sciences
-#          3/17/03
 
 
 ##################### Preprocessor and Compiler Flags #####################
  
 #DA   =  -P  -DREAL4  -DCSCA         #Preprocessor flags for a single precision, scalar code
-DA   =  -P  -DREAL8  -DCSCA          #Preprocessor flags for a double presision, scalar code
+DA   =  -P  -DREAL8  -DCSCA  -DRKSSP         #Preprocessor flags for a double presision, scalar code
 #DA   =  -P  -DREAL4  -DCVEC         #Preprocessor flags for a single presision, vector code
 #DA   =  -P  -DREAL8  -DCVEC         #Preprocessor flags for a double presision, vector code
 
@@ -36,8 +32,8 @@ FFLAGS     = /inline:all /fast /cxml #Compiler flags  -DVF:Visual Fortran
 # corresponding target name
 #
 
-adcirc.f: ../src/adcirc.F
-	fpp $(DA) ../src/adcirc.F  ../work/adcirc.f
+dgswem.f: ../src/dgswem.F
+	fpp $(DA) ../src/dgswem.F  ../work/dgswem.f
 
 calc_normal.f: ../src/calc_normal.F
 	fpp $(DA)  ../src/calc_normal.F   ../work/calc_normal.f
@@ -57,20 +53,11 @@ dg.f: ../src/dg.F
 DG_hydro_timestep.f: ../src/DG_hydro_timestep.F
 	fpp $(DA)  ../src/DG_hydro_timestep.F   ../work/DG_hydro_timestep.f
 
-DG_sed_timestep.f: ../src/DG_sed_timestep.F
-	fpp $(DA)  ../src/DG_sed_timestep.F   ../work/DG_sed_timestep.f
-
 edge_int_hydro.f: ../src/edge_int_hydro.F
 	fpp $(DA)  ../src/edge_int_hydro.F   ../work/edge_int_hydro.f
 
-edge_int_sed.f: ../src/edge_int_sed.F
-	fpp $(DA)  ../src/edge_int_sed.F   ../work/edge_int_sed.f
-
 flow_edge_hydro.f: ../src/flow_edge_hydro.F
 	fpp $(DA)  ../src/flow_edge_hydro.F   ../work/flow_edge_hydro.f
-
-flow_edge_sed.f: ../src/flow_edge_sed.F
-	fpp $(DA)  ../src/flow_edge_sed.F   ../work/flow_edge_sed.f
 
 global.f: ../src/global.F    
 	fpp $(DA)  ../src/global.F ../work/global.f
@@ -93,23 +80,14 @@ ibarrier_fluxes.f: ../src/ibarrier_fluxes.F
 internal_edge_hydro.f: ../src/internal_edge_hydro.F
 	fpp $(DA) ../src/internal_edge_hydro.F   ../work/internal_edge_hydro.f
 
-internal_edge_sed.f: ../src/internal_edge_sed.F
-	fpp $(DA) ../src/internal_edge_sed.F   ../work/internal_edge_sed.f
-
 land_edge_hydro.f: ../src/land_edge_hydro.F
 	fpp $(DA) ../src/land_edge_hydro.F   ../work/land_edge_hydro.f
-
-land_edge_sed.f: ../src/land_edge_sed.F
-	fpp $(DA) ../src/land_edge_sed.F   ../work/land_edge_sed.f
-
-lund_formula.f: ../src/lund_formula.F
-	fpp $(DA) ../src/lund_formula.F   ../work/lund_formula.f
 
 LDG_hydro.f: ../src/LDG_hydro.F
 	fpp $(DA) ../src/LDG_hydro.F   ../work/LDG_hydro.f
 
-modified_wave_friction.f: ../src/modified_wave_friction.F
-	fpp $(DA) ../src/modified_wave_friction.F   ../work/modified_wave_friction.f
+modal2nodal.f: ../src/modal2nodal.F
+	fpp $(DA) ../src/modal2nodal.F   ../work/modal2nodal.f
 
 ocean_edge_hydro.f: ../src/ocean_edge_hydro.F
 	fpp $(DA)  ../src/ocean_edge_hydro.F   ../work/ocean_edge_hydro.f
@@ -117,23 +95,17 @@ ocean_edge_hydro.f: ../src/ocean_edge_hydro.F
 ocean_edge_hydro_post.f: ../src/ocean_edge_hydro_post.F
 	fpp $(DA)  ../src/ocean_edge_hydro_post.F   ../work/ocean_edge_hydro_post.f
 
-ocean_edge_hydro_strict.f: ../src/ocean_edge_hydro_strict.F
-	fpp $(DA)  ../src/ocean_edge_hydro_strict.F   ../work/ocean_edge_hydro_strict.f
-
-ocean_edge_sed.f: ../src/ocean_edge_sed.F
-	fpp $(DA)  ../src/ocean_edge_sed.F   ../work/ocean_edge_sed.f
-
 orthobasis_area.f: ../src/orthobasis_area.F
 	fpp $(DA)  ../src/orthobasis_area.F   ../work/orthobasis_area.f
 
 orthobasis_edge.f: ../src/orthobasis_edge.F
 	fpp $(DA)  ../src/orthobasis_edge.F   ../work/orthobasis_edge.f
 
+p_enrichment.f: ../src/p_enrichment.F    
+	fpp $(DA)  ../src/p_enrichment.F ../work/p_enrichment.f
+
 prep_dg.f: ../src/prep_dg.F    
 	fpp $(DA)  ../src/prep_dg.F ../work/prep_dg.f
-
-prep_sed.f: ../src/prep_sed.F    
-	fpp $(DA)  ../src/prep_sed.F ../work/prep_sed.f
 
 quad_pts_area.f: ../src/quad_pts_area.F
 	fpp $(DA)  ../src/quad_pts_area.F   ../work/quad_pts_area.f
@@ -144,17 +116,14 @@ quad_pts_edge.f: ../src/quad_pts_edge.F
 radiation_edge_hydro.f: ../src/radiation_edge_hydro.F
 	fpp $(DA) ../src/radiation_edge_hydro.F   ../work/radiation_edge_hydro.f
 
+read_fort_dg.f: ../src/read_fort_dg.F
+	fpp $(DA)  ../src/read_fort_dg.F   ../work/read_fort_dg.f
+
 read_input.f: ../src/read_input.F
 	fpp $(DA) ../src/read_input.F   ../work/read_input.f
 
 rhs_dg_hydro.f: ../src/rhs_dg_hydro.F
 	fpp $(DA)  ../src/rhs_dg_hydro.F   ../work/rhs_dg_hydro.f
-
-rhs_dg_sed.f: ../src/rhs_dg_sed.F
-	fpp $(DA)  ../src/rhs_dg_sed.F   ../work/rhs_dg_sed.f
-
-sed.f: ../src/sed.F
-	fpp $(DA)  ../src/sed.F   ../work/sed.f
 
 sta_basis.f: ../src/sta_basis.F
 	fpp $(DA)  ../src/sta_basis.F   ../work/sta_basis.f
@@ -192,9 +161,11 @@ DG_timestep.f: ../src/DG_timestep.F
 wetdry.f: ../src/wetdry.F
 	fpp $(DA)  ../src/wetdry.F   ../work/wetdry.f
 
+write_output.f: ../src/write_output.F
+	fpp $(DA)  ../src/write_output.F   ../work/write_output.f
+
 met_forcing.f: ../src/met_forcing.F
 	fpp $(DA)  ../src/met_forcing.F   ../work/met_forcing.f
-
 owiwind.f: ../src/owiwind.F
 	fpp $(DA)  ../src/owiwind.F   ../work/owiwind.f
 
@@ -207,8 +178,8 @@ nodalattr.f: ../src/nodalattr.F
 #  a general variable name to both
 #
 
-ADCIRC_MODS   =  sizes.f global.f harm.f wind.f dg.f sed.f diff45_41.f global_3dvs.f owiwind.f nodalattr.f
-ADCIRC_MANS   =  adcirc.f calc_normal.f create_edge_data.f cstart.f detector.f DG_hydro_timestep.f DG_sed_timestep.f edge_int_hydro.f edge_int_sed.f flow_edge_hydro.f flow_edge_sed.f hstart.f ibarrier_edge_hydro.f ibarrier_fluxes.f internal_edge_hydro.f internal_edge_sed.f land_edge_hydro.f land_edge_sed.f lund_formula.f modified_wave_friction.f ocean_edge_hydro.f ocean_edge_hydro_strict.f ocean_edge_sed.f orthobasis_area.f orthobasis_edge.f prep_DG.f prep_sed.f quad_pts_area.f quad_pts_edge.f radiation_edge_hydro.f read_input.f rhs_dg_hydro.f rhs_dg_sed.f tidal_potential.f wind.f write_results.f slopelimiter.f prep_slopelim.f sta_basis.f LDG_hydro.f wetdry.f DG_timestep.f numerical_flux.f ocean_edge_hydro_post.f ebarrier_edge_hydro.f met_forcing.f
+DGSWEM_MODS   =  sizes.f global.f harm.f wind.f dg.f diff45_41.f global_3dvs.f owiwind.f nodalattr.f read_fort_dg.f
+DGSWEM_MANS   =  dgswem.f calc_normal.f create_edge_data.f cstart.f detector.f DG_hydro_timestep.f edge_int_hydro.f flow_edge_hydro.f hstart.f ibarrier_edge_hydro.f ibarrier_fluxes.f internal_edge_hydro.f land_edge_hydro.f ocean_edge_hydro.f orthobasis_area.f orthobasis_edge.f p_enrichment.f prep_DG.f quad_pts_area.f quad_pts_edge.f radiation_edge_hydro.f read_input.f rhs_dg_hydro.f tidal_potential.f wind.f write_results.f slopelimiter.f prep_slopelim.f sta_basis.f LDG_hydro.f wetdry.f DG_timestep.f numerical_flux.f ocean_edge_hydro_post.f ebarrier_edge_hydro.f met_forcing.f write_output.f
 
 
 
@@ -217,8 +188,8 @@ ADCIRC_MANS   =  adcirc.f calc_normal.f create_edge_data.f cstart.f detector.f D
 #  this associates a target with each variable name
 #
 
-preprocessed_mods:  $(ADCIRC_MODS)
-preprocessed_mans:  $(ADCIRC_MANS)
+preprocessed_mods:  $(DGSWEM_MODS)
+preprocessed_mans:  $(DGSWEM_MANS)
 
 
 ####################### Object File Dependencies ############################
@@ -226,23 +197,23 @@ preprocessed_mans:  $(ADCIRC_MANS)
 #  this assigns a general variable name to the modules and mains object files
 #
 
-ADCIRC_MODS_OBJS   =  sizes.obj global.obj harm.obj wind.obj dg.obj sed.obj diff45_41.obj global_3dvs.obj owiwind.obj nodalattr.obj
-ADCIRC_MANS_OBJS   =  adcirc.obj calc_normal.obj create_edge_data.obj cstart.obj detector.obj DG_hydro_timestep.obj DG_sed_timestep.obj edge_int_hydro.obj edge_int_sed.obj flow_edge_hydro.obj flow_edge_sed.obj hstart.obj ibarrier_edge_hydro.obj ibarrier_fluxes.obj internal_edge_hydro.obj internal_edge_sed.obj land_edge_hydro.obj land_edge_sed.obj lund_formula.obj modified_wave_friction.obj ocean_edge_hydro.obj ocean_edge_hydro_strict.obj ocean_edge_sed.obj orthobasis_area.obj orthobasis_edge.obj prep_DG.obj prep_sed.obj quad_pts_area.obj quad_pts_edge.obj radiation_edge_hydro.obj read_input.obj rhs_dg_hydro.obj rhs_dg_sed.obj tidal_potential.obj write_results.obj slopelimiter.obj prep_slopelim.obj sta_basis.obj LDG_hydro.obj wetdry.obj DG_timestep.obj numerical_flux.obj ocean_edge_hydro_post.obj ebarrier_edge_hydro.obj met_forcing.obj
+DGSWEM_MODS_OBJS   =  sizes.obj global.obj harm.obj wind.obj dg.obj diff45_41.obj global_3dvs.obj owiwind.obj nodalattr.obj read_fort_dg.obj
+DGSWEM_MANS_OBJS   =  dgswem.obj calc_normal.obj create_edge_data.obj cstart.obj detector.obj DG_hydro_timestep.obj edge_int_hydro.obj flow_edge_hydro.obj hstart.obj ibarrier_edge_hydro.obj ibarrier_fluxes.obj internal_edge_hydro.obj land_edge_hydro.obj ocean_edge_hydro.obj orthobasis_area.obj orthobasis_edge.obj p_enrichment.obj prep_DG.obj quad_pts_area.obj quad_pts_edge.obj radiation_edge_hydro.obj read_input.obj rhs_dg_hydro.obj tidal_potential.obj write_results.obj slopelimiter.obj prep_slopelim.obj sta_basis.obj LDG_hydro.obj wetdry.obj DG_timestep.obj numerical_flux.obj ocean_edge_hydro_post.obj ebarrier_edge_hydro.obj met_forcing.obj write_output.obj
 
 
 
 ######################## compilation rules #################################
 
-$(ADCIRC_MODS_OBJS):  preprocessed_mods
+$(DGSWEM_MODS_OBJS):  preprocessed_mods
 	$(FC) -c $(FFLAGS)  $*.f
 
-$(ADCIRC_MANS_OBJS):  preprocessed_mans
+$(DGSWEM_MANS_OBJS):  preprocessed_mans
 	$(FC) -c  $(FFLAGS) $*.f
 
 ########################## Executable Targets ###############################
 
-adcirc: $(ADCIRC_MODS_OBJS) $(ADCIRC_MANS_OBJS)
-	$(FC) /exe:adcirc  $(ADCIRC_MODS_OBJS) $(ADCIRC_MANS_OBJS)
+dgswem: $(DGSWEM_MODS_OBJS) $(DGSWEM_MANS_OBJS)
+	$(FC) /exe:dgswem  $(DGSWEM_MODS_OBJS) $(DGSWEM_MANS_OBJS)
 
 ########################## Misc Commands ####################################
 

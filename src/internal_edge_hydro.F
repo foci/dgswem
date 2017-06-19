@@ -170,7 +170,7 @@ C.....Compute the total mass in the elements
          MASS_EL_IN = (ZE(1,EL_IN,IRK)+HB(1,EL_IN,1))*AREAS(EL_IN)*0.5D0
          MASS_EL_EX = (ZE(1,EL_EX,IRK)+HB(1,EL_EX,1))*AREAS(EL_EX)*0.5D0
 
-#ifdef SED_LAY                  !Must add up the layers as they shift
+#ifdef SED_LAY
          HB(1,EL_IN,irk) = 0.D0
          HB(1,EL_EX,irk) = 0.D0
          do ll=1,layers
@@ -206,7 +206,7 @@ C.....Compute ZE, QX, QY, and HB at each edge Gauss quadrature point
             QY_IN = QY(1,EL_IN,IRK)
             HB_IN = BATHED(GP_IN,LED_IN,EL_IN,pa)
 
-#ifdef SED_LAY                  !When layered, these change
+#ifdef SED_LAY
             do ll = 1,layers
                bed_IN(ll) = bed(1,EL_IN,irk,ll)
             enddo
@@ -285,44 +285,52 @@ C.....Compute ZE, QX, QY, and HB at each edge Gauss quadrature point
 
             DO K = 2,DOFS(EL)
 
-               ZE_IN = ZE_IN + ZE(K,EL_IN,IRK)*PHI_EDGE(K,GP_IN,LED_IN,pa)
-               QX_IN = QX_IN + QX(K,EL_IN,IRK)*PHI_EDGE(K,GP_IN,LED_IN,pa)
-               QY_IN = QY_IN + QY(K,EL_IN,IRK)*PHI_EDGE(K,GP_IN,LED_IN,pa)
+             ZE_IN = ZE_IN + ZE(K,EL_IN,IRK)*PHI_EDGE(K,GP_IN,LED_IN,pa)
+             QX_IN = QX_IN + QX(K,EL_IN,IRK)*PHI_EDGE(K,GP_IN,LED_IN,pa)
+             QY_IN = QY_IN + QY(K,EL_IN,IRK)*PHI_EDGE(K,GP_IN,LED_IN,pa)
 
-               ZE_EX = ZE_EX + ZE(K,EL_EX,IRK)*PHI_EDGE(K,GP_EX,LED_EX,pa)
-               QX_EX = QX_EX + QX(K,EL_EX,IRK)*PHI_EDGE(K,GP_EX,LED_EX,pa)
-               QY_EX = QY_EX + QY(K,EL_EX,IRK)*PHI_EDGE(K,GP_EX,LED_EX,pa)
+             ZE_EX = ZE_EX + ZE(K,EL_EX,IRK)*PHI_EDGE(K,GP_EX,LED_EX,pa)
+             QX_EX = QX_EX + QX(K,EL_EX,IRK)*PHI_EDGE(K,GP_EX,LED_EX,pa)
+             QY_EX = QY_EX + QY(K,EL_EX,IRK)*PHI_EDGE(K,GP_EX,LED_EX,pa)
 
 #ifdef TRACE
-               iota_IN = iota_IN + iota(K,EL_IN,IRK)*PHI_EDGE(K,GP_IN,LED_IN,pa)
-               iota_EX = iota_EX + iota(K,EL_EX,IRK)*PHI_EDGE(K,GP_EX,LED_EX,pa)
+       iota_IN = iota_IN + iota(K,EL_IN,IRK)*PHI_EDGE(K,GP_IN,LED_IN,pa)
+       iota_EX = iota_EX + iota(K,EL_EX,IRK)*PHI_EDGE(K,GP_EX,LED_EX,pa)
 #endif
 
 #ifdef CHEM
-               iota_IN  = iota_IN  + iota(K,EL_IN,IRK)*PHI_EDGE(K,GP_IN,LED_IN,pa)
-               iota_EX  = iota_EX  + iota(K,EL_EX,IRK)*PHI_EDGE(K,GP_EX,LED_EX,pa)
+      iota_IN = iota_IN  + iota(K,EL_IN,IRK)*PHI_EDGE(K,GP_IN,LED_IN,pa)
+      iota_EX = iota_EX  + iota(K,EL_EX,IRK)*PHI_EDGE(K,GP_EX,LED_EX,pa)
 
-               iota2_IN = iota2_IN + iota2(K,EL_IN,IRK)*PHI_EDGE(K,GP_IN,LED_IN,pa)
-               iota2_EX = iota2_EX + iota2(K,EL_EX,IRK)*PHI_EDGE(K,GP_EX,LED_EX,pa)
+      iota2_IN = iota2_IN+iota2(K,EL_IN,IRK)*PHI_EDGE(K,GP_IN,LED_IN,pa)
+      iota2_EX=iota2_EX + iota2(K,EL_EX,IRK)*PHI_EDGE(K,GP_EX,LED_EX,pa)
 #endif
 
 #ifdef DYNP
-               dynP_IN = dynP_IN + dynP(K,EL_IN,IRK)*PHI_EDGE(K,GP_IN,LED_IN,pa)
-               dynP_EX = dynP_EX + dynP(K,EL_EX,IRK)*PHI_EDGE(K,GP_EX,LED_EX,pa)
+       dynP_IN = dynP_IN + dynP(K,EL_IN,IRK)*PHI_EDGE(K,GP_IN,LED_IN,pa)
+       dynP_EX = dynP_EX + dynP(K,EL_EX,IRK)*PHI_EDGE(K,GP_EX,LED_EX,pa)
 #endif
 
 #ifdef SED_LAY
                do ll=1,layers
-                  bed_IN(ll) = bed_IN(ll) + bed(K,EL_IN,IRK,ll)*PHI_EDGE(K,GP_IN,LED_IN,pa)
-                  bed_EX(ll) = bed_EX(ll) + bed(K,EL_EX,IRK,ll)*PHI_EDGE(K,GP_EX,LED_EX,pa)
-                  HB_IN = HB_IN + bed(k,EL_IN,irk,ll)*PHI_EDGE(K,GP_IN,LED_IN,pa)
-                  HB_EX = HB_EX + bed(k,EL_EX,irk,ll)*PHI_EDGE(K,GP_EX,LED_EX,pa)
+                  bed_IN(ll) = bed_IN(ll) +
+     & bed(K,EL_IN,IRK,ll)*PHI_EDGE(K,GP_IN,LED_IN,pa)
+                  bed_EX(ll) = bed_EX(ll) +
+     & bed(K,EL_EX,IRK,ll)*PHI_EDGE(K,GP_EX,LED_EX,pa)
+                  HB_IN = HB_IN +
+     & bed(k,EL_IN,irk,ll)*PHI_EDGE(K,GP_IN,LED_IN,pa)
+                  HB_EX = HB_EX +
+     & bed(k,EL_EX,irk,ll)*PHI_EDGE(K,GP_EX,LED_EX,pa)
 
-                  MZ_X_IN(ll) = MZ_X_IN(ll) + MZ(K,1,ll,EL_IN)*PHI_EDGE(K,GP_IN,LED_IN,pa)
-                  MZ_Y_IN(ll) = MZ_Y_IN(ll) + MZ(K,2,ll,EL_IN)*PHI_EDGE(K,GP_IN,LED_IN,pa)  
+                  MZ_X_IN(ll) = MZ_X_IN(ll) +
+     & MZ(K,1,ll,EL_IN)*PHI_EDGE(K,GP_IN,LED_IN,pa)
+                  MZ_Y_IN(ll) = MZ_Y_IN(ll) +
+     & MZ(K,2,ll,EL_IN)*PHI_EDGE(K,GP_IN,LED_IN,pa)
                   
-                  MZ_X_EX(ll) = MZ_X_EX(ll) + MZ(K,1,ll,EL_EX)*PHI_EDGE(K,GP_EX,LED_EX,pa)
-                  MZ_Y_EX(ll) = MZ_Y_EX(ll) + MZ(K,2,ll,EL_EX)*PHI_EDGE(K,GP_EX,LED_EX,pa)
+                  MZ_X_EX(ll) = MZ_X_EX(ll) +
+     & MZ(K,1,ll,EL_EX)*PHI_EDGE(K,GP_EX,LED_EX,pa)
+                  MZ_Y_EX(ll) = MZ_Y_EX(ll) +
+     & MZ(K,2,ll,EL_EX)*PHI_EDGE(K,GP_EX,LED_EX,pa)
                enddo
 #endif
 
@@ -402,7 +410,7 @@ C......... dummy
 C.....Check if the flux is large enough to dry up the elements
 C.....1.01D0 is a safty factor.
 
-            IF ( (1.01*F_HAT*XLEN_EL_IN*MAX_BOA_DT(IRK).GE.MASS_EL_IN).OR.
+          IF ( (1.01*F_HAT*XLEN_EL_IN*MAX_BOA_DT(IRK).GE.MASS_EL_IN).OR.
      &           (1.01*F_HAT*XLEN_EL_EX*MAX_BOA_DT(IRK)*(-1.D0).GE.
      &           MASS_EL_EX)) THEN
 
@@ -622,7 +630,7 @@ C........Check to make sure mass flux is not coming from a dry element
 
                                 !Let us add some diffusive penalties
 #ifdef WAVE_DIF
-            F_HAT_O = F_HAT_O + 0.5D0*(HZ_X_IN*SFAC_IN+HZ_X_EX*SFAC_EX)*NX + 
+        F_HAT_O = F_HAT_O + 0.5D0*(HZ_X_IN*SFAC_IN+HZ_X_EX*SFAC_EX)*NX +
      &           0.5D0*(HZ_Y_IN+HZ_Y_EX)*NY
             !F_HAT_EX = F_HAT_EX + 0.5D0*(HZ_X_IN+HZ_X_EX)*SFAC_IN*NX + 
             !&           0.5D0*(HZ_Y_EX+HZ_Y_EX)*NY
@@ -650,7 +658,7 @@ cnd try adding the penalty term in the LDG method
 
 #ifdef TRACE
 
-            I_HAT_O = I_HAT_O + 0.5D0*(TZ_X_IN*SFAC_IN+TZ_X_EX*SFAC_EX)*NX + 
+        I_HAT_O = I_HAT_O + 0.5D0*(TZ_X_IN*SFAC_IN+TZ_X_EX*SFAC_EX)*NX +
      &           0.5D0*(TZ_Y_IN+TZ_Y_EX)*NY
       !&           +ESLM*.01D0*(iota_IN-iota_EX)
 
@@ -661,10 +669,10 @@ cnd try adding the penalty term in the LDG method
 #ifdef SED_LAY
             do ll=1,layers
                bed_HAT_IN(ll) = bed_HAT_IN(ll) + 0.5D0 * ( (MZ_X_IN(ll)+
-     &              MZ_X_EX(ll))*SFAC_IN*NX+(MZ_Y_IN(ll)+MZ_Y_EX(ll))*NY)
+     &             MZ_X_EX(ll))*SFAC_IN*NX+(MZ_Y_IN(ll)+MZ_Y_EX(ll))*NY)
 
                bed_HAT_EX(ll) = bed_HAT_EX(ll) + 0.5D0 * ( (MZ_X_IN(ll)+
-     &              MZ_X_EX(ll))*SFAC_IN*NX+(MZ_Y_IN(ll)+MZ_Y_EX(ll))*NY)
+     &             MZ_X_EX(ll))*SFAC_IN*NX+(MZ_Y_IN(ll)+MZ_Y_EX(ll))*NY)
             enddo
 #endif
 
@@ -685,27 +693,29 @@ C.....Compute the edge integral
 
 #ifdef TRACE
 
-               RHS_iota(K,EL_IN,IRK) = RHS_iota(K,EL_IN,IRK) - W_IN*I_HAT_O 
-               RHS_iota(K,EL_EX,IRK) = RHS_iota(K,EL_EX,IRK) + W_EX*I_HAT_O
+            RHS_iota(K,EL_IN,IRK) = RHS_iota(K,EL_IN,IRK) - W_IN*I_HAT_O
+            RHS_iota(K,EL_EX,IRK) = RHS_iota(K,EL_EX,IRK) + W_EX*I_HAT_O
 #endif
 
 #ifdef CHEM
-               RHS_iota(K,EL_IN,IRK)  = RHS_iota(K,EL_IN,IRK)  - W_IN*I_HAT_O 
-               RHS_iota2(K,EL_IN,IRK) = RHS_iota2(K,EL_IN,IRK) - W_IN*J_HAT_O 
-               RHS_iota(K,EL_EX,IRK)  = RHS_iota(K,EL_EX,IRK)  + W_EX*I_HAT_O
-               RHS_iota2(K,EL_EX,IRK) = RHS_iota2(K,EL_EX,IRK) + W_EX*J_HAT_O
+          RHS_iota(K,EL_IN,IRK)  = RHS_iota(K,EL_IN,IRK)  - W_IN*I_HAT_O
+          RHS_iota2(K,EL_IN,IRK) = RHS_iota2(K,EL_IN,IRK) - W_IN*J_HAT_O
+          RHS_iota(K,EL_EX,IRK)  = RHS_iota(K,EL_EX,IRK)  + W_EX*I_HAT_O
+          RHS_iota2(K,EL_EX,IRK) = RHS_iota2(K,EL_EX,IRK) + W_EX*J_HAT_O
 #endif
 
 #ifdef DYNP
-               RHS_dynP(K,EL_IN,IRK) = RHS_dynP(K,EL_IN,IRK) - W_IN*K_HAT_O 
-               RHS_dynP(K,EL_EX,IRK) = RHS_dynP(K,EL_EX,IRK) + W_EX*K_HAT_O
+           RHS_dynP(K,EL_IN,IRK) = RHS_dynP(K,EL_IN,IRK) - W_IN*K_HAT_O
+           RHS_dynP(K,EL_EX,IRK) = RHS_dynP(K,EL_EX,IRK) + W_EX*K_HAT_O
 #endif
 
 
 #ifdef SED_LAY
                do ll = 1,layers
-                  RHS_bed(K,EL_IN,IRK,ll) = RHS_bed(K,EL_IN,IRK,ll) - W_IN*bed_HAT_IN(ll) 
-                  RHS_bed(K,EL_EX,IRK,ll) = RHS_bed(K,EL_EX,IRK,ll) + W_EX*bed_HAT_EX(ll)
+                  RHS_bed(K,EL_IN,IRK,ll) = RHS_bed(K,EL_IN,IRK,ll) -
+     & W_IN*bed_HAT_IN(ll)
+                  RHS_bed(K,EL_EX,IRK,ll) = RHS_bed(K,EL_EX,IRK,ll) +
+     & W_EX*bed_HAT_EX(ll)
                enddo
 #endif
 
@@ -755,7 +765,7 @@ C     ----------------------------- EL_IN ------------------------------
             dynP_IN = dynP(1,EL_IN,IRK)
 #endif
 
-#ifdef SED_LAY                  !Must add up the layers as they shift
+#ifdef SED_LAY
             HB(1,EL_IN,irk) = 0.D0
             do ll=1,layers
                bed_IN(ll) = bed(1,EL_IN,irk,ll)
@@ -787,30 +797,34 @@ C     ----------------------------- EL_IN ------------------------------
 
             DO K = 2,DOFS(EL)
 
-               ZE_IN = ZE_IN + ZE(K,EL_IN,IRK)*PHI_EDGE(K,GP_IN,LED_IN,pa)
-               QX_IN = QX_IN + QX(K,EL_IN,IRK)*PHI_EDGE(K,GP_IN,LED_IN,pa)
-               QY_IN = QY_IN + QY(K,EL_IN,IRK)*PHI_EDGE(K,GP_IN,LED_IN,pa)
+             ZE_IN = ZE_IN + ZE(K,EL_IN,IRK)*PHI_EDGE(K,GP_IN,LED_IN,pa)
+             QX_IN = QX_IN + QX(K,EL_IN,IRK)*PHI_EDGE(K,GP_IN,LED_IN,pa)
+             QY_IN = QY_IN + QY(K,EL_IN,IRK)*PHI_EDGE(K,GP_IN,LED_IN,pa)
 
 #ifdef TRACE
-               iota_IN = iota_IN + iota(K,EL_IN,IRK)*PHI_EDGE(K,GP_IN,LED_IN,PA)
+       iota_IN = iota_IN + iota(K,EL_IN,IRK)*PHI_EDGE(K,GP_IN,LED_IN,PA)
 #endif
 
 #ifdef CHEM
-               iota_IN  = iota_IN  + iota(K,EL_IN,IRK)*PHI_EDGE(K,GP_IN,LED_IN,PA)
-               iota2_IN = iota2_IN + iota2(K,EL_IN,IRK)*PHI_EDGE(K,GP_IN,LED_IN,PA)
+      iota_IN = iota_IN  + iota(K,EL_IN,IRK)*PHI_EDGE(K,GP_IN,LED_IN,PA)
+      iota2_IN =iota2_IN+ iota2(K,EL_IN,IRK)*PHI_EDGE(K,GP_IN,LED_IN,PA)
 #endif
 
 #ifdef DYNP
-               dynP_IN = dynP_IN + dynP(K,EL_IN,IRK)*PHI_EDGE(K,GP_IN,LED_IN,PA)
+      dynP_IN = dynP_IN + dynP(K,EL_IN,IRK)*PHI_EDGE(K,GP_IN,LED_IN,PA)
 #endif
 
 #ifdef SED_LAY
                do ll=1,layers
-                  bed_IN(ll) = bed_IN(ll) + bed(k,EL_IN,irk,ll)*PHI_EDGE(K,GP_IN,LED_IN,pa)
-                  HB_IN = HB_IN + bed(k,EL_IN,irk,ll)*PHI_EDGE(K,GP_IN,LED_IN,pa)
+                  bed_IN(ll) = bed_IN(ll) +
+     & bed(k,EL_IN,irk,ll)*PHI_EDGE(K,GP_IN,LED_IN,pa)
+                  HB_IN = HB_IN +
+     & bed(k,EL_IN,irk,ll)*PHI_EDGE(K,GP_IN,LED_IN,pa)
                   
-                  MZ_X_IN(ll) = MZ_X_IN(ll) + MZ(K,1,ll,EL_IN)*PHI_EDGE(K,GP_IN,LED_IN,pa)
-                  MZ_Y_IN(ll) = MZ_Y_IN(ll) + MZ(K,2,ll,EL_IN)*PHI_EDGE(K,GP_IN,LED_IN,pa)  
+                  MZ_X_IN(ll) = MZ_X_IN(ll) +
+     & MZ(K,1,ll,EL_IN)*PHI_EDGE(K,GP_IN,LED_IN,pa)
+                  MZ_Y_IN(ll) = MZ_Y_IN(ll) +
+     & MZ(K,2,ll,EL_IN)*PHI_EDGE(K,GP_IN,LED_IN,pa)
                enddo
 #endif
                                 ! LDG terms
@@ -928,21 +942,22 @@ C.....Compute the edge integral
                RHS_QY(K,EL_IN,IRK) = RHS_QY(K,EL_IN,IRK) - W_IN*H_HAT
 
 #ifdef TRACE
-               RHS_iota(K,EL_IN,IRK) = RHS_iota(K,EL_IN,IRK) - W_IN*I_HAT
+             RHS_iota(K,EL_IN,IRK) = RHS_iota(K,EL_IN,IRK) - W_IN*I_HAT
 #endif
 
 #ifdef CHEM
-               RHS_iota(K,EL_IN,IRK)  = RHS_iota(K,EL_IN,IRK)  - W_IN*I_HAT
-               RHS_iota2(K,EL_IN,IRK) = RHS_iota2(K,EL_IN,IRK) - W_IN*J_HAT
+            RHS_iota(K,EL_IN,IRK)  = RHS_iota(K,EL_IN,IRK)  - W_IN*I_HAT
+            RHS_iota2(K,EL_IN,IRK) = RHS_iota2(K,EL_IN,IRK) - W_IN*J_HAT
 #endif
 
 #ifdef DYNP
-               RHS_dynP(K,EL_IN,IRK) = RHS_dynP(K,EL_IN,IRK) - W_IN*K_HAT
+              RHS_dynP(K,EL_IN,IRK) = RHS_dynP(K,EL_IN,IRK) - W_IN*K_HAT
 #endif
 
 #ifdef SED_LAY
                do ll = 1,layers
-                  RHS_bed(K,EL_IN,IRK,ll) = RHS_bed(K,EL_IN,IRK,ll) - W_IN*bed_HAT(ll) 
+                  RHS_bed(K,EL_IN,IRK,ll) = RHS_bed(K,EL_IN,IRK,ll) -
+     & W_IN*bed_HAT(ll)
                enddo
 #endif
 
@@ -970,7 +985,7 @@ C     ----------------------------- EL_EX ------------------------------
             dynP_EX = dynP(1,EL_EX,IRK)
 #endif
 
-#ifdef SED_LAY                  !Must add up the layers as they shift
+#ifdef SED_LAY
             HB(1,EL_EX,irk) = 0.D0
             do ll=1,layers
                bed_EX(ll) = bed(1,EL_EX,irk,ll)
@@ -1001,30 +1016,34 @@ C     ----------------------------- EL_EX ------------------------------
 
             DO K = 2,DOFS(EL)
 
-               ZE_EX = ZE_EX + ZE(K,EL_EX,IRK)*PHI_EDGE(K,GP_EX,LED_EX,pa)
-               QX_EX = QX_EX + QX(K,EL_EX,IRK)*PHI_EDGE(K,GP_EX,LED_EX,pa)
-               QY_EX = QY_EX + QY(K,EL_EX,IRK)*PHI_EDGE(K,GP_EX,LED_EX,pa)
+             ZE_EX = ZE_EX + ZE(K,EL_EX,IRK)*PHI_EDGE(K,GP_EX,LED_EX,pa)
+             QX_EX = QX_EX + QX(K,EL_EX,IRK)*PHI_EDGE(K,GP_EX,LED_EX,pa)
+             QY_EX = QY_EX + QY(K,EL_EX,IRK)*PHI_EDGE(K,GP_EX,LED_EX,pa)
 
 #ifdef TRACE
-               iota_EX = iota_EX + iota(K,EL_EX,IRK)*PHI_EDGE(K,GP_EX,LED_EX,pa)
+       iota_EX = iota_EX + iota(K,EL_EX,IRK)*PHI_EDGE(K,GP_EX,LED_EX,pa)
 #endif
 
 #ifdef CHEM
-               iota_EX  = iota_EX  + iota(K,EL_EX,IRK)*PHI_EDGE(K,GP_EX,LED_EX,pa)
-               iota2_EX = iota2_EX + iota2(K,EL_EX,IRK)*PHI_EDGE(K,GP_EX,LED_EX,pa)
+      iota_EX = iota_EX  + iota(K,EL_EX,IRK)*PHI_EDGE(K,GP_EX,LED_EX,pa)
+      iota2_EX = iota2_EX+iota2(K,EL_EX,IRK)*PHI_EDGE(K,GP_EX,LED_EX,pa)
 #endif
 
 #ifdef DYNP
-               dynP_EX = dynP_EX + dynP(K,EL_EX,IRK)*PHI_EDGE(K,GP_EX,LED_EX,pa)
+      dynP_EX = dynP_EX + dynP(K,EL_EX,IRK)*PHI_EDGE(K,GP_EX,LED_EX,pa)
 #endif
 
 #ifdef SED_LAY
                do ll=1,layers
-                  bed_EX(ll) = bed_EX(ll) + bed(k,EL_EX,irk,ll)*PHI_EDGE(K,GP_EX,LED_EX,pa)
-                  HB_EX = HB_EX + bed(k,EL_EX,irk,ll)*PHI_EDGE(K,GP_EX,LED_EX,pa)
+                  bed_EX(ll) = bed_EX(ll) +
+     & bed(k,EL_EX,irk,ll)*PHI_EDGE(K,GP_EX,LED_EX,pa)
+                  HB_EX = HB_EX +
+     & bed(k,EL_EX,irk,ll)*PHI_EDGE(K,GP_EX,LED_EX,pa)
                   
-                  MZ_X_EX(ll) = MZ_X_EX(ll) + MZ(K,1,ll,EL_EX)*PHI_EDGE(K,GP_EX,LED_EX,pa)
-                  MZ_Y_EX(ll) = MZ_Y_EX(ll) + MZ(K,2,ll,EL_EX)*PHI_EDGE(K,GP_EX,LED_EX,pa) 
+                  MZ_X_EX(ll) = MZ_X_EX(ll) +
+     & MZ(K,1,ll,EL_EX)*PHI_EDGE(K,GP_EX,LED_EX,pa)
+                  MZ_Y_EX(ll) = MZ_Y_EX(ll) +
+     & MZ(K,2,ll,EL_EX)*PHI_EDGE(K,GP_EX,LED_EX,pa)
                enddo
 #endif
 
@@ -1147,21 +1166,22 @@ C.....Compute the edge integral
                RHS_QY(K,EL_EX,IRK) = RHS_QY(K,EL_EX,IRK) + W_EX*H_HAT
 
 #ifdef TRACE
-               RHS_iota(K,EL_EX,IRK) = RHS_iota(K,EL_EX,IRK) + W_EX*I_HAT
+              RHS_iota(K,EL_EX,IRK) = RHS_iota(K,EL_EX,IRK) + W_EX*I_HAT
 #endif
 
 #ifdef CHEM
-               RHS_iota(K,EL_EX,IRK)  = RHS_iota(K,EL_EX,IRK)  + W_EX*I_HAT
-               RHS_iota2(K,EL_EX,IRK) = RHS_iota2(K,EL_EX,IRK) + W_EX*J_HAT
+            RHS_iota(K,EL_EX,IRK)  = RHS_iota(K,EL_EX,IRK)  + W_EX*I_HAT
+            RHS_iota2(K,EL_EX,IRK) = RHS_iota2(K,EL_EX,IRK) + W_EX*J_HAT
 #endif
 
 #ifdef DYNP
-               RHS_dynP(K,EL_EX,IRK) = RHS_dynP(K,EL_EX,IRK) + W_EX*K_HAT
+             RHS_dynP(K,EL_EX,IRK) = RHS_dynP(K,EL_EX,IRK) + W_EX*K_HAT
 #endif
 
 #ifdef SED_LAY
                do ll = 1,layers
-                  RHS_bed(K,EL_EX,IRK,ll) = RHS_bed(K,EL_EX,IRK,ll) + W_EX*bed_HAT(ll) 
+                  RHS_bed(K,EL_EX,IRK,ll) = RHS_bed(K,EL_EX,IRK,ll) +
+     & W_EX*bed_HAT(ll)
                enddo
 #endif
 

@@ -65,7 +65,7 @@ C
       IF(IDUM80.NE.MNPROC) THEN
          IF(MYPROC.EQ.0) THEN
             WRITE(*,'(A)') '*** ERROR IN PARALLEL SETUP!'
-            WRITE(*,'(2A,I4,A)') '*** Number of CPUS for submitted job ',
+           WRITE(*,'(2A,I4,A)') '*** Number of CPUS for submitted job ',
      &           '(NCPU = ',MNPROC,') is not equal to the'
             WRITE(*,'(2A,I4,A)') '*** number of CPUS specified during',
      &           ' ADCPREP (see fort.80: NCPU = ',IDUM80,').'
@@ -133,8 +133,8 @@ C.....Print out header for output including version number and copyright
      &     /,10X,'No part of the adcirc base code may be reproduced',
      &     /,10X,'or redistributed without the written permission of',
      &     /,10X,'the above authors.',
-     &     ///,5X,'The DG version of the code was written largely ab initio,',   
-     &     /,5X,'though some data structures from the CG version were used.',
+     &///,5X,'The DG version was written largely ab initio,',
+     &/,5X,'though some data structures from the CG version were used.',
      &     //,7X,'Developed by:',
      &     /,10X,'Ethan J. Kubatko, The Ohio State University (EJK)',
      &     /,10X,'Clint N. Dawson, UT ICES (cnd)',
@@ -236,12 +236,12 @@ C.....Read and process NABOUT - abbreviated unit 16 output option
          WRITE(16,3501) NABOUT
  3501    FORMAT(5X,'NABOUT = ',I2,
      &        /,9X,'ABREVIATED OUTPUT WILL BE PROVIDED TO UNIT 16',
-     &        /,9X,'UNIT 14, 21, 22 INPUT DATA WILL NOT BE ECHO PRINTED',/)
+     &     /,9X,'UNIT 14, 21, 22 INPUT DATA WILL NOT BE ECHO PRINTED',/)
       ELSE
          WRITE(16,3502) NABOUT
  3502    FORMAT(/,5X,'NABOUT = ',I3,
      &        /,9X,'DETAILED OUTPUT WILL BE PROVIDED TO UNIT 16',
-     &        /,9X,'UNIT 14, 15, 21, 22 INPUT DATA WILL BE ECHO PRINTED',/)
+     &     /,9X,'UNIT 14, 15, 21, 22 INPUT DATA WILL BE ECHO PRINTED',/)
       ENDIF
 
 C.....Read and process NSCREEN - screen ouput option
@@ -591,12 +591,12 @@ C.....Read and process NCOR - spatially varying Coriolis parameter
       IF (NCOR.EQ.0) THEN
          WRITE(16,233) NCOR
  233     FORMAT(/,5X,'NCOR = ',I2,
-     &        /,9X,'A CONSTANT VALUE OF THE CORIOLIS PARAMETER WILL BE ',
+     &       /,9X,'A CONSTANT VALUE OF THE CORIOLIS PARAMETER WILL BE ',
      &        /,9X,'USED THROUGHOUT THE DOMAIN')
       ELSE
          WRITE(16,234) NCOR
  234     FORMAT(/,5X,'NCOR = ',I2,
-     &        /,9X,'SPATIALLY VARYING CORIOLIS VALUES WILL BE COMPUTED ',
+     &       /,9X,'SPATIALLY VARYING CORIOLIS VALUES WILL BE COMPUTED ',
      &        'FROM INPUT LATITUDES')
       ENDIF
 
@@ -646,7 +646,7 @@ C.....Read and process NTIP - tidal potential forcing
       IF (NTIP.GE.1) THEN
         WRITE(16,236) NTIP
  236     FORMAT(/,5X,'NTIP = ',I2,
-     &        /,9X,'TIDAL POTENTIAL FORCING IS USED IN THE COMPUTATION ',
+     &       /,9X,'TIDAL POTENTIAL FORCING IS USED IN THE COMPUTATION ',
      &        'BASED ON INPUT LONGITUDES/LATITUDES')
       ENDIF
       IF (NTIP.EQ.2) THEN
@@ -670,9 +670,9 @@ C.....Read and process NWS - wind and pressure forcing & wave rad stress
      &     (NWS.NE.8).AND.
      &     (NWS.NE.206).AND.(NWS.NE.210)     .AND.(NWS.NE.211) .AND.
 Casey 101118: Added the following cases for coupling to unstructured SWAN.
-     &   (ABS(NWS).NE.300).AND.(ABS(NWS).NE.303).AND.(ABS(NWS).NE.304).AND.
-     &   (ABS(NWS).NE.305).AND.(ABS(NWS).NE.306).AND.(ABS(NWS).NE.308).AND.
-     &   (ABS(NWS).NE.309).AND.(ABS(NWS).NE.310).AND.(ABS(NWS).NE.311).AND.
+     &(ABS(NWS).NE.300).AND.(ABS(NWS).NE.303).AND.(ABS(NWS).NE.304).AND.
+     &(ABS(NWS).NE.305).AND.(ABS(NWS).NE.306).AND.(ABS(NWS).NE.308).AND.
+     &(ABS(NWS).NE.309).AND.(ABS(NWS).NE.310).AND.(ABS(NWS).NE.311).AND.
      &   (ABS(NWS).NE.312)) THEN
          IF ((NSCREEN.EQ.1).AND.(MYPROC.EQ.0)) THEN
             WRITE(6,9972)
@@ -1332,7 +1332,7 @@ C.....been used for inputting the connectivity table
          DIF1R = LOG10(DIF1R)
          DIF2R = LOG10(DIF2R)
          DIF3R = LOG10(DIF3R)
-         IF((DIF1R.GT.NPREC).OR.(DIF2R.GT.NPREC).OR.(DIF3R.GT.NPREC))THEN
+        IF((DIF1R.GT.NPREC).OR.(DIF2R.GT.NPREC).OR.(DIF3R.GT.NPREC))THEN
             IF ((NSCREEN.EQ.1).AND.(MYPROC.EQ.0)) WRITE(6,9898) JKI
             WRITE(16,9898) JKI
  9898       FORMAT(////,1X,'!!!!!!!!!!  WARNING  !!!!!!!!!',
@@ -1349,12 +1349,12 @@ C.....NOTE: This is 2 times the actual element area (why?)
          IF (AREAS(JKI).LT.0.0) THEN
             IF((NSCREEN.EQ.1).AND.(MYPROC.EQ.0)) WRITE(6,9899) JKI
             WRITE(16,9899) JKI
- 9899       FORMAT(////,1X,'!!!!!!!!!!  WARNING - FATAL ERROR !!!!!!!!!',
-     &           //,1X,'THE CONNECTIVITY FOR ELEMENT ',I6,
+ 9899      FORMAT(////,1X,'!!!!!!!!!!  WARNING - FATAL ERROR !!!!!!!!!',
+     &          //,1X,'THE CONNECTIVITY FOR ELEMENT ',I6,
      &           '  HAS BEEN INCORRECTLY SPECIFIED ',
      &           /,1X,'CHECK INPUT AND ENSURE THAT COUNTERCLOCKWISE',
      &           ' CONVENTION HAS BEEN USED ',
-     &           //,1X,'!!!!!! EXECUTION WILL NOW BE TERMINATED !!!!!!',//)
+     &        //,1X,'!!!!!! EXECUTION WILL NOW BE TERMINATED !!!!!!',//)
             STOP
          ENDIF
       ENDDO
@@ -1406,9 +1406,9 @@ C.....Check that NE2 and NP2 mathe with grid file
             IF ((NSCREEN.EQ.1).AND.(MYPROC.EQ.0)) WRITE(6,9900)
             WRITE(16,9900)
  9900       FORMAT(////,1X,'!!!!!!!!!!  FATAL ERROR  !!!!!!!!!',
-     &           //,1X,'THE PARAMETER NE2 AND NP2 MUST MATCH NE AND NP ',
+     &         //,1X,'THE PARAMETER NE2 AND NP2 MUST MATCH NE AND NP ',
      &           /,1X,'USER MUST CHECK FORT.12 INPUT FILE ',
-     &           //,1X,'!!!!!! EXECUTION WILL NOW BE TERMINATED !!!!!!',//)
+     &        //,1X,'!!!!!! EXECUTION WILL NOW BE TERMINATED !!!!!!',//)
             STOP
          ENDIF
 
@@ -1499,7 +1499,7 @@ C.....and nodal coordinates and bathymetry
                ENDIF
             ELSE
                WRITE(16,9225)
- 9225          FORMAT(/,1X,'   NODE ',2X,'LAMBDA(DEG)',5X,'FEA(DEG)',11X,
+ 9225         FORMAT(/,1X,'   NODE ',2X,'LAMBDA(DEG)',5X,'FEA(DEG)',11X,
      &              'XCP',14X,'YCP',11X,'DP',/)
                DO I = 1,NP
                   WRITE (16,9228) I,SLAM(I)*RAD2DEG,SFEA(I)*RAD2DEG,
@@ -1548,14 +1548,14 @@ C.....and nodal coordinates and bathymetry
                ENDIF
             ELSE
                WRITE(16,3535)
- 3535          FORMAT(/,1X,'   NODE ',2X,'LAMBDA(DEG)',5X,'FEA(DEG)',11X,
+ 3535         FORMAT(/,1X,'   NODE ',2X,'LAMBDA(DEG)',5X,'FEA(DEG)',11X,
      &              'XCP',14X,'YCP',11X,'DP',
      &              5X,'STARTDRY',/)
                DO I = 1,NP
                   IF (STARTDRY(I).EQ.-88888.D0) THEN
                      WRITE (16,3537) I,SLAM(I)*RAD2DEG,SFEA(I)*RAD2DEG,
      &                    X(I),Y(I),DP(I),STARTDRY(I)
- 3537                FORMAT(1X,I6,2(1X,F14.8),2(1X,F15.1),1X,F10.2,2X,F10.0)
+ 3537            FORMAT(1X,I6,2(1X,F14.8),2(1X,F15.1),1X,F10.2,2X,F10.0)
                   ELSE
                      WRITE (16,9228) I,SLAM(I)*RAD2DEG,SFEA(I)*RAD2DEG,
      &                    X(I),Y(I),DP(I)
@@ -1746,7 +1746,7 @@ C     ek: Initialize nodal attributes, now that grid has been read
 C     in from unit 14 file.
 
       IF (NWP.GT.0)
-     &     CALL InitNodalAttr(DP, NP, G, NScreen, ScreenUnit,MyProc,NAbOut)
+     &  CALL InitNodalAttr(DP, NP, G, NScreen, ScreenUnit,MyProc,NAbOut)
       
 
 
@@ -2003,7 +2003,7 @@ C...
          WRITE(16,9945)
  9945    FORMAT(////,1X,'!!!!!!!!!!  WARNING - NONFATAL INPUT ERROR ',
      &        '!!!!!!!!!',
-     &        //,1X,'THE INPUT PARAMETER NETA FROM UNIT 14 DOES NOT MATCH ',
+     &    //,1X,'THE INPUT PARAMETER NETA FROM UNIT 14 DOES NOT MATCH ',
      &        'THE TOTAL NUMBER OF BOUNDARY NODES',
      &        /,1X,' FROM ALL THE SPECIFIED SEGMENTS COMBINED')
          IF(NFOVER.EQ.1) THEN
@@ -2134,7 +2134,7 @@ C.......CHECK THAT IBTYPE PARAMETER HAS BEEN SET PROPERLY
      &        .AND.(IBTYPE.NE.3).AND.(IBTYPE.NE.13).AND.(IBTYPE.NE.23)
 cjj   wm001 - following 2 lines modified 
      &        .AND.(IBTYPE.NE.4).AND.(IBTYPE.NE.24)
-     &        .AND.(IBTYPE.NE.5).AND.(IBTYPE.NE.25).AND.(IBTYPE.NE.30)) THEN
+     &   .AND.(IBTYPE.NE.5).AND.(IBTYPE.NE.25).AND.(IBTYPE.NE.30)) THEN
          IF(NSCREEN.EQ.1.AND.MYPROC.EQ.0) WRITE(6,9985) K
          WRITE(16,9985) K
  9985    FORMAT(////,1X,'!!!!!!!!!!  WARNING - FATAL ERROR !!!!!!!!!',
@@ -2696,7 +2696,7 @@ C...........CHECK INTERNAL BARRIER HEIGHTS AGAINST DEPTHS
                   WRITE(16,8368) JGW,NBV(JGW),BARINHT(JGW),DP(NBV(JGW))
  8368             FORMAT(////,1X,'!!!!!!!!!!  FATAL INPUT ERROR   !!!'
      &                 ,'!!!!!!!!!',//,
-     &                 1X,'AT BOUNDARY NODE NO.',I6,' (GLOBAL NODE NO. ',
+     &                1X,'AT BOUNDARY NODE NO.',I6,' (GLOBAL NODE NO. ',
      &                 I6,' AND OF INTERNAL BARRIER TYPE) ',/,
      &                 2X,'THE INTERNAL BARRIER HEIGHT = ',E12.5,
      &                 2X,'IS EXCEEDED BY THE DEPTH SPECIFIED AT ',/,2X
@@ -2717,7 +2717,7 @@ C...........CHECK INTERNAL BARRIER WITH PIPES BARRIER HEIGHTS AGAINST DEPTHS
                   WRITE(16,8370) JGW,NBV(JGW),BARINHT(JGW),DP(NBV(JGW))
  8370             FORMAT(////,1X,'!!!!!!!!!!  FATAL INPUT ERROR   !!!'
      &                 ,'!!!!!!!!!',//,
-     &                 1X,'AT BOUNDARY NODE NO.',I6,' (GLOBAL NODE NO. ',
+     &                1X,'AT BOUNDARY NODE NO.',I6,' (GLOBAL NODE NO. ',
      &                 I6,' AND OF INTERNAL BARRIER TYPE) ',/,
      &                 2X,'THE INTERNAL BARRIER HEIGHT = ',E12.5,
      &                 2X,'IS EXCEEDED BY THE DEPTH SPECIFIED AT ',/,2X
@@ -2737,7 +2737,7 @@ C...........CHECK INTERNAL BARRIER WITH PIPES PIPE HEIGHTS AGAINST DEPTHS
                   WRITE(16,8372) JGW,NBV(JGW),BARINHT(JGW),DP(NBV(JGW))
  8372             FORMAT(////,1X,'!!!!!!!!!!  FATAL INPUT ERROR   !!!'
      &                 ,'!!!!!!!!!',//,
-     &                 1X,'AT BOUNDARY NODE NO.',I6,' (GLOBAL NODE NO. ',
+     &                1X,'AT BOUNDARY NODE NO.',I6,' (GLOBAL NODE NO. ',
      &                 I6,' AND OF INTERNAL BARRIER TYPE) ',/,
      &                 2X,'THE BARRIER PIPE HEIGHT = ',E12.5,
      &                 2X,'IS EXCEEDED BY THE DEPTH SPECIFIED AT ',/,2X
@@ -2760,18 +2760,18 @@ C...............CHECK IF OVERLAP EXISTS
                   IF(NBV(ICK).EQ.NBV(JGW)) THEN
 C.................CHECK FOR ILLEGAL OVERLAPS
                      IF((LBCODEI(ICK).EQ.2).OR.(LBCODEI(ICK).EQ.3).OR.
-     &                    (LBCODEI(ICK).EQ.12).OR.(LBCODEI(ICK).EQ.13)) THEN 
+     &                (LBCODEI(ICK).EQ.12).OR.(LBCODEI(ICK).EQ.13)) THEN
                         IF(NSCREEN.EQ.1.AND.MYPROC.EQ.0) WRITE(6,8567) 
      &                       JGW,NBV(JGW),ICK,NBV(ICK)
                         WRITE(16,8567) JGW,NBV(JGW),ICK,NBV(ICK)
- 8567                   FORMAT(////,1X,'!!!!!!!!!!  FATAL INPUT ERROR   !!!'
+ 8567               FORMAT(////,1X,'!!!!!!!!!!  FATAL INPUT ERROR   !!!'
      &                       ,'!!!!!!!!!',//,
-     &                       1X,'BOUNDARY NODE NO. ',I6,' (GLOBAL NODE NO. ',
+     &                  1X,'BOUNDARY NODE NO. ',I6,' (GLOBAL NODE NO. ',
      &                       I9, 'AND OF INTERNAL BARRIER TYPE) ',/,
-     &                       2X,'OVERLAPS BOUNDARY NODE NO.',I6,' (GLOBAL NODE'
+     &                2X,'OVERLAPS BOUNDARY NODE NO.',I6,' (GLOBAL NODE'
      &                       ,' NO.',I6,' )',/,
-     &                       2X,'THIS IS AN ILLEGAL TYPE OVERLAP !! - INTERNAL '
-     &                       ,'BARRIER BOUNDARIES CAN ONLY OVERLAP WITH ',
+     &               2X,'THIS IS AN ILLEGAL TYPE OVERLAP !! - INTERNAL '
+     &                   ,'BARRIER BOUNDARIES CAN ONLY OVERLAP WITH ',
      &                       'NO NORMAL FLOW EXTERNAL BOUNDARIES',/
      &                       2X,'(I.E. IBTYPE=0,10,20)')
                         IF(NSCREEN.EQ.1.AND.MYPROC.EQ.0) WRITE(6,9973)
@@ -2781,45 +2781,45 @@ C.................CHECK FOR ILLEGAL OVERLAPS
 C.................CHECK FOR OVERLAPS WHICH REQUIRE ADJUSTMENTS OF BOUNDARY
 C..................CODE ON THE EXTERNAL BOUNDARY
                      IF(((IBTYPE.EQ.4).AND.(LBCODEI(ICK).EQ.0))
-     &                    .OR.((IBTYPE.EQ.5).AND.(LBCODEI(ICK).EQ.0))) THEN
+     &                .OR.((IBTYPE.EQ.5).AND.(LBCODEI(ICK).EQ.0))) THEN
                         WRITE(16,8568) JGW,ICK,ICK
  8568                   FORMAT(1X,'DUE TO LEGAL OVERLAPPING OF ',
-     &                       'BOUNDARY NODE',I7,' (WHICH IS AN ESSENTIAL INTER'
+     &                'BOUNDARY NODE',I7,' (WHICH IS AN ESSENTIAL INTER'
      &                       ,'NAL BARRIER BOUNDARY NODE)', /,2X,
-     &                       'AND BOUNDARY NODE',I7,' (WHICH IS AN ESSENTIAL ',
-     &                       'EXTERNAL NO NORMAL FLOW WITH SLIP BOUNDARY',
+     &                'AND BOUNDARY NODE',I7,' (WHICH IS AN ESSENTIAL ',
+     &                     'EXTERNAL NO NORMAL FLOW WITH SLIP BOUNDARY',
      &                       ' NODE),',/,2X,
      &                       'THE BOUNDARY TYPE FOR BOUNDARY NODE ',I7,
      &                       ' IS BEING RESET TO IBTYPE=20',/,2X,
-     &                       '(NATURAL NO NORMAL FLOW WITH SLIP BOUNDARY) ')
+     &                   '(NATURAL NO NORMAL FLOW WITH SLIP BOUNDARY) ')
                         LBCODEI(ICK)=20
                      ENDIF
                      IF(((IBTYPE.EQ.4).AND.(LBCODEI(ICK).EQ.10)) 
-     &                    .OR.((IBTYPE.EQ.5).AND.(LBCODEI(ICK).EQ.10))) THEN
+     &                .OR.((IBTYPE.EQ.5).AND.(LBCODEI(ICK).EQ.10))) THEN
                         WRITE(16,8569) JGW,ICK,ICK
- 8569                   FORMAT(1X,'DUE TO LEGAL OVERLAPPING OF ',
-     &                       'BOUNDARY NODE ',I7,' (WHICH IS AN ESSENTIAL INTER'
+ 8569                 FORMAT(1X,'DUE TO LEGAL OVERLAPPING OF ',
+     &               'BOUNDARY NODE ',I7,' (WHICH IS AN ESSENTIAL INTER'
      &                       ,'NAL BARRIER BOUNDARY NODE)', /,2X,
-     &                       'AND BOUNDARY NODE',I7,' (WHICH IS AN ESSENTIAL ',
-     &                       'EXTERNAL NO NORMAL FLOW WITH NO SLIP BOUNDARY',
+     &                'AND BOUNDARY NODE',I7,' (WHICH IS AN ESSENTIAL ',
+     &                  'EXTERNAL NO NORMAL FLOW WITH NO SLIP BOUNDARY',
      &                       ' NODE),',/,2X,
      &                       'THE BOUNDARY TYPE FOR BOUNDARY NODE ',I7,
      &                       ' IS BEING RESET TO IBTYPE=20',/,2X,
-     &                       '(NATURAL NO NORMAL FLOW WITH SLIP BOUNDARY) ')
+     &                   '(NATURAL NO NORMAL FLOW WITH SLIP BOUNDARY) ')
                         LBCODEI(ICK)=20
                      ENDIF
                      IF(((IBTYPE.EQ.24).AND.(LBCODEI(ICK).EQ.10))  
-     &                    .OR.((IBTYPE.EQ.25).AND.(LBCODEI(ICK).EQ.10))) THEN
+     &              .OR.((IBTYPE.EQ.25).AND.(LBCODEI(ICK).EQ.10))) THEN
                         WRITE(16,8570) JGW,ICK,ICK
  8570                   FORMAT(1X,'DUE TO LEGAL OVERLAPPING OF ',
-     &                       'BOUNDARY NODE',I7,' (WHICH IS A NATURAL INTERNAL'
+     &                'BOUNDARY NODE',I7,' (WHICH IS A NATURAL INTERNAL'
      &                       ,' BARRIER BOUNDARY NODE)', /,2X,
-     &                       'AND BOUNDARY NODE',I7,' (WHICH IS AN ESSENTIAL ',
-     &                       'EXTERNAL NO NORMAL FLOW WITH NO SLIP BOUNDARY',
+     &                'AND BOUNDARY NODE',I7,' (WHICH IS AN ESSENTIAL ',
+     &                  'EXTERNAL NO NORMAL FLOW WITH NO SLIP BOUNDARY',
      &                       ' NODE),',/,2X,
      &                       'THE BOUNDARY TYPE FOR BOUNDARY NODE',I7,
      &                       ' IS BEING RESET TO IBTYPE=0',/,2X,
-     &                       '(ESSENTIAL NO NORMAL FLOW WITH SLIP BOUNDARY) ')
+     &                 '(ESSENTIAL NO NORMAL FLOW WITH SLIP BOUNDARY) ')
                         LBCODEI(ICK)=0
                      ENDIF
                   ENDIF
@@ -2839,12 +2839,18 @@ C.......Put barrier data into arrays more amiable to DG data structure
          ENDDO
       ENDIF
       
-      IF ((IBTYPE.EQ.4).OR.(IBTYPE.EQ.24)) THEN
+      IF ((IBTYPE.EQ.4).OR.(IBTYPE.EQ.24).OR.
+     &    (IBTYPE.EQ.5).OR.(IBTYPE.EQ.25)) THEN
          DO I = 1,NVELL(K)-1
             NIBSEG = NIBSEG + 1
             IBHT(NIBSEG)   = 0.5D0*( BARINHTR(I)   + BARINHTR(I+1)   )
             IBCFSB(NIBSEG) = 0.5D0*( BARINCFSBR(I) + BARINCFSBR(I+1) )
             IBCFSP(NIBSEG) = 0.5D0*( BARINCFSPR(I) + BARINCFSPR(I+1) )
+            IF ((IBTYPE.EQ.5).OR.(IBTYPE.EQ.25)) THEN
+               PIHT(NIBSEG) = 0.5D0*( PIPEHTR(I)   + PIPEHTR(I+1)   )
+               PICF(NIBSEG) = 0.5D0*( PIPECOEFR(I) + PIPECOEFR(I+1) )
+               PIDI(NIBSEG) = 0.5D0*( PIPEDIAMR(I) + PIPEDIAMR(I+1) )
+            ENDIF 
             BACKNODES(1,NIBSEG) = IBCONNR(I)
             BACKNODES(2,NIBSEG) = IBCONNR(I+1)
          ENDDO
@@ -2939,7 +2945,7 @@ C.....READ IN AND WRITE OUT INFO ON SPECIFIED NORMAL FLOW BOUNDARIES
  2202       FORMAT(/,5X,'NUMBER OF PERIODIC NORMAL FLOW CONSTITUENTS =',
      &           I5)
             WRITE(16,2203)
- 2203       FORMAT(/,7X,'CONSTITUENT #',4X,'FREQUENCY',4X,'NODAL FACTOR',
+ 2203      FORMAT(/,7X,'CONSTITUENT #',4X,'FREQUENCY',4X,'NODAL FACTOR',
      &           3X,'EQU.ARG (DEG)',2X,'CONSTITUENT',/)
             DO I=1,NFFR
                READ(15,'(A5)') FBOUNTAG(I)
@@ -3242,7 +3248,7 @@ C.... THE ELEMENT NO. THE STATION LIES IN
                IF(NSCREEN.EQ.1.AND.MYPROC.EQ.0) WRITE(6,9790) AEMIN
                WRITE(16,9790) AEMIN
  9790          FORMAT(/,1X,'PROGRAM WILL ESTIMATE NEAREST ELEMENT',
-     &              /,1X,'PROXIMITY INDEX FOR THIS STATION EQUALS ',E15.6,
+     &            /,1X,'PROXIMITY INDEX FOR THIS STATION EQUALS ',E15.6,
      &              //,1X,'!!!!!! EXECUTION WILL CONTINUE !!!!!!',//)
                NNE(I)=KMIN
             ELSE
@@ -3480,7 +3486,7 @@ C.....CHECK INPUT PARAMETER NOUTC
          IF(ABS(NOUTC).GT.2) THEN
             IF(NSCREEN.EQ.1.AND.MYPROC.EQ.0) WRITE(6,3202)
             WRITE(16,3202)
- 3202       FORMAT(////,1X,'!!!!!!!!!!  WARNING - FATAL ERROR !!!!!!!!!',
+ 3202      FORMAT(////,1X,'!!!!!!!!!!  WARNING - FATAL ERROR !!!!!!!!!',
      &           //,1X,'YOUR SELECTION OF THE UNIT 15 INPUT PARAMETER',
      &           ' NOUTC',
      &           /,1X,'IS NOT AN ALLOWABLE VALUE.  CHECK YOUR INPUT!!')
@@ -3592,7 +3598,7 @@ C.....THEN COMPUTE ELEMENT NO. WITHIN WHICH STATION LIES
             IF(NNC(I).EQ.0) THEN
                IF(NSCREEN.EQ.1.AND.MYPROC.EQ.0) WRITE(6,9785) I
                WRITE(16,9785) I
- 9785          FORMAT(///,1X,'!!!!!!!!!!  WARNING - NONFATAL INPUT ERROR ',
+ 9785       FORMAT(///,1X,'!!!!!!!!!!  WARNING - NONFATAL INPUT ERROR ',
      &          '!!!!!!!!!',//,
      &          ' CONCENTRATION RECORDING STATION ',I6,' DOES NOT LIE'
      &          ,' WITHIN ANY ELEMENT IN THE DEFINED',/,
@@ -3661,7 +3667,7 @@ C.....CHECK INPUT PARAMETER NOUTM
          IF(ABS(NOUTM).GT.2) THEN
             IF(NSCREEN.EQ.1.AND.MYPROC.EQ.0) WRITE(6,3212)
             WRITE(16,3202)
- 3212       FORMAT(////,1X,'!!!!!!!!!!  WARNING - FATAL ERROR !!!!!!!!!',
+ 3212      FORMAT(////,1X,'!!!!!!!!!!  WARNING - FATAL ERROR !!!!!!!!!',
      &           //,1X,'YOUR SELECTION OF THE UNIT 15 INPUT PARAMETER',
      &           ' NOUTC',
      &           /,1X,'IS NOT AN ALLOWABLE VALUE.  CHECK YOUR INPUT!!')
@@ -3772,7 +3778,7 @@ C.....THEN COMPUTE ELEMENT NO. WITHIN WHICH STATION LIES
             IF(NNM(I).EQ.0) THEN
                IF(NSCREEN.EQ.1.AND.MYPROC.EQ.0) WRITE(6,9942) I
                WRITE(16,9942) I
- 9942          FORMAT(///,1X,'!!!!!!!!!!  WARNING - NONFATAL INPUT ERROR ',
+ 9942       FORMAT(///,1X,'!!!!!!!!!!  WARNING - NONFATAL INPUT ERROR ',
      &          '!!!!!!!!!',//,
      &          ' METEOROLOGICAL RECORDING STATION ',I6,' DOES NOT LIE'
      &          ,' WITHIN ANY ELEMENT IN THE DEFINED',/,
@@ -3963,7 +3969,7 @@ C.....BETWEEN TIMES TOUTSGC AND TOUTFGC; IF ABS(NOUTGC)=2, OUTPUT WILL BE BINARY
 
          READ(15,*) NOUTGC,TOUTSGC,TOUTFGC,NSPOOLGC
          WRITE(16,3401) NOUTGC
- 3401    FORMAT(////,1X,'GLOBAL NODAL CONCENTRATION INFORMATION OUTPUT:',
+ 3401   FORMAT(////,1X,'GLOBAL NODAL CONCENTRATION INFORMATION OUTPUT:',
      &        //,5X,'NOUTGC = ',I2)
 
 C.....CHECK INPUT PARAMETER NOUTGC
@@ -3971,7 +3977,7 @@ C.....CHECK INPUT PARAMETER NOUTGC
          IF(ABS(NOUTGC).GT.2) THEN
             IF(NSCREEN.EQ.1.AND.MYPROC.EQ.0) WRITE(6,3402)
             WRITE(16,3402)
- 3402       FORMAT(////,1X,'!!!!!!!!!!  WARNING - FATAL ERROR !!!!!!!!!',
+ 3402      FORMAT(////,1X,'!!!!!!!!!!  WARNING - FATAL ERROR !!!!!!!!!',
      &           //,1X,'YOUR SELECTION OF THE UNIT 15 INPUT PARAMETER',
      &           ' NOUTGC',
      &           /,1X,'IS NOT AN ALLOWABLE VALUE.  CHECK YOUR INPUT!!')
@@ -4041,7 +4047,7 @@ C......CHECK INPUT PARAMETER NOUTGW
          IF(ABS(NOUTGW).GT.2) THEN
             IF(NSCREEN.EQ.1.AND.MYPROC.EQ.0) WRITE(6,3452)
             WRITE(16,3452)
- 3452       FORMAT(////,1X,'!!!!!!!!!!  WARNING - FATAL ERROR !!!!!!!!!',
+ 3452      FORMAT(////,1X,'!!!!!!!!!!  WARNING - FATAL ERROR !!!!!!!!!',
      &           //,1X,'YOUR SELECTION OF THE UNIT 15 INPUT PARAMETER',
      &           ' NOUTGW',
      &           /,1X,'IS NOT AN ALLOWABLE VALUE.  CHECK YOUR INPUT!!')
@@ -4054,7 +4060,7 @@ C......IF GLOBAL WIND STRESS OUTPUT WILL NOT BE GENERATED
 
          IF(NOUTGW.EQ.0) THEN
             WRITE(16,3453)
- 3453       FORMAT(///,5X,'NO GLOBAL WIND STRESS OUTPUT WILL BE SPOOLED')
+ 3453      FORMAT(///,5X,'NO GLOBAL WIND STRESS OUTPUT WILL BE SPOOLED')
          ENDIF
 
 C........IF GLOBAL WIND STRESS OUTPUT WILL BE GENERATED
@@ -4097,7 +4103,7 @@ C...
       READ(15,*) NFREQ 
       WRITE(16,99392) NFREQ  
 99392 FORMAT(////,1X,'HARMONIC ANALYSIS INFORMATION OUTPUT : ',
-     &     //,5X,'HARMONIC ANALYSIS PERFORMED FOR ',I4,' CONSTITUENTS',/)
+     &    //,5X,'HARMONIC ANALYSIS PERFORMED FOR ',I4,' CONSTITUENTS',/)
       MNHARF = NFREQ
 
       IF (NFREQ.EQ.0) MNHARF = 1
@@ -4384,7 +4390,8 @@ C...
       WRITE(16,1196)
  1196 FORMAT(/,1X,'THE NEIGHBOR TABLE IS BEING COMPUTED ',/)
 C     
-      CALL NEIGHB(NE,NP,NM,NNEIGH,NEITAB,NEIMIN,NEIMAX,X,Y,NSCREEN,NNEIGH_ELEM,NEIGH_ELEM)
+      CALL NEIGHB(NE,NP,NM,NNEIGH,NEITAB,NEIMIN,NEIMAX,X,Y,NSCREEN,
+     & NNEIGH_ELEM,NEIGH_ELEM)
 C     
       IF(NSCREEN.EQ.1.AND.MYPROC.EQ.0) 
      &     WRITE(6,1195) NEIMIN,NEIMAX,NEIMAX
@@ -4450,7 +4457,7 @@ C--
 C.....Write table of parameter sizes (vjp 11/28/99)
 
       WRITE(16,4010) MNPROC,MNE,MNP,MNEI,MNOPE,MNETA,MNBOU,MNVEL,
-     &     MNTIF,MNBFR,MNSTAE,MNSTAV,MNSTAC,MNSTAM,NWLAT,NWLON,MNHARF,MNFFR
+     &  MNTIF,MNBFR,MNSTAE,MNSTAV,MNSTAC,MNSTAM,NWLAT,NWLON,MNHARF,MNFFR
       IF (NWS.EQ.0) WRITE(16,4011)
       IF (NWS.EQ.1) WRITE(16,4012)
       IF (ABS(NWS).EQ.2) WRITE(16,4013)

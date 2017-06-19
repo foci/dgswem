@@ -353,7 +353,7 @@ C.....Compute the edge integral
             
             DO K = 1,DOFS(EL_IN)
                CALL EDGE_INT_LDG_HYDRO
-     &              (K,EL_IN,LED,GED,I,iota_AVG,ZE_AVG,QX_AVG,QY_AVG,NX,NY,pa)
+     &        (K,EL_IN,LED,GED,I,iota_AVG,ZE_AVG,QX_AVG,QY_AVG,NX,NY,pa)
 #ifdef SED_LAY
                do ll=1,layers
                   CALL EDGE_INT_LDG_sediment
@@ -458,11 +458,11 @@ C.....Compute the solution at the interior state
                QX_IN = QX_IN + QX(K,EL_IN,IRK)*PHI_EDGE(K,I,LED,pa)
                QY_IN = QY_IN + QY(K,EL_IN,IRK)*PHI_EDGE(K,I,LED,pa)
 #ifdef TRACE
-               iota_IN = iota_IN + iota(K,EL_IN,IRK)*PHI_EDGE(K,I,LED,pa)
+              iota_IN = iota_IN + iota(K,EL_IN,IRK)*PHI_EDGE(K,I,LED,pa)
 #endif
 #ifdef SED_LAY
                do ll=1,layers
-                  bed_IN(ll) = bed_IN(ll) + bed(K,EL_IN,IRK,ll)*PHI_EDGE(K,I,LED,pa)
+      bed_IN(ll) = bed_IN(ll) + bed(K,EL_IN,IRK,ll)*PHI_EDGE(K,I,LED,pa)
                enddo
 #endif
 
@@ -509,7 +509,7 @@ C.....Compute the edge integral
 
             DO K = 1,DOFS(EL_IN)
                CALL EDGE_INT_LDG_HYDRO
-     &              (K,EL_IN,LED,GED,I,iota_AVG,ZE_AVG,QX_AVG,QY_AVG,NX,NY,pa)
+     &        (K,EL_IN,LED,GED,I,iota_AVG,ZE_AVG,QX_AVG,QY_AVG,NX,NY,pa)
 #ifdef SED_LAY
                do ll=1,layers
                   CALL EDGE_INT_LDG_sediment
@@ -627,9 +627,9 @@ C.....Compute the specified flow boundaries for the exterior state
                RFF  = FFF(JJ)*RAMPExtFlux
                
                QNAM_GP = 0.5D0*(QNAM_DG(JJ,L,1) + QNAM_DG(JJ,L,2))
-     &              + 0.5D0*(QNAM_DG(JJ,L,2) - QNAM_DG(JJ,L,1))*XEGP(I,pa)
+     &            + 0.5D0*(QNAM_DG(JJ,L,2) - QNAM_DG(JJ,L,1))*XEGP(I,pa)
                QNPH_GP = 0.5D0*(QNPH_DG(JJ,L,1) + QNPH_DG(JJ,L,2))
-     &              + 0.5D0*(QNPH_DG(JJ,L,2) - QNPH_DG(JJ,L,1))*XEGP(I,pa)
+     &            + 0.5D0*(QNPH_DG(JJ,L,2) - QNPH_DG(JJ,L,1))*XEGP(I,pa)
                
                ARG = ARGJ - QNPH_GP
                
@@ -652,8 +652,8 @@ C.....Compute the solution at the interior state
 
 #ifdef SED_LAY
                do ll=1,layers
-                  bed_in(ll) = bed_in(ll) + bed(K,EL_IN,IRK,ll)*PHI_EDGE(K,I,LED,pa)
-                  bed_ex(ll) = bed_ex(ll) + bed(K,EL_IN,IRK,ll)*PHI_EDGE(K,I,LED,pa)
+      bed_in(ll) = bed_in(ll) + bed(K,EL_IN,IRK,ll)*PHI_EDGE(K,I,LED,pa)
+      bed_ex(ll) = bed_ex(ll) + bed(K,EL_IN,IRK,ll)*PHI_EDGE(K,I,LED,pa)
                enddo
 #endif
             ENDDO
@@ -683,7 +683,7 @@ C.....Compute the edge integral
 
             DO K = 1,DOFS(EL_IN)
                CALL EDGE_INT_LDG_HYDRO
-     &              (K,EL_IN,LED,GED,I,iota_AVG,ZE_AVG,QX_AVG,QY_AVG,NX,NY,pa)
+     &        (K,EL_IN,LED,GED,I,iota_AVG,ZE_AVG,QX_AVG,QY_AVG,NX,NY,pa)
 #ifdef SED_LAY
                do ll=1,layers
                   CALL EDGE_INT_LDG_sediment
@@ -782,12 +782,12 @@ C.....Compute the solution at the interior state
                QX_IN = QX_IN + QX(K,EL_IN,IRK)*PHI_EDGE(K,I,LED,pa)
                QY_IN = QY_IN + QY(K,EL_IN,IRK)*PHI_EDGE(K,I,LED,pa)
 #ifdef TRACE
-               iota_IN = iota_IN + iota(K,EL_IN,IRK)*PHI_EDGE(K,I,LED,pa)
+              iota_IN = iota_IN + iota(K,EL_IN,IRK)*PHI_EDGE(K,I,LED,pa)
 #endif
 
 #ifdef SED_LAY
                do ll=1,layers
-                  bed_in(ll) = bed_in(ll) + bed(K,EL_IN,IRK,ll)*PHI_EDGE(K,I,LED,pa)
+      bed_in(ll) = bed_in(ll) + bed(K,EL_IN,IRK,ll)*PHI_EDGE(K,I,LED,pa)
                enddo
 #endif
         
@@ -800,7 +800,7 @@ C.....Compute the edge integral
            
             DO K = 1,DOFS(EL_IN)
                CALL EDGE_INT_LDG_HYDRO
-     &              (K,EL_IN,LED,GED,I,iota_IN,ZE_IN,QX_IN,QY_IN,NX,NY,pa)
+     &            (K,EL_IN,LED,GED,I,iota_IN,ZE_IN,QX_IN,QY_IN,NX,NY,pa)
 #ifdef SED_LAY
                do ll=1,layers
                   CALL EDGE_INT_LDG_sediment
@@ -913,18 +913,18 @@ C.....Compute ZE, QX, QY, and HB at each edge Gauss quadrature point
             DO K = 1,DOFS(EL)
 
 #ifdef WAVE_DIF
-               ZE_IN = ZE_IN + ZE(K,EL_IN,IRK)*PHI_EDGE(K,GP_IN,LED_IN,pa)
+             ZE_IN = ZE_IN + ZE(K,EL_IN,IRK)*PHI_EDGE(K,GP_IN,LED_IN,pa)
 #endif
-               QX_IN = QX_IN + QX(K,EL_IN,IRK)*PHI_EDGE(K,GP_IN,LED_IN,pa)
-               QY_IN = QY_IN + QY(K,EL_IN,IRK)*PHI_EDGE(K,GP_IN,LED_IN,pa)
+             QX_IN = QX_IN + QX(K,EL_IN,IRK)*PHI_EDGE(K,GP_IN,LED_IN,pa)
+             QY_IN = QY_IN + QY(K,EL_IN,IRK)*PHI_EDGE(K,GP_IN,LED_IN,pa)
 #ifdef WAVE_DIF
-               ZE_EX = ZE_EX + ZE(K,EL_EX,IRK)*PHI_EDGE(K,GP_EX,LED_EX,pa)
+             ZE_EX = ZE_EX + ZE(K,EL_EX,IRK)*PHI_EDGE(K,GP_EX,LED_EX,pa)
 #endif
-               QX_EX = QX_EX + QX(K,EL_EX,IRK)*PHI_EDGE(K,GP_EX,LED_EX,pa)
-               QY_EX = QY_EX + QY(K,EL_EX,IRK)*PHI_EDGE(K,GP_EX,LED_EX,pa)
+             QX_EX = QX_EX + QX(K,EL_EX,IRK)*PHI_EDGE(K,GP_EX,LED_EX,pa)
+             QY_EX = QY_EX + QY(K,EL_EX,IRK)*PHI_EDGE(K,GP_EX,LED_EX,pa)
 #ifdef TRACE
-               iota_IN = iota_IN + iota(K,EL_IN,IRK)*PHI_EDGE(K,GP_IN,LED_IN,pa)
-               iota_EX = iota_EX + iota(K,EL_EX,IRK)*PHI_EDGE(K,GP_EX,LED_EX,pa)
+       iota_IN = iota_IN + iota(K,EL_IN,IRK)*PHI_EDGE(K,GP_IN,LED_IN,pa)
+       iota_EX = iota_EX + iota(K,EL_EX,IRK)*PHI_EDGE(K,GP_EX,LED_EX,pa)
 #endif
 
 #ifdef SED_LAY
@@ -1025,8 +1025,8 @@ C     01-10-2011 - cem - adapted for p_enrichment and multicomponent
 C     
 C***********************************************************************
 
-      SUBROUTINE EDGE_INT_LDG_HYDRO(K,EL,LED,GED,GP,iota_Avg,ZE_Avg,QX_Avg,
-     &     QY_Avg,NX,NY,pa)
+      SUBROUTINE EDGE_INT_LDG_HYDRO(K,EL,LED,GED,GP,iota_Avg,ZE_Avg,
+     &     QX_Avg, QY_Avg,NX,NY,pa)
 
 C.....Use appropriate modules
 
@@ -1053,24 +1053,24 @@ C.....Comput the edge integral
 
 #ifdef WAVE_DIF
       HZ(K,1,1,EL) = HZ(K,1,1,EL)
-     &     - IMASS*XLEN(GED)*0.5*ZE_Avg*PHI_EDGE(K,GP,LED,pa)*NX*WEGP(GP,pa)
+     & - IMASS*XLEN(GED)*0.5*ZE_Avg*PHI_EDGE(K,GP,LED,pa)*NX*WEGP(GP,pa)
       HZ(K,2,2,EL) = HZ(K,2,2,EL)
-     &     - IMASS*XLEN(GED)*0.5*ZE_Avg*PHI_EDGE(K,GP,LED,pa)*NY*WEGP(GP,pa)
+     &- IMASS*XLEN(GED)*0.5*ZE_Avg*PHI_EDGE(K,GP,LED,pa)*NY*WEGP(GP,pa)
 #endif
       LZ(K,1,1,EL) = LZ(K,1,1,EL)
-     &     - IMASS*XLEN(GED)*0.5*QX_Avg*PHI_EDGE(K,GP,LED,pa)*NX*WEGP(GP,pa)
+     & - IMASS*XLEN(GED)*0.5*QX_Avg*PHI_EDGE(K,GP,LED,pa)*NX*WEGP(GP,pa)
       LZ(K,1,2,EL) = LZ(K,1,2,EL)
-     &     - IMASS*XLEN(GED)*0.5*QX_Avg*PHI_EDGE(K,GP,LED,pa)*NY*WEGP(GP,pa)
+     & - IMASS*XLEN(GED)*0.5*QX_Avg*PHI_EDGE(K,GP,LED,pa)*NY*WEGP(GP,pa)
       LZ(K,2,1,EL) = LZ(K,2,1,EL)
-     &     - IMASS*XLEN(GED)*0.5*QY_Avg*PHI_EDGE(K,GP,LED,pa)*NX*WEGP(GP,pa)
+     & - IMASS*XLEN(GED)*0.5*QY_Avg*PHI_EDGE(K,GP,LED,pa)*NX*WEGP(GP,pa)
       LZ(K,2,2,EL) = LZ(K,2,2,EL)
-     &     - IMASS*XLEN(GED)*0.5*QY_Avg*PHI_EDGE(K,GP,LED,pa)*NY*WEGP(GP,pa)
+     & - IMASS*XLEN(GED)*0.5*QY_Avg*PHI_EDGE(K,GP,LED,pa)*NY*WEGP(GP,pa)
 
 #ifdef TRACE
-      TZ(K,1,1,EL) = TZ(K,1,1,EL)
-     &     - IMASS*XLEN(GED)*0.5D0*iota_Avg*PHI_EDGE(K,GP,LED,pa)*NX*WEGP(GP,pa)
-      TZ(K,2,2,EL) = TZ(K,2,2,EL)
-     &     - IMASS*XLEN(GED)*0.5D0*iota_Avg*PHI_EDGE(K,GP,LED,pa)*NY*WEGP(GP,pa)
+      TZ(K,1,1,EL) = TZ(K,1,1,EL)  - IMASS*XLEN(GED)
+     &    *0.5D0*iota_Avg*PHI_EDGE(K,GP,LED,pa)*NX*WEGP(GP,pa)
+      TZ(K,2,2,EL) = TZ(K,2,2,EL) - IMASS*XLEN(GED)
+     &     *0.5D0*iota_Avg*PHI_EDGE(K,GP,LED,pa)*NY*WEGP(GP,pa)
 
 #endif
       
@@ -1114,9 +1114,9 @@ C.....Comput the edge integral
       IMASS = M_INV(K,pa)/(0.5D0*AREA)
 
       MZ(K,1,ll,EL) = MZ(K,1,ll,EL)
-     &     - IMASS*XLEN(GED)*0.5*bed_avg*PHI_EDGE(K,GP,LED,pa)*NX*WEGP(GP,pa)
+     &- IMASS*XLEN(GED)*0.5*bed_avg*PHI_EDGE(K,GP,LED,pa)*NX*WEGP(GP,pa)
       MZ(K,2,ll,EL) = MZ(K,2,ll,EL)
-     &     - IMASS*XLEN(GED)*0.5*bed_avg*PHI_EDGE(K,GP,LED,pa)*NY*WEGP(GP,pa)
+     &- IMASS*XLEN(GED)*0.5*bed_avg*PHI_EDGE(K,GP,LED,pa)*NY*WEGP(GP,pa)
       
       RETURN
       END SUBROUTINE
@@ -1140,10 +1140,10 @@ C.....Use appropriate modules
       USE SIZES,ONLY : layers,SZ
       USE GLOBAL,ONLY : NE,NM,N1,N2,N3,pdg_el,entrop
       USE DG,ONLY : QX_IN,QY_IN,LZ,M_INV,SFAC_ELEM,ZE_IN,
-     &     DRPHI,DSPHI,DRDX,DRDY,DSDX,DSDY,bed,mz,hz,
+     &     DRPHI,DSPHI,DRDX,DRDY,DSDX,DSDY,mz,hz,
      &     WAGP,NAGP,DOFS,QX,QY,PHI_AREA,IRK,bed_IN,iota_IN,
      &     slimit1,slimit2,slimit5,balance,
-     &     ze,iota,iota2,bed,irk,slimit3,slimit4,TZ
+     &     ze,iota,iota2,slimit3,slimit4,TZ
 
       IMPLICIT NONE
       
@@ -1204,7 +1204,7 @@ C.....Compute ZE, QX, QY, and HB at each area Gauss quadrature point
 
 #ifdef SED_LAY
                do ll=1,layers
-                  bed_IN(ll) = bed_IN(ll) + bed(K,L,IRK,ll)*PHI_AREA(K,I,pa)
+             bed_IN(ll) = bed_IN(ll) + bed(K,L,IRK,ll)*PHI_AREA(K,I,pa)
                enddo
 #endif
 
@@ -1258,11 +1258,11 @@ C.....Build the rhs
                do ll=1,layers
                   MZ(K,1,ll,L) =  MZ(K,1,ll,L)
      &                 + M_INV(K,pa)*bed_IN(ll)*SFAC_ELEM(I,L,pa)* 
-     &                 ( DRPHI(K,I,pa)*DRDX(L) + DSPHI(K,I,pa)*DSDX(L) )* 
+     &                ( DRPHI(K,I,pa)*DRDX(L) + DSPHI(K,I,pa)*DSDX(L) )*
      &                 WAGP(I,pa) 
                   MZ(K,2,ll,L) =  MZ(K,2,ll,L)
      &                 + M_INV(K,pa)*bed_IN(ll)* 
-     &                 ( DRPHI(K,I,pa)*DRDY(L) + DSPHI(K,I,pa)*DSDY(L) )* 
+     &                ( DRPHI(K,I,pa)*DRDY(L) + DSPHI(K,I,pa)*DSDY(L) )*
      &                 WAGP(I,pa) 
                enddo
 #endif

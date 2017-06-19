@@ -50,12 +50,16 @@ C.....Declare local variables
 
       real(sz) xmid,ymid,Ox,Oy,rev,C_0,sig,C_1
 
-      Real(SZ),allocatable :: XBCbt(:),YBCbt(:),radial(:),XB(:),YB(:),l2e(:)
-      Real(SZ),allocatable :: iota_check(:),iota_check2(:),hbo(:,:,:), ydubo(:,:)
+      Real(SZ),allocatable :: XBCbt(:),YBCbt(:),radial(:),XB(:),YB(:),
+     & l2e(:)
+      Real(SZ),allocatable :: iota_check(:),iota_check2(:),hbo(:,:,:),
+     & ydubo(:,:)
       Real(SZ),allocatable :: YELEM(:),YED(:),HB1(:,:,:,:), zeo(:,:,:)
 
-      Allocate ( XBCbt(MNE),YBCbt(MNE),radial(MNE),XB(MNE),YB(MNE),l2e(MNE) )
-      Allocate ( iota_check(MNE),iota_check2(MNE),hbo(36,MNE,1),ydubo(36,mne) ) 
+      Allocate ( XBCbt(MNE),YBCbt(MNE),radial(MNE),XB(MNE),YB(MNE),
+     & l2e(MNE) )
+      Allocate ( iota_check(MNE),iota_check2(MNE),hbo(36,MNE,1),
+     & ydubo(36,mne) )
       Allocate ( YELEM(ph),YED(ph),hb1(36,mne,1,ph), zeo(36,mne,1) )
 
       C13 = 1.D0/3.D0
@@ -379,7 +383,7 @@ C     this assumes a cold start
                zeo(1,J,1)=1.d0/3.d0*(GeoidOffset(N1)+GeoidOffset(N2)+
      $              GeoidOffset(N3))
                IF (dof_0.NE.1) THEN
-                  zeo(2,J,1)=-1.d0/6.d0*(GeoidOffset(N1)+GeoidOffset(N2))
+                 zeo(2,J,1)=-1.d0/6.d0*(GeoidOffset(N1)+GeoidOffset(N2))
      $                 +1.d0/3.d0*GeoidOffset(N3)
                   zeo(3,J,1)=-.5d0*GeoidOffset(N1)+.5d0*GeoidOffset(N2)
                ENDIF
@@ -679,13 +683,13 @@ C.......the quadrature points and compute volume of water
 
                   DO K = 1,(chi+1)*(chi+2)/2 
 
-                     DPHIDX = DRPHI(K,I,chi)*DRDX(J) + DSPHI(K,I,chi)*DSDX(J)
-                     DPHIDY = DRPHI(K,I,chi)*DRDY(J) + DSPHI(K,I,chi)*DSDY(J)
+                DPHIDX = DRPHI(K,I,chi)*DRDX(J) + DSPHI(K,I,chi)*DSDX(J)
+                DPHIDY = DRPHI(K,I,chi)*DRDY(J) + DSPHI(K,I,chi)*DSDY(J)
                      XFAC(K,I,J,chi)  = M_INV(K,chi)*WAGP(I,chi)*DPHIDX
                      YFAC(K,I,J,chi)  = M_INV(K,chi)*WAGP(I,chi)*DPHIDY
-                     SRFAC(K,I,J,chi) = M_INV(K,chi)*WAGP(I,chi)*PHI_AREA(K,I,chi)
-                     BATH(I,J,chi) = BATH(I,J,chi) + HB(K,J,1)*PHI_AREA(K,I,chi)
-                     YELEM(chi) = YELEM(chi) + YDUB(K,J,chi)*PHI_AREA(K,I,chi)
+           SRFAC(K,I,J,chi) = M_INV(K,chi)*WAGP(I,chi)*PHI_AREA(K,I,chi)
+            BATH(I,J,chi) = BATH(I,J,chi) + HB(K,J,1)*PHI_AREA(K,I,chi)
+               YELEM(chi) = YELEM(chi) + YDUB(K,J,chi)*PHI_AREA(K,I,chi)
                      
                      IF (ICS.EQ.1) THEN
                         SFAC_ELEM(I,J,chi)=1.0D0
@@ -693,9 +697,10 @@ C.......the quadrature points and compute volume of water
                         SFAC_ELEM(I,J,chi)=COS(SFEA0)/COS(YELEM(chi)/R)
                      ENDIF
 
-                     DBATHDX(I,J,chi) = DBATHDX(I,J,chi) + HB(K,J,1)*DPHIDX
-                     DBATHDY(I,J,chi) = DBATHDY(I,J,chi) + HB(K,J,1)*DPHIDY
-                     DP_VOL(J,chi) = DP_VOL(J,chi) + WAGP(I,chi)*HB(K,J,1)*PHI_AREA(K,I,chi)
+                  DBATHDX(I,J,chi) = DBATHDX(I,J,chi) + HB(K,J,1)*DPHIDX
+                  DBATHDY(I,J,chi) = DBATHDY(I,J,chi) + HB(K,J,1)*DPHIDY
+                     DP_VOL(J,chi) = DP_VOL(J,chi) +
+     & WAGP(I,chi)*HB(K,J,1)*PHI_AREA(K,I,chi)
 
                   ENDDO
 
@@ -712,13 +717,13 @@ C.......the quadrature points and compute volume of water
 
                   DO K = 1,(chi+1)*(chi+2)/2 
 
-                     DPHIDX = DRPHI(K,I,chi)*DRDX(J) + DSPHI(K,I,chi)*DSDX(J)
-                     DPHIDY = DRPHI(K,I,chi)*DRDY(J) + DSPHI(K,I,chi)*DSDY(J)
+                DPHIDX = DRPHI(K,I,chi)*DRDX(J) + DSPHI(K,I,chi)*DSDX(J)
+                DPHIDY = DRPHI(K,I,chi)*DRDY(J) + DSPHI(K,I,chi)*DSDY(J)
                      XFAC(K,I,J,chi)  = M_INV(K,chi)*WAGP(I,chi)*DPHIDX
                      YFAC(K,I,J,chi)  = M_INV(K,chi)*WAGP(I,chi)*DPHIDY
-                     SRFAC(K,I,J,chi) = M_INV(K,chi)*WAGP(I,chi)*PHI_AREA(K,I,chi)
-                     BATH(I,J,chi) = BATH(I,J,chi) + HB(K,J,1)*PHI_AREA(K,I,chi)
-                     YELEM(chi) = YELEM(chi) + YDUB(K,J,chi)*PHI_AREA(K,I,chi)
+           SRFAC(K,I,J,chi) = M_INV(K,chi)*WAGP(I,chi)*PHI_AREA(K,I,chi)
+             BATH(I,J,chi) = BATH(I,J,chi) + HB(K,J,1)*PHI_AREA(K,I,chi)
+               YELEM(chi) = YELEM(chi) + YDUB(K,J,chi)*PHI_AREA(K,I,chi)
                      
                      IF (ICS.EQ.1) THEN
                         SFAC_ELEM(I,J,chi)=1.0D0
@@ -726,9 +731,10 @@ C.......the quadrature points and compute volume of water
                         SFAC_ELEM(I,J,chi)=COS(SFEA0)/COS(YELEM(chi)/R)
                      ENDIF
 
-                     DBATHDX(I,J,chi) = DBATHDX(I,J,chi) + HB(K,J,1)*DPHIDX
-                     DBATHDY(I,J,chi) = DBATHDY(I,J,chi) + HB(K,J,1)*DPHIDY
-                     DP_VOL(J,chi) = DP_VOL(J,chi) + WAGP(I,chi)*HB(K,J,1)*PHI_AREA(K,I,chi)
+                 DBATHDX(I,J,chi) = DBATHDX(I,J,chi) + HB(K,J,1)*DPHIDX
+                 DBATHDY(I,J,chi) = DBATHDY(I,J,chi) + HB(K,J,1)*DPHIDY
+                 DP_VOL(J,chi) = DP_VOL(J,chi) +
+     & WAGP(I,chi)*HB(K,J,1)*PHI_AREA(K,I,chi)
 
                   ENDDO
 
@@ -754,9 +760,10 @@ C.......the quadrature points and compute volume of water
 
                      DO K = 1,(chi+1)*(chi+2)/2
                         
-                        BATHED(I,L,J,chi) = BATHED(I,L,J,chi)+HB(K,J,1)*PHI_EDGE(K,I,L,chi)
+                       BATHED(I,L,J,chi) =
+     & BATHED(I,L,J,chi)+HB(K,J,1)*PHI_EDGE(K,I,L,chi)
 
-                        YED(chi) = YED(chi) + YDUB(K,J,chi)*PHI_EDGE(K,I,L,chi)
+                 YED(chi) = YED(chi) + YDUB(K,J,chi)*PHI_EDGE(K,I,L,chi)
 
                         IF (ICS.EQ.1) THEN
                            SFACED(I,L,J,chi)=1.0d0
@@ -764,7 +771,8 @@ C.......the quadrature points and compute volume of water
                            SFACED(I,L,J,chi)=COS(SFEA0)/COS(YED(chi)/R)
                         ENDIF
 
-                        EDGEQ(K,I,L,chi) = 2.0*M_INV(K,chi)*PHI_EDGE(K,I,L,chi)*WEGP(I,chi)
+                        EDGEQ(K,I,L,chi) =
+     & 2.0*M_INV(K,chi)*PHI_EDGE(K,I,L,chi)*WEGP(I,chi)
 
                      ENDDO
                   enddo
@@ -780,9 +788,11 @@ C.......the quadrature points and compute volume of water
 
                      DO K = 1,(chi+1)*(chi+2)/2
                         
-                        BATHED(I,L,J,chi) = BATHED(I,L,J,chi)+HB(K,J,1)*PHI_EDGE(K,I,L,chi)
+                        BATHED(I,L,J,chi) =
+     & BATHED(I,L,J,chi)+HB(K,J,1)*PHI_EDGE(K,I,L,chi)
 
-                        YED(chi) = YED(chi) + YDUB(K,J,chi)*PHI_EDGE(K,I,L,chi)
+                        YED(chi)
+     & = YED(chi) + YDUB(K,J,chi)*PHI_EDGE(K,I,L,chi)
 
                         IF (ICS.EQ.1) THEN
                            SFACED(I,L,J,chi)=1.0d0
@@ -790,7 +800,8 @@ C.......the quadrature points and compute volume of water
                            SFACED(I,L,J,chi)=COS(SFEA0)/COS(YED(chi)/R)
                         ENDIF
 
-                        EDGEQ(K,I,L,chi) = 2.0*M_INV(K,chi)*PHI_EDGE(K,I,L,chi)*WEGP(I,chi)
+                        EDGEQ(K,I,L,chi)
+     & = 2.0*M_INV(K,chi)*PHI_EDGE(K,I,L,chi)*WEGP(I,chi)
 
                      ENDDO
                   enddo
@@ -866,7 +877,8 @@ C.....Integrate the basis functions
       do chi = 1,ph
          DO I = 1,NAGP(chi)
             DO K = 1,(chi+1)*(chi+2)/2
-               PHI_INTEGRATED(K,chi) = PHI_INTEGRATED(K,chi) + WAGP(I,chi)*PHI_AREA(K,I,chi)
+               PHI_INTEGRATED(K,chi) = PHI_INTEGRATED(K,chi)
+     & + WAGP(I,chi)*PHI_AREA(K,I,chi)
             enddo
          ENDDO
       ENDDO
@@ -915,7 +927,7 @@ C.........If so set initial surface elevation values
                   ELSE
                      ze(1,J,1)=(ZE1+ZE2+ZE3)/3.D0
                      IF (DOF_0.NE.1) THEN
-                        ze(2,J,1) = -1.D0/6.D0*(ZE1 + ZE2) + 1.D0/3.D0*ZE3
+                      ze(2,J,1) = -1.D0/6.D0*(ZE1 + ZE2) + 1.D0/3.D0*ZE3
                         ze(3,J,1) = -0.5D0*ZE1 + 0.5D0*ZE2
                         ze(4:dofh,J,1) = 0.D0 ! forced again for transparency
                      ENDIF
@@ -994,7 +1006,7 @@ C.........If so set initial surface elevation values
                   ELSE
                      ze(1,J,1)=(ZE1+ZE2+ZE3)/3.D0
                      IF (DOF_0.NE.1) THEN
-                        ze(2,J,1) = -1.D0/6.D0*(ZE1 + ZE2) + 1.D0/3.D0*ZE3
+                     ze(2,J,1) = -1.D0/6.D0*(ZE1 + ZE2) + 1.D0/3.D0*ZE3
                         ze(3,J,1) = -0.5D0*ZE1 + 0.5D0*ZE2
                         ze(4:dofh,J,1) = 0.D0 ! forced again for transparency
                      ENDIF
@@ -1613,7 +1625,8 @@ C.... Compute the Runge-Kutta Chebyshev (RKC) version
             if(j.gt.1) then
 
                RKC_Tprime(j) = j*RKC_U(j-1)
-               RKC_Tdprime(j) = (j*(j*RKC_T(j) - RKC_omega0*RKC_U(j-1))/( RKC_omega0**(2.D0) - 1.D0 ) )
+               RKC_Tdprime(j) = (j*(j*RKC_T(j) - RKC_omega0*RKC_U(j-1))/
+     & ( RKC_omega0**(2.D0) - 1.D0 ) )
                RKC_b(j) = RKC_Tdprime(j)*RKC_Tprime(j)**(-2.D0)
 
             endif

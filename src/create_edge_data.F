@@ -354,11 +354,13 @@ C.....Determine the different boundary types
                 ENDIF
                 
                 IF ( (SEGTYPE(K).EQ.4 ).OR.(SEGTYPE(K).EQ.14).OR.
-     &               (SEGTYPE(K).EQ.24) ) THEN
+     &               (SEGTYPE(K).EQ.24).OR.(SEGTYPE(K).EQ.5 ).OR.
+     &               (SEGTYPE(K).EQ.15).OR.(SEGTYPE(K).EQ.25) )THEN
                   NIBSEG = NIBSEG + 1
                   NIBEDS = NIBEDS + 1
                   NIBEDN(NIBEDS) = JED
                   NIBSEGN(1,NIBSEG) = JED
+                  NIBSEGN(3,NIBSEG) = SEGTYPE(K)
 
 C.....Find the edge on the opposite side of the barrier
 

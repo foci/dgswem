@@ -65,7 +65,7 @@ C.....PI and degrees to radians conversions
       REAL(8), PARAMETER  ::  DEG2RAD = PI/180.D0
       REAL(8), PARAMETER  ::  RAD2DEG = 180.D0/PI
 
-C.....parameters used in barrier overflow 
+C.....parameters used in barrier overflow
       REAL(SZ), PARAMETER ::  BARMIN=0.01D0
       REAL(SZ) DEPAVG,DEPMAX,DEPMIN
 C
@@ -142,8 +142,9 @@ C...
 #endif
 
       INTEGER, ALLOCATABLE ::   pdg_el(:)
-      REAL(SZ),ALLOCATABLE ::   ETAS(:),ETA1(:),ETA2(:),ETAMAX(:),entrop(:,:)
-      Real(SZ),Allocatable ::   tracer(:),tracer2(:),MassMax(:),bed_int(:,:)
+      REAL(SZ),ALLOCATABLE ::   ETAS(:),ETA1(:),ETA2(:),ETAMAX(:)
+      REAL(SZ),ALLOCATABLE ::   entrop(:,:)
+      Real(SZ),Allocatable::tracer(:),tracer2(:),MassMax(:),bed_int(:,:)
       REAL(SZ),ALLOCATABLE ::   UU1(:),UU2(:),VV1(:),VV2(:), dyn_P(:)
       REAL(SZ),ALLOCATABLE ::   DP(:),DP0(:),DPe(:),SFAC(:) !,STARTDRY(:)
       REAL(SZ),ALLOCATABLE ::   QU(:),QV(:),QW(:)
@@ -181,9 +182,9 @@ Casey 101118: Added the following arrays for output of radiation stress gradient
       REAL(SZ),ALLOCATABLE,TARGET :: RSNXOUT(:), RSNYOUT(:)
 #endif
 C.....Allocate additional variables for wave friction
-      REAL(SZ),ALLOCATABLE ::   WAVE_T1(:),WAVE_H1(:),WAVE_A1(:),WAVE_D1(:)
-      REAL(SZ),ALLOCATABLE ::   WAVE_T2(:),WAVE_H2(:),WAVE_A2(:),WAVE_D2(:)
-      REAL(SZ),ALLOCATABLE ::   WAVE_T(:), WAVE_H(:), WAVE_A(:), WAVE_D(:)
+      REAL(SZ),ALLOCATABLE ::WAVE_T1(:),WAVE_H1(:),WAVE_A1(:),WAVE_D1(:)
+      REAL(SZ),ALLOCATABLE ::WAVE_T2(:),WAVE_H2(:),WAVE_A2(:),WAVE_D2(:)
+      REAL(SZ),ALLOCATABLE ::WAVE_T(:), WAVE_H(:), WAVE_A(:), WAVE_D(:)
       REAL(SZ),ALLOCATABLE ::   WB(:)
       REAL(SZ),ALLOCATABLE ::   WVNXOUT(:),WVNYOUT(:)
       REAL(SZ),ALLOCATABLE ::   TKXX(:),TKYY(:),TKXY(:)
@@ -244,7 +245,6 @@ C.....for internal barrier boundaries with flowthrough pipes
       REAL(SZ),ALLOCATABLE ::   BARINHT(:),BARINCFSB(:),BARINCFSP(:)
       REAL(SZ),ALLOCATABLE ::   PIPEHT(:),PIPECOEF(:),PIPEDIAM(:)
       REAL(SZ),ALLOCATABLE ::   RBARWL1AVG(:),RBARWL2AVG(:)
-      REAL(SZ),ALLOCATABLE ::   RPIPEWL1AVG(:),RPIPEWL2AVG(:)
       REAL(SZ),ALLOCATABLE ::   ELEXLEN(:,:)
       INTEGER, ALLOCATABLE ::   IBCONN(:),IBCONNR(:),NTRAN1(:),NTRAN2(:)
 
@@ -445,8 +445,10 @@ C      ALLOCATE ( TAU0VAR(MNP))
       ALLOCATE ( YDUB(36,MNE,8))
       ALLOCATE ( UU2(max(MNP,MNE)))
       ALLOCATE ( VV2(max(MNP,MNE)))
-      ALLOCATE ( ETA1(max(MNP,MNE)),ETA2(max(MNP,MNE)), ETAMAX(MNP), MassMax(MNE) )
-      Allocate ( tracer(max(MNP,MNE)), tracer2(max(MNP,MNE)), bed_int(max(mnp,mne),layers), entrop(5,MNE) )
+      ALLOCATE ( ETA1(max(MNP,MNE)),ETA2(max(MNP,MNE)), ETAMAX(MNP),
+     &  MassMax(MNE) )
+      Allocate ( tracer(max(MNP,MNE)), tracer2(max(MNP,MNE)),
+     &  bed_int(max(mnp,mne),layers), entrop(5,MNE) )
       ALLOCATE ( CORIF(MNP), dyn_P(max(MNP,MNE)), pdg_el(MNE) )
       ALLOCATE ( QU(MNP),QV(MNP))
       ALLOCATE ( LBCODE(MNP))
@@ -519,7 +521,6 @@ C
       ALLOCATE ( BTRAN3(MNVEL),BTRAN4(MNVEL),BTRAN5(MNVEL))
       ALLOCATE ( BTRAN6(MNVEL),BTRAN7(MNVEL),BTRAN8(MNVEL))
       ALLOCATE ( RBARWL1AVG(MNVEL),RBARWL2AVG(MNVEL))
-      ALLOCATE ( RPIPEWL1AVG(MNVEL),RPIPEWL2AVG(MNVEL))
       ALLOCATE ( QNIN1(MNVEL),QNIN2(MNVEL))
       ALLOCATE ( NBVV(MNBOU,0:MNVEL))
       ALLOCATE ( NVELL(MNBOU))
@@ -703,10 +704,10 @@ C
       SUBROUTINE ALLOC_NNOEL2(MNP,MAXEL)
       ALLOCATE ( DP_DG(MAXEL),DG_ANG(MAXEL) )
       ALLOCATE ( NNOEL(MNP,MAXEL),CENTAB(MNP,MAXEL+1) )
-      ALLOCATE ( ELETAB(MNP,MAXEL+1),ANGTAB(MNP,MAXEL+1),dynP_DG(MAXEL) )
+      ALLOCATE (ELETAB(MNP,MAXEL+1),ANGTAB(MNP,MAXEL+1),dynP_DG(MAXEL) )
       ALLOCATE ( ZE_DG(MAXEL), QX_DG(MAXEL), QY_DG(MAXEL), HB_DG(MAXEL))
       Allocate ( iota2_DG(MAXEL), iota_DG(MAXEL), iotaa_DG(MAXEL) )
-      Allocate ( bed_DG(MAXEL,layers),bed_N_int(layers), bed_N_ext(layers) )
+      Allocate(bed_DG(MAXEL,layers),bed_N_int(layers),bed_N_ext(layers))
       RETURN
       END SUBROUTINE
 

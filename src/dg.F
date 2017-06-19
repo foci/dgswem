@@ -89,9 +89,9 @@ C     sb...Wetting and drying
 
 !Declare some stuff for function parsing for bed load
 
-      CHARACTER (LEN=*), DIMENSION(4),  PARAMETER :: varx  = (/ 'ZE_ROE', 
+      CHARACTER (LEN=*), DIMENSION(4),  PARAMETER :: varx = (/ 'ZE_ROE',
      & 'QX_ROE','QY_ROE','bed_ROE' /)
-      CHARACTER (LEN=*), DIMENSION(4),  PARAMETER :: vary  = (/ 'ZE_ROE', 
+      CHARACTER (LEN=*), DIMENSION(4),  PARAMETER :: vary = (/ 'ZE_ROE',
      & 'QX_ROE','QY_ROE','bed_ROE' /)
       CHARACTER (LEN=200) funcx(4), funcy(4)
       Real(sz)  valx(4), valy(4)
@@ -121,8 +121,9 @@ C.....Declare allocatable real arrays
       REAL(SZ), ALLOCATABLE :: DTVD(:), MAX_BOA_DT(:),e1(:),balance(:)
       Real(SZ), Allocatable :: RKC_T(:),RKC_U(:),RKC_Tprime(:)
       Real(SZ), Allocatable :: RKC_Tdprime(:),RKC_a(:),RKC_b(:),RKC_c(:)
-      Real(SZ), Allocatable :: RKC_mu(:),RKC_tildemu(:),RKC_nu(:),RKC_gamma(:)
-      REAL(SZ), ALLOCATABLE :: BATH(:,:,:), DBATHDX(:,:,:), DBATHDY(:,:,:)
+      Real(SZ), Allocatable :: RKC_mu(:),RKC_tildemu(:),RKC_nu(:),
+     & RKC_gamma(:)
+      REAL(SZ), ALLOCATABLE :: BATH(:,:,:),DBATHDX(:,:,:),DBATHDY(:,:,:)
       REAL(SZ), ALLOCATABLE :: SFAC_ELEM(:,:,:)
       REAL(SZ), ALLOCATABLE :: BATHED(:,:,:,:),SFACED(:,:,:,:)
       REAL(SZ), ALLOCATABLE :: COSNX(:), SINNX(:)
@@ -137,8 +138,8 @@ C.....Declare allocatable real arrays
       REAL(SZ), ALLOCATABLE :: XLEN(:)
       REAL(SZ), ALLOCATABLE :: HB(:,:,:)
       REAL(SZ), ALLOCATABLE :: MANN(:,:)
-      REAL(SZ), ALLOCATABLE :: IBHT(:), EBHT(:)
-      REAL(SZ), ALLOCATABLE :: EBCFSP(:), IBCFSP(:), IBCFSB(:)
+      REAL(SZ), ALLOCATABLE :: IBHT(:), EBHT(:), PIHT(:), PIDI(:)
+      REAL(SZ), ALLOCATABLE :: EBCFSP(:), IBCFSP(:), IBCFSB(:), PICF(:)
       REAL(SZ), ALLOCATABLE :: JACOBI(:,:,:,:)
       REAL(SZ), ALLOCATABLE :: M_INV(:,:),phi_edge_fixed(:,:,:)
       REAL(SZ), ALLOCATABLE :: PHI_AREA(:,:,:), PHI_EDGE(:,:,:,:)
@@ -155,7 +156,8 @@ C.....Declare allocatable real arrays
       Real(SZ), ALLOCATABLE, target:: bed(:,:,:,:)
       Real(SZ), Allocatable :: dynP(:,:,:),dynP_MAX(:), dynP_MIN(:)
       Real(SZ), Allocatable :: iota(:,:,:),iotaa(:,:,:),iota2(:,:,:)
-      Real(SZ), Allocatable :: iota_MAX(:),iota_MIN(:),iotaa2(:,:,:),iotaa3(:,:,:)
+      Real(SZ), Allocatable :: iota_MAX(:),iota_MIN(:),iotaa2(:,:,:),
+     & iotaa3(:,:,:)
       Real(SZ), Allocatable :: iota2_MAX(:),iota2_MIN(:)
       Real(SZ), pointer :: arrayfix(:,:,:)
       REAL(SZ), ALLOCATABLE :: CORI_EL(:), FRIC_EL(:)
@@ -168,13 +170,16 @@ C.....Declare allocatable real arrays
       REAL(SZ), ALLOCATABLE :: QNAM_DG(:,:,:), QNPH_DG(:,:,:)
       REAL(SZ), ALLOCATABLE :: RHS_ZE(:,:,:), RHS_bed(:,:,:,:)
       REAL(SZ), ALLOCATABLE :: RHS_QX(:,:,:),RHS_QY(:,:,:)
-      Real(SZ), Allocatable :: RHS_iota(:,:,:),RHS_iota2(:,:,:), RHS_dynP(:,:,:)
-      Real(SZ), Allocatable :: RHS_bed_IN(:,:),RHS_bed_EX(:,:), bed_HAT_O(:)
+      Real(SZ), Allocatable :: RHS_iota(:,:,:),RHS_iota2(:,:,:),
+     & RHS_dynP(:,:,:)
+      Real(SZ), Allocatable :: RHS_bed_IN(:,:),RHS_bed_EX(:,:),
+     & bed_HAT_O(:)
       REAL(SZ), ALLOCATABLE :: XAGP(:,:), YAGP(:,:), WAGP(:,:)
       REAL(SZ), ALLOCATABLE :: XEGP(:,:), YEGP(:,:), WEGP(:,:)
       REAL(SZ), ALLOCATABLE :: SL3(:,:)
       REAL(SZ), ALLOCATABLE :: XBC(:), YBC(:)
-      REAL(SZ), ALLOCATABLE :: XFAC(:,:,:,:), YFAC(:,:,:,:), SRFAC(:,:,:,:)
+      REAL(SZ), ALLOCATABLE :: XFAC(:,:,:,:), YFAC(:,:,:,:),
+     & SRFAC(:,:,:,:)
       REAL(SZ), ALLOCATABLE :: EDGEQ(:,:,:,:)
       REAL(SZ), ALLOCATABLE :: PHI(:), DPHIDZ1(:), DPHIDZ2(:)
       REAL(SZ), ALLOCATABLE :: PHI_STAE(:,:), PHI_STAV(:,:)
@@ -183,17 +188,20 @@ C.....Declare allocatable real arrays
 C.....These (below) are defined in prep_slopelim.F
 
       Integer :: lim_count,lim_count_roll
-      Integer,Allocatable :: fact(:),focal_neigh(:,:),focal_up(:),bi(:),bj(:)
+      Integer,Allocatable :: fact(:),focal_neigh(:,:),focal_up(:),bi(:),
+     & bj(:)
 
       Real(SZ),Allocatable :: XBCb(:),YBCb(:),xi1(:,:),xi2(:,:)
       Real(SZ),Allocatable :: xtransform(:,:),ytransform(:,:)
       Real(SZ),Allocatable :: xi1BCb(:),xi2BCb(:),xi1vert(:,:)
-      Real(SZ),Allocatable :: xi2vert(:,:),xtransformv(:,:),ytransformv(:,:)
+      Real(SZ),Allocatable :: xi2vert(:,:),xtransformv(:,:),
+     & ytransformv(:,:)
       Real(SZ),Allocatable :: XBCv(:,:),YBCv(:,:)
       Real(SZ),Allocatable :: xi1BCv(:,:),xi2BCv(:,:)
       Real(SZ),Allocatable :: Area_integral(:,:,:)
       Real(SZ),Allocatable :: f(:,:,:,:),g0(:,:,:,:),varsigma0(:,:,:,:)
-      Real(SZ),Allocatable :: fv(:,:,:,:),g0v(:,:,:,:),varsigma0v(:,:,:,:)
+      Real(SZ),Allocatable :: fv(:,:,:,:),g0v(:,:,:,:),
+     & varsigma0v(:,:,:,:)
       Real(SZ),Allocatable :: var2sigmag(:,:,:),var2sigmav(:,:,:)
       Real(SZ),Allocatable :: Nmatrix(:,:,:,:),NmatrixInv(:,:,:,:)
       Real(SZ),Allocatable :: deltx(:),delty(:),pmatrix(:,:,:)
@@ -207,7 +215,8 @@ C.....These (below) are defined in slopelimiter.F
       Real(SZ),Allocatable :: iota2min(:,:),iota2max(:,:)
 
 #ifdef SLOPEALL
-      Real(SZ),Allocatable :: ZEtaylor(:,:,:),QXtaylor(:,:,:),QYtaylor(:,:,:)
+      Real(SZ),Allocatable :: ZEtaylor(:,:,:),QXtaylor(:,:,:),
+     & QYtaylor(:,:,:)
       Real(SZ),Allocatable :: iotataylor(:,:,:),iota2taylor(:,:,:)
       Real(SZ),Allocatable :: ZEtaylorvert(:,:,:),QXtaylorvert(:,:,:)
       Real(SZ),Allocatable :: QYtaylorvert(:,:,:),iotataylorvert(:,:,:)
@@ -236,15 +245,15 @@ C**********************END OF DATA DECLARATIONS ***********************
 C.....Set edge array sizes
 
       SUBROUTINE ALLOC_EDGES0()
-      ALLOCATE ( IBHT(3*MNE), EBHT(3*MNE) )
+      ALLOCATE ( IBHT(3*MNE), EBHT(3*MNE), PIHT(3*MNE), PIDI(3*MNE) )
       ALLOCATE ( EBCFSP(3*MNE), IBCFSP(3*MNE), IBCFSB(3*MNE) )
-      ALLOCATE ( BACKNODES(2,3*MNE) )
+      ALLOCATE ( PICF(3*MNE), BACKNODES(2,3*MNE) )
       RETURN
       END SUBROUTINE
 
       SUBROUTINE ALLOC_EDGES1()
       ALLOCATE ( NEDNO(2,MNED), NEDEL(2,MNED), NEDSD(2,MNED) )
-      ALLOCATE ( NIBSEGN(2,MNED) )
+      ALLOCATE ( NIBSEGN(3,MNED) )
       ALLOCATE ( NEBSEGN(MNED) )
       ALLOCATE ( NIEDN(MNED), NLEDN(MNED), NEEDN(MNED) )
       ALLOCATE ( NFEDN(MNED),  NREDN(MNED), NIBEDN(MNED), NEBEDN(MNED) )
@@ -285,7 +294,8 @@ Csb-20070228 NRK+1-->NRK+2 --- XX(:,:,NRK+2) will be used by slope limiter
       Allocate ( iotaa3(DOFH,MNE,NRK+2) )
 Csb-20060711 For wet/dry
       ALLOCATE ( ZE_MAX(MNE),ZE_MIN(MNE),DPE_MIN(MNE) )
-      Allocate ( iota_MAX(MNE),iota_MIN(MNE),iota2_MAX(MNE),iota2_MIN(MNE) )
+      Allocate ( iota_MAX(MNE),iota_MIN(MNE),iota2_MAX(MNE),
+     & iota2_MIN(MNE) )
       Allocate ( dynP_MAX(MNE),dynP_MIN(MNE) )
       ALLOCATE ( WATER_DEPTH(MNE,3), WATER_DEPTH_OLD(MNE,3))
       ALLOCATE ( ADVECTQX(MNE), ADVECTQY(MNE),
@@ -319,8 +329,10 @@ C.....Set RK time scheme parameters array sizes
       ALLOCATE( ATVD(NRK,NRK), BTVD(NRK,NRK), CTVD(NRK,NRK)  )
       ALLOCATE( DTVD(NRK), MAX_BOA_DT(NRK) )
       Allocate( RKC_T(0:nrk),RKC_U(0:nrk),RKC_Tprime(0:nrk) )
-      Allocate( RKC_Tdprime(0:nrk),RKC_a(0:nrk),RKC_b(0:nrk),RKC_c(0:nrk) ) 
-      Allocate( RKC_mu(0:nrk),RKC_tildemu(0:nrk),RKC_nu(0:nrk),RKC_gamma(0:nrk) )
+      Allocate( RKC_Tdprime(0:nrk),RKC_a(0:nrk),RKC_b(0:nrk),
+     & RKC_c(0:nrk) )
+      Allocate( RKC_mu(0:nrk),RKC_tildemu(0:nrk),RKC_nu(0:nrk),
+     & RKC_gamma(0:nrk) )
       RETURN
       END SUBROUTINE ALLOC_RK
 
@@ -328,7 +340,8 @@ C.....Set sizes for arrays used in orthobasis
 
       SUBROUTINE ALLOC_JACOBI()
       ALLOCATE ( JACOBI(ph+1,2*ph+3,2,NAGP(ph)+1) )
-      ALLOCATE ( DXPHI2(ph+1,ph+1,NAGP(ph)+1),DYPHI2(ph+1,ph+1,NAGP(ph)+1) )
+      ALLOCATE ( DXPHI2(ph+1,ph+1,NAGP(ph)+1),DYPHI2(ph+1,ph+1,
+     & NAGP(ph)+1) )
       ALLOCATE ( PHI2(ph+1,ph+1,NAGP(ph)+1) )
       ALLOCATE ( PHI_CORNER1(ph+1,ph+1,3,ph) )
       RETURN
@@ -346,7 +359,7 @@ C.....Set sizes for arrays for area integrals
       ALLOCATE ( BATH(NAGP(ph),MNE,ph),DBATHDX(NAGP(ph),MNE,ph) )
       Allocate ( DBATHDY(NAGP(ph),MNE,ph) )
       ALLOCATE ( SFAC_ELEM(NAGP(ph),MNE,ph) )
-      ALLOCATE ( XFAC(DOFH,NAGP(ph),MNE,ph), YFAC(DOFH,NAGP(ph),MNE,ph) )
+      ALLOCATE ( XFAC(DOFH,NAGP(ph),MNE,ph), YFAC(DOFH,NAGP(ph),MNE,ph))
       ALLOCATE ( SRFAC(DOFH,NAGP(ph),MNE,ph) )
       RETURN
       END SUBROUTINE
@@ -372,20 +385,24 @@ C.....slopelim arrays
 
 C.....These are defined in prep_slopelim.F
 
-      Allocate ( fact(0:ph) ,focal_neigh(MNE,3*MNEI),focal_up(MNE),bi(dofh),bj(dofh) )
+      Allocate ( fact(0:ph) ,focal_neigh(MNE,3*MNEI),focal_up(MNE),
+     & bi(dofh),bj(dofh) )
 
-      Allocate ( XBCb(MNE),YBCb(MNE),xi1(MNE,NAGP(ph)),xi2(MNE,NAGP(ph)) )
+      Allocate ( XBCb(MNE),YBCb(MNE),xi1(MNE,NAGP(ph)),
+     & xi2(MNE,NAGP(ph)) )
       Allocate ( xtransform(MNE,NAGP(ph)),ytransform(MNE,NAGP(ph)) )
       Allocate ( xi1BCb(MNE),xi2BCb(MNE),xi1vert(MNE,3) )
       Allocate ( xi2vert(MNE,3),xtransformv(MNE,3),ytransformv(MNE,3) )
       Allocate ( XBCv(MNE,MNE),YBCv(MNE,MNE) )
-      Allocate ( xi1BCv(MNE,MNE),xi2BCv(MNE,MNE),Area_integral(MNE,0:ph,0:ph) )
+      Allocate ( xi1BCv(MNE,MNE),xi2BCv(MNE,MNE),
+     & Area_integral(MNE,0:ph,0:ph) )
       Allocate ( f(MNE,NAGP(ph),0:ph,0:ph),g0(MNE,NAGP(ph),0:ph,0:ph) )
       Allocate ( fv(MNE,3,0:ph,0:ph),g0v(MNE,3,0:ph,0:ph) )
       Allocate ( varsigma0(MNE,NAGP(ph),0:ph,0:ph) ) 
       Allocate ( varsigma0v(MNE,3,0:ph,0:ph) )
       Allocate ( pmatrix(MNE,dofh,dofh), var2sigmag(MNE,NAGP(ph),dofh) )
-      Allocate ( Nmatrix(MNE,dofh,dofh,dofh),NmatrixInv(MNE,dofh,dofh,dofh) )
+      Allocate ( Nmatrix(MNE,dofh,dofh,dofh),
+     & NmatrixInv(MNE,dofh,dofh,dofh) )
       Allocate ( deltx(MNE),delty(MNE),var2sigmav(MNE,3,dofh))
 
 C.....These (below) are defined in slopelimiter.F (slopelimiter4)
@@ -406,7 +423,8 @@ C.....These (below) are defined in slopelimiter.F (slopelimiter4)
       Allocate ( alphaiota20(MNE,dofh,3) )
       Allocate ( alphaZE(MNE,dofh),alphaQX(MNE,dofh),alphaQY(MNE,dofh) )
       Allocate ( alphaiota(MNE,dofh),alphaiota2(MNE,dofh) )
-      Allocate ( alphaZEm(MNE,dofh),alphaQXm(MNE,dofh),alphaQYm(MNE,dofh) )
+      Allocate ( alphaZEm(MNE,dofh),alphaQXm(MNE,dofh),
+     & alphaQYm(MNE,dofh) )
       Allocate ( alphaiotam(MNE,dofh),alphaiota2m(MNE,dofh) )
       Allocate ( alphaZE_max(MNE,dofh),alphaQX_max(MNE,dofh) )
       Allocate ( alphaQY_max(MNE,dofh) )

@@ -161,7 +161,7 @@ C.........Compute the x and y components of the external state flow
             
 C.........Compute numerical flux
             
-            CALL NUMERICAL_FLUX(IT)
+            CALL NUMERICAL_FLUX(IT,test_el)
 
             DO K = 1,DOFS(EL)
 

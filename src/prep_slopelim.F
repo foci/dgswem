@@ -33,7 +33,7 @@ C.....Declare local variables
       Real(SZ),Allocatable :: Full_M_inv(:,:), temp_p(:,:),temp_t(:,:)
       Real(SZ),Allocatable :: Taylor_mass(:,:,:)
 
-      Allocate ( tempmat(dofh,dofh),tempInv(dofh,dofh), tempag(dofh,dofh) )
+      Allocate(tempmat(dofh,dofh),tempInv(dofh,dofh),tempag(dofh,dofh) )
       Allocate ( AreaV_integral(MNE,0:ph,0:ph,3), A(dofh,dofh) )
       Allocate ( Full_M_inv(dofh,dofh), temp_p(dofh,dofh) )
       Allocate ( Taylor_mass(MNE,dofh,dofh),temp_t(dofh,dofh))
@@ -221,8 +221,8 @@ C.....Transform quad points to physical space (for integration) xi --> x
                   ell_2 =  0.5D0 * ( xagp(mm,ph) + 1.D0 )
                   ell_3 =  0.5D0 * ( yagp(mm,ph) + 1.D0 )
 
-                  xtransform(k,mm) = x(n1)*ell_1 + x(n2)*ell_2 + x(n3)*ell_3
-                  ytransform(k,mm) = y(n1)*ell_1 + y(n2)*ell_2 + y(n3)*ell_3
+              xtransform(k,mm) = x(n1)*ell_1 + x(n2)*ell_2 + x(n3)*ell_3
+              ytransform(k,mm) = y(n1)*ell_1 + y(n2)*ell_2 + y(n3)*ell_3
 
                enddo
 
@@ -239,10 +239,10 @@ C.....Find vertices in the master element frame
 
                do lll=1,3
 
-                  xi1vert(k,lll) =  ( (y(N3)-y(N1))*( x(nm(k,lll)) -0.5D0 * 
+               xi1vert(k,lll) =  ( (y(N3)-y(N1))*( x(nm(k,lll)) -0.5D0 *
      &                 (x(N2) + x(N3))) + (x(N1) - x(N3))* (y(nm(k,lll))
      &                 - 0.5D0*(y(N2) + y(N3)) ) ) / areau
-                  xi2vert(k,lll) =  ( (y(N1)-y(N2))*( x(nm(k,lll)) -0.5D0 * 
+               xi2vert(k,lll) =  ( (y(N1)-y(N2))*( x(nm(k,lll)) -0.5D0 *
      &                 (x(N2) + x(N3))) + (x(N2) - x(N1))* (y(nm(k,lll))
      &                 - 0.5D0*(y(N2) + y(N3)) ) ) / areau
 
@@ -274,12 +274,12 @@ C.....of base element k to the master element space
      &                          ( XBCv(k,mm) 
      &                          -0.5D0 * (x(Nm(mm,2)) + x(NM(mm,3)))) + 
      &                          (x(NM(mm,1)) - x(NM(mm,3)))*(YBCv(k,mm) 
-     &                          - 0.5D0*(y(NM(mm,2)) + y(NM(mm,3))) ) ) / areau
+     &                   - 0.5D0*(y(NM(mm,2)) + y(NM(mm,3))) ) ) / areau
                            xi2BCv(k,mm) = ( (y(NM(mm,1))-y(NM(mm,2)))*
      &                          ( XBCv(k,mm) 
      &                          -0.5D0 * (x(Nm(mm,2)) + x(NM(mm,3)))) + 
      &                          (x(NM(mm,2)) - x(NM(mm,1)))*(YBCv(k,mm)
-     &                          - 0.5D0*(y(NM(mm,2)) + y(NM(mm,3))) ) ) / areau
+     &                   - 0.5D0*(y(NM(mm,2)) + y(NM(mm,3))) ) ) / areau
                            
                         endif
                      enddo
@@ -320,18 +320,18 @@ C.....using the physical to master transformation, e.g. T^-1:x-->xi
 
                         Area_integral(k,i,j) = Area_integral(k,i,j) + 
      &                       ( (  xtransform(k,mm) - XBCb(k) )**i 
-     &                       * (  ytransform(k,mm)- YBCb(k))**j * ( wagp(mm,ll) ) )
+     &            * (  ytransform(k,mm)- YBCb(k))**j * ( wagp(mm,ll) ) )
      &                       * abs( dxdxi1*dydxi2 - dxdxi2*dydxi1 )
-     &                       / ( fact(i)*fact(j)*Deltx(k)**i * Delty(k)**j )		
+     &                   / ( fact(i)*fact(j)*Deltx(k)**i * Delty(k)**j )
 
 
                      enddo
                      
                      do mm =1,nagp(ll) !at quad points
 
-                        f(k,mm,i,j) = (  xtransform(k,mm) - XBCb(k)  )**i 
+                      f(k,mm,i,j) = (  xtransform(k,mm) - XBCb(k)  )**i
      &                       / ( fact(i) * Deltx(k)**i )
-                        g0(k,mm,i,j) = (  ytransform(k,mm) - YBCb(k)  )**j 
+                      g0(k,mm,i,j) = (  ytransform(k,mm) - YBCb(k)  )**j
      &                       / ( fact(j) * Delty(k)**j )		
 
                         if (i.eq.0.and.j.eq.0) then
@@ -340,7 +340,7 @@ C.....using the physical to master transformation, e.g. T^-1:x-->xi
 
                         else
                            
-                           varsigma0(k,mm,i,j) = ( f(k,mm,i,j) * g0(k,mm,i,j) ) 
+                    varsigma0(k,mm,i,j) = ( f(k,mm,i,j) * g0(k,mm,i,j) )
      &                          - Area_integral(k,i,j)/areau
 
                         endif
@@ -354,18 +354,18 @@ C.....using the physical to master transformation, e.g. T^-1:x-->xi
 
                         do mm = 1,nagp(ll) !number of quad points
 
-                           AreaV_integral(k,i,j,lll) = AreaV_integral(k,i,j,lll) + 
+                 AreaV_integral(k,i,j,lll) = AreaV_integral(k,i,j,lll) +
      &                          ( (  x(nm(k,lll)) - XBCb(k) )**i 
-     &                          * (  y(nm(k,lll)) - YBCb(k) )**j * ( wagp(mm,ll) ) )
+     &              * (  y(nm(k,lll)) - YBCb(k) )**j * ( wagp(mm,ll) ) )
      &                          * abs( dxdxi1*dydxi2 - dxdxi2*dydxi1 )
-     &                          / ( fact(i)*fact(j)*Deltx(k)**i * Delty(k)**j )
+     &                   / ( fact(i)*fact(j)*Deltx(k)**i * Delty(k)**j )
 
                         enddo
 
                         fv(k,lll,i,j) = (  x(nm(k,lll)) - XBCb(k) )**i / 
      &                       ( fact(i) * Deltx(k)**i )
                         
-                        g0v(k,lll,i,j) =  ( y(nm(k,lll)) - YBCb(k) )**j / 
+                       g0v(k,lll,i,j) =  ( y(nm(k,lll)) - YBCb(k) )**j /
      &                       ( fact(j) * Delty(k)**j )
                         
                         if (i.eq.0.and.j.eq.0) then
@@ -414,7 +414,7 @@ C.....Re-order the Taylor basis functions and componentwise derivatives into hie
 
                         var2sigmav(k,lll,bbb) = varsigma0v(k,lll,i,j-i)
 
-                        if ( abs(var2sigmav(k,lll,bbb)).lt.1.0E-15 ) then 
+                       if ( abs(var2sigmav(k,lll,bbb)).lt.1.0E-15 ) then
 
                                 !var2sigmav(k,lll,bbb) = 0.D0 
                            
@@ -460,7 +460,7 @@ C.....matrix Nmatrix=Pmatrix*M(-1), using the mass matrix inverse M_inv,
 
                         temp_p(i,j) = pmatrix(k,i,j)
 
-                        Taylor_mass(k,i,j) = Taylor_mass(k,i,j) +  wagp(mm,ll) 
+                  Taylor_mass(k,i,j) = Taylor_mass(k,i,j) +  wagp(mm,ll)
      &                       *  var2sigmag(k,mm,i) *  var2sigmag(k,mm,j)
 
                         temp_t(i,j) = Taylor_mass(k,i,j)
@@ -475,7 +475,8 @@ C.....matrix Nmatrix=Pmatrix*M(-1), using the mass matrix inverse M_inv,
 
                Call Inv(temp_t(1:ell,1:ell), tempInv(1:ell,1:ell), ell)
                
-               Nmatrix(k,1:ell,1:ell,ell) = matmul(tempInv(1:ell,1:ell), temp_p(1:ell,1:ell))
+               Nmatrix(k,1:ell,1:ell,ell) =
+     & matmul(tempInv(1:ell,1:ell), temp_p(1:ell,1:ell))
 
                tempmat(1:ell,1:ell) = Nmatrix(k,1:ell,1:ell,ell)
 

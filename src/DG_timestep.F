@@ -70,7 +70,8 @@ C.....Use appropriate modules
 #else
       USE SIZES, ONLY : SZ,layers
 #endif
-      USE GLOBAL, ONLY : NE,NM,DP,X,Y,SLAM,SFEA,DEG2RAD,tracer_flag,chem_flag,pdg_el
+      USE GLOBAL, ONLY : NE,NM,DP,X,Y,SLAM,SFEA,DEG2RAD,tracer_flag,
+     & chem_flag,pdg_el
       USE DG, ONLY : DOF,ZE,QX,QY,iota,iota2,dynP,bed,ncheck,dp_node
 
       IMPLICIT NONE
@@ -241,7 +242,7 @@ C.....Detect NaN
 #ifdef CMPI
                   PRINT *, 'IN SUBDOMAIN ',MYPROC
 #endif
-                  PRINT *, '  bed(',K,',',J,',1,',l,') IS ', bed(K,J,1,l)
+                 PRINT *, '  bed(',K,',',J,',1,',l,') IS ', bed(K,J,1,l)
                   PRINT *, ' x,  y ',X(NM(J,1)),Y(NM(J,1))
                   Detected = .TRUE.
                   ErrorElevExceeded = 1
