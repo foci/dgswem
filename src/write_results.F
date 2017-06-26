@@ -879,8 +879,8 @@ C.....If applicable write out a DG hot start
             OPEN(264,FILE=DIRNAME//'/'//'Hot_start.264')
             OPEN(214,FILE=DIRNAME//'/'//'Hot_start.214')
 
-            WRITE(263,*) P
-            WRITE(264,*) P, P
+            WRITE(263,*) PH
+            WRITE(264,*) PH, PH
             WRITE(214,*) IT, DTDP
 
             DO J = 1,MNE
