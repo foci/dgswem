@@ -252,7 +252,9 @@ C..............type rules would go. The author has no practical need
 C..............for these rules, so they are currently excluded.
             endif                  
          endif
-            
+         if (lobatyn) then
+            n = n + 1
+         endif   
 
       enddo 
 
