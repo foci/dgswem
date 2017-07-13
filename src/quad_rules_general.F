@@ -1,5 +1,4 @@
 C-----------------------------------------------------------------------
-C
 C     Subroutine quad_rules_general
 C
 C     Written by Dylan Wood (03-10-2017)
@@ -89,7 +88,6 @@ c.....places these elements in the necessary locations.
          Jac(n,n+1) = bjp1
          Jac(n+1,n) = bjp1
          nn = n + 1
-            
       else
          al = alph
          be = bet
