@@ -37,7 +37,7 @@ C.....Declare integer variables
       INTEGER NIBSEG, NEBSEG
       INTEGER MNED, MNLED, MNSED, MNRAED, MNRIED
       INTEGER, TARGET :: MODAL_IC
-      INTEGER P_READ
+      INTEGER P_READ, P_READ2
       INTEGER, TARGET :: SLOPEFLAG
       INTEGER test_el
       INTEGER, TARGET :: FLUXTYPE
@@ -137,7 +137,7 @@ C.....Declare allocatable real arrays
       REAL(SZ), ALLOCATABLE :: VFA_DG(:,:,:), VMO_DG(:,:,:)
       REAL(SZ), ALLOCATABLE :: XLEN(:)
       REAL(SZ), ALLOCATABLE :: HB(:,:,:)
-      REAL(SZ), ALLOCATABLE :: MANN(:,:)
+      REAL(SZ), ALLOCATABLE :: MANN(:,:), IBL(:)
       REAL(SZ), ALLOCATABLE :: IBHT(:), EBHT(:), PIHT(:), PIDI(:)
       REAL(SZ), ALLOCATABLE :: EBCFSP(:), IBCFSP(:), IBCFSB(:), PICF(:)
       REAL(SZ), ALLOCATABLE :: JACOBI(:,:,:,:)
@@ -190,7 +190,6 @@ C.....These (below) are defined in prep_slopelim.F
       Integer :: lim_count,lim_count_roll
       Integer,Allocatable :: fact(:),focal_neigh(:,:),focal_up(:),bi(:),
      & bj(:)
-
       Real(SZ),Allocatable :: XBCb(:),YBCb(:),xi1(:,:),xi2(:,:)
       Real(SZ),Allocatable :: xtransform(:,:),ytransform(:,:)
       Real(SZ),Allocatable :: xi1BCb(:),xi2BCb(:),xi1vert(:,:)
@@ -247,7 +246,7 @@ C.....Set edge array sizes
       SUBROUTINE ALLOC_EDGES0()
       ALLOCATE ( IBHT(3*MNE), EBHT(3*MNE), PIHT(3*MNE), PIDI(3*MNE) )
       ALLOCATE ( EBCFSP(3*MNE), IBCFSP(3*MNE), IBCFSB(3*MNE) )
-      ALLOCATE ( PICF(3*MNE), BACKNODES(2,3*MNE) )
+      ALLOCATE ( PICF(3*MNE), IBL(3*MNE), BACKNODES(2,3*MNE) )
       RETURN
       END SUBROUTINE
 
@@ -350,7 +349,7 @@ C.....Set sizes for arrays used in orthobasis
 C.....Set sizes for arrays for area integrals
       
       SUBROUTINE ALLOC_AREA_GAUSS()
-      ALLOCATE ( XAGP(NAGP(ph),ph),YAGP(NAGP(ph),ph),WAGP(NAGP(ph),ph) ) 
+      ALLOCATE ( XAGP(NAGP(ph),ph),YAGP(NAGP(ph),ph),WAGP(NAGP(ph),ph) )
       ALLOCATE ( PHI_AREA(DOFH,NAGP(ph)+1,ph ) )
       ALLOCATE ( DSPHI(DOFH,NAGP(ph)+1,ph),DRPHI(DOFH,NAGP(ph)+1,ph) )
       ALLOCATE ( PHI_CORNER(DOFH,3,ph),PHI_MID(DOFH,3,ph) )
@@ -387,7 +386,6 @@ C.....These are defined in prep_slopelim.F
 
       Allocate ( fact(0:ph) ,focal_neigh(MNE,3*MNEI),focal_up(MNE),
      & bi(dofh),bj(dofh) )
-
       Allocate ( XBCb(MNE),YBCb(MNE),xi1(MNE,NAGP(ph)),
      & xi2(MNE,NAGP(ph)) )
       Allocate ( xtransform(MNE,NAGP(ph)),ytransform(MNE,NAGP(ph)) )

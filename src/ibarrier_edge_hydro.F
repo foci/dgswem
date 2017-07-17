@@ -39,7 +39,7 @@ C.....Declare local variables
       REAL(SZ) ib_hat,if_hat,jb_hat,jf_hat, kf_hat, kb_hat
       REAL(SZ) ABOVEB, ABOVEF, ABOVEPIB, ABOVEPIF
       REAL(SZ) QNIB(2)
-      REAL(SZ) NLEQG_TMP, G_TMP
+      REAL(SZ) NLEQG_TMP, G_TMP, FFACT
       REAL(SZ) SUBSUPB, SUBSUPF, WEGPB, WEGPF
       REAL(SZ) NXB, NYB, NXF, NYF, TXB, TYB, TXF, TYF
       REAL(SZ) QB_N_INT, QF_N_INT, QB_N_EXT, QF_N_EXT
@@ -104,6 +104,7 @@ C.....Set the components for the tangential vector to the edge
          TYF =  NXF
          
 C.......Compute the variables at the quadrature points
+         FFACT = 1.0d0/WEGP(1,pa)*2**pa/(2*pa-1)
 
          DO I = 1,NEGP(pa)
             
@@ -172,8 +173,8 @@ C.........Obtain the height of the barrier at the quadrature point
 #ifdef CHEM
                iotaB = iotaB + iota(K,ELB,IRK)*PHI_EDGE(K,GPB,LEDB,pa)
                iotaF = iotaF + iota(K,ELF,IRK)*PHI_EDGE(K,GPF,LEDF,pa)
-               iota2B = iota2B + iota2(K,ELB,IRK)*PHI_EDGE(K,GPB,LEDB,pa)
-               iota2B = iota2F + iota2(K,ELF,IRK)*PHI_EDGE(K,GPF,LEDF,pa)
+              iota2B = iota2B + iota2(K,ELB,IRK)*PHI_EDGE(K,GPB,LEDB,pa)
+              iota2B = iota2F + iota2(K,ELF,IRK)*PHI_EDGE(K,GPF,LEDF,pa)
 #endif
 
 #ifdef DYNP
@@ -212,11 +213,19 @@ C.........Obtain the height of the barrier at the quadrature point
             
 C...........Calculate flow rates if cross-barrier pipe exists
             IF ((NIBSEGN(3,L).EQ.5).OR.(NIBSEGN(3,L).EQ.25)) THEN
+C...........DO NOT compute flow if Gauss point is not on pipe node, 
+C...........i.e. either endpoint of the segment.
+               IF ((I.NE.1).AND.(I.NE.NEGP(pa))) THEN
+                  QB_N_INT = 0.0D0 
+                  QF_N_INT = 0.0D0
+                  QB_T_INT = 0.0D0
+                  QF_T_INT = 0.0D0
+                  PIPE_FLOW = 0
             
 C...........Case 1:  Water is below pipe crown on both sides
 C           ---------------------------------------------
             
-               IF ((ABOVEPIF.LT.BARMIN).AND.(ABOVEPIB.LT.BARMIN)) THEN
+               ELSEIF((ABOVEPIF.LT.BARMIN).AND.(ABOVEPIB.LT.BARMIN))THEN
                   QB_N_INT = 0.0D0
                   QF_N_INT = 0.0D0
                   QB_T_INT = 0.0D0
@@ -243,15 +252,25 @@ C           ------------------------------------------------------------
 C..............Case 3: Water level on back is below pipe crown.
                   IF (ABOVEPIB.LT.BARMIN) THEN
                      QF_N_INT = RAMPDG*(0.25D0*PI*(PIDI(L))**2.0D0)*
-     &                        SQRT(2.0D0*G*ABOVEPIF/(1.0D0 + PICF(L)))
+     &                         SQRT(2.0D0*G*ABOVEPIF/(1.0D0 + PICF(L)))/
+     &                         (IBL(L))*FFACT
                      QF_T_INT = 0.0D0
                      
 c..............Case 4: Water level on back is above pipe crown.
                   ELSE
                      QF_N_INT = RAMPDG*(0.25D0*PI*(PIDI(L))**2.0D0)*
-     &                        SQRT(2.0D0*G*(ABOVEPIF-ABOVEPIB)/PICF(L))
+     &                        SQRT(2.0D0*G*(ABOVEPIF-ABOVEPIB)/PICF(L))/
+     &                        (IBL(L))*FFACT
                      QF_T_INT = 0.0D0
                   ENDIF
+
+                  !IF (L .EQ. 1 .AND. I .EQ. 1) THEN
+                  !   QB_N_INT = 2.0d0*QB_N_INT
+                  !   QF_N_INT = 2.0d0*QF_N_INT
+                  !ELSEIF (L .EQ. NIBSEG .AND. I .EQ. NEGP(pa)) THEN
+                  !   QB_N_INT = 2.0d0*QB_N_INT
+                  !   QF_N_INT = 2.0d0*QF_N_INT
+                  !ENDIF
 C.................If water above pipe crown BUT below barrier top, then
 C.................skip barrier flux computation so flux values computed
 C.................above are not replaced; otherwise add to overflow.
@@ -270,15 +289,25 @@ C           ------------------------------------------------------------
 C..............Case 5: Water level on front is below pipe crown.
                   IF (ABOVEPIF.LT.BARMIN) THEN
                      QB_N_INT = RAMPDG*(0.25D0*PI*(PIDI(L))**2.0D0)*
-     &                        SQRT(2.0D0*G*ABOVEPIB/(1.0D0 + PICF(L)))
+     &                         SQRT(2.0D0*G*ABOVEPIB/(1.0D0 + PICF(L)))/
+     &                         (IBL(L))*FFACT
                      QB_T_INT = 0.0D0
                      
 c..............Case 6: Water level on front is above pipe crown.
                   ELSE
                      QB_N_INT = RAMPDG*(0.25D0*PI*(PIDI(L))**2.0D0)*
-     &                        SQRT(2.0D0*G*(ABOVEPIB-ABOVEPIF)/PICF(L))
+     &                        SQRT(2.0D0*G*(ABOVEPIB-ABOVEPIF)/PICF(L))/
+     &                        (IBL(L))*FFACT
                      QB_T_INT = 0.0D0                
                   ENDIF
+
+                  !IF (L .EQ. 1 .AND. I .EQ. 1) THEN
+                  !   QB_N_INT = 2.0d0*QB_N_INT
+                  !   QF_N_INT = 2.0d0*QF_N_INT
+                  !ELSEIF (L .EQ. NIBSEG .AND. I .EQ. NEGP(pa)) THEN
+                  !   QB_N_INT = 2.0d0*QB_N_INT
+                  !   QF_N_INT = 2.0d0*QF_N_INT
+                  !ENDIF
 C.................If water above pipe crown BUT below barrier top, then
 C.................skip barrier flux computation so flux values computed
 C.................above are not replaced; otherwise add to overflow.
@@ -661,8 +690,8 @@ c
                RHS_iota(K,ELB,IRK) = RHS_iota(K,ELB,IRK) - WEGPB*IB_HAT
                RHS_iota(K,ELF,IRK) = RHS_iota(K,ELF,IRK) - WEGPB*IF_HAT
                
-               RHS_iota2(K,ELB,IRK) = RHS_iota2(K,ELB,IRK) - WEGPB*JB_HAT
-               RHS_iota2(K,ELF,IRK) = RHS_iota2(K,ELF,IRK) - WEGPB*JF_HAT
+               RHS_iota2(K,ELB,IRK) = RHS_iota2(K,ELB,IRK)-WEGPB*JB_HAT
+               RHS_iota2(K,ELF,IRK) = RHS_iota2(K,ELF,IRK)-WEGPB*JF_HAT
 #endif
 
 #ifdef DYNP

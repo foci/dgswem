@@ -205,7 +205,7 @@ C.......Compute ZE, QX, QY, and HB at each area Gauss quadrature point
 
 #ifdef SED_LAY
                do ll = 1,layers
-                  bed_IN(ll) = bed_IN(ll) + bed(K,L,IRK,ll)*PHI_AREA(K,I,pa)
+                  bed_IN(ll)=bed_IN(ll)+bed(K,L,IRK,ll)*PHI_AREA(K,I,pa)
                   HB_IN = HB_IN + bed(K,L,irk,ll)*PHI_AREA(K,I,pa)
 
                   MZ_X(ll) =  MZ_X(ll) + MZ(K,1,ll,L)*PHI_AREA(K,I,pa)
@@ -216,9 +216,11 @@ C.......Compute ZE, QX, QY, and HB at each area Gauss quadrature point
 C.........Compute sediment discharge model                                                                           
 
                !Note that the choice of linearization can require this to be changed
-            QMag_IN = (QX_IN*QX_IN/(DEPTH**2) + QY_IN*QY_IN/(DEPTH)**2)**(1/2)
-            discharge_modelX_IN = porosity * DEPTH**(-1) * QMag_IN**(2) * QX_IN*SFACQUAD                             
-            discharge_modelY_IN = porosity * DEPTH**(-1) * QMag_IN**(2) *QY_IN  
+          QMag_IN=(QX_IN*QX_IN/(DEPTH**2)+QY_IN*QY_IN/(DEPTH)**2)**(1/2)
+            discharge_modelX_IN = porosity * DEPTH**(-1) * QMag_IN**(2)*
+     &         QX_IN*SFACQUAD                             
+            discharge_modelY_IN = porosity * DEPTH**(-1) * QMag_IN**(2)*
+     &         QY_IN  
 
 #endif
                
@@ -403,8 +405,8 @@ C.........6) Chemical mass action
             
             rate = reaction_rate*1.D0/86400.D0
 
-            MassAction1st =  rate * (max(iota2_IN,0.D0)*max(iota_IN,0.D0))
-            MassAction2nd =  rate * (max(iota2_IN,0.D0)*max(iota_IN,0.D0))
+            MassAction1st =  rate*(max(iota2_IN,0.D0)*max(iota_IN,0.D0))
+            MassAction2nd =  rate*(max(iota2_IN,0.D0)*max(iota_IN,0.D0))
 
             MassMax(L) = min(MassAction1st,MassAction2nd)
 
@@ -434,16 +436,17 @@ C.........Build the rhs
                do ll = 1,layers !only really makes sense for single layer
 
                   RHS_bed(K,L,IRK,ll) = RHS_bed(K,L,IRK,ll) 
-     &                 + XFAC(K,I,L,pa)*(discharge_modelX_IN+MZ_X(ll)*SFACQUAD)
-     &                 + YFAC(K,I,L,pa)*(discharge_modelY_IN+MZ_Y(ll))
+     &                 + XFAC(K,I,L,pa)*(discharge_modelX_IN+MZ_X(ll)*
+     &                 SFACQUAD) + YFAC(K,I,L,pa)*
+     &                 (discharge_modelY_IN+MZ_Y(ll))
 
                enddo
 #endif
 
 #ifdef TRACE
                RHS_iota(K,L,IRK) = RHS_iota(K,L,IRK) 
-     &              + XFAC(K,I,L,pa)*(iota_IN*QX_IN*FH_NL+TZ_X*SFACQUAD) 
-     &              + YFAC(K,I,L,pa)*(iota_IN*QY_IN*FH_NL+TZ_Y) 
+     &             + XFAC(K,I,L,pa)*(iota_IN*QX_IN*FH_NL+TZ_X*SFACQUAD) 
+     &             + YFAC(K,I,L,pa)*(iota_IN*QY_IN*FH_NL+TZ_Y) 
 #endif
 
 #ifdef CHEM

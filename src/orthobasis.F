@@ -85,7 +85,7 @@ C.....the given point
                   POLY2  = JACOBI(J-1,A+1,B+1)
                   DEN = 2*(J-1+1)*(J-1+A+B+1)*(2*(J-1)+A+B)
 
-                  JACOBI(J+1,A+1,B+1) = (COEFF1*POLY1 + COEFF2*POLY2)/DEN
+                  JACOBI(J+1,A+1,B+1) =(COEFF1*POLY1 + COEFF2*POLY2)/DEN
 
                ENDIF
 

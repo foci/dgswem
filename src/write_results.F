@@ -335,7 +335,7 @@ c              if (it == NSPOOLGE) then
      $                ' DATAPACKING=POINT ','SOLUTIONTIME=',time_a
                  do i=1,np
                     if (ics.eq.2) then
-                       write(777,7777) slam(i)/deg2rad, sfea(i)/deg2rad, 
+                       write(777,7777) slam(i)/deg2rad, sfea(i)/deg2rad,
 c                 write(777,7777) x(i), y(i), 
      $                   dp(i), eta2(i), eta2(i)+dp(i),uu2(i),vv2(i),
      $           sqrt(uu2(i)**2+vv2(i)**2),sqrt(wsx2(i)**2+wsy2(i)**2),
@@ -848,7 +848,7 @@ C
          ENDIF
 #else
          IF(ELMAX.LT.200.0.and.(MOD(IT,NSCREEN_INC).EQ.0) ) THEN
-            WRITE(6,1992) IT,TIME_A/86400.,ETA2(KEMAX),KEMAX,VELMAX,KVMAX
+           WRITE(6,1992) IT,TIME_A/86400.,ETA2(KEMAX),KEMAX,VELMAX,KVMAX
  1992       FORMAT(1X,'TIME STEP =',I8,5X,'TIME =',F12.6,
      &           /,2X,'ELMAX = ', E10.4,' AT NODE',I7,
      &           2X,'SPEEDMAX = ',E10.4,' AT NODE',I7)
@@ -879,8 +879,8 @@ C.....If applicable write out a DG hot start
             OPEN(264,FILE=DIRNAME//'/'//'Hot_start.264')
             OPEN(214,FILE=DIRNAME//'/'//'Hot_start.214')
 
-            WRITE(263,*) P
-            WRITE(264,*) P, P
+            WRITE(263,*) PH
+            WRITE(264,*) PH, PH
             WRITE(214,*) IT, DTDP
 
             DO J = 1,MNE

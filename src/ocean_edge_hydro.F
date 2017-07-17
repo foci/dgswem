@@ -219,7 +219,8 @@ C.....Compute the solution at the interior state
                do ll = 1,layers
                   bed_IN(ll) = bed_IN(ll) +
      & bed(K,EL_IN,IRK,ll)*PHI_EDGE(K,I,LED,pa)
-                  HB_IN = HB_IN + bed(k,EL_IN,irk,ll)*PHI_EDGE(K,I,LED,pa)
+                  HB_IN = HB_IN + bed(k,EL_IN,irk,ll)*
+     & PHI_EDGE(K,I,LED,pa)
 
                   MZ_X_IN(ll) = MZ_X_IN(ll) +
      & MZ(K,1,ll,EL_IN)*PHI_EDGE(K,I,LED,pa)

@@ -112,7 +112,7 @@ C.....Compute the solution at the interior state
 
 #ifdef CHEM
             iota_IN = iota_IN + iota(K,EL_IN,IRK)*PHI_EDGE(K,I,LED,pa)
-            iota2_IN = iota2_IN + iota2(K,EL_IN,IRK)*PHI_EDGE(K,I,LED,pa)
+            iota2_IN = iota2_IN +iota2(K,EL_IN,IRK)*PHI_EDGE(K,I,LED,pa)
 #endif
 
 #ifdef DYNP
@@ -147,7 +147,8 @@ C.....Compute the Roe flux
 C.....Compute the edge integral
 
          DO K = 1,DOFS(EL_IN)
-            CALL EDGE_INT_HYDRO(EL_IN, LED, GED, I, F_HAT, G_HAT, H_HAT, i_hat, j_hat, k)
+            CALL EDGE_INT_HYDRO(EL_IN, LED, GED, I, F_HAT, G_HAT, H_HAT,
+     &         i_hat, j_hat, k)
          ENDDO
          
       ENDDO

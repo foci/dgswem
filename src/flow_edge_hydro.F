@@ -182,7 +182,8 @@ C.....Compute the solution at the interior state
 #endif
 
 #ifdef DYNP    
-               dynP_IN = dynP_IN + dynP(K,EL_IN,IRK)*PHI_EDGE(K,I,LED,pa)
+               dynP_IN = dynP_IN + dynP(K,EL_IN,IRK)
+     &                       *PHI_EDGE(K,I,LED,pa)
 #endif
 
 #ifdef SED_LAY

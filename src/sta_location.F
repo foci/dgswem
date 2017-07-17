@@ -84,7 +84,8 @@ C.............Store the element in the appropriate array
               
 C.............Compute the basis functions at that point and store
               
-            CALL ORTHOBASIS( Z1, Z2, pdg_el(j), DOF, PHI_STA, DPHIDZ1, DPHIDZ2 )
+            CALL ORTHOBASIS( Z1, Z2, pdg_el(j), DOF, PHI_STA, DPHIDZ1,
+     &          DPHIDZ2 )
             GOTO 100
           ENDIF
         ENDIF

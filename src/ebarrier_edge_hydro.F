@@ -90,7 +90,7 @@ C.........Obtain the height of the barrier at the quadrature point
 
 #ifdef CHEM
                iota_IN = iota_IN + iota(K,EL,IRK)*PHI_EDGE(K,I,LED,pa)
-               iota2_IN = iota2_IN + iota2(K,EL,IRK)*PHI_EDGE(K,I,LED,pa)
+               iota2_IN = iota2_IN +iota2(K,EL,IRK)*PHI_EDGE(K,I,LED,pa)
 #endif
 
 #ifdef DYNP
@@ -101,7 +101,8 @@ C.........Obtain the height of the barrier at the quadrature point
 
             do ll = 1,layers
                
-               bed_IN(ll) = bed_IN(ll) + bed(K,EL,IRK,ll)*PHI_EDGE(K,I,LED,pa)
+               bed_IN(ll) = bed_IN(ll) + 
+     &            bed(K,EL,IRK,ll)*PHI_EDGE(K,I,LED,pa)
                HB_IN = HB_IN + bed(k,EL,irk,ll)*PHI_EDGE(K,I,LED,pa)
                
             enddo
@@ -189,7 +190,8 @@ C.........Compute numerical flux
 
                do ll=1,layers
 
-                  RHS_bed(K,EL,IRK,ll) = RHS_bed(K,EL,IRK,ll) - W_IN*Bed_HAT(ll)
+                  RHS_bed(K,EL,IRK,ll) = RHS_bed(K,EL,IRK,ll) 
+     &               - W_IN*Bed_HAT(ll)
 
                enddo
 

@@ -87,7 +87,8 @@ C.....Declare local variables
 C.....Detect negative mass
       ErrorElevExceeded=0
       DO J = 1,NE
-         DPAVG =  1.D0/ncheck(pdg_el(j)) * (sum(DP_NODE(:,J,pdg_el(j)))) !(DP(NM(J,1))+DP(NM(J,2))+DP(NM(J,3)))/3.D0
+         DPAVG =  1.D0/ncheck(pdg_el(j)) * (sum(DP_NODE(:,J,pdg_el(j))))
+         !(DP(NM(J,1))+DP(NM(J,2))+DP(NM(J,3)))/3.D0
          Detected = .FALSE.
          IF((ZE(1,J,1)+DPAVG).LE.0.D0) THEN
             PRINT *, ''

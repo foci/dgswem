@@ -332,7 +332,7 @@ C.....using the physical to master transformation, e.g. T^-1:x-->xi
                       f(k,mm,i,j) = (  xtransform(k,mm) - XBCb(k)  )**i
      &                       / ( fact(i) * Deltx(k)**i )
                       g0(k,mm,i,j) = (  ytransform(k,mm) - YBCb(k)  )**j
-     &                       / ( fact(j) * Delty(k)**j )		
+     &                       / ( fact(j) * Delty(k)**j )
 
                         if (i.eq.0.and.j.eq.0) then
 
@@ -362,7 +362,7 @@ C.....using the physical to master transformation, e.g. T^-1:x-->xi
 
                         enddo
 
-                        fv(k,lll,i,j) = (  x(nm(k,lll)) - XBCb(k) )**i / 
+                        fv(k,lll,i,j) = (  x(nm(k,lll)) - XBCb(k) )**i /
      &                       ( fact(i) * Deltx(k)**i )
                         
                        g0v(k,lll,i,j) =  ( y(nm(k,lll)) - YBCb(k) )**j /
@@ -401,7 +401,7 @@ C.....Re-order the Taylor basis functions and componentwise derivatives into hie
                         var2sigmag(k,mm,bbb) = varsigma0(k,mm,i,j-i)
 
                         
-                        if ( abs(var2sigmag(k,mm,bbb)).lt.1.0E-15 ) then 
+                        if ( abs(var2sigmag(k,mm,bbb)).lt.1.0E-15 ) then
 
                            var2sigmag(k,mm,bbb) = 0.D0 
                            
@@ -418,7 +418,7 @@ C.....Re-order the Taylor basis functions and componentwise derivatives into hie
 
                                 !var2sigmav(k,lll,bbb) = 0.D0 
                            
-                        endif	
+                        endif
 
                      enddo      !lll
 
@@ -454,7 +454,7 @@ C.....matrix Nmatrix=Pmatrix*M(-1), using the mass matrix inverse M_inv,
 
                      do mm=1,NAGP(ll)
                         
-                        pmatrix(k,i,j) = pmatrix(k,i,j)  + wagp(mm,ll) * 
+                        pmatrix(k,i,j) = pmatrix(k,i,j)  + wagp(mm,ll) *
      &                       var2sigmag(k,mm,i) * phi_area(j,mm,ll) 
                         
 
@@ -482,7 +482,7 @@ C.....matrix Nmatrix=Pmatrix*M(-1), using the mass matrix inverse M_inv,
 
 C.....Invert the transformation matrix Nmatrix^(-1), 
 
-               Call Inv(tempmat(1:ell,1:ell), tempInv(1:ell,1:ell), ell) 
+               Call Inv(tempmat(1:ell,1:ell), tempInv(1:ell,1:ell), ell)
                
                NmatrixInv(k,1:ell,1:ell,ell) = tempInv(1:ell,1:ell)
 
@@ -608,7 +608,7 @@ C.....Subroutine to find the inverse of a square matrix by Guass-Jordan eliminat
 
          endif
 
-         do j = k+1, n			
+         do j = k+1, n
 
             m = augmatrix(j,k)/augmatrix(k,k)
 
@@ -642,7 +642,7 @@ C.....Subroutine to find the inverse of a square matrix by Guass-Jordan eliminat
 
          m = augmatrix(i,i)
 
-         do j = i, (2 * n)				
+         do j = i, (2 * n)
 
             augmatrix(i,j) = (augmatrix(i,j) / m)
 
@@ -666,7 +666,7 @@ C.....Subroutine to find the inverse of a square matrix by Guass-Jordan eliminat
 
          enddo
 
-      enddo				
+      enddo
       
                                 !Compute answer
 

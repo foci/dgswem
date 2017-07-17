@@ -123,7 +123,7 @@ C.....Print out header for output including version number and copyright
       ENDIF
 
  1114 FORMAT(//,19X,'dgswem.11.13 ',
-     &     //,5X,'A disconintuous Galerkin shallow water equation model' 
+     &     //,5X,'A disconintuous Galerkin shallow water equation model'
      &     /,10X,'for coastal seas and estuarine research',
      &     ///,7X,'-  Based off of the ADCIRC model created by',
      &     //,10X,'R.A. Luettich, Jr., University of North Carolina',
@@ -2611,7 +2611,7 @@ C............A KEY TO THE GWCE BOUNDARY CONDITION ARRAY
      &                    (LBCODEI(JGW).EQ.13).OR. ! OR A RADIATION
      &                    (LBCODEI(JGW).EQ.23).OR. ! BOUNDARY
      &                    (LBCODEI(JGW).EQ.30)) ME2GW(JME)=JGW
-                  ENDIF                                                                
+                  ENDIF                                                
                ENDIF
             ENDIF
             IF((I.GT.1).AND.(I.LT.NVELL(K))) THEN !IF NOT FIRST OR
@@ -2843,6 +2843,11 @@ C.......Put barrier data into arrays more amiable to DG data structure
      &    (IBTYPE.EQ.5).OR.(IBTYPE.EQ.25)) THEN
          DO I = 1,NVELL(K)-1
             NIBSEG = NIBSEG + 1
+            X1=X(NBVV(K,I))
+            X2=X(NBVV(K,I+1))
+            Y1=Y(NBVV(K,I))
+            Y2=Y(NBVV(K,I+1))
+            IBL(NIBSEG)=SQRT((X1-X2)**2+(Y1-Y2)**2)
             IBHT(NIBSEG)   = 0.5D0*( BARINHTR(I)   + BARINHTR(I+1)   )
             IBCFSB(NIBSEG) = 0.5D0*( BARINCFSBR(I) + BARINCFSBR(I+1) )
             IBCFSP(NIBSEG) = 0.5D0*( BARINCFSPR(I) + BARINCFSPR(I+1) )

@@ -84,7 +84,7 @@ Casey 110111: Create new data structure with discontinuous information for SWAN.
       USE GLOBAL, ONLY        : ETA2
       USE M_GENARR, ONLY      : DEPTH
       USE SwanGridData, ONLY  : nverts
-      USE SWCOMM3, ONLY       : DDIR, DEPMIN, FRINTF, GRAV, MDC, MSC, RHO
+      USE SWCOMM3, ONLY       : DDIR, DEPMIN,FRINTF, GRAV, MDC, MSC, RHO
 
       IMPLICIT NONE
 
@@ -627,8 +627,8 @@ Casey 091216: If we get a junk number, then use the default value.
             ENDIF
             IF(ABS(NOUTGW).EQ.2)THEN
                IGSW(IW) = 0
-               OPEN(UnitNumber,FILE=TRIM(LOCALDIR)//'/'//TRIM(FileName(IW)),
-     &              ACCESS='DIRECT',RECL=NByte)
+               OPEN(UnitNumber,FILE=TRIM(LOCALDIR)//'/'//
+     &            TRIM(FileName(IW)),ACCESS='DIRECT',RECL=NByte)
                IF(NByte.EQ.4)THEN
                   DO I=1,8
                      WRITE(UnitNumber,REC=IGSW(IW)+I) RDES4(I)
@@ -669,7 +669,8 @@ Casey 091216: If we get a junk number, then use the default value.
          SWAN_MTC = MTC
          Processed26 = .TRUE.
 !... Ready the array for the maximum SWAN output.
-         IF(.NOT.ALLOCATED(SWAN_MAX)) ALLOCATE(SWAN_MAX(1:NP,1:NumSwanOutput))
+         IF(.NOT.ALLOCATED(SWAN_MAX)) 
+     &      ALLOCATE(SWAN_MAX(1:NP,1:NumSwanOutput))
          DO IP=1,nverts
             DO IW=1,NumSwanOutput
 !Casey 100608: Force the max files to take the correct default values.
@@ -697,7 +698,8 @@ Casey 091216: If we get a junk number, then use the default value.
          SWAN_WK(IS) = 0.
       ENDDO
 !... Allocate VOQ and set up the first seven entries inside it.
-      IF(.NOT.ALLOCATED(SWAN_VOQ)) ALLOCATE(SWAN_VOQ(1:NP,1:(7+NumSwanOutput+1)))
+      IF(.NOT.ALLOCATED(SWAN_VOQ)) 
+     &   ALLOCATE(SWAN_VOQ(1:NP,1:(7+NumSwanOutput+1)))
       DO IP=1,nverts
 !... X,Y in problem coordinate system.
          SWAN_OQPROC(1) = .TRUE.
@@ -782,7 +784,8 @@ Casey 091216: If we get a junk number, then use the default value.
             ENDIF
             IF(IW.NE.5)THEN
 !Casey 100608: Ensure that dry nodes are written with default values.
-               IF((NODECODE(IP).EQ.1).AND.(SwanOut(IP).GT.SWAN_MAX(IP,IW)))THEN
+               IF((NODECODE(IP).EQ.1).AND.(SwanOut(IP)
+     &            .GT.SWAN_MAX(IP,IW)))THEN
                   IF(IW.EQ.1)THEN
                      UpdateMax(IP) = 1
                      SWAN_MAX(IP,IW) = SwanOut(IP)
@@ -792,9 +795,11 @@ Casey 091216: If we get a junk number, then use the default value.
                ENDIF
             ELSE
                IF((NODECODE(IP).EQ.1).AND.
-     &            (SQRT(SwanOut(IP)*SwanOut(IP)+SwanOut2(IP)*SwanOut2(IP)).GT.SWAN_MAX(IP,IW)))THEN
+     &            (SQRT(SwanOut(IP)*SwanOut(IP)+SwanOut2(IP)*
+     &            SwanOut2(IP)).GT.SWAN_MAX(IP,IW)))THEN
                   IF(UpdateMax(IP).EQ.1)THEN
-                     SWAN_MAX(IP,IW) = SQRT(SwanOut(IP)*SwanOut(IP)+SwanOut2(IP)*SwanOut2(IP))
+                     SWAN_MAX(IP,IW) = SQRT(SwanOut(IP)*SwanOut(IP)+
+     &               SwanOut2(IP)*SwanOut2(IP))
                   ENDIF
                ENDIF
             ENDIF
@@ -805,21 +810,25 @@ Casey 091216: If we get a junk number, then use the default value.
                IF((NSCOUGW.EQ.0 .OR. IT.EQ.SWAN_MTC).AND.IT.NE.0)THEN
                   IF(IW.NE.5)THEN
                      IF(ABS(NOUTGW).EQ.1.OR.ABS(NOUTGW).EQ.2)THEN
-                        CALL WriteOutArray(UnitNumber,DT*ITIME,ITIME,SwanDescript,
-     &                                      PackOne,UnPackOne,IGSW(IW),FileName(IW))
+                        CALL WriteOutArray(UnitNumber,DT*ITIME,ITIME,
+     &                  SwanDescript,PackOne,UnPackOne,IGSW(IW),
+     &                  FileName(IW))
                      ELSEIF(ABS(NOUTGW).EQ.4)THEN
                         CALL WRITE_GBL_FILE_SKIP_DEFAULT
-     &                     (UnitNumber,TRIM(GLOBALDIR)//'/'//TRIM(FileName(IW)),
-     &                      SwanDescript,DT*ITIME,ITIME,StoreOne,DBLE(OVEXCV(IVTYPE)))
+     &                     (UnitNumber,TRIM(GLOBALDIR)//'/'//
+     &                     TRIM(FileName(IW)),SwanDescript,DT*ITIME,
+     &                     ITIME,StoreOne,DBLE(OVEXCV(IVTYPE)))
                      ENDIF
                   ELSE
                      IF(ABS(NOUTGW).EQ.1.OR.ABS(NOUTGW).EQ.2)THEN
-                        CALL WriteOutArray(UnitNumber,DT*ITIME,ITIME,SwanDescript,
-     &                                     PackTwo,UnPackTwo,IGSW(IW),FileName(IW))
+                        CALL WriteOutArray(UnitNumber,DT*ITIME,ITIME,
+     &                  SwanDescript,PackTwo,UnPackTwo,IGSW(IW),
+     &                  FileName(IW))
                      ELSEIF(ABS(NOUTGW).EQ.4)THEN
                         CALL WRITE_GBL_FILE_SKIP_DEFAULT
-     &                     (UnitNumber,TRIM(GLOBALDIR)//'/'//TRIM(FileName(IW)),
-     &                      SwanDescript,DT*ITIME,ITIME,StoreTwo,DBLE(OVEXCV(IVTYPE)))
+     &                     (UnitNumber,TRIM(GLOBALDIR)//'/'//
+     &                     TRIM(FileName(IW)),SwanDescript,DT*ITIME,
+     &                     ITIME,StoreTwo,DBLE(OVEXCV(IVTYPE)))
                      ENDIF
                   ENDIF
                ENDIF
@@ -843,16 +852,16 @@ Casey 091216: If we get a junk number, then use the default value.
             DO IP=1,NP
                SWAN_MAXTEMP(IP) = SWAN_MAX(IP,IW)
             ENDDO
-            CALL OPEN_GBL_FILE(963, TRIM(GLOBALDIR)//'/'//TRIM(FileNameMax),
-     &           NP_G, NP, HEADER_MAX)
+            CALL OPEN_GBL_FILE(963, TRIM(GLOBALDIR)//'/'//
+     &         TRIM(FileNameMax),NP_G, NP, HEADER_MAX)
             SwanDescriptMax % initial_value        = 0.
             SwanDescriptMax % num_items_per_record = 1
             SwanDescriptMax % num_fd_records       = NP_G
             SwanDescriptMax % num_records_this     = NP
             SwanDescriptMax % imap                 => NODES_LG
             SwanDescriptMax % array                => SWAN_MAXTEMP
-            CALL WRITE_GBL_FILE(963, TRIM(GLOBALDIR)//'/'//TRIM(FileNameMax),
-     &           SwanDescriptMax, DT*ITIME, ITIME, StoreOne)
+            CALL WRITE_GBL_FILE(963, TRIM(GLOBALDIR)//'/'//
+     &        TRIM(FileNameMax),SwanDescriptMax,DT*ITIME,ITIME,StoreOne)
          ENDDO
          IF(ALLOCATED(SWAN_MAXTEMP)) DEALLOCATE(SWAN_MAXTEMP)
       ENDIF
