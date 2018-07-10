@@ -791,9 +791,9 @@ C
            go to 12345
          ENDIF
          READ(LOC(IPROC),'(A85)')  INLINE
-         READ(LOC(IPROC),3645)  NDSETGE,NE,DTE,NSTEMP,ITEMPE
-         IF (NE.NE.NELP(IPROC)) THEN
-           print *, "NE = ",NE," NNODP = ",NNODP(IPROC)
+         READ(LOC(IPROC),3645)  NDSETGE,NP,DTE,NSTEMP,ITEMPE
+         IF (NP.NE.NNODP(IPROC)) THEN
+           print *, "NP = ",NP," NNODP = ",NNODP(IPROC)
            STOP 'Inconsistency in number of local elems'
          ENDIF
       ENDDO
@@ -1852,8 +1852,8 @@ C
            RETURN
          ENDIF
          READ(LOC(IPROC),'(A85)')  INLINE
-         READ(LOC(IPROC),3645) NDSETGV,NE,DTV,NSTEMP,ITEMPV
-         IF (NE.NE.NELP(IPROC)) THEN
+         READ(LOC(IPROC),3645) NDSETGV,NP,DTV,NSTEMP,ITEMPV
+         IF (NP.NE.NNODP(IPROC)) THEN
            STOP 'Inconsistency in number of local nodes'
          ENDIF
       ENDDO
