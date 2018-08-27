@@ -320,8 +320,8 @@ c.....QR decomposition with shifting
 
       subroutine dotprod(vec1,vec2,n,prod)
       implicit none
-      real(8), dimension(n)::vec1,vec2
       integer::n,i
+      real(8), dimension(n)::vec1,vec2
       real(8)::prod
       prod=0.0d0
       do i=1,n
@@ -332,9 +332,9 @@ c.....QR decomposition with shifting
 
       function DoIterate (A1,A2,eps,n)
       implicit none
+      integer::n,i,j
       real(8), dimension(n,n)::A1,A2
       real(8)::eps
-      integer::n,i,j
       logical::DoIterate
 
       DoIterate=.false.
