@@ -815,7 +815,7 @@ C      ALLOCATE ( PTS(N,2), WTS(N) )
 C.......Transform quadrature points to master element coordinates
 
         J = 1
-        DO I = 1,N
+        DO I = 1,L
           IF (M(I).EQ.1) THEN
             B(I) = A(I)
             C(I) = B(I)
@@ -1648,7 +1648,7 @@ C        ALLOCATE ( PTS(N,2), WTS(N) )
 C.......Transform quadrature points to master element coordinates
 
         J = 1
-        DO I = 1,N
+        DO I = 1,L
           IF (M(I).EQ.1) THEN
             PTS(J,1)   =  A(I)
             PTS(J,2)   =  B(I)
@@ -1749,7 +1749,7 @@ C        ALLOCATE ( PTS(N,3), WTS(N) )
 C.......Transform quadrature points to master element coordinates
 
         J = 1
-        DO I = 1,N
+        DO I = 1,L
           IF (M(I).EQ.1) THEN
             PTS(J,1)   =  A(I)
             PTS(J,2)   =  B(I)
