@@ -24,7 +24,7 @@ C.......Obtain the global and local edge numbers
 C.......Obtain the element
 
          EL = NEDEL(1,GED)
-         PA = PDG_EL(EL_IN)
+         PA = PDG_EL(EL)
 
 #ifdef P0
          if (pa.eq.0) then

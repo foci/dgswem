@@ -30,7 +30,7 @@ C.....Declare local variables
       REAL(SZ) AREA, DEPTH, ANGLE_SUM, FH_NL, DP1, DP2, DP3, DP00, ZE00
       LOGICAL FORCE_WRITE
       real(sz) qmaxe,elmaxe
-      integer imaxze,imaxq,ErrorElevExceeded
+      integer :: imaxze,imaxq,ErrorElevExceeded
       
 C.....Transform from modal coordinates to nodal coordinates and average
 C.....to single nodal values
@@ -316,9 +316,13 @@ C.....time step falls within the specified window
 2120          FORMAT(2X,E20.10,5X,I10)
               DO I=1,NP
                 IF (ABS(ETA2(I)).LE.(10.0**(-30))) ETA2(I) = 0.D0
-                IF (NODECODE(I).EQ.1) WRITE(63,2453) I,ETA2(I)
-                IF (NODECODE(I).EQ.0) WRITE(63,2453) I,-99999.
-2453            FORMAT(2X,I8,2X,E15.8E3)
+                IF (NOLIFA .EQ. 2) THEN
+                  IF (NODECODE(I).EQ.1) WRITE(63,2453) I,ETA2(I)
+                  IF (NODECODE(I).EQ.0) WRITE(63,2453) I,-99999.
+                ELSE
+                  WRITE(63,2453) I,ETA2(I)
+                ENDIF
+2453            FORMAT(2X,I8,2X,E16.8E3)
               ENDDO
               IF(SEDFLAG.GE.1) THEN
                 WRITE(84,2120) TIME_A, IT
@@ -382,14 +386,26 @@ C.....Write DG.65 results, elemental statuses (wet/dry)
               ENDIF
               
               IGEP = IGEP + 1 + NP
+              
+              open(963,FILE=DIRNAME//'/'//'maxele.63',STATUS="REPLACE")
+              write(963,*) np
+              do i=1,np
+                write(963,9633) etamax(i)
+              enddo
+ 9633         format(f20.8)
+              close(963)
             ENDIF
             IF (ABS(NOUTGE).EQ.2) THEN
               WRITE(63,REC=IGEP+1) TIME_A
               WRITE(63,REC=IGEP+2) IT
               IGEP = IGEP + 2
               DO I = 1,NP
-                IF (NODECODE(I).EQ.1) WRITE(63,REC=IGEP+I) ETA2(I)
-                IF (NODECODE(I).EQ.0) WRITE(63,REC=IGEP+I) -99999.
+                IF (NOLIFA .EQ. 2) THEN
+                  IF (NODECODE(I).EQ.1) WRITE(63,REC=IGEP+I) ETA2(I)
+                  IF (NODECODE(I).EQ.0) WRITE(63,REC=IGEP+I) -99999.
+                ELSE
+                  WRITE(63,REC=IGEP+I) ETA2(I)
+                ENDIF
               ENDDO
               IF(SEDFLAG.GE.1) THEN
                 WRITE(84,REC=IGEP+1) TIME_A
@@ -425,7 +441,7 @@ C.....Had trouble writing out numbers with less than E-99 (EJK)
                 IF (ABS(UU2(I)).LE.(10.0**(-30))) UU2(I) = 0.D0
                 IF (ABS(VV2(I)).LE.(10.0**(-30))) VV2(I) = 0.D0
                 WRITE(64,2454) I,UU2(I),VV2(I)
-2454            FORMAT(2X,I8,2(2X,E15.8E3))
+2454            FORMAT(2X,I8,2(2X,E16.8E3))
               ENDDO
               
 C.....Write DG.64 results
@@ -498,7 +514,7 @@ C...
       endif
 
       if (it.eq.nt) then
-         open(963,FILE=DIRNAME//'/'//'maxele.63')
+         open(963,FILE=DIRNAME//'/'//'maxele.63',STATUS="REPLACE")
          write(963,*) np
          write(778,*) 'TITLE = "PADCIRC-DG output"'
          write(778,*) 
@@ -513,7 +529,6 @@ C...
             write(963,9633) etamax(i)
          enddo
  7778    format(3f20.8)
- 9633    format(f20.8)
          do i=1,ne
             write(778,"(3i12)") nm(i,1), nm(i,2), nm(i,3)
          enddo
@@ -534,8 +549,12 @@ C...
                 DO I=1,NP
                   HH2=DP(I)+IFNLFA*ETA2(I)
 C                  C1=CC2(I)
-                  IF(NODECODE(I).EQ.1) WRITE(83,2453) I,C1
-                  IF(NODECODE(I).EQ.0) WRITE(83,2453) I,-99999.
+                  IF (NOLIFA .EQ. 2) THEN
+                    IF(NODECODE(I).EQ.1) WRITE(83,2453) I,C1
+                    IF(NODECODE(I).EQ.0) WRITE(83,2453) I,-99999.
+                  ELSE
+                    WRITE(83,2453) I,C1
+                  ENDIF
                   ENDDO
                 IGCP=IGCP+1+NP
                 ENDIF
@@ -546,8 +565,12 @@ C                  C1=CC2(I)
                 DO I=1,NP
                   HH2=DP(I)+IFNLFA*ETA2(I)
 C                  C1=CC2(I)!/HH2
-                  IF(NODECODE(I).EQ.1) WRITE(83,REC=IGCP+I) C1
-                  IF(NODECODE(I).EQ.0) WRITE(83,REC=IGCP+I) -99999.
+                  IF (NOLIFA .EQ. 2) THEN
+                    IF(NODECODE(I).EQ.1) WRITE(83,REC=IGCP+I) C1
+                    IF(NODECODE(I).EQ.0) WRITE(83,REC=IGCP+I) -99999.
+                  ELSE
+                    WRITE(83,REC=IGCP+I) C1
+                  ENDIF
                   ENDDO
                 IGCP=IGCP+NP
                 ENDIF
@@ -765,7 +788,7 @@ C...
               ENDIF
             WRITE(16,24541) IHSFIL,IT,TIME_A
 24541       FORMAT(1X,'HOT START OUTPUT WRITTEN TO UNIT ',I2,
-     &                ' AT TIME STEP = ',I9,' TIME = ',E15.8)
+     &                ' AT TIME STEP = ',I9,' TIME = ',E16.8)
             IF(IHSFIL.EQ.67) THEN
               IHSFIL=68
               ELSE
@@ -799,7 +822,7 @@ c
                 KVMAX=I
              ENDIF
           END DO
-cnd
+
           do i=1,ne
              if (wdflg(i).ne.0) then
                 if (abs(ze(1,i,1)).gt.elmaxe) then
@@ -815,6 +838,9 @@ cnd
 C             
           VELMAX=VELMAX**0.5d0
           ErrorElevExceeded=0
+          if (KEMAX .eq. 0) then
+             KEMAX = 1
+          endif 
 C          
 #ifdef CMPI
           IF( (MYPROC.EQ.0).AND.(ELMAX.LT.200.0).AND.
@@ -822,22 +848,22 @@ C
              WRITE(6,1991) IT,TIME_A/86400.,
      $            ETA2(KEMAX),KEMAX,VELMAX,KVMAX,MYPROC
  1991        FORMAT(1X,'TIME STEP =',I8,5X,'TIME = ',F12.6,
-     &            /,2X,'ELMAX = ', E10.4,' AT NODE',I7,
-     &            2X,'SPEEDMAX = ',E10.4,' AT NODE',I7,
+     &            /,2X,'ELMAX = ', E11.4,' AT NODE',I7,
+     &            2X,'SPEEDMAX = ',E11.4,' AT NODE',I7,
      &            2X,'ON MYPRnOC = ',I4)
-             write(6,*) 'elmaxe, imaxze, qmaxe, imaxq ',elmaxe,imaxze,
-     $            qmaxe,imaxq,qx(2,imaxq,1),qx(3,imaxq,1),
-     $            qy(2,imaxq,1),qy(3,imaxq,1)
+c             write(6,*) 'elmaxe, imaxze, qmaxe, imaxq ',elmaxe,imaxze,
+c     &            qmaxe,imaxq,qx(2,imaxq,1),qx(3,imaxq,1),
+c     &            qy(2,imaxq,1),qy(3,imaxq,1)
           ENDIF
 
           IF(ELMAX.GT.200.0) THEN
             WRITE(6,1993) IT,TIME_A/86400,
-     $            ETA2(KEMAX),KEMAX,VELMAX,KVMAX,MYPROC
+     &            ETA2(KEMAX),KEMAX,VELMAX,KVMAX,MYPROC
             WRITE(16,1993) IT,TIME_A/86400,
-     $           ETA2(KEMAX),KEMAX,VELMAX,KVMAX,MYPROC
+     &           ETA2(KEMAX),KEMAX,VELMAX,KVMAX,MYPROC
  1993       FORMAT(1X,'TIME STEP =',I8,6X,'TIME =',F12.6,
-     &       /,2X,'ELMAX = ', E10.4,' AT NODE',I7,
-     &       2X,'SPEEDMAX = ',E10.4,' AT NODE',I7,
+     &       /,2X,'ELMAX = ', E11.4,' AT NODE',I7,
+     &       2X,'SPEEDMAX = ',E11.4,' AT NODE',I7,
      &       2X,'ON MYPROC = ',I4,' !!! WARNING - HIGH ELEVATION !!!')
             ErrorElevExceeded=1
          ENDIF
@@ -850,8 +876,8 @@ C
          IF(ELMAX.LT.200.0.and.(MOD(IT,NSCREEN_INC).EQ.0) ) THEN
            WRITE(6,1992) IT,TIME_A/86400.,ETA2(KEMAX),KEMAX,VELMAX,KVMAX
  1992       FORMAT(1X,'TIME STEP =',I8,5X,'TIME =',F12.6,
-     &           /,2X,'ELMAX = ', E10.4,' AT NODE',I7,
-     &           2X,'SPEEDMAX = ',E10.4,' AT NODE',I7)
+     &           /,2X,'ELMAX = ', E11.4,' AT NODE',I7,
+     &           2X,'SPEEDMAX = ',E11.4,' AT NODE',I7)
 C            write(6,*) 'elmaxe, imaxze, qmaxe, imaxq ',elmaxe,imaxze,
 C     $           qmaxe,imaxq,qx(2,imaxq,1),qx(3,imaxq,1),
 C     $            qy(2,imaxq,1),qy(3,imaxq,1)
@@ -863,8 +889,8 @@ C
             WRITE(16,1994) IT,TIME_A/86400.,
      $           ETA2(KEMAX),KEMAX,VELMAX,KVMAX
  1994       FORMAT(1X,'TIME STEP =',I8,6X,'TIME =',F12.6,
-     &           /,2X,'ELMAX = ', E10.4,' AT NODE',I7,
-     &           2X,'SPEEDMAX = ',E10.4,' AT NODE',I7,
+     &           /,2X,'ELMAX = ', E11.4,' AT NODE',I7,
+     &           2X,'SPEEDMAX = ',E11.4,' AT NODE',I7,
      &           2X,' !!! WARNING - HIGH ELEVATION !!!')
             STOP
          ENDIF
@@ -991,8 +1017,8 @@ C        CLOSE(652)
 C      ENDIF
 
 2120  FORMAT(2X,E20.10,5X,I10)
-2453  FORMAT(2X,I8,2X,E15.8E3)
-2454  FORMAT(2X,I8,2(2X,E15.8E3))
+2453  FORMAT(2X,I8,2X,E16.8E3)
+2454  FORMAT(2X,I8,2(2X,E16.8E3))
 2455  FORMAT(2X,I8,2X,I2)
 3220  FORMAT(1X,A32,2X,A24,2X,A24)
 3645  FORMAT(1X,I10,1X,I10,1X,E15.7,1X,I5,1X,I5)

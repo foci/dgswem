@@ -1,4 +1,4 @@
-C**************************************************************************
+C***********************************************************************
 C PADCIRC RELEASE VERSION 41.11 09/14/2001  
 C    last changes in this file VERSION 41.11
 C
@@ -7,18 +7,20 @@ C  v40.02mxxx - date - programmer - describe change
 C                    - mark change in code with  cinitials-mxxx 
 C
 C  v41.11 - 09/14/01 - rl - from 41.10 - added NWS = -2 capability
-C  v41.09 - 06/30/01 - jw - from 41.08 - made minor mods as per vp version 41.05
-C  v40.02m002 - 12/22 - jjw/vjp - Vic suggested this change to avoid compiler conflicts
+C  v41.09 - 06/30/01 - jw - from 41.08 - made minor mods as per vp 
+C                                                          version 41.05
+C  v40.02m002 - 12/22 - jjw/vjp - Vic suggested this change to avoid 
+C                                                     compiler conflicts
 C  v40.02m001 - 12/21 - jjw - add cross barrier pipes cjjwm001
-C************************************************************************** 
+C*********************************************************************** 
 C 
         SUBROUTINE HOTSTART()
 C
-C**************************************************************************
+C***********************************************************************
 C
 C  HOT START PROGRAM SETUP ROUTINE 
 C
-C**************************************************************************
+C***********************************************************************
 C
       USE GLOBAL
       USE HARM
@@ -31,18 +33,18 @@ C
      
       IMPLICIT NONE
       INTEGER i,j, IT
-      REAL(SZ) WindDragLimit    !jgf46.01 Cap on max wind drag coefficient
+      REAL(SZ) WindDragLimit  !jgf46.01 Cap on max wind drag coefficient
       REAL(SZ) RampExtFlux1   ! Ramp for external flux b.c.s @ITHS-1
       REAL(SZ) RampExtFlux2   ! Ramp for external flux b.c.s @ITHS
       REAL(SZ) RampIntFlux1   ! Ramp for internal flux b.c.s @ITHS-1
       REAL(SZ) RampIntFlux2   ! Ramp for internal flux b.c.s @ITHS
-      REAL(SZ) RampTip2    ! Ramp for tidal potential @ITHS
-      REAL(SZ) RampMete2   ! Ramp for wind and atmospheric pressure @ITHS
-      REAL(SZ) RampWRad2   ! Ramp for wave radiation stress @ITHS
+      REAL(SZ) RampTip2   ! Ramp for tidal potential @ITHS
+      REAL(SZ) RampMete2  ! Ramp for wind and atmospheric pressure @ITHS
+      REAL(SZ) RampWRad2  ! Ramp for wave radiation stress @ITHS
 C...
-C......READ IN 2DDI HOT START INITIAL CONDITION OVER WHOLE DOMAIN
-C......THIS FILE ALWAYS HAS A RECL=8 BECAUSE IT IS ASSUMED THAT THE HARMONIC
-C......ANALYSIS IS ALWAYS DONE IN 64 BITS, EVEN ON A WORKSTATION
+C.....READ IN 2DDI HOT START INITIAL CONDITION OVER WHOLE DOMAIN
+C.....THIS FILE ALWAYS HAS A RECL=8 BECAUSE IT IS ASSUMED THAT THE 
+C.....HARMONIC ANALYSIS IS ALWAYS DONE IN 64 BITS, EVEN ON A WORKSTATION
 C...
         IF(IHOT.EQ.67) OPEN(67,FILE=DIRNAME//'/'//'fort.67',
      &        ACCESS='DIRECT',RECL=8)
@@ -115,14 +117,14 @@ C
 
 C......INITIALLY, ZERO OUT THE NORMAL FLOW ON ALL BOUNDARIES
 
-        DO I=1,NVEL
-          QN2(I)=0.D0
-          QN1(I)=0.D0
-          QN0(I)=0.D0
-          END DO
+        ! DO I=1,NVEL
+          ! QN2(I)=0.D0
+          ! QN1(I)=0.D0
+          ! QN0(I)=0.D0
+          ! END DO
 
-C....FIND THE PROPER PLACE IN THE APERIODIC ELEVATION SPECIFIED BOUNDARY CONDITION
-C....FILE IF IT IS REQURIED.
+C....FIND THE PROPER PLACE IN THE APERIODIC ELEVATION SPECIFIED BOUNDARY 
+C....CONDITION FILE IF IT IS REQURIED.
 
         IF((NOPE.GT.0).AND.(NBFR.EQ.0)) THEN
           IF(NSCREEN.EQ.1.AND.MYPROC.EQ.0) WRITE(6,1112)
@@ -137,10 +139,10 @@ C....FILE IF IT IS REQURIED.
           ETIME2=ETIME1+ETIMINC
           DO J=1,NETA
             READ(19,*) ESBIN1(J)
-                     END DO
+          END DO
           DO J=1,NETA
-              READ(19,*) ESBIN2(J)
-            END DO
+            READ(19,*) ESBIN2(J)
+          END DO
           DO IT=1,ITHS-1
             TIMEIT=IT*DTDP + STATIM*86400.D0
             IF(TIMEIT.GT.ETIME2) THEN
@@ -149,22 +151,22 @@ C....FILE IF IT IS REQURIED.
               DO J=1,NETA
                 ESBIN1(J)=ESBIN2(J)        
                 READ(19,*) ESBIN2(J)
-                END DO
-              ENDIF
-            END DO
+              END DO
+            ENDIF
+          END DO
           IF(TIME_A.GT.ETIME2) THEN
             ETIME1=ETIME2
             ETIME2=ETIME1+ETIMINC
             DO J=1,NETA
               ESBIN1(J)=ESBIN2(J)
               READ(19,*) ESBIN2(J)
-              END DO
-            ENDIF
-          ETRATIO=(TIMEIT-ETIME1)/ETIMINC
+            END DO
           ENDIF
+          ETRATIO=(TIMEIT-ETIME1)/ETIMINC
+        ENDIF
 
-C......FIND PROPER PLACE IN THE APERIODIC NORMAL FLOW BOUNDARY CONDITION FILE IF IT
-C......IS REQUIRED
+C......FIND PROPER PLACE IN THE APERIODIC NORMAL FLOW BOUNDARY CONDITION 
+C......FILE IF IT IS REQUIRED
 
         IF((NFLUXF.EQ.1).AND.(NFFR.EQ.0)) THEN
           IF(NSCREEN.EQ.1.AND.MYPROC.EQ.0) WRITE(6,1112)
@@ -173,273 +175,55 @@ C......IS REQUIRED
           WRITE(16,1978)
  1978     FORMAT(/,1X,'LOCATING NORMAL FLOW INFORMATION IN UNIT 20',/)
           OPEN(20,FILE=DIRNAME//'/'//'fort.20')
-            READ(20,*) FTIMINC
+          READ(20,*) FTIMINC
           QTIME1=STATIM*86400.D0
           QTIME2=QTIME1+FTIMINC
           DO J=1,NVEL
             QNIN1(J)=0.D0
             IF((LBCODEI(J).EQ.2).OR.(LBCODEI(J).EQ.12)
      &                          .OR.(LBCODEI(J).EQ.22))
-     &                                              READ(20,*) QNIN1(J)
-            END DO
+     &      READ(20,*) QNIN1(J)
+          END DO
           DO J=1,NVEL
             QNIN2(J)=0.D0
             IF((LBCODEI(J).EQ.2).OR.(LBCODEI(J).EQ.12)
      &                          .OR.(LBCODEI(J).EQ.22))
-     &                                              READ(20,*) QNIN2(J)
-            END DO
+     &      READ(20,*) QNIN2(J)
+          END DO
           DO IT=1,ITHS-1
             TIMEIT=IT*DTDP + STATIM*86400.D0
             IF(TIMEIT.GT.QTIME2) THEN
               QTIME1=QTIME2
               QTIME2=QTIME2+FTIMINC
               DO J=1,NVEL
+                QNIN1(J)=QNIN2(J) 
+                QNIN2(J)=0.D0
                 IF((LBCODEI(J).EQ.2).OR.(LBCODEI(J).EQ.12)
-     &                              .OR.(LBCODEI(J).EQ.22)) THEN
-                  QNIN1(J)=QNIN2(J)        
-                  READ(20,*) QNIN2(J)
-                  ENDIF
-                END DO
-              ENDIF
-            END DO
-          QTRATIO=(TIMEIT-QTIME1)/FTIMINC
-          DO I=1,NVEL
-            QN1(I)=RAMP1*(QNIN1(I)+QTRATIO*(QNIN2(I)-QNIN1(I)))
-            END DO
+     &                              .OR.(LBCODEI(J).EQ.22))      
+     &          READ(20,*) QNIN2(J)
+              END DO
+            ENDIF
+          END DO
+C          QTRATIO=(TIMEIT-QTIME1)/FTIMINC
+C          DO I=1,NVEL
+C            QN1(I)=RAMP1*(QNIN1(I)+QTRATIO*(QNIN2(I)-QNIN1(I)))
+C          END DO
           IF(TIME_A.GT.QTIME2) THEN
             QTIME1=QTIME2
             QTIME2=QTIME1+FTIMINC
             DO J=1,NVEL
+              QNIN1(J)=QNIN2(J)
+              QNIN2(J)=0.D0
               IF((LBCODEI(J).EQ.2).OR.(LBCODEI(J).EQ.12)
-     &                            .OR.(LBCODEI(J).EQ.22)) THEN
-                QNIN1(J)=QNIN2(J)        
-                READ(20,*) QNIN2(J)
-                ENDIF
-              END DO
-            ENDIF
-          QTRATIO=(TIME_A-QTIME1)/FTIMINC
-          DO I=1,NVEL
-            QN2(I)=RAMP2*(QNIN1(I)+QTRATIO*(QNIN2(I)-QNIN1(I)))
+     &                            .OR.(LBCODEI(J).EQ.22))     
+     &        READ(20,*) QNIN2(J)
             END DO
           ENDIF
-
-C......RESTART THE PERIODIC NORMAL FLOW BOUNDARY CONDITION
-
-        IF((NFLUXF.EQ.1).AND.(NFFR.GT.0)) THEN
-          DO J=1,NFFR
-            IF(FPER(J).EQ.0.) THEN
-              NCYC=0.
-              ELSE
-              NCYC=INT(TIME_A/FPER(J))
-              ENDIF
-            ARGJ1=FAMIG(J)*(TIME_A-DTDP-NCYC*FPER(J))+FFACE(J)
-            ARGJ2=FAMIG(J)*(TIME_A-NCYC*FPER(J))+FFACE(J)
-            RFF1=FFF(J)*RAMP1
-            RFF2=FFF(J)*RAMP2
-            DO I=1,NVEL
-              ARG1=ARGJ1-QNPH(J,I)
-              ARG2=ARGJ2-QNPH(J,I)
-              QN1(I)=QN1(I)+QNAM(J,I)*RFF1*COS(ARG1)
-              QN2(I)=QN2(I)+QNAM(J,I)*RFF2*COS(ARG2)
-              END DO
-            END DO
-            ENDIF
-
-C...
-C...RESTART SUPERCRITICAL OUTWARD NORMAL FLOW OVER SPECIFIED
-C....EXTERNAL BARRIER BOUNDARY NODES
-C...
-        IF(NFLUXB.EQ.1) THEN
-          DO I=1,NVEL
-            IF((LBCODEI(I).EQ.3).OR.(LBCODEI(I).EQ.13)
-     &        .OR.(LBCODEI(I).EQ.23)) THEN
-              NNBB=NBV(I)
-              RBARWL=2.D0*(ETA1(NNBB)-BARLANHT(I))/3.D0
-              IF(RBARWL.GT.0.0D0) THEN
-                QN1(I)=-RAMP1*BARLANCFSP(I)*RBARWL*(RBARWL*G)**0.5D0
-              ENDIF
-              RBARWL=2.D0*(ETA2(NNBB)-BARLANHT(I))/3.D0
-              IF(RBARWL.GT.0.0D0) THEN
-                QN2(I)=-RAMP2*BARLANCFSP(I)*RBARWL*(RBARWL*G)**0.5D0
-              ENDIF
-            ENDIF
-          END DO
+          QTRATIO=(TIME_A-QTIME1)/FTIMINC
+C          DO I=1,NVEL
+C            QN2(I)=RAMP2*(QNIN1(I)+QTRATIO*(QNIN2(I)-QNIN1(I)))
+C          END DO
         ENDIF
-
-C...
-C...RESTART INWARD/OUTWARD NORMAL FLOW OVER SPECIFIED
-cjjwm001 - modified/added the following 3 lines
-C....INTERNAL BARRIERS AND FOR INTERNAL BARRIER BOUNDARIES
-C....WITH CROSS BARRIER PIPES
-C....THIS SECTION ONLY RESTARTS THE OVER BARRIER FLOW COMPONENT
-C...
-cjjwm001 - modified following line
-        IF(NFLUXIB.EQ.1) THEN
-          DO I=1,NVEL
-cjjwm001 - modified following 2 lines
-            IF((LBCODEI(I).EQ.4).OR.(LBCODEI(I).EQ.24) 
-     &        .OR.(LBCODEI(I).EQ.5).OR.(LBCODEI(I).EQ.25)) THEN
-              NNBB1=NBV(I)      ! GLOBAL NODE NUMBER ON THIS SIDE OF BARRIER
-              NNBB2=IBCONN(I)   ! GLOBAL NODE NUMBER ON OPPOSITE SIDE OF BARRIER
-C.............RESET INFORMATION FOR K-1 TIME LEVEL
-              RBARWL1=ETA1(NNBB1)-BARINHT(I)
-              RBARWL2=ETA1(NNBB2)-BARINHT(I)
-              RBARWL1F=2.0D0*RBARWL1/3.0D0
-              RBARWL2F=2.0D0*RBARWL2/3.0D0
-              IF((RBARWL1.LT.0.0).AND.(RBARWL2.LT.0.0)) THEN ! WATER LEVEL BELOW BARRIER
-                QN1(I)=0.0D0                                   ! NO FLOW
-                GOTO 1998
-              ENDIF
-              IF(RBARWL1.EQ.RBARWL2) THEN ! WATER LEVEL EQUAL ON BOTH SIDES OF BARRIER
-                QN1(I)=0.0D0                ! NO FLOW
-                GOTO 1998
-              ENDIF
-              IF(RBARWL1.GT.RBARWL2) THEN ! WATER LEVEL GREATER ON THIS SIDE OF BARRIER
-                IF(RBARWL2.GT.RBARWL1F) THEN ! OUTWARD SUBCRITICAL FLOW
-                  QN1(I)=-RAMP1*BARINCFSB(I)*RBARWL2*
-     &                    (2.d0*G*(RBARWL1-RBARWL2))**0.5D0
-                  GOTO 1998
-                ELSE                        ! OUTWARD SUPERCRITICAL FLOW
-                  QN1(I)=-RAMP1*BARINCFSP(I)*RBARWL1F*
-     &                    (RBARWL1F*G)**0.5D0
-                  GOTO 1998
-                ENDIF
-              ENDIF
-              IF(RBARWL2.GT.RBARWL1) THEN  ! WATER LEVEL LOWER ON THIS SIDE OF BARRIER
-                IF(RBARWL1.GT.RBARWL2F) THEN ! INWARD SUBCRITICAL FLOW
-                  QN1(I)=RAMP1*BARINCFSB(I)*RBARWL1*
-     &                   (2.d0*G*(RBARWL2-RBARWL1))**0.5D0
-                  GOTO 1998
-                ELSE                         ! INWARD SUPERCRITICAL FLOW
-                  QN1(I)=RAMP1*BARINCFSP(I)*RBARWL2F*(RBARWL2F*G)**0.5D0
-                  GOTO 1998
-                ENDIF
-              ENDIF
-1998          CONTINUE
-C.............RESET INFORMATION FOR K TIME LEVEL
-              RBARWL1=ETA2(NNBB1)-BARINHT(I)
-              RBARWL2=ETA2(NNBB2)-BARINHT(I)
-              RBARWL1F=2.0D0*RBARWL1/3.0D0
-              RBARWL2F=2.0D0*RBARWL2/3.0D0
-              IF((RBARWL1.LT.0.0).AND.(RBARWL2.LT.0.0)) THEN ! WATER LEVEL BELOW BARRIER
-                QN2(I)=0.0D0                                   ! NO FLOW
-                GOTO 1999
-              ENDIF
-              IF(RBARWL1.EQ.RBARWL2) THEN ! WATER LEVEL EQUAL ON BOTH SIDES OF BARRIER
-                QN2(I)=0.0D0                ! NO FLOW
-                GOTO 1999
-              ENDIF
-              IF(RBARWL1.GT.RBARWL2) THEN ! WATER LEVEL GREATER ON THIS SIDE OF BARRIER
-                IF(RBARWL2.GT.RBARWL1F) THEN ! OUTWARD SUBCRITICAL FLOW
-                  QN2(I)=-RAMP2*BARINCFSB(I)*RBARWL2*
-     &                    (2.d0*G*(RBARWL1-RBARWL2))**0.5D0
-                  GOTO 1999
-                ELSE                         ! OUTWARD SUPERCRITICAL FLOW
-                  QN2(I)=-RAMP2*BARINCFSP(I)*RBARWL1F*
-     &                    (RBARWL1F*G)**0.5D0
-                  GOTO 1999
-                ENDIF
-              ENDIF
-              IF(RBARWL2.GT.RBARWL1) THEN !WATER LEVEL LOWER ON THIS SIDE OF BARRIER
-                IF(RBARWL1.GT.RBARWL2F) THEN ! INWARD SUBCRITICAL FLOW
-                  QN2(I)=RAMP2*BARINCFSB(I)*RBARWL1*
-     &                   (2.d0*G*(RBARWL2-RBARWL1))**0.5D0
-                  GOTO 1999
-                ELSE                         ! INWARD SUPERCRITICAL FLOW
-                  QN2(I)=RAMP2*BARINCFSP(I)*RBARWL2F*(RBARWL2F*G)**0.5D0
-                  GOTO 1999
-                ENDIF
-              ENDIF
-1999          CONTINUE
-            ENDIF
-          END DO
-        ENDIF
-
-cjjwm001 - start add
-C...
-C...RESTART INWARD/OUTWARD NORMAL FLOW OVER SPECIFIED
-C....INTERNAL BARRIERS WITH CROSS BARRIER PIPES
-C....THIS SECTION RESTARTS THE PIPE FLOW COMPONENT
-C....NOTE THAT PIPE FLOW COMPONENT IS ADDED INTO BARRIER FLOW COMPONENT
-C....THAT WAS PREVIOUSLY SET
-C...
-        IF(NFLUXIBP.EQ.1) THEN
-          DO I=1,NVEL
-            IF((LBCODEI(I).EQ.5).OR.(LBCODEI(I).EQ.25)) THEN
-              NNBB1=NBV(I)      ! GLOBAL NODE NUMBER ON THIS SIDE OF BARRIER
-              NNBB2=IBCONN(I)   ! GLOBAL NODE NUMBER ON OPPOSITE SIDE OF BARRIER
-C.............RESET INFORMATION FOR K-1 TIME LEVEL
-              RBARWL1=ETA1(NNBB1)-PIPEHT(I)
-              RBARWL2=ETA1(NNBB2)-PIPEHT(I)
-              IF((RBARWL1.LT.0.0).AND.(RBARWL2.LT.0.0)) THEN ! WATER LEVEL BELOW PIPE
-                QN1(I)=QN1(I)+0.0D0                                 ! NO FLOW
-                GOTO 2002
-              ENDIF
-              IF(RBARWL1.EQ.RBARWL2) THEN ! WATER LEVEL EQUAL ON BOTH SIDES OF PIPE
-                QN1(I)=QN1(I)+0.0D0                ! NO FLOW
-                GOTO 2002
-              ENDIF
-              IF(RBARWL1.GT.RBARWL2) THEN ! WATER LEVEL GREATER ON THIS SIDE OF PIPE
-                IF(RBARWL2.LE.0) THEN ! OUTWARD FREE DISCHARGE 
-                  QN1(I)=QN1(I)-RAMP1*0.25D0*PI*(PIPEDIAM(I))**2
-     &                    *(2.D0*G*RBARWL1/(1+PIPECOEF(I)))**0.5D0
-                  GOTO 2002
-                ELSE                        ! OUTWARD SUBMERGED DISCHARGE
-                  QN1(I)=QN1(I)-RAMP1*0.25D0*PI*(PIPEDIAM(I))**2
-     &                    *(2.D0*G*(RBARWL1-RBARWL2)/PIPECOEF(I))**0.5D0
-                  GOTO 2002
-                ENDIF
-              ENDIF
-              IF(RBARWL2.GT.RBARWL1) THEN  ! WATER LEVEL LOWER ON THIS SIDE OF PIPE
-                IF(RBARWL1.LE.0) THEN ! INWARD FREE DISCHARGE 
-                  QN1(I)=QN1(I)+RAMP1*0.25D0*PI*(PIPEDIAM(I))**2
-     &                    *(2.D0*G*RBARWL2/(1+PIPECOEF(I)))**0.5D0
-                  GOTO 2002
-                ELSE                         ! INWARD SUBMERGED DISCHARGE
-                  QN1(I)=QN1(I)+RAMP1*0.25D0*PI*(PIPEDIAM(I))**2
-     &                    *(2.D0*G*(RBARWL2-RBARWL1)/PIPECOEF(I))**0.5D0
-                  GOTO 2002
-                ENDIF
-              ENDIF
-2002          CONTINUE
-C.............RESET INFORMATION FOR K TIME LEVEL
-              RBARWL1=ETA2(NNBB1)-PIPEHT(I)
-              RBARWL2=ETA2(NNBB2)-PIPEHT(I)
-              IF((RBARWL1.LT.0.0).AND.(RBARWL2.LT.0.0)) THEN ! WATER LEVEL BELOW PIPE
-                QN2(I)=QN2(I)+0.0D0                                   ! NO FLOW
-                GOTO 2003
-              ENDIF
-              IF(RBARWL1.EQ.RBARWL2) THEN ! WATER LEVEL EQUAL ON BOTH SIDES OF PIPE
-                QN2(I)=QN2(I)+0.0D0                ! NO FLOW
-                GOTO 2003
-              ENDIF
-              IF(RBARWL1.GT.RBARWL2) THEN ! WATER LEVEL GREATER ON THIS SIDE OF PIPE
-                IF(RBARWL2.LE.0) THEN ! OUTWARD FREE DISCHARGE
-                  QN2(I)=QN2(I)-RAMP2*0.25D0*PI*(PIPEDIAM(I))**2
-     &                    *(2.D0*G*RBARWL1/(1+PIPECOEF(I)))**0.5D0
-                  GOTO 2003
-                ELSE                         ! OUTWARD SUBMERGED DISCHARGE
-                  QN2(I)=QN2(I)-RAMP2*0.25D0*PI*(PIPEDIAM(I))**2
-     &                    *(2.D0*G*(RBARWL1-RBARWL2)/PIPECOEF(I))**0.5D0
-                  GOTO 2003
-                ENDIF
-              ENDIF
-              IF(RBARWL2.GT.RBARWL1) THEN !WATER LEVEL LOWER ON THIS SIDE OF PIPE
-                IF(RBARWL1.LE.0) THEN ! INWARD FREE DISCHARGE
-                  QN2(I)=QN2(I)+RAMP2*0.25D0*PI*(PIPEDIAM(I))**2
-     &                    *(2.D0*G*RBARWL2/(1+PIPECOEF(I)))**0.5D0
-                  GOTO 2003
-                ELSE                         ! INWARD SUBMERGED DISCHARGE
-                  QN2(I)=QN2(I)+RAMP2*0.25D0*PI*(PIPEDIAM(I))**2
-     &                    *(2.D0*G*(RBARWL2-RBARWL1)/PIPECOEF(I))**0.5D0
-                  GOTO 2003
-                ENDIF
-              ENDIF
-2003          CONTINUE
-            ENDIF
-          END DO
-        ENDIF
-cjjwm001 - end add    
 
 C......RESTART WIND AND PRESSURE INFORMATION
 
@@ -525,7 +309,7 @@ C......RESTART WIND AND PRESSURE INFORMATION
           IF(NSCREEN.EQ.1.AND.MYPROC.EQ.0) 
      &         WRITE(6,*)'FOUND WIND DATA AT TIME= ',IWTIME
           WRITE(16,*) 'FOUND WIND DATA AT TIME =',IWTIME
-          WTIME2=WTIMED-WREFTIM                    !CAST INTO MODEL TIME REFERENCE
+          WTIME2=WTIMED-WREFTIM          !CAST INTO MODEL TIME REFERENCE
           WTIME1=WTIME2-WTIMINC
           DO IT=1,ITHS
             TIMEIT=IT*DTDP + STATIM*86400.D0
@@ -656,12 +440,13 @@ C......RESTART WIND AND PRESSURE INFORMATION
 
         IF(NWS.EQ.6) THEN
           OPEN(22,FILE=DIRNAME//'/'//'fort.22')
-C   The following 3 lines are a hardwire to allow a non standard met file to be read in at 
-C   time zero in a hot start.  They should be eliminated or commented out for normal operation
+C   The following 3 lines are a hardwire to allow a non standard met 
+C   file to be read in at time zero in a hot start. 
+C   They should be eliminated or commented out for normal operation
 c         OPEN(199,FILE=DIRNAME//'/'//'fort.199')
 c         READ(199,*) (NHG,PRN1(I),WVNX1(I),WVNY1(I),I=1,NP)
 c         CLOSE(199)
-C   The following CALL statement should be uncommented for normal operation
+C   The following CALL should be uncommented for normal operation
           CALL NWS6GET(X,Y,SLAM,SFEA,WVNX1,WVNY1,PRN1,NP,NWLON,NWLAT,
      &                 WLATMAX,WLONMIN,WLATINC,WLONINC,ICS,RHOWAT0,G)
           CALL NWS6GET(X,Y,SLAM,SFEA,WVNX2,WVNY2,PRN2,NP,NWLON,NWLAT,
@@ -879,8 +664,8 @@ C...
         IF(NBYTE.EQ.8) ITEMPSTP=10
 
 C...
-C....IF RESTARTING THE ELEVATION STATION OUTPUT FILE, GO TO THE PROPER PLACE
-C....IN THE FILE.  OTHERWISE ZERO OUT NSCOUE.
+C....IF RESTARTING THE ELEVATION STATION OUTPUT FILE, GO TO THE PROPER 
+C....PLACE IN THE FILE.  OTHERWISE ZERO OUT NSCOUE.
 C...
         READ(IHOT,REC=IHOTSTP+1) IESTP
         READ(IHOT,REC=IHOTSTP+2) NSCOUE
@@ -951,8 +736,8 @@ C...
           WRITE(61,REC=IESTP+5) 1
           IF (SEDFLAG.GE.1) WRITE(82,REC=IESTP+5) 1
           IESTP=IESTP+5
-          CLOSE(61)                    ! DO THIS TO FLUSH THE WRITE BUFFER
-          IF (SEDFLAG.GE.1) CLOSE(82)                    ! DO THIS TO FLUSH THE WRITE BUFFER
+          CLOSE(61)                  ! DO THIS TO FLUSH THE WRITE BUFFER
+          IF (SEDFLAG.GE.1) CLOSE(82)! DO THIS TO FLUSH THE WRITE BUFFER
           OPEN(61,FILE=DIRNAME//'/'//'fort.61',
      &         ACCESS='DIRECT',RECL=NBYTE)
           IF (SEDFLAG.GE.1) OPEN(82,FILE=DIRNAME//'/'//'fort.82',
@@ -971,7 +756,7 @@ C...
         IF(NOUTE.EQ.1) THEN
           OPEN(61,FILE=DIRNAME//'/'//'fort.61')
           IF (SEDFLAG.GE.1) OPEN(82,FILE=DIRNAME//'/'//'fort.82')
-          DO I=1,IESTP          !I DON'T KNOW OF A PRACTICAL WAY TO CHANGE NTRSPE
+          DO I=1,IESTP !I DON'T KNOW OF A PRACTICAL WAY TO CHANGE NTRSPE
  1050       FORMAT(1X)
             READ(61,1050)
             IF (SEDFLAG.GE.1) READ(82,1050)
@@ -982,10 +767,12 @@ C...
      &          ACCESS='DIRECT',RECL=NBYTE)
           IF (SEDFLAG.GE.1) OPEN(82,FILE=DIRNAME//'/'//'fort.82',
      &          ACCESS='DIRECT',RECL=NBYTE)
-          WRITE(61,REC=ITEMPSTP+1) NTRSPE   ! ALLOW ADDITIONAL OUTPUT DATA TO BE WRITTEN
-          IF (SEDFLAG.GE.1) WRITE(82,REC=ITEMPSTP+1) NTRSPE   ! ALLOW ADDITIONAL OUTPUT DATA TO BE WRITTEN
-          CLOSE(61)                         ! DO THIS TO FLUSH THE WRITE BUFFER
-          IF (SEDFLAG.GE.1) CLOSE(82)                         ! DO THIS TO FLUSH THE WRITE BUFFER
+          WRITE(61,REC=ITEMPSTP+1) NTRSPE   ! ALLOW ADDITIONAL OUTPUT 
+                                            !DATA TO BE WRITTEN
+          IF (SEDFLAG.GE.1) WRITE(82,REC=ITEMPSTP+1) NTRSPE   ! ALLOW 
+                                 !ADDITIONAL OUTPUT DATA TO BE WRITTEN
+          CLOSE(61)                  ! DO THIS TO FLUSH THE WRITE BUFFER
+          IF (SEDFLAG.GE.1) CLOSE(82)! DO THIS TO FLUSH THE WRITE BUFFER
           OPEN(61,FILE=DIRNAME//'/'//'fort.61',
      &         ACCESS='DIRECT',RECL=NBYTE)
           IF (SEDFLAG.GE.1) OPEN(82,FILE=DIRNAME//'/'//'fort.82',
@@ -1051,7 +838,7 @@ C...
           WRITE(62,REC=IVSTP+4) NSPOOLV
           WRITE(62,REC=IVSTP+5) 2
           IVSTP=IVSTP+5
-          CLOSE(62)                    ! DO THIS TO FLUSH THE WRITE BUFFER
+          CLOSE(62)                  ! DO THIS TO FLUSH THE WRITE BUFFER
           OPEN(62,FILE=DIRNAME//'/'//'fort.62',
      &         ACCESS='DIRECT',RECL=NBYTE)
           ENDIF
@@ -1063,15 +850,16 @@ C...
           ENDIF
         IF(NOUTV.EQ.1) THEN
           OPEN(62,FILE=DIRNAME//'/'//'fort.62')
-          DO I=1,IVSTP          !I DON'T KNOW OF A PRACTICAL WAY TO CHANGE NTRSPV
+          DO I=1,IVSTP !I DON'T KNOW OF A PRACTICAL WAY TO CHANGE NTRSPV
             READ(62,1050)
             ENDDO
           ENDIF
         IF(NOUTV.EQ.2) THEN
           OPEN(62,FILE=DIRNAME//'/'//'fort.62',
      &          ACCESS='DIRECT',RECL=NBYTE)
-          WRITE(62,REC=ITEMPSTP+1) NTRSPV   ! ALLOW ADDITIONAL OUTPUT DATA TO BE WRITTEN
-          CLOSE(62)                         ! DO THIS TO FLUSH THE WRITE BUFFER
+          WRITE(62,REC=ITEMPSTP+1) NTRSPV ! ALLOW ADDITIONAL OUTPUT DATA 
+                                          ! TO BE WRITTEN
+          CLOSE(62)                  ! DO THIS TO FLUSH THE WRITE BUFFER
           OPEN(62,FILE=DIRNAME//'/'//'fort.62',
      &         ACCESS='DIRECT',RECL=NBYTE)
           ENDIF
@@ -1135,7 +923,7 @@ C...
           WRITE(81,REC=ICSTP+4) NSPOOLC
           WRITE(81,REC=ICSTP+5) 1
           ICSTP=ICSTP+5
-          CLOSE(81)                    ! DO THIS TO FLUSH THE WRITE BUFFER
+          CLOSE(81)                  ! DO THIS TO FLUSH THE WRITE BUFFER
           OPEN(81,FILE=DIRNAME//'/'//'fort.81',
      &         ACCESS='DIRECT',RECL=NBYTE)
           ENDIF
@@ -1147,15 +935,16 @@ C...
           ENDIF
         IF(NOUTC.EQ.1) THEN
           OPEN(81,FILE=DIRNAME//'/'//'fort.81')
-          DO I=1,ICSTP          !I DON'T KNOW OF A PRACTICAL WAY TO CHANGE NTRSPC
+          DO I=1,ICSTP !I DON'T KNOW OF A PRACTICAL WAY TO CHANGE NTRSPC
             READ(81,1050)
             ENDDO
           ENDIF
         IF(NOUTC.EQ.2) THEN
           OPEN(81,FILE=DIRNAME//'/'//'fort.81',
      &          ACCESS='DIRECT',RECL=NBYTE)
-crevisit          WRITE(81,REC=ITEMPSTP+1) NTRSPC   ! ALLOW ADDITIONAL OUTPUT DATA TO BE WRITTEN
-          CLOSE(81)                         ! DO THIS TO FLUSH THE WRITE BUFFER
+crevisit          WRITE(81,REC=ITEMPSTP+1) NTRSPC   ! ALLOW ADDITIONAL 
+                                            !OUTPUT DATA TO BE WRITTEN
+          CLOSE(81)                 ! DO THIS TO FLUSH THE WRITE BUFFER
           OPEN(81,FILE=DIRNAME//'/'//'fort.81',
      &         ACCESS='DIRECT',RECL=NBYTE)
           ENDIF
@@ -1243,7 +1032,7 @@ C...
           WRITE(72,REC=IWSTP+5) 2
           IPSTP=IPSTP+5
           IWSTP=IWSTP+5
-          CLOSE(71)                    ! DO THIS TO FLUSH THE WRITE BUFFER
+          CLOSE(71)                  ! DO THIS TO FLUSH THE WRITE BUFFER
           CLOSE(72)
           OPEN(71,FILE=DIRNAME//'/'//'fort.71',
      &         ACCESS='DIRECT',RECL=NBYTE)          
@@ -1265,10 +1054,10 @@ C...
         IF(NOUTM.EQ.1) THEN
           OPEN(71,FILE=DIRNAME//'/'//'fort.71')
           OPEN(72,FILE=DIRNAME//'/'//'fort.72')
-          DO I=1,IPSTP          !I DON'T KNOW OF A PRACTICAL WAY TO CHANGE NTRSPM
+          DO I=1,IPSTP !I DON'T KNOW OF A PRACTICAL WAY TO CHANGE NTRSPM
             READ(71,1050)
             ENDDO
-          DO I=1,IWSTP          !I DON'T KNOW OF A PRACTICAL WAY TO CHANGE NTRSPM
+          DO I=1,IWSTP !I DON'T KNOW OF A PRACTICAL WAY TO CHANGE NTRSPM
             READ(72,1050)
             ENDDO
           ENDIF
@@ -1277,9 +1066,10 @@ C...
      &          ACCESS='DIRECT',RECL=NBYTE)
           OPEN(72,FILE=DIRNAME//'/'//'fort.72',
      &          ACCESS='DIRECT',RECL=NBYTE)
-crevisit          WRITE(71,REC=ITEMPSTP+1) NTRSPM   ! ALLOW ADDITIONAL OUTPUT DATA TO BE WRITTEN
+crevisit          WRITE(71,REC=ITEMPSTP+1) NTRSPM   ! ALLOW ADDITIONAL 
+                                              !OUTPUT DATA TO BE WRITTEN
 crevisit          WRITE(72,REC=ITMEPSTP+1) NTRSPM
-          CLOSE(71)                         ! DO THIS TO FLUSH THE WRITE BUFFER
+          CLOSE(71)                  ! DO THIS TO FLUSH THE WRITE BUFFER
           CLOSE(72)
           OPEN(71,FILE=DIRNAME//'/'//'fort.71',
      &         ACCESS='DIRECT',RECL=NBYTE)
@@ -1372,9 +1162,9 @@ C...
           IF (SEDFLAG.GE.1) WRITE(84,REC=IGEP+5) 1
           IF (SEDFLAG.GE.1) WRITE(85,REC=IGEP+5) 1
           IGEP=IGEP+5
-          CLOSE(63)                    ! DO THIS TO FLUSH THE WRITE BUFFER
-          IF (SEDFLAG.GE.1) CLOSE(84)  ! DO THIS TO FLUSH THE WRITE BUFFER
-          IF (SEDFLAG.GE.1) CLOSE(85)  ! DO THIS TO FLUSH THE WRITE BUFFER
+          CLOSE(63)                  ! DO THIS TO FLUSH THE WRITE BUFFER
+          IF (SEDFLAG.GE.1) CLOSE(84)! DO THIS TO FLUSH THE WRITE BUFFER
+          IF (SEDFLAG.GE.1) CLOSE(85)! DO THIS TO FLUSH THE WRITE BUFFER
           OPEN(63,FILE=DIRNAME//'/'//'fort.63',
      &         ACCESS='DIRECT',RECL=NBYTE)
           IF (SEDFLAG.GE.1) OPEN(84,FILE=DIRNAME//'/'//'fort.84',
@@ -1391,7 +1181,7 @@ C...
           IF (SEDFLAG.GE.1) WRITE(85,3220) RUNDES,RUNID,AGRID
 Casey 130211: Debug.
          !WRITE(63,3645) NDSETSE,NP,DTDP*NSPOOLGE,NSPOOLGE,1
-          WRITE(63,3645) NDSETSE,NE,DTDP*NSPOOLGE,NSPOOLGE,1
+          WRITE(63,3645) NDSETSE,NP,DTDP*NSPOOLGE,NSPOOLGE,1
           IF (SEDFLAG.GE.1) WRITE(84,3645) NDSETSE,NP,DTDP*NSPOOLGE,
      &                                     NSPOOLGE,1
           IF (SEDFLAG.GE.1) WRITE(85,3645) NDSETSE,NP,DTDP*NSPOOLGE,
@@ -1402,7 +1192,7 @@ Casey 130211: Debug.
           OPEN(63,FILE=DIRNAME//'/'//'fort.63')
           IF (SEDFLAG.GE.1) OPEN(84,FILE=DIRNAME//'/'//'fort.84')
           IF (SEDFLAG.GE.1) OPEN(85,FILE=DIRNAME//'/'//'fort.85')
-          DO I=1,IGEP           !I DON'T KNOW OF A PRACTICAL WAY TO CHANGE NDSETSE
+          DO I=1,IGEP !I DON'T KNOW OF A PRACTICAL WAY TO CHANGE NDSETSE
             READ(63,1050)
             IF (SEDFLAG.GE.1) READ(84,1050)
             IF (SEDFLAG.GE.1) READ(85,1050)
@@ -1415,11 +1205,13 @@ Casey 130211: Debug.
      &          ACCESS='DIRECT',RECL=NBYTE)
           IF (SEDFLAG.GE.1) OPEN(85,FILE=DIRNAME//'/'//'fort.85',
      &          ACCESS='DIRECT',RECL=NBYTE)
-          WRITE(63,REC=ITEMPSTP+1) NDSETSE  ! ALLOW ADDITIONAL OUTPUT DATA TO BE WRITTEN
-          IF (SEDFLAG.GE.1) WRITE(84,REC=ITEMPSTP+1) NDSETSE  ! ALLOW ADDITIONAL OUTPUT DATA TO BE WRITTEN
-          CLOSE(63)                         ! DO THIS TO FLUSH THE WRITE BUFFER
-          IF (SEDFLAG.GE.1) CLOSE(84)                         ! DO THIS TO FLUSH THE WRITE BUFFER
-          IF (SEDFLAG.GE.1) CLOSE(85)                         ! DO THIS TO FLUSH THE WRITE BUFFER
+          WRITE(63,REC=ITEMPSTP+1) NDSETSE  ! ALLOW ADDITIONAL OUTPUT 
+                                            ! DATA TO BE WRITTEN
+          IF (SEDFLAG.GE.1) WRITE(84,REC=ITEMPSTP+1) NDSETSE  ! ALLOW 
+                               ! ADDITIONAL OUTPUT DATA TO BE WRITTEN
+          CLOSE(63)                  ! DO THIS TO FLUSH THE WRITE BUFFER
+          IF (SEDFLAG.GE.1) CLOSE(84)! DO THIS TO FLUSH THE WRITE BUFFER
+          IF (SEDFLAG.GE.1) CLOSE(85)! DO THIS TO FLUSH THE WRITE BUFFER
           OPEN(63,FILE=DIRNAME//'/'//'fort.63',
      &         ACCESS='DIRECT',RECL=NBYTE)
           IF (SEDFLAG.GE.1) OPEN(84,FILE=DIRNAME//'/'//'fort.84',
@@ -1513,7 +1305,7 @@ C...
           IF (SEDFLAG.GE.1) WRITE(94,REC=IGVP+5) 2
           IF (SEDFLAG.GE.1) WRITE(96,REC=IGVP+5) 2
           IGVP=IGVP+5
-          CLOSE(64)                    ! DO THIS TO FLUSH THE WRITE BUFFER
+          CLOSE(64)                  ! DO THIS TO FLUSH THE WRITE BUFFER
           IF (SEDFLAG.GE.1) CLOSE(94)
           IF (SEDFLAG.GE.1) CLOSE(96)
           OPEN(64,FILE=DIRNAME//'/'//'fort.64',
@@ -1532,7 +1324,7 @@ C...
           IF (SEDFLAG.GE.1) WRITE(96,3220) RUNDES,RUNID,AGRID
 Casey 130211: Debug.
          !WRITE(64,3645) NDSETSV,NP,DTDP*NSPOOLGV,NSPOOLGV,2
-          WRITE(64,3645) NDSETSV,NE,DTDP*NSPOOLGV,NSPOOLGV,2
+          WRITE(64,3645) NDSETSV,NP,DTDP*NSPOOLGV,NSPOOLGV,2
           IF (SEDFLAG.GE.1) WRITE(94,3645) NDSETSV,NP,DTDP*NSPOOLGV,
      &                                     NSPOOLGV,2
           IF (SEDFLAG.GE.1) WRITE(96,3645) NDSETSV,NP,DTDP*NSPOOLGV,
@@ -1543,7 +1335,7 @@ Casey 130211: Debug.
           OPEN(64,FILE=DIRNAME//'/'//'fort.64')
           IF (SEDFLAG.GE.1) OPEN(94,FILE=DIRNAME//'/'//'fort.94')
           IF (SEDFLAG.GE.1) OPEN(96,FILE=DIRNAME//'/'//'fort.96')
-          DO I=1,IGVP           !I DON'T KNOW OF A PRACTICAL WAY TO CHANGE NDSETSV
+          DO I=1,IGVP !I DON'T KNOW OF A PRACTICAL WAY TO CHANGE NDSETSV
             READ(64,1050)
             IF (SEDFLAG.GE.1) READ(94,1050)
             IF (SEDFLAG.GE.1) READ(96,1050)
@@ -1556,12 +1348,13 @@ Casey 130211: Debug.
      &          ACCESS='DIRECT',RECL=NBYTE)
           IF (SEDFLAG.GE.1) OPEN(96,FILE=DIRNAME//'/'//'fort.96',
      &          ACCESS='DIRECT',RECL=NBYTE)
-          WRITE(64,REC=ITEMPSTP+1) NDSETSV  ! ALLOW ADDITIONAL OUTPUT DATA TO BE WRITTEN
+          WRITE(64,REC=ITEMPSTP+1) NDSETSV  ! ALLOW ADDITIONAL OUTPUT 
+                                            ! DATA TO BE WRITTEN
           IF (SEDFLAG.GE.1) WRITE(94,REC=ITEMPSTP+1) NDSETSV
           IF (SEDFLAG.GE.1) WRITE(96,REC=ITEMPSTP+1) NDSETSV
           CLOSE(64)
           IF (SEDFLAG.GE.1) CLOSE(94)
-          IF (SEDFLAG.GE.1) CLOSE(96)                          ! DO THIS TO FLUSH THE WRITE BUFFER
+          IF (SEDFLAG.GE.1) CLOSE(96)! DO THIS TO FLUSH THE WRITE BUFFER
           OPEN(64,FILE=DIRNAME//'/'//'fort.64',
      &         ACCESS='DIRECT',RECL=NBYTE)
           IF (SEDFLAG.GE.1) OPEN(94,FILE=DIRNAME//'/'//'fort.94',
@@ -1629,7 +1422,7 @@ C...
           WRITE(83,REC=IGCP+4) NSPOOLGC
           WRITE(83,REC=IGCP+5) 1
           IGCP=IGCP+5
-          CLOSE(83)                    ! DO THIS TO FLUSH THE WRITE BUFFER
+          CLOSE(83)                  ! DO THIS TO FLUSH THE WRITE BUFFER
           OPEN(83,FILE=DIRNAME//'/'//'fort.83',
      &         ACCESS='DIRECT',RECL=NBYTE)
           ENDIF
@@ -1641,15 +1434,16 @@ C...
           ENDIF
         IF(NOUTGC.EQ.1) THEN
           OPEN(83,FILE=DIRNAME//'/'//'fort.83')
-          DO I=1,IGCP           !I DON'T KNOW OF A PRACTICAL WAY TO CHANGE NDSETSC
+          DO I=1,IGCP !I DON'T KNOW OF A PRACTICAL WAY TO CHANGE NDSETSC
             READ(83,1050)
             ENDDO
           ENDIF
         IF(NOUTGC.EQ.2) THEN
           OPEN(83,FILE=DIRNAME//'/'//'fort.83',
      &          ACCESS='DIRECT',RECL=NBYTE)
-          WRITE(83,REC=ITEMPSTP+1) NDSETSC  ! ALLOW ADDITIONAL OUTPUT DATA TO BE WRITTEN
-          CLOSE(83)                         ! DO THIS TO FLUSH THE WRITE BUFFER
+          WRITE(83,REC=ITEMPSTP+1) NDSETSC  ! ALLOW ADDITIONAL OUTPUT
+                                            ! DATA TO BE WRITTEN
+          CLOSE(83)                  ! DO THIS TO FLUSH THE WRITE BUFFER
           OPEN(83,FILE=DIRNAME//'/'//'fort.83',
      &         ACCESS='DIRECT',RECL=NBYTE)
           ENDIF
@@ -1731,7 +1525,7 @@ C...
           write(73,rec=igpp+4) nspoolgw
           write(73,rec=igpp+5) 2
           igpp=igpp+5
-          close(73)                    ! DO THIS TO FLUSH THE WRITE BUFFER
+          close(73)                  ! DO THIS TO FLUSH THE WRITE BUFFER
           open(73,file=dirname//'/'//'fort.73',
      &         access='direct',recl=nbyte)
           WRITE(74,REC=IGWP+1) NDSETSW
@@ -1740,7 +1534,7 @@ C...
           WRITE(74,REC=IGWP+4) NSPOOLGW
           WRITE(74,REC=IGWP+5) 2
           IGWP=IGWP+5
-          CLOSE(74)                    ! DO THIS TO FLUSH THE WRITE BUFFER
+          CLOSE(74)                  ! DO THIS TO FLUSH THE WRITE BUFFER
           OPEN(74,FILE=DIRNAME//'/'//'fort.74',
      &         ACCESS='DIRECT',RECL=NBYTE)
           ENDIF
@@ -1756,25 +1550,27 @@ C...
           ENDIF
         IF(NOUTGW.EQ.1) THEN
           OPEN(73,FILE=DIRNAME//'/'//'fort.73')
-          do i=1,igpp           !I DON'T KNOW OF A PRACTICAL WAY TO CHANGE NDSETSW
+          do i=1,igpp !I DON'T KNOW OF A PRACTICAL WAY TO CHANGE NDSETSW
             read(73,1050)
             enddo          
                 OPEN(74,FILE=DIRNAME//'/'//'fort.74')
-          DO I=1,IGWP           !I DON'T KNOW OF A PRACTICAL WAY TO CHANGE NDSETSW
+          DO I=1,IGWP !I DON'T KNOW OF A PRACTICAL WAY TO CHANGE NDSETSW
             READ(74,1050)
             ENDDO
           ENDIF
         IF(NOUTGW.EQ.2) THEN
           open(73,file=dirname//'/'//'fort.73',
      &          access='direct',recl=nbyte)
-          write(73,REC=itempstp+1) ndsetsw  ! ALLOW ADDITIONAL OUTPUT DATA TO BE WRITTEN
-          close(73)                         ! DO THIS TO FLUSH THE WRITE BUFFER
+          write(73,REC=itempstp+1) ndsetsw  ! ALLOW ADDITIONAL OUTPUT 
+                                            ! DATA TO BE WRITTEN
+          close(73)                  ! DO THIS TO FLUSH THE WRITE BUFFER
           open(73,file=dirname//'/'//'fort.73',
      &         access='direct',recl=nbyte)
           OPEN(74,FILE=DIRNAME//'/'//'fort.74',
      &          ACCESS='DIRECT',RECL=NBYTE)
-          WRITE(74,REC=ITEMPSTP+1) NDSETSW  ! ALLOW ADDITIONAL OUTPUT DATA TO BE WRITTEN
-          CLOSE(74)                         ! DO THIS TO FLUSH THE WRITE BUFFER
+          WRITE(74,REC=ITEMPSTP+1) NDSETSW  ! ALLOW ADDITIONAL OUTPUT 
+                                            ! DATA TO BE WRITTEN
+          CLOSE(74)                  ! DO THIS TO FLUSH THE WRITE BUFFER
           OPEN(74,FILE=DIRNAME//'/'//'fort.74',
      &         ACCESS='DIRECT',RECL=NBYTE)
           ENDIF
@@ -1820,7 +1616,7 @@ Casey 101118: Added the output of radiation stress gradients.
           WRITE(164,REC=IGRadS+4) NSPOOLGW
           WRITE(164,REC=IGRadS+5) 2
           IGRadS=IGRadS+5
-          CLOSE(164)                    ! DO THIS TO FLUSH THE WRITE BUFFER
+          CLOSE(164)                 ! DO THIS TO FLUSH THE WRITE BUFFER
           OPEN(164,FILE=TRIM(LOCALDIR)//'/'//'rads.64',
      &         ACCESS='DIRECT',RECL=NBYTE)
           ENDIF
@@ -1832,15 +1628,16 @@ Casey 101118: Added the output of radiation stress gradients.
           ENDIF
         IF(NOUTGW.EQ.1) THEN
           OPEN(164,FILE=DIRNAME//'/'//'rads.64')
-          DO I=1,IGRadS           !I DON'T KNOW OF A PRACTICAL WAY TO CHANGE NDSETSW
+         DO I=1,IGRadS!I DON'T KNOW OF A PRACTICAL WAY TO CHANGE NDSETSW
             READ(164,1050)
             ENDDO
           ENDIF
         IF(NOUTGW.EQ.2) THEN
           OPEN(164,FILE=DIRNAME//'/'//'rads.64',
      &          ACCESS='DIRECT',RECL=NBYTE)
-          WRITE(164,REC=ITEMPSTP+1) NDSETSW  ! ALLOW ADDITIONAL OUTPUT DATA TO BE WRITTEN
-          CLOSE(164)                         ! DO THIS TO FLUSH THE WRITE BUFFER
+          WRITE(164,REC=ITEMPSTP+1) NDSETSW  ! ALLOW ADDITIONAL OUTPUT 
+                                             ! DATA TO BE WRITTEN
+          CLOSE(164)                ! DO THIS TO FLUSH THE WRITE BUFFER
           OPEN(164,FILE=DIRNAME//'/'//'rads.64',
      &         ACCESS='DIRECT',RECL=NBYTE)
           ENDIF
@@ -1853,8 +1650,8 @@ C...
         IF(IHARIND.EQ.1) THEN
           IHABEG=ITHAS+NHAINC
 C...
-C........IF HARMONIC ANALYSIS HAS NOT BEGUN, COLD START THE HARMONIC ANALYSIS
-C...
+C........IF HARMONIC ANALYSIS HAS NOT BEGUN, COLD START THE HARMONIC
+C........ANALYSIS
           IF(ITHS.LT.IHABEG) THEN
             ICHA=0
             CALL HACOLDS(HAFREQ)
@@ -1923,8 +1720,8 @@ C..Read in Means and Squares
 
        if(C3DVS) then
 C3DVS..UNCOMMENT THE FOLLOWING LINES TO RUN THE CODE IN 3D VS MODE.
-C3DVS..COMMENT OUT THE FOLLOWING LINES TO RUN THE CODE IN 2DDI OR 3D DSS MODE.
-C3DVS..
+C3DVS..COMMENT OUT THE FOLLOWING LINES TO RUN THE CODE IN 2DDI OR 3D DSS
+C3DVS..MODE.
 c     ! CALL VSSTUP(DT,STATIM,NBYTE,RUNDES,RUNID,AGRID,NT)
 C3DVS..
 C3DVS..END OF 3D VS STATEMENTS (MORE FOLLOW BELOW)
@@ -1935,8 +1732,8 @@ C3DVS..
 
        if(C3DDSS)  then
 C3DDSS.UNCOMMENT THE FOLLOWING LINES TO RUN THE CODE IN 3D DSS MODE
-C3DDSS.COMMENT OUT THE FOLLOWING LINES TO RUN THE CODE IN 2DDI OR 3D VS MODE.
-C3DDSS.
+C3DDSS.COMMENT OUT THE FOLLOWING LINES TO RUN THE CODE IN 2DDI OR 3D VS 
+C3DDSS.MODE.
 c     ! CALL DSSSTUP(DT,STATIM,NBYTE,RUNDES,RUNID,AGRID,NT)
 C3DDSS.
 C3DDSS.END OF 3D DSS STATEMENTS (MORE FOLLOW BELOW)
