@@ -770,7 +770,7 @@ C
 C--Determine whether Unit 63 is Sequential Formatted or Direct Access Binary
 C
       IF (ABS(NOUTGE).EQ.1) THEN
-        GO TO 12345
+        GO TO 1000
       ELSE
         GO TO 2000
       ENDIF
@@ -794,22 +794,22 @@ C
          READ(LOC(IPROC),3645)  NDSETGE,NP,DTE,NSTEMP,ITEMPE
          IF (NP.NE.NNODP(IPROC)) THEN
            print *, "NP = ",NP," NNODP = ",NNODP(IPROC)
-           STOP 'Inconsistency in number of local elems'
+           STOP 'Inconsistency in number of local nodes'
          ENDIF
       ENDDO
       OPEN(UNIT=63,FILE='fort.63')
 C
       WRITE(63,'(A85)') INLINE
-      WRITE(63,3645) NDSETGE,NELG,DTE,NSPOOLGE,ITEMPE
+      WRITE(63,3645) NDSETGE,NNODG,DTE,NSPOOLGE,ITEMPE
 C
       DO J=1,NDSETGE
 C
          DO IPROC=1,NPROC
             READ(LOC(IPROC),FMT=2120,END=9999,ERR=9999) TIMEOUTE,ITE
             IF (IPROC.EQ.1) WRITE(63,2120) TIMEOUTE,ITE
-            DO K = 1,NELP(IPROC)
+            DO K = 1,NNODP(IPROC)
                READ(LOC(IPROC),80,END=9999,ERR=9999) ETASCP(K)
-               INDEX = IMAP_EL_LG(K,IPROC) !IMAP_NOD_LG(K,IPROC)
+               INDEX = IMAP_NOD_LG(K,IPROC) !IMAP_NOD_LG(K,IPROC)
                !IF (IMAP_EL_LG(1,INDEX).EQ.IPROC) THEN
                  ETASC(INDEX) = ETASCP(K)
                 !ENDIF
@@ -819,7 +819,7 @@ c        DO I = 1,NELG
 c           READ(ETASC(I),*) IDUM, ETA
 c           WRITE(63,2453) I, ETA
 c        ENDDO
-         DO I = 1,NELG
+         DO I = 1,NNODG
             CALL NEWINDEX(ETASC(I),OUTMSG,I)
             WRITE(63,80) OUTMSG
          ENDDO 
@@ -993,8 +993,8 @@ c  post-process maxele file
          ENDIF
          READ(LOC(IPROC),*)  NP
          IF (NP.NE.NNODP(IPROC)) THEN
-            print *, "NE = ",NP," NNODP = ",NNODP(IPROC)
-            STOP 'Inconsistency in number of local elems'
+            print *, "NP = ",NP," NNODP = ",NNODP(IPROC)
+            STOP 'Inconsistency in number of local nodes'
          ENDIF
       ENDDO
       OPEN(UNIT=63,FILE='maxele.63')
@@ -1603,7 +1603,7 @@ C
          READ(LOC(IPROC),3645)  NDSETGE,NE,DTE,NSTEMP,ITEMPE
          IF (NE.NE.NELP(IPROC)) THEN
            print *, "NE = ",NE," NELP = ",NELP(IPROC)
-           STOP 'Inconsistency in number of local nodes'
+           STOP 'Inconsistency in number of local elems'
          ENDIF
       ENDDO
       OPEN(UNIT=4441,FILE='fort.4l')
@@ -1860,15 +1860,15 @@ C
       OPEN(UNIT=64,FILE='fort.64')
 C
       WRITE(64,'(A85)') INLINE
-      WRITE(64,3645) NDSETGV,NELG,DTV,NSPOOLGV,ITEMPV
+      WRITE(64,3645) NDSETGV,NNODG,DTV,NSPOOLGV,ITEMPV
 C
       DO J=1,NDSETGV
          DO IPROC=1,NPROC
             READ(LOC(IPROC),FMT=2120,END=9999,ERR=9999) TIMEOUTV,ITV
             IF (IPROC.EQ.1) WRITE(64,2120) TIMEOUTV,ITV
-            DO K = 1,NELP(IPROC)
+            DO K = 1,NNODP(IPROC)
                READ(LOC(IPROC),80,END=9999,ERR=9999) UUP(K)
-               INDEX =  IMAP_EL_LG(K,IPROC) !IMAP_NOD_LG(K,IPROC)
+               INDEX =  IMAP_NOD_LG(K,IPROC) !IMAP_NOD_LG(K,IPROC)
                !IF(IMAP_NOD_GL(1,INDEX).EQ.IPROC) THEN
                 UU(INDEX) = UUP(K)
                !ENDIF
@@ -1879,7 +1879,7 @@ c           CALL NEWINDEX(UU(I),OUTMSG,I)
 c           READ(UU(I),*)  IDUM, U1,V1
 c           WRITE(64,2454) I, U1, V1
 c        ENDDO
-         DO I = 1,NELG
+         DO I = 1,NNODG
             CALL NEWINDEX(UU(I),OUTMSG,I)
             WRITE(64,80) OUTMSG
          ENDDO
