@@ -38,7 +38,7 @@ C.....Declare local variables
       REAL(SZ) FB_HAT, GB_HAT, HB_HAT, FF_HAT, GF_HAT, HF_HAT
       REAL(SZ) ib_hat,if_hat,jb_hat,jf_hat, kf_hat, kb_hat
       REAL(SZ) ABOVEB, ABOVEF, ABOVEPIB, ABOVEPIF
-      REAL(SZ) QNIB(2)
+      REAL(SZ) QNIB(2), PHT, PDI, PCF
       REAL(SZ) NLEQG_TMP, G_TMP, FFACT
       REAL(SZ) SUBSUPB, SUBSUPF, WEGPB, WEGPF
       REAL(SZ) NXB, NYB, NXF, NYF, TXB, TYB, TXF, TYF
@@ -104,8 +104,8 @@ C.....Set the components for the tangential vector to the edge
          TYF =  NXF
          
 C.......Compute the variables at the quadrature points
-         FFACT = 1.0d0/WEGP(1,pa)*2**pa/(2*pa-1)
-
+         !FFACT = 1.0d0/WEGP(1,pa)*2**pa/(2*pa-1)
+         FFACT = 4.9298
          DO I = 1,NEGP(pa)
             
             GPB = I
@@ -197,12 +197,38 @@ C.........Obtain the height of the barrier at the quadrature point
             
             IF ((WDFLG(ELB).EQ.1).AND.((NIBSEGN(3,L).EQ.5).OR.
      &                                 (NIBSEGN(3,L).EQ.25))) THEN
-               ABOVEPIB = ZEB - PIHT(L)
+	  	          PHT = 0.5d0*(PIHT(L,1) + PIHT(L,2))
+	             PCF = 0.5d0*(PICF(L,1) + PICF(L,2))
+	             PDI = 0.5d0*(PIDI(L,1) + PIDI(L,2))	
+					 
+C               IF (I.EQ.1) THEN
+C                  PHT = PIHT(L,1)
+C                  PCF = PICF(L,1)
+C                  PDI = PIDI(L,1)
+C               ELSEIF (I.EQ.NEGP(pa) ) THEN
+C                  PHT = PIHT(L,2)
+C                  PCF = PICF(L,2)
+C                  PDI = PIDI(L,2)
+C               ENDIF
+               ABOVEPIB = ZEB - PHT
             ENDIF
             IF ((WDFLG(ELF).EQ.1).AND.((NIBSEGN(3,L).EQ.5).OR.
      &                                 (NIBSEGN(3,L).EQ.25))) THEN
-               ABOVEPIF = ZEF - PIHT(L)
-            ENDIf
+	            PHT = 0.5d0*(PIHT(L,1) + PIHT(L,2))
+	            PCF = 0.5d0*(PICF(L,1) + PICF(L,2))
+	            PDI = 0.5d0*(PIDI(L,1) + PIDI(L,2))	
+					
+C               IF (I.EQ.1) THEN
+C                  PHT = PIHT(L,1)
+C                  PCF = PICF(L,1)
+C                  PDI = PIDI(L,1)
+C               ELSEIF (I.EQ.NEGP(pa) ) THEN
+C                  PHT = PIHT(L,2)
+C                  PCF = PICF(L,2)
+C                  PDI = PIDI(L,2)
+C               ENDIF
+               ABOVEPIF = ZEF - PHT
+            ENDIF
             
             WEIR_FLOW = 0
             PIPE_FLOW = 0
@@ -232,6 +258,7 @@ C           ---------------------------------------------
                   QF_T_INT = 0.0D0
                   PIPE_FLOW = 0
                
+                  !print*, L, '1'
 C...........Case 2:  Water level on both sides is equal (within tol)
 C           ------------------------------------------------------------            
                ELSEIF (ABS(ABOVEPIF-ABOVEPIB).LT.BARMIN) THEN
@@ -241,6 +268,7 @@ C           ------------------------------------------------------------
                   QF_T_INT = 0.0D0
                   PIPE_FLOW = 0
                   
+                  !print*, L, '2'
 C...........Case 3 & 4: Water level higher on front side; water level on  
 C...........front is above pipe crown.
 C...........Flow from front to back side
@@ -249,19 +277,21 @@ C           ------------------------------------------------------------
                ELSEIF ((ABOVEPIF.GT.ABOVEPIB)
      &                                   .AND.(ABOVEPIF.GE.BARMIN)) THEN
                   PIPE_FLOW = 1
+
 C..............Case 3: Water level on back is below pipe crown.
                   IF (ABOVEPIB.LT.BARMIN) THEN
-                     QF_N_INT = RAMPDG*(0.25D0*PI*(PIDI(L))**2.0D0)*
-     &                         SQRT(2.0D0*G*ABOVEPIF/(1.0D0 + PICF(L)))/
+                     QF_N_INT = RAMPDG*(0.25D0*PI*PDI**2.0D0)*
+     &                         SQRT(2.0D0*G*ABOVEPIF/(1.0D0 + PCF))/
      &                         (IBL(L))*FFACT
                      QF_T_INT = 0.0D0
-                     
+                     !print*, L, '3'
 c..............Case 4: Water level on back is above pipe crown.
                   ELSE
-                     QF_N_INT = RAMPDG*(0.25D0*PI*(PIDI(L))**2.0D0)*
-     &                        SQRT(2.0D0*G*(ABOVEPIF-ABOVEPIB)/PICF(L))/
+                     QF_N_INT = RAMPDG*(0.25D0*PI*PDI**2.0D0)*
+     &                        SQRT(2.0D0*G*(ABOVEPIF-ABOVEPIB)/PCF)/
      &                        (IBL(L))*FFACT
                      QF_T_INT = 0.0D0
+                     !print*, L, '4'
                   ENDIF
 
                   !IF (L .EQ. 1 .AND. I .EQ. 1) THEN
@@ -288,17 +318,19 @@ C           ------------------------------------------------------------
                   PIPE_FLOW = -1
 C..............Case 5: Water level on front is below pipe crown.
                   IF (ABOVEPIF.LT.BARMIN) THEN
-                     QB_N_INT = RAMPDG*(0.25D0*PI*(PIDI(L))**2.0D0)*
-     &                         SQRT(2.0D0*G*ABOVEPIB/(1.0D0 + PICF(L)))/
+                     QB_N_INT = RAMPDG*(0.25D0*PI*PDI**2.0D0)*
+     &                         SQRT(2.0D0*G*ABOVEPIB/(1.0D0 + PCF))/
      &                         (IBL(L))*FFACT
                      QB_T_INT = 0.0D0
                      
+                     !print*, L, '5'
 c..............Case 6: Water level on front is above pipe crown.
                   ELSE
-                     QB_N_INT = RAMPDG*(0.25D0*PI*(PIDI(L))**2.0D0)*
-     &                        SQRT(2.0D0*G*(ABOVEPIB-ABOVEPIF)/PICF(L))/
+                     QB_N_INT = RAMPDG*(0.25D0*PI*PDI**2.0D0)*
+     &                        SQRT(2.0D0*G*(ABOVEPIB-ABOVEPIF)/PCF)/
      &                        (IBL(L))*FFACT
-                     QB_T_INT = 0.0D0                
+                     QB_T_INT = 0.0D0      
+                     !print*, L, '6'
                   ENDIF
 
                   !IF (L .EQ. 1 .AND. I .EQ. 1) THEN

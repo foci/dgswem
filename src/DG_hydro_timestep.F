@@ -43,7 +43,7 @@ Casey 101118: Add variables for coupling to SWAN.
 C.....Declare local variables
 
 
-      INTEGER IT,L,GED,NBOREL,NNBORS,NDRYNBORS,Istop,k,j,kk,i,mm
+      INTEGER IT,L,GED,NBOREL,NNBORS,NDRYNBORS,NQEDS,Istop,k,j,kk,i,mm
       INTEGER Detected,flagger,store
       REAL(SZ) QBCT1,QBCT2,QBC1,QBC2,ZP(3),QXP(3),QXP_OLD(3),
      $     QYP(3),QYP_OLD(3),ZP_OLD(3),ell_1,ell_2,ell_3
@@ -114,8 +114,9 @@ Casey 090302: Added for coupling to SWAN.
             IF((NRS.EQ.3).AND.(IRK.EQ.1)) THEN
               InterpoWeight = 1.0
               CALL ComputeWaveDrivenForces
-Casey 090707: We want to extrapolate forward in time.  Load the latest (current) forces
-C             into RSNX1/RSNY1, and then load the future forces into RSNX2/RSNY2.
+Casey 090707: We want to extrapolate forward in time.  Load the latest 
+C             (current) forces into RSNX1/RSNY1, and then load the 
+C             future forces into RSNX2/RSNY2.
               DO I=1,NP
                 RSX = RSNX1(I)
                 RSY = RSNY1(I)
@@ -144,6 +145,57 @@ Casey 090302: Added these lines for output to the rads.64 file.
 C.......Compute tidal potential terms
 
          IF (NTIP.NE.0) CALL TIDAL_POTENTIAL()
+
+C.......For non-periodic elevation bcs
+
+         IF ((NBFR.EQ.0).AND.(NOPE.GT.0)) THEN
+           IF (TIME_A.GT.ETIME2) THEN
+             ETIME1 = ETIME2
+             ETIME2 = ETIME1 + ETIMINC
+             DO J = 1,NETA
+               ESBIN1(J) = ESBIN2(J)
+               READ(19,*) ESBIN2(J)
+             ENDDO
+           ENDIF
+           ETRATIO = (TIMEDG - ETIME1)/ETIMINC
+           DO I = 1,NETA
+             NBDI = NBD(I)
+             ETA2(NBDI) = RAMPDG*( ESBIN1(I) + ETRATIO*( ESBIN2(I) -
+     &                                                   ESBIN1(I) ) )
+           ENDDO
+         ENDIF
+         
+C.......For non-periodic flux bcs
+
+         IF (MNFFR.EQ.1 .AND. NFFR.EQ.0) THEN
+           IF (TIME_A.GT.QTIME2) THEN
+             QTIME1 = QTIME2
+             QTIME2 = QTIME1 + FTIMINC
+             DO J=1,NVEL
+               QNIN1(J)=QNIN2(J)
+               QNIN2(J)=0.D0
+               IF((LBCODEI(J).EQ.2).OR.(LBCODEI(J).EQ.12)
+     &                             .OR.(LBCODEI(J).EQ.22))    
+     &         READ(20,*) QNIN2(J)
+             END DO
+           ENDIF
+           QTRATIO = (TIMEDG - QTIME1)/FTIMINC
+           NQEDS = 0
+           DO I = 1,NVEL
+             IF((LBCODEI(I).EQ.2).OR.(LBCODEI(I).EQ.12)
+     &                             .OR.(LBCODEI(I).EQ.22)) THEN 
+               NQEDS = NQEDS + 1
+               IF (NQEDS .LE. NFEDS) THEN
+                 QNAM_DG(1,NQEDS,1) = RAMPDG*( QNIN1(I) + QTRATIO*
+     &                                         ( QNIN2(I) - QNIN1(I) ) )
+                 QNPH_DG(1,NQEDS,1) = 0.D0
+                 QNAM_DG(1,NQEDS,2) = RAMPDG*( QNIN1(I+1) + QTRATIO*
+     &                                     ( QNIN2(I+1) - QNIN1(I+1) ) )
+                 QNPH_DG(1,NQEDS,2) = 0.D0
+               ENDIF
+             ENDIF
+           ENDDO
+         ENDIF       
 
 C.......Compute LDG auxiliary equations
          
@@ -488,7 +540,7 @@ C.......Apply the wet-dry algorithm if appropriate
          CALL WETDRY()
       ENDIF
 
-c$$$C.......Apply the slopelimiter again if auxiliary variable is being used
+c$$$C...Apply the slopelimiter again if auxiliary variable is being used
 c$$$
 c$$$         if (EVMSUM.NE.0.D0.or.artdif.eq.1) then
 c$$$#ifdef SLOPEALL
@@ -500,8 +552,8 @@ c$$$            CALL SLOPELIMITER()
 c$$$#endif
 c$$$         endif
 
-C.......For parallel run update for dofs if slope limiter and/or wetting and
-C.......drying is being used
+C...For parallel run update for dofs if slope limiter and/or wetting and
+C...drying is being used
 
 #ifdef CMPI
          if (SLOPEFLAG.NE.0.OR.NOLIFA.GE.2) THEN

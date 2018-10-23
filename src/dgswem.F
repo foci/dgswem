@@ -226,13 +226,13 @@ c$$$  enddo
             write(777,7777)  y(i)
          enddo
          do i=1,np
-            write(777,7777)  dpe(i)
+            write(777,7777)  dp(i)
          enddo
          do i=1,np
             write(777,7777)  eta2(i)
          enddo
          do i=1,np 
-            write(777,7777)  eta2(i)+dpe(i)
+            write(777,7777)  eta2(i)+dp(i)
          enddo
          do i=1,np 
             write(777,7777)  uu2(i)

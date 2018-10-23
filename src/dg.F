@@ -137,9 +137,9 @@ C.....Declare allocatable real arrays
       REAL(SZ), ALLOCATABLE :: VFA_DG(:,:,:), VMO_DG(:,:,:)
       REAL(SZ), ALLOCATABLE :: XLEN(:)
       REAL(SZ), ALLOCATABLE :: HB(:,:,:)
-      REAL(SZ), ALLOCATABLE :: MANN(:,:), IBL(:)
-      REAL(SZ), ALLOCATABLE :: IBHT(:), EBHT(:), PIHT(:), PIDI(:)
-      REAL(SZ), ALLOCATABLE :: EBCFSP(:), IBCFSP(:), IBCFSB(:), PICF(:)
+      REAL(SZ), ALLOCATABLE :: MANN(:,:), IBL(:), PICF(:,:)
+      REAL(SZ), ALLOCATABLE :: IBHT(:), EBHT(:), PIHT(:,:), PIDI(:,:)
+      REAL(SZ), ALLOCATABLE :: EBCFSP(:), IBCFSP(:), IBCFSB(:)
       REAL(SZ), ALLOCATABLE :: JACOBI(:,:,:,:)
       REAL(SZ), ALLOCATABLE :: M_INV(:,:),phi_edge_fixed(:,:,:)
       REAL(SZ), ALLOCATABLE :: PHI_AREA(:,:,:), PHI_EDGE(:,:,:,:)
@@ -244,9 +244,9 @@ C**********************END OF DATA DECLARATIONS ***********************
 C.....Set edge array sizes
 
       SUBROUTINE ALLOC_EDGES0()
-      ALLOCATE ( IBHT(3*MNE), EBHT(3*MNE), PIHT(3*MNE), PIDI(3*MNE) )
+      ALLOCATE ( IBHT(3*MNE), EBHT(3*MNE), IBL(3*MNE), PIDI(3*MNE,2) )
       ALLOCATE ( EBCFSP(3*MNE), IBCFSP(3*MNE), IBCFSB(3*MNE) )
-      ALLOCATE ( PICF(3*MNE), IBL(3*MNE), BACKNODES(2,3*MNE) )
+      ALLOCATE ( PICF(3*MNE,2), PIHT(3*MNE,2), BACKNODES(2,3*MNE) )
       RETURN
       END SUBROUTINE
 

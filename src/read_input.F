@@ -2852,10 +2852,13 @@ C.......Put barrier data into arrays more amiable to DG data structure
             IBCFSB(NIBSEG) = 0.5D0*( BARINCFSBR(I) + BARINCFSBR(I+1) )
             IBCFSP(NIBSEG) = 0.5D0*( BARINCFSPR(I) + BARINCFSPR(I+1) )
             IF ((IBTYPE.EQ.5).OR.(IBTYPE.EQ.25)) THEN
-               PIHT(NIBSEG) = 0.5D0*( PIPEHTR(I)   + PIPEHTR(I+1)   )
-               PICF(NIBSEG) = 0.5D0*( PIPECOEFR(I) + PIPECOEFR(I+1) )
-               PIDI(NIBSEG) = 0.5D0*( PIPEDIAMR(I) + PIPEDIAMR(I+1) )
-            ENDIF 
+               PIHT(NIBSEG,1) = PIPEHTR(I)   
+               PIHT(NIBSEG,2) = PIPEHTR(I+1)
+               PICF(NIBSEG,1) = PIPECOEFR(I)  
+               PICF(NIBSEG,2) = PIPECOEFR(I+1)
+               PIDI(NIBSEG,1) = PIPEDIAMR(I)  
+               PIDI(NIBSEG,2) = PIPEDIAMR(I+1)
+			ENDIF 
             BACKNODES(1,NIBSEG) = IBCONNR(I)
             BACKNODES(2,NIBSEG) = IBCONNR(I+1)
          ENDDO
