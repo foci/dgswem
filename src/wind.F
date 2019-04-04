@@ -256,7 +256,7 @@ C     jgf46.02 Added the following two lines.
       WVNX(NHG)=WVNX(NHG)*0.5144d0 !CONVERT KNOTS TO  M/S
       WVNY(NHG)=WVNY(NHG)*0.5144d0 
       PRN(NHG)=100.d0*PRN(NHG)/RHOWATG !CONVERT MILLIBARS TO M OF WATER
-      IF(PRN(NHG).EQ.0.) PRN(NHG)=101300.d0/RHOWATG                       !RAL0315+ OK
+      IF(PRN(NHG).EQ.0.) PRN(NHG)=101300.d0/RHOWATG                     !RAL0315+ OK
       READ(22,'(A80)') PBLJAGF
       IF(PBLJAGF(2:2).NE.'#') GOTO 171
       RETURN

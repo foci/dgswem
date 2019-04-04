@@ -38,38 +38,39 @@ C.....Use appropriate modules
       
 C.....Declare local variables
 
-      INTEGER II, l, P_0, DOF_0,j,k,kk,jj,i,chi,ll,mm,Q,M,P,SZ2,w,III
-      CHARACTER(LEN=:),allocatable :: REGION
-      REAL(SZ) AREA, ANGLE_SUM, HBB(3), CASUM, DP_MIN,temp_lay,XP,YP
-      REAL(SZ) XI, YI, ZE1, ZE2, ZE3, l2er,l2erh2,xcen,ycen,epsl,pi_n
-      REAL(SZ) ZP(3), DHBX, ell_1,ell_2,ell_3,int_hb,int_ze,int_yd
-      REAL(SZ), Allocatable :: BARY(:), VERT(:,:), BASIS(:), DBASIS(:,:)
-      REAL(SZ), Allocatable :: PTS(:,:), WTS(:),PT(:)
+      INTEGER II,l,P_0,DOF_0,j,k,kk,jj,jjj,i,chi,ll,mm,Q,M,P,SZ2,w,III
+      CHARACTER(LEN=8) REGION
+      REAL(SZ) AREA, ANGLE_SUM, HBB(MXEDGS),CASUM, DP_MIN,temp_lay,XP,YP
+      REAL(SZ) XI,YI,ZE1,ZE2,ZE3,ZE4,l2er,l2erh2,xcen,ycen,epsl,pi_n
+      REAL(SZ) ZP(MXEDGS), DHBX, ell_1,ell_2,ell_3,int_hb,int_ze,int_yd
+      REAL(SZ), Allocatable :: PTS(:,:), VERT(:,:,:), DBASIS(:,:)
+      REAL(SZ), Allocatable :: BARY(:,:), WTS(:), BASIS(:), PT(:)
+      REAL(SZ), Allocatable :: PHI_AREAM(:,:), PHI_AREAMT(:,:), WM(:,:)
+      REAL(SZ), Allocatable :: MTEMP1(:,:),MTEMP2(:,:),MTEMPI(:,:)
+      REAL(SZ), Allocatable :: vtemp1(:),vtemp2(:),PHI_AREAV(:)
 
       real(sz) checkarea,arint(2,2),rhsint(2),edgeint,dpsdx,psimid,
-     $     determ,sfacdub2max,sfacdub3max,R
-      integer i1,i2,sfac_flag,led,ELEM,ADDGP,NEDGS
-      integer ifac2max,ifac3max,phh,DIM
+     $     determ,sfacdub2max,sfacdub3max,R,Jac,XX,YY
+      integer i1,i2,sfac_flag,led,ADDGP(2)
+      integer ifac2max,ifac3max,phh,ELT,pp,NN,KI(MNP)
+      logical Logi
 
-      real(sz) xmid,ymid,Ox,Oy,rev,C_0,sig,C_1
+      real(sz) xmid,ymid,Ox,Oy,rev,C_0,sig,C_1,Aq,Atr1,Atr2
 
-      Real(SZ),allocatable :: XBCbt(:),YBCbt(:),radial(:),XB(:),YB(:),l2e(:)
-      Real(SZ),allocatable :: iota_check(:),iota_check2(:),hbo(:,:,:), ydubo(:,:)
+      Real(SZ),allocatable :: XBCbt(:),YBCbt(:),radial(:),XB(:),YB(:),
+     & l2e(:)
+      Real(SZ),allocatable :: iota_check(:),iota_check2(:),hbo(:,:,:), 
+     & ydubo(:,:)
       Real(SZ),allocatable :: YELEM(:),YED(:),HB1(:,:,:,:), zeo(:,:,:)
 
-      if (IM .eq. 0) then
-         DIM = 2
-      elseif (IM .eq. 1) then
-         DIM = 3
-      elseif (IM .eq. 2) then
-         DIM = 3
-      endif
-
-      Allocate ( XBCbt(MNE),YBCbt(MNE),radial(MNE),XB(MNE),YB(MNE),l2e(MNE) )
-      Allocate ( iota_check(MNE),iota_check2(MNE),hbo(36,MNE,1),ydubo(36,mne) ) 
-      Allocate ( YELEM(ph),YED(ph),hb1(36,mne,1,ph), zeo(36,mne,1), BARY(DIM) )
+      Allocate ( XBCbt(MNE),YBCbt(MNE),radial(MNE),XB(MNE),YB(MNE),
+     & l2e(MNE) )
+      Allocate ( iota_check(MNE),iota_check2(MNE),hbo(36,MNE,1),
+     & ydubo(36,mne) ) 
+      Allocate ( YELEM(ph),YED(ph),hb1(36,mne,1,ph), zeo(36,mne,1), 
+     & BARY(DIM,2), VERT(4,DIM,2) )
       Allocate ( PT(DIM) )
-
+      
       C13 = 1.D0/3.D0
       C16 = 1.D0/6.D0
       R = 6378206.4d0
@@ -118,7 +119,12 @@ C.....Initialize stabilizer sweep for A.D.
 
 C.....Compute the number of gauss points needed for the edge integrals
 
-      CALL ALLOC_DG4()          !moved here 6.28.10, for p_adapt because of messenger_elem      
+      if (MXEDGS .eq. 4) THEN
+         Logi = .true.
+      elseif (MXEDGS .eq. 3) THEN
+         Logi = .false.
+      endif
+      CALL ALLOC_DG4(Logi)          !moved here 6.28.10, for p_adapt because of messenger_elem      
 
          dofs(:) = dofl
          PDG_EL(:) = pl
@@ -246,8 +252,9 @@ C.....Determine the number of elements connected at each node
 
       EL_COUNT = 0
       MAXEL = 1
-      DO K = 1,3
-         DO J = 1,MNE
+
+      DO J = 1,MNE
+         DO K = 1,EDN(J)
             N1 = NM(J,K)
             EL_COUNT(N1) = EL_COUNT(N1) + 1
          ENDDO
@@ -261,8 +268,8 @@ C.....Allocate the array for the node to element table
 C.....Construct node to element table
 
       EL_COUNT = 0
-      DO K = 1,3
-         DO J = 1,MNE
+      DO J = 1,MNE
+         DO K = 1,EDN(J)
             N1 = NM(J,K)
             NNOEL(N1,1+EL_COUNT(N1)) = J
             EL_COUNT(N1) = EL_COUNT(N1) + 1
@@ -270,50 +277,175 @@ C.....Construct node to element table
       ENDDO
 
 C.....Construct node to element angle table
-
       DO I = 1,MNP
          ETAMAX(I) = -99999
          KK = 1
          ELETAB(I,1) = I
          S1 = SFAC(I)
          J1 = NEITAB(I,1)
+
          DO 111 K = 1,NNEIGH(I)-1
             J2 = NEITAB(I,1+K)
-            IF (K.LT.(NNEIGH(I)-1)) THEN
-               J3 = NEITAB(I,2+K)
-            ELSE
-               J3 = NEITAB(I,2)
-            ENDIF
             DO J = 1,EL_COUNT(I)
                EL = NNOEL(I,J)
-               N1 = NM(EL,1)
-               N2 = NM(EL,2)
-               N3 = NM(EL,3)
-               IF ((J1.EQ.N1).OR.(J1.EQ.N2).OR.(J1.EQ.N3)) THEN
-                  IF ((J2.EQ.N1).OR.(J2.EQ.N2).OR.(J2.EQ.N3)) THEN
-                     IF ((J3.EQ.N1).OR.(J3.EQ.N2).OR.(J3.EQ.N3)) THEN
-                        ELETAB(I,1+KK) = EL
-                        S2  = SFAC(J2)
-                        SAV = (S1 + S2)/2.D0
-                        VEC1(1) =      X(J1) - X(J2)
-                        VEC1(2) = SAV*(Y(J1) - Y(J2))
-                        VEC2(1) =      X(J1) - X(J3)
-                        VEC2(2) = SAV*(Y(J1) - Y(J3))
-                        MAG1 = SQRT(VEC1(1)**2 + VEC1(2)**2)
-                        MAG2 = SQRT(VEC2(1)**2 + VEC2(2)**2)
-                        DOT = DOT_PRODUCT(VEC1,VEC2)
-                        EL_ANG  = ACOS(DOT/(MAG1*MAG2))
-                        ANGTAB(I,KK+1) = RAD2DEG*EL_ANG
-                        KK = KK + 1
-                        GOTO 111
+               JJ = EDN(EL) - 2
+               J2 = NEITAB(I,1+K)
+               IF (K.LT.(NNEIGH(I)-JJ)) THEN
+                  J3 = NEITAB(I,JJ+1+K)
+               ELSE
+                  J3 = NEITAB(I,2)
+               ENDIF
+               IF (EDN(EL) .EQ. 3) THEN
+                  N1 = NM(EL,1)
+                  N2 = NM(EL,2)
+                  N3 = NM(EL,3)
+                  IF ((J1.EQ.N1).OR.(J1.EQ.N2).OR.(J1.EQ.N3)) THEN
+                     IF ((J2.EQ.N1).OR.(J2.EQ.N2).OR.(J2.EQ.N3)) THEN
+                        IF ((J3.EQ.N1).OR.(J3.EQ.N2).OR.(J3.EQ.N3)) THEN
+                           ELETAB(I,1+KK) = EL
+                           S2  = SFAC(J2)
+                           SAV = (S1 + S2)/2.D0
+                           VEC1(1) =      X(J1) - X(J2)
+                           VEC1(2) = SAV*(Y(J1) - Y(J2))
+                           VEC2(1) =      X(J1) - X(J3)
+                           VEC2(2) = SAV*(Y(J1) - Y(J3))
+                           MAG1 = SQRT(VEC1(1)**2 + VEC1(2)**2)
+                           MAG2 = SQRT(VEC2(1)**2 + VEC2(2)**2)
+                           DOT = DOT_PRODUCT(VEC1,VEC2)
+                           EL_ANG  = ACOS(DOT/(MAG1*MAG2))
+                           ANGTAB(I,KK+1) = RAD2DEG*EL_ANG
+                           KK = KK + 1
+                           GOTO 111
+                        ENDIF
                      ENDIF
                   ENDIF
+               ELSEIF (EDN(EL) .EQ. 4) THEN
+                  N1 = NM(EL,1)
+                  N2 = NM(EL,2)
+                  N3 = NM(EL,3)
+                  N4 = NM(EL,4)
+                  IF (J1.EQ.N1) THEN
+                     IF ((J2.EQ.N1).OR.(J2.EQ.N2).OR.(J2.EQ.N4)) THEN
+                        IF((J3.EQ.N1).OR.(J3.EQ.N2).OR.(J3.EQ.N4)) THEN
+                           ELETAB(I,1+KK) = EL
+                           S2  = SFAC(J2)
+                           SAV = (S1 + S2)/2.D0
+                           VEC1(1) =      X(J1) - X(J2)
+                           VEC1(2) = SAV*(Y(J1) - Y(J2))
+                           VEC2(1) =      X(J1) - X(J3)
+                           VEC2(2) = SAV*(Y(J1) - Y(J3))
+                           MAG1 = SQRT(VEC1(1)**2 + VEC1(2)**2)
+                           MAG2 = SQRT(VEC2(1)**2 + VEC2(2)**2)
+                           DOT = DOT_PRODUCT(VEC1,VEC2)
+                           EL_ANG  = ACOS(DOT/(MAG1*MAG2))
+                           ANGTAB(I,KK+1) = RAD2DEG*EL_ANG
+                           KK = KK + 1
+                           GOTO 111
+                        ENDIF
+                     ENDIF
+                  ELSEIF (J1.EQ.N2) THEN
+                     IF((J2.EQ.N1).OR.(J2.EQ.N2).OR.(J2.EQ.N3)) THEN
+                        IF((J3.EQ.N1).OR.(J3.EQ.N2).OR.(J3.EQ.N3)) THEN
+                           ELETAB(I,1+KK) = EL
+                           S2  = SFAC(J2)
+                           SAV = (S1 + S2)/2.D0
+                           VEC1(1) =      X(J1) - X(J2)
+                           VEC1(2) = SAV*(Y(J1) - Y(J2))
+                           VEC2(1) =      X(J1) - X(J3)
+                           VEC2(2) = SAV*(Y(J1) - Y(J3))
+                           MAG1 = SQRT(VEC1(1)**2 + VEC1(2)**2)
+                           MAG2 = SQRT(VEC2(1)**2 + VEC2(2)**2)
+                           DOT = DOT_PRODUCT(VEC1,VEC2)
+                           EL_ANG  = ACOS(DOT/(MAG1*MAG2))
+                           ANGTAB(I,KK+1) = RAD2DEG*EL_ANG
+                           KK = KK + 1
+                           GOTO 111
+                        ENDIF
+                     ENDIF
+                  ELSEIF (J1.EQ.N3) THEN
+                     IF((J2.EQ.N2).OR.(J2.EQ.N3).OR.(J2.EQ.N4)) THEN
+                        IF((J3.EQ.N2).OR.(J3.EQ.N3).OR.(J3.EQ.N4)) THEN
+                           ELETAB(I,1+KK) = EL
+                           S2  = SFAC(J2)
+                           SAV = (S1 + S2)/2.D0
+                           VEC1(1) =      X(J1) - X(J2)
+                           VEC1(2) = SAV*(Y(J1) - Y(J2))
+                           VEC2(1) =      X(J1) - X(J3)
+                           VEC2(2) = SAV*(Y(J1) - Y(J3))
+                           MAG1 = SQRT(VEC1(1)**2 + VEC1(2)**2)
+                           MAG2 = SQRT(VEC2(1)**2 + VEC2(2)**2)
+                           DOT = DOT_PRODUCT(VEC1,VEC2)
+                           EL_ANG  = ACOS(DOT/(MAG1*MAG2))
+                           ANGTAB(I,KK+1) = RAD2DEG*EL_ANG
+                           KK = KK + 1
+                           GOTO 111
+                        ENDIF
+                     ENDIF
+                  ELSEIF (J1.EQ.N4) THEN
+                     IF((J2.EQ.N1).OR.(J2.EQ.N3).OR.(J2.EQ.N4)) THEN
+                        IF((J3.EQ.N1).OR.(J3.EQ.N3).OR.(J3.EQ.N4)) THEN
+                           ELETAB(I,1+KK) = EL
+                           S2  = SFAC(J2)
+                           SAV = (S1 + S2)/2.D0
+                           VEC1(1) =      X(J1) - X(J2)
+                           VEC1(2) = SAV*(Y(J1) - Y(J2))
+                           VEC2(1) =      X(J1) - X(J3)
+                           VEC2(2) = SAV*(Y(J1) - Y(J3))
+                           MAG1 = SQRT(VEC1(1)**2 + VEC1(2)**2)
+                           MAG2 = SQRT(VEC2(1)**2 + VEC2(2)**2)
+                           DOT = DOT_PRODUCT(VEC1,VEC2)
+                           EL_ANG  = ACOS(DOT/(MAG1*MAG2))
+                           ANGTAB(I,KK+1) = RAD2DEG*EL_ANG
+                           KK = KK + 1
+                           GOTO 111
+                        ENDIF
+                     ENDIF      
+                  ENDIF
+                  !IF ((J1.EQ.N1).OR.(J1.EQ.N2).OR.(J1.EQ.N3).OR.(J1.EQ.N4)) THEN
+                  !   IF((J2.EQ.N1).OR.(J2.EQ.N2).OR.(J2.EQ.N3).OR.(J2.EQ.N4)) THEN
+                  !      IF((J3.EQ.N1).OR.(J3.EQ.N2).OR.(J3.EQ.N3).OR.(J3.EQ.N4)) THEN
+                  !         ELETAB(I,1+KK) = EL
+                  !         S2  = SFAC(J2)
+                  !         SAV = (S1 + S2)/2.D0
+                  !         VEC1(1) =      X(J1) - X(J2)
+                  !         VEC1(2) = SAV*(Y(J1) - Y(J2))
+                  !         VEC2(1) =      X(J1) - X(J3)
+                  !         VEC2(2) = SAV*(Y(J1) - Y(J3))
+                  !         MAG1 = SQRT(VEC1(1)**2 + VEC1(2)**2)
+                  !         MAG2 = SQRT(VEC2(1)**2 + VEC2(2)**2)
+                  !         DOT = DOT_PRODUCT(VEC1,VEC2)
+                  !         EL_ANG  = ACOS(DOT/(MAG1*MAG2))
+                  !         ANGTAB(I,KK+1) = RAD2DEG*EL_ANG
+                  !         KK = KK + 1
+                  !         GOTO 111
+                  !      ENDIF
+                  !   ENDIF
+                  !ENDIF
                ENDIF
             ENDDO
  111     CONTINUE
+         KI(I) = KK
       ENDDO
 
-
+      
+C.....Delete any duplicate entries in ELETAB and ANGTAB
+C.....Typically only occurs for nodes with just 1 element connection.
+      DO I = 1,MNP
+         DO j = 2,KI(I)-1
+            do while (ELETAB(i,j) .eq. ELETAB(i,j+1) .and. ELETAB(i,j) .ne. 0)
+               do jj = j+1,KI(I)
+                  if (jj .ne. KI(I)) then
+                      ELETAB(i,jj) = ELETAB(i,jj+1)
+                      ANGTAB(i,jj) = ANGTAB(i,jj+1)
+                  else
+                      ELETAB(i,jj) = 0
+                      ANGTAB(i,jj) = 0
+                  endif
+               enddo
+            enddo
+         ENDDO
+      ENDDO
+ 
 !     C.....Allocate some DG stuff
 
 !     CALL ALLOC_DG4()
@@ -351,7 +483,7 @@ C.....Initialize the DG arrays
 
 C.....If using modal initial conditions transform the bathymetry from
 C.....nodal coordinates to modal dof
-
+      ! COME BACK TO THIS!
       DO J = 1,MNE
          N1 = NM(J,1)
          N2 = NM(J,2)
@@ -367,7 +499,7 @@ C.....nodal coordinates to modal dof
 
       ENDDO
 
-
+      ! COME BACK TO THIS!
       if (LoadManningsN) then
          DO J = 1,NE
             N1 = NM(J,1)
@@ -380,7 +512,7 @@ C.....nodal coordinates to modal dof
             MANN(3,J) = -0.5D0*ManningsN(N1) + 0.5D0*ManningsN(N2)
          ENDDO
       endif
-
+      ! COME BACK TO THIS!
       IF (MODAL_IC.EQ.0) THEN
 C     this assumes a cold start
          if (LoadGeoidOffset) then
@@ -391,7 +523,7 @@ C     this assumes a cold start
                zeo(1,J,1)=1.d0/3.d0*(GeoidOffset(N1)+GeoidOffset(N2)+
      $              GeoidOffset(N3))
                IF (dof_0.NE.1) THEN
-                  zeo(2,J,1)=-1.d0/6.d0*(GeoidOffset(N1)+GeoidOffset(N2))
+                 zeo(2,J,1)=-1.d0/6.d0*(GeoidOffset(N1)+GeoidOffset(N2))
      $                 +1.d0/3.d0*GeoidOffset(N3)
                   zeo(3,J,1)=-.5d0*GeoidOffset(N1)+.5d0*GeoidOffset(N2)
                ENDIF
@@ -432,10 +564,12 @@ C.....not specified by fort.12
 C.....2. Set wet-and-dry elemental flags
 C.....3. Set the DOF at dry elements = 1
 
-      NCHECK(1) = 3
+      NCHECK(1,1) = MNEDGS
+      NCHECK(1,2) = MXEDGS
       if (ph.gt.1) then
          do chi = 2,ph
-            NCHECK(chi) = NCHECK(1) + 3*negp(chi)
+            NCHECK(chi,1) = NCHECK(1,1) + MNEDGS*negp(chi)
+            NCHECK(chi,2) = NCHECK(1,2) + MXEDGS*negp(chi)
          enddo
       endif
       
@@ -450,194 +584,193 @@ C.....Retrieve the normals to the edges
 
       CALL CALC_NORMAL()
 
-C***********************************************************************
-C Edited by Dylan Wood starting here (03-14-2017) until next line of *'s
-C-----------------------------------------------------------------------
-C.....Master element type for quadrature
-C.....(1 = triangle, 2 = quad)
-      ELEM = 1
-
 C.....Retrieve the area integral gauss quadrature points
       
       do j=1,ph
          if (j.eq.1) then
             phh = 2*ph
-            if (ELEM.eq.1 .and. DIM.eq.2) then
-               Allocate( character(8) :: REGION )
-               REGION = 'TRIANGLE'
-               if (phh.le.1) then
-                  NAGP(ph) = 1
-               elseif (phh.le.2) then
-                  NAGP(ph) = 3
-               elseif (phh.le.4) then
-                  NAGP(ph) = 6
-               elseif (phh.le.5) then
-                  NAGP(ph) = 7
-               elseif (phh.le.6) then
-                  NAGP(ph) = 12
-               elseif (phh.le.8) then
-                  NAGP(ph) = 16
-               elseif (phh.le.9) then
-                  NAGP(ph) = 19
-               elseif (phh.le.10) then
-                  NAGP(ph) = 25
-               elseif (phh.le.11) then
-                  NAGP(ph) = 28
-               elseif (phh.le.12) then
-                  NAGP(ph) = 33
-               elseif (phh.le.13) then
-                  NAGP(ph) = 37
-               elseif (phh.le.14) then
-                  NAGP(ph) = 42
-               elseif (phh.le.15) then
-                  NAGP(ph) = 52
-               elseif (phh.le.16) then
-                  NAGP(ph) = 55
-               elseif (phh.le.17) then
-                  NAGP(ph) = 61
-               elseif (phh.le.18) then
-                  NAGP(ph) = 72
-               elseif (phh.le.19) then   
-                  NAGP(ph) = 73
-               elseif (phh.le.20) then
-                  NAGP(ph) = 88
-               elseif (phh.le.21) then
-                  NAGP(ph) = 91
+            do ELT = MNEDGS,MXEDGS
+               if (ELT.eq.3 .and. DIM.eq.2) then
+                  if (phh.le.1) then
+                     NAGP(ph,1) = 1
+                  elseif (phh.le.2) then
+                     NAGP(ph,1) = 3
+                  elseif (phh.le.4) then
+                     NAGP(ph,1) = 6
+                  elseif (phh.le.5) then
+                     NAGP(ph,1) = 7
+                  elseif (phh.le.6) then
+                     NAGP(ph,1) = 12
+                  elseif (phh.le.8) then
+                     NAGP(ph,1) = 16
+                  elseif (phh.le.9) then
+                     NAGP(ph,1) = 19
+                  elseif (phh.le.10) then
+                     NAGP(ph,1) = 25
+                  elseif (phh.le.11) then
+                     NAGP(ph,1) = 28
+                  elseif (phh.le.12) then
+                     NAGP(ph,1) = 33
+                  elseif (phh.le.13) then
+                     NAGP(ph,1) = 37
+                  elseif (phh.le.14) then
+                     NAGP(ph,1) = 42
+                  elseif (phh.le.15) then
+                     NAGP(ph,1) = 52
+                  elseif (phh.le.16) then
+                     NAGP(ph,1) = 55
+                  elseif (phh.le.17) then
+                     NAGP(ph,1) = 61
+                  elseif (phh.le.18) then
+                     NAGP(ph,1) = 72
+                  elseif (phh.le.19) then   
+                     NAGP(ph,1) = 73
+                  elseif (phh.le.20) then
+                     NAGP(ph,1) = 88
+                  elseif (phh.le.21) then
+                     NAGP(ph,1) = 91
+                  endif
+               elseif (ELT.eq.4 .and. DIM.eq.2) then
+                  if (phh.le.1) then
+                     NAGP(ph,2) = 1
+                  elseif (phh.le.2) then
+                     NAGP(ph,2) = 3
+                  elseif (phh.le.3) then
+                     NAGP(ph,2) = 4
+                  elseif (phh.le.4) then
+                     NAGP(ph,2) = 6
+                  elseif (phh.le.5) then
+                     NAGP(ph,2) = 7
+                  elseif (phh.le.6) then
+                     NAGP(ph,2) = 10
+                  elseif (phh.le.7) then
+                     NAGP(ph,2) = 8
+                  elseif (phh.le.8) then
+                     NAGP(ph,2) = 16
+                  elseif (phh.le.9) then
+                     NAGP(ph,2) = 17
+                  elseif (phh.le.10) then
+                     NAGP(ph,2) = 22
+                  elseif (phh.le.11) then
+                     NAGP(ph,2) = 24
+                  elseif (phh.le.12) then
+                     NAGP(ph,2) = 31
+                  elseif (phh.le.13) then
+                     NAGP(ph,2) = 33
+                  elseif (phh.le.15) then
+                     NAGP(ph,2) = 44
+                  elseif (phh.le.17) then
+                     NAGP(ph,2) = 56
+                  elseif (phh.le.19) then
+                     NAGP(ph,2) = 68
+                  elseif (phh.le.21) then
+                     NAGP(ph,2) = 81
+                  elseif (phh.le.23) then
+                     NAGP(ph,2) = 100
+                  endif
                endif
-            elseif (ELEM.eq.2 .and. DIM.eq.2) then
-               Allocate( character(6) :: REGION )
-               REGION = 'SQUARE'
-               if (phh.le.1) then
-                  NAGP(ph) = 1
-               elseif (phh.le.2) then
-                  NAGP(ph) = 3
-               elseif (phh.le.3) then
-                  NAGP(ph) = 4
-               elseif (phh.le.4) then
-                  NAGP(ph) = 6
-               elseif (phh.le.5) then
-                  NAGP(ph) = 7
-               elseif (phh.le.6) then
-                  NAGP(ph) = 10
-               elseif (phh.le.7) then
-                  NAGP(ph) = 8
-               elseif (phh.le.8) then
-                  NAGP(ph) = 16
-               elseif (phh.le.9) then
-                  NAGP(ph) = 17
-               elseif (phh.le.10) then
-                  NAGP(ph) = 22
-               elseif (phh.le.11) then
-                  NAGP(ph) = 24
-               elseif (phh.le.12) then
-                  NAGP(ph) = 31
-               elseif (phh.le.13) then
-                  NAGP(ph) = 33
-               elseif (phh.le.15) then
-                  NAGP(ph) = 44
-               elseif (phh.le.17) then
-                  NAGP(ph) = 56
-               elseif (phh.le.19) then
-                  NAGP(ph) = 68
-               elseif (phh.le.21) then
-                  NAGP(ph) = 81
-               elseif (phh.le.23) then
-                  NAGP(ph) = 100
-               endif
-            endif
+            enddo
 C...........Allocate XaGP, YaGP, and WaGP
-
-            call ALLOC_AREA_GAUSS()
+            MXNAGP = max(NAGP(ph,1),NAGP(ph,2))
+            call ALLOC_AREA_GAUSS(Logi)
          endif
-         jj = 2*j
-         if (ELEM.eq.1 .and. DIM.eq.2) then
-	         if (jj.le.1) then
-               SZ2 = 1
-            elseif (jj.le.2) then
-               SZ2 = 3
-            elseif (jj.le.4) then
-               SZ2 = 6
-            elseif (jj.le.5) then
-               SZ2 = 7
-            elseif (jj.le.6) then
-               SZ2 = 12
-            elseif (jj.le.8) then
-               SZ2 = 16
-            elseif (jj.le.9) then
-               SZ2 = 19
-            elseif (jj.le.10) then
-               SZ2 = 25
-            elseif (jj.le.11) then
-               SZ2 = 28
-            elseif (jj.le.12) then
-               SZ2 = 33
-            elseif (jj.le.13) then
-               SZ2 = 37
-            elseif (jj.le.14) then
-               SZ2 = 42
-            elseif (jj.le.15) then
-               SZ2 = 52
-            elseif (jj.le.16) then
-               SZ2 = 55
-            elseif (jj.le.17) then
-               SZ2 = 61
-            elseif (jj.le.18) then
-               SZ2 = 72
-            elseif (jj.le.19) then
-               SZ2 = 73
-            elseif (jj.le.20) then
-               SZ2 = 88
-            elseif (jj.le.21) then
-               SZ2 = 91
-            endif 
-         elseif (ELEM.eq.2 .and. DIM.eq.2) then
-            if (jj.le.1) then
-               SZ2 = 1
-            elseif (jj.le.2) then
-               SZ2 = 3
-            elseif (jj.le.3) then
-               SZ2 = 4
-            elseif (jj.le.4) then
-               SZ2 = 6
-            elseif (jj.le.5) then
-               SZ2 = 7
-            elseif (jj.le.6) then
-               SZ2 = 10
-            elseif (jj.le.7) then
-               SZ2 = 8
-            elseif (jj.le.8) then
-               SZ2 = 16
-            elseif (jj.le.9) then
-               SZ2 = 17
-            elseif (jj.le.10) then
-               SZ2 = 22
-            elseif (jj.le.11) then
-               SZ2 = 24
-            elseif (jj.le.12) then
-               SZ2 = 31
-            elseif (jj.le.13) then
-               SZ2 = 33
-            elseif (jj.le.15) then
-               SZ2 = 44
-            elseif (jj.le.17) then
-               SZ2 = 56
-            elseif (jj.le.19) then
-               SZ2 = 68
-            elseif (jj.le.21) then
-               SZ2 = 81
-            elseif (jj.le.23) then
-               SZ2 = 100
+         do ELT = MNEDGS,MXEDGS
+			   jj = 2*j
+            if (ELT.eq.3 .and. DIM.eq.2) then
+               REGION = 'TRIANGLE'
+               if (jj.le.1) then
+                  SZ2 = 1
+               elseif (jj.le.2) then
+                  SZ2 = 3
+               elseif (jj.le.4) then
+                  SZ2 = 6
+               elseif (jj.le.5) then
+                  SZ2 = 7
+               elseif (jj.le.6) then
+                  SZ2 = 12
+               elseif (jj.le.8) then
+                  SZ2 = 16
+               elseif (jj.le.9) then
+                  SZ2 = 19
+               elseif (jj.le.10) then
+                  SZ2 = 25
+               elseif (jj.le.11) then
+                  SZ2 = 28
+               elseif (jj.le.12) then
+                  SZ2 = 33
+               elseif (jj.le.13) then
+                  SZ2 = 37
+               elseif (jj.le.14) then
+                  SZ2 = 42
+               elseif (jj.le.15) then
+                  SZ2 = 52
+               elseif (jj.le.16) then
+                  SZ2 = 55
+               elseif (jj.le.17) then
+                  SZ2 = 61
+               elseif (jj.le.18) then
+                  SZ2 = 72
+               elseif (jj.le.19) then
+                  SZ2 = 73
+               elseif (jj.le.20) then
+                  SZ2 = 88
+               elseif (jj.le.21) then
+                  SZ2 = 91
+               endif 
+            elseif (ELT.eq.4 .and. DIM.eq.2) then
+               REGION = 'SQUARE  '
+               if (jj.le.1) then
+                  SZ2 = 1
+               elseif (jj.le.2) then
+                  SZ2 = 3
+               elseif (jj.le.3) then
+                  SZ2 = 4
+               elseif (jj.le.4) then
+                  SZ2 = 6
+               elseif (jj.le.5) then
+                  SZ2 = 7
+               elseif (jj.le.6) then
+                  SZ2 = 10
+               elseif (jj.le.7) then
+                  SZ2 = 8
+               elseif (jj.le.8) then
+                  SZ2 = 16
+               elseif (jj.le.9) then
+                  SZ2 = 17
+               elseif (jj.le.10) then
+                  SZ2 = 22
+               elseif (jj.le.11) then
+                  SZ2 = 24
+               elseif (jj.le.12) then
+                  SZ2 = 31
+               elseif (jj.le.13) then
+                  SZ2 = 33
+               elseif (jj.le.15) then
+                  SZ2 = 44
+               elseif (jj.le.17) then
+                  SZ2 = 56
+               elseif (jj.le.19) then
+                  SZ2 = 68
+               elseif (jj.le.21) then
+                  SZ2 = 81
+               elseif (jj.le.23) then
+                  SZ2 = 100
+               endif
             endif
-         endif
 
-      	Allocate( PTS(SZ2,DIM), WTS(SZ2) )
+            Allocate( PTS(SZ2,DIM), WTS(SZ2) )
+            NN = 0
 
-         call QUADRATURE( jj, REGION, PTS, WTS, NAGP(j), SZ2, 2 )
-         XAGP(1:NAGP(j),j) = PTS(1:NAGP(j),1)
-         YAGP(1:NAGP(j),j) = PTS(1:NAGP(j),2)
-
-         WAGP(1:NAGP(j),j) = WTS(1:NAGP(j))
-	      Deallocate( PTS, WTS )
+            call QUADRATURE( jj,REGION,PTS,WTS,NN,SZ2,DIM )
+            
+            NAGP(j,ELT-2) = NN
+            do jj = 1,SZ2 
+               XAGP(jj,j,ELT-2) = PTS(jj,1)
+               YAGP(jj,j,ELT-2) = PTS(jj,2)
+               WAGP(jj,j,ELT-2) = WTS(jj)
+            enddo
+            Deallocate( PTS, WTS )
+         enddo
       enddo
 
 C.....Retrieve the edge integral gauss quadrature points
@@ -646,16 +779,16 @@ C.....Retrieve the edge integral gauss quadrature points
 
           if (j.eq.1) then
 
-             NEGP(ph) = CEILING((phh+1)/2.)+1
-             CALL ALLOC_EDGE_GAUSS()
+             NEGP(ph) = CEILING((phh+3)/2.0d0)
+             CALL ALLOC_EDGE_GAUSS(Logi)
 
           endif
           jj = 2*j
-          SZ2 = CEILING((jj+1)/2.)+1
+          SZ2 = CEILING((jj+3)/2.0d0)
+          NEGP(j) = SZ2
 
           Allocate( PTS(SZ2,1), WTS(SZ2) )
-  
-          CALL QUADRATURE( jj, 'EDGE', PTS, WTS, NEGP(j), SZ2, 1 )
+          CALL quad_rules_general(NEGP(j),.true.,0.0d0,0.0d0,PTS,WTS)
      
           XEGP(1:NEGP(j),j) = PTS(1:NEGP(j),1)
           WEGP(1:NEGP(j),j) = WTS(1:NEGP(j))
@@ -666,22 +799,19 @@ C.....Evaluate the orthogonal basis and its derivatives at the area
 C.....gauss quadrature points
 
 C.....Determine vertices and element barycenter by elements type
-  
-      if (ELEM .eq. 1 .and. DIM .eq. 2) then
-         Allocate( VERT(3,DIM) )
-         BARY(:) = (/ -1.D0/3.D0, -1.D0/3.D0/)
-         VERT(1,:) = (/ -1.D0, -1.D0 /)
-         VERT(2,:) = (/ 1.D0, -1.D0 /)
-         VERT(3,:) = (/ -1.D0, 1.D0 /)
-         ADDGP = 3
-      elseif (ELEM .eq. 2 .and. DIM .eq. 2) then
-         Allocate( VERT(4,DIM) )
-         BARY(:) = (/ 0.D0, 0.D0 /)
-         VERT(1,:) = (/ -1.D0, -1.D0 /)
-         VERT(2,:) = (/ 1.D0, -1.D0 /)
-         VERT(3,:) = (/ 1.D0, 1.D0 /)
-         VERT(4,:) = (/ -1.D0, 1.D0 /)
-         ADDGP = 4
+
+      BARY(:,1) = (/ -1.D0/3.D0, -1.D0/3.D0/)
+      VERT(1,:,1) = (/ -1.D0, -1.D0 /)
+      VERT(2,:,1) = (/ 1.D0, -1.D0 /)
+      VERT(3,:,1) = (/ -1.D0, 1.D0 /)
+      ADDGP(1) = 3
+      if (MXEDGS .eq. 4) then
+         BARY(:,2) = (/ 0.D0, 0.D0 /)
+         VERT(1,:,2) = (/ -1.D0, -1.D0 /)
+         VERT(2,:,2) = (/ 1.D0, -1.D0 /)
+         VERT(3,:,2) = (/ 1.D0, 1.D0 /)
+         VERT(4,:,2) = (/ -1.D0, 1.D0 /)
+         ADDGP(2) = 4
       endif
 
 C.....Loop over orders of polynomials required
@@ -691,229 +821,285 @@ C.....Loop over orders of polynomials required
          SZ2 = (P+2)*(P+1)**(DIM-1)/2
          Allocate ( BASIS(SZ2),DBASIS(SZ2,DIM) )
 
-C........Allocate JACOBI
+C........Allocate JACOBI (orthobasis routine is no longer used so
+C........ALLOC_JACOBI is no longer needed)
 
-         if (L.eq.1.and.p.eq.1) then
- 
-            call ALLOC_JACOBI()
-
-         endif
+C$$$        if (L.eq.1 .and. p.eq.1) then
+C$$$ 
+C$$$           call ALLOC_JACOBI()
+C$$$
+C$$$        endif
 
 C.......Calculate orthogonal basis functions and derivatives at
 C.......gauss area integral points, element barycenter and vertices
 
 C........Loop over area gauss points, then element barycenter, then vertices
-         do Q=1,NAGP(L)+1+ADDGP
-            if (Q.eq.NAGP(L)+1) then
-               PT(1) = BARY(1)
-               PT(2) = BARY(2)
-            elseif (Q.gt.NAGP(L)+1) then
-               PT(1) = VERT(Q - NAGP(L)-1,1)
-               PT(2) = VERT(Q - NAGP(L)-1,2)
-            else
-               PT(1) = XAGP(Q,L)
-               PT(2) = YAGP(Q,L)
-            endif
-
+         do ELT = MNEDGS,MXEDGS
+            J = ELT - 2
+            do Q=1,NAGP(L,J)+1+ADDGP(J)
+               if (Q.eq.NAGP(L,J)+1) then
+                  PT(1) = BARY(1,J)
+                  PT(2) = BARY(2,J)
+               elseif (Q.gt.NAGP(L,J)+1) then
+                  PT(1) = VERT(Q - NAGP(L,J)-1,1,J)
+                  PT(2) = VERT(Q - NAGP(L,J)-1,2,J)
+               else
+                  PT(1) = XAGP(Q,L,J)
+                  PT(2) = YAGP(Q,L,J)
+               endif
+   
 c...........Evaluate basis functions for specified element at current point, order basis functions hierarchically         
-            call ORTHOGONAL_BASIS(ELEM,PT,P,DIM,BASIS,DBASIS)
-            if (Q.le.NAGP(L)) then
-               PHI_AREA(:,Q,P) = BASIS
-               DRPHI(:,Q,P) = DBASIS(:,1)
-               DSPHI(:,Q,P) = DBASIS(:,2)
-            elseif (Q.eq.NAGP(L)+1) then
-               PHI_CENTER(:,P) = BASIS
-	         else
-               PHI_CORNER(:,Q - NAGP(L)-1,P) = BASIS
-            endif
-	      enddo
-         Deallocate ( BASIS, DBASIS )
+               call ORTHOGONAL_BASIS(J,PT,P,DIM,BASIS,DBASIS)
+               if (Q.le.NAGP(L,J)) then
+                  PHI_AREA(:,Q,P,J) = BASIS
+                  DRPHI(:,Q,P,J) = DBASIS(:,1)
+                  DSPHI(:,Q,P,J) = DBASIS(:,2)
+               elseif (Q.eq.NAGP(L,J)+1) then
+                  PHI_CENTER(:,P,J) = BASIS
+               else
+                  PHI_CORNER(:,Q - NAGP(L,J)-1,P,J) = BASIS
+               endif
+            enddo
+         enddo
+			Deallocate ( BASIS, DBASIS )
       enddo
       Deallocate( BARY, VERT )
 
 
 C.....Evaluate the orthogonal basis at the edge gauss quadrature points
 
-      if (ELEM .eq. 1 .and. DIM .eq. 2) then
-         NEDGS = 3
-      elseif (ELEM .eq. 2 .and. DIM .eq. 2) then
-         NEDGS = 4
-      elseif (ELEM .eq. 1 .and. DIM .eq. 3) then
-         NEDGS = 9
-      elseif (ELEM .eq. 2 .and. DIM .eq. 3) then
-         NEDGS = 12
-      else
-         print*, '  ****** ERROR!!! INVALID CHOICE OF ELEMENT/DIMENSION PARAMETER!  *******  '
-         print*, '  Execution terminated in subroutine prep_DG  '
-         STOP
-      endif
-
       do w=1,ph
-	     P = w
+         P = w
          L = w
-	     SZ2 = (P+2)*(P+1)**(DIM-1)/2
+         SZ2 = (P+2)*(P+1)**(DIM-1)/2
          Allocate ( BASIS(SZ2),DBASIS(SZ2,DIM) )
 
 c........Calculate entries for inverse mass stiffness matrix
           
-         if (ELEM .eq. 1 .and. DIM .eq. 2) then
+         do ELT = MNEDGS,MXEDGS
+            JJJ = ELT - 2
+            if (JJJ .eq. 1 .and. DIM .eq. 2) then
 c........For triangular elements
-	        M = 1
-      	    do J = 0,P
-               do I = 0,J
-                  JJ = J - I
-                  M_INV(M,P) = ((2.D0*I+1.D0)*(2.D0*JJ+2.D0*I+2.D0)/4.D0)
-                  M = M+1
+               M = 1
+               do J = 0,P
+                  do I = 0,J
+                     JJ = J - I
+                     M_INV(M,P) =((2.D0*I+1.D0)*(2.D0*JJ+2.D0*I+2.D0)
+     &                                                            /4.D0)
+                     M = M+1
+                  enddo
                enddo
-            enddo
-         elseif (ELEM .eq. 2 .and. DIM .eq. 2) then
-c........For rectangular elements
-	        M = 1
-      	    do J = 0,P
-               do I = 0,J
-                  JJ = J - I
-                  M_INV(M,P) = ((2.D0*I+1.D0)*(2.D0*JJ+1.D0)/4.D0)
-                  M = M+1
+            elseif (JJJ .eq. 2 .and. DIM .eq. 2) then
+c........Below is for parallelogram elements; if we can determine  
+c........whether an element is parallelogram, then we may use this  
+c........approximation for M_INV; until we implement that capability,
+C........I am leaving this commented out, -DW. 
+C........l(This should not be hard to implement though, so coming soon.) 
+c               M = 1
+c               do J = 0,P
+c                  do I = 0,J
+c                     JJ = J - I
+c                     M_INV(M,P) =((2.D0*I+1.D0)*(2.D0*JJ+1.D0)/4.D0)
+c                     M = M+1
+c                  enddo
+c               enddo
+C........For the general quadrilateral element, orthogonality is lost,
+C........and so is our 'matrix free' implementation, so we must compute
+C........the entire mass-stiffness matrix and its inverse, for each element.
+               Allocate( PHI_AREAM(NAGP(P,2),(P+1)*(P+2)/2), 
+     &                             WM(NAGP(P,2),NAGP(P,2)), 
+     &                             PHI_AREAMT((P+1)*(P+2)/2,NAGP(P,2)),
+     &                             MTEMP1((P+1)*(P+2)/2,NAGP(P,2)),
+     &                             MTEMP2((P+1)*(P+2)/2,(P+1)*(P+2)/2),
+     &                             MTEMPI((P+1)*(P+2)/2,(P+1)*(P+2)/2) )
+               do jj = 1,NE
+                  if (EDN(jj) .eq. 4) then
+C.................Compute element Jacobian for each area gauss point
+                     X1 = X(NM(jj,1))
+                     X2 = X(NM(jj,2))
+                     X3 = X(NM(jj,3))
+                     X4 = X(NM(jj,4)) 
+                     Y1 = Y(NM(jj,1))
+                     Y2 = Y(NM(jj,2))
+                     Y3 = Y(NM(jj,3))
+                     Y4 = Y(NM(jj,4))
+                     Aq = 0.5d0*(X1*Y2 + X2*Y3 + X3*Y4 + X4*Y1  
+     &                                  - X2*Y1 - X3*Y2 - X4*Y3 - X1*Y4)
+                     Atr1 = 0.5d0*((X1 - X3)*(Y2 - Y3) 
+     &                                            + (X3 - X2)*(Y1 - Y3))
+                     Atr2 = 0.5d0*((X1 - X4)*(Y2 - Y4) 
+     &                                            + (X4 - X2)*(Y1 - Y4))
+C.................Instead of storing the Jacobian, we store these,
+C.................so that we may later easily compute the Jacobian for each integral.
+                     Q1(jj) = 0.25d0*Aq
+                     Q2(jj) = 0.25d0*(Atr2 - Atr1)
+                     Q3(jj) = 0.25d0*(Aq - Atr1 - Atr2)
+                     WM = 0
+                     do j = 1,NAGP(P,2)
+                        Jac = Q1(jj) + Q2(jj)*XAGP(j,P,2) +
+     &                                                Q3(jj)*YAGP(j,P,2)
+                        do k = 1,(P+1)*(P+2)/2
+                           PHI_AREAM(j,k) = PHI_AREA(k,j,P,2)
+                           PHI_AREAMT(k,j) = PHI_AREA(k,j,P,2)
+                        enddo
+                        WM(j,j) = Jac*WAGP(j,P,2)
+                     enddo
+                     MTEMP1 = matmul(PHI_AREAMT,WM)
+                     MTEMP2 = matmul(MTEMP1,PHI_AREAM)
+                     call inv(MTEMP2,MTEMPI,(P+1)*(P+2)/2)
+                     do k = 1,(P+1)*(P+2)/2
+                        do j = 1,(P+1)*(P+2)/2
+                           M_INVM(jj,j,k,P) = MTEMPI(j,k)
+                        enddo
+                     enddo
+                  endif
                enddo
-            enddo
-         elseif (ELEM .eq. 1 .and. DIM .eq. 3) then
+               Deallocate(PHI_AREAM,WM,PHI_AREAMT,MTEMP1,MTEMP2,MTEMPI )
+            elseif (JJJ .eq. 1 .and. DIM .eq. 3) then
 c........For triangular prism elements
-	        M = 1 
-            do k = 0,P
-      	      do J = 0,P
-                  do I = 0,J
-                     JJ = J - I
-                     M_INV(M,P) = ((2.D0*I+1.D0)*(2.D0*JJ+2.D0*I+2.D0)*(2.D0*k+1.D0)/8.D0)
-                     M = M+1
+               M = 1 
+               do k = 0,P
+                  do J = 0,P
+                     do I = 0,J
+                        JJ = J - I
+                        M_INV(M,P) =((2.D0*I+1.D0)*(2.D0*JJ+2.D0
+     &                                      *I+2.D0)*(2.D0*k+1.D0)/8.D0)
+                        M = M+1
+                     enddo
                   enddo
                enddo
-            enddo
-         elseif (ELEM .eq. 2 .and. DIM .eq. 3) then
-c........For rectangular hexahedron elements
-	        M = 1 
-            do k = 0,P
-      	      do J = 0,P
-                  do I = 0,J
-                     JJ = J - I
-                     M_INV(M,P) = ((2.D0*I+1.D0)*(2.D0*JJ+1.D0)*(2.D0*k+1.D0)/8.D0)
-                     M = M+1
-                  enddo
-               enddo
-            enddo
-         endif
-
+            elseif (JJJ .eq. 2 .and. DIM .eq. 3) then
+C........This is only for parallelepiped elements should change this
+C........later to reflect the above approach for 2D quads . 
+C               M = 1 
+C               do k = 0,P
+C                  do J = 0,P
+C                     do I = 0,J
+C                        JJ = J - I                   
+C                        M_INV(M,P) = ((2.D0*I+1.D0)*(2.D0*JJ+1.D0)*
+C     &                                               (2.D0*k+1.D0)/8.D0)
+C                        M = M+1
+C                     enddo
+C                  enddo
+C               enddo
+            endif
+            
 c........Loop over edges
-         do 100 II = 1,NEDGS
+            do 100 II = 1,ELT
 c..........Loop over edge gauss points
- 	         do Q=1,NEGP(L)+1
+               do Q=1,NEGP(L)+1
 c..............Get edge gauss points (and midpoint) for triangle edges
-               if (ELEM .eq. 1 .and. DIM .eq. 2) then
-                  if (II.eq.1) then
-                     if (Q.lt.(NEGP(L)+1)) then
-                        PT(1) = -XEGP(Q,L)
-                        PT(2) =  XEGP(Q,L)
-                     else
-                        PT(1) = 0.D0
-                        PT(2) = 0.D0
+                  if (JJJ .eq. 1 .and. DIM .eq. 2) then
+                     if (II.eq.1) then
+                        if (Q.lt.(NEGP(L)+1)) then
+                           PT(1) = -XEGP(Q,L)
+                           PT(2) =  XEGP(Q,L)
+                        else
+                           PT(1) = 0.D0
+                           PT(2) = 0.D0
+                        endif
+                     elseif (II.eq.2) then
+                        if (Q.lt.(NEGP(L)+1)) then
+                           PT(1) = -1.D0
+                           PT(2) = -XEGP(Q,L)
+                        else
+                           PT(1) = -1.D0
+                           PT(2) =  0.D0
+                        endif
+                     elseif (II.eq.3) then
+                        if (Q.lt.(NEGP(L)+1)) then
+                           PT(1) = XEGP(Q,L)
+                           PT(2) = -1.D0
+                        else
+                           PT(1) =  0.D0
+                           PT(2) = -1.D0
+                        endif
                      endif
-                  elseif (II.eq.2) then
-                     if (Q.lt.(NEGP(L)+1)) then
-                        PT(1) = -1.D0
-                        PT(2) = -XEGP(Q,L)
-                     else
-                        PT(1) = -1.D0
-                        PT(2) =  0.D0
-                     endif
-                  elseif (II.eq.3) then
-                     if (Q.lt.(NEGP(L)+1)) then
-                        PT(1) = XEGP(Q,L)
-                        PT(2) = -1.D0
-                     else
-                        PT(1) =  0.D0
-                        PT(2) = -1.D0
-                     endif
-                  endif
 c..............Get edge gauss points (and midpoint) for rectangle edges
-               elseif (ELEM .eq. 2 .and. DIM .eq. 2) then
-	              if (II.eq.1) then
-                     if (Q.lt.(NEGP(L)+1)) then
-                        PT(1) = -XEGP(Q,L)
-                        PT(2) = 1.D0
-                     else
-                        PT(1) = 0.D0
-                        PT(2) = 1.D0
-                     endif
-                  elseif (II.eq.2) then
-                     if (Q.lt.(NEGP(L)+1)) then
-                        PT(1) = -1.D0
-                        PT(2) = -XEGP(Q,L)
-                     else
-                        PT(1) = -1.D0
-                        PT(2) =  0.D0
-                     endif
-                  elseif (II.eq.3) then
-                     if (Q.lt.(NEGP(L)+1)) then
-                        PT(1) = XEGP(Q,L)
-                        PT(2) = -1.D0
-                     else
-                        PT(1) =  0.D0
-                        PT(2) = -1.D0
-                     endif
-         	      elseif (II.eq.4) then
-                     if (Q.lt.(NEGP(L)+1)) then
-                        PT(1) = 1.D0
-                        PT(2) = XEGP(Q,L)
-                     else
-                        PT(1) = 1.D0
-                        PT(2) = 0.D0
+                  elseif (JJJ .eq. 2 .and. DIM .eq. 2) then
+                     if (II.eq.1) then
+                        if (Q.lt.(NEGP(L)+1)) then
+                           PT(1) = 1.D0
+                           PT(2) = XEGP(Q,L)
+                        else
+                           PT(1) = 1.D0
+                           PT(2) = 0.D0
+                        endif
+                     elseif (II.eq.2) then
+                        if (Q.lt.(NEGP(L)+1)) then
+                           PT(1) = -XEGP(Q,L)
+                           PT(2) = 1.D0
+                        else
+                           PT(1) = 0.D0
+                           PT(2) = 1.D0
+                        endif
+                     elseif (II.eq.3) then
+                        if (Q.lt.(NEGP(L)+1)) then
+                           PT(1) = -1.D0
+                           PT(2) = -XEGP(Q,L)
+                        else
+                           PT(1) = -1.D0
+                           PT(2) =  0.D0
+                        endif
+                     elseif (II.eq.4) then
+                        if (Q.lt.(NEGP(L)+1)) then
+                           PT(1) = XEGP(Q,L)
+                           PT(2) = -1.D0
+                        else
+                           PT(1) =  0.D0
+                           PT(2) = -1.D0
+                        endif
                      endif
                   endif
-               endif
 
 c..............Evaluate basis functions for specified element at current point, order basis functions hierarchically   
-	           call ORTHOGONAL_BASIS(ELEM,PT,P,DIM,BASIS,DBASIS)
-               if (Q.le.NAGP(L)) then
-                  PHI_EDGE(:,Q,II,P) = BASIS
-               else
-                  PHI_MID(:,II,P) = BASIS
+                  call ORTHOGONAL_BASIS(JJJ,PT,P,DIM,BASIS,DBASIS)
+                  if (Q.le.NEGP(L)+1) then
+                     PHI_EDGE(:,Q,II,P,JJJ) = BASIS
+                  else
+                     PHI_MID(:,II,P,JJJ) = BASIS
+                  endif
+               enddo
+
+               if (JJJ .eq. 1) then !.and. DIM .eq. 2) then
+                  XP = PT(1)
+                  YP = PT(2)
+                  III = 3
+                  do Q = 1,NEGP(L)+1
+                     if (P.gt.1) then
+                        if (Q.lt.(NEGP(L)+1)) then
+                           PSI_CHECK(1,III,JJJ) = -1.D0/2.D0*(XP + YP )
+                           PSI_CHECK(2,III,JJJ) =  1.D0/2.D0*(XP + 1.D0)
+                           PSI_CHECK(3,III,JJJ) =  1.D0/2.D0*(YP + 1.D0)
+                           III = III + 1
+                        endif
+                     endif
+                  enddo
+               elseif (JJJ .eq. 2) then ! .and. DIM .eq. 2) then
+                  XP = PT(1)
+                  YP = PT(2)
+                  III = 4
+                  do Q = 1,NEGP(L)+1
+                     if (P.gt.1) then
+                        if (Q.lt.(NEGP(L)+1)) then
+                           PSI_CHECK(1,III,JJJ) =  1.D0/4.D0*
+     &                                         (1.0D0 - XP)*(1.0D0 - YP)
+                           PSI_CHECK(2,III,JJJ) =  1.D0/4.D0*
+     &                                         (1.0D0 + XP)*(1.0D0 - YP)
+                           PSI_CHECK(3,III,JJJ) =  1.D0/4.D0*
+     &                                         (1.0D0 + XP)*(1.0D0 + YP)
+                           PSI_CHECK(4,III,JJJ) =  1.D0/4.D0*
+     &                                         (1.0D0 - XP)*(1.0D0 + YP)
+                           III = III + 1
+                        endif
+                     endif
+                  enddo
                endif
-            enddo
-
-            if (ELEM .eq. 1 .and. DIM .eq. 2) then
-               XP = PT(1)
-               YP = PT(2)
-               III = 3
-               do Q = 1,NEGP(L)+1
-                  if (P.gt.1) then
-                     if (Q.lt.(NEGP(L)+1)) then
-                        PSI_CHECK(1,III) = -1.D0/2.D0*(XP + YP )
-                        PSI_CHECK(2,III) =  1.D0/2.D0*(XP + 1.D0)
-                        PSI_CHECK(3,III) =  1.D0/2.D0*(YP + 1.D0)
-                        III = III + 1
-                     endif
-                  endif
-               enddo
-            elseif (ELEM .eq. 2 .and. DIM .eq. 2) then
-               XP = PT(1)
-               YP = PT(2)
-               III = 4
-               do Q = 1,NEGP(L)+1
-                  if (P.gt.1) then
-                     if (Q.lt.(NEGP(L)+1)) then
-                        PSI_CHECK(1,III) =  1.D0/2.D0*(XP - 1.D0)
-	                    PSI_CHECK(2,III) =  1.D0/2.D0*(YP - 1.D0)
-                        PSI_CHECK(3,III) =  1.D0/2.D0*(XP + 1.D0)
-                        PSI_CHECK(4,III) =  1.D0/2.D0*(YP + 1.D0)
-                        III = III + 1
-                     endif
-                  endif
-               enddo
-            endif
- 100     continue
-	     Deallocate ( BASIS, DBASIS )
+ 100        continue
+         enddo
+         Deallocate ( BASIS, DBASIS )
       enddo
-C***********************************************************************
-
+      
 C.....Do the L2-projection of the initial conditions
 
       hb = 0.D0
@@ -1047,28 +1233,74 @@ c$$$      enddo
 !Update DPE_MIN
 
       DO J = 1,NE
-         DPE_MIN(J) = MIN(DP(NM(J,1)),DP(NM(J,2)),DP(NM(J,3)))
+         IF (EDN(J).EQ.3) THEN
+            DPE_MIN(J) = MIN(DP(NM(J,1)),DP(NM(J,2)),DP(NM(J,3)))
+         ELSEIF (EDN(J).EQ.4) THEN
+            DPE_MIN(J) = MIN(DP(NM(J,1)),DP(NM(J,2)),DP(NM(J,3)),
+     &                                                      DP(NM(J,4)))
+         ENDIF
       ENDDO
 
 C.....Compute the values of the nodal basis functions at the
 C.....area gauss quadrature points, at every p level chi
 
-      do chi = 1,ph
-         do I = 1,NAGP(chi)
-            PSI1(I,chi) = -1.D0/2.D0*(XAGP(I,chi) + YAGP(I,chi))
-            PSI2(I,chi) =  1.D0/2.D0*(XAGP(I,chi) + 1.D0)
-            PSI3(I,chi) =  1.D0/2.D0*(YAGP(I,chi) + 1.D0)
-         enddo
+      do ELT = MNEDGS,MXEDGS
+         J = ELT - 2
+         if (J .eq. 1) then
+            do chi = 1,ph
+               do I = 1,NAGP(chi,J)
+                  PSI1(I,chi,J) = -1.D0/2.D0*(XAGP(I,chi,J) 
+     &                                                  + YAGP(I,chi,J))
+                  PSI2(I,chi,J) =  1.D0/2.D0*(XAGP(I,chi,J) + 1.D0)
+                  PSI3(I,chi,J) =  1.D0/2.D0*(YAGP(I,chi,J) + 1.D0)
+               enddo
+            enddo
+         elseif (J .eq. 2) THEN
+            do chi = 1,ph
+               do I = 1,NAGP(chi,J)
+                  PSI1(I,chi,J) = 0.25D0*(1.D0 - XAGP(I,chi,J))*
+     &                                            (1.D0 - YAGP(I,chi,J))
+                  PSI2(I,chi,J) = 0.25D0*(1.D0 + XAGP(I,chi,J))*
+     &                                            (1.D0 - YAGP(I,chi,J))
+                  PSI3(I,chi,J) = 0.25D0*(1.D0 + XAGP(I,chi,J))*
+     &                                            (1.D0 + YAGP(I,chi,J))
+                  PSI4(I,chi) = 0.25D0*(1.D0 - XAGP(I,chi,J))*
+     &                                            (1.D0 + YAGP(I,chi,J))
+               enddo
+            enddo
+         endif
       enddo
       
+      
 C.....Store the derivatives of the (linear) nodal basis functions
-
-      DRPSI(1) = -1.D0/2.D0
-      DRPSI(2) =  1.D0/2.D0
-      DRPSI(3) =  0.D0
-      DSPSI(1) = -1.D0/2.D0
-      DSPSI(2) =  0.D0
-      DSPSI(3) =  1.D0/2.D0
+      if (MXEDGS .eq. 3) then
+         call ALLOC_DPSI_TRI()
+      elseif (MXEDGS .eq. 4) then
+         call ALLOC_DPSI_QUAD()
+      endif
+      do ELT = MNEDGS,MXEDGS
+         if (ELT .eq. 3) then
+            DRPSI(1,1,1,1) = -1.D0/2.D0
+            DRPSI(2,1,1,1) =  1.D0/2.D0
+            DRPSI(3,1,1,1) =  0.D0
+            DSPSI(1,1,1,1) = -1.D0/2.D0
+            DSPSI(2,1,1,1) =  0.D0
+            DSPSI(3,1,1,1) =  1.D0/2.D0
+         elseif (ELT .eq. 4) then
+            do chi = 1,ph
+               do I = 1,NAGP(chi,2)
+                  DRPSI(1,I,chi,2) = -0.25D0*(1.D0 - YAGP(I,chi,2))
+                  DRPSI(2,I,chi,2) =  0.25D0*(1.D0 - YAGP(I,chi,2))
+                  DRPSI(3,I,chi,2) =  0.25D0*(1.D0 + YAGP(I,chi,2))
+                  DRPSI(4,I,chi,2) = -0.25D0*(1.D0 + YAGP(I,chi,2))
+                  DSPSI(1,I,chi,2) = -0.25D0*(1.D0 - XAGP(I,chi,2))
+                  DSPSI(2,I,chi,2) = -0.25D0*(1.D0 + XAGP(I,chi,2))
+                  DSPSI(3,I,chi,2) =  0.25D0*(1.D0 + XAGP(I,chi,2))
+                  DSPSI(4,I,chi,2) =  0.25D0*(1.D0 - XAGP(I,chi,2))
+               enddo
+            enddo 
+         endif
+      enddo
       
 
 C.....Pre-compute the derivatives of the coordinate transformation for
@@ -1077,166 +1309,371 @@ C.....each element
       DO J = 1,MNE
 
 C.....Retrieve the global node numbers for the element
+         IF (EDN(J).EQ.3) THEN
+            N1 = NM(J,1)
+            N2 = NM(J,2)
+            N3 = NM(J,3)
+            X1=X(N1)
+            Y1=Y(N1)
+            X2=X(N2)
+            Y2=Y(N2)
+            X3=X(N3)
+            Y3=Y(N3)
+            AREA = (X1 - X3)*(Y2 - Y3) + (X3 - X2)*(Y1 - Y3)
+            AREA=AREA*0.5D0
+C..........Compute the derivatives of the coordinate transformation
 
-         N1 = NM(J,1)
-         N2 = NM(J,2)
-         N3 = NM(J,3)
-         x1=x(n1)
-         y1=y(n1)
-         x2=x(n2)
-         y2=y(n2)
-         x3=x(n3)
-         y3=y(n3)
-         AREA = (X1 - X3)*(Y2 - Y3) + (X3 - X2)*(Y1 - Y3)
-         area=area*.5d0
+            DRDX(J) = 1.D0/AREA*(Y3 - Y1)
+            DSDX(J) = 1.D0/AREA*(Y1 - Y2)
 
-C.....Compute the derivatives of the coordinate transformation
+            DRDY(J) = 1.D0/AREA*(X1 - X3)
+            DSDY(J) = 1.D0/AREA*(X2 - X1)
+C..........Compute elemental Coriolis and friction terms
 
-         DRDX(J) = 1.D0/AREA*(Y(N3) - Y(N1))
-         DSDX(J) = 1.D0/AREA*(Y(N1) - Y(N2))
+            CORI_EL(J) = (CORIF(N1) + CORIF(N2) + CORIF(N3))/3.D0
+            FRIC_EL(J) = (FRIC(N1) + FRIC(N2) + FRIC(N3))/3.D0
+         ELSEIF (EDN(J).EQ.4) THEN
+            N1 = NM(J,1)
+            N2 = NM(J,2)
+            N3 = NM(J,3)
+            N4 = NM(J,4)
+            X1=X(N1)
+            Y1=Y(N1)
+            X2=X(N2)
+            Y2=Y(N2)
+            X3=X(N3)
+            Y3=Y(N3)
+            X4=X(N4)
+            Y4=Y(N4)
+C........Compute the derivatives of the coordinate transformation.
+C........The commented expressions are for PARALLELOGRAMS ONLY; they are
+C........commented out until we implement a method to identify parallelogram elements
+C            DRDX(J) = 2.D0/(X2 - X1)
+C            DSDX(J) = 0.D0       
+C            DRDY(J) = 0.D0
+C            DSDY(J) = 2.D0/(Y4 - Y1)
+C........Compute derivatives for each order of rule and for each area gauss point.
+            do chi = 1,ph
+               do I = 1,NAGP(chi,2)
+                  XX = XAGP(I,chi,2)
+                  YY = YAGP(I,chi,2)
+                  Jac = Q1(J) + Q2(J)*XX + Q3(J)*YY
+                  DRDXQ(J,I,chi) = -0.25d0*1.0d0/Jac*((1-XX)*Y1 + 
+     &                                (1+XX)*Y2 - (1+XX)*Y3 - (1-XX)*Y4)
+                  DSDXQ(J,I,chi) = 0.25d0*1.0d0/Jac*((1-YY)*Y1 - 
+     &                                (1-YY)*Y2 - (1+YY)*Y3 + (1+YY)*Y4)
+                  DRDYQ(J,I,chi) = 0.25d0*1.0d0/Jac*((1-XX)*X1 + 
+     &                                (1+XX)*X2 - (1+XX)*X3 - (1-XX)*X4)
+                  DSDYQ(J,I,chi) = -0.25d0*1.0d0/Jac*((1-YY)*X1 - 
+     &                                (1-YY)*X2 - (1+YY)*X3 + (1+YY)*X4)
+               enddo
+            end do
 
-         DRDY(J) = 1.D0/AREA*(X(N1) - X(N3))
-         DSDY(J) = 1.D0/AREA*(X(N2) - X(N1))
-         
-C.......Compute elemental Coriolis and friction terms
+C..........Compute elemental Coriolis and friction terms
 
-         CORI_EL(J) = (CORIF(N1) + CORIF(N2) + CORIF(N3))/3.D0
-         FRIC_EL(J) = (FRIC(N1) + FRIC(N2) + FRIC(N3))/3.D0
+            CORI_EL(J)=(CORIF(N1)+CORIF(N2)+CORIF(N3)+CORIF(N4))/4.D0
+            FRIC_EL(J)=(FRIC(N1) + FRIC(N2) + FRIC(N3) + FRIC(N4))/4.D0
+         ENDIF
 
 C.......Pre-compute the bathymetry and the gradient of the bathymetry at
 C.......the quadrature points and compute volume of water
 
          DP_VOL(J,:) = 0.D0
          SFAC_ELEM(:,J,:) = 0.D0
-
+         JJ = EDN(J) - 2
          do chi = 1,ph
+            pp = (chi+1)*(chi+2)/2
+            if (EDN(J) .eq. 4) then
+               allocate(vtemp1(pp),vtemp2(pp), MTEMPI(pp,pp),
+     &                                                    PHI_AREAV(pp))
+            endif
 
             if (chi.gt.1) then
 
-               do I = 1,NAGP(chi) ! Forced for wetting and drying's sake
+               do I = 1,NAGP(chi,JJ) ! Forced for wetting and drying's sake
 
                   BATH(I,J,chi) = 0.D0
                   DBATHDX(I,J,chi) = 0.D0
                   DBATHDY(I,J,chi) = 0.D0
                   YELEM(chi) = 0.d0
 
-                  DO K = 1,(chi+1)*(chi+2)/2 
+                  DO K = 1,pp 
 
-                     DPHIDX = DRPHI(K,I,chi)*DRDX(J) + DSPHI(K,I,chi)*DSDX(J)
-                     DPHIDY = DRPHI(K,I,chi)*DRDY(J) + DSPHI(K,I,chi)*DSDY(J)
-                     XFAC(K,I,J,chi)  = M_INV(K,chi)*WAGP(I,chi)*DPHIDX
-                     YFAC(K,I,J,chi)  = M_INV(K,chi)*WAGP(I,chi)*DPHIDY
-                     SRFAC(K,I,J,chi) = M_INV(K,chi)*WAGP(I,chi)*PHI_AREA(K,I,chi)
-                     BATH(I,J,chi) = BATH(I,J,chi) + HB(K,J,1)*PHI_AREA(K,I,chi)
-                     YELEM(chi) = YELEM(chi) + YDUB(K,J,chi)*PHI_AREA(K,I,chi)
+                     if (EDN(J) .eq. 3) then
+                        DPHIDX=DRPHI(K,I,chi,JJ)*DRDX(J)+
+     &                                         DSPHI(K,I,chi,JJ)*DSDX(J)
+                        DPHIDY=DRPHI(K,I,chi,JJ)*DRDY(J)+
+     &                                         DSPHI(K,I,chi,JJ)*DSDY(J)
+                        XFAC(K,I,J,chi)=M_INV(K,chi)*WAGP(I,chi,JJ)
+     &                                                           *DPHIDX
+                        YFAC(K,I,J,chi)=M_INV(K,chi)*WAGP(I,chi,JJ)
+     &                                                           *DPHIDY
+                        SRFAC(K,I,J,chi)=M_INV(K,chi)*WAGP(I,chi,JJ)*
+     &                                              PHI_AREA(K,I,chi,JJ)
+                     elseif (EDN(J) .eq. 4) then
+                        DPHIDX=DRPHI(K,I,chi,JJ)*DRDXQ(J,I,chi)+
+     &                                  DSPHI(K,I,chi,JJ)*DSDXQ(J,I,chi)
+                        DPHIDY=DRPHI(K,I,chi,JJ)*DRDYQ(J,I,chi)+
+     &                                  DSPHI(K,I,chi,JJ)*DSDYQ(J,I,chi)
+                        vtemp1(K) = DPHIDX
+                        vtemp2(K) = DPHIDY
+                        PHI_AREAV(K) = PHI_AREA(K,I,chi,JJ)
+                     endif
                      
+                     BATH(I,J,chi) = BATH(I,J,chi) + HB(K,J,1)*
+     &                                              PHI_AREA(K,I,chi,JJ)
+                     YELEM(chi) = YELEM(chi) + YDUB(K,J,chi)*
+     &                                              PHI_AREA(K,I,chi,JJ)
                      IF (ICS.EQ.1) THEN
                         SFAC_ELEM(I,J,chi)=1.0D0
                      ELSE
                         SFAC_ELEM(I,J,chi)=COS(SFEA0)/COS(YELEM(chi)/R)
                      ENDIF
 
-                     DBATHDX(I,J,chi) = DBATHDX(I,J,chi) + HB(K,J,1)*DPHIDX
-                     DBATHDY(I,J,chi) = DBATHDY(I,J,chi) + HB(K,J,1)*DPHIDY
-                     DP_VOL(J,chi) = DP_VOL(J,chi) + WAGP(I,chi)*HB(K,J,1)*PHI_AREA(K,I,chi)
+                     DBATHDX(I,J,chi) =DBATHDX(I,J,chi)+HB(K,J,1)*DPHIDX
+                     DBATHDY(I,J,chi) =DBATHDY(I,J,chi)+HB(K,J,1)*DPHIDY
+                     if (EDN(J) .eq. 3) then 
+                        DP_VOL(J,chi)=DP_VOL(J,chi)+WAGP(I,chi,JJ)*
+     &                                    HB(K,J,1)*PHI_AREA(K,I,chi,JJ)
+                     elseif (EDN(J) .eq. 4) then
+                        Jac = Q1(J) + Q2(J)*XAGP(I,chi,JJ) 
+     &                                            + Q3(J)*YAGP(I,chi,JJ)
+                        DP_VOL(J,chi)=DP_VOL(J,chi)+Jac*WAGP(I,chi,JJ)*
+     &                                    HB(K,J,1)*PHI_AREA(K,I,chi,JJ)
+                     endif
+
 
                   ENDDO
+                  if (EDN(J) .eq. 4) then
+                     do k = 1,pp
+                        do ii = 1,pp
+                           Jac = Q1(J) + Q2(J)*XAGP(I,chi,JJ) +
+     &                                              Q3(J)*YAGP(I,chi,JJ)
+                           MTEMPI(ii,k) = Jac*M_INVM(J,ii,k,chi)
+                        enddo
+                     enddo
+                     vtemp1 = matmul(MTEMPI,vtemp1)
+                     vtemp1 = vtemp1*WAGP(I,chi,JJ)
+                     vtemp2 = matmul(MTEMPI,vtemp2)
+                     vtemp2 = vtemp2*WAGP(I,chi,JJ)
+                     PHI_AREAV = matmul(MTEMPI,PHI_AREAV)
+                     PHI_AREAV = PHI_AREAV*WAGP(I,chi,JJ)
+                     do k = 1,pp
+                        XFAC(k,I,J,chi) = vtemp1(k)
+                        YFAC(k,I,J,chi) = vtemp2(k)
+                        SRFAC(k,I,J,chi) = PHI_AREAV(k)
+                     enddo
+                  endif
 
                enddo
-
+               if (EDN(J) .eq. 4) then
+                  deallocate(vtemp1,vtemp2,MTEMPI,PHI_AREAV)
+               endif
             else
 
-               do I = 1,NAGP(chi) ! Area quadrature points
+               do I = 1,NAGP(chi,JJ) ! Area quadrature points
 
                   BATH(I,J,chi) = 0.D0
                   DBATHDX(I,J,chi) = 0.D0
                   DBATHDY(I,J,chi) = 0.D0
                   YELEM(chi) = 0.d0
 
-                  DO K = 1,(chi+1)*(chi+2)/2 
+                  DO K = 1,pp 
 
-                     DPHIDX = DRPHI(K,I,chi)*DRDX(J) + DSPHI(K,I,chi)*DSDX(J)
-                     DPHIDY = DRPHI(K,I,chi)*DRDY(J) + DSPHI(K,I,chi)*DSDY(J)
-                     XFAC(K,I,J,chi)  = M_INV(K,chi)*WAGP(I,chi)*DPHIDX
-                     YFAC(K,I,J,chi)  = M_INV(K,chi)*WAGP(I,chi)*DPHIDY
-                     SRFAC(K,I,J,chi) = M_INV(K,chi)*WAGP(I,chi)*PHI_AREA(K,I,chi)
-                     BATH(I,J,chi) = BATH(I,J,chi) + HB(K,J,1)*PHI_AREA(K,I,chi)
-                     YELEM(chi) = YELEM(chi) + YDUB(K,J,chi)*PHI_AREA(K,I,chi)
+                     if (EDN(J) .eq. 3) then
+                        DPHIDX=DRPHI(K,I,chi,JJ)*DRDX(J)+
+     &                                         DSPHI(K,I,chi,JJ)*DSDX(J)
+                        DPHIDY=DRPHI(K,I,chi,JJ)*DRDY(J)+
+     &                                         DSPHI(K,I,chi,JJ)*DSDY(J)
+                        XFAC(K,I,J,chi)=M_INV(K,chi)*WAGP(I,chi,JJ)
+     &                                                           *DPHIDX
+                        YFAC(K,I,J,chi)=M_INV(K,chi)*WAGP(I,chi,JJ)
+     &                                                           *DPHIDY
+                        SRFAC(K,I,J,chi)=M_INV(K,chi)*WAGP(I,chi,JJ)*
+     &                                              PHI_AREA(K,I,chi,JJ)
+                     elseif (EDN(J) .eq. 4) then
+                        DPHIDX=DRPHI(K,I,chi,JJ)*DRDXQ(J,I,chi)+
+     &                                  DSPHI(K,I,chi,JJ)*DSDXQ(J,I,chi)
+                        DPHIDY=DRPHI(K,I,chi,JJ)*DRDYQ(J,I,chi)+
+     &                                  DSPHI(K,I,chi,JJ)*DSDYQ(J,I,chi)
+                        vtemp1(K) = DPHIDX
+                        vtemp2(K) = DPHIDY
+                        PHI_AREAV(K) = PHI_AREA(K,I,chi,JJ)
+                     endif
                      
+                     BATH(I,J,chi) = BATH(I,J,chi) + HB(K,J,1)*
+     &                                              PHI_AREA(K,I,chi,JJ)
+                     YELEM(chi) = YELEM(chi) + YDUB(K,J,chi)*
+     &                                              PHI_AREA(K,I,chi,JJ)
                      IF (ICS.EQ.1) THEN
                         SFAC_ELEM(I,J,chi)=1.0D0
                      ELSE
                         SFAC_ELEM(I,J,chi)=COS(SFEA0)/COS(YELEM(chi)/R)
                      ENDIF
 
-                     DBATHDX(I,J,chi) = DBATHDX(I,J,chi) + HB(K,J,1)*DPHIDX
-                     DBATHDY(I,J,chi) = DBATHDY(I,J,chi) + HB(K,J,1)*DPHIDY
-                     DP_VOL(J,chi) = DP_VOL(J,chi) + WAGP(I,chi)*HB(K,J,1)*PHI_AREA(K,I,chi)
+                     DBATHDX(I,J,chi) =DBATHDX(I,J,chi)+HB(K,J,1)*DPHIDX
+                     DBATHDY(I,J,chi) =DBATHDY(I,J,chi)+HB(K,J,1)*DPHIDY
+                     if (EDN(J) .eq. 3) then 
+                        DP_VOL(J,chi)=DP_VOL(J,chi)+WAGP(I,chi,JJ)*
+     &                                    HB(K,J,1)*PHI_AREA(K,I,chi,JJ)
+                     elseif (EDN(J) .eq. 4) then
+                        Jac = Q1(J) + Q2(J)*XAGP(I,chi,JJ) 
+     &                                            + Q3(J)*YAGP(I,chi,JJ)
+                        DP_VOL(J,chi)=DP_VOL(J,chi)+Jac*WAGP(I,chi,JJ)*
+     &                                    HB(K,J,1)*PHI_AREA(K,I,chi,JJ)
+                     endif
 
                   ENDDO
+                  if (EDN(J) .eq. 4) then
+                     do k = 1,pp
+                        do ii = 1,pp
+                           Jac = Q1(J) + Q2(J)*XAGP(I,chi,JJ) +
+     &                                              Q3(J)*YAGP(I,chi,JJ)
+                           MTEMPI(ii,k) = Jac*M_INVM(J,ii,k,chi)
+                        enddo
+                     enddo
+                     vtemp1 = matmul(MTEMPI,vtemp1)
+                     vtemp1 = vtemp1*WAGP(I,chi,JJ)
+                     vtemp2 = matmul(MTEMPI,vtemp2)
+                     vtemp2 = vtemp2*WAGP(I,chi,JJ)
+                     PHI_AREAV = matmul(MTEMPI,PHI_AREAV)
+                     PHI_AREAV = PHI_AREAV*WAGP(I,chi,JJ)
+                     do k = 1,pp
+                        XFAC(k,I,J,chi) = vtemp1(k)
+                        YFAC(k,I,J,chi) = vtemp2(k)
+                        SRFAC(k,I,J,chi) = PHI_AREAV(k)
+                     enddo
+                  endif
 
-               enddo     
-
+               enddo
+               if (EDN(J) .eq. 4) then
+                  deallocate(vtemp1,vtemp2,MTEMPI,PHI_AREAV)
+               endif
             endif
 
          enddo 
+         if (EDN(J).EQ.3) then
+            do chi = 1,ph
+               DP_VOL(J,chi) = 0.25D0*AREAS(J)*DP_VOL(J,chi)
+            enddo
+         endif
 
          do chi = 1,ph
-            DP_VOL(J,chi) = 0.25D0*AREAS(J)*DP_VOL(J,chi)
-         enddo
-
-         do chi = 1,ph
-
+            pp = (chi+1)*(chi+2)/2
             if (chi.ge.1) then
 
-               DO L = 1,3
-                  do I = 1,NEGP(chi) ! Edge quadrature points
+               DO L = 1,EDN(J)
+                  if (EDN(J) .EQ. 4) THEN
+                     allocate(MTEMP1(pp,NEGP(chi)),MTEMPI(pp,pp),
+     &                                         WM(NEGP(chi),NEGP(chi)) )
+                  endif
+                  do I = 1,NEGP(chi) ! Forced for wetting and drying's sake
 
                      BATHED(I,L,J,chi) = 0.D0
                      yed(chi) = 0.d0
-
-                     DO K = 1,(chi+1)*(chi+2)/2
+                     
+                     DO K = 1,pp
                         
-                        BATHED(I,L,J,chi) = BATHED(I,L,J,chi)+HB(K,J,1)*PHI_EDGE(K,I,L,chi)
+                        BATHED(I,L,J,chi) = BATHED(I,L,J,chi)+HB(K,J,1)*
+     &                                            PHI_EDGE(K,I,L,chi,JJ)
 
-                        YED(chi) = YED(chi) + YDUB(K,J,chi)*PHI_EDGE(K,I,L,chi)
+                        YED(chi) = YED(chi) + YDUB(K,J,chi)*
+     &                                            PHI_EDGE(K,I,L,chi,JJ)
 
                         IF (ICS.EQ.1) THEN
                            SFACED(I,L,J,chi)=1.0d0
                         ELSE
                            SFACED(I,L,J,chi)=COS(SFEA0)/COS(YED(chi)/R)
                         ENDIF
+                        IF (EDN(J) .EQ. 3) THEN
 
-                        EDGEQ(K,I,L,chi) = 2.0*M_INV(K,chi)*PHI_EDGE(K,I,L,chi)*WEGP(I,chi)
-
+                           EDGEQ(K,I,L,chi,JJ) = 2.0d0*M_INV(K,chi)*
+     &                                PHI_EDGE(K,I,L,chi,JJ)*WEGP(I,chi)
+                        ENDIF
                      ENDDO
                   enddo
+                  
+                  if (EDN(J) .eq. 4) then
+                     WM = 0
+                     do I = 1,NEGP(chi)
+                        WM(I,I) = WEGP(I,chi)
+                        do k = 1,pp
+                           MTEMP1(k,I) = PHI_EDGE(k,I,L,chi,JJ)
+                        enddo
+                     enddo
+                     do k = 1,pp
+                        do I = 1,pp
+                           MTEMPI(I,k) = M_INVM(J,I,k,chi)
+                        enddo
+                     enddo
+                     MTEMP1 = matmul(MTEMP1,WM)
+                     MTEMP1 = matmul(MTEMPI,MTEMP1)
+                     do I = 1,NEGP(chi)
+                        do k = 1,pp
+                           EDGEQ(k,I,L,chi,JJ) = MTEMP1(k,I)
+                        enddo
+                     enddo
+                     deallocate(MTEMP1,MTEMPI,WM)
+                  endif
+                  
                ENDDO
 
             else
 
-               DO L = 1,3
+               DO L = 1,EDN(J)
+                  if (EDN(J) .EQ. 4) THEN
+                     allocate(MTEMP1(pp,NEGP(chi)),MTEMPI(pp,pp),
+     &                                         WM(NEGP(chi),NEGP(chi)) )
+                  endif
                   do I = 1,NEGP(chi) ! Edge quadrature points
 
                      BATHED(I,L,J,chi) = 0.D0
                      yed(chi) = 0.d0
-
-                     DO K = 1,(chi+1)*(chi+2)/2
+                     
+                     DO K = 1,pp
                         
-                        BATHED(I,L,J,chi) = BATHED(I,L,J,chi)+HB(K,J,1)*PHI_EDGE(K,I,L,chi)
+                        BATHED(I,L,J,chi) = BATHED(I,L,J,chi)+HB(K,J,1)*
+     &                                            PHI_EDGE(K,I,L,chi,JJ)
 
-                        YED(chi) = YED(chi) + YDUB(K,J,chi)*PHI_EDGE(K,I,L,chi)
+                        YED(chi) = YED(chi) + YDUB(K,J,chi)*
+     &                                            PHI_EDGE(K,I,L,chi,JJ)
 
                         IF (ICS.EQ.1) THEN
                            SFACED(I,L,J,chi)=1.0d0
                         ELSE
                            SFACED(I,L,J,chi)=COS(SFEA0)/COS(YED(chi)/R)
                         ENDIF
+                        IF (EDN(J) .EQ. 3) THEN
 
-                        EDGEQ(K,I,L,chi) = 2.0*M_INV(K,chi)*PHI_EDGE(K,I,L,chi)*WEGP(I,chi)
-
+                           EDGEQ(K,I,L,chi,JJ) = 2.0d0*M_INV(K,chi)*
+     &                                PHI_EDGE(K,I,L,chi,JJ)*WEGP(I,chi)
+                        ENDIF
                      ENDDO
                   enddo
+                  
+                  if (EDN(J) .eq. 4) then
+                     WM = 0
+                     do I = 1,NEGP(chi)
+                        WM(I,I) = WEGP(I,chi)
+                        do k = 1,pp
+                           MTEMP1(k,I) = PHI_EDGE(k,I,L,chi,JJ)
+                        enddo
+                     enddo
+                     do k = 1,pp
+                        do I = 1,pp
+                           MTEMPI(I,k) = M_INVM(J,I,k,chi)
+                        enddo
+                     enddo
+                     MTEMP1 = matmul(MTEMPI,MTEMP1)
+                     MTEMP1 = matmul(MTEMP1,WM)
+                     do I = 1,NEGP(chi)
+                        do k = 1,pp
+                           EDGEQ(k,I,L,chi,JJ) = MTEMP1(k,I)
+                        enddo
+                     enddo
+                     deallocate(MTEMP1,MTEMPI,WM)
+                  endif
+                  
                ENDDO
 
             endif
@@ -1249,14 +1686,14 @@ C........
 
          do chi = 1,ph
 
-            DO I = 1,3
+            DO I = 1,EDN(J)
                DP_NODE(I,J,chi) = DP(NM(J,I))
             ENDDO
 
 
-            IF (NCHECK(chi).GT.3) THEN
-               II = 4
-               DO L = 1,3
+            IF (NCHECK(chi,EDN(J)-2).GT.EDN(J)) THEN
+               II = EDN(J) + 1
+               DO L = 1,EDN(J)
                   DO I = 1,NEGP(chi)
                      DP_NODE(II,J,chi) = BATHED(I,L,J,chi)
                      II = II + 1
@@ -1266,57 +1703,88 @@ C........
          enddo
       ENDDO
       
-      DO I = 1,3
-         IF (I.EQ.1) THEN
-            XI = -1.D0
-            YI = -1.D0
-         ELSEIF (I.EQ.2) THEN
-            XI =  1.D0 
-            YI = -1.D0
-         ELSE
-            XI = -1.D0
-            YI =  1.D0
-         ENDIF
-         PSI_CHECK(1,I) = -1.D0/2.D0*(XI + YI)
-         PSI_CHECK(2,I) =  1.D0/2.D0*(XI + 1.D0)
-         PSI_CHECK(3,I) =  1.D0/2.D0*(YI + 1.D0)
-         do chi = 1,ph
-            DO K = 1,(chi+1)*(chi+2)/2 
-               PHI_CHECK(K,I,chi) = PHI_CORNER(K,I,chi)
-            ENDDO
-         enddo
-      ENDDO
+      DO ELT = MNEDGS,MXEDGS
+        J = ELT - 2
+        IF (J .eq. 1) THEN
+          DO I = 1,3
+            IF (I.EQ.1) THEN
+              XI = -1.D0
+              YI = -1.D0
+            ELSEIF (I.EQ.2) THEN
+              XI =  1.D0 
+              YI = -1.D0
+            ELSE
+              XI = -1.D0
+              YI =  1.D0
+            ENDIF
+            PSI_CHECK(1,I,1) = -1.D0/2.D0*(XI + YI)
+            PSI_CHECK(2,I,1) =  1.D0/2.D0*(XI + 1.D0)
+            PSI_CHECK(3,I,1) =  1.D0/2.D0*(YI + 1.D0)
+            do chi = 1,ph
+              DO K = 1,(chi+1)*(chi+2)/2 
+                PHI_CHECK(K,I,chi,1) = PHI_CORNER(K,I,chi,1)
+              ENDDO
+            enddo
+          ENDDO
+        ELSEIF (J .eq. 2) THEN
+          DO I = 1,4
+            IF (I.EQ.1) THEN
+              XI = -1.D0
+              YI = -1.D0
+            ELSEIF (I.EQ.2) THEN
+              XI =  1.D0 
+              YI = -1.D0
+            ELSEIF (I.EQ.3) THEN
+              XI =  1.D0
+              YI =  1.D0
+            ELSE
+              XI = -1.0D0
+              YI =  1.0D0
+            ENDIF
+            PSI_CHECK(1,I,2) =  0.25d0*(1.0D0 - XP)*(1.0D0 - YP)                        
+            PSI_CHECK(2,I,2) =  0.25d0*(1.0D0 + XP)*(1.0D0 - YP)                        
+            PSI_CHECK(3,I,2) =  0.25d0*(1.0D0 + XP)*(1.0D0 + YP)                       
+            PSI_CHECK(4,I,2) =  0.25d0*(1.0D0 - XP)*(1.0D0 + YP)                   
+            do chi = 1,ph
+              DO K = 1,(chi+1)*(chi+2)/2 
+                PHI_CHECK(K,I,chi,2) = PHI_CORNER(K,I,chi,2)
+              ENDDO
+            enddo
+          ENDDO
+        ENDIF
 
-      do chi =1,ph
-         IF (NCHECK(chi).GT.3) THEN
-            II = 4
-            DO L = 1,3
-               DO I = 1,NEGP(chi)
-                  DO K = 1,(chi+1)*(chi+2)/2
-                     
-                     PHI_CHECK(K,II,chi) = PHI_EDGE(K,I,L,chi)
-                     
-                  ENDDO
-                  II = II + 1
-               ENDDO
-            ENDDO
-         ENDIF
-      enddo
-
+        do chi =1,ph
+           IF (NCHECK(chi,J).GT.ELT) THEN
+              II = ELT + 1
+              DO L = 1,ELT
+                 DO I = 1,NEGP(chi)
+                    DO K = 1,(chi+1)*(chi+2)/2
+                       
+                       PHI_CHECK(K,II,chi,J) = PHI_EDGE(K,I,L,chi,J)
+                       
+                    ENDDO
+                    II = II + 1
+                 ENDDO
+              ENDDO
+           ENDIF
+        enddo
+      
 C.....Integrate the basis functions
 
-      PHI_INTEGRATED = 0.D0
-      do chi = 1,ph
-         DO I = 1,NAGP(chi)
-            DO K = 1,(chi+1)*(chi+2)/2
-               PHI_INTEGRATED(K,chi) = PHI_INTEGRATED(K,chi) + WAGP(I,chi)*PHI_AREA(K,I,chi)
-            enddo
+        PHI_INTEGRATED = 0.D0
+        do chi = 1,ph
+           DO I = 1,NAGP(chi,J)
+              DO K = 1,(chi+1)*(chi+2)/2
+                 PHI_INTEGRATED(K,chi,J) =PHI_INTEGRATED(K,chi,J)+
+     &                                 WAGP(I,chi,J)*PHI_AREA(K,I,chi,J)
+              enddo
+           ENDDO
          ENDDO
       ENDDO
 
 C.....Wetting and drying is not turned on
 
-      IF(NOLIFA.EQ.0.OR.NOLIFA.EQ.1) THEN
+      IF (NOLIFA.EQ.0 .OR. NOLIFA.EQ.1) THEN
          DO J = 1,MNE
             WDFLG(J) = 1
                                 !DOFS(J) = 3
@@ -1325,7 +1793,7 @@ C.....Wetting and drying is not turned on
 C.....Wetting and drying is turned on but there are no dry nodes below
 C.....geoid
 
-      ELSEIF (NOLIFA.EQ.2.AND.NSTARTDRY.EQ.0) THEN
+      ELSEIF (NOLIFA.EQ.2 .AND. NSTARTDRY.EQ.0) THEN
 
          DO J = 1,MNE
             
@@ -1338,48 +1806,86 @@ C.........Check to see if there are initially any dry nodes
             ZE1 = ze(1,J,1)
             ZE2 = ze(1,J,1)
             ZE3 = ze(1,J,1)
+            
             IF (DP(NM(J,1)).LT.H0) ZE1 = max(ze1,H0 - DP(NM(J,1)))
             IF (DP(NM(J,2)).LT.H0) ZE2 = max(ze2,H0 - DP(NM(J,2)))
             IF (DP(NM(J,3)).LT.H0) ZE3 = max(ze3,H0 - DP(NM(J,3)))
             
+            IF (EDN(J) .EQ. 4) THEN
+               ZE4 = ze(1,J,1)
+               IF (DP(NM(J,4)).LT.H0) ZE4 = max(ze4,H0 - DP(NM(J,4)))
+            ENDIF
 C.........If so set initial surface elevation values
             
-            IF ((ZE1 + ZE2 + ZE3)/3.D0.NE.ze(1,J,1)) THEN
-               IF (p_0.EQ.0) THEN
-                  DP_MIN = MIN(DP(NM(J,1)),DP(NM(J,2)),DP(NM(J,3)))
-                  ze(1,J,1) = max(ze(1,j,1),H0 - DP_MIN)
-               ELSE
-                  IF (ze(1,J,1).GT.(ZE1+ZE2+ZE3)/3.d0) THEN
-                     IF (dof_0.NE.1) THEN
-                        ze(2,J,1)=0.d0
-                        ze(3,J,1)=0.d0
-                        ze(4:dofh,J,1) = 0.D0 ! forced again for transparency
-                     ENDIF
+            IF (EDN(J) .EQ. 3) THEN
+               IF ((ZE1 + ZE2 + ZE3)/3.D0 .NE. ze(1,J,1)) THEN
+                  IF (p_0.EQ.0) THEN
+                     DP_MIN = MIN(DP(NM(J,1)),DP(NM(J,2)),DP(NM(J,3)))
+                     ze(1,J,1) = max(ze(1,j,1),H0 - DP_MIN)
                   ELSE
-                     ze(1,J,1)=(ZE1+ZE2+ZE3)/3.D0
-                     IF (DOF_0.NE.1) THEN
-                        ze(2,J,1) = -1.D0/6.D0*(ZE1 + ZE2) + 1.D0/3.D0*ZE3
-                        ze(3,J,1) = -0.5D0*ZE1 + 0.5D0*ZE2
-                        ze(4:dofh,J,1) = 0.D0 ! forced again for transparency
+                     IF (ze(1,J,1).GT.(ZE1+ZE2+ZE3)/3.d0) THEN
+                        IF (dof_0.NE.1) THEN
+                           ze(2,J,1)=0.d0
+                           ze(3,J,1)=0.d0
+                           ze(4:dofh,J,1) = 0.D0 ! forced again for transparency
+                        ENDIF
+                     ELSE
+                        ze(1,J,1)=(ZE1+ZE2+ZE3)/3.D0
+                        IF (DOF_0.NE.1) THEN
+                           ze(2,J,1)=-1.D0/6.D0*(ZE1+ZE2)+1.D0/3.D0*ZE3
+                           ze(3,J,1) = -0.5D0*ZE1 + 0.5D0*ZE2
+                           ze(4:dofh,J,1) = 0.D0 ! forced again for transparency
+                        ENDIF
                      ENDIF
                   ENDIF
+               
+C...........   .and set wet/dry flag (0 = dry, 1 = wet)
+               
+                  WDFLG(J) = 0
+                  DOFS(J) = dof_0
+               ELSE
+                  WDFLG(J) = 1
+                  DOFS(J) = dofs(J)
                ENDIF
-
-C............and set wet/dry flag (0 = dry, 1 = wet)
-
-               WDFLG(J) = 0
-               DOFS(J) = dof_0
-            ELSE
-               WDFLG(J) = 1
-               DOFS(J) = dofs(J)
+            ELSEIF (EDN(J) .EQ. 4) THEN
+               IF ((ZE1 + ZE2 + ZE3 + ZE4)/4.D0 .NE. ze(1,J,1)) THEN
+                  IF (p_0.EQ.0) THEN
+                     DP_MIN = MIN(DP(NM(J,1)),DP(NM(J,2)),DP(NM(J,3)),
+     &                                                      DP(NM(J,4)))
+                     ze(1,J,1) = max(ze(1,j,1),H0 - DP_MIN)
+                  ELSE
+                     IF (ze(1,J,1).GT.(ZE1+ZE2+ZE3+ZE4)/4.d0) THEN
+                        IF (dof_0.NE.1) THEN
+                           ze(2,J,1)=0.d0 
+                           ze(3,J,1)=0.d0
+                           ze(4:dofh,J,1) = 0.D0 ! forced again for transparency
+                        ENDIF
+                     ELSE
+                        ze(1,J,1)=(ZE1+ZE2+ZE3+ZE4)/4.D0
+                        IF (DOF_0.NE.1) THEN
+                           ! COME BACK TO THIS!
+                           ze(2,J,1) = -1.D0/6.D0*(ZE1 + ZE2)+1.D0/3.D0*ZE3
+                           ze(3,J,1) = -0.5D0*ZE1 + 0.5D0*ZE2
+                           ze(4:dofh,J,1) = 0.D0 ! forced again for transparency
+                        ENDIF
+                     ENDIF
+                  ENDIF
+               
+C...........   .and set wet/dry flag (0 = dry, 1 = wet)
+               
+                  WDFLG(J) = 0
+                  DOFS(J) = dof_0
+               ELSE
+                  WDFLG(J) = 1
+                  DOFS(J) = dofs(J)
+               ENDIF
             ENDIF
-
          ENDDO
 
 
 C.....If there are dry nodes below geoid
 
-      ELSEIF (NOLIFA.EQ.2.AND.NSTARTDRY.EQ.1) THEN
+      ELSEIF (NOLIFA.EQ.2 .AND. NSTARTDRY.EQ.1) THEN
          
 C.......Loop over elements
          
@@ -1393,9 +1899,9 @@ C........Retrieve global node numbers for element
 
 C........Check to see if nodes are initially dry
 
-            ZE1 = 0
-            ZE2 = 0
-            ZE3 = 0
+            ZE1 = 0.0d0
+            ZE2 = 0.0d0
+            ZE3 = 0.0d0
             IF (STARTDRY(N1).EQ.1) ZE1 = H0 - DP(N1)
             IF (DP(N1).LT.H0) ZE1 = H0 - DP(N1)
             IF (STARTDRY(N2).EQ.1) ZE2 = H0 - DP(N2)
@@ -1420,37 +1926,83 @@ C........Check to see if nodes are initially dry
                   ZE3 = STARTDRY(N3)
                endif
             ENDIF
-
-C.........If so set initial surface elevation values
-
-            IF ((ZE1 + ZE2 + ZE3).NE.0) THEN
-               IF (P_0.EQ.0) THEN
-                  DP_MIN = MIN(DP(NM(J,1)),DP(NM(J,2)),DP(NM(J,3)))
-                  ze(1,J,1) = max(ze(1,j,1),H0 - DP_MIN)
-               ELSE
-                  IF (ze(1,J,1).GT.(ZE1+ZE2+ZE3)/3.d0) THEN
-                     IF (DOF_0.NE.1) THEN
-                        ze(2,J,1)=0.d0
-                        ze(3,J,1)=0.d0
-                        ze(4:dofh,J,1) = 0.D0 ! forced again for transparency
-                     ENDIF
+            IF (EDN(J) .EQ. 4) THEN
+               N4 = NM(J,4)
+               ZE4 = 0.0d0
+               IF (STARTDRY(N4).EQ.1) ZE4 = H0 - DP(N4)
+               IF (DP(N4).LT.H0) ZE4 = H0 - DP(N4)
+               IF (MODAL_IC.EQ.3) THEN
+                  IF (STARTDRY(N4).EQ.-88888) THEN
+                     ZE4 = H0 - DP(N4)
                   ELSE
-                     ze(1,J,1)=(ZE1+ZE2+ZE3)/3.D0
-                     IF (DOF_0.NE.1) THEN
-                        ze(2,J,1) = -1.D0/6.D0*(ZE1 + ZE2) + 1.D0/3.D0*ZE3
-                        ze(3,J,1) = -0.5D0*ZE1 + 0.5D0*ZE2
-                        ze(4:dofh,J,1) = 0.D0 ! forced again for transparency
-                     ENDIF
+                     ZE4 = STARTDRY(N4)
                   ENDIF
                ENDIF
+            ENDIF
 
-C...........Set wet/dry flag (0 = dry, 1 = wet)
-
-               WDFLG(J) = 0
-               DOFS(J) = DOF_0
-            ELSE
-               WDFLG(J) = 1
-               DOFS(J) = DOFS(J)
+C.........If so set initial surface elevation values
+            IF (EDN(J) .EQ. 3) THEN
+               IF ((ZE1 + ZE2 + ZE3).NE.0.0d0) THEN
+                  IF (P_0.EQ.0) THEN
+                     DP_MIN = MIN(DP(NM(J,1)),DP(NM(J,2)),DP(NM(J,3)))
+                     ze(1,J,1) = max(ze(1,j,1),H0 - DP_MIN)
+                  ELSE
+                     IF (ze(1,J,1).GT.(ZE1+ZE2+ZE3)/3.d0) THEN
+                        IF (DOF_0.NE.1) THEN
+                           ze(2,J,1)=0.d0
+                           ze(3,J,1)=0.d0
+                           ze(4:dofh,J,1) = 0.D0 ! forced again for transparency
+                        ENDIF
+                     ELSE
+                        ze(1,J,1)=(ZE1+ZE2+ZE3)/3.D0
+                        IF (DOF_0.NE.1) THEN
+                           ze(2,J,1)=-1.D0/6.D0*(ZE1+ZE2)+1.D0/3.D0*ZE3
+                           ze(3,J,1) = -0.5D0*ZE1 + 0.5D0*ZE2
+                           ze(4:dofh,J,1) = 0.D0 ! forced again for transparency
+                        ENDIF
+                     ENDIF
+                  ENDIF
+               
+C...........   Set wet/dry flag (0 = dry, 1 = wet)
+               
+                  WDFLG(J) = 0
+                  DOFS(J) = DOF_0
+               ELSE
+                  WDFLG(J) = 1
+                  DOFS(J) = DOFS(J)
+               ENDIF
+            ELSEIF (EDN(J) .EQ. 4) THEN
+               IF ((ZE1 + ZE2 + ZE3 + ZE4).NE.0.0d0) THEN
+                  IF (P_0.EQ.0) THEN
+                     DP_MIN = MIN(DP(NM(J,1)),DP(NM(J,2)),DP(NM(J,3)),
+     &                                                      DP(NM(J,4)))
+                     ze(1,J,1) = max(ze(1,j,1),H0 - DP_MIN)
+                  ELSE
+                     IF (ze(1,J,1).GT.(ZE1+ZE2+ZE3+ZE4)/4.d0) THEN
+                        IF (DOF_0.NE.1) THEN
+                           ze(2,J,1)=0.d0
+                           ze(3,J,1)=0.d0
+                           ze(4:dofh,J,1) = 0.D0 ! forced again for transparency
+                        ENDIF
+                     ELSE
+                        ze(1,J,1)=(ZE1+ZE2+ZE3+ZE4)/4.D0
+                        IF (DOF_0.NE.1) THEN
+                           ! COME BACK TO THIS!
+                           ze(2,J,1) = -1.D0/6.D0*(ZE1 + ZE2)+1.D0/3.D0*ZE3
+                           ze(3,J,1) = -0.5D0*ZE1 + 0.5D0*ZE2
+                           ze(4:dofh,J,1) = 0.D0 ! forced again for transparency
+                        ENDIF
+                     ENDIF
+                  ENDIF
+               
+C...........   Set wet/dry flag (0 = dry, 1 = wet)
+               
+                  WDFLG(J) = 0
+                  DOFS(J) = DOF_0
+               ELSE
+                  WDFLG(J) = 1
+                  DOFS(J) = DOFS(J)
+               ENDIF
             ENDIF
          ENDDO
       ENDIF
@@ -1469,7 +2021,19 @@ C.....Read in modal dof for initial conditions
          OPEN(164,FILE=DIRNAME//'/'//'Initial_Conditions.164')
          OPEN(114,FILE=DIRNAME//'/'//'Initial_Bathymetry.114')
          READ(163,*) P_READ
-         READ(164,*) P_READ,P_READ
+         IF (P_READ.NE.ph) THEN
+            PRINT*,'INCONSISTENCY IN P -- CHECK INPUT FILES'
+            STOP
+         ENDIF
+         READ(164,*) P_READ,P_READ2
+         IF (P_READ.NE.ph) THEN
+            PRINT*,'INCONSISTENCY IN P -- CHECK INPUT FILES'
+            STOP
+         ENDIF
+         IF (P_READ2.NE.ph) THEN
+            PRINT*,'INCONSISTENCY IN P -- CHECK INPUT FILES'
+            STOP
+         ENDIF
          READ(114,*) P_READ
          IF (P_READ.NE.ph) THEN
             PRINT*,'INCONSISTENCY IN P -- CHECK INPUT FILES'
@@ -1507,8 +2071,20 @@ c$$$#ifdef SED_LAY
 c$$$         OPEN(290,FILE=DIRNAME//'/'//'Hot_start.290')
 c$$$#endif
          READ(263,*) P_READ
-         READ(264,*) P_READ,P_READ
-         READ(214,*) ITHS
+         IF (P_READ.NE.PH) THEN
+            PRINT*,'INCONSISTENCY IN P -- CHECK INPUT FILES'
+            STOP
+         ENDIF
+         READ(264,*) P_READ,P_READ2
+         IF (P_READ.NE.PH) THEN
+            PRINT*,'INCONSISTENCY IN P -- CHECK INPUT FILES'
+            STOP
+         ENDIF
+         IF (P_READ2.NE.PH) THEN
+            PRINT*,'INCONSISTENCY IN P -- CHECK INPUT FILES'
+            STOP
+         ENDIF
+         READ(214,*) P_READ
          IF (P_READ.NE.PH) THEN
             PRINT*,'INCONSISTENCY IN P -- CHECK INPUT FILES'
             STOP
@@ -1597,14 +2173,14 @@ C.....Compute basis functions at stations
       IF (NSTAE.GT.0) THEN      ! Elevation stations
          CALL ALLOC_STAE( NSTAE )
          DO I = 1,NSTAE
-            CALL STA_BASIS( ELEM, DIM, XEL(I), YEL(I),  NNE(I), PHI_STAE(:,I) )
+           CALL STA_BASIS( DIM, XEL(I), YEL(I),  NNE(I), PHI_STAE(:,I) )
          ENDDO
       ENDIF
       
       IF (NSTAV.GT.0) THEN      ! Velocity Stations
          CALL ALLOC_STAV( NSTAV )
          DO I = 1,NSTAV
-            CALL STA_BASIS( ELEM, DIM, XEV(I), YEV(I),  NNV(I), PHI_STAV(:,I) )
+           CALL STA_BASIS( DIM, XEV(I), YEV(I),  NNV(I), PHI_STAV(:,I) )
          ENDDO
       ENDIF
 
@@ -1624,9 +2200,9 @@ C--
 
 C.....Close files
 
-      CLOSE(115)
-      CLOSE(25)
-
+!      CLOSE(115)
+!      CLOSE(25)
+      
       RETURN
       END SUBROUTINE PREP_DG
 
@@ -1670,30 +2246,98 @@ C.....The forward Euler method
          BTVD(1,1) = 1.D0
 
 C.....SSP(s,2) schemes
-
+C.....THESE ARE DG-OPTIMIZED METHODS!
+C..... Kubatko, Ethan J., Benjamin A. Yeager, and David I. Ketcheson. 
+C....."Optimal strong-stability-preserving Runge–Kutta time 
+C..... discretizations for discontinuous Galerkin methods." 
+C..... Journal of Scientific Computing 60.2 (2014): 313-344.
       ELSEIF (RK_ORDER.EQ.2) THEN
+      
+        ATVD(:,:) = 0.D0
+        BTVD(:,:) = 0.D0
+        CTVD(:,:) = 0.D0
+        DTVD(:)   = 0.D0
+        
+        IF (RK_STAGE.EQ.3) THEN
 
-         ATVD(:,:) = 0.D0
-         BTVD(:,:) = 0.D0
-         CTVD(:,:) = 0.D0
-         DTVD(:)   = 0.D0
+          ATVD(1,1) =  1.000000000000000D0
+          ATVD(2,1) =  0.087353119859156D0
+          ATVD(3,1) =  0.344956917166841D0
+          ATVD(2,2) =  0.912646880140844D0
+          ATVD(3,3) =  0.655043082833159D0
 
-         DO I = 1,NRK
+          BTVD(1,1) =  0.528005024856522D0
+          BTVD(3,1) =  0.022826837460491D0
+          BTVD(2,2) =  0.481882138633993D0
+          BTVD(3,3) =  0.345866039233415D0
+
+        ELSEIF (RK_STAGE.EQ.4) THEN
+
+          ATVD(1,1) =  1.000000000000000D0
+          ATVD(2,1) =  0.394806441339829D0
+          ATVD(3,1) =  0.002797307087390D0
+          ATVD(4,1) =  0.252860909354373D0
+          ATVD(2,2) =  0.605193558660171D0
+          ATVD(3,3) =  0.997202692912610D0
+          ATVD(4,4) =  0.747139090645627D0
+
+          BTVD(1,1) =  0.406584463657504D0
+          BTVD(3,1) =  0.013637216641451D0
+          BTVD(4,1) =  0.016453567333598D0
+          BTVD(2,2) =  0.246062298456822D0
+          BTVD(3,3) =  0.405447122055692D0
+          BTVD(4,4) =  0.303775146447707D0
+
+        ELSEIF (RK_STAGE.EQ.5) THEN
+
+          ATVD(1,1) = 1.000000000000000D0
+          ATVD(2,1) = 0.235593265061659D0
+          ATVD(3,1) = 0.174017972351526D0
+          ATVD(4,1) = 0.235264368870758D0
+          ATVD(5,1) = 0.141720372339803D0
+          ATVD(2,2) = 0.764406734938341D0
+          ATVD(4,2) = 0.000058643383967D0
+          ATVD(5,2) = 0.095374613155521D0
+          ATVD(3,3) = 0.825982027648475D0
+          ATVD(5,3) = 0.000311763705780D0
+          ATVD(4,4) = 0.764676987745275D0
+          ATVD(5,5) = 0.762593250798895D0
+
+          BTVD(1,1) = 0.324840618151514D0
+          BTVD(3,1) = 0.108822380501601D0
+          BTVD(4,1) = 0.054392262422093D0
+          BTVD(5,1) = 0.000000180291569D0
+          BTVD(2,2) = 0.248310356296551D0
+          BTVD(4,2) = 0.000019049753098D0
+          BTVD(5,2) = 0.030981548293401D0
+          BTVD(3,3) = 0.268312512443371D0
+          BTVD(5,3) = 0.000101273514903D0
+          BTVD(4,4) = 0.248398145385413D0
+          BTVD(5,5) = 0.247721262987686D0
+        ELSE
+
+
+          ATVD(:,:) = 0.D0
+          BTVD(:,:) = 0.D0
+          CTVD(:,:) = 0.D0
+          DTVD(:)   = 0.D0
+
+          DO I = 1,NRK
             DO J = 0,NRK-1
 
                IF ((J.EQ.(I-1)).AND.(I.LT.NRK)) THEN
-                  ATVD(I,J+1) = 1.D0
-                  BTVD(I,J+1) = 1.D0/(NRK-1)
+                 ATVD(I,J+1) = 1.D0
+                 BTVD(I,J+1) = 1.D0/(NRK-1)
                ELSEIF ((J.EQ.0).AND.(I.EQ.NRK)) THEN
-                  ATVD(I,J+1) = 1.D0/NRK
+                 ATVD(I,J+1) = 1.D0/NRK
                ELSEIF ((J.EQ.(NRK-1)).AND.(I.EQ.NRK)) THEN
-                  ATVD(I,J+1) = (NRK-1.D0)/NRK
-                  BTVD(I,J+1) = 1.D0/NRK
+                 ATVD(I,J+1) = (NRK-1.D0)/NRK
+                 BTVD(I,J+1) = 1.D0/NRK
                ENDIF
 
             ENDDO
-         ENDDO
-
+          ENDDO
+        ENDIF
 C.....SSP(3,3) scheme
 
       ELSEIF ((RK_STAGE.EQ.3).AND.(RK_ORDER.EQ.3)) THEN
@@ -2056,7 +2700,8 @@ C.... Compute the Runge-Kutta Chebyshev (RKC) version
             if(j.gt.1) then
 
                RKC_Tprime(j) = j*RKC_U(j-1)
-               RKC_Tdprime(j) = (j*(j*RKC_T(j) - RKC_omega0*RKC_U(j-1))/( RKC_omega0**(2.D0) - 1.D0 ) )
+               RKC_Tdprime(j) = (j*(j*RKC_T(j) - RKC_omega0*RKC_U(j-1))/
+     &            ( RKC_omega0**(2.D0) - 1.D0 ) )
                RKC_b(j) = RKC_Tdprime(j)*RKC_Tprime(j)**(-2.D0)
 
             endif
@@ -2102,3 +2747,139 @@ C.... Compute the Runge-Kutta Chebyshev (RKC) version
       DEALLOCATE(CTVD)
       RETURN
       END SUBROUTINE RK_TIME
+
+C.....Subroutine to find the inverse of a square matrix by Guass-Jordan elimination
+
+      subroutine Inv(matrix, inverse, n)
+      Use sizes, only : sz
+
+      implicit none
+      integer n
+      real(sz), dimension(n,n) :: matrix
+      real(sz), dimension(n,n) :: inverse
+      
+      integer :: i, j, k, l
+      real(sz) :: m
+      real(sz), dimension(n,2*n) :: augmatrix !augmented matrix
+      
+                                !Augment input matrix with an identity matrix
+
+      do i = 1, n
+
+         do j = 1, 2*n
+
+            if ( j.le.n ) then
+
+               augmatrix(i,j) = matrix(i,j)
+
+            else if ((i+n) == j) then
+
+               augmatrix(i,j) = 1
+
+            else
+
+               augmatrix(i,j) = 0
+
+            endif
+
+         enddo
+
+      enddo
+      
+                                !Reduce augmented matrix to upper traingular form
+
+      do k =1, n-1
+
+         if (augmatrix(k,k) == 0) then
+
+
+            do i = k+1, n
+
+               if (augmatrix(i,k) /= 0) then
+
+                  do j = 1,2*n
+
+                     augmatrix(k,j) = augmatrix(k,j)+augmatrix(i,j)
+
+                  enddo
+
+               endif
+
+
+            enddo
+
+         endif
+
+         do j = k+1, n
+
+            m = augmatrix(j,k)/augmatrix(k,k)
+
+            do i = k, 2*n
+
+               augmatrix(j,i) = augmatrix(j,i) - m*augmatrix(k,i)
+
+            enddo
+
+         enddo
+
+      enddo 
+      
+                                !Test for invertibility
+
+      do i = 1, n
+
+         if (augmatrix(i,i) == 0) then
+
+            inverse = 0
+
+            return
+
+         endif
+
+      enddo
+      
+                                !Make diagonal elements as 1
+
+      do i = 1 , n
+
+         m = augmatrix(i,i)
+
+         do j = i, (2 * n)
+
+            augmatrix(i,j) = (augmatrix(i,j) / m)
+
+         enddo
+
+      enddo
+      
+                                !Reduced right side half of augmented matrix to identity matrix
+
+      do k = n-1, 1, -1
+
+         do i =1, k
+
+            m = augmatrix(i,k+1)
+
+            do j = k, (2*n)
+
+               augmatrix(i,j) = augmatrix(i,j) -augmatrix(k+1,j) * m
+
+            enddo
+
+         enddo
+
+      enddo
+      
+                                !Compute answer
+
+      do i =1, n
+
+         do j = 1, n
+
+            inverse(i,j) = augmatrix(i,j+n)
+
+         enddo
+
+      enddo
+
+      end subroutine Inv

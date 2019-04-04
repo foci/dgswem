@@ -9,8 +9,10 @@ C.....Use appropriate modules
 
 C.....Declare local variables
 
-      INTEGER GED, LED, L,i,k,ll,IT
+      INTEGER GED, LED, L,i,k,kk,ll,IT, J
       REAL(SZ) ABOVE, SUBSUP, W_IN, TX, TY
+      Real(SZ), allocatable :: vtemp1(:), vtemp2(:)
+
 
 C.....Loop over the external barrier segments
 
@@ -24,8 +26,13 @@ C.......Obtain the global and local edge numbers
 C.......Obtain the element
 
          EL = NEDEL(1,GED)
-         PA = PDG_EL(EL_IN)
-
+          
+         J = EDN(EL) - 2
+         PA = PDG_EL(EL)
+         
+         if (J .eq. 2) then
+            allocate( vtemp1(DOFS(EL)),vtemp2(DOFS(EL)) )
+         endif
 #ifdef P0
          if (pa.eq.0) then
             pa = 1
@@ -79,30 +86,31 @@ C.........Obtain the height of the barrier at the quadrature point
 
 
             DO K = 2,DOFS(EL)
-               ZE_IN = ZE_IN + ZE(K,EL,IRK)*PHI_EDGE(K,I,LED,pa)
-               QX_IN = QX_IN + QX(K,EL,IRK)*PHI_EDGE(K,I,LED,pa)
-               QY_IN = QY_IN + QY(K,EL,IRK)*PHI_EDGE(K,I,LED,pa)
+               ZE_IN = ZE_IN + ZE(K,EL,IRK)*PHI_EDGE(K,I,LED,pa,J)
+               QX_IN = QX_IN + QX(K,EL,IRK)*PHI_EDGE(K,I,LED,pa,J)
+               QY_IN = QY_IN + QY(K,EL,IRK)*PHI_EDGE(K,I,LED,pa,J)
                !HB_IN = HB_IN + HB(K,EL,IRK)*PHI_EDGE(K,I,LED,pa)
 
 #ifdef TRACE
-               iota_IN = iota_IN + iota(K,EL,IRK)*PHI_EDGE(K,I,LED,pa)
+               iota_IN = iota_IN + iota(K,EL,IRK)*PHI_EDGE(K,I,LED,pa,J)
 #endif
 
 #ifdef CHEM
-               iota_IN = iota_IN + iota(K,EL,IRK)*PHI_EDGE(K,I,LED,pa)
-               iota2_IN = iota2_IN + iota2(K,EL,IRK)*PHI_EDGE(K,I,LED,pa)
+               iota_IN = iota_IN + iota(K,EL,IRK)*PHI_EDGE(K,I,LED,pa,J)
+             iota2_IN = iota2_IN +iota2(K,EL,IRK)*PHI_EDGE(K,I,LED,pa,J)
 #endif
 
 #ifdef DYNP
-               dynP_IN = dynP_IN + dynP(K,EL,IRK)*PHI_EDGE(K,I,LED,pa)
+               dynP_IN = dynP_IN + dynP(K,EL,IRK)*PHI_EDGE(K,I,LED,pa,J)
 #endif
 
 #ifdef SED_LAY
 
             do ll = 1,layers
                
-               bed_IN(ll) = bed_IN(ll) + bed(K,EL,IRK,ll)*PHI_EDGE(K,I,LED,pa)
-               HB_IN = HB_IN + bed(k,EL,irk,ll)*PHI_EDGE(K,I,LED,pa)
+               bed_IN(ll) = bed_IN(ll) + 
+     &            bed(K,EL,IRK,ll)*PHI_EDGE(K,I,LED,pa,J)
+               HB_IN = HB_IN + bed(k,EL,irk,ll)*PHI_EDGE(K,I,LED,pa,J)
                
             enddo
 #endif
@@ -161,12 +169,21 @@ C.........Compute the x and y components of the external state flow
             
 C.........Compute numerical flux
             
-            CALL NUMERICAL_FLUX(IT)
+            CALL NUMERICAL_FLUX(IT,test_el)
 
             DO K = 1,DOFS(EL)
-
-               W_IN = 2.0*M_INV(K,pa)/AREAS(EL)*XLEN(GED)
-     &              *PHI_EDGE(K,I,LED,pa)*WEGP(I,pa)
+            
+               if (J .eq. 1) then
+                  W_IN = 2.0*M_INV(K,pa)/AREAS(EL)*XLEN(GED)*
+     &               PHI_EDGE(K,I,LED,pa,J)*WEGP(I,pa)
+               elseif (J .eq. 2) then
+                  do kk = 1,DOFS(EL)
+                     vtemp1(kk) = M_INVM(EL,K,kk,pa)
+                     vtemp2(kk) = PHI_EDGE(kk,I,LED,pa,J)
+                  enddo
+                  W_IN = dot_product(vtemp1,vtemp2)
+                  W_IN = W_IN*0.5d0*XLEN(GED)*WEGP(I,pa)
+               endif
 
                RHS_ZE(K,EL,IRK) = RHS_ZE(K,EL,IRK) - W_IN*F_HAT
                RHS_QX(K,EL,IRK) = RHS_QX(K,EL,IRK) - W_IN*G_HAT
@@ -189,7 +206,8 @@ C.........Compute numerical flux
 
                do ll=1,layers
 
-                  RHS_bed(K,EL,IRK,ll) = RHS_bed(K,EL,IRK,ll) - W_IN*Bed_HAT(ll)
+                  RHS_bed(K,EL,IRK,ll) = RHS_bed(K,EL,IRK,ll) 
+     &               - W_IN*Bed_HAT(ll)
 
                enddo
 

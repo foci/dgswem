@@ -94,14 +94,14 @@ C.....Assign X, Y, and Z coordinates
       IF (DIM.EQ.3) THEN
         Z = PT(3)
       ELSE
-        Z = 0.
+        Z = 0.D0
       ENDIF
       
 C.....Case D = 0 for 2D or 3D
 
       IF (D.EQ.0) THEN
-        BASIS  = 1.
-        DBASIS = 0.
+        BASIS  = 1.D0
+        DBASIS = 0.D0
         RETURN
       ENDIF
 
@@ -115,8 +115,8 @@ C-----------------------------------------------------------------------
 C.......Check to make sure point PT is contained within the reference
 C.......element.  Issue warning if not but continue execution.
 
-        IF ((ABS(X).LE.1).AND.(ABS(Y).LE.1).AND.
-     &                    ((X+Y).LE.0).AND.(ABS(Z).LE.1)) THEN
+        IF ((ABS(X).LE.1.D0).AND.(ABS(Y).LE.1.D0).AND.
+     &                    ((X+Y).LE.0.D0).AND.(ABS(Z).LE.1.D0)) THEN
           CONTINUE
         ELSE
          PRINT*,' ***** WARNING!! in subroutine orthogonal_basis ***** '
@@ -126,42 +126,43 @@ C.......element.  Issue warning if not but continue execution.
       
 C.......First basis function and derivatives
 
-        PHI(0,0)    = 1.
-        DPHI(0,0,1) = 0.
-        DPHI(0,0,2) = 0.
+        PHI(0,0)    = 1.D0
+        DPHI(0,0,1) = 0.D0
+        DPHI(0,0,2) = 0.D0
       
 C.......Second basis function and derivatives
       
-        PHI(1,0)    = (1+2*X+Y)/2.
-        DPHI(1,0,1) = 1.
-        DPHI(1,0,2) = 1./2
+        PHI(1,0)    = (1.D0+2.D0*X+Y)/2.D0
+        DPHI(1,0,1) = 1.D0
+        DPHI(1,0,2) = 1.D0/2.D0
       
 C.......Recurrence relations
       
         DO P = 1,D-1
-          PHI(P+1,0)    = (2.*P+1.)/(P+1.)*PHI(1,0)*PHI(P,0)
-     &                  - P/(P+1.)*((1.-Y)/2.)**2.*PHI(P-1,0)
-          DPHI(P+1,0,1) = (2.*P+1.)/(P+1.)*(DPHI(1,0,1)*PHI(P,0)
+          PHI(P+1,0)    = (2.D0*P+1.D0)/(P+1.D0)*PHI(1,0)*PHI(P,0)
+     &                  - P/(P+1.D0)*((1.D0-Y)/2.D0)**2.D0*PHI(P-1,0)
+          DPHI(P+1,0,1) = (2.D0*P+1.D0)/(P+1.D0)*(DPHI(1,0,1)*PHI(P,0)
      &                  + PHI(1,0)*DPHI(P,0,1))
-     &                  - P/(P+1.)*((1.-Y)/2.)**2.*DPHI(P-1,0,1)
-          DPHI(P+1,0,2) = (2.*P+1.)/(P+1.)*(DPHI(1,0,2)*PHI(P,0)
-     &                  + PHI(1,0)*DPHI(P,0,2)) - P/(P+1.)*((Y-1)/2
-     &                  * PHI(P-1,0) + ((1.-Y)/2.)**2.*DPHI(P-1,0,2))
+     &                  - P/(P+1.D0)*((1.D0-Y)/2.D0)**2.D0*DPHI(P-1,0,1)
+          DPHI(P+1,0,2) = (2.D0*P+1.D0)/(P+1.D0)*(DPHI(1,0,2)*PHI(P,0)
+     &                  + PHI(1,0)*DPHI(P,0,2)) - P/(P+1.D0)*((Y-1)/2
+     &               * PHI(P-1,0) + ((1.D0-Y)/2.D0)**2.D0*DPHI(P-1,0,2))
         ENDDO
         DO P = 0,D-1
-          PHI(P,1)    =  PHI(P,0)*(1.+2.*P+(3.+2.*P)*Y)/2.
-          DPHI(P,1,1) = DPHI(P,0,1)*(1.+2.*P+(3.+2.*P)*Y)/2.
-          DPHI(P,1,2) = DPHI(P,0,2)*(1.+2.*P+(3.+2.*P)*Y)/2.
-     &                + PHI(P,0)*(3.+2.*P)/2.
+          PHI(P,1)    =  PHI(P,0)*(1.D0+2.D0*P+(3.D0+2.D0*P)*Y)/2.D0
+          DPHI(P,1,1) = DPHI(P,0,1)*(1.D0+2.D0*P+(3.D0+2.D0*P)*Y)/2.D0
+          DPHI(P,1,2) = DPHI(P,0,2)*(1.D0+2.D0*P+(3.D0+2.D0*P)*Y)/2.D0
+     &                + PHI(P,0)*(3.D0+2.D0*P)/2.D0
         ENDDO
 
         DO Q = 1,D-1
           DO P = 0,D-Q-1
-            AQ = (2.*Q+2+2.*P)*(2.*Q+3+2.*P)/(2.*Q+2)/(Q+2+2.*P)
-            BQ = (2.*P+1)**2.*(2.*Q+2+2.*P)/
-     &                                 (2.*Q+2)/(2.*Q+2.*P+1)/(Q+2+2.*P)
-            CQ = (Q+2.*P+1)*Q*(2.*Q+3+2.*P)/
-     &                                   (Q+1.)/(Q+2+2.*P)/(2.*Q+2.*P+1)
+            AQ = (2.D0*Q+2.D0+2.D0*P)*(2.D0*Q+3.D0+2.D0*P)/(2.D0*Q+2.D0)
+     &                                                  /(Q+2.D0+2.D0*P)
+            BQ = (2.D0*P+1.D0)**2.D0*(2.D0*Q+2.D0+2.D0*P)/
+     &                (2.D0*Q+2.D0)/(2.D0*Q+2.D0*P+1.D0)/(Q+2.D0+2.D0*P)
+            CQ = (Q+2.D0*P+1.D0)*Q*(2.D0*Q+3.D0+2.D0*P)/
+     &                     (Q+1.D0)/(Q+2.D0+2.D0*P)/(2.D0*Q+2.D0*P+1.D0)
             PHI(P,Q+1)    = (AQ*Y+BQ)*PHI(P,Q) - CQ*PHI(P,Q-1)
             DPHI(P,Q+1,1) = (AQ*Y+BQ)*DPHI(P,Q,1) - CQ*DPHI(P,Q-1,1)
             DPHI(P,Q+1,2) = (AQ*Y+BQ)*DPHI(P,Q,2) + AQ*PHI(P,Q)
@@ -180,7 +181,8 @@ C-----------------------------------------------------------------------
 C.......Check to make sure point PT is contained within the reference
 C.......element.  Issue warning if not but continue execution.
       
-        IF ((ABS(X).LE.1).AND.(ABS(Y).LE.1).AND.(ABS(Z).LE.1)) THEN
+        IF ((ABS(X).LE.1.D0).AND.(ABS(Y).LE.1.D0).AND.
+     &                                            (ABS(Z).LE.1.D0)) THEN
           CONTINUE
         ELSE
           PRINT*,'  ***** WARNING in suroutine orthogonal_basis *****  '
@@ -190,28 +192,28 @@ C.......element.  Issue warning if not but continue execution.
 
 C.......Legendre Polynomials in X
 
-        LEGENDRE_X(0)  = 1.
-        DLEGENDRE_X(0) = 0.
+        LEGENDRE_X(0)  = 1.D0
+        DLEGENDRE_X(0) = 0.D0
         LEGENDRE_X(1)  = X
-        DLEGENDRE_X(1) = 1.
+        DLEGENDRE_X(1) = 1.D0
         DO P = 1,D-1
-         LEGENDRE_X(P+1) = ((2.*P+1.)*X*LEGENDRE_X(P)-P*LEGENDRE_X(P-1))
-     &                                                           /(P+1.)
-         DLEGENDRE_X(P+1) = ((2.*P+1.)*(X*DLEGENDRE_X(P) +
-     &                       LEGENDRE_X(P)) - P*DLEGENDRE_X(P-1))/(P+1.)
+         LEGENDRE_X(P+1) = ((2.D0*P+1.D0)*X*LEGENDRE_X(P)-P*
+     &                                         LEGENDRE_X(P-1))/(P+1.D0)
+         DLEGENDRE_X(P+1) = ((2.D0*P+1.D0)*(X*DLEGENDRE_X(P) +
+     &                     LEGENDRE_X(P)) - P*DLEGENDRE_X(P-1))/(P+1.D0)
         ENDDO
 
 C.......Legendre Polynomials in Y
 
-        LEGENDRE_Y(0)  = 1.
-        DLEGENDRE_Y(0) = 0.
+        LEGENDRE_Y(0)  = 1.D0
+        DLEGENDRE_Y(0) = 0.D0
         LEGENDRE_Y(1)  = Y
-        DLEGENDRE_Y(1) = 1.
+        DLEGENDRE_Y(1) = 1.D0
         DO P = 1,D-1
-         LEGENDRE_Y(P+1) = ((2.*P+1.)*Y*LEGENDRE_Y(P)-P*LEGENDRE_Y(P-1))
-     &                                                           /(P+1.)
-         DLEGENDRE_Y(P+1) = ((2.*P+1.)*(Y*DLEGENDRE_Y(P) +
-     &                       LEGENDRE_Y(P)) - P*DLEGENDRE_Y(P-1))/(P+1.)
+         LEGENDRE_Y(P+1) = ((2.D0*P+1.D0)*Y*LEGENDRE_Y(P)-P*
+     &                                         LEGENDRE_Y(P-1))/(P+1.D0)
+         DLEGENDRE_Y(P+1) = ((2.D0*P+1.D0)*(Y*DLEGENDRE_Y(P) +
+     &                     LEGENDRE_Y(P)) - P*DLEGENDRE_Y(P-1))/(P+1.D0)
         ENDDO
 
 C.......Forming the basis functions
@@ -234,17 +236,17 @@ C.....Re-order basis functions hierarchically
           PHI_2D(R)    = PHI(P,Q-P)
           DPHI_2D(R,1) = DPHI(P,Q-P,1)
           DPHI_2D(R,2) = DPHI(P,Q-P,2)
-          IF (ABS(PHI_2D(R)).LT.1.0E-15) PHI_2D(R) = 0.
-          IF (ABS(DPHI_2D(R,1)).LT.1.0E-15) DPHI_2D(R,1) = 0.
-          IF (ABS(DPHI_2D(R,2)).LT.1.0E-15) DPHI_2D(R,2) = 0.
+          IF (ABS(PHI_2D(R)).LT.1.0E-15) PHI_2D(R) = 0.D0
+          IF (ABS(DPHI_2D(R,1)).LT.1.0E-15) DPHI_2D(R,1) = 0.D0
+          IF (ABS(DPHI_2D(R,2)).LT.1.0E-15) DPHI_2D(R,2) = 0.D0
           R = R + 1
         ENDDO
       ENDDO
       
 
       IF (DIM.EQ.2) THEN
-        BASIS  = PHI_2D
-        DBASIS = DPHI_2D
+         BASIS  = PHI_2D
+         DBASIS = DPHI_2D
       ELSEIF (DIM.EQ.3) THEN
 
 C-----------------------------------------------------------------------
@@ -253,29 +255,30 @@ C     3D Bases
 C
 C-----------------------------------------------------------------------
 
-        LEGENDRE(0)  = 1.
-        DLEGENDRE(0) = 0.
-        LEGENDRE(1)  = Z
-        DLEGENDRE(1) = 1.
-        DO P = 1,D-1
-          LEGENDRE(P+1)  = ((2*P+1)*Z*LEGENDRE(P)-P*LEGENDRE(P-1))/(P+1)
-          DLEGENDRE(P+1) = ((2*P+1)*(Z*DLEGENDRE(P) + LEGENDRE(P))
-     &                                         - P*DLEGENDRE(P-1))/(P+1)
-        ENDDO
-        R = 1
-        DO Q = 0,D
-          DO P = 1,(D+2)*(D+1)/2
-              BASIS(R)    = PHI_2D(P)*LEGENDRE(Q)
-              DBASIS(R,1) = DPHI_2D(P,1)*LEGENDRE(Q)
-              DBASIS(R,2) = DPHI_2D(P,2)*LEGENDRE(Q)
-              DBASIS(R,3) = PHI_2D(P)*DLEGENDRE(Q)
-              IF (ABS(BASIS(R)).LT.1.0E-15) BASIS(R) = 0.
-              IF (ABS(DBASIS(R,1)).LT.1.0E-15) DBASIS(R,1) = 0.
-              IF (ABS(DBASIS(R,2)).LT.1.0E-15) DBASIS(R,2) = 0.
-              IF (ABS(DBASIS(R,3)).LT.1.0E-15) DBASIS(R,3) = 0.
-              R = R + 1
-          ENDDO
-        ENDDO
+         LEGENDRE(0)  = 1.D0
+         DLEGENDRE(0) = 0.D0
+         LEGENDRE(1)  = Z
+         DLEGENDRE(1) = 1.D0
+         DO P = 1,D-1
+            LEGENDRE(P+1) =((2.D0*P+1.D0)*Z*LEGENDRE(P)-P*LEGENDRE(P-1))
+     &                                                         /(P+1.D0)
+            DLEGENDRE(P+1) = ((2.D0*P+1.D0)*
+     &       (Z*DLEGENDRE(P) + LEGENDRE(P)) - P*DLEGENDRE(P-1))/(P+1.D0)
+         ENDDO
+         R = 1
+         DO Q = 0,D
+            DO P = 1,(D+2)*(D+1)/2
+               BASIS(R)    = PHI_2D(P)*LEGENDRE(Q)
+               DBASIS(R,1) = DPHI_2D(P,1)*LEGENDRE(Q)
+               DBASIS(R,2) = DPHI_2D(P,2)*LEGENDRE(Q)
+               DBASIS(R,3) = PHI_2D(P)*DLEGENDRE(Q)
+               IF (ABS(BASIS(R)).LT.1.0E-15) BASIS(R) = 0.D0
+               IF (ABS(DBASIS(R,1)).LT.1.0E-15) DBASIS(R,1) = 0.D0
+               IF (ABS(DBASIS(R,2)).LT.1.0E-15) DBASIS(R,2) = 0.D0
+               IF (ABS(DBASIS(R,3)).LT.1.0E-15) DBASIS(R,3) = 0.D0
+               R = R + 1
+            ENDDO
+         ENDDO
       ENDIF
 
       RETURN

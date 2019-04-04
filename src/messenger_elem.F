@@ -3,7 +3,8 @@ C  last changes in this file VERSION 12.sb01                                  *
 C  S.Bunya changed this file a bit. 07/13/2005                                *
 C  S.Bunya changed this file a bit. 01/04/2007                                *
 C                                                                             *
-C     01-10-2011 - cem - adapted for p_enrichment and multicomponent          * C****************************************************************************** 
+C     01-10-2011 - cem - adapted for p_enrichment and multicomponent          * 
+C****************************************************************************** 
 C 
       MODULE MESSENGER_ELEM
 C

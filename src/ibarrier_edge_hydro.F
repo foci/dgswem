@@ -31,19 +31,20 @@ C.....Use appropriate modules
 C.....Declare local variables
 
       INTEGER GEDB, GEDF, LEDB, LEDF, ELB, ELF, GPB, GPF, L, WEIR_FLOW
-      INTEGER IT, NB1, NB2, NF1, NF2,i,k,ll
+      INTEGER IT, NB1, NB2, NF1, NF2,i,k,kk,ll, PIPE_FLOW,JB,JF
       REAL(SZ) ZEB, QXB, QYB, HBB, ZEF, QXF, QYF, HBF
       REAL(SZ) SFACB,SFACF
       Real(SZ) iotaB, iota2B, iotaF, iota2F, dynPB, dynPF
       REAL(SZ) FB_HAT, GB_HAT, HB_HAT, FF_HAT, GF_HAT, HF_HAT
       REAL(SZ) ib_hat,if_hat,jb_hat,jf_hat, kf_hat, kb_hat
-      REAL(SZ) ABOVEB, ABOVEF
-      REAL(SZ) QNIB(2)
-      REAL(SZ) NLEQG_TMP, G_TMP
+      REAL(SZ) ABOVEB, ABOVEF, ABOVEPIB, ABOVEPIF
+      REAL(SZ) QNIB(2), PHT, PDI, PCF
+      REAL(SZ) NLEQG_TMP, G_TMP, FFACT
       REAL(SZ) SUBSUPB, SUBSUPF, WEGPB, WEGPF
       REAL(SZ) NXB, NYB, NXF, NYF, TXB, TYB, TXF, TYF
       REAL(SZ) QB_N_INT, QF_N_INT, QB_N_EXT, QF_N_EXT
       REAL(SZ) QB_T_INT, QF_T_INT, QB_T_EXT, QF_T_EXT
+      Real(SZ), allocatable :: vtemp1(:), vtemp2(:)
 
 C.....Loop over the internal barrier segments (note: an internal barrier
 C.....segment consists of two internal barrier edges -- a "front" edge &
@@ -65,9 +66,15 @@ C.......Obtain the elements of the back and front sides
 
          ELB = NEDEL(1,GEDB)
          ELF = NEDEL(1,GEDF)
+         JB = EDN(ELB) - 2
+         JF = EDN(ELF) - 2
 
+         EL = ELB
          if (DOFS(ELB).LT.DOFS(ELF)) then
             EL = ELF
+         endif
+         if (JB .eq. 2 .or. JF .eq. 2) then
+            allocate( vtemp1(DOFS(EL)),vtemp2(DOFS(EL)) )
          endif
 
          pa = PDG_EL(EL)
@@ -104,6 +111,7 @@ C.....Set the components for the tangential vector to the edge
          TYF =  NXF
          
 C.......Compute the variables at the quadrature points
+         FFACT = 1.0d0/WEGP(1,pa)*2**pa/(2*pa-1)
 
          DO I = 1,NEGP(pa)
             
@@ -139,7 +147,7 @@ C.........Obtain the height of the barrier at the quadrature point
             dynPF = dynP(1,ELF,IRK)
 #endif
 
-#ifdef SED_LAY !This does not affect much here, hb and bed do not change at weirs
+#ifdef SED_LAY
             HB(1,ELB,irk) = 0.D0
             do ll=1,layers
                HB(1,ELB,irk) = HB(1,ELB,irk) + bed(1,ELB,irk,ll)
@@ -155,30 +163,30 @@ C.........Obtain the height of the barrier at the quadrature point
 
 
             DO K = 2,dofs(EL)
-               ZEB = ZEB + ZE(K,ELB,IRK)*PHI_EDGE(K,GPB,LEDB,pa)
-               QXB = QXB + QX(K,ELB,IRK)*PHI_EDGE(K,GPB,LEDB,pa)
-               QYB = QYB + QY(K,ELB,IRK)*PHI_EDGE(K,GPB,LEDB,pa)
+               ZEB = ZEB + ZE(K,ELB,IRK)*PHI_EDGE(K,GPB,LEDB,pa,JB)
+               QXB = QXB + QX(K,ELB,IRK)*PHI_EDGE(K,GPB,LEDB,pa,JB)
+               QYB = QYB + QY(K,ELB,IRK)*PHI_EDGE(K,GPB,LEDB,pa,JB)
                                 !HBB = HBB + HB(K,ELB,1  )*PHI_EDGE(K,GPB,LEDB,pa)
 
-               ZEF = ZEF + ZE(K,ELF,IRK)*PHI_EDGE(K,GPF,LEDF,pa)
-               QXF = QXF + QX(K,ELF,IRK)*PHI_EDGE(K,GPF,LEDF,pa)
-               QYF = QYF + QY(K,ELF,IRK)*PHI_EDGE(K,GPF,LEDF,pa)
+               ZEF = ZEF + ZE(K,ELF,IRK)*PHI_EDGE(K,GPF,LEDF,pa,JF)
+               QXF = QXF + QX(K,ELF,IRK)*PHI_EDGE(K,GPF,LEDF,pa,JF)
+               QYF = QYF + QY(K,ELF,IRK)*PHI_EDGE(K,GPF,LEDF,pa,JF)
                                 !HBF = HBF + HB(K,ELF,1  )*PHI_EDGE(K,GPF,LEDF,pa)
 #ifdef TRACE
-               iotaB = iotaB + iota(K,ELB,IRK)*PHI_EDGE(K,GPB,LEDB,pa)
-               iotaF = iotaF + iota(K,ELF,IRK)*PHI_EDGE(K,GPF,LEDF,pa)
+              iotaB = iotaB + iota(K,ELB,IRK)*PHI_EDGE(K,GPB,LEDB,pa,JB)
+              iotaF = iotaF + iota(K,ELF,IRK)*PHI_EDGE(K,GPF,LEDF,pa,JF)
 #endif
 
 #ifdef CHEM
-               iotaB = iotaB + iota(K,ELB,IRK)*PHI_EDGE(K,GPB,LEDB,pa)
-               iotaF = iotaF + iota(K,ELF,IRK)*PHI_EDGE(K,GPF,LEDF,pa)
-               iota2B = iota2B + iota2(K,ELB,IRK)*PHI_EDGE(K,GPB,LEDB,pa)
-               iota2B = iota2F + iota2(K,ELF,IRK)*PHI_EDGE(K,GPF,LEDF,pa)
+              iotaB = iotaB + iota(K,ELB,IRK)*PHI_EDGE(K,GPB,LEDB,pa,JB)
+              iotaF = iotaF + iota(K,ELF,IRK)*PHI_EDGE(K,GPF,LEDF,pa,JF)
+           iota2B = iota2B + iota2(K,ELB,IRK)*PHI_EDGE(K,GPB,LEDB,pa,JB)
+           iota2F = iota2F + iota2(K,ELF,IRK)*PHI_EDGE(K,GPF,LEDF,pa,JF)
 #endif
 
 #ifdef DYNP
-               dynPB = dynPB + dynP(K,ELB,IRK)*PHI_EDGE(K,GPB,LEDB,pa)
-               dynPF = dynPF + dynP(K,ELF,IRK)*PHI_EDGE(K,GPF,LEDF,pa)
+              dynPB = dynPB + dynP(K,ELB,IRK)*PHI_EDGE(K,GPB,LEDB,pa,JB)
+              dynPF = dynPF + dynP(K,ELF,IRK)*PHI_EDGE(K,GPF,LEDF,pa,JF)
 #endif
 
             ENDDO
@@ -187,11 +195,159 @@ C.........Obtain the height of the barrier at the quadrature point
             SFACB = SFACED(I,LEDB,ELB,pa)
             SFACF = SFACED(I,LEDF,ELF,pa)
             
-            ABOVEB = 0
-            ABOVEF = 0 
+            ABOVEB = 0.0D0
+            ABOVEF = 0.0D0
+            ABOVEPIB = 0.0D0
+            ABOVEPIF = 0.0D0
             IF (WDFLG(ELB).EQ.1) ABOVEB = ZEB - IBHT(L)
             IF (WDFLG(ELF).EQ.1) ABOVEF = ZEF - IBHT(L)
             
+            IF ((WDFLG(ELB).EQ.1).AND.((NIBSEGN(3,L).EQ.5).OR.
+     &                                 (NIBSEGN(3,L).EQ.25))) THEN
+               IF (I.EQ.1) THEN
+                  PHT = PIHT(L,1)
+                  PCF = PICF(L,1)
+                  PDI = PIDI(L,1)
+               ELSEIF (I.EQ.NEGP(pa) ) THEN
+                  PHT = PIHT(L,2)
+                  PCF = PICF(L,2)
+                  PDI = PIDI(L,2)
+               ENDIF
+               ABOVEPIB = ZEB - PHT
+            ENDIF
+            IF ((WDFLG(ELF).EQ.1).AND.((NIBSEGN(3,L).EQ.5).OR.
+     &                                 (NIBSEGN(3,L).EQ.25))) THEN
+               IF (I.EQ.1) THEN
+                  PHT = PIHT(L,1)
+                  PCF = PICF(L,1)
+                  PDI = PIDI(L,1)
+               ELSEIF (I.EQ.NEGP(pa) ) THEN
+                  PHT = PIHT(L,2)
+                  PCF = PICF(L,2)
+                  PDI = PIDI(L,2)
+               ENDIF
+               ABOVEPIF = ZEF - PHT
+            ENDIf
+            
+            WEIR_FLOW = 0
+            PIPE_FLOW = 0
+            QB_N_INT = 0.0D0
+            QF_N_INT = 0.0D0
+            QB_T_INT = 0.0D0
+            QF_T_INT = 0.0D0
+            
+C...........Calculate flow rates if cross-barrier pipe exists
+            IF ((NIBSEGN(3,L).EQ.5).OR.(NIBSEGN(3,L).EQ.25)) THEN
+C...........DO NOT compute flow if Gauss point is not on pipe node, 
+C...........i.e. either endpoint of the segment.
+               IF ((I.NE.1).AND.(I.NE.NEGP(pa))) THEN
+                  QB_N_INT = 0.0D0 
+                  QF_N_INT = 0.0D0
+                  QB_T_INT = 0.0D0
+                  QF_T_INT = 0.0D0
+                  PIPE_FLOW = 0
+            
+C...........Case 1:  Water is below pipe crown on both sides
+C           ---------------------------------------------
+            
+               ELSEIF((ABOVEPIF.LT.BARMIN).AND.(ABOVEPIB.LT.BARMIN))THEN
+                  QB_N_INT = 0.0D0
+                  QF_N_INT = 0.0D0
+                  QB_T_INT = 0.0D0
+                  QF_T_INT = 0.0D0
+                  PIPE_FLOW = 0
+               
+                  !print*, L, '1'
+C...........Case 2:  Water level on both sides is equal (within tol)
+C           ------------------------------------------------------------            
+               ELSEIF (ABS(ABOVEPIF-ABOVEPIB).LT.BARMIN) THEN
+                  QB_N_INT = 0.0D0
+                  QF_N_INT = 0.0D0
+                  QB_T_INT = 0.0D0
+                  QF_T_INT = 0.0D0
+                  PIPE_FLOW = 0
+                  
+                  !print*, L, '2'
+C...........Case 3 & 4: Water level higher on front side; water level on  
+C...........front is above pipe crown.
+C...........Flow from front to back side
+C           ------------------------------------------------------------
+
+               ELSEIF ((ABOVEPIF.GT.ABOVEPIB)
+     &                                   .AND.(ABOVEPIF.GE.BARMIN)) THEN
+                  PIPE_FLOW = 1
+
+C..............Case 3: Water level on back is below pipe crown.
+                  IF (ABOVEPIB.LT.BARMIN) THEN
+                     QF_N_INT = RAMPDG*(0.25D0*PI*PDI**2)*
+     &                         SQRT(2.0D0*G*ABOVEPIF/(1.0D0 + PCF))/
+     &                         (IBL(L))*FFACT
+                     QF_T_INT = 0.0D0
+                     !print*, L, '3'
+c..............Case 4: Water level on back is above pipe crown.
+                  ELSE
+                     QF_N_INT = RAMPDG*(0.25D0*PI*PDI**2)*
+     &                        SQRT(2.0D0*G*(ABOVEPIF-ABOVEPIB)/PCF)/
+     &                        (IBL(L))*FFACT
+                     QF_T_INT = 0.0D0
+                     !print*, L, '4'
+                  ENDIF
+
+                  !IF (L .EQ. 1 .AND. I .EQ. 1) THEN
+                  !   QB_N_INT = 2.0d0*QB_N_INT
+                  !   QF_N_INT = 2.0d0*QF_N_INT
+                  !ELSEIF (L .EQ. NIBSEG .AND. I .EQ. NEGP(pa)) THEN
+                  !   QB_N_INT = 2.0d0*QB_N_INT
+                  !   QF_N_INT = 2.0d0*QF_N_INT
+                  !ENDIF
+C.................If water above pipe crown BUT below barrier top, then
+C.................skip barrier flux computation so flux values computed
+C.................above are not replaced; otherwise add to overflow.
+                  IF ((ABOVEF.LE.BARMIN).AND.(ABOVEB.LE.BARMIN)) THEN
+                     GOTO 100
+                  ENDIF
+                     
+C...........Case 5 & 6: Water level higher on back side; water level on  
+C...........back is above pipe crown.
+C...........Flow from back to front side
+C           ------------------------------------------------------------
+
+               ELSEIF ((ABOVEPIB.GT.ABOVEPIF)
+     &                                   .AND.(ABOVEPIB.GE.BARMIN)) THEN
+                  PIPE_FLOW = -1
+C..............Case 5: Water level on front is below pipe crown.
+                  IF (ABOVEPIF.LT.BARMIN) THEN
+                     QB_N_INT = RAMPDG*(0.25D0*PI*PDI**2)*
+     &                         SQRT(2.0D0*G*ABOVEPIB/(1.0D0 + PCF))/
+     &                         (IBL(L))*FFACT
+                     QB_T_INT = 0.0D0
+                     
+                     !print*, L, '5'
+c..............Case 6: Water level on front is above pipe crown.
+                  ELSE
+                     QB_N_INT = RAMPDG*(0.25D0*PI*PDI**2)*
+     &                        SQRT(2.0D0*G*(ABOVEPIB-ABOVEPIF)/PCF)/
+     &                        (IBL(L))*FFACT
+                     QB_T_INT = 0.0D0      
+                     !print*, L, '6'
+                  ENDIF
+
+                  !IF (L .EQ. 1 .AND. I .EQ. 1) THEN
+                  !   QB_N_INT = 2.0d0*QB_N_INT
+                  !   QF_N_INT = 2.0d0*QF_N_INT
+                  !ELSEIF (L .EQ. NIBSEG .AND. I .EQ. NEGP(pa)) THEN
+                  !   QB_N_INT = 2.0d0*QB_N_INT
+                  !   QF_N_INT = 2.0d0*QF_N_INT
+                  !ENDIF
+C.................If water above pipe crown BUT below barrier top, then
+C.................skip barrier flux computation so flux values computed
+C.................above are not replaced; otherwise add to overflow.
+                  IF ((ABOVEF.LE.BARMIN).AND.(ABOVEB.LE.BARMIN)) THEN
+                     GOTO 100
+                  ENDIF
+                  
+               ENDIF
+            ENDIF    
 C.........Case 1:  Water is below barrier on both sides
 C     ---------------------------------------------
             
@@ -230,15 +386,16 @@ C...........Case 3a) Subcritical flow
 C     -------------------------
 
                IF (ABOVEB.GT.SUBSUPF) THEN
-                  QF_N_INT = RAMPDG*IBCFSB(L)*ABOVEB
-     &                 *SQRT((2.D0*G*(ABOVEF-ABOVEB)))
+                  QF_N_INT = QF_N_INT + RAMPDG*IBCFSB(L)*ABOVEB
+     &                           *SQRT((2.D0*G*(ABOVEF-ABOVEB)))
                   QF_T_INT = 0.D0
                   
 C...........Case 3b) Supercritical flow
 C     ---------------------------
 
                ELSE
-                  QF_N_INT = RAMPDG*IBCFSP(L)*SUBSUPF*SQRT(SUBSUPF*G)
+                  QF_N_INT = QF_N_INT + RAMPDG*IBCFSP(L)*SUBSUPF
+     &                           *SQRT(SUBSUPF*G)
                   QF_T_INT = 0.D0
                ENDIF
                GOTO 100
@@ -257,15 +414,16 @@ C...........Case 4a) Subcritical flow
 C     -------------------------
 
                IF (ABOVEF.GT.SUBSUPB) THEN
-                  QB_N_INT = RAMPDG*IBCFSB(L)*ABOVEF
-     &                 *SQRT((2.D0*G*(ABOVEB-ABOVEF)))
+                  QB_N_INT = QB_N_INT + RAMPDG*IBCFSB(L)*ABOVEF
+     &                           *SQRT((2.D0*G*(ABOVEB-ABOVEF)))
                   QB_T_INT = 0.D0
                   
 C...........Case 4b) Supercritical flow
 C     ---------------------------
                   
                ELSE
-                  QB_N_INT = RAMPDG*IBCFSP(L)*SUBSUPB*SQRT(SUBSUPB*G)
+                  QB_N_INT = QB_N_INT + RAMPDG*IBCFSP(L)*SUBSUPB
+     &                           *SQRT(SUBSUPB*G)
                   QB_T_INT = 0.D0
                ENDIF
                GOTO 100
@@ -273,8 +431,7 @@ C     ---------------------------
             
  100        CONTINUE
 
-            IF (WEIR_FLOW.LE.0) THEN
-
+            IF ((WEIR_FLOW.LE.0).AND.(PIPE_FLOW.LE.0)) THEN
 C...........Compute the numerical flux for the back side edge
 
                ZE_IN = ZEB
@@ -330,7 +487,7 @@ C...........Compute the x and y components of the external state flow
 
 C...........Compute the numerical flux
                
-               CALL NUMERICAL_FLUX(IT)
+               CALL NUMERICAL_FLUX(IT,test_el)
                FB_HAT = F_HAT
                GB_HAT = G_HAT
                HB_HAT = H_HAT
@@ -348,7 +505,8 @@ C...........Compute the numerical flux
                KB_HAT = K_HAT
 #endif
 
-               IF (WEIR_FLOW.LT.0) THEN
+               IF ((WEIR_FLOW.LT.0).OR.(PIPE_FLOW.LT.0)) THEN
+
                   ZE_IN = ZEF
                   QX_IN = QXF
                   QY_IN = QYF
@@ -386,7 +544,7 @@ C...........Compute the numerical flux
                      G_TMP = G
                      G = 0.D0
                   ENDIF
-                  CALL NUMERICAL_FLUX(IT)
+                  CALL NUMERICAL_FLUX(IT,test_el)
                   FF_HAT = F_HAT
                   GF_HAT = G_HAT
                   HF_HAT = H_HAT
@@ -412,7 +570,7 @@ C...........Compute the numerical flux
                ENDIF
             ENDIF
 
-            IF (WEIR_FLOW.GE.0) THEN
+            IF ((WEIR_FLOW.GE.0).AND.(PIPE_FLOW.GE.0)) THEN
                
 C...........Compute the numerical flux for the front side edge
 
@@ -457,7 +615,7 @@ C...........Compute the x and y components of the external state flow
                QX_EX = ( TYF*Q_N_EXT - NYF*Q_T_EXT)/(NXF*TYF - NYF*TXF)
                QY_EX = (-TXF*Q_N_EXT + NXF*Q_T_EXT)/(NXF*TYF - NYF*TXF)
 
-               CALL NUMERICAL_FLUX(IT)
+               CALL NUMERICAL_FLUX(IT,test_el)
                FF_HAT = F_HAT
                GF_HAT = G_HAT
                HF_HAT = H_HAT
@@ -475,7 +633,7 @@ C...........Compute the x and y components of the external state flow
                KF_HAT = K_HAT
 #endif
                
-               IF (WEIR_FLOW.GT.0) THEN
+               IF ((WEIR_FLOW.GT.0).OR.(PIPE_FLOW.GT.0)) THEN
                   ZE_IN = ZEB
                   QX_IN = QXB
                   QY_IN = QYB
@@ -511,7 +669,7 @@ C...........Compute the x and y components of the external state flow
                      G_TMP = G
                      G = 0.D0
                   ENDIF
-                  CALL NUMERICAL_FLUX(IT)
+                  CALL NUMERICAL_FLUX(IT,test_el)
                   FB_HAT = F_HAT
                   GB_HAT = G_HAT
 
@@ -540,11 +698,29 @@ C...........Compute the x and y components of the external state flow
  200        CONTINUE
 c     
             DO K = 1,DOFS(el)
-
-               WEGPB = 2.0*M_INV(K,pa)/AREAS(ELB)*XLEN(GEDB)
-     &              *PHI_EDGE(K,GPB,LEDB,pa)*WEGP(GPB,pa)
-               WEGPF = 2.0*M_INV(K,pa)/AREAS(ELF)*XLEN(GEDF)
-     &              *PHI_EDGE(K,GPF,LEDF,pa)*WEGP(GPF,pa)
+            
+               if (JB .eq. 1) then
+                  WEGPB = 2.0*M_INV(K,pa)/AREAS(ELB)*XLEN(GEDB)*
+     &               PHI_EDGE(K,GPB,LEDB,pa,JB)*WEGP(GPB,pa)
+               elseif (JB .eq. 2) then
+                  do kk = 1,DOFS(ELB)
+                     vtemp1(kk) = M_INVM(ELB,K,kk,pa)
+                     vtemp2(kk) = PHI_EDGE(kk,GPB,LEDB,pa,JB)
+                  enddo
+                  WEGPB = dot_product(vtemp1,vtemp2)
+                  WEGPB = WEGPB*0.5d0*XLEN(GEDB)*WEGP(GPB,pa)
+               endif
+               if (JF .eq. 1) then
+                  WEGPF = 2.0*M_INV(K,pa)/AREAS(ELF)*XLEN(GEDF)*
+     &               PHI_EDGE(K,GPF,LEDF,pa,JF)*WEGP(GPF,pa)
+               elseif (JF .eq. 2) then
+                  do kk = 1,DOFS(ELF)
+                     vtemp1(kk) = M_INVM(ELF,K,kk,pa)
+                     vtemp2(kk) = PHI_EDGE(kk,GPF,LEDF,pa,JF)
+                  enddo
+                  WEGPF = dot_product(vtemp1,vtemp2)
+                  WEGPF = WEGPF*0.5d0*XLEN(GEDF)*WEGP(GPF,pa)
+               endif
 
                RHS_ZE(K,ELB,IRK) = RHS_ZE(K,ELB,IRK) - WEGPB*FB_HAT
                RHS_QX(K,ELB,IRK) = RHS_QX(K,ELB,IRK) - WEGPB*GB_HAT
@@ -563,8 +739,8 @@ c
                RHS_iota(K,ELB,IRK) = RHS_iota(K,ELB,IRK) - WEGPB*IB_HAT
                RHS_iota(K,ELF,IRK) = RHS_iota(K,ELF,IRK) - WEGPB*IF_HAT
                
-               RHS_iota2(K,ELB,IRK) = RHS_iota2(K,ELB,IRK) - WEGPB*JB_HAT
-               RHS_iota2(K,ELF,IRK) = RHS_iota2(K,ELF,IRK) - WEGPB*JF_HAT
+               RHS_iota2(K,ELB,IRK) = RHS_iota2(K,ELB,IRK)-WEGPB*JB_HAT
+               RHS_iota2(K,ELF,IRK) = RHS_iota2(K,ELF,IRK)-WEGPB*JF_HAT
 #endif
 
 #ifdef DYNP
@@ -574,6 +750,7 @@ c
 
             ENDDO
          ENDDO
+         if (JB .eq. 2 .or. JF .eq. 2) deallocate( vtemp1,vtemp2 )
  1000 CONTINUE
       RETURN
       END SUBROUTINE IBARRIER_EDGE_HYDRO

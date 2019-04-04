@@ -28,11 +28,12 @@ C.....Use appropriate modules
 
 C.....Declare local variables
 
-      INTEGER L, LED, GED,i,k,ll,IT
+      INTEGER L, LED, GED,j,i,k,kk,ll,IT
       REAL(SZ) TX, TY, W_IN, DEN
       REAL(SZ) LZ_XX_IN, LZ_XY_IN, LZ_YX_IN, LZ_YY_IN
       Real(sz) HZ_X_IN,HZ_Y_IN,TZ_X_IN,TZ_Y_IN
       Real(SZ) MZ_X_IN(layers),MZ_Y_IN(layers)
+      Real(SZ), allocatable :: vtemp1(:), vtemp2(:)
 
       test_el = 0
       DO 1000 L = 1,NREDS
@@ -45,9 +46,12 @@ C.....Retrieve the global and local edge number
 C.....Retrieve the elements which share the edge
 
          EL_IN = NEDEL(1,GED)
-
+         J = EDN(EL_IN) - 2
          pa = PDG_EL(EL_IN)
 
+         if (J .eq. 2) then
+            allocate( vtemp1(DOFS(EL_IN)),vtemp2(DOFS(EL_IN)) )
+         endif
 #ifdef P0
          if (pa.eq.0) then
             pa = 1
@@ -105,7 +109,7 @@ C.....Compute ZE, QX, QY, and HB at each Gauss point
             dynP_IN = dynP(1,EL_IN,IRK)
 #endif
 
-#ifdef SED_LAY                  !When layered, these change
+#ifdef SED_LAY
             HB(1,EL_IN,irk) = 0.D0
             do ll=1,layers
                HB(1,EL_IN,irk) = HB(1,EL_IN,irk) + bed(1,EL_IN,irk,ll)
@@ -121,44 +125,47 @@ C.....Compute the solution at the interior state
 
             DO K = 2,DOFS(EL_IN)
                
-               ZE_IN = ZE_IN + ZE(K,EL_IN,IRK)*PHI_EDGE(K,I,LED,pa)
-               QX_IN = QX_IN + QX(K,EL_IN,IRK)*PHI_EDGE(K,I,LED,pa)
-               QY_IN = QY_IN + QY(K,EL_IN,IRK)*PHI_EDGE(K,I,LED,pa)
+               ZE_IN = ZE_IN + ZE(K,EL_IN,IRK)*PHI_EDGE(K,I,LED,pa,J)
+               QX_IN = QX_IN + QX(K,EL_IN,IRK)*PHI_EDGE(K,I,LED,pa,J)
+               QY_IN = QY_IN + QY(K,EL_IN,IRK)*PHI_EDGE(K,I,LED,pa,J)
 
                                 ! LDG terms
 #ifdef WAVE_DIF 
-               HZ_X_IN = HZ_X_IN + HZ(K,1,1,EL_IN)*PHI_EDGE(K,I,LED,pa)
-               HZ_Y_IN = HZ_Y_IN + HZ(K,2,2,EL_IN)*PHI_EDGE(K,I,LED,pa)
+              HZ_X_IN = HZ_X_IN + HZ(K,1,1,EL_IN)*PHI_EDGE(K,I,LED,pa,J)
+               Z_Y_IN = HZ_Y_IN + HZ(K,2,2,EL_IN)*PHI_EDGE(K,I,LED,pa,J)
 #endif
 
-               LZ_XX_IN = LZ_XX_IN + LZ(K,1,1,EL_IN)*PHI_EDGE(K,I,LED,pa)
-               LZ_XY_IN = LZ_XY_IN + LZ(K,1,2,EL_IN)*PHI_EDGE(K,I,LED,pa)
-               LZ_YX_IN = LZ_YX_IN + LZ(K,2,1,EL_IN)*PHI_EDGE(K,I,LED,pa)
-               LZ_YY_IN = LZ_YY_IN + LZ(K,2,2,EL_IN)*PHI_EDGE(K,I,LED,pa)
+            LZ_XX_IN = LZ_XX_IN + LZ(K,1,1,EL_IN)*PHI_EDGE(K,I,LED,pa,J)
+            LZ_XY_IN = LZ_XY_IN + LZ(K,1,2,EL_IN)*PHI_EDGE(K,I,LED,pa,J)
+            LZ_YX_IN = LZ_YX_IN + LZ(K,2,1,EL_IN)*PHI_EDGE(K,I,LED,pa,J)
+            LZ_YY_IN = LZ_YY_IN + LZ(K,2,2,EL_IN)*PHI_EDGE(K,I,LED,pa,J)
 
 #ifdef TRACE
-               TZ_X_IN = TZ_X_IN + TZ(K,1,1,EL_IN)*PHI_EDGE(K,I,LED,pa)
-               TZ_Y_IN = TZ_Y_IN + TZ(K,2,2,EL_IN)*PHI_EDGE(K,I,LED,pa)
+              TZ_X_IN = TZ_X_IN + TZ(K,1,1,EL_IN)*PHI_EDGE(K,I,LED,pa,J)
+              TZ_Y_IN = TZ_Y_IN + TZ(K,2,2,EL_IN)*PHI_EDGE(K,I,LED,pa,J)
 
-               iota_IN = iota_IN + iota(K,EL_IN,IRK)*PHI_EDGE(K,I,LED,pa)
+            iota_IN = iota_IN + iota(K,EL_IN,IRK)*PHI_EDGE(K,I,LED,pa,J)
 #endif
 
 #ifdef CHEM
-               iota_IN = iota_IN + iota(K,EL_IN,IRK)*PHI_EDGE(K,I,LED,pa)
-               iota2_IN = iota2_IN + iota2(K,EL_IN,IRK)*PHI_EDGE(K,I,LED,pa)
+            iota_IN = iota_IN + iota(K,EL_IN,IRK)*PHI_EDGE(K,I,LED,pa,J)
+         iota2_IN = iota2_IN + iota2(K,EL_IN,IRK)*PHI_EDGE(K,I,LED,pa,J)
 #endif
 
 #ifdef DYNP
-               dynP_IN = dynP_IN + dynP(K,EL_IN,IRK)*PHI_EDGE(K,I,LED,pa)
+            dynP_IN = dynP_IN + dynP(K,EL_IN,IRK)*PHI_EDGE(K,I,LED,pa,J)
 #endif
 
 #ifdef SED_LAY
                do ll = 1,layers
-                  bed_IN(ll) = bed_IN(ll) + bed(K,EL_IN,IRK,ll)*PHI_EDGE(K,I,LED,pa)
-                  HB_IN = HB_IN + bed(k,EL_IN,irk,ll)*PHI_EDGE(K,I,LED,pa)
+                  bed_IN(ll) = bed_IN(ll) +
+     & bed(K,EL_IN,IRK,ll)*PHI_EDGE(K,I,LED,pa,J)
+              HB_IN = HB_IN + bed(k,EL_IN,irk,ll)*PHI_EDGE(K,I,LED,pa,J)
 
-                  MZ_X_IN(ll) = MZ_X_IN(ll) + MZ(K,1,ll,EL_IN)*PHI_EDGE(K,I,LED,pa)
-                  MZ_Y_IN(ll) = MZ_Y_IN(ll) + MZ(K,2,ll,EL_IN)*PHI_EDGE(K,I,LED,pa)
+                  MZ_X_IN(ll) = MZ_X_IN(ll) +
+     & MZ(K,1,ll,EL_IN)*PHI_EDGE(K,I,LED,pa,J)
+                  MZ_Y_IN(ll) = MZ_Y_IN(ll) +
+     & MZ(K,2,ll,EL_IN)*PHI_EDGE(K,I,LED,pa,J)
                enddo
 #endif
 
@@ -213,28 +220,40 @@ C.....Compute the edge integral
 
             
             DO K = 1,DOFS(EL_IN)
-               W_IN = 2.0*M_INV(K,pa)/AREAS(EL_IN)*XLEN(GED)*
-     &              PHI_EDGE(K,I,LED,pa)*WEGP(I,pa)
+            
+               if (J .eq. 1) then
+                  W_IN = 2.0*M_INV(K,pa)/AREAS(EL_IN)*XLEN(GED)*
+     &               PHI_EDGE(K,I,LED,pa,J)*WEGP(I,pa)
+               elseif (J .eq. 2) then
+                  do kk = 1,DOFS(EL_IN)
+                     vtemp1(kk) = M_INVM(EL_IN,K,kk,pa)
+                     vtemp2(kk) = PHI_EDGE(kk,I,LED,pa,J)
+                  enddo
+                  W_IN = dot_product(vtemp1,vtemp2)
+                  W_IN = W_IN*0.5d0*XLEN(GED)*WEGP(I,pa)
+               endif
+               
                RHS_ZE(K,EL_IN,IRK) = RHS_ZE(K,EL_IN,IRK) - W_IN*F_HAT
                RHS_QX(K,EL_IN,IRK) = RHS_QX(K,EL_IN,IRK) - W_IN*G_HAT
                RHS_QY(K,EL_IN,IRK) = RHS_QY(K,EL_IN,IRK) - W_IN*H_HAT
 
 #ifdef TRACE
-               RHS_iota(K,EL_IN,IRK) = RHS_iota(K,EL_IN,IRK) - W_IN*I_HAT
+              RHS_iota(K,EL_IN,IRK) = RHS_iota(K,EL_IN,IRK) - W_IN*I_HAT
 #endif
 
 #ifdef CHEM
-               RHS_iota(K,EL_IN,IRK) = RHS_iota(K,EL_IN,IRK) - W_IN*I_HAT
-               RHS_iota2(K,EL_IN,IRK) = RHS_iota2(K,EL_IN,IRK) - W_IN*J_HAT
+            RHS_iota(K,EL_IN,IRK) = RHS_iota(K,EL_IN,IRK) - W_IN*I_HAT
+            RHS_iota2(K,EL_IN,IRK) = RHS_iota2(K,EL_IN,IRK) - W_IN*J_HAT
 #endif
 
 #ifdef DYNP
-               RHS_dynP(K,EL_IN,IRK) = RHS_dynP(K,EL_IN,IRK) - W_IN*K_HAT
+              RHS_dynP(K,EL_IN,IRK) = RHS_dynP(K,EL_IN,IRK) - W_IN*K_HAT
 #endif
 
 #ifdef SED_LAY
                do ll = 1,layers
-                  RHS_bed(K,EL_IN,IRK,ll) = RHS_bed(K,EL_IN,IRK,ll) - W_IN*bed_HAT(ll)
+                  RHS_bed(K,EL_IN,IRK,ll) = RHS_bed(K,EL_IN,IRK,ll) -
+     & W_IN*bed_HAT(ll)
                enddo
 #endif
 
@@ -244,7 +263,8 @@ c     !CALL EDGE_INT_HYDRO(EL_IN, LED, GED, I, F_HAT, G_HAT, H_HAT,k)
             ENDDO
 
          ENDDO
-
+         if (J .eq. 2) deallocate( vtemp1,vtemp2 )
  1000 CONTINUE      
       RETURN
       END SUBROUTINE
+   

@@ -1,4 +1,5 @@
 C-----------------------------------------------------------------------
+C
 C     Subroutine quad_rules_general
 C
 C     Written by Dylan Wood (03-10-2017)
@@ -17,7 +18,7 @@ C
 C     Input:
 C     ------
 C       n:       Number of quadrature points/weights desired.
-C       lobatyn: Logocial value indicating whether a Lobatto type rule
+C       lobatyn: Logicial value indicating whether a Lobatto type rule
 C                 is desired, i.e. rule including the endpoints -1 and 1
 C                 as quadrature points.
 C       alph:    Value for alpha in Jacobi weight, 
@@ -41,9 +42,9 @@ C       pts: Array of quadrature points of size n by 1
 C       wts: Array of quadrature weights of size n by 1.
 C
 C-----------------------------------------------------------------------
-   	subroutine quad_rules_general(n, lobatyn, alph, bet, pts, wts)
+      subroutine quad_rules_general(n, lobatyn, alph, bet, pts, wts)
 
-   	implicit none
+      implicit none
 
       integer n,np1,nm1,nin
       logical, intent(in) :: lobatyn
@@ -54,7 +55,7 @@ C-----------------------------------------------------------------------
       real(8) :: Jac(n,n), augJ(n+1,n), eig(n), v(n)
       real(8), dimension(0:n+1) :: polyo
       real(8) eps, jrl, dum, ajp1, bjp1, x, prl,nv,lambda
-      real(8) summ, dpolyon, al, be, nrl,B0
+      real(8) summ, dpolyon, al, be, nrl,B0, gammaf
 
 c.....Determine whether Lobatto rules are needed. If so, 
 c.....prepare elements for modified Jacobi matrix, and
@@ -88,6 +89,7 @@ c.....places these elements in the necessary locations.
          Jac(n,n+1) = bjp1
          Jac(n+1,n) = bjp1
          nn = n + 1
+            
       else
          al = alph
          be = bet
@@ -215,8 +217,8 @@ C...........computed by Guassian elimination.
             v = v/nv
 
             B0 = 2.0d0**(alph + bet + 1.0d0) 
-     &         * gamma(alph + 1.0d0) * gamma(bet + 1.0d0) 
-     &         / gamma(alph + bet + 2.0d0)
+     &         * gammaf(alph + 1.0d0) * gammaf(bet + 1.0d0) 
+     &         / gammaf(alph + bet + 2.0d0)
             wts(m) = B0*v(1)*v(1)
 
          elseif (lobatyn) then
@@ -250,24 +252,24 @@ C..............type rules would go. The author has no practical need
 C..............for these rules, so they are currently excluded.
             endif                  
          endif
-         if (lobatyn) then
-            n = n + 1
-         endif   
 
       enddo 
+      if (lobatyn) then
+         n = n + 1
+      endif   
 
       end subroutine
-	
+   
       subroutine QRdecomp(A,n,eps,eig)
-c.....QR decomposition with shifting
+C.....QR decomposition with shifting
       implicit none
       integer, intent(in)::n
       integer i,k
       real(8), dimension(n,n), intent(in):: A
-      real(8), dimension(n,n)::A2,oldA2,Q,QT,R,EYE
+      real(8), dimension(n,n) :: A2,oldA2,Q,QT,R,EYE
       real(8) res,sig,normA
       real(8), intent(in):: eps
-      real(8), dimension(n)::vec1,vec2
+      real(8), dimension(n) :: vec1,vec2
       real(8), dimension(n), intent(out)::eig
       logical DoIterate
 
@@ -294,9 +296,9 @@ c.....QR decomposition with shifting
          oldA2(:,:)=A2(:,:)
          A2(:,:) = A2(:,:) - sig*EYE(:,:)
 
-      	Q(:,:)=A2(:,:)
-      	do i=1,n
-      		do k=1,i-1
+         Q(:,:)=A2(:,:)
+         do i=1,n
+            do k=1,i-1
                vec1 = Q(:,i)
                vec2 = Q(:,k)
                call dotprod(vec1,vec2,n,res)
@@ -315,8 +317,28 @@ c.....QR decomposition with shifting
          eig(i)=A2(i,i)
       enddo
       end subroutine
+      
+      function gammaf(n)
+      ! Compute the gamma function for an input
+      implicit none
+      real(8), intent(in) :: n
+      integer :: i, m
+      real(8) :: ans, gammaf
+      
+      ! Subtract 1 from input number (should be an integer as a real)
+      m = int(n - 1.0d0)
+      ans = 1.0d0
+      ! Calculate the factorial of n-1
+      do i = 1,m
+         ans = ans * dble(i)
+      end do
+      gammaf = ans
+      return
+      
+      end function
 
       subroutine dotprod(vec1,vec2,n,prod)
+      ! Compute the dot product of two vector inputs
       implicit none
       integer::n,i
       real(8), dimension(n)::vec1,vec2
@@ -329,6 +351,7 @@ c.....QR decomposition with shifting
       end subroutine
 
       function DoIterate (A1,A2,eps,n)
+      ! Evaluate whether or not to iterate QR decomp.
       implicit none
       integer::n,i,j
       real(8), dimension(n,n)::A1,A2
@@ -349,6 +372,7 @@ c.....QR decomposition with shifting
       end function
 
       subroutine Gauss_Elim(M,n,ierr)
+      ! Perform Gaussian elimination on an "augmented matrix"
       implicit none
       integer, intent(in)::n
       integer, intent(out)::ierr

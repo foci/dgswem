@@ -35,11 +35,12 @@ C.....Use appropriate modules
 
 C.....Declare local variables
 
-      INTEGER L, LED, GED, i,k,jj,II,ll,IT,mm
+      INTEGER L, LED, GED, i,k,kk,j,jj,II,ll,IT,mm
       Real(SZ) DEN2,U_AVG,V_AVG,VEL_NORMAL,q_RoeX, q_RoeY, q_Roe
       REAL(SZ) TX, TY, DEN,ell_1,ell_2,ell_3,HZ_X_IN,HZ_Y_IN
       REAL(SZ) LZ_XX_IN, LZ_XY_IN, LZ_YX_IN, LZ_YY_IN,W_IN
       Real(SZ) MZ_X_IN(layers),MZ_Y_IN(layers),TZ_X_IN,TZ_Y_IN
+      Real(SZ), allocatable :: vtemp1(:), vtemp2(:)
 
       test_el = 0
       DO 1000 L = 1,NLEDS
@@ -52,8 +53,12 @@ C.....Retrieve the global and local edge number
 C.....Retrieve the elements which share the edge
 
          EL_IN = NEDEL(1,GED)
-
+         J = EDN(EL_IN) - 2
          pa = PDG_EL(EL_IN)
+         
+         if (J .eq. 2) then
+            allocate( vtemp1(DOFS(EL_IN)),vtemp2(DOFS(EL_IN)) )
+         endif
 
 #ifdef P0
          if (pa.eq.0) then
@@ -101,7 +106,7 @@ C.....Compute ZE, QX, QY, and HB at each Gauss point
             dynP_IN = dynP(1,EL_IN,IRK)
 #endif
 
-#ifdef SED_LAY                  !When layered, these change
+#ifdef SED_LAY
             HB(1,EL_IN,irk) = 0.D0
             do ll=1,layers
                HB(1,EL_IN,irk) = HB(1,EL_IN,irk) + bed(1,EL_IN,irk,ll)
@@ -138,49 +143,52 @@ C.....(modified for wetting and drying)
 
             DO K = 2,DOFS(EL_IN)
                
-               ZE_IN = ZE_IN + ZE(K,EL_IN,IRK)*PHI_EDGE(K,I,LED,pa)
-               QX_IN = QX_IN + QX(K,EL_IN,IRK)*PHI_EDGE(K,I,LED,pa)
-               QY_IN = QY_IN + QY(K,EL_IN,IRK)*PHI_EDGE(K,I,LED,pa)
+               ZE_IN = ZE_IN + ZE(K,EL_IN,IRK)*PHI_EDGE(K,I,LED,pa,J)
+               QX_IN = QX_IN + QX(K,EL_IN,IRK)*PHI_EDGE(K,I,LED,pa,J)
+               QY_IN = QY_IN + QY(K,EL_IN,IRK)*PHI_EDGE(K,I,LED,pa,J)
 
                                 !LDG terms
 #ifdef WAVE_DIF
-               HZ_X_IN = HZ_X_IN + HZ(K,1,1,EL_IN)*PHI_EDGE(K,I,LED,pa)
-               HZ_Y_IN = HZ_Y_IN + HZ(K,2,2,EL_IN)*PHI_EDGE(K,I,LED,pa)
+              HZ_X_IN = HZ_X_IN + HZ(K,1,1,EL_IN)*PHI_EDGE(K,I,LED,pa,J)
+              HZ_Y_IN = HZ_Y_IN + HZ(K,2,2,EL_IN)*PHI_EDGE(K,I,LED,pa,J)
 #endif
-               LZ_XX_IN = LZ_XX_IN + LZ(K,1,1,EL_IN)*PHI_EDGE(K,I,LED,pa)
-               LZ_XY_IN = LZ_XY_IN + LZ(K,1,2,EL_IN)*PHI_EDGE(K,I,LED,pa)
-               LZ_YX_IN = LZ_YX_IN + LZ(K,2,1,EL_IN)*PHI_EDGE(K,I,LED,pa)
-               LZ_YY_IN = LZ_YY_IN + LZ(K,2,2,EL_IN)*PHI_EDGE(K,I,LED,pa)
+            LZ_XX_IN = LZ_XX_IN + LZ(K,1,1,EL_IN)*PHI_EDGE(K,I,LED,pa,J)
+            LZ_XY_IN = LZ_XY_IN + LZ(K,1,2,EL_IN)*PHI_EDGE(K,I,LED,pa,J)
+            LZ_YX_IN = LZ_YX_IN + LZ(K,2,1,EL_IN)*PHI_EDGE(K,I,LED,pa,J)
+            LZ_YY_IN = LZ_YY_IN + LZ(K,2,2,EL_IN)*PHI_EDGE(K,I,LED,pa,J)
 
 #ifdef TRACE
 
-               TZ_X_IN = TZ_X_IN + TZ(K,1,1,EL_IN)*PHI_EDGE(K,I,LED,pa)
-               TZ_Y_IN = TZ_Y_IN + TZ(K,2,2,EL_IN)*PHI_EDGE(K,I,LED,pa)
+              TZ_X_IN = TZ_X_IN + TZ(K,1,1,EL_IN)*PHI_EDGE(K,I,LED,pa,J)
+              TZ_Y_IN = TZ_Y_IN + TZ(K,2,2,EL_IN)*PHI_EDGE(K,I,LED,pa,J)
 
 #endif
 
                                 !LDG terms for sediment diffusion
 
 #ifdef TRACE
-               iota_IN = iota_IN + iota(K,EL_IN,IRK)*PHI_EDGE(K,I,LED,pa)
+            iota_IN = iota_IN + iota(K,EL_IN,IRK)*PHI_EDGE(K,I,LED,pa,J)
 #endif
 
 #ifdef CHEM
-               iota_IN = iota_IN + iota(K,EL_IN,IRK)*PHI_EDGE(K,I,LED,pa)
-               iota2_IN = iota2_IN + iota2(K,EL_IN,IRK)*PHI_EDGE(K,I,LED,pa)
+            iota_IN = iota_IN + iota(K,EL_IN,IRK)*PHI_EDGE(K,I,LED,pa,J)
+         iota2_IN = iota2_IN + iota2(K,EL_IN,IRK)*PHI_EDGE(K,I,LED,pa,J)
 #endif
 
 #ifdef DYNP
-               dynP_IN = dynP_IN + dynP(K,EL_IN,IRK)*PHI_EDGE(K,I,LED,pa)
+            dynP_IN = dynP_IN + dynP(K,EL_IN,IRK)*PHI_EDGE(K,I,LED,pa,J)
 #endif
 
 #ifdef SED_LAY
                do ll = 1,layers
-                  bed_IN(ll) = bed_IN(ll) + bed(K,EL_IN,IRK,ll)*PHI_EDGE(K,I,LED,pa)
-                  HB_IN = HB_IN + bed(k,EL_IN,irk,ll)*PHI_EDGE(K,I,LED,pa)
+                  bed_IN(ll) = bed_IN(ll) +
+     &                  bed(K,EL_IN,IRK,ll)*PHI_EDGE(K,I,LED,pa,J)
+                HB_IN=HB_IN + bed(k,EL_IN,irk,ll)*PHI_EDGE(K,I,LED,pa,J)
 
-                  MZ_X_IN(ll) = MZ_X_IN(ll) + MZ(K,1,ll,EL_IN)*PHI_EDGE(K,I,LED,pa)
-                  MZ_Y_IN(ll) = MZ_Y_IN(ll) + MZ(K,2,ll,EL_IN)*PHI_EDGE(K,I,LED,pa)
+                  MZ_X_IN(ll) = MZ_X_IN(ll) +
+     & MZ(K,1,ll,EL_IN)*PHI_EDGE(K,I,LED,pa,J)
+                  MZ_Y_IN(ll) = MZ_Y_IN(ll) +
+     & MZ(K,2,ll,EL_IN)*PHI_EDGE(K,I,LED,pa,J)
 
                enddo
 #endif
@@ -247,7 +255,8 @@ C.....Add LDG terms for sediment
 
 #ifdef SED_LAY
             do ll=1,layers
-               bed_HAT(ll) = bed_HAT(ll) + MZ_X_IN(ll)*NX*SFAC_IN + MZ_Y_IN(ll)*NY
+               bed_HAT(ll) = bed_HAT(ll) +
+     & MZ_X_IN(ll)*NX*SFAC_IN + MZ_Y_IN(ll)*NY
             enddo
 #endif
             
@@ -257,36 +266,46 @@ C.....(modified for wetting and drying)
 C.....Compute the edge integral
             DO K = 1,DOFS(EL_IN)
 
-               W_IN = 2.0*M_INV(K,pa)/AREAS(EL_IN)*XLEN(GED)*
-     &              PHI_EDGE(K,I,LED,pa)*WEGP(I,pa)
+               if (EDN(EL_IN) .eq. 3) then
+                  W_IN = 2.0d0*M_INV(K,pa)/AREAS(EL_IN)*XLEN(GED)*
+     &               PHI_EDGE(K,I,LED,pa,J)*WEGP(I,pa)
+               elseif (EDN(EL_IN) .eq. 4) then
+                  do kk = 1,DOFS(EL_IN)
+                     vtemp1(kk) = M_INVM(EL_IN,K,kk,pa)
+                     vtemp2(kk) = PHI_EDGE(kk,I,LED,pa,J)
+                  enddo
+                  W_IN = dot_product(vtemp1,vtemp2)
+                  W_IN = W_IN*0.5d0*XLEN(GED)*WEGP(I,pa)
+               endif
 
                RHS_ZE(K,EL_IN,IRK) = RHS_ZE(K,EL_IN,IRK) - W_IN*F_HAT
                RHS_QX(K,EL_IN,IRK) = RHS_QX(K,EL_IN,IRK) - W_IN*G_HAT
                RHS_QY(K,EL_IN,IRK) = RHS_QY(K,EL_IN,IRK) - W_IN*H_HAT
 
 #ifdef TRACE
-               RHS_iota(K,EL_IN,IRK) = RHS_iota(K,EL_IN,IRK) - W_IN*I_HAT
+               RHS_iota(K,EL_IN,IRK) = RHS_iota(K,EL_IN,IRK)-W_IN*I_HAT
 #endif
 
 #ifdef CHEM
-               RHS_iota(K,EL_IN,IRK) = RHS_iota(K,EL_IN,IRK) - W_IN*I_HAT
-               RHS_iota2(K,EL_IN,IRK) = RHS_iota2(K,EL_IN,IRK) - W_IN*J_HAT
+              RHS_iota(K,EL_IN,IRK) = RHS_iota(K,EL_IN,IRK)-W_IN*I_HAT
+             RHS_iota2(K,EL_IN,IRK) = RHS_iota2(K,EL_IN,IRK)-W_IN*J_HAT
 #endif
 
 #ifdef DYNP
-               RHS_dynP(K,EL_IN,IRK) = RHS_dynP(K,EL_IN,IRK) - W_IN*K_HAT
+               RHS_dynP(K,EL_IN,IRK) = RHS_dynP(K,EL_IN,IRK)- W_IN*K_HAT
 #endif
 
 #ifdef SED_LAY
                do ll = 1,layers
-                  RHS_bed(K,EL_IN,IRK,ll) = RHS_bed(K,EL_IN,IRK,ll) - W_IN*bed_HAT(ll)
+                  RHS_bed(K,EL_IN,IRK,ll) = RHS_bed(K,EL_IN,IRK,ll) -
+     & W_IN*bed_HAT(ll)
                enddo
 #endif
 
             ENDDO
 
          ENDDO
-
+         if (J .eq. 2) deallocate( vtemp1,vtemp2 )
  1000 CONTINUE
       
       RETURN
@@ -308,133 +327,133 @@ C     Written by Shintaro Bunya (02-13-2006)
 C     
 C***********************************************************************
 
-      SUBROUTINE LAND_EDGE_HYDRO_POST()
-
+C      SUBROUTINE LAND_EDGE_HYDRO_POST()
+C
 C.....Use appropriate modules
-
-      USE SIZES,ONLY : SZ,MYPROC,layers
-      USE GLOBAL,ONLY : pdg_el 
-      USE DG,ONLY : NLEDS,NLEDN,NEDSD,NEDEL,COSNX,SINNX,QX,QY,
-     &     PHI_CORNER, IRK, EL_UPDATED,pa,DOFS
-
-      IMPLICIT NONE
-
+C
+C      USE SIZES,ONLY : SZ,MYPROC,layers
+C      USE GLOBAL,ONLY : pdg_el 
+C      USE DG,ONLY : NLEDS,NLEDN,NEDSD,NEDEL,COSNX,SINNX,QX,QY,
+C     &     PHI_CORNER, IRK, EL_UPDATED,pa,DOFS
+C
+C      IMPLICIT NONE
+C
 C.....Declare local variables
-
-      INTEGER L, LED, GED, EL_IN, K, KK, NOD1, NOD2, NOD3, NEDGES
-      REAL(SZ) NX, NY
-      REAL(SZ) TX, TY
-      REAL(SZ) DIR
-      REAL(SZ) QXP(3),QXPN(3)
-      REAL(SZ) QYP(3),QYPN(3)
-      REAL(SZ) QP(3)
-      
-      DO 1000 L=1, NLEDS
-
+C
+C      INTEGER L, LED, GED, EL_IN, K, KK, NOD1, NOD2, NOD3, NEDGES
+C      REAL(SZ) NX, NY
+C      REAL(SZ) TX, TY
+C      REAL(SZ) DIR
+C      REAL(SZ) QXP(3),QXPN(3)
+C      REAL(SZ) QYP(3),QYPN(3)
+C      REAL(SZ) QP(3)
+C      
+C      DO 1000 L=1, NLEDS
+C
 C.....Retrieve the global and local edge number
-
-         GED = NLEDN(L)
-         LED = NEDSD(1,GED)
-
+C
+C         GED = NLEDN(L)
+C         LED = NEDSD(1,GED)
+C
 C.....Retrieve the elements which share the edge
-
-         EL_IN = NEDEL(1,GED)
-
-         PA = PDG_EL(GED)
-
-#ifdef P0
-         if (pa.eq.0) then
-            pa = 1
-         endif
-#endif
-
+C
+C         EL_IN = NEDEL(1,GED)
+C
+C         PA = PDG_EL(GED)
+C
+C#ifdef P0
+C         if (pa.eq.0) then
+C            pa = 1
+C         endif
+C#endif
+C
 C.....Apply the following sequences only on dry, drying, or wetting elements
-
-         IF(EL_UPDATED(EL_IN).EQ.0) CYCLE
-
+C
+C         IF(EL_UPDATED(EL_IN).EQ.0) CYCLE
+C
 C.....Retrieve the components of the normal vector to the edge
-         
-         NX = COSNX(GED)
-         NY = SINNX(GED)
-         
+C         
+C         NX = COSNX(GED)
+C         NY = SINNX(GED)
+C         
 C.....Set the components for the tangential vector to the edge
-         
-         TX = -NY
-         TY =  NX
-
+C         
+C         TX = -NY
+C         TY =  NX
+C
 C.....Compute nodal QX and QY
-
-         QXP(:) = 0.D0
-         QYP(:) = 0.D0
-
-         DO K = 1,3
-            DO KK = 1,DOFS(EL_IN)
-               QXP(K) = QXP(K) + PHI_CORNER(KK,K,pa)*QX(KK,EL_IN,IRK+1)
-               QYP(K) = QYP(K) + PHI_CORNER(KK,K,pa)*QY(KK,EL_IN,IRK+1)
-            ENDDO
-            QP(K) = SQRT(QXP(K)*QXP(K)+QYP(K)*QYP(K))
-            
-         ENDDO
-
+C
+C         QXP(:) = 0.D0
+C         QYP(:) = 0.D0
+C
+C         DO K = 1,3
+C            DO KK = 1,DOFS(EL_IN)
+C               QXP(K) = QXP(K) + PHI_CORNER(KK,K,pa)*QX(KK,EL_IN,IRK+1)
+C               QYP(K) = QYP(K) + PHI_CORNER(KK,K,pa)*QY(KK,EL_IN,IRK+1)
+C            ENDDO
+C            QP(K) = SQRT(QXP(K)*QXP(K)+QYP(K)*QYP(K))
+C            
+C         ENDDO
+C
 C.....Retrieve the end nodes of the edge and the other node
-
-         NOD1 = MOD(LED+0,3)+1
-         NOD2 = MOD(LED+1,3)+1
-         NOD3 = MOD(LED+2,3)+1
-         
+C
+C         NOD1 = MOD(LED+0,3)+1
+C         NOD2 = MOD(LED+1,3)+1
+C         NOD3 = MOD(LED+2,3)+1
+C         
 C.....Modify QX and QY at the end nodes
 
 C.......Node 1
 
-         IF(ABS( QXP(NOD1)*TX + QYP(NOD1)*TY ).GT.(10.D0**(-20.D0))) THEN
-            DIR = ( QXP(NOD1)*TX + QYP(NOD1)*TY )
-     &           / ABS( QXP(NOD1)*TX + QYP(NOD1)*TY )
-
-#if 1
-            QXPN(NOD1) = DIR*QP(NOD1)*TX
-            QYPN(NOD1) = DIR*QP(NOD1)*TY
-#else
-            QXPN(NOD1) = (QXP(NOD1)*TX + QYP(NOD1)*TY)*TX
-            QYPN(NOD1) = (QXP(NOD1)*TX + QYP(NOD1)*TY)*TY
-#endif
-         ELSE
-            QXPN(NOD1) = 0.D0
-            QYPN(NOD1) = 0.D0
-         ENDIF
-
+C         IF(ABS( QXP(NOD1)*TX + QYP(NOD1)*TY ).GT.(10.D0**(-20.D0)))THEN
+C            DIR = ( QXP(NOD1)*TX + QYP(NOD1)*TY )
+C     &           / ABS( QXP(NOD1)*TX + QYP(NOD1)*TY )
+C
+C#if 1
+C            QXPN(NOD1) = DIR*QP(NOD1)*TX
+C            QYPN(NOD1) = DIR*QP(NOD1)*TY
+C#else
+C            QXPN(NOD1) = (QXP(NOD1)*TX + QYP(NOD1)*TY)*TX
+C            QYPN(NOD1) = (QXP(NOD1)*TX + QYP(NOD1)*TY)*TY
+C#endif
+C         ELSE
+C            QXPN(NOD1) = 0.D0
+C            QYPN(NOD1) = 0.D0
+C         ENDIF
+C
 C.......Node 2
-
-         IF(ABS( QXP(NOD2)*TX + QYP(NOD2)*TY ).GT.(10.D0**(-20.D0))) THEN
-            DIR = ( QXP(NOD2)*TX + QYP(NOD2)*TY )
-     &           / ABS( QXP(NOD2)*TX + QYP(NOD2)*TY )
-
-#if 1
-            QXPN(NOD2) = DIR*QP(NOD2)*TX
-            QYPN(NOD2) = DIR*QP(NOD2)*TY
-#else
-            QXPN(NOD2) = (QXP(NOD2)*TX + QYP(NOD2)*TY)*TX
-            QYPN(NOD2) = (QXP(NOD2)*TX + QYP(NOD2)*TY)*TY
-#endif
-         ELSE
-            QXPN(NOD2) = 0.D0
-            QYPN(NOD2) = 0.D0
-         ENDIF
-
+C
+C         IF(ABS( QXP(NOD2)*TX + QYP(NOD2)*TY ).GT.(10.D0**(-20.D0)))THEN
+C            DIR = ( QXP(NOD2)*TX + QYP(NOD2)*TY )
+C     &           / ABS( QXP(NOD2)*TX + QYP(NOD2)*TY )
+C
+C#if 1
+C            QXPN(NOD2) = DIR*QP(NOD2)*TX
+C            QYPN(NOD2) = DIR*QP(NOD2)*TY
+C#else
+C            QXPN(NOD2) = (QXP(NOD2)*TX + QYP(NOD2)*TY)*TX
+C            QYPN(NOD2) = (QXP(NOD2)*TX + QYP(NOD2)*TY)*TY
+C#endif
+C         ELSE
+C            QXPN(NOD2) = 0.D0
+C            QYPN(NOD2) = 0.D0
+C         ENDIF
+C
 C.......Node 3
 
-         QXPN(NOD3) = QXP(NOD3)
-         QYPN(NOD3) = QYP(NOD3)
+C         QXPN(NOD3) = QXP(NOD3)
+C         QYPN(NOD3) = QYP(NOD3)
 
 C.....Inverse the modified QX and QY
 
-         QX(1,EL_IN,IRK+1) = 1.D0/3.D0*(QXPN(1)+QXPN(2)+QXPN(3))
-         QX(2,EL_IN,IRK+1) =-1.D0/6.D0*(QXPN(1)+QXPN(2))+1.D0/3.D0*QXPN(3)
-         QX(3,EL_IN,IRK+1) =-0.5D0*QXPN(1)+0.5D0*QXPN(2)
-
-         QY(1,EL_IN,IRK+1) = 1.D0/3.D0*(QYPN(1)+QYPN(2)+QYPN(3))
-         QY(2,EL_IN,IRK+1) =-1.D0/6.D0*(QYPN(1)+QYPN(2))+1.D0/3.D0*QYPN(3)
-         QY(3,EL_IN,IRK+1) =-0.5D0*QYPN(1)+0.5D0*QYPN(2)
-
- 1000 CONTINUE
-      RETURN
-      END SUBROUTINE
+C         QX(1,EL_IN,IRK+1) = 1.D0/3.D0*(QXPN(1)+QXPN(2)+QXPN(3))
+C       QX(2,EL_IN,IRK+1) =-1.D0/6.D0*(QXPN(1)+QXPN(2))+1.D0/3.D0*QXPN(3)
+C         QX(3,EL_IN,IRK+1) =-0.5D0*QXPN(1)+0.5D0*QXPN(2)
+C
+C         QY(1,EL_IN,IRK+1) = 1.D0/3.D0*(QYPN(1)+QYPN(2)+QYPN(3))
+C       QY(2,EL_IN,IRK+1) =-1.D0/6.D0*(QYPN(1)+QYPN(2))+1.D0/3.D0*QYPN(3)
+C         QY(3,EL_IN,IRK+1) =-0.5D0*QYPN(1)+0.5D0*QYPN(2)
+C
+C 1000 CONTINUE
+C      RETURN
+C      END SUBROUTINE

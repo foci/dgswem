@@ -17,7 +17,8 @@ C.....Use appropriate modules
 
 C.....Declare local variables
 
-      INTEGER L,GED,LED_IN,LED_EX,II,IT,GP_IN(NEGP(ph)),GP_EX(NEGP(ph)),I,K,JJ
+      INTEGER L,GED,LED_IN,LED_EX,II,IT,GP_IN(NEGP(ph)),
+     & GP_EX(NEGP(ph)),I,K,JJ
       REAL(SZ) DEN
       
 C.....Set the inflow integrals and length to zero
@@ -98,7 +99,7 @@ C.....Sum of the length of the outflow boundaries for the given element
             ZE_EX = 0.D0
 
             DO K = 1,DOF
-              ZE_IN = ZE_IN + ZE(K,L,IRK+1)*PHI_EDGE(K,GP_IN(I),LED_IN,pa)
+              ZE_IN = ZE_IN+ZE(K,L,IRK+1)*PHI_EDGE(K,GP_IN(I),LED_IN,pa)
             ENDDO
 
 C.....If the edge is an open ocean edge compute the specified elevation
@@ -136,14 +137,14 @@ C.....If the edge is a land edge compute the exterior value
 !            ELSE
               DO K = 1,DOFS(L)
                 ZE_EX = ZE_EX
-     &                   + ZE(K,EL_EX,IRK+1)*PHI_EDGE(K,GP_EX(I),LED_EX,pa)
+     &                + ZE(K,EL_EX,IRK+1)*PHI_EDGE(K,GP_EX(I),LED_EX,pa)
               ENDDO
 !            ENDIF
             
 C.....Sum the edge integral
 
             INFLOW_ZE = INFLOW_ZE +
-     &                       XLEN(GED)/2.D0*(ZE_IN-ZE_EX)*WEGP(GP_IN(I),pa)
+     &                    XLEN(GED)/2.D0*(ZE_IN-ZE_EX)*WEGP(GP_IN(I),pa)
             
 C.....Store the minimum edge length of the given element
 

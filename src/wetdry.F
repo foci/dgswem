@@ -42,10 +42,10 @@ C.....Declare local variables
       REAL(SZ) ZE_VOL
 
       REAL(SZ) DH_HAT(3)
-      REAL(SZ) HT_HAT(NCHECK(ph)), HT_MODE(42)
-      REAL(SZ) HT_NODE(NCHECK(ph))
+      REAL(SZ) HT_HAT(NCHECK(ph,1)), HT_MODE(42)
+      REAL(SZ) HT_NODE(NCHECK(ph,1))
       REAL(SZ) QX_HAT(3), QX_NODE(3), QY_HAT(3), QY_NODE(3)
-      REAL(SZ) ZE_HAT(NCHECK(ph),ph), ZE_NODE(NCHECK(ph),ph)
+      REAL(SZ) ZE_HAT(NCHECK(ph,1),ph), ZE_NODE(NCHECK(ph,1),ph)
 
       REAL(SZ), PARAMETER:: HUGEVEL = 1.D+5  
       REAL(SZ):: HS0, U_HAT(3), V_HAT(3)
@@ -80,11 +80,12 @@ C.......and count number of dry nodes
          NDRYNODE = 0
          HT_MIN = HUGE
          HT_MAX = ZERO
-         DO I = 1,NCHECK(pa)
+         DO I = 1,NCHECK(pa,1)
             !
             ZE_NODE(I,pa) = ZE(1,J,IRK+1)
             DO K = 2,DOFS(J)
-               ZE_NODE(I,pa) = ZE_NODE(I,pa) + PHI_CHECK(K,I,pa)*ZE(K,J,IRK+1)
+               ZE_NODE(I,pa) = ZE_NODE(I,pa) +
+     & PHI_CHECK(K,I,pa,1)*ZE(K,J,IRK+1)
                                 ! print*,phi_check(k,i,pa),k,i,pa
             ENDDO
             HT_NODE(I) = ZE_NODE(I,pa) + DP_NODE(I,J,pa)
@@ -94,7 +95,8 @@ C.......and count number of dry nodes
             do l=1,layers !notice we are summing over layers at nodes
                DP_NODE(I,J,pa) = bed(1,J,IRK+1,l)
                DO K = 2,DOFS(J)
-                  DP_NODE(I,J,pa) = DP_NODE(I,J,pa) + PHI_CHECK(K,I,pa)*bed(K,J,IRK+1,l)
+                  DP_NODE(I,J,pa) = DP_NODE(I,J,pa) +
+     & PHI_CHECK(K,I,pa,1)*bed(K,J,IRK+1,l)
                ENDDO
             enddo
 #endif
@@ -117,7 +119,7 @@ C.......Set "average" bathymetry based on p
          
          !Notice that the average is the average over the sum of the layers
          !DP_AVG = 1.D0/ncheck(pa) * (sum(DP_NODE(:,J,pa)))        
-         DP_AVG = C13*(DP_NODE(1,J,pa) + DP_NODE(2,J,pa) + DP_NODE(3,J,pa))
+      DP_AVG = C13*(DP_NODE(1,J,pa) + DP_NODE(2,J,pa) + DP_NODE(3,J,pa))
 
 #ifdef P0
          IF (pdg_el(J).EQ.0) THEN
@@ -163,7 +165,7 @@ C-----------------------------------------------------------------------
 C.......Case 2: All nodes are dry
 C-----------------------------------------------------------------------
 
-         ELSEIF (NDRYNODE.EQ.NCHECK(pa)) THEN
+         ELSEIF (NDRYNODE.EQ.NCHECK(pa,1)) THEN
             
   
 C.........Set surface elevation parallel to bathymetry such that total
@@ -175,7 +177,7 @@ C.........water depth at all points = average water depth
             ELSE
                ZE_VOL = 0.D0
                DO K = 1,DOFS(J)
-                  ZE_VOL = ZE_VOL + ZE(K,J,IRK+1)*PHI_INTEGRATED(K,pa)
+                  ZE_VOL = ZE_VOL + ZE(K,J,IRK+1)*PHI_INTEGRATED(K,pa,1)
                ENDDO
                HT_VOL = DP_VOL(J,pa) + 0.25D0*AREAS(J)*ZE_VOL
                HT_AVG = HT_VOL/(0.5D0*AREAS(J))
@@ -246,7 +248,7 @@ C.........Set averages based on p
             ELSE
                ZE_VOL = 0.D0
                DO K = 1,DOFS(J)
-                  ZE_VOL = ZE_VOL + ZE(K,J,IRK+1)*PHI_INTEGRATED(K,pa)
+                  ZE_VOL = ZE_VOL + ZE(K,J,IRK+1)*PHI_INTEGRATED(K,pa,1)
                ENDDO
                HT_VOL = DP_VOL(J,pa) + 0.25D0*AREAS(J)*ZE_VOL
                HT_AVG = HT_VOL/(0.5D0*AREAS(J))
@@ -296,9 +298,9 @@ C...........water depth and the same linear components
                   HT_MODE(3) = -(ZE(3,J,1) + HB(3,J,1))
                   HT_NODE = 0.D0
                   DO K = 1,3
-                     HT_NODE(1) = HT_NODE(1) + PHI_CORNER(K,1,pa)*HT_MODE(K)
-                     HT_NODE(2) = HT_NODE(2) + PHI_CORNER(K,2,pa)*HT_MODE(K)
-                     HT_NODE(3) = HT_NODE(3) + PHI_CORNER(K,3,pa)*HT_MODE(K)
+                     HT_NODE(1)=HT_NODE(1)+PHI_CORNER(K,1,pa,1)*HT_MODE(K)
+                     HT_NODE(2)=HT_NODE(2)+PHI_CORNER(K,2,pa,1)*HT_MODE(K)
+                     HT_NODE(3)=HT_NODE(3)+PHI_CORNER(K,3,pa,1)*HT_MODE(K)
                   ENDDO
 
                ENDIF
@@ -320,10 +322,10 @@ C...........Reorder the nodes=vertices from shallowest to deepest
 
 C...........Compute the factors needed for nodal/vertex ajustment
 
-               DH_HAT(L2H(1)) = MAX(H0, HT_NODE(L2H(1))) - HT_NODE(L2H(1))
-               DH_HAT(L2H(2)) = MAX(H0, HT_NODE(L2H(2))-0.5*DH_HAT(L2H(1)))
+            DH_HAT(L2H(1)) = MAX(H0, HT_NODE(L2H(1))) - HT_NODE(L2H(1))
+            DH_HAT(L2H(2)) = MAX(H0, HT_NODE(L2H(2))-0.5*DH_HAT(L2H(1)))
      &              - HT_NODE(L2H(2))
-               DH_HAT(L2H(3)) = - DH_HAT(L2H(1)) - DH_HAT(L2H(2))
+            DH_HAT(L2H(3)) = - DH_HAT(L2H(1)) - DH_HAT(L2H(2))
 
 C...........Adjust nodal/vertex heights, find location of maximum, sum nodal/vertex
 C...........fluxes on dry nodes, and count new # of dry nodes/vertices
@@ -341,8 +343,10 @@ C...........fluxes on dry nodes, and count new # of dry nodes/vertices
                      HT_MAX = HT_HAT(I)
                   ENDIF
                   DO K = 2,DOFS(J) !NOTE: We look at integrated value AT the vertex!
-                     QX_NODE(I) = QX_NODE(I) + PHI_CORNER(K,I,pa)*QX(K,J,IRK+1)
-                     QY_NODE(I) = QY_NODE(I) + PHI_CORNER(K,I,pa)*QY(K,J,IRK+1)
+                     QX_NODE(I) = QX_NODE(I) +
+     & PHI_CORNER(K,I,pa,1)*QX(K,J,IRK+1)
+                     QY_NODE(I) = QY_NODE(I) +
+     & PHI_CORNER(K,I,pa,1)*QY(K,J,IRK+1)
                   ENDDO
                   IF (HT_HAT(I).LE.(H0+1.D-10)) THEN
                      NDRYNODE = NDRYNODE + 1
@@ -427,15 +431,15 @@ C...........Else re-distribute nodal/vertex fluxes
 
 C.............Compute new linear modal dofs for x-direction flux
 
-                  QX(1,J,IRK+1) =  C13*(QX_HAT(1) + QX_HAT(2) + QX_HAT(3))
-                  QX(2,J,IRK+1) = -C16*(QX_HAT(1) + QX_HAT(2))+C13*QX_HAT(3)
-                  QX(3,J,IRK+1) = -0.5D0*QX_HAT(1) + 0.5D0*QX_HAT(2)
+              QX(1,J,IRK+1) =  C13*(QX_HAT(1) + QX_HAT(2) + QX_HAT(3))
+              QX(2,J,IRK+1) = -C16*(QX_HAT(1) + QX_HAT(2))+C13*QX_HAT(3)
+              QX(3,J,IRK+1) = -0.5D0*QX_HAT(1) + 0.5D0*QX_HAT(2)
 
 C.............Compute new linear modal dofs for y-direction flux
 
-                  QY(1,J,IRK+1) =  C13*(QY_HAT(1) + QY_HAT(2) + QY_HAT(3))
-                  QY(2,J,IRK+1) = -C16*(QY_HAT(1) + QY_HAT(2))+C13*QY_HAT(3)
-                  QY(3,J,IRK+1) = -0.5D0*QY_HAT(1) + 0.5D0*QY_HAT(2)
+              QY(1,J,IRK+1) =  C13*(QY_HAT(1) + QY_HAT(2) + QY_HAT(3))
+              QY(2,J,IRK+1) = -C16*(QY_HAT(1) + QY_HAT(2))+C13*QY_HAT(3)
+              QY(3,J,IRK+1) = -0.5D0*QY_HAT(1) + 0.5D0*QY_HAT(2)
                ENDIF
 
 C...........Compute new nodal surface elevations
@@ -444,7 +448,8 @@ C...........Compute new nodal surface elevations
 
 C...........Compute the new linear modal dofs for the surface elevation
 
-               ZE(2,J,IRK+1) = -C16*(ZE_HAT(1,pa) + ZE_HAT(2,pa)) + C13*ZE_HAT(3,pa)
+               ZE(2,J,IRK+1) = -C16*(ZE_HAT(1,pa) +
+     & ZE_HAT(2,pa)) + C13*ZE_HAT(3,pa)
                ZE(3,J,IRK+1) = -0.5D0*ZE_HAT(1,pa) + 0.5D0*ZE_HAT(2,pa)
 
             ENDIF
@@ -458,7 +463,7 @@ C.........If applicable zero out higher dofs
                QX(i,J,IRK+1) = 0.D0
                QY(i,J,IRK+1) = 0.D0
 
-#ifdef SED_LAY !Do we want to zero this out?
+#ifdef SED_LAY
                do l=1,layers
                   bed(i,J,irk+1,l) = 0.D0
                enddo

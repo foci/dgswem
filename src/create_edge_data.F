@@ -46,15 +46,15 @@ C.....Declare local variables
 Csb--
       INTEGER JEL, JJEL,ED_ID,L,GED,I,J,K
 C--
-      INTEGER I1, I2, I3, II, LED(2,3)
-      INTEGER NED1, NED2, NED3, NED4, NED5, NED6
-      INTEGER NERR, NN1, NN2
-      INTEGER IC1, IC2, IC3
+      INTEGER I1, I2, I3, II, LED(2,MXEDGS)
+      INTEGER NED1, NED2, NED3, NED4, NED5, NED6, NED7, NED8
+      INTEGER NERR, NN1, NN2, NI(MXEDGS)
+      INTEGER IC1, IC2, IC3, IC4
       INTEGER IERROR
 
 C.....Compute maximum number of edges
 
-      MNED = 3*MNE
+      MNED = MXEDGS*MNE
 
 C.....Allocate the edge data arrays
 
@@ -62,13 +62,11 @@ C.....Allocate the edge data arrays
 
 C.....Generate the edge connectivity
 
+C.....Initialize EDFLG over edges of each element
       DO J = 1,MNE
-        EDFLG(1,J) = 0
-        EDFLG(2,J) = 0
-        EDFLG(3,J) = 0
-        NELED(1,J) = 0
-        NELED(2,J) = 0
-        NELED(3,J) = 0
+         DO I = 1,MXEDGS
+            EDFLG(I,J) = 0
+         ENDDO
       ENDDO
 
 
@@ -82,62 +80,63 @@ C.....Generate the edge connectivity
       ENDIF
 
       DO 30 IEL = 1,NE
-        N1 = NM(IEL,1)
-        N2 = NM(IEL,2)
-        N3 = NM(IEL,3)
-        LED(1,1) = N2
-        LED(2,1) = N3
-        LED(1,2) = N3
-        LED(2,2) = N1
-        LED(1,3) = N1
-        LED(2,3) = N2
-
-        DO 10 IED = 1,3
-          IF(EDFLG(IED,IEL).EQ.1) GOTO 10
-           
-          I1 = LED(1,IED)
-          I2 = LED(2,IED)
-
-          NEDGES = NEDGES + 1
-          ED_ID = NEDGES
-          NELED(IED,IEL) = ED_ID
-          NEDNO(1,ED_ID) = I1
-          NEDNO(2,ED_ID) = I2
-          NEDEL(1,ED_ID) = IEL
-          EDFLG(IED,IEL) = 1
-
-          DO 15 JJEL = 1,NNDEL(I1)
-            JEL = NDEL(I1,JJEL)
-            IF(JEL.EQ.IEL) GOTO 15
-            DO JED = 1,3
-              J1 = NM(JEL,MOD(JED+0,3)+1)
-              J2 = NM(JEL,MOD(JED+1,3)+1)
-              IF ( ((J1.EQ.I1).AND.(J2.EQ.I2)).OR.
-     &             ((J1.EQ.I2).AND.(J2.EQ.I1)) ) THEN
-
-                IF(EDFLG(JED,JEL).EQ.1) THEN
-                  PRINT *,'POSSIBLE DUPLICATE ELEMENT'
-                  PRINT *,'MYPROC=',MYPROC
-                  PRINT *,'EL=',JEL,', J1=',J1,', J2=',J2
-                  PRINT *,'  (CREATE_EDGE_DATA.F)'
-                  PRINT *,'EXECUTION WILL BE TERMINATED'
-                  PRINT *,'! CHECK THE GRID CAREFULLY !'
-                  PRINT*,'--------------------------------------'
-                  STOP
-                ENDIF
-           
-                NELED(JED,JEL) = ED_ID
-                NEDEL(2,ED_ID) = JEL
-                EDFLG(JED,JEL) = 1
-                GOTO 10
-              ENDIF
-            ENDDO
- 15       CONTINUE
- 10     CONTINUE
+         DO J = 1,EDN(IEL)
+           NI(J) = NM(IEL,J)
+         ENDDO
+         DO J = 1,EDN(IEL)
+           JJ1 = mod(J,EDN(IEL))+1
+           JJ2 = mod(J+1,EDN(IEL))+1
+           LED(1,J) = NI(JJ1)
+           LED(2,J) = NI(JJ2)
+         ENDDO
+         
+         DO 10 IED = 1,EDN(IEL)
+           IF(EDFLG(IED,IEL).EQ.1) GOTO 10
+            
+           I1 = LED(1,IED)
+           I2 = LED(2,IED)
+         
+           NEDGES = NEDGES + 1
+           ED_ID = NEDGES
+           NELED(IED,IEL) = ED_ID
+           NEDNO(1,ED_ID) = I1
+           NEDNO(2,ED_ID) = I2
+           NEDEL(1,ED_ID) = IEL
+           EDFLG(IED,IEL) = 1
+         
+           DO 15 JJEL = 1,NNDEL(I1)
+             JEL = NDEL(I1,JJEL)
+             IF(JEL.EQ.IEL) GOTO 15
+             DO JED = 1,EDN(JEL)
+               J1 = NM(JEL,MOD(JED+0,EDN(JEL))+1)
+               J2 = NM(JEL,MOD(JED+1,EDN(JEL))+1)
+               IF ( ((J1.EQ.I1).AND.(J2.EQ.I2)).OR.
+     &                                ((J1.EQ.I2).AND.(J2.EQ.I1)) ) THEN
+         
+                 IF(EDFLG(JED,JEL).EQ.1) THEN
+                   PRINT *,'POSSIBLE DUPLICATE ELEMENT'
+                   PRINT *,'MYPROC=',MYPROC
+                   PRINT *,'EL=',JEL,', J1=',J1,', J2=',J2
+                   PRINT *,'  (CREATE_EDGE_DATA.F)'
+                   PRINT *,'EXECUTION WILL BE TERMINATED'
+                   PRINT *,'! CHECK THE GRID CAREFULLY !'
+                   PRINT*,'--------------------------------------'
+                   STOP
+                 ENDIF
+            
+                 NELED(JED,JEL) = ED_ID
+                 NEDEL(2,ED_ID) = JEL
+                 EDFLG(JED,JEL) = 1
+                 GOTO 10
+               ENDIF
+             ENDDO
+ 15        CONTINUE
+ 10      CONTINUE
  30   CONTINUE
+ 
 
       DEALLOCATE(EDFLG)
-
+      
       IF(MYPROC.EQ.0) THEN
          PRINT *,'DONE'
          PRINT *,''
@@ -152,9 +151,13 @@ C.....Print out the edge-to-node and edge-to-element connectivity
       ENDDO
         
 C.....Print out the element-to-edge connectivity
-
       DO IEL = 1,NE
-        WRITE(17,*)IEL, NELED(1,IEL), NELED(2,IEL), NELED(3,IEL)
+        IF (EDN(IEL) .EQ. 3) THEN
+          WRITE(17,*)IEL, NELED(1,IEL), NELED(2,IEL), NELED(3,IEL)
+        ELSEIF (EDN(IEL) .EQ. 4) THEN
+          WRITE(17,*)IEL, NELED(1,IEL), NELED(2,IEL), NELED(3,IEL), 
+     &                                                      NELED(4,IEL)
+        ENDIF
       ENDDO
 
 C.....An index to keep track of the edges
@@ -354,11 +357,13 @@ C.....Determine the different boundary types
                 ENDIF
                 
                 IF ( (SEGTYPE(K).EQ.4 ).OR.(SEGTYPE(K).EQ.14).OR.
-     &               (SEGTYPE(K).EQ.24) ) THEN
+     &               (SEGTYPE(K).EQ.24).OR.(SEGTYPE(K).EQ.5 ).OR.
+     &               (SEGTYPE(K).EQ.15).OR.(SEGTYPE(K).EQ.25) )THEN
                   NIBSEG = NIBSEG + 1
                   NIBEDS = NIBEDS + 1
                   NIBEDN(NIBEDS) = JED
                   NIBSEGN(1,NIBSEG) = JED
+                  NIBSEGN(3,NIBSEG) = SEGTYPE(K)
 
 C.....Find the edge on the opposite side of the barrier
 
@@ -420,25 +425,19 @@ C--
 C.....Check the order of the nodes assigned to an edge - important in
 C.....the calculation of the unit normal
 
+
       DO I = 1,NEDGES
         N1 = NEDNO(1,I)
         N2 = NEDNO(2,I)
         IEL = NEDEL(1,I)
-        IF((N1.EQ.NM(IEL,2)).AND.(N2.EQ.NM(IEL,1))) THEN
-          WRITE(6,*)'THE ORDER OF NODES ASSIGNED IS WRONG FOR EDGE',I
-          WRITE(16,*)'THE ORDER OF NODES ASSIGNED IS WRONG FOR EDGE',I
-          STOP
-        ENDIF
-        IF((N1.EQ.NM(IEL,3)).AND.(N2.EQ.NM(IEL,2)))THEN
-          WRITE(6,*)'THE ORDER OF NODES ASSIGNED IS WRONG FOR EDGE',I
-          WRITE(16,*)'THE ORDER OF NODES ASSIGNED IS WRONG FOR EDGE',I
-          STOP
-        ENDIF
-        IF((N1.EQ.NM(IEL,1)).AND.(N2.EQ.NM(IEL,3)))THEN
-          WRITE(6,*)'THE ORDER OF NODES ASSIGNED IS WRONG FOR EDGE',I
-          WRITE(16,*)'THE ORDER OF NODES ASSIGNED IS WRONG FOR EDGE',I
-          STOP
-        ENDIF
+        DO J = 1,EDN(IEL)
+          JJ1 = mod(J,EDN(IEL))+1
+          IF((N1.EQ.NM(IEL,JJ1)).AND.(N2.EQ.NM(IEL,J))) THEN
+            WRITE(6,*)'THE ORDER OF NODES ASSIGNED IS WRONG FOR EDGE',I
+            WRITE(16,*)'THE ORDER OF NODES ASSIGNED IS WRONG FOR EDGE',I
+            STOP
+          ENDIF
+        ENDDO
       ENDDO
       
 C.....Check for missing edges
@@ -575,21 +574,20 @@ C.....Print out radiation edges info.
         ENDDO
       ENDIF
       
-C.....Construct global edge to local edge (1,2, or 3) table
-
+C....Construct global edge to local edge (1,2, or 3) table for triangles
+C....Construct global edge to local edge (1,2,3, or 4) table for quads
+ 
       NEDSD(:,:) = 0.D0
       DO I = 1,MNED
         DO K = 1,2
           IF (NEDEL(K,I).NE.0) THEN
-            N1 = NELED(1,NEDEL(K,I))
-            N2 = NELED(2,NEDEL(K,I))
-            N3 = NELED(3,NEDEL(K,I))
-            IF (N1.EQ.I) NEDSD(K,I) = 1
-            IF (N2.EQ.I) NEDSD(K,I) = 2
-            IF (N3.EQ.I) NEDSD(K,I) = 3
+            DO J = 1,EDN(NEDEL(K,I))
+              NI(J) = NELED(J,NEDEL(K,I))
+              IF (NI(J).EQ.I) NEDSD(K,I) = J
+            ENDDO
           ENDIF
         ENDDO
       ENDDO
-
+      
       RETURN
       END SUBROUTINE CREATE_EDGE_DATA

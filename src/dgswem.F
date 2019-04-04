@@ -60,7 +60,6 @@ c     nd
 #endif         
 
       
-      
 C...  
 C...  ******************* START PROGRAM SETUP SECTION ****************************
 C...  
@@ -83,17 +82,34 @@ C...
       END DO
 
       DO IE=1,NE
-         NM1=NM(IE,1)
-         NM2=NM(IE,2)
-         NM3=NM(IE,3)
-         NCELE=NODECODE(NM1)*NODECODE(NM2)*NODECODE(NM3)
-         MJU(NM1)=MJU(NM1)+NCELE
-         MJU(NM2)=MJU(NM2)+NCELE
-         MJU(NM3)=MJU(NM3)+NCELE
-         NODELE(NM1)=NODELE(NM1)+1
-         NODELE(NM2)=NODELE(NM2)+1
-         NODELE(NM3)=NODELE(NM3)+1
-      END DO
+         IF (EDN(IE) .EQ. 3) THEN
+            NM1=NM(IE,1)
+            NM2=NM(IE,2)
+            NM3=NM(IE,3)
+            NCELE=NODECODE(NM1)*NODECODE(NM2)*NODECODE(NM3)
+            MJU(NM1)=MJU(NM1)+NCELE
+            MJU(NM2)=MJU(NM2)+NCELE
+            MJU(NM3)=MJU(NM3)+NCELE
+            NODELE(NM1)=NODELE(NM1)+1
+            NODELE(NM2)=NODELE(NM2)+1
+            NODELE(NM3)=NODELE(NM3)+1
+         ELSEIF (EDN(IE) .EQ. 4) THEN
+            NM1=NM(IE,1)
+            NM2=NM(IE,2)
+            NM3=NM(IE,3)
+            NM4=NM(IE,4)
+            NCELE=NODECODE(NM1)*NODECODE(NM2)*NODECODE(NM3)
+     &                                                    *NODECODE(NM4)
+            MJU(NM1)=MJU(NM1)+NCELE
+            MJU(NM2)=MJU(NM2)+NCELE
+            MJU(NM3)=MJU(NM3)+NCELE
+            MJU(NM4)=MJU(NM4)+NCELE
+            NODELE(NM1)=NODELE(NM1)+1
+            NODELE(NM2)=NODELE(NM2)+1
+            NODELE(NM3)=NODELE(NM3)+1
+            NODELE(NM4)=NODELE(NM4)+1
+         ENDIF
+      ENDDO
 
       DO I=1,NP
          IF(MJU(I).EQ.0) MJU(I)=1
@@ -174,7 +190,6 @@ c     write(200+myproc,*) 'back from prep_dg'
 
       CALL PREP_DG()
       CALL WRITE_RESULTS(0,.FALSE.)
-
                                !cnd...for tecplot output
 !Casey 120813: Begin the OUT_TEC conditional.
 #ifdef OUT_TEC
@@ -204,12 +219,12 @@ c     write(200+myproc,*) 'back from prep_dg'
 
       if (ModetoNode.eq.0) then
          write(777,*) 
-     $        'VARIABLES = "x", "y", "b", "ze", "H", "u", "v", "|v|","|w|","p","iota","iota2","sum","diff"'
+C     $        'VARIABLES = "x", "y", "b", "ze", "H", "u", "v", "|v|","|w|","p","iota","iota2","sum","diff"'
          write(777,*) 'ZONE ZONETYPE=FETRIANGLE ',
      $        'NODES=', np, 
      $        ' ELEMENTS=', ne, 
 !     $     ' DATAPACKING=POINT ','SOLUTIONTIME=',time_a
-     $        ' DATAPACKING=BLOCK ',' VARLOCATION=([3,4,5,6,7,8,10,11,12,13,14]=CELLCENTERED) ',
+C     $        ' DATAPACKING=BLOCK ',' VARLOCATION=([3,4,5,6,7,8,10,11,12,13,14]=CELLCENTERED) ',
      $        'SOLUTIONTIME=',time_a 
 
 c$$$  write(777,7777) x(i), y(i),  
@@ -225,22 +240,22 @@ c$$$  enddo
          do i=1,np
             write(777,7777)  y(i)
          enddo
-         do i=1,ne
-            write(777,7777)  dpe(i)
+         do i=1,np
+            write(777,7777)  dp(i)
          enddo
-         do i=1,ne 
+         do i=1,np
             write(777,7777)  eta2(i)
          enddo
-         do i=1,ne 
-            write(777,7777)  eta2(i)+dpe(i)
+         do i=1,np 
+            write(777,7777)  eta2(i)+dp(i)
          enddo
-         do i=1,ne 
+         do i=1,np 
             write(777,7777)  uu2(i)
          enddo
-         do i=1,ne 
+         do i=1,np 
             write(777,7777)  vv2(i)
          enddo
-         do i=1,ne 
+         do i=1,np 
             write(777,7777)  sqrt(uu2(i)**2+vv2(i)**2)
          enddo
          do i=1,np 
@@ -249,16 +264,16 @@ c$$$  enddo
          do i=1,ne 
             write(777,7777)  DBLE(pdg_el(i))
          enddo
-         do i=1,ne 
+         do i=1,np 
             write(777,7777)  tracer(i)
          enddo
-         do i=1,ne 
+         do i=1,np 
             write(777,7777)  tracer2(i)
          enddo
-         do i=1,ne 
+         do i=1,np 
             write(777,7777)  abs(tracer(i)+tracer2(i))
          enddo
-         do i=1,ne 
+         do i=1,np 
             write(777,7777)  abs(tracer(i)-tracer2(i))    
          enddo
       else
@@ -272,12 +287,12 @@ c$$$  enddo
             if (ics.eq.2) then
                write(777,7777) slam(i)/deg2rad, sfea(i)/deg2rad,  
      $              dp(i), eta2(i), eta2(i)+dp(i),uu2(i),vv2(i),
-     $              sqrt(uu2(i)**2+vv2(i)**2),sqrt(wsx2(i)**2+wsy2(i)**2),
+     $            sqrt(uu2(i)**2+vv2(i)**2),sqrt(wsx2(i)**2+wsy2(i)**2),
      $              myproc
             else
                write(777,7777) x(i), y(i),
      $              dp(i), eta2(i), eta2(i)+dp(i),uu2(i),vv2(i),
-     $              sqrt(uu2(i)**2+vv2(i)**2),sqrt(wsx2(i)**2+wsy2(i)**2),
+     $            sqrt(uu2(i)**2+vv2(i)**2),sqrt(wsx2(i)**2+wsy2(i)**2),
      $              myproc
             endif
          enddo
@@ -286,9 +301,12 @@ c$$$  enddo
 
  7777    format(9f20.8,i10)
          do i=1,ne
-            write(777,"(3i12)") nm(i,1), nm(i,2), nm(i,3)
+            if (EDN(i) .EQ. 3) then
+               write(777,"(3i12)") nm(i,1), nm(i,2), nm(i,3)
+            elseif (EDN(i) .EQ. 4) then
+               write(777,"(3i12)") nm(i,1), nm(i,2), nm(i,3), nm(i,4)
+            endif
          enddo
-
 !Casey 120813: End the OUT_TEC conditional.
 #endif
 
@@ -403,9 +421,9 @@ C     CPU_TIME = TARRAY(1) + TARRAY(2)
 C     PRINT*,'CPU_TIME = ',CPU_TIME
 #endif
 
-      CALL ETIME(TARRAY)
-      CPU_TIME = TARRAY(1) + TARRAY(2)
-      PRINT*,'CPU_TIME = ',CPU_TIME
+c      CALL ETIME(TARRAY)
+c      CPU_TIME = TARRAY(1) + TARRAY(2)
+c      PRINT*,'CPU_TIME = ',CPU_TIME
       STOP
       END
 
@@ -432,7 +450,7 @@ C     *
 C     VARIABLE DEFINITIONS:                                                 *
 C     NE - NUMBER OF ELEMENTS                                               *
 C     NP - NUMBER OF NODES                                                  *
-C     NM(MNE,3) - NODE NUMBERS ASSOCIATED WITH EACH ELEMENT                 *
+C     NM(MNE,4) - NODE NUMBERS ASSOCIATED WITH EACH ELEMENT                 *
 C     NNEIGH(MNP) NUMBER OF NEIGHBORS FOR EACH NODE                         *
 C     NNEIGH_ELEM(MNP) NUMBER OF NEIGHBORS BY ELEMENT                       *
 C     NEIGH(MNP,NEIMAX) 2D ARRAY OF NEIGHBORS FOR EACH NODE                 *
@@ -442,12 +460,12 @@ C     *
 C******************************************************************************
 C     
       SUBROUTINE NEIGHB(NE,NP,NM,NNEIGH,NEIGH,NEIMIN,NEIMAX,
-     &     X,Y,NSCREEN,NNEIGH_ELEM,NEIGH_ELEM)
+     &     X,Y,NSCREEN,NNEIGH_ELEM,NEIGH_ELEM,EDN)
       USE SIZES
 C     
-      INTEGER NP,NE,NEIMIN,NEIMAX,NSCREEN,N,NN,EN1,EN2,EN3,I,J
+      INTEGER NP,NE,NEIMIN,NEIMAX,NSCREEN,N,NN,EN1,EN2,EN3,EN4,I,J
       INTEGER :: NEIGH(MNP,MNEI),NNEIGH(MNP),NNEIGH_ELEM(MNP)
-      INTEGER NM(MNE,3),NEIGH_ELEM(MNP,MNEI)
+      INTEGER NM(MNE,4),NEIGH_ELEM(MNP,MNEI),EDN(MNE)
       REAL(8) X(MNP),Y(MNP),DELX,DELY,DIST
       REAL(8) ANGLELOW,ANGLEMORE,RAD2DEG
       REAL(8), ALLOCATABLE :: ANGLE(:)
@@ -460,45 +478,111 @@ C
 C     
       DO N=1,NP
          NNEIGH(N) = 0
-	 NNEIGH_ELEM(N) = 0
+         NNEIGH_ELEM(N) = 0
          DO NN=1,MNEI
             NEIGH(N,NN) = 0
-	    NEIGH_ELEM(N,NN) = 0
+            NEIGH_ELEM(N,NN) = 0
          ENDDO
       ENDDO
 C     
       DO 10 N=1,NE
-         EN1 = NM(N,1)
-         EN2 = NM(N,2)
-         EN3 = NM(N,3)
-	 NNEIGH_ELEM(EN1) = NNEIGH_ELEM(EN1)+1
-	 NEIGH_ELEM(EN1,NNEIGH_ELEM(EN1)) = N
-	 NNEIGH_ELEM(EN2) = NNEIGH_ELEM(EN2)+1
-	 NEIGH_ELEM(EN2,NNEIGH_ELEM(EN2)) = N
-	 NNEIGH_ELEM(EN3) = NNEIGH_ELEM(EN3)+1
-	 NEIGH_ELEM(EN3,NNEIGH_ELEM(EN3)) = N
-         DO 20 J=1,NNEIGH(EN1)
- 20         IF(EN2.EQ.NEIGH(EN1,J)) GOTO 25
-            NNEIGH(EN1)=NNEIGH(EN1)+1
-            NNEIGH(EN2)=NNEIGH(EN2)+1
-            IF((NNEIGH(EN1).GT.MNEI-1).OR.(NNEIGH(EN2).GT.MNEI-1)) GOTO 999
-            NEIGH(EN1,NNEIGH(EN1))=EN2
-            NEIGH(EN2,NNEIGH(EN2))=EN1
- 25         DO 30 J=1,NNEIGH(EN1)
- 30            IF(EN3.EQ.NEIGH(EN1,J)) GOTO 35
+         IF (EDN(N) .EQ. 3) THEN
+            EN1 = NM(N,1)
+            EN2 = NM(N,2)
+            EN3 = NM(N,3)
+            NNEIGH_ELEM(EN1) = NNEIGH_ELEM(EN1)+1
+            NEIGH_ELEM(EN1,NNEIGH_ELEM(EN1)) = N
+            NNEIGH_ELEM(EN2) = NNEIGH_ELEM(EN2)+1
+            NEIGH_ELEM(EN2,NNEIGH_ELEM(EN2)) = N
+            NNEIGH_ELEM(EN3) = NNEIGH_ELEM(EN3)+1
+            NEIGH_ELEM(EN3,NNEIGH_ELEM(EN3)) = N
+            DO 20 J=1,NNEIGH(EN1)
+ 20            IF(EN2.EQ.NEIGH(EN1,J)) GOTO 25
                NNEIGH(EN1)=NNEIGH(EN1)+1
-               NNEIGH(EN3)=NNEIGH(EN3)+1
-               IF((NNEIGH(EN1).GT.MNEI-1).OR.(NNEIGH(EN3).GT.MNEI-1)) GOTO 999
-               NEIGH(EN1,NNEIGH(EN1))=EN3
-               NEIGH(EN3,NNEIGH(EN3))=EN1
- 35            DO 50 J=1,NNEIGH(EN2)
- 50               IF(EN3.EQ.NEIGH(EN2,J)) GOTO 10
-                  NNEIGH(EN2)=NNEIGH(EN2)+1
+               NNEIGH(EN2)=NNEIGH(EN2)+1
+               IF((NNEIGH(EN1).GT.MNEI-1).OR.(NNEIGH(EN2).GT.MNEI-1)) 
+     &                                                          GOTO 999
+               NEIGH(EN1,NNEIGH(EN1))=EN2
+               NEIGH(EN2,NNEIGH(EN2))=EN1
+ 25            DO 30 J=1,NNEIGH(EN1)
+ 30               IF(EN3.EQ.NEIGH(EN1,J)) GOTO 35
+                  NNEIGH(EN1)=NNEIGH(EN1)+1
                   NNEIGH(EN3)=NNEIGH(EN3)+1
-                  IF((NNEIGH(EN2).GT.MNEI-1).OR.(NNEIGH(EN3).GT.MNEI-1)) GOTO 999
-                  NEIGH(EN2,NNEIGH(EN2))=EN3
-                  NEIGH(EN3,NNEIGH(EN3))=EN2
- 10            CONTINUE
+                  IF((NNEIGH(EN1).GT.MNEI-1).OR.(NNEIGH(EN3).GT.MNEI-1)) 
+     &                                                          GOTO 999
+                  NEIGH(EN1,NNEIGH(EN1))=EN3
+                  NEIGH(EN3,NNEIGH(EN3))=EN1
+ 35               DO 50 J=1,NNEIGH(EN2)
+ 50                  IF(EN3.EQ.NEIGH(EN2,J)) GOTO 10
+                     NNEIGH(EN2)=NNEIGH(EN2)+1
+                     NNEIGH(EN3)=NNEIGH(EN3)+1
+                     IF((NNEIGH(EN2).GT.MNEI-1).OR.(NNEIGH(EN3)
+     &                                             .GT.MNEI-1)) GOTO 999
+                     NEIGH(EN2,NNEIGH(EN2))=EN3
+                     NEIGH(EN3,NNEIGH(EN3))=EN2
+         ELSEIF (EDN(N) .EQ. 4) THEN
+            EN1 = NM(N,1)
+            EN2 = NM(N,2)
+            EN3 = NM(N,3)
+            EN4 = NM(N,4)
+            NNEIGH_ELEM(EN1) = NNEIGH_ELEM(EN1)+1
+            NEIGH_ELEM(EN1,NNEIGH_ELEM(EN1)) = N
+            NNEIGH_ELEM(EN2) = NNEIGH_ELEM(EN2)+1
+            NEIGH_ELEM(EN2,NNEIGH_ELEM(EN2)) = N
+            NNEIGH_ELEM(EN3) = NNEIGH_ELEM(EN3)+1
+            NEIGH_ELEM(EN3,NNEIGH_ELEM(EN3)) = N
+            NNEIGH_ELEM(EN4) = NNEIGH_ELEM(EN4)+1
+            NEIGH_ELEM(EN4,NNEIGH_ELEM(EN4)) = N
+            DO 21 J=1,NNEIGH(EN1)
+ 21            IF(EN2.EQ.NEIGH(EN1,J)) GOTO 26
+               NNEIGH(EN1)=NNEIGH(EN1)+1
+               NNEIGH(EN2)=NNEIGH(EN2)+1
+               IF((NNEIGH(EN1).GT.MNEI-1).OR.(NNEIGH(EN2).GT.MNEI-1)) 
+     &                                                          GOTO 999
+               NEIGH(EN1,NNEIGH(EN1))=EN2
+               NEIGH(EN2,NNEIGH(EN2))=EN1
+ 26            DO 31 J=1,NNEIGH(EN1)
+ 31               IF(EN3.EQ.NEIGH(EN1,J)) GOTO 36
+                  NNEIGH(EN1)=NNEIGH(EN1)+1
+                  NNEIGH(EN3)=NNEIGH(EN3)+1
+                  IF((NNEIGH(EN1).GT.MNEI-1).OR.(NNEIGH(EN3).GT.MNEI-1)) 
+     &                                                          GOTO 999
+                  NEIGH(EN1,NNEIGH(EN1))=EN3
+                  NEIGH(EN3,NNEIGH(EN3))=EN1
+ 36               DO 51 J=1,NNEIGH(EN1)
+ 51                  IF(EN4.EQ.NEIGH(EN1,J)) GOTO 46
+                     NNEIGH(EN1)=NNEIGH(EN1)+1
+                     NNEIGH(EN4)=NNEIGH(EN4)+1
+                     IF((NNEIGH(EN1).GT.MNEI-1).OR.(NNEIGH(EN4)
+     &                                             .GT.MNEI-1)) GOTO 999
+                     NEIGH(EN1,NNEIGH(EN1))=EN4
+                     NEIGH(EN4,NNEIGH(EN4))=EN1
+ 46                  DO 71 J=1,NNEIGH(EN2)
+ 71                     IF(EN3.EQ.NEIGH(EN2,J)) GOTO 56
+                        NNEIGH(EN2)=NNEIGH(EN2)+1
+                        NNEIGH(EN3)=NNEIGH(EN3)+1
+                        IF((NNEIGH(EN2).GT.MNEI-1).OR.(NNEIGH(EN3)
+     &                                             .GT.MNEI-1)) GOTO 999
+                        NEIGH(EN2,NNEIGH(EN2))=EN3
+                        NEIGH(EN3,NNEIGH(EN3))=EN2
+ 56                     DO 81 J=1,NNEIGH(EN2)
+ 81                        IF(EN4.EQ.NEIGH(EN2,J)) GOTO 66
+                           NNEIGH(EN2)=NNEIGH(EN2)+1
+                           NNEIGH(EN4)=NNEIGH(EN4)+1
+                           IF((NNEIGH(EN2).GT.MNEI-1).OR.(NNEIGH(EN4)
+     &                                             .GT.MNEI-1)) GOTO 999
+                           NEIGH(EN2,NNEIGH(EN2))=EN4
+                           NEIGH(EN4,NNEIGH(EN4))=EN2
+ 66                        DO 91 J=1,NNEIGH(EN3)
+ 91                           IF(EN4.EQ.NEIGH(EN3,J)) GOTO 10
+                              NNEIGH(EN3)=NNEIGH(EN3)+1
+                              NNEIGH(EN4)=NNEIGH(EN4)+1
+                              IF((NNEIGH(EN3).GT.MNEI-1).OR.(NNEIGH(EN4)
+     &                                             .GT.MNEI-1)) GOTO 999
+                              NEIGH(EN3,NNEIGH(EN3))=EN4
+                              NEIGH(EN4,NNEIGH(EN4))=EN3
+		   ENDIF
+ 10   CONTINUE
 C     
 C     INSERT NODE ITSELF IN PLACE #1 and SORT other NEIGHBORS by increasing cw angle from East
 C     
@@ -522,7 +606,7 @@ C
                   DO JJ=1,NNEIGH(I)
                      ANGLELOW=400.d0
                      DO J=1,NNEIGH(I)
-                        IF((ANGLE(J).LT.ANGLELOW).AND.(ANGLE(J).GT.ANGLEMORE))
+                 IF((ANGLE(J).LT.ANGLELOW).AND.(ANGLE(J).GT.ANGLEMORE))
      &                       THEN
                            ANGLELOW=ANGLE(J)
                            JLOW=J
@@ -552,19 +636,19 @@ C     TERMINATE PROGRAM IF MAXIMUM NUMBER OF NEIGHBORS SET TOO SMALL
  999           CONTINUE
                IF(NSCREEN.EQ.1.AND.MYPROC.EQ.0) WRITE(6,99311)
                WRITE(16,99311)
-99311          FORMAT(////,1X,'!!!!!!!!!!  WARNING - FATAL ERROR !!!!!!!!!',
-     &              //,1X,'THE DIMENSIONING PARAMETER MNEI IS TOO SMALL'
-     &              /,1X,'USER MUST RE-DIMENSION PROGRAM',
-     &              //,1X,'!!!!!! EXECUTION WILL NOW BE TERMINATED !!!!!!',//)
+99311      FORMAT(////,1X,'!!!!!!!!!!  WARNING - FATAL ERROR !!!!!!!!!',
+     &           //,1X,'THE DIMENSIONING PARAMETER MNEI IS TOO SMALL'
+     &           /,1X,'USER MUST RE-DIMENSION PROGRAM',
+     &        //,1X,'!!!!!! EXECUTION WILL NOW BE TERMINATED !!!!!!',//)
                STOP
 
  998           CONTINUE
-               IF(NSCREEN.EQ.1.AND.MYPROC.EQ.0) WRITE(6,99312) I,NEITEM(J)
+             IF(NSCREEN.EQ.1.AND.MYPROC.EQ.0) WRITE(6,99312) I,NEITEM(J)
                WRITE(16,99312) I,NEITEM(J)
-99312          FORMAT(////,1X,'!!!!!!!!!!  WARNING - FATAL ERROR !!!!!!!!!',
+99312      FORMAT(////,1X,'!!!!!!!!!!  WARNING - FATAL ERROR !!!!!!!!!',
      &              //,1X,'NODES ',I7,' AND ',I7,
      &         ' HAVE THE SAME COORDINATES'
-     &              //,1X,'!!!!!! EXECUTION WILL NOW BE TERMINATED !!!!!!',//)
+     &       //,1X,'!!!!!! EXECUTION WILL NOW BE TERMINATED !!!!!!',//)
 
                STOP
                END         

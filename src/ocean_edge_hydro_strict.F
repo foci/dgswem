@@ -21,7 +21,7 @@ C.....Use appropriate modules
 
       USE GLOBAL
       USE DG
-      USE SED
+C      USE SED
 
       IMPLICIT NONE
 

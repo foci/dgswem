@@ -35,21 +35,22 @@ C
 C-----------------------------------------------------------------------
 
       SUBROUTINE QUADRATURE( D, REGION, PTS, WTS, N, SZ2, SZ3 )
+      USE SIZES
 
       IMPLICIT NONE
 
 C.....Declare subroutine input and output
 
-      INTEGER, INTENT(IN) :: D, SZ2, SZ3
-      CHARACTER(LEN = *), INTENT(IN) :: REGION
-      INTEGER, INTENT(OUT) :: N
-      REAL(8), INTENT(OUT) :: PTS(SZ2,SZ3)
-      REAL(8), INTENT(OUT) :: WTS(SZ2)
+      INTEGER :: D, SZ2, SZ3
+      CHARACTER(LEN = 8) :: REGION
+      INTEGER :: N
+      REAL(SZ) :: PTS(SZ2,SZ3)
+      REAL(SZ) :: WTS(SZ2)
 
       INTEGER :: I, J, K, L
-      REAL(8) :: AREA
-      REAL(8) :: V1(2), V2(2), V3(2)
-      REAL(8), ALLOCATABLE :: A(:), B(:), C(:), M(:), W(:)
+      REAL(SZ) :: AREA
+      REAL(SZ) :: V1(2), V2(2), V3(2)
+      REAL(SZ), ALLOCATABLE :: A(:), B(:), C(:), M(:), W(:)
 
 C-----------------------------------------------------------------------
 C                        EDGE QUADRATURE RULES
@@ -61,7 +62,7 @@ C                integrate up to a 2n-1 degree polynomial exactly.
 C
 C-----------------------------------------------------------------------
 
-      IF (REGION == 'EDGE') THEN
+      IF (REGION == 'EDGE    ') THEN
         N = CEILING((D+1)/2.)
         L = CEILING(N/2.)
 C-----------------------------------------------------------------------
@@ -205,7 +206,7 @@ C-----------------------------------------------------------------------
         ELSE
 C-----------------------------------------------------------------------
           call quad_rules_general(N, .false., 0.0, 0.0, pts, wts)
-		  
+        
         ENDIF
 C-----------------------------------------------------------------------
         J = MOD(N,2)
@@ -811,11 +812,10 @@ C.......Count up number of quadrature points
       DO I = 1,L
         N = N + M(I)
       ENDDO
-C      ALLOCATE ( PTS(N,2), WTS(N) )
 C.......Transform quadrature points to master element coordinates
 
         J = 1
-        DO I = 1,N
+        DO I = 1,L
           IF (M(I).EQ.1) THEN
             B(I) = A(I)
             C(I) = B(I)
@@ -891,7 +891,7 @@ C         Mathematik, 25, 185--200, 1976. (in German)
 C
 C-----------------------------------------------------------------------
 
-      ELSEIF (REGION == 'SQUARE') THEN
+      ELSEIF (REGION == 'SQUARE  ') THEN
 
 C-----------------------------------------------------------------------
         IF (D.LE.1) THEN                                      ! Ref [1]*
@@ -1646,9 +1646,8 @@ C.......Count up number of quadrature points
 
 C        ALLOCATE ( PTS(N,2), WTS(N) )
 C.......Transform quadrature points to master element coordinates
-
         J = 1
-        DO I = 1,N
+        DO I = 1,L
           IF (M(I).EQ.1) THEN
             PTS(J,1)   =  A(I)
             PTS(J,2)   =  B(I)

@@ -49,17 +49,17 @@ C...
             IF(HTOT.LE.H0) THEN
               NNODECODE(I)=0
               ETA2(I)=H0-DP(I)
-C              ELSE
+C           ELSE
 C              IF(STARTDRY(I).EQ.-88888) THEN
 C                NNODECODE(I)=0
 C                ETA2(I)=H0-DP(I)
-C                ENDIF
+C              ENDIF
             ENDIF
           ENDIF
           ETA1(I)=ETA2(I)
           ETAS(I)=0.D0
           CH1(I)=0.d0
-          END DO
+        END DO
 
 C...
 C....INITIALIZE THE ELEVATION SPECIFIED BOUNDARY CONDITION IF IT REQUIRES THE USE
@@ -67,9 +67,9 @@ C....OF THE UNIT 19 FILE.
 C...
 
         IF((NOPE.GT.0).AND.(NBFR.EQ.0)) THEN
-          IF(NSCREEN.EQ.1.AND.MYPROC.EQ.0) WRITE(6,1112)
+          IF(NSCREEN.EQ.1) WRITE(6,1112)
           WRITE(16,1112)
-          IF(NSCREEN.EQ.1.AND.MYPROC.EQ.0) WRITE(6,1977)
+          IF(NSCREEN.EQ.1) WRITE(6,1977)
           WRITE(16,1977)
  1977     FORMAT(/,1X,'ELEVATION SPECIFIED INFORMATION READ FROM UNIT ',
      &           '19',/)
@@ -94,9 +94,9 @@ C....INITIALIZE THE NORMAL FLOW BOUNDARY CONDITION
         END DO
 
         IF((NFLUXF.EQ.1).AND.(NFFR.EQ.0)) THEN
-          IF(NSCREEN.EQ.1.AND.MYPROC.EQ.0) WRITE(6,1112)
+          IF(NSCREEN.EQ.1) WRITE(6,1112)
           WRITE(16,1112)
-          IF(NSCREEN.EQ.1.AND.MYPROC.EQ.0) WRITE(6,1979)
+          IF(NSCREEN.EQ.1) WRITE(6,1979)
           WRITE(16,1979)
  1979     FORMAT(/,1X,'NORMAL FLOW INFORMATION READ FROM UNIT 20',/)
           OPEN(20,FILE=DIRNAME//'/'//'fort.20')
@@ -133,9 +133,9 @@ C....TIME LEVEL 1 AND LEVEL 2 WIND FIELDS
             PR2(I) =0.D0
             ENDDO
 
-          IF(NSCREEN.EQ.1.AND.MYPROC.EQ.0) WRITE(6,1112)
+          IF(NSCREEN.EQ.1) WRITE(6,1112)
           WRITE(16,1112)
-          IF(NSCREEN.EQ.1.AND.MYPROC.EQ.0) WRITE(6,1980)
+          IF(NSCREEN.EQ.1) WRITE(6,1980)
           WRITE(16,1980)
  1980     FORMAT(/,1X,'WIND (AND PRESSURE) INFORMATION READ.',/)
           ENDIF
@@ -173,10 +173,10 @@ C....TIME LEVEL 1 AND LEVEL 2 WIND FIELDS
               END DO
             GOTO 2222
             ENDIF
-          IF(NSCREEN.EQ.1.AND.MYPROC.EQ.0) 
+          IF(NSCREEN.EQ.1) 
      &         WRITE(6,*)'FOUND WIND DATA AT TIME= ',IWTIMEP
           WRITE(16,*) 'FOUND WIND DATA AT TIME= ',IWTIMEP
-          IF(NSCREEN.EQ.1.AND.MYPROC.EQ.0) 
+          IF(NSCREEN.EQ.1) 
      &         WRITE(6,*)'FOUND WIND DATA AT TIME= ',IWTIME
           WRITE(16,*) 'FOUND WIND DATA AT TIME= ',IWTIME
           WTIME2=WTIMED-WREFTIM                  !CAST INTO MODEL TIME REFRENCE
@@ -225,13 +225,13 @@ C....TIME LEVEL 1 AND LEVEL 2 WIND FIELDS
           WTIME2=WTIME1+WTIMINC
           NWSEGWI=0
           IDSETFLG=0
-          IF(NSCREEN.EQ.1.AND.MYPROC.EQ.0) WRITE(6,1197)
+          IF(NSCREEN.EQ.1) WRITE(6,1197)
           WRITE(16,1197)
  1197     FORMAT(/,1X,'THE E29 MET GRID INTERPOLATING FACTORS ARE ',
      &                'BEING COMPUTED ')
           CALL NWS11GET(NWSEGWI,IDSETFLG,SLAM,SFEA,WVNX1,WVNY1,PRN1,NP,
      &                  RHOWAT0,G)  !JUST COMPUTE INTERPOLATING FACTORS
-          IF(NSCREEN.EQ.1.AND.MYPROC.EQ.0) WRITE(6,1198)
+          IF(NSCREEN.EQ.1) WRITE(6,1198)
           WRITE(16,1198)
  1198     FORMAT(1X,'FINISHED COMPUTING E29 INTERPOLATING FACTORS',/)
           NWSEGWI=1
@@ -293,9 +293,9 @@ Casey 101118: Added this call to initialize the radiation stress gradients.
            ENDDO
          ENDIF
 #endif
-          IF(NSCREEN.EQ.1.AND.MYPROC.EQ.0) WRITE(6,1112)
+          IF(NSCREEN.EQ.1) WRITE(6,1112)
           WRITE(16,1112)
-          IF(NSCREEN.EQ.1.AND.MYPROC.EQ.0) WRITE(6,1981)
+          IF(NSCREEN.EQ.1) WRITE(6,1981)
           WRITE(16,1981)
  1981     FORMAT(/,1X,'RADIATION STRESS INFORMATION READ.',/)
           ENDIF
@@ -318,25 +318,42 @@ CWET...
         IF(NOLIFA.EQ.2) THEN
           DO I=1,NP
             MJU(I)=0
-            ENDDO
+          ENDDO
+
           DO I=1,NE
-            NM1=NM(I,1)
-            NM2=NM(I,2)
-            NM3=NM(I,3)
-            NC1=NNODECODE(NM1)
-            NC2=NNODECODE(NM2)
-            NC3=NNODECODE(NM3)
-            NCELE=NC1*NC2*NC3
-            MJU(NM1)=MJU(NM1)+NCELE
-            MJU(NM2)=MJU(NM2)+NCELE
-            MJU(NM3)=MJU(NM3)+NCELE
+            IF (EDN(I) .EQ. 1) THEN
+               NM1=NM(I,1)
+               NM2=NM(I,2)
+               NM3=NM(I,3)
+               NC1=NNODECODE(NM1)
+               NC2=NNODECODE(NM2)
+               NC3=NNODECODE(NM3)
+               NCELE=NC1*NC2*NC3
+               MJU(NM1)=MJU(NM1)+NCELE
+               MJU(NM2)=MJU(NM2)+NCELE
+               MJU(NM3)=MJU(NM3)+NCELE
+            ELSEIF (EDN(I) .EQ. 2) THEN
+               NM1=NM(I,1)
+               NM2=NM(I,2)
+               NM3=NM(I,3)
+               NM4=NM(I,4)
+               NC1=NNODECODE(NM1)
+               NC2=NNODECODE(NM2)
+               NC3=NNODECODE(NM3)
+               NC4=NNODECODE(NM4)   
+               NCELE=NC1*NC2*NC3*NC4
+               MJU(NM1)=MJU(NM1)+NCELE
+               MJU(NM2)=MJU(NM2)+NCELE
+               MJU(NM3)=MJU(NM3)+NCELE
+               MJU(NM4)=MJU(NM4)+NCELE
+            ENDIF
           ENDDO
           DO I=1,NP
             IF((NNODECODE(I).EQ.1).AND.(MJU(I).EQ.0)) THEN
               NNODECODE(I)=0
-              IF(NSCREEN.EQ.1.AND.MYPROC.EQ.0) WRITE(*,9883) I
+              IF (NSCREEN.EQ.1) WRITE(*,9883) I
               WRITE(16,9883) I
-              ENDIF
+            ENDIF
           ENDDO
         ENDIF
 C...
@@ -692,7 +709,7 @@ C...
         IF(ABS(NOUTGE).EQ.1) THEN
           OPEN(63,FILE=DIRNAME//'/'//'fort.63')
           WRITE(63,3220) RUNDES,RUNID,AGRID
-          WRITE(63,3645) NDSETSE,NE,DTDP*NSPOOLGE,NSPOOLGE,1
+          WRITE(63,3645) NDSETSE,NP,DTDP*NSPOOLGE,NSPOOLGE,1
           IGEP=2
           ENDIF
 
@@ -713,7 +730,7 @@ C...
         IF(ABS(NOUTGE).EQ.1) THEN
           OPEN(4441,FILE=DIRNAME//'/'//'fort.4l')
           WRITE(4441,3220) RUNDES,RUNID,AGRID
-          WRITE(4441,3645) NDSETSE,NE,DTDP*NSPOOLGE,NSPOOLGE,1
+          WRITE(4441,3645) NDSETSE,NP,DTDP*NSPOOLGE,NSPOOLGE,1
           IGEP=2
           ENDIF
 
@@ -749,7 +766,7 @@ C...
             IGEP=IGEP+3
             ENDIF
           WRITE(63,REC=IGEP+1) NDSETSE
-          WRITE(63,REC=IGEP+2) NE
+          WRITE(63,REC=IGEP+2) NP
           WRITE(63,REC=IGEP+3) DT*NSPOOLGE
           WRITE(63,REC=IGEP+4) NSPOOLGE
           WRITE(63,REC=IGEP+5) 1
@@ -772,7 +789,7 @@ C...
         IF(ABS(NOUTGV).EQ.1) THEN
           OPEN(64,FILE=DIRNAME//'/'//'fort.64')
           WRITE(64,3220) RUNDES,RUNID,AGRID
-          WRITE(64,3645) NDSETSV,NE,DTDP*NSPOOLGV,NSPOOLGV,2
+          WRITE(64,3645) NDSETSV,NP,DTDP*NSPOOLGV,NSPOOLGV,2
           IGVP=2
           ENDIF
 
@@ -808,7 +825,7 @@ C...
             IGVP=IGVP+3
             ENDIF
           WRITE(64,REC=IGVP+1) NDSETSV
-          WRITE(64,REC=IGVP+2) NE
+          WRITE(64,REC=IGVP+2) NP
           WRITE(64,REC=IGVP+3) DT*NSPOOLGV
           WRITE(64,REC=IGVP+4) NSPOOLGV
           WRITE(64,REC=IGVP+5) 2
@@ -1293,6 +1310,11 @@ C...
           ENDIF
 
         ENDIF
+        
+      DO I=1,NP
+         write(99,*) I, NNODECODE(I)
+         write(98,*) I, HTOT
+      ENDDO
           
       RETURN
       END

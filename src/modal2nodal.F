@@ -15,6 +15,7 @@ Casey 110422: Create new data structure with discontinuous information for SWAN.
      &                  AREAS,
      &                  CEN_SUM,
      &                  DP,
+     &                  EDN,
      &                  EL_COUNT,
      &                  ELETAB,
      &                  ETA2,
@@ -86,7 +87,7 @@ Casey 110111: Create new data structure with discontinuous information for SWAN.
           PASS2SWAN(I)%NBOR_EL(J) = NBOR_EL
 #endif
           IF(WDFLG(NBOR_EL).EQ.0) CYCLE
-          DO K = 1,3
+          DO K = 1,EDN(NBOR_EL)
             N1 = NM(NBOR_EL,K)
             IF (N1.EQ.I) THEN
               ZE_DG(J) = ZE(1,NBOR_EL,1)
@@ -94,10 +95,14 @@ Casey 110111: Create new data structure with discontinuous information for SWAN.
               QY_DG(J) = QY(1,NBOR_EL,1)
               HB_DG(J) = HB(1,NBOR_EL,1)
               DO KK = 2,DOF
-                ZE_DG(J) = ZE_DG(J) + PHI_CORNER(KK,K,ph)*ZE(KK,NBOR_EL,1)
-                QX_DG(J) = QX_DG(J) + PHI_CORNER(KK,K,ph)*QX(KK,NBOR_EL,1)
-                QY_DG(J) = QY_DG(J) + PHI_CORNER(KK,K,ph)*QY(KK,NBOR_EL,1)
-                HB_DG(J) = HB_DG(J) + PHI_CORNER(KK,K,ph)*HB(KK,NBOR_EL,1)
+                ZE_DG(J) = ZE_DG(J) + PHI_CORNER(KK,K,ph,1)
+     &                                                 *ZE(KK,NBOR_EL,1)
+                QX_DG(J) = QX_DG(J) + PHI_CORNER(KK,K,ph,1)
+     &                                                 *QX(KK,NBOR_EL,1)
+                QY_DG(J) = QY_DG(J) + PHI_CORNER(KK,K,ph,1)
+     &                                                 *QY(KK,NBOR_EL,1)
+                HB_DG(J) = HB_DG(J) + PHI_CORNER(KK,K,ph,1)
+     &                                                 *HB(KK,NBOR_EL,1)
               ENDDO
               AREA = 0.5*AREAS(NBOR_EL)
               AREA_SUM = AREA_SUM + AREA

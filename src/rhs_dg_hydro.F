@@ -30,8 +30,8 @@ C.....Use appropriate modules
       
 C.....Declare local variables
 
-      INTEGER L,k,i,ll
-      REAL(SZ) DPSIDX(3), DPSIDY(3)
+      INTEGER L,k,i,ll,J
+      REAL(SZ) DPSIDX(4), DPSIDY(4)
       REAL(SZ) AREA, IMASS, TKX, TKY, Xpart, Ypart,H_0,C_1
       REAL(SZ) PHI_AREA_KI,MN_IN, MassAction1st,MassAction2nd,fx,fy
       REAL(SZ) LZ_XX, LZ_XY, LZ_YX, LZ_YY, rate, s_mass, s_sed,b_0
@@ -55,7 +55,7 @@ c     nd
 c     nd
          
 C.......Adjust the p values for constants
-         
+         J = EDN(L) - 2
          pa = PDG_EL(L)
 
 #ifdef P0
@@ -75,6 +75,9 @@ C.......Retrieve the global node numbers for the element
          N1 = NM(L,1)
          N2 = NM(L,2)
          N3 = NM(L,3)
+         if (EDN(L) .eq. 4) then
+            N4 = NM(L,4)
+         endif
 
 C.......Compute avaraged values
 C.......These will be used later when bottom friction is computed
@@ -88,18 +91,38 @@ C.......These will be used later when bottom friction is computed
 C.......Compute derivatives of Lagrange basis functions at nodes
          
          IF ((NWS.NE.0).OR.(NTIP.NE.0)) THEN
-            DPSIDX(1) = DRPSI(1)*DRDX(L) + DSPSI(1)*DSDX(L)
-            DPSIDX(2) = DRPSI(2)*DRDX(L) + DSPSI(2)*DSDX(L)
-            DPSIDX(3) = DRPSI(3)*DRDX(L) + DSPSI(3)*DSDX(L)
-            DPSIDY(1) = DRPSI(1)*DRDY(L) + DSPSI(1)*DSDY(L)
-            DPSIDY(2) = DRPSI(2)*DRDY(L) + DSPSI(2)*DSDY(L)
-            DPSIDY(3) = DRPSI(3)*DRDY(L) + DSPSI(3)*DSDY(L)
+            if (J .eq. 1) then
+               DPSIDX(1) = DRPSI(1,1,1,1)*DRDX(L)+DSPSI(1,1,1,1)*DSDX(L)
+               DPSIDX(2) = DRPSI(2,1,1,1)*DRDX(L)+DSPSI(2,1,1,1)*DSDX(L)
+               DPSIDX(3) = DRPSI(3,1,1,1)*DRDX(L)+DSPSI(3,1,1,1)*DSDX(L)
+               DPSIDY(1) = DRPSI(1,1,1,1)*DRDY(L)+DSPSI(1,1,1,1)*DSDY(L)
+               DPSIDY(2) = DRPSI(2,1,1,1)*DRDY(L)+DSPSI(2,1,1,1)*DSDY(L)
+               DPSIDY(3) = DRPSI(3,1,1,1)*DRDY(L)+DSPSI(3,1,1,1)*DSDY(L)
+            endif
          ENDIF
 
 C.......Compute ZE, QX, QY, and HB at each area Gauss quadrature point
          
-         DO I = 1,NAGP(pa)
+         DO I = 1,NAGP(pa,J)
             
+            if (J .eq. 2) then
+               DPSIDX(1) = DRPSI(1,I,pa,J)*DRDXQ(L,I,pa)+DSPSI(1,I,pa,J)
+     &                                                    *DSDXQ(L,I,pa)
+               DPSIDX(2) = DRPSI(2,I,pa,J)*DRDXQ(L,I,pa)+DSPSI(2,I,pa,J)
+     &                                                    *DSDXQ(L,I,pa)
+               DPSIDX(3) = DRPSI(3,I,pa,J)*DRDXQ(L,I,pa)+DSPSI(3,I,pa,J)
+     &                                                    *DSDXQ(L,I,pa)
+               DPSIDX(4) = DRPSI(4,I,pa,J)*DRDXQ(L,I,pa)+DSPSI(4,I,pa,J)
+     &                                                    *DSDXQ(L,I,pa)
+               DPSIDY(1) = DRPSI(1,I,pa,J)*DRDYQ(L,I,pa)+DSPSI(1,I,pa,J)
+     &                                                    *DSDYQ(L,I,pa)
+               DPSIDY(2) = DRPSI(2,I,pa,J)*DRDYQ(L,I,pa)+DSPSI(2,I,pa,J)
+     &                                                    *DSDYQ(L,I,pa)
+               DPSIDY(3) = DRPSI(3,I,pa,J)*DRDYQ(L,I,pa)+DSPSI(3,I,pa,J)
+     &                                                    *DSDYQ(L,I,pa)
+               DPSIDY(4) = DRPSI(4,I,pa,J)*DRDYQ(L,I,pa)+DSPSI(4,I,pa,J)
+     &                                                    *DSDYQ(L,I,pa)
+            endif
             ZE_IN = ZE(1,L,IRK)
             QX_IN = QX(1,L,IRK)
             QY_IN = QY(1,L,IRK)
@@ -121,7 +144,7 @@ C.......Compute ZE, QX, QY, and HB at each area Gauss quadrature point
             DHB_X = DBATHDX(I,L,pa)
             DHB_Y = DBATHDY(I,L,pa)
 
-#ifdef SED_LAY                  !When layered, these change
+#ifdef SED_LAY
             HB(:,L,irk) = 0.D0
             do ll = 1,layers
                HB(1,L,irk) = HB(1,L,irk) + bed(1,L,irk,ll)
@@ -141,8 +164,15 @@ C.......Compute ZE, QX, QY, and HB at each area Gauss quadrature point
                do ll = 1,layers
                   HB(k,L,irk) = HB(k,L,irk) + bed(k,L,irk,ll)
                enddo
-               DPHIDX = DRPHI(K,I,pa)*DRDX(L) + DSPHI(K,I,pa)*DSDX(L)
-               DPHIDY = DRPHI(K,I,pa)*DRDY(L) + DSPHI(K,I,pa)*DSDY(L)
+               if (J .eq. 1) then
+                  DPHIDX=DRPHI(K,I,pa,J)*DRDX(L)+DSPHI(K,I,pa,J)*DSDX(L)
+                  DPHIDY=DRPHI(K,I,pa,J)*DRDY(L)+DSPHI(K,I,pa,J)*DSDY(L)
+               elseif (J .eq. 2) then
+                  DPHIDX=DRPHI(K,I,pa,J)*DRDXQ(L,I,pa)+DSPHI(K,I,pa,J)*
+     &                                                     DSDXQ(L,I,pa)
+                  DPHIDY=DRPHI(K,I,pa,J)*DRDYQ(L,I,pa)+DSPHI(K,I,pa,J)*
+     &                                                     DSDYQ(L,I,pa)
+               endif
                DHB_X = DHB_X + HB(K,L,irk)*DPHIDX
                DHB_Y = DHB_Y + HB(K,L,irk)*DPHIDY
                DH_Y = DH_Y + (HB(K,L,irk)+ZE(K,L,irk))*DPHIDY
@@ -171,54 +201,56 @@ C.......Compute ZE, QX, QY, and HB at each area Gauss quadrature point
             
             DO K = 2,DOFS(L)
                
-               ZE_IN = ZE_IN + ZE(K,L,IRK)*PHI_AREA(K,I,pa)
-               QX_IN = QX_IN + QX(K,L,IRK)*PHI_AREA(K,I,pa)
-               QY_IN = QY_IN + QY(K,L,IRK)*PHI_AREA(K,I,pa)
+               ZE_IN = ZE_IN + ZE(K,L,IRK)*PHI_AREA(K,I,pa,J)
+               QX_IN = QX_IN + QX(K,L,IRK)*PHI_AREA(K,I,pa,J)
+               QY_IN = QY_IN + QY(K,L,IRK)*PHI_AREA(K,I,pa,J)
 
 #ifdef WAVE_DIF 
-               HZ_X = HZ_X + HZ(K,1,1,L)*PHI_AREA(K,I,pa)
-               HZ_Y = HZ_Y + HZ(K,2,2,L)*PHI_AREA(K,I,pa)
+               HZ_X = HZ_X + HZ(K,1,1,L)*PHI_AREA(K,I,pa,J)
+               HZ_Y = HZ_Y + HZ(K,2,2,L)*PHI_AREA(K,I,pa,J)
 #endif
 
-               LZ_XX = LZ_XX + LZ(K,1,1,L)*PHI_AREA(K,I,pa)
-               LZ_XY = LZ_XY + LZ(K,1,2,L)*PHI_AREA(K,I,pa)
-               LZ_YX = LZ_YX + LZ(K,2,1,L)*PHI_AREA(K,I,pa)
-               LZ_YY = LZ_YY + LZ(K,2,2,L)*PHI_AREA(K,I,pa)
+               LZ_XX = LZ_XX + LZ(K,1,1,L)*PHI_AREA(K,I,pa,J)
+               LZ_XY = LZ_XY + LZ(K,1,2,L)*PHI_AREA(K,I,pa,J)
+               LZ_YX = LZ_YX + LZ(K,2,1,L)*PHI_AREA(K,I,pa,J)
+               LZ_YY = LZ_YY + LZ(K,2,2,L)*PHI_AREA(K,I,pa,J)
 
 #ifdef TRACE
-               TZ_X = TZ_X + TZ(K,1,1,L)*PHI_AREA(K,I,pa)
-               TZ_Y = TZ_Y + TZ(K,2,2,L)*PHI_AREA(K,I,pa)
+               TZ_X = TZ_X + TZ(K,1,1,L)*PHI_AREA(K,I,pa,J)
+               TZ_Y = TZ_Y + TZ(K,2,2,L)*PHI_AREA(K,I,pa,J)
 
-               iota_IN = iota_IN + iota(K,L,IRK)*PHI_AREA(K,I,pa)
+               iota_IN = iota_IN + iota(K,L,IRK)*PHI_AREA(K,I,pa,J)
 #endif
 
 #ifdef CHEM
-               iota_IN = iota_IN + iota(K,L,IRK)*PHI_AREA(K,I,pa)
-               iota2_IN = iota2_IN + iota2(K,L,IRK)*PHI_AREA(K,I,pa)
+               iota_IN = iota_IN + iota(K,L,IRK)*PHI_AREA(K,I,pa,J)
+               iota2_IN = iota2_IN + iota2(K,L,IRK)*PHI_AREA(K,I,pa,J)
 #endif
 
 #ifdef DYNP
-               dynP_IN = dynP_IN + dynP(K,L,IRK)*PHI_AREA(K,I,pa)
+               dynP_IN = dynP_IN + dynP(K,L,IRK)*PHI_AREA(K,I,pa,J)
 #endif
 
                DEPTH = ZE_IN + HB_IN
 
 #ifdef SED_LAY
                do ll = 1,layers
-                  bed_IN(ll) = bed_IN(ll) + bed(K,L,IRK,ll)*PHI_AREA(K,I,pa)
-                  HB_IN = HB_IN + bed(K,L,irk,ll)*PHI_AREA(K,I,pa)
+                bed_IN(ll)=bed_IN(ll)+bed(K,L,IRK,ll)*PHI_AREA(K,I,pa,J)
+                  HB_IN = HB_IN + bed(K,L,irk,ll)*PHI_AREA(K,I,pa,J)
 
-                  MZ_X(ll) =  MZ_X(ll) + MZ(K,1,ll,L)*PHI_AREA(K,I,pa)
-                  MZ_Y(ll) =  MZ_Y(ll) + MZ(K,2,ll,L)*PHI_AREA(K,I,pa)
+                  MZ_X(ll) =  MZ_X(ll) + MZ(K,1,ll,L)*PHI_AREA(K,I,pa,J)
+                  MZ_Y(ll) =  MZ_Y(ll) + MZ(K,2,ll,L)*PHI_AREA(K,I,pa,J)
                enddo
                DEPTH = 0.D0
                DEPTH = ZE_IN + HB_IN
 C.........Compute sediment discharge model                                                                           
 
                !Note that the choice of linearization can require this to be changed
-            QMag_IN = (QX_IN*QX_IN/(DEPTH**2) + QY_IN*QY_IN/(DEPTH)**2)**(1/2)
-            discharge_modelX_IN = porosity * DEPTH**(-1) * QMag_IN**(2) * QX_IN*SFACQUAD                             
-            discharge_modelY_IN = porosity * DEPTH**(-1) * QMag_IN**(2) *QY_IN  
+          QMag_IN=(QX_IN*QX_IN/(DEPTH**2)+QY_IN*QY_IN/(DEPTH)**2)**(1/2)
+            discharge_modelX_IN = porosity * DEPTH**(-1) * QMag_IN**(2)*
+     &         QX_IN*SFACQUAD                             
+            discharge_modelY_IN = porosity * DEPTH**(-1) * QMag_IN**(2)*
+     &         QY_IN  
 
 #endif
                
@@ -356,17 +388,28 @@ C.........4.) Wind and pressure forcing (in x and y)
 
             IF (NWS.NE.0) THEN
                FW_NL = 1.D0/F1_NL
-               SOURCE_X = SOURCE_X + FW_NL*( WSX2(N1)*PSI1(I,pa)
-     &              + WSX2(N2)*PSI2(I,pa)  + WSX2(N3)*PSI3(I,pa) )
-c     &                          - G*DEPTH*( PR2(N1)*DPSIDX(1)
-c     nd
-     &              - G*SFACQUAD*DEPTH
-     $              *( PR2(N1)*DPSIDX(1)
-     &              + PR2(N2)*DPSIDX(2) + PR2(N3)*DPSIDX(3))
-               SOURCE_Y = SOURCE_Y + FW_NL*( WSY2(N1)*PSI1(I,pa)
-     &              + WSY2(N2)*PSI2(I,pa)  + WSY2(N3)*PSI3(I,pa) )
-     &              - G*DEPTH*( PR2(N1)*DPSIDY(1)
-     &              + PR2(N2)*DPSIDY(2) + PR2(N3)*DPSIDY(3))
+               if (J .eq. 1) then
+                  SOURCE_X = SOURCE_X + FW_NL*( WSX2(N1)*PSI1(I,pa,J)
+     &               + WSX2(N2)*PSI2(I,pa,J)  + WSX2(N3)*PSI3(I,pa,J) )
+     &               - G*SFACQUAD*DEPTH
+     $                *( PR2(N1)*DPSIDX(1)
+     &               + PR2(N2)*DPSIDX(2) + PR2(N3)*DPSIDX(3))
+                  SOURCE_Y = SOURCE_Y + FW_NL*( WSY2(N1)*PSI1(I,pa,J)
+     &               + WSY2(N2)*PSI2(I,pa,J)  + WSY2(N3)*PSI3(I,pa,J) )
+     &               - G*DEPTH*( PR2(N1)*DPSIDY(1)
+     &               + PR2(N2)*DPSIDY(2) + PR2(N3)*DPSIDY(3))
+               elseif (J .eq. 2) then
+                  SOURCE_X = SOURCE_X + FW_NL*( WSX2(N1)*PSI1(I,pa,J)
+     &               + WSX2(N2)*PSI2(I,pa,J)  + WSX2(N3)*PSI3(I,pa,J) 
+     &               + WSX2(N4)*PSI4(I,pa) )- G*SFACQUAD*DEPTH
+     $                *( PR2(N1)*DPSIDX(1) + PR2(N2)*DPSIDX(2)
+     &                + PR2(N3)*DPSIDX(3) + PR2(N4)*DPSIDX(4)) 
+                  SOURCE_Y = SOURCE_Y + FW_NL*( WSY2(N1)*PSI1(I,pa,J)
+     &               + WSY2(N2)*PSI2(I,pa,J)  + WSY2(N3)*PSI3(I,pa,J) 
+     &               + WSY2(N4)*PSI4(I,pa) )- G*DEPTH
+     &               *( PR2(N1)*DPSIDY(1) + PR2(N2)*DPSIDY(2)
+     &               + PR2(N3)*DPSIDY(3) + PR2(N4)*DPSIDY(4))
+               endif
             ENDIF
 
 c     if (myproc.eq.1.and.l.eq.440.and.i.eq.1) then
@@ -376,18 +419,25 @@ c     endif
 C.........5) Tidal potential forcing (in x and y)
 
             IF (NTIP.NE.0) THEN
-c$$$               SOURCE_X = SOURCE_X + RAMPDG*G*DEPTH*SFAC_ELEM(I,L,pa)*
-c$$$     &              ( DPSIDX(1)*TIP2(N1)
-c$$$     &              + DPSIDX(2)*TIP2(N2) + DPSIDX(3)*TIP2(N3) )
-
-               SOURCE_X = SOURCE_X + 
-c     $            RAMPDG*G*DEPTH*( DPSIDX(1)*TIP2(N1)
-c     nd
-     $              RAMPDG*G*DEPTH*SFACQUAD*( DPSIDX(1)*TIP2(N1)
-     &              + DPSIDX(2)*TIP2(N2) + DPSIDX(3)*TIP2(N3) )
+               if (J .eq. 1) then
+                  SOURCE_X = SOURCE_X + 
+     &                      RAMPDG*G*DEPTH*SFACQUAD*( DPSIDX(1)*TIP2(N1)
+     &                       + DPSIDX(2)*TIP2(N2) + DPSIDX(3)*TIP2(N3) )
                
-               SOURCE_Y = SOURCE_Y + RAMPDG*G*DEPTH*( DPSIDY(1)*TIP2(N1)
-     &              + DPSIDY(2)*TIP2(N2) + DPSIDY(3)*TIP2(N3) )
+                  SOURCE_Y = SOURCE_Y + 
+     &                               RAMPDG*G*DEPTH*( DPSIDY(1)*TIP2(N1)
+     &                       + DPSIDY(2)*TIP2(N2) + DPSIDY(3)*TIP2(N3) )
+               elseif (J .eq. 2) then
+                  SOURCE_X = SOURCE_X + 
+     &                      RAMPDG*G*DEPTH*SFACQUAD*( DPSIDX(1)*TIP2(N1)
+     &                       + DPSIDX(2)*TIP2(N2) + DPSIDX(3)*TIP2(N3) 
+     &                                            + DPSIDX(4)*TIP2(N4) )
+               
+                  SOURCE_Y = SOURCE_Y + 
+     &                               RAMPDG*G*DEPTH*( DPSIDY(1)*TIP2(N1)
+     &                       + DPSIDY(2)*TIP2(N2) + DPSIDY(3)*TIP2(N3) 
+     &                                            + DPSIDY(4)*TIP2(N4) )
+               endif
             ENDIF
 
             sourceqx(l)=sourceqx(l)+source_x
@@ -403,8 +453,8 @@ C.........6) Chemical mass action
             
             rate = reaction_rate*1.D0/86400.D0
 
-            MassAction1st =  rate * (max(iota2_IN,0.D0)*max(iota_IN,0.D0))
-            MassAction2nd =  rate * (max(iota2_IN,0.D0)*max(iota_IN,0.D0))
+            MassAction1st =  rate*(max(iota2_IN,0.D0)*max(iota_IN,0.D0))
+            MassAction2nd =  rate*(max(iota2_IN,0.D0)*max(iota_IN,0.D0))
 
             MassMax(L) = min(MassAction1st,MassAction2nd)
 
@@ -434,16 +484,17 @@ C.........Build the rhs
                do ll = 1,layers !only really makes sense for single layer
 
                   RHS_bed(K,L,IRK,ll) = RHS_bed(K,L,IRK,ll) 
-     &                 + XFAC(K,I,L,pa)*(discharge_modelX_IN+MZ_X(ll)*SFACQUAD)
-     &                 + YFAC(K,I,L,pa)*(discharge_modelY_IN+MZ_Y(ll))
+     &                 + XFAC(K,I,L,pa)*(discharge_modelX_IN+MZ_X(ll)*
+     &                 SFACQUAD) + YFAC(K,I,L,pa)*
+     &                 (discharge_modelY_IN+MZ_Y(ll))
 
                enddo
 #endif
 
 #ifdef TRACE
                RHS_iota(K,L,IRK) = RHS_iota(K,L,IRK) 
-     &              + XFAC(K,I,L,pa)*(iota_IN*QX_IN*FH_NL+TZ_X*SFACQUAD) 
-     &              + YFAC(K,I,L,pa)*(iota_IN*QY_IN*FH_NL+TZ_Y) 
+     &             + XFAC(K,I,L,pa)*(iota_IN*QX_IN*FH_NL+TZ_X*SFACQUAD) 
+     &             + YFAC(K,I,L,pa)*(iota_IN*QY_IN*FH_NL+TZ_Y) 
 #endif
 
 #ifdef CHEM

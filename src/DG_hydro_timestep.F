@@ -45,10 +45,11 @@ C.....Declare local variables
 
       INTEGER IT,L,GED,NBOREL,NNBORS,NDRYNBORS,Istop,k,j,kk,i,mm
       INTEGER Detected,flagger,store
-      REAL(SZ) QBCT1,QBCT2,QBC1,QBC2,ZP(3),QXP(3),QXP_OLD(3),
-     $     QYP(3),QYP_OLD(3),ZP_OLD(3),ell_1,ell_2,ell_3
+      REAL(SZ) QBCT1,QBCT2,QBC1,QBC2,ZP(NEDGS),QXP(NEDGS),
+     $            QXP_OLD(NEDGS),QYP(NEDGS),QYP_OLD(NEDGS),ZP_OLD(NEDGS)
       REAL(SZ) DPAVG, ITDT, ARK, BRK, CRK, DRK, ERK,s,alph,eta,seta
       Real(sz) tempx,tempy,rev,Ox,Oy,time_at,C_0,C_1,sig,sigma
+      Real(sz) ell_1,ell_2,ell_3
 
       Real(SZ),allocatable :: XB(:),YB(:),radial(:)
 
@@ -68,7 +69,7 @@ C.....Update ETA1 (shintaro: do we need this?)
 
 C.....Begin Runge-Kutta time stepper
 
-      DO 100 IRK = 1,NRK
+       DO 100 IRK = 1,NRK
          
 C.......Compute the DG time and DG ramp
 
@@ -79,14 +80,16 @@ C.......Compute the DG time and DG ramp
          RAMPExtFlux = 1.0d0
          IF (NRAMP.GE.1) THEN
             IF (NRAMP.EQ.1) THEN
-               RAMPDG = TANH((2.D0*((IT-1) + DTVD(IRK))*DTDP/86400.D0)/DRAMP)
-               RAMPExtFlux = 
-     $              TANH((2.D0*((IT-1) + DTVD(IRK))*DTDP/86400.D0)/DRAMPExtFlux)
+               RAMPDG = TANH((2.D0*((IT-1) +
+     &                                  DTVD(IRK))*DTDP/86400.D0)/DRAMP)
+               RAMPExtFlux = TANH((2.D0*((IT-1) +
+     &                           DTVD(IRK))*DTDP/86400.D0)/DRAMPExtFlux)
             ENDIF
             IF (NRAMP.EQ.2) THEN
-               RAMPDG = TANH((2.D0*((IT-1) + DTVD(IRK))*DTDP/86400.D0)/DRAMP)
-               RAMPExtFlux = 
-     $              TANH((2.D0*((IT-1) + DTVD(IRK))*DTDP/86400.D0)/DRAMPExtFlux)
+               RAMPDG = TANH((2.D0*((IT-1) +
+     &                                  DTVD(IRK))*DTDP/86400.D0)/DRAMP)
+               RAMPExtFlux = TANH((2.D0*((IT-1) +
+     &                           DTVD(IRK))*DTDP/86400.D0)/DRAMPExtFlux)
             ENDIF
             IF (NRAMP.EQ.3) THEN
                WRITE(*,*) 'NRAMP = 3 not supported '
@@ -99,52 +102,52 @@ C.......Obtain the meteorological forcing
 
          IF (NWS.NE.0) CALL MET_FORCING(IT)
         
-        IF(NRS.GE.1) THEN
-          IF(TIME_A.GT.RSTIME2) THEN
-            RSTIME1=RSTIME2
-            RSTIME2=RSTIME2+RSTIMINC
+         IF(NRS.GE.1) THEN
+           IF(TIME_A.GT.RSTIME2) THEN
+             RSTIME1=RSTIME2
+             RSTIME2=RSTIME2+RSTIMINC
            !DO I=1,NP
            !  RSNX1(I)=RSNX2(I)
            !  RSNY1(I)=RSNY2(I)
            !END DO
 #ifdef SWAN
 Casey 090302: Added for coupling to SWAN.
-            IF((NRS.EQ.3).AND.(IRK.EQ.1)) THEN
-              InterpoWeight = 1.0
-              CALL ComputeWaveDrivenForces
+             IF((NRS.EQ.3).AND.(IRK.EQ.1)) THEN
+               InterpoWeight = 1.0
+               CALL ComputeWaveDrivenForces
 Casey 090707: We want to extrapolate forward in time.  Load the latest (current) forces
 C             into RSNX1/RSNY1, and then load the future forces into RSNX2/RSNY2.
-              DO I=1,NP
-                RSX = RSNX1(I)
-                RSY = RSNY1(I)
-                RSNX1(I) = RSNX2(I)
-                RSNY1(I) = RSNY2(I)
-                RSNX2(I) = RSNX2(I) + (RSNX2(I)-RSX)
-                RSNY2(I) = RSNY2(I) + (RSNY2(I)-RSY)
-              ENDDO
-            ENDIF
+               DO I=1,NP
+                 RSX = RSNX1(I)
+                 RSY = RSNY1(I)
+                 RSNX1(I) = RSNX2(I)
+                 RSNY1(I) = RSNY2(I)
+                 RSNX2(I) = RSNX2(I) + (RSNX2(I)-RSX)
+                 RSNY2(I) = RSNY2(I) + (RSNY2(I)-RSY)
+               ENDDO
+             ENDIF
 #endif
-          ENDIF
-          RStRatio=(TIME_A-RSTIME1)/RSTIMINC
-          DO I=1,NP
-            RSX = RampMete*(RSNX1(I) + RStRatio*(RSNX2(I)-RSNX1(I)))
-            RSY = RampMete*(RSNY1(I) + RStRatio*(RSNY2(I)-RSNY1(I)))
-            WSX2(I) = WSX2(I) + RSX
-            WSY2(I) = WSY2(I) + RSY
+           ENDIF
+           RStRatio=(TIME_A-RSTIME1)/RSTIMINC
+           DO I=1,NP
+             RSX = RampMete*(RSNX1(I) + RStRatio*(RSNX2(I)-RSNX1(I)))
+             RSY = RampMete*(RSNY1(I) + RStRatio*(RSNY2(I)-RSNY1(I)))
+             WSX2(I) = WSX2(I) + RSX
+             WSY2(I) = WSY2(I) + RSY
 #ifdef SWAN
 Casey 090302: Added these lines for output to the rads.64 file.
-            RSNXOUT(I) = RSX
-            RSNYOUT(I) = RSY
+             RSNXOUT(I) = RSX
+             RSNYOUT(I) = RSY
 #endif
-         ENDDO
-      ENDIF
+           ENDDO
+         ENDIF
  
 C.......Compute tidal potential terms
 
          IF (NTIP.NE.0) CALL TIDAL_POTENTIAL()
 
 C.......Compute LDG auxiliary equations
-         
+
          IF (EVMSUM.NE.0.D0.or.artdif.eq.1) CALL LDG_HYDRO(IT)
          
 C.......Compute elevation specified edges
@@ -169,7 +172,7 @@ C.......Compute internal barrier edges
          
 C.......Compute external barrier edges
 
-         IF (NIBEDS.GT.0) CALL EBARRIER_EDGE_HYDRO(IT)
+         IF (NEBEDS.GT.0) CALL EBARRIER_EDGE_HYDRO(IT)
          
 C.......Compute internal edges
 
@@ -191,11 +194,11 @@ C.......SSP Runge-Kutta Time Scheme
 
                   do l = 1,layers
                      
-                     bed(K,J,IRK+1,l) = bed(K,J,irk+1,l) + ARK*bed(K,J,I,l)
-     &                    + BRK*RHS_bed(K,J,I,l)
+                     bed(K,J,IRK+1,l) = bed(K,J,irk+1,l) 
+     &                  + ARK*bed(K,J,I,l) + BRK*RHS_bed(K,J,I,l)
 
                      !adjust for state variable represenation
-                     ZE(K,J,IRK+1) = ZE(K,J,IRK+1) - BRK*RHS_bed(K,J,I,l)
+                     ZE(K,J,IRK+1) = ZE(K,J,IRK+1)-BRK*RHS_bed(K,J,I,l)
 
 
                   enddo
@@ -246,14 +249,18 @@ C.......Compute the dynamic pressure if flagged
          RAMPExtFlux = 1.0d0
          IF (NRAMP.GE.1) THEN
             IF (NRAMP.EQ.1) THEN
-               RAMPDG = TANH((2.D0*(IT + RKC_c(IRK))*DTDP/86400.D0)/DRAMP)
+               RAMPDG = TANH((2.D0*(IT + RKC_c(IRK))*DTDP/86400.D0)
+     &            /DRAMP)
                RAMPExtFlux = 
-     $              TANH((2.D0*(IT + RKC_c(IRK))*DTDP/86400.D0)/DRAMPExtFlux)
+     &              TANH((2.D0*(IT + RKC_c(IRK))*DTDP/86400.D0)
+     &            /DRAMPExtFlux)
             ENDIF
             IF (NRAMP.EQ.2) THEN
-               RAMPDG = TANH((2.D0*(IT + RKC_c(IRK))*DTDP/86400.D0)/DRAMP)
+               RAMPDG = TANH((2.D0*(IT + RKC_c(IRK))*DTDP/86400.D0)
+     &            /DRAMP)
                RAMPExtFlux = 
-     $              TANH((2.D0*(IT + RKC_c(IRK))*DTDP/86400.D0)/DRAMPExtFlux)
+     &              TANH((2.D0*(IT + RKC_c(IRK))*DTDP/86400.D0)
+     &           /DRAMPExtFlux)
             ENDIF
             IF (NRAMP.EQ.3) THEN
                WRITE(*,*) 'NRAMP = 3 not supported '
@@ -296,7 +303,7 @@ C.......Compute internal barrier edges
          
 C.......Compute external barrier edges
 
-         IF (NIBEDS.GT.0) CALL EBARRIER_EDGE_HYDRO(IT)
+         IF (NEBEDS.GT.0) CALL EBARRIER_EDGE_HYDRO(IT)
          
 C.......Compute internal edges
 
@@ -322,7 +329,7 @@ C.......RKC Time Scheme
      &                    + BRK*RHS_bed(K,J,1,l)
 
                    !adjust for state variable represenation
-                     ZE(K,J,IRK+1) = ZE(K,J,IRK+1) - BRK*RHS_bed(K,J,1,l)
+                     ZE(K,J,IRK+1) = ZE(K,J,IRK+1)-BRK*RHS_bed(K,J,1,l)
                      
                   enddo
 #endif
@@ -374,47 +381,57 @@ C.......Compute the dynamic pressure if flagged
 #ifdef SED_LAY
                   do l = 1,layers
                      
-                     bed(K,J,IRK+1,l) = bed(K,J,irk+1,l) + ARK*bed(K,J,1,l) + CRK*bed(K,J,irk,l)
-     &                    + DRK*bed(K,J,irk-1,l) + BRK*RHS_bed(K,J,irk,l) + ERK*RHS_bed(K,J,1,l)
+                     bed(K,J,IRK+1,l) = bed(K,J,irk+1,l) 
+     &                   + ARK*bed(K,J,1,l) + CRK*bed(K,J,irk,l)
+     &                   + DRK*bed(K,J,irk-1,l) + BRK*RHS_bed(K,J,irk,l)
+     &                   + ERK*RHS_bed(K,J,1,l)
 
 
                    !adjust for state variable represenation
-                     ZE(K,J,IRK+1) = ZE(K,J,IRK+1) - BRK*RHS_bed(K,J,irk,l) - ERK*RHS_bed(K,J,1,l)
+                     ZE(K,J,IRK+1) = ZE(K,J,IRK+1) 
+     &                   - BRK*RHS_bed(K,J,irk,l) - ERK*RHS_bed(K,J,1,l)
                      
                   enddo
 #endif
 
-                  ZE(K,J,IRK+1) = ZE(K,J,irk+1) + ARK*ZE(K,J,1) + CRK*ZE(K,J,irk)
-     &                 + DRK*ZE(K,J,irk-1) + BRK*RHS_ZE(K,J,irk) + ERK*RHS_ZE(K,J,1)
-                  QX(K,J,IRK+1) = QX(K,J,irk+1) + ARK*QX(K,J,1) + CRK*QX(K,J,irk)
-     &                 + DRK*QX(K,J,irk-1) + BRK*RHS_QX(K,J,irk) + ERK*RHS_QX(K,J,1)
-                  QY(K,J,IRK+1) = QY(K,J,irk+1) + ARK*QY(K,J,1) + CRK*QY(K,J,irk)
-     &                 + DRK*QY(K,J,irk-1) + BRK*RHS_QY(K,J,irk) + ERK*RHS_QY(K,J,1)
+                  ZE(K,J,IRK+1) = ZE(K,J,irk+1) + ARK*ZE(K,J,1) 
+     &                + CRK*ZE(K,J,irk) + DRK*ZE(K,J,irk-1) 
+     &                + BRK*RHS_ZE(K,J,irk) + ERK*RHS_ZE(K,J,1)
+                  QX(K,J,IRK+1) = QX(K,J,irk+1) + ARK*QX(K,J,1)
+     &                + CRK*QX(K,J,irk) + DRK*QX(K,J,irk-1) 
+     &                + BRK*RHS_QX(K,J,irk) + ERK*RHS_QX(K,J,1)
+                  QY(K,J,IRK+1) = QY(K,J,irk+1) + ARK*QY(K,J,1) 
+     &                + CRK*QY(K,J,irk) + DRK*QY(K,J,irk-1)
+     &                + BRK*RHS_QY(K,J,irk) + ERK*RHS_QY(K,J,1)
 
 
 C.......Compute the transported tracer term if flagged
 
 #ifdef TRACE
-                  iota(K,J,IRK+1) = iota(K,J,irk+1) + ARK*iota(K,J,1) + CRK*iota(K,J,irk)
-     &                 + DRK*iota(K,J,irk-1) + BRK*RHS_iota(K,J,irk) + ERK*RHS_iota(K,J,1)
+                  iota(K,J,IRK+1) = iota(K,J,irk+1) + ARK*iota(K,J,1) 
+     &                + CRK*iota(K,J,irk) + DRK*iota(K,J,irk-1) 
+     &                + BRK*RHS_iota(K,J,irk) + ERK*RHS_iota(K,J,1)
 
 #endif
 
 C......Compute chemistry transported terms if flagged
 
 #ifdef CHEM
-                  iota(K,J,IRK+1) =  iota(K,J,irk+1) + ARK*iota(K,J,1) + CRK*iota(K,J,irk)
-     &                 + DRK*iota(K,J,irk-1) + BRK*RHS_iota(K,J,irk) + ERK*RHS_iota(K,J,1)
-                  iota2(K,J,IRK+1) = iota2(K,J,irk+1) + ARK*iota2(K,J,1) + CRK*iota2(K,J,irk)
-     &                 + DRK*iota2(K,J,irk-1) + BRK*RHS_iota2(K,J,irk) + ERK*RHS_iota2(K,J,1)
+                  iota(K,J,IRK+1) =  iota(K,J,irk+1) + ARK*iota(K,J,1) 
+     &                 + CRK*iota(K,J,irk) + DRK*iota(K,J,irk-1) 
+     &                 + BRK*RHS_iota(K,J,irk) + ERK*RHS_iota(K,J,1)
+                  iota2(K,J,IRK+1) = iota2(K,J,irk+1) + ARK*iota2(K,J,1)
+     &                 + CRK*iota2(K,J,irk) + DRK*iota2(K,J,irk-1) 
+     &                 + BRK*RHS_iota2(K,J,irk) + ERK*RHS_iota2(K,J,1)
 
 #endif
 
 C.......Compute the dynamic pressure if flagged
 
 #ifdef DYNP
-                  dynP(K,J,IRK+1) = dynP(K,J,irk+1) + ARK*dynP(K,J,1) + CRK*dynP(K,J,irk)
-     &                 + DRK*dynP(K,J,irk-1) + BRK*RHS_dynP(K,J,irk) + ERK*RHS_dynP(K,J,1)
+                  dynP(K,J,IRK+1) = dynP(K,J,irk+1) + ARK*dynP(K,J,1) 
+     &                 + CRK*dynP(K,J,irk) + DRK*dynP(K,J,irk-1) 
+     &                 + BRK*RHS_dynP(K,J,irk) + ERK*RHS_dynP(K,J,1)
 
 #endif
 

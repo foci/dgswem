@@ -143,22 +143,23 @@ c..........................
                
                do k = 1,dofs(l)
                   
-                  ze_center = ze_center + ze(k,l,irk+1)*phi_center(k,pa)
-                  qx_center = qx_center + qx(k,l,irk+1)*phi_center(k,pa)
-                  qy_center = qy_center + qy(k,l,irk+1)*phi_center(k,pa)
+                ze_center = ze_center + ze(k,l,irk+1)*phi_center(k,pa,1)
+                qx_center = qx_center + qx(k,l,irk+1)*phi_center(k,pa,1)
+                qy_center = qy_center + qy(k,l,irk+1)*phi_center(k,pa,1)
                   
 #ifdef TRACE
-                  iota_center = iota_center + iota(k,l,irk+1)*phi_center(k,pa)
+          iota_center = iota_center + iota(k,l,irk+1)*phi_center(k,pa,1)
 #endif
                   
 #ifdef CHEM            
-                  iota_center = iota_center + iota(k,l,irk+1)*phi_center(k,pa)
-                  iota2_center = iota2_center + iota2(k,l,irk+1)*phi_center(k,pa)
+          iota_center = iota_center + iota(k,l,irk+1)*phi_center(k,pa,1)
+       iota2_center = iota2_center + iota2(k,l,irk+1)*phi_center(k,pa,1)
 #endif
 
 #ifdef SED_LAY
                   do ll=1,layers
-                     tbed_center = tbed_center + bed(k,l,irk+1,ll)*phi_center(k,pa)
+                     tbed_center = tbed_center +
+     & bed(k,l,irk+1,ll)*phi_center(k,pa,1)
                   enddo
 #endif
                   
@@ -195,42 +196,47 @@ c......Compute the sensor using edges in each variable
                   
                   do k = 1,dofs(l)
                      
-                     ze_mid = ze_mid + ze(k,l,irk+1)*phi_mid(k,i,pa)
-                     qx_mid = qx_mid + qx(k,l,irk+1)*phi_mid(k,i,pa)
-                     qy_mid = qy_mid + qy(k,l,irk+1)*phi_mid(k,i,pa)
+                     ze_mid = ze_mid + ze(k,l,irk+1)*phi_mid(k,i,pa,1)
+                     qx_mid = qx_mid + qx(k,l,irk+1)*phi_mid(k,i,pa,1)
+                     qy_mid = qy_mid + qy(k,l,irk+1)*phi_mid(k,i,pa,1)
                      
 #ifdef TRACE
-                     iota_mid = iota_mid + iota(k,l,irk+1)*phi_mid(k,i,pa)
+                 iota_mid = iota_mid + iota(k,l,irk+1)*phi_mid(k,i,pa,1)
 #endif
                      
 #ifdef CHEM               
-                     iota_mid = iota_mid + iota(k,l,irk+1)*phi_mid(k,i,pa)
-                     iota2_mid = iota2_mid + iota2(k,l,irk+1)*phi_mid(k,i,pa)
+                 iota_mid = iota_mid + iota(k,l,irk+1)*phi_mid(k,i,pa,1)
+              iota2_mid = iota2_mid + iota2(k,l,irk+1)*phi_mid(k,i,pa,1)
 #endif
 
 #ifdef SED_LAY
                      do ll=1,layers
-                        tbed_mid = tbed_mid + bed(k,l,irk+1,ll)*phi_mid(k,i,pa)
+                        tbed_mid = tbed_mid +
+     & bed(k,l,irk+1,ll)*phi_mid(k,i,pa,1)
                      enddo
 #endif
                      
                   enddo
                   
-                  ze_sensor(l) = max(abs( (ze_mid - ze_center)/dist ),ze_sensor(l))
-                  qx_sensor(l) = max(abs( (qx_mid - qx_center)/dist ),qx_sensor(l))
-                  qy_sensor(l) = max(abs( (qy_mid - qy_center)/dist ),qy_sensor(l))
+       ze_sensor(l) = max(abs( (ze_mid - ze_center)/dist ),ze_sensor(l))
+       qx_sensor(l) = max(abs( (qx_mid - qx_center)/dist ),qx_sensor(l))
+       qy_sensor(l) = max(abs( (qy_mid - qy_center)/dist ),qy_sensor(l))
                   
 #ifdef TRACE
-                  iota_sensor(l) = max(abs( (iota_mid - iota_center)/dist ),iota_sensor(l))
+      iota_sensor(l)= max(abs( (iota_mid - iota_center)/dist ),
+     & iota_sensor(l))
 #endif
 
 #ifdef CHEM                  
-                  iota_sensor(l) = max(abs( (iota_mid - iota_center)/dist ),iota_sensor(l))
-                  iota2_sensor(l) = max(abs( (iota2_mid - iota2_center)/dist ),iota_sensor(l))
+                  iota_sensor(l) =
+     & max(abs( (iota_mid - iota_center)/dist ),iota_sensor(l))
+                  iota2_sensor(l) =
+     & max(abs( (iota2_mid - iota2_center)/dist ),iota_sensor(l))
 #endif
 
 #ifdef SED_LAY
-                  tbed_sensor(l) = max(abs( (tbed_mid - tbed_center)/dist ),tbed_sensor(l))
+                  tbed_sensor(l) =
+     & max(abs( (tbed_mid - tbed_center)/dist ),tbed_sensor(l))
 #endif
                   
                endif
@@ -280,7 +286,7 @@ c.....the order of p
                   pcount(l) = it
                   
                   
-               elseif (pdg_el(l).eq.0.and.( (it-pcount(l)).gt.plimit ) ) then
+          elseif (pdg_el(l).eq.0.and.( (it-pcount(l)).gt.plimit ) ) then
                   
                   pdg_el(l) = pdg_el(l) + 1 
                   dofs(l) = (pdg_el(l) + 1 )*(pdg_el(l) + 2 ) / 2
@@ -331,7 +337,7 @@ c.....the order of p
                   pcount(l) = it
                   
                   
-               elseif (pdg_el(l).eq.0.and.( (it-pcount(l)).gt.plimit ) ) then
+          elseif (pdg_el(l).eq.0.and.( (it-pcount(l)).gt.plimit ) ) then
                   
                   pdg_el(l) = pdg_el(l) + 1 
                   dofs(l) = (pdg_el(l) + 1 )*(pdg_el(l) + 2 ) / 2
@@ -383,7 +389,7 @@ c.....the order of p
                   pcount(l) = it
                   
                   
-               elseif (pdg_el(l).eq.0.and.( (it-pcount(l)).gt.plimit ) ) then
+          elseif (pdg_el(l).eq.0.and.( (it-pcount(l)).gt.plimit ) ) then
                   
                   pdg_el(l) = pdg_el(l) + 1 
                   dofs(l) = (pdg_el(l) + 1 )*(pdg_el(l) + 2 ) / 2
@@ -393,7 +399,7 @@ c.....the order of p
                endif
 #endif
 
-#ifdef SED_LAY !when chem or tracers are on, this coupling could be made tighter      
+#ifdef SED_LAY
                
 c.....if the sensor is greater than the limit and the p is low increase
 c.....the order of p
@@ -434,7 +440,7 @@ c.....the order of p
                   pcount(l) = it
                   
                   
-               elseif (pdg_el(l).eq.0.and.( (it-pcount(l)).gt.plimit ) ) then
+          elseif (pdg_el(l).eq.0.and.( (it-pcount(l)).gt.plimit ) ) then
                   
                   pdg_el(l) = pdg_el(l) + 1 
                   dofs(l) = (pdg_el(l) + 1 )*(pdg_el(l) + 2 ) / 2
@@ -516,8 +522,8 @@ c.....the order of p
 
                   if (iota2_sensor(l).ne.0.d0) then
                      
-                     miniota2_sensor = min(iota2_sensor(l),miniota2_sensor)
-                     maxiota2_sensor = max(iota2_sensor(l),maxiota2_sensor)
+                  miniota2_sensor = min(iota2_sensor(l),miniota2_sensor)
+                  maxiota2_sensor = max(iota2_sensor(l),maxiota2_sensor)
                      
                   endif
 #endif
@@ -607,21 +613,28 @@ c.....the order of p
 #endif
             
 
-            ze_delta = ( diorism / 100.d0 )* (abs(maxze_sensor - minze_sensor) )
-            qx_delta = ( diorism / 100.d0 )* (abs(maxqx_sensor - minqx_sensor) )
-            qy_delta = ( diorism / 100.d0 )* (abs(maxqy_sensor - minqy_sensor) )   
+            ze_delta =
+     & ( diorism / 100.d0 )* (abs(maxze_sensor - minze_sensor) )
+            qx_delta =
+     & ( diorism / 100.d0 )* (abs(maxqx_sensor - minqx_sensor) )
+            qy_delta =
+     & ( diorism / 100.d0 )* (abs(maxqy_sensor - minqy_sensor) )
             
 #ifdef TRACE
-            iota_delta = ( diorism / 100.d0 )* (abs(maxiota_sensor - miniota_sensor) )
+            iota_delta =
+     & ( diorism / 100.d0 )* (abs(maxiota_sensor - miniota_sensor) )
 #endif
             
 #ifdef CHEM
-            iota_delta = ( diorism / 100.d0 )* (abs(maxiota_sensor - miniota_sensor) )
-            iota2_delta = ( diorism / 100.d0 )* (abs(maxiota2_sensor - miniota2_sensor) )
+            iota_delta =
+     & ( diorism / 100.d0 )* (abs(maxiota_sensor - miniota_sensor) )
+            iota2_delta =
+     & ( diorism / 100.d0 )* (abs(maxiota2_sensor - miniota2_sensor) )
 #endif
 
 #ifdef SED_LAY    
-            tbed_delta = ( diorism / 100.d0 )* (abs(maxtbed_sensor - mintbed_sensor) )
+            tbed_delta =
+     & ( diorism / 100.d0 )* (abs(maxtbed_sensor - mintbed_sensor) )
 #endif
 
             
@@ -976,32 +989,32 @@ c$$$            enddo
             else
 
                do k = (pa*(pa+1))/2 + 1 ,dofs(l)
-                  do mm = 1,nagp(pa)
+                  do mm = 1,nagp(pa,1)
                      
                      ze_sensor1 = ze_sensor1 + abs(ze(k,l,irkp+1)* 
-     &                    phi_area(k,mm,pa))**lebesgue * wagp(mm,pa)
+     &                    phi_area(k,mm,pa,1))**lebesgue * wagp(mm,pa,1)
                      qx_sensor1 = qx_sensor1 + abs(qx(k,l,irkp+1)* 
-     &                    phi_area(k,mm,pa))**lebesgue * wagp(mm,pa)
+     &                    phi_area(k,mm,pa,1))**lebesgue * wagp(mm,pa,1)
                      qy_sensor1 = qy_sensor1 + abs(qy(k,l,irkp+1)* 
-     &                    phi_area(k,mm,pa))**lebesgue * wagp(mm,pa)
+     &                    phi_area(k,mm,pa,1))**lebesgue * wagp(mm,pa,1)
                      
 #ifdef TRACE       
                      iota_sensor1 = iota_sensor1 + abs(iota(k,l,irkp+1)* 
-     &                    phi_area(k,mm,pa))**lebesgue * wagp(mm,pa)
+     &                    phi_area(k,mm,pa,1))**lebesgue * wagp(mm,pa,1)
 #endif
                      
 #ifdef CHEM                
-                     iota_sensor1  = iota_sensor1 + abs(iota(k,l,irkp+1)* 
-     &                    phi_area(k,mm,pa))**lebesgue * wagp(mm,pa)
-                     iota2_sensor1 = iota2_sensor1 + abs(iota2(k,l,irkp+1)* 
-     &                    phi_area(k,mm,pa))**lebesgue * wagp(mm,pa)
+                    iota_sensor1  = iota_sensor1 + abs(iota(k,l,irkp+1)*
+     &                    phi_area(k,mm,pa,1))**lebesgue * wagp(mm,pa,1)
+                  iota2_sensor1 = iota2_sensor1 + abs(iota2(k,l,irkp+1)*
+     &                    phi_area(k,mm,pa,1))**lebesgue * wagp(mm,pa,1)
 #endif
 
 #ifdef SED_LAY       
 
                      do ll=1,layers
-                        tbed_sensor1 = tbed_sensor1 + abs(bed(k,l,irkp+1,ll)* 
-     &                       phi_area(k,mm,pa))**lebesgue * wagp(mm,pa)
+                   tbed_sensor1 = tbed_sensor1 + abs(bed(k,l,irkp+1,ll)*
+     &                    phi_area(k,mm,pa,1))**lebesgue * wagp(mm,pa,1)
                      enddo
 #endif
                      
@@ -1020,32 +1033,32 @@ c$$$            enddo
                
                do k = 1, dofs(l)
 
-                  do mm=1,nagp(pa)
+                  do mm=1,nagp(pa,1)
                      
                      ze_sensor2 = ze_sensor2 + abs(ze(k,l,irkp+1)* 
-     &                    phi_area(k,mm,pa))**lebesgue * wagp(mm,pa)
+     &                    phi_area(k,mm,pa,1))**lebesgue * wagp(mm,pa,1)
                      qx_sensor2 = qx_sensor2 + abs(qx(k,l,irkp+1)* 
-     &                    phi_area(k,mm,pa))**lebesgue * wagp(mm,pa)
+     &                    phi_area(k,mm,pa,1))**lebesgue * wagp(mm,pa,1)
                      qy_sensor2 = qy_sensor2 + abs(qy(k,l,irkp+1)* 
-     &                    phi_area(k,mm,pa))**lebesgue * wagp(mm,pa)
+     &                    phi_area(k,mm,pa,1))**lebesgue * wagp(mm,pa,1)
                      
 #ifdef TRACE
                      iota_sensor2 = iota_sensor2 + abs(iota(k,l,irkp+1)* 
-     &                    phi_area(k,mm,pa))**lebesgue * wagp(mm,pa)
+     &                    phi_area(k,mm,pa,1))**lebesgue * wagp(mm,pa,1)
 #endif
                      
 #ifdef CHEM
                      iota_sensor2 = iota_sensor2 + abs(iota(k,l,irkp+1)* 
-     &                    phi_area(k,mm,pa))**lebesgue * wagp(mm,pa)
-                     iota2_sensor2 = iota2_sensor2 + abs(iota2(k,l,irkp+1)* 
-     &                    phi_area(k,mm,pa))**lebesgue * wagp(mm,pa)
+     &                    phi_area(k,mm,pa,1))**lebesgue * wagp(mm,pa,1)
+                  iota2_sensor2 = iota2_sensor2 + abs(iota2(k,l,irkp+1)*
+     &                    phi_area(k,mm,pa,1))**lebesgue * wagp(mm,pa,1)
 #endif
 
                      
 #ifdef SED_LAY
                      do ll=1,layers
-                        tbed_sensor2 = tbed_sensor2 + abs(bed(k,l,irkp+1,ll)* 
-     &                       phi_area(k,mm,pa))**lebesgue * wagp(mm,pa)
+                  tbed_sensor2 = tbed_sensor2 + abs(bed(k,l,irkp+1,ll)*
+     &                    phi_area(k,mm,pa,1))**lebesgue * wagp(mm,pa,1)
                      enddo
 #endif
                      
@@ -1061,10 +1074,12 @@ c................................................................
                
                if (pa.gt.0) then
                   
-                  if  (ze_sensor2.gt.1.0e-12.and.ze_sensor1.gt.1.0e-12 ) then
+             if  (ze_sensor2.gt.1.0e-12.and.ze_sensor1.gt.1.0e-12 ) then
                      
-                     ze_sensor(l) = log10( ( (ze_sensor1 )**roo) / (ze_sensor2**roo) )
-                     slimit1 = log10(kon*real(pdg_el(l))**(- lebesgue**2)) - kons
+                     ze_sensor(l) =
+     & log10( ( (ze_sensor1 )**roo) / (ze_sensor2**roo) )
+                     slimit1 =
+     & log10(kon*real(pdg_el(l))**(- lebesgue**2)) - kons
                      
                   else
                      
@@ -1073,10 +1088,12 @@ c................................................................
                      
                   endif
 
-                  if (qx_sensor2.gt.1.0e-12.and.qx_sensor1.gt.1.0e-12 ) then
+              if (qx_sensor2.gt.1.0e-12.and.qx_sensor1.gt.1.0e-12 ) then
                      
-                     qx_sensor(l) = log10( ( (qx_sensor1)**roo) / (qx_sensor2**roo) )
-                     slimit2 = log10(kon*real(pdg_el(l))**(- lebesgue**2)) - kons
+                     qx_sensor(l) =
+     & log10( ( (qx_sensor1)**roo) / (qx_sensor2**roo) )
+                     slimit2 =
+     & log10(kon*real(pdg_el(l))**(- lebesgue**2)) - kons
                      
                   else
                      
@@ -1085,10 +1102,12 @@ c................................................................
                      
                   endif
                   
-                  if ( qy_sensor2.gt.1.0e-12.and.qy_sensor1.gt.1.0e-12 ) then
+             if ( qy_sensor2.gt.1.0e-12.and.qy_sensor1.gt.1.0e-12 ) then
                      
-                     qy_sensor(l) = log10( ((qy_sensor1)**roo) / (qy_sensor2**roo) )
-                     slimit3 = log10(kon*real(pdg_el(l))**(- lebesgue**2)) - kons
+                     qy_sensor(l) =
+     & log10( ((qy_sensor1)**roo) / (qy_sensor2**roo) )
+                     slimit3 =
+     & log10(kon*real(pdg_el(l))**(- lebesgue**2)) - kons
                      
                   else
                      
@@ -1098,10 +1117,12 @@ c................................................................
                   endif
                   
 #ifdef TRACE
-                  if ( iota_sensor2.gt.1.0e-12.and.iota_sensor1.gt.1.0e-12 ) then
+         if ( iota_sensor2.gt.1.0e-12.and.iota_sensor1.gt.1.0e-12 ) then
                      
-                     iota_sensor(l) = log10( ( (iota_sensor1)**roo) / (iota_sensor2**roo) )
-                     slimit4 = log10(kon*real(pdg_el(l))**(- lebesgue**2)) - kons
+                     iota_sensor(l) =
+     & log10( ( (iota_sensor1)**roo) / (iota_sensor2**roo) )
+                     slimit4 =
+     & log10(kon*real(pdg_el(l))**(- lebesgue**2)) - kons
                      
                   else
                      
@@ -1113,10 +1134,12 @@ c................................................................
 #endif
                   
 #ifdef CHEM            
-                  if ( iota_sensor2.gt.1.0e-12.and.iota_sensor1.gt.1.0e-12) then
+          if ( iota_sensor2.gt.1.0e-12.and.iota_sensor1.gt.1.0e-12) then
                      
-                     iota_sensor(l) = log10( ( (iota_sensor1 )**roo) / (iota_sensor2**roo) )
-                     slimit4 = log10(kon*real(pdg_el(l))**(- lebesgue**2)) - kons
+                     iota_sensor(l) =
+     & log10( ( (iota_sensor1 )**roo) / (iota_sensor2**roo) )
+                     slimit4 =
+     & log10(kon*real(pdg_el(l))**(- lebesgue**2)) - kons
                      
                   else
                      
@@ -1125,10 +1148,12 @@ c................................................................
                      
                   endif
                   
-                  if ( iota2_sensor2.gt.1.0e-12.and.iota2_sensor1.gt.1.0e-12 ) then
+       if ( iota2_sensor2.gt.1.0e-12.and.iota2_sensor1.gt.1.0e-12 ) then
                      
-                     iota2_sensor(l) = log10( ( (iota2_sensor1)**roo) / (iota2_sensor2**roo) )
-                     slimit5 = log10(kon*real(pdg_el(l))**(- lebesgue**2)) - kons
+                     iota2_sensor(l) =
+     & log10( ( (iota2_sensor1)**roo) / (iota2_sensor2**roo) )
+                     slimit5 =
+     & log10(kon*real(pdg_el(l))**(- lebesgue**2)) - kons
                      
                   else
                      
@@ -1139,10 +1164,12 @@ c................................................................
 #endif
 
 #ifdef SED_LAY
-                  if ( tbed_sensor2.gt.1.0e-12.and.tbed_sensor1.gt.1.0e-12 ) then
+         if ( tbed_sensor2.gt.1.0e-12.and.tbed_sensor1.gt.1.0e-12 ) then
                      
-                     tbed_sensor(l) = log10( ( (tbed_sensor1)**roo) / (tbed_sensor2**roo) )
-                     slimit6 = log10(kon*real(pdg_el(l))**(- lebesgue**2)) - kons
+                     tbed_sensor(l) =
+     & log10( ( (tbed_sensor1)**roo) / (tbed_sensor2**roo) )
+                     slimit6 =
+     & log10(kon*real(pdg_el(l))**(- lebesgue**2)) - kons
                      
                   else
                      
@@ -1347,9 +1374,10 @@ c................................................................
 
             if (gflag.eq.1) then ! dioristic algorithm ON
 
-               if (ze_sensor2.gt.1.0e-12.and.ze_sensor1.gt.1.0e-12 ) then
+              if (ze_sensor2.gt.1.0e-12.and.ze_sensor1.gt.1.0e-12 ) then
                   
-                  ze_sensor(l) = log10(( ze_sensor1**roo) / (ze_sensor2**roo))
+                  ze_sensor(l) =
+     & log10(( ze_sensor1**roo) / (ze_sensor2**roo))
                   
                else
 
@@ -1357,9 +1385,9 @@ c................................................................
 
                endif 
                
-               if  (qx_sensor2.gt.1.0e-12.and.qx_sensor1.gt.1.0e-12 ) then
+            if  (qx_sensor2.gt.1.0e-12.and.qx_sensor1.gt.1.0e-12 ) then
                   
-                  qx_sensor(l) = log10(( qx_sensor1**roo) / (qx_sensor2**roo))
+            qx_sensor(l) = log10(( qx_sensor1**roo) / (qx_sensor2**roo))
                   
                else
                   
@@ -1367,9 +1395,9 @@ c................................................................
 
                endif
 
-               if  (qy_sensor2.gt.1.0e-12.and.qy_sensor1.gt.1.0e-12 ) then
+            if  (qy_sensor2.gt.1.0e-12.and.qy_sensor1.gt.1.0e-12 ) then
                   
-                  qy_sensor(l) = log10(( qy_sensor1**roo) / (qy_sensor2**roo))
+            qy_sensor(l) = log10(( qy_sensor1**roo) / (qy_sensor2**roo))
 
                else
 
@@ -1379,9 +1407,10 @@ c................................................................
 
                
 #ifdef TRACE
-               if  (iota_sensor2.gt.1.0e-12.and.iota_sensor1.gt.1.0e-12 ) then
+         if  (iota_sensor2.gt.1.0e-12.and.iota_sensor1.gt.1.0e-12 ) then
                   
-                  iota_sensor(l) = log10(( iota_sensor1**roo) / (iota_sensor2**roo))
+                  iota_sensor(l) =
+     & log10(( iota_sensor1**roo) / (iota_sensor2**roo))
                   
                else
                   
@@ -1391,9 +1420,10 @@ c................................................................
 #endif
                
 #ifdef CHEM         
-               if  (iota_sensor2.gt.1.0e-12.and.iota_sensor1.gt.1.0e-12 ) then
+         if  (iota_sensor2.gt.1.0e-12.and.iota_sensor1.gt.1.0e-12 ) then
                   
-                  iota_sensor(l) = log10(( iota_sensor1**roo) / (iota_sensor2**roo))
+                  iota_sensor(l) =
+     & log10(( iota_sensor1**roo) / (iota_sensor2**roo))
                   
                else
 
@@ -1401,9 +1431,10 @@ c................................................................
 
                endif
 
-               if  (iota2_sensor2.gt.1.0e-12.and.iota2_sensor1.gt.1.0e-12 ) then
+       if  (iota2_sensor2.gt.1.0e-12.and.iota2_sensor1.gt.1.0e-12 ) then
                   
-                  iota2_sensor(l) = log10(( iota2_sensor1**roo) / (iota2_sensor2**roo)) 
+                  iota2_sensor(l) =
+     & log10(( iota2_sensor1**roo) / (iota2_sensor2**roo))
                   
                else
 
@@ -1414,9 +1445,10 @@ c................................................................
 
              
 #ifdef SED_LAY
-               if  (tbed_sensor2.gt.1.0e-12.and.tbed_sensor1.gt.1.0e-12 ) then
+        if  (tbed_sensor2.gt.1.0e-12.and.tbed_sensor1.gt.1.0e-12 ) then
                   
-                  tbed_sensor(l) = log10(( tbed_sensor1**roo) / (tbed_sensor2**roo))
+                  tbed_sensor(l) =
+     & log10(( tbed_sensor1**roo) / (tbed_sensor2**roo))
                   
                else
                   
@@ -1496,8 +1528,8 @@ c................................................................
 
                   if (iota2_sensor(l).ne.0.d0) then
                      
-                     miniota2_sensor = min(iota2_sensor(l),miniota2_sensor)
-                     maxiota2_sensor = max(iota2_sensor(l),maxiota2_sensor)
+                  miniota2_sensor = min(iota2_sensor(l),miniota2_sensor)
+                  maxiota2_sensor = max(iota2_sensor(l),maxiota2_sensor)
                      
                   endif
 #endif
@@ -1586,21 +1618,25 @@ c................................................................
             tbed_delta = 0.d0
 #endif
             
-            ze_delta = ( diorism / 100.d0 )* (abs(maxze_sensor - minze_sensor) )
-            qx_delta = ( diorism / 100.d0 )* (abs(maxqx_sensor - minqx_sensor) )
-            qy_delta = ( diorism / 100.d0 )* (abs(maxqy_sensor - minqy_sensor) )   
+      ze_delta = (diorism / 100.d0 )*(abs(maxze_sensor - minze_sensor) )
+      qx_delta = (diorism / 100.d0 )*(abs(maxqx_sensor - minqx_sensor) )
+      qy_delta = (diorism / 100.d0 )*(abs(maxqy_sensor - minqy_sensor) )
             
 #ifdef TRACE
-            iota_delta = ( diorism / 100.d0 )* (abs(maxiota_sensor - miniota_sensor) )
+      iota_delta =
+     & ( diorism / 100.d0 )* (abs(maxiota_sensor - miniota_sensor) )
 #endif
             
 #ifdef CHEM
-            iota_delta = ( diorism / 100.d0 )* (abs(maxiota_sensor - miniota_sensor) )
-            iota2_delta = ( diorism / 100.d0 )* (abs(maxiota2_sensor - miniota2_sensor) )
+            iota_delta =
+     & ( diorism / 100.d0 )* (abs(maxiota_sensor - miniota_sensor) )
+            iota2_delta =
+     & ( diorism / 100.d0 )* (abs(maxiota2_sensor - miniota2_sensor) )
 #endif
 
 #ifdef SED_LAY
-            tbed_delta = ( diorism / 100.d0 )* (abs(maxtbed_sensor - mintbed_sensor) )
+            tbed_delta =
+     & ( diorism / 100.d0 )* (abs(maxtbed_sensor - mintbed_sensor) )
 #endif
             
             do l = 1,ne
@@ -1824,13 +1860,18 @@ c.....at the min of the union for stability
 
          do j = 1,nibseg
 
-            if ( pdg_el(nedel(1,nibsegn(1,j))).ne.pdg_el(nedel(1,nibsegn(2,j))) ) then
+            if ( pdg_el(nedel(1,nibsegn(1,j))).ne.
+     & pdg_el(nedel(1,nibsegn(2,j))) ) then
 
-               pdg_el(nedel(1,nibsegn(1,j))) = max(pdg_el(nedel(1,nibsegn(1,j))), pdg_el(nedel(1,nibsegn(2,j))) )
-               pdg_el(nedel(2,nibsegn(1,j))) = max(pdg_el(nedel(1,nibsegn(1,j))), pdg_el(nedel(1,nibsegn(2,j))) )
+               pdg_el(nedel(1,nibsegn(1,j))) =
+     & max(pdg_el(nedel(1,nibsegn(1,j))), pdg_el(nedel(1,nibsegn(2,j))))
+               pdg_el(nedel(2,nibsegn(1,j))) =
+     & max(pdg_el(nedel(1,nibsegn(1,j))), pdg_el(nedel(1,nibsegn(2,j))))
 
-               dofs(nedel(1,nibsegn(1,j))) = max(dofs(nedel(1,nibsegn(1,j))), dofs(nedel(1,nibsegn(2,j))) )
-               dofs(nedel(2,nibsegn(1,j))) = max(dofs(nedel(1,nibsegn(1,j))), dofs(nedel(1,nibsegn(2,j))) )
+               dofs(nedel(1,nibsegn(1,j))) =
+     & max(dofs(nedel(1,nibsegn(1,j))), dofs(nedel(1,nibsegn(2,j))) )
+               dofs(nedel(2,nibsegn(1,j))) =
+     & max(dofs(nedel(1,nibsegn(1,j))), dofs(nedel(1,nibsegn(2,j))) )
 
             endif
 

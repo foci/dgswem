@@ -25,19 +25,29 @@ C.....Use appropriate modules
       Use SIZES, only: layers
 c     
       USE NodalAttributes, ONLY: GeoidOffset, LoadGeoidOffset
-      use fparser
-      use fparser2
+C      use fparser
+C      use fparser2
 
       IMPLICIT NONE
 
 C.....Declare local variables
       
-      INTEGER L, LED, GED, i,k,jj,II,ll,IT,w
+      INTEGER L, LED, GED,j,i,k,kk,jj,II,ll,IT,w
       Real(SZ) DEN2,U_AVG,V_AVG,VEL_NORMAL,q_RoeX, q_RoeY, q_Roe
       REAL(SZ) TX, TY, HUU, HUV, GH2,FH_NL_IN,F1_NL,FX1_IN,FY1_IN
       REAL(SZ) LZ_XX_IN, LZ_XY_IN, LZ_YX_IN, LZ_YY_IN,W_IN,FX3_IN
       Real(SZ) chi_pref,MZ_X_IN(layers),MZ_Y_IN(layers)
       Real(SZ) HZ_X_IN,HZ_Y_IN,TZ_X_IN,TZ_Y_IN
+      Real(SZ), allocatable :: vtemp1(:), vtemp2(:)
+
+
+C
+C BEG: DW
+      INTEGER:: IPT
+      REAL(SZ):: ZEFREQ      
+      REAL(SZ), dimension(2):: EFA_GPT, EMO_GPT, ARG_GPT, ZE_GPT
+C END DW
+C
 
       test_el = 0
       DO 1000 L = 1, needs
@@ -51,7 +61,12 @@ C.....Retrieve the elements which share the edge
 
          EL_IN = NEDEL(1,GED)
          
+         J = EDN(EL_IN) - 2
          pa = PDG_EL(EL_IN)
+         
+         if (J .eq. 2) then
+            allocate( vtemp1(DOFS(EL_IN)),vtemp2(DOFS(EL_IN)) )
+         endif
 
 #ifdef P0
          if (pa.eq.0) then
@@ -146,19 +161,42 @@ C.....Compute the specified open ocean elevation
                ENDIF
                
 C...........Surface Elevation
-
+               
                ARGJ = AMIG(JJ)*(TIMEDG - NCYC*PER(JJ)) + FACE(JJ)
                RFF = FF(JJ)*RAMPDG
-               
-               EFA_GP = 0.5D0*(EFA_DG(JJ,L,1) + EFA_DG(JJ,L,2))
-     &                + 0.5D0*(EFA_DG(JJ,L,2) - EFA_DG(JJ,L,1))*XEGP(I,pa)
-               EMO_GP = 0.5D0*(EMO_DG(JJ,L,1) + EMO_DG(JJ,L,2))
-     &                + 0.5D0*(EMO_DG(JJ,L,2) - EMO_DG(JJ,L,1))*XEGP(I,pa)
+ 
+C================, commented out by DW
+C               EFA_GP = 0.5D0*(EFA_DG(JJ,L,1) + EFA_DG(JJ,L,2))
+C     &                + 0.5D0*(EFA_DG(JJ,L,2) - EFA_DG(JJ,L,1))*XEGP(I,pa)
+C               EMO_GP = 0.5D0*(EMO_DG(JJ,L,1) + EMO_DG(JJ,L,2))
+C     &                + 0.5D0*(EMO_DG(JJ,L,2) - EMO_DG(JJ,L,1))*XEGP(I,pa)
+C
+C               ARG = ARGJ - EFA_GP
+C               
+C               ZE_EX = ZE_EX + EMO_GP*RFF*COS(ARG) 
+C================ DW
 
-               ARG = ARGJ - EFA_GP
-               
-               ZE_EX = ZE_EX + EMO_GP*RFF*COS(ARG) 
-      
+
+C
+C BEG: DW
+C===============  linearly interpolate from
+C===============  the time-serie of the harmonic forcing 
+               DO IPT = 1, 2
+                  EFA_GPT(IPT) = EFA_DG(JJ,L,IPT) ;
+                  EMO_GPT(IPT) = EMO_DG(JJ,L,IPT) ; 
+
+                  ARG_GPT(IPT) = ARGJ - EFA_GPT(IPT) ;
+
+                  ZE_GPT(IPT) = EMO_GPT(IPT)*RFF*COS(ARG_GPT(IPT)) ;
+               END DO
+
+               ZEFREQ = 0.5D0*( ZE_GPT(1) + ZE_GPT(2) ) +
+     &              0.5D0*(ZE_GPT(2) - ZE_GPT(1))*XEGP(I,pa) ;
+
+               ZE_EX = ZE_EX + ZEFREQ ;
+C===============
+C END: DW
+C
             ENDDO
 
 
@@ -166,47 +204,51 @@ C.....Compute the solution at the interior state
 
             DO K = 2,DOFS(EL_IN)
 
-               ZE_IN = ZE_IN + ZE(K,EL_IN,IRK)*PHI_EDGE(K,I,LED,pa)
-               QX_IN = QX_IN + QX(K,EL_IN,IRK)*PHI_EDGE(K,I,LED,pa)
-               QY_IN = QY_IN + QY(K,EL_IN,IRK)*PHI_EDGE(K,I,LED,pa)
+               ZE_IN = ZE_IN + ZE(K,EL_IN,IRK)*PHI_EDGE(K,I,LED,pa,J)
+               QX_IN = QX_IN + QX(K,EL_IN,IRK)*PHI_EDGE(K,I,LED,pa,J)
+               QY_IN = QY_IN + QY(K,EL_IN,IRK)*PHI_EDGE(K,I,LED,pa,J)
 
 #ifdef TRACE
-               iota_IN = iota_IN + iota(K,EL_IN,IRK)*PHI_EDGE(K,I,LED,pa)
+            iota_IN = iota_IN + iota(K,EL_IN,IRK)*PHI_EDGE(K,I,LED,pa,J)
 #endif
 
 #ifdef CHEM
-               iota_IN = iota_IN + iota(K,EL_IN,IRK)*PHI_EDGE(K,I,LED,pa)
-               iota2_IN = iota2_IN + iota2(K,EL_IN,IRK)*PHI_EDGE(K,I,LED,pa)
+            iota_IN = iota_IN + iota(K,EL_IN,IRK)*PHI_EDGE(K,I,LED,pa,J)
+         iota2_IN = iota2_IN + iota2(K,EL_IN,IRK)*PHI_EDGE(K,I,LED,pa,J)
 #endif
 
 #ifdef DYNP
-               dynP_IN = dynP_IN + dynP(K,EL_IN,IRK)*PHI_EDGE(K,I,LED,pa)
+            dynP_IN = dynP_IN + dynP(K,EL_IN,IRK)*PHI_EDGE(K,I,LED,pa,J)
 #endif
 
 #ifdef SED_LAY
                do ll = 1,layers
-                  bed_IN(ll) = bed_IN(ll) + bed(K,EL_IN,IRK,ll)*PHI_EDGE(K,I,LED,pa)
-                  HB_IN = HB_IN + bed(k,EL_IN,irk,ll)*PHI_EDGE(K,I,LED,pa)
+                  bed_IN(ll) = bed_IN(ll) +
+     & bed(K,EL_IN,IRK,ll)*PHI_EDGE(K,I,LED,pa,J)
+                  HB_IN = HB_IN + bed(k,EL_IN,irk,ll)*
+     & PHI_EDGE(K,I,LED,pa,J)
 
-                  MZ_X_IN(ll) = MZ_X_IN(ll) + MZ(K,1,ll,EL_IN)*PHI_EDGE(K,I,LED,pa)
-                  MZ_Y_IN(ll) = MZ_Y_IN(ll) + MZ(K,2,ll,EL_IN)*PHI_EDGE(K,I,LED,pa)
+                  MZ_X_IN(ll) = MZ_X_IN(ll) +
+     & MZ(K,1,ll,EL_IN)*PHI_EDGE(K,I,LED,pa,J)
+                  MZ_Y_IN(ll) = MZ_Y_IN(ll) +
+     & MZ(K,2,ll,EL_IN)*PHI_EDGE(K,I,LED,pa,J)
                enddo
 #endif
 
                                 ! LDG terms
 #ifdef WAVE_DIF 
-               HZ_X_IN = HZ_X_IN + HZ(K,1,1,EL_IN)*PHI_EDGE(K,I,LED,pa)
-               HZ_Y_IN = HZ_Y_IN + HZ(K,2,2,EL_IN)*PHI_EDGE(K,I,LED,pa)
+              HZ_X_IN = HZ_X_IN + HZ(K,1,1,EL_IN)*PHI_EDGE(K,I,LED,pa,J)
+              HZ_Y_IN = HZ_Y_IN + HZ(K,2,2,EL_IN)*PHI_EDGE(K,I,LED,pa,J)
 #endif
 
-               LZ_XX_IN = LZ_XX_IN + LZ(K,1,1,EL_IN)*PHI_EDGE(K,I,LED,pa)
-               LZ_XY_IN = LZ_XY_IN + LZ(K,1,2,EL_IN)*PHI_EDGE(K,I,LED,pa)
-               LZ_YX_IN = LZ_YX_IN + LZ(K,2,1,EL_IN)*PHI_EDGE(K,I,LED,pa)
-               LZ_YY_IN = LZ_YY_IN + LZ(K,2,2,EL_IN)*PHI_EDGE(K,I,LED,pa)
+            LZ_XX_IN = LZ_XX_IN + LZ(K,1,1,EL_IN)*PHI_EDGE(K,I,LED,pa,J)
+            LZ_XY_IN = LZ_XY_IN + LZ(K,1,2,EL_IN)*PHI_EDGE(K,I,LED,pa,J)
+            LZ_YX_IN = LZ_YX_IN + LZ(K,2,1,EL_IN)*PHI_EDGE(K,I,LED,pa,J)
+            LZ_YY_IN = LZ_YY_IN + LZ(K,2,2,EL_IN)*PHI_EDGE(K,I,LED,pa,J)
 
 #ifdef TRACE
-               TZ_X_IN = TZ_X_IN + TZ(K,1,1,EL_IN)*PHI_EDGE(K,I,LED,pa)
-               TZ_Y_IN = TZ_Y_IN + TZ(K,2,2,EL_IN)*PHI_EDGE(K,I,LED,pa)
+              TZ_X_IN = TZ_X_IN + TZ(K,1,1,EL_IN)*PHI_EDGE(K,I,LED,pa,J)
+              TZ_Y_IN = TZ_Y_IN + TZ(K,2,2,EL_IN)*PHI_EDGE(K,I,LED,pa,J)
 #endif
 
             ENDDO
@@ -269,43 +311,54 @@ C.....Add LDG terms for sediment
 
 #ifdef SED_LAY
             do ll=1,layers
-               bed_HAT(ll) = bed_HAT(ll) + MZ_X_IN(ll)*NX*SFAC_IN + MZ_Y_IN(ll)*NY
+               bed_HAT(ll) = bed_HAT(ll) +
+     & MZ_X_IN(ll)*NX*SFAC_IN + MZ_Y_IN(ll)*NY
             enddo
 #endif
 
 C.....Compute the edge integral
             DO K = 1,DOFS(EL_IN)
-
-               W_IN = 2.0*M_INV(K,pa)/AREAS(EL_IN)*XLEN(GED)*
-     &              PHI_EDGE(K,I,LED,pa)*WEGP(I,pa)
+            
+               if (EDN(EL_IN) .eq. 3) then
+                  W_IN = 2.0d0*M_INV(K,pa)/AREAS(EL_IN)*XLEN(GED)*
+     &               PHI_EDGE(K,I,LED,pa,J)*WEGP(I,pa)
+               elseif (EDN(EL_IN) .eq. 4) then
+                  do kk = 1,DOFS(EL_IN)
+                     vtemp1(kk) = M_INVM(EL_IN,K,kk,pa)
+                     vtemp2(kk) = PHI_EDGE(kk,I,LED,pa,J)
+                  enddo
+                  W_IN = dot_product(vtemp1,vtemp2)
+                  W_IN = W_IN*0.5d0*XLEN(GED)*WEGP(I,pa)
+               endif
 
                RHS_ZE(K,EL_IN,IRK) = RHS_ZE(K,EL_IN,IRK) - W_IN*F_HAT
                RHS_QX(K,EL_IN,IRK) = RHS_QX(K,EL_IN,IRK) - W_IN*G_HAT
                RHS_QY(K,EL_IN,IRK) = RHS_QY(K,EL_IN,IRK) - W_IN*H_HAT
 
 #ifdef TRACE
-               RHS_iota(K,EL_IN,IRK) = RHS_iota(K,EL_IN,IRK) - W_IN*I_HAT
+              RHS_iota(K,EL_IN,IRK) = RHS_iota(K,EL_IN,IRK) - W_IN*I_HAT
 #endif
 
 #ifdef CHEM
-               RHS_iota(K,EL_IN,IRK) = RHS_iota(K,EL_IN,IRK) - W_IN*I_HAT
-               RHS_iota2(K,EL_IN,IRK) = RHS_iota2(K,EL_IN,IRK) - W_IN*J_HAT
+              RHS_iota(K,EL_IN,IRK) = RHS_iota(K,EL_IN,IRK) - W_IN*I_HAT
+            RHS_iota2(K,EL_IN,IRK) = RHS_iota2(K,EL_IN,IRK) - W_IN*J_HAT
 #endif
 
 #ifdef DYNP
-               RHS_dynP(K,EL_IN,IRK) = RHS_dynP(K,EL_IN,IRK) - W_IN*K_HAT
+              RHS_dynP(K,EL_IN,IRK) = RHS_dynP(K,EL_IN,IRK) - W_IN*K_HAT
 #endif
 
 #ifdef SED_LAY
                
                do ll = 1,layers
-                  RHS_bed(K,EL_IN,IRK,ll) = RHS_bed(K,EL_IN,IRK,ll) - W_IN*bed_HAT(ll)
+                  RHS_bed(K,EL_IN,IRK,ll) = RHS_bed(K,EL_IN,IRK,ll) -
+     & W_IN*bed_HAT(ll)
                enddo
 #endif
 
             ENDDO
          ENDDO
-
+         if (J .eq. 2) deallocate( vtemp1,vtemp2 )
  1000 CONTINUE
       
       RETURN

@@ -33,7 +33,8 @@ Casey 101118: Enable hot-start file generation by SWAN.
       
 C.....Declare local variables
 
-      INTEGER NIBP, IBN1, IK, NDISC, NBBN, NVEL2, II, i,j,jj,k
+       REAL(8) AVGXY,DIF1R,DIF2R,DIF3R,DIF4R
+      INTEGER NIBP, IBN1, IK, NDISC, NBBN, NVEL2, II, i,j,jj,k,code
       CHARACTER(256) LINE,LINE2
       
 C     sb-PDG1 added
@@ -65,7 +66,7 @@ C
       IF(IDUM80.NE.MNPROC) THEN
          IF(MYPROC.EQ.0) THEN
             WRITE(*,'(A)') '*** ERROR IN PARALLEL SETUP!'
-            WRITE(*,'(2A,I4,A)') '*** Number of CPUS for submitted job ',
+           WRITE(*,'(2A,I4,A)') '*** Number of CPUS for submitted job ',
      &           '(NCPU = ',MNPROC,') is not equal to the'
             WRITE(*,'(2A,I4,A)') '*** number of CPUS specified during',
      &           ' ADCPREP (see fort.80: NCPU = ',IDUM80,').'
@@ -123,7 +124,7 @@ C.....Print out header for output including version number and copyright
       ENDIF
 
  1114 FORMAT(//,19X,'dgswem.11.13 ',
-     &     //,5X,'A disconintuous Galerkin shallow water equation model' 
+     &     //,5X,'A disconintuous Galerkin shallow water equation model'
      &     /,10X,'for coastal seas and estuarine research',
      &     ///,7X,'-  Based off of the ADCIRC model created by',
      &     //,10X,'R.A. Luettich, Jr., University of North Carolina',
@@ -133,8 +134,8 @@ C.....Print out header for output including version number and copyright
      &     /,10X,'No part of the adcirc base code may be reproduced',
      &     /,10X,'or redistributed without the written permission of',
      &     /,10X,'the above authors.',
-     &     ///,5X,'The DG version of the code was written largely ab initio,',   
-     &     /,5X,'though some data structures from the CG version were used.',
+     &///,5X,'The DG version was written largely ab initio,',
+     &/,5X,'though some data structures from the CG version were used.',
      &     //,7X,'Developed by:',
      &     /,10X,'Ethan J. Kubatko, The Ohio State University (EJK)',
      &     /,10X,'Clint N. Dawson, UT ICES (cnd)',
@@ -183,22 +184,7 @@ C.....Write out header information describing how code has been set up
       WRITE(16,*) '      - NONVECTORIZABLE PARTS OF CODE OPTIMIZED FOR',
      &     ' MEMORY'
       WRITE(16,*) '      - CODE WILL USE JCG ITERATIVE GWCE SOLVER'
-      WRITE(16,1112)
-
-      
-      
-C.....Read in the fort.dg file
-
-      !srb - check fort.dg format (for backwards compatibility)
-      READ(25,*) LINE
-      CLOSE(25)
-      LINE2 = ADJUSTL(LINE)
-      
-      IF (LINE2(1:1) .EQ. "1") THEN
-        CALL read_fixed_fort_dg()   ! first line of old fort.dg is a 1 for the dgswe option
-      ELSE
-        CALL read_keyword_fort_dg() ! otherwise assume keyword format
-      ENDIF     
+      WRITE(16,1112)   
       
       RHOWAT0 = 1000.D0
                   
@@ -236,12 +222,12 @@ C.....Read and process NABOUT - abbreviated unit 16 output option
          WRITE(16,3501) NABOUT
  3501    FORMAT(5X,'NABOUT = ',I2,
      &        /,9X,'ABREVIATED OUTPUT WILL BE PROVIDED TO UNIT 16',
-     &        /,9X,'UNIT 14, 21, 22 INPUT DATA WILL NOT BE ECHO PRINTED',/)
+     &     /,9X,'UNIT 14, 21, 22 INPUT DATA WILL NOT BE ECHO PRINTED',/)
       ELSE
          WRITE(16,3502) NABOUT
  3502    FORMAT(/,5X,'NABOUT = ',I3,
      &        /,9X,'DETAILED OUTPUT WILL BE PROVIDED TO UNIT 16',
-     &        /,9X,'UNIT 14, 15, 21, 22 INPUT DATA WILL BE ECHO PRINTED',/)
+     &     /,9X,'UNIT 14, 15, 21, 22 INPUT DATA WILL BE ECHO PRINTED',/)
       ENDIF
 
 C.....Read and process NSCREEN - screen ouput option
@@ -249,7 +235,7 @@ C.....Read and process NSCREEN - screen ouput option
       READ(15,*) NSCREEN
       NSCREEN_INC = NSCREEN
       IF (NSCREEN.NE.0) NSCREEN = 1
-      IF(NSCREEN.EQ.1.AND.MYPROC.EQ.0) THEN
+      IF(NSCREEN.EQ.1 .AND. MYPROC.EQ.0) THEN
          WRITE(16,3561) NSCREEN
  3561    FORMAT(5X,'NSCREEN = ',I2,
      &        /,9X,'SCREEN OUTPUT WILL BE PROVIDED TO UNIT 6',/)
@@ -348,6 +334,12 @@ C.....Read and process IM - 2D/3D model option
      &        'parameter) is not an allowable value')
          STOP
       ENDIF
+        
+      if ((IM .eq. 0) .OR. (IM .eq. 10)) then
+         DIM = 2
+      elseif ((IM .eq. 1) .OR. (IM .eq. 2)) then
+         DIM = 3
+      endif
 
 C.....Read and process NOLIBF - nonlinear bottom friction option
 
@@ -419,7 +411,7 @@ C.....Read and process NOLIFA - nonlinear finite amplitude option
          NSTARTDRY = 1
       ENDIF
 
-C.....Read and process NOLICA - advective term spatial gradinet
+C.....Read and process NOLICA - advective term spatial gradient
 
       READ(15,*) NOLICA
       IF ((NOLICA.LT.0).OR.(NOLICA.GT.1)) THEN
@@ -591,12 +583,12 @@ C.....Read and process NCOR - spatially varying Coriolis parameter
       IF (NCOR.EQ.0) THEN
          WRITE(16,233) NCOR
  233     FORMAT(/,5X,'NCOR = ',I2,
-     &        /,9X,'A CONSTANT VALUE OF THE CORIOLIS PARAMETER WILL BE ',
+     &       /,9X,'A CONSTANT VALUE OF THE CORIOLIS PARAMETER WILL BE ',
      &        /,9X,'USED THROUGHOUT THE DOMAIN')
       ELSE
          WRITE(16,234) NCOR
  234     FORMAT(/,5X,'NCOR = ',I2,
-     &        /,9X,'SPATIALLY VARYING CORIOLIS VALUES WILL BE COMPUTED ',
+     &       /,9X,'SPATIALLY VARYING CORIOLIS VALUES WILL BE COMPUTED ',
      &        'FROM INPUT LATITUDES')
       ENDIF
 
@@ -646,7 +638,7 @@ C.....Read and process NTIP - tidal potential forcing
       IF (NTIP.GE.1) THEN
         WRITE(16,236) NTIP
  236     FORMAT(/,5X,'NTIP = ',I2,
-     &        /,9X,'TIDAL POTENTIAL FORCING IS USED IN THE COMPUTATION ',
+     &       /,9X,'TIDAL POTENTIAL FORCING IS USED IN THE COMPUTATION ',
      &        'BASED ON INPUT LONGITUDES/LATITUDES')
       ENDIF
       IF (NTIP.EQ.2) THEN
@@ -670,9 +662,9 @@ C.....Read and process NWS - wind and pressure forcing & wave rad stress
      &     (NWS.NE.8).AND.
      &     (NWS.NE.206).AND.(NWS.NE.210)     .AND.(NWS.NE.211) .AND.
 Casey 101118: Added the following cases for coupling to unstructured SWAN.
-     &   (ABS(NWS).NE.300).AND.(ABS(NWS).NE.303).AND.(ABS(NWS).NE.304).AND.
-     &   (ABS(NWS).NE.305).AND.(ABS(NWS).NE.306).AND.(ABS(NWS).NE.308).AND.
-     &   (ABS(NWS).NE.309).AND.(ABS(NWS).NE.310).AND.(ABS(NWS).NE.311).AND.
+     &(ABS(NWS).NE.300).AND.(ABS(NWS).NE.303).AND.(ABS(NWS).NE.304).AND.
+     &(ABS(NWS).NE.305).AND.(ABS(NWS).NE.306).AND.(ABS(NWS).NE.308).AND.
+     &(ABS(NWS).NE.309).AND.(ABS(NWS).NE.310).AND.(ABS(NWS).NE.311).AND.
      &   (ABS(NWS).NE.312)) THEN
          IF ((NSCREEN.EQ.1).AND.(MYPROC.EQ.0)) THEN
             WRITE(6,9972)
@@ -1305,59 +1297,124 @@ C.....been used for inputting the connectivity table
       DO I = 1, NP
          NNEIGH(I) = 0
       ENDDO
-
+      
+      MNEDGS = 9999
+      MXEDGS = 0
       DO I = 1,NE
          READ(14,*) JKI,NHY,NM(JKI,1),NM(JKI,2),NM(JKI,3)
-         NNEIGH(NM(JKI,1)) = NNEIGH(NM(JKI,1)) + 1
-         NNEIGH(NM(JKI,2)) = NNEIGH(NM(JKI,2)) + 1
-         NNEIGH(NM(JKI,3)) = NNEIGH(NM(JKI,3)) + 1
+         EDN(JKI) = NHY
          IF (JKI.NE.I) THEN
             IF ((NSCREEN.EQ.1).AND.(MYPROC.EQ.0)) WRITE(6,99802)
             WRITE(16,99802)
 99802       FORMAT(////,1X,'!!!!!!!!!!  WARNING - NONFATAL ',
-     &           'INPUT ERROR  !!!!!!!!!',
-     &           //,1X,'YOUR ELEMENT NUMBERING IS NOT SEQUENTIAL ',
-     &           /,1X,'CHECK YOUR UNIT 14 INPUT FILE CAREFULLY',//)
+     &                     'INPUT ERROR  !!!!!!!!!',
+     &               //,1X,'YOUR ELEMENT NUMBERING IS NOT SEQUENTIAL ',
+     &                /,1X,'CHECK YOUR UNIT 14 INPUT FILE CAREFULLY',//)
          ENDIF
-         X1 = X(NM(JKI,1))
-         X2 = X(NM(JKI,2))
-         X3 = X(NM(JKI,3))
-         Y1 = Y(NM(JKI,1))
-         Y2 = Y(NM(JKI,2))
-         Y3 = Y(NM(JKI,3))
-         AVGXY = (ABS(X1)+ABS(X2)+ABS(X3)+ABS(Y1)+ABS(Y2)+ABS(Y3))/6.D0
-         DIF1R = AVGXY/(((X2-X1)**2+(Y2-Y1)**2)**0.5d0)
-         DIF2R = AVGXY/(((X3-X2)**2+(Y3-Y2)**2)**0.5d0)
-         DIF3R = AVGXY/(((X3-X1)**2+(Y3-Y1)**2)**0.5d0)
-         DIF1R = LOG10(DIF1R)
-         DIF2R = LOG10(DIF2R)
-         DIF3R = LOG10(DIF3R)
-         IF((DIF1R.GT.NPREC).OR.(DIF2R.GT.NPREC).OR.(DIF3R.GT.NPREC))THEN
-            IF ((NSCREEN.EQ.1).AND.(MYPROC.EQ.0)) WRITE(6,9898) JKI
-            WRITE(16,9898) JKI
- 9898       FORMAT(////,1X,'!!!!!!!!!!  WARNING  !!!!!!!!!',
-     &           //,1X,'IF THE GRID COORDINATES HAVE 32 BITS ',
-     &           '(APPROX 7 DIGITS) OF PRECISION',
-     &           /,1X,'A ROBUST MODEL SOLUTION CAN NOT BE GUARANTEED',
-     &           'AT ELEMENT NO. ',I10,
-     &           //,1X,'MORE PRECISION MUST BE USED IN THE GRID',//)
-         ENDIF
-         
+         IF (EDN(JKI) .EQ. 3) THEN
+            MNEDGS = min(MNEDGS,3)
+            MXEDGS = max(MXEDGS,3)
+            NM(JKI,4) = 0
+            
+            NNEIGH(NM(JKI,1)) = NNEIGH(NM(JKI,1)) + 1
+            NNEIGH(NM(JKI,2)) = NNEIGH(NM(JKI,2)) + 1
+            NNEIGH(NM(JKI,3)) = NNEIGH(NM(JKI,3)) + 1
+            
+            X1 = X(NM(JKI,1))
+            X2 = X(NM(JKI,2))
+            X3 = X(NM(JKI,3))
+            Y1 = Y(NM(JKI,1))
+            Y2 = Y(NM(JKI,2))
+            Y3 = Y(NM(JKI,3))
+            AVGXY = (ABS(X1)+ABS(X2)+ABS(X3)+ABS(Y1)+ABS(Y2)+ABS(Y3))
+     &                                                             /6.D0
+            DIF1R = AVGXY/(((X2-X1)**2+(Y2-Y1)**2)**0.5d0)
+            DIF2R = AVGXY/(((X3-X2)**2+(Y3-Y2)**2)**0.5d0)
+            DIF3R = AVGXY/(((X3-X1)**2+(Y3-Y1)**2)**0.5d0)
+            DIF1R = LOG10(DIF1R)
+            DIF2R = LOG10(DIF2R)
+            DIF3R = LOG10(DIF3R)
+            IF((DIF1R.GT.NPREC).OR.(DIF2R.GT.NPREC).OR.
+     &                                             (DIF3R.GT.NPREC))THEN
+               IF ((NSCREEN.EQ.1).AND.(MYPROC.EQ.0)) WRITE(6,9888) JKI
+               WRITE(16,9888) JKI
+ 9888          FORMAT(////,1X,'!!!!!!!!!!  WARNING  !!!!!!!!!',
+     &         //,1X,'IF THE GRID COORDINATES HAVE 32 BITS ',
+     &               '(APPROX 7 DIGITS) OF PRECISION',
+     &          /,1X,'A ROBUST MODEL SOLUTION CAN NOT BE GUARANTEED',
+     &               'AT ELEMENT NO. ',I10,
+     &         //,1X,'MORE PRECISION MUST BE USED IN THE GRID',//)
+            ENDIF
+            
 C.....NOTE: This is 2 times the actual element area (why?)
 
-         AREAS(JKI) = (X1 - X3)*(Y2 - Y3) + (X3 - X2)*(Y1 - Y3)
+            AREAS(JKI) = (X1 - X3)*(Y2 - Y3) + (X3 - X2)*(Y1 - Y3)
+				
+         ELSEIF (EDN(JKI) .EQ. 4) THEN
+            BACKSPACE(UNIT = 14, IOSTAT = CODE, ERR=99813 )
+99813       WRITE(16,99812)
+99812       FORMAT(////,1X,'!!!!!!!!!!  WARNING - NONFATAL ',
+     &                     'INPUT ERROR  !!!!!!!!!',
+     &               //,1X,'ERROR READING QUADRILATERAL ELEMENT ',
+     &                /,1X,'CHECK YOUR UNIT 14 INPUT FILE CAREFULLY',//)
+            READ(14,*) JKI,NHY,NM(JKI,1),NM(JKI,2),NM(JKI,3),NM(JKI,4)
+            MNEDGS = min(MNEDGS,4)
+            MXEDGS = max(MXEDGS,4)
+            NNEIGH(NM(JKI,1)) = NNEIGH(NM(JKI,1)) + 1
+            NNEIGH(NM(JKI,2)) = NNEIGH(NM(JKI,2)) + 1
+            NNEIGH(NM(JKI,3)) = NNEIGH(NM(JKI,3)) + 1
+            NNEIGH(NM(JKI,4)) = NNEIGH(NM(JKI,4)) + 1
+            
+            X1 = X(NM(JKI,1))
+            X2 = X(NM(JKI,2))
+            X3 = X(NM(JKI,3))
+            X4 = X(NM(JKI,4)) 
+            Y1 = Y(NM(JKI,1))
+            Y2 = Y(NM(JKI,2))
+            Y3 = Y(NM(JKI,3))
+            Y4 = Y(NM(JKI,4))
+            AVGXY = (ABS(X1)+ABS(X2)+ABS(X3)+ABS(X4)+ABS(Y1)+ABS(Y2)
+     &                                            +ABS(Y3)+ABS(Y4))/8.D0
+            DIF1R = AVGXY/(((X2-X1)**2+(Y2-Y1)**2)**0.5d0)
+            DIF2R = AVGXY/(((X3-X2)**2+(Y3-Y2)**2)**0.5d0)
+            DIF3R = AVGXY/(((X4-X3)**2+(Y4-Y3)**2)**0.5d0)
+            DIF4R = AVGXY/(((X4-X1)**2+(Y4-Y1)**2)**0.5d0)
+            DIF1R = LOG10(DIF1R)
+            DIF2R = LOG10(DIF2R)
+            DIF3R = LOG10(DIF3R)
+            DIF4R = LOG10(DIF4R)
+            IF((DIF1R.GT.NPREC).OR.(DIF2R.GT.NPREC).OR.
+     &                         (DIF3R.GT.NPREC).OR.(DIF4R.GT.NPREC))THEN
+               IF ((NSCREEN.EQ.1).AND.(MYPROC.EQ.0)) WRITE(6,9898) JKI
+               WRITE(16,9898) JKI
+ 9898          FORMAT(////,1X,'!!!!!!!!!!  WARNING  !!!!!!!!!',
+     &         //,1X,'IF THE GRID COORDINATES HAVE 32 BITS ',
+     &         '(APPROX 7 DIGITS) OF PRECISION',
+     &         /,1X,'A ROBUST MODEL SOLUTION CAN NOT BE GUARANTEED',
+     &         'AT ELEMENT NO. ',I10,
+     &         //,1X,'MORE PRECISION MUST BE USED IN THE GRID',//)
+            ENDIF
+            
+C........NOTE: This is 2 times the actual element area (why?)
+C.........(Shoelace Formula) 
+
+            AREAS(JKI) = x1*y2 + x2*y3 + x3*y4 + x4*y1 - x2*y1 - x3*y2
+     &                                                  - x4*y3 - x1*y4
+
+         ENDIF
          IF (AREAS(JKI).LT.0.0) THEN
             IF((NSCREEN.EQ.1).AND.(MYPROC.EQ.0)) WRITE(6,9899) JKI
             WRITE(16,9899) JKI
- 9899       FORMAT(////,1X,'!!!!!!!!!!  WARNING - FATAL ERROR !!!!!!!!!',
-     &           //,1X,'THE CONNECTIVITY FOR ELEMENT ',I6,
-     &           '  HAS BEEN INCORRECTLY SPECIFIED ',
-     &           /,1X,'CHECK INPUT AND ENSURE THAT COUNTERCLOCKWISE',
-     &           ' CONVENTION HAS BEEN USED ',
-     &           //,1X,'!!!!!! EXECUTION WILL NOW BE TERMINATED !!!!!!',//)
+ 9899       FORMAT(////,1X,'!!!!!!!  WARNING - FATAL ERROR !!!!!!!',
+     &      //,1X,'THE CONNECTIVITY FOR ELEMENT ',I6,
+     &            '  HAS BEEN INCORRECTLY SPECIFIED ',
+     &       /,1X,'CHECK INPUT AND ENSURE THAT COUNTERCLOCKWISE',
+     &            ' CONVENTION HAS BEEN USED ',
+     &      //,1X,'!!!!! EXECUTION WILL NOW BE TERMINATED !!!!!',//)
             STOP
          ENDIF
       ENDDO
+      NEDGS = SUM(EDN)
 
 C.....If baroclinic 2D run, read in initial density field
 
@@ -1406,9 +1463,9 @@ C.....Check that NE2 and NP2 mathe with grid file
             IF ((NSCREEN.EQ.1).AND.(MYPROC.EQ.0)) WRITE(6,9900)
             WRITE(16,9900)
  9900       FORMAT(////,1X,'!!!!!!!!!!  FATAL ERROR  !!!!!!!!!',
-     &           //,1X,'THE PARAMETER NE2 AND NP2 MUST MATCH NE AND NP ',
+     &         //,1X,'THE PARAMETER NE2 AND NP2 MUST MATCH NE AND NP ',
      &           /,1X,'USER MUST CHECK FORT.12 INPUT FILE ',
-     &           //,1X,'!!!!!! EXECUTION WILL NOW BE TERMINATED !!!!!!',//)
+     &        //,1X,'!!!!!! EXECUTION WILL NOW BE TERMINATED !!!!!!',//)
             STOP
          ENDIF
 
@@ -1499,7 +1556,7 @@ C.....and nodal coordinates and bathymetry
                ENDIF
             ELSE
                WRITE(16,9225)
- 9225          FORMAT(/,1X,'   NODE ',2X,'LAMBDA(DEG)',5X,'FEA(DEG)',11X,
+ 9225         FORMAT(/,1X,'   NODE ',2X,'LAMBDA(DEG)',5X,'FEA(DEG)',11X,
      &              'XCP',14X,'YCP',11X,'DP',/)
                DO I = 1,NP
                   WRITE (16,9228) I,SLAM(I)*RAD2DEG,SFEA(I)*RAD2DEG,
@@ -1548,14 +1605,14 @@ C.....and nodal coordinates and bathymetry
                ENDIF
             ELSE
                WRITE(16,3535)
- 3535          FORMAT(/,1X,'   NODE ',2X,'LAMBDA(DEG)',5X,'FEA(DEG)',11X,
+ 3535         FORMAT(/,1X,'   NODE ',2X,'LAMBDA(DEG)',5X,'FEA(DEG)',11X,
      &              'XCP',14X,'YCP',11X,'DP',
      &              5X,'STARTDRY',/)
                DO I = 1,NP
                   IF (STARTDRY(I).EQ.-88888.D0) THEN
                      WRITE (16,3537) I,SLAM(I)*RAD2DEG,SFEA(I)*RAD2DEG,
      &                    X(I),Y(I),DP(I),STARTDRY(I)
- 3537                FORMAT(1X,I6,2(1X,F14.8),2(1X,F15.1),1X,F10.2,2X,F10.0)
+ 3537            FORMAT(1X,I6,2(1X,F14.8),2(1X,F15.1),1X,F10.2,2X,F10.0)
                   ELSE
                      WRITE (16,9228) I,SLAM(I)*RAD2DEG,SFEA(I)*RAD2DEG,
      &                    X(I),Y(I),DP(I)
@@ -1577,10 +1634,16 @@ C.....elements
          WRITE(16,26)
  26      FORMAT(//,5X,'GLOBAL NODE NUMBERS FOR EACH ELEMENT :')
          WRITE(16,27)
- 27      FORMAT(/,9X,'ELEMENT',8X,'N1',9X,'N2',10X,'N3',/)
+ 27      FORMAT(/,9X,'ELEMENT',8X,'N1',9X,'N2',9X,'N3',9X,'N4'/)
+
          DO I = 1,NE
-            WRITE(16,2009) I,NM(I,1),NM(I,2),NM(I,3)
- 2009       FORMAT(8X,4(I7,4X))
+            WRITE(16,2009,ADVANCE = 'NO') I
+            DO J = 1,EDN(I)-1
+               WRITE(16,2010,ADVANCE = 'NO') NM(I,J)
+            ENDDO
+            WRITE(16,2010) NM(I,EDN(I))
+ 2009       FORMAT(8X,I7,4X)
+ 2010       FORMAT(I7,4X)
          ENDDO
       ELSE
          WRITE(16,3512)
@@ -1746,7 +1809,7 @@ C     ek: Initialize nodal attributes, now that grid has been read
 C     in from unit 14 file.
 
       IF (NWP.GT.0)
-     &     CALL InitNodalAttr(DP, NP, G, NScreen, ScreenUnit,MyProc,NAbOut)
+     &  CALL InitNodalAttr(DP, NP, G, NScreen, ScreenUnit,MyProc,NAbOut)
       
 
 
@@ -2003,7 +2066,7 @@ C...
          WRITE(16,9945)
  9945    FORMAT(////,1X,'!!!!!!!!!!  WARNING - NONFATAL INPUT ERROR ',
      &        '!!!!!!!!!',
-     &        //,1X,'THE INPUT PARAMETER NETA FROM UNIT 14 DOES NOT MATCH ',
+     &    //,1X,'THE INPUT PARAMETER NETA FROM UNIT 14 DOES NOT MATCH ',
      &        'THE TOTAL NUMBER OF BOUNDARY NODES',
      &        /,1X,' FROM ALL THE SPECIFIED SEGMENTS COMBINED')
          IF(NFOVER.EQ.1) THEN
@@ -2134,7 +2197,7 @@ C.......CHECK THAT IBTYPE PARAMETER HAS BEEN SET PROPERLY
      &        .AND.(IBTYPE.NE.3).AND.(IBTYPE.NE.13).AND.(IBTYPE.NE.23)
 cjj   wm001 - following 2 lines modified 
      &        .AND.(IBTYPE.NE.4).AND.(IBTYPE.NE.24)
-     &        .AND.(IBTYPE.NE.5).AND.(IBTYPE.NE.25).AND.(IBTYPE.NE.30)) THEN
+     &   .AND.(IBTYPE.NE.5).AND.(IBTYPE.NE.25).AND.(IBTYPE.NE.30)) THEN
          IF(NSCREEN.EQ.1.AND.MYPROC.EQ.0) WRITE(6,9985) K
          WRITE(16,9985) K
  9985    FORMAT(////,1X,'!!!!!!!!!!  WARNING - FATAL ERROR !!!!!!!!!',
@@ -2611,7 +2674,7 @@ C............A KEY TO THE GWCE BOUNDARY CONDITION ARRAY
      &                    (LBCODEI(JGW).EQ.13).OR. ! OR A RADIATION
      &                    (LBCODEI(JGW).EQ.23).OR. ! BOUNDARY
      &                    (LBCODEI(JGW).EQ.30)) ME2GW(JME)=JGW
-                  ENDIF                                                                
+                  ENDIF                                                
                ENDIF
             ENDIF
             IF((I.GT.1).AND.(I.LT.NVELL(K))) THEN !IF NOT FIRST OR
@@ -2696,7 +2759,7 @@ C...........CHECK INTERNAL BARRIER HEIGHTS AGAINST DEPTHS
                   WRITE(16,8368) JGW,NBV(JGW),BARINHT(JGW),DP(NBV(JGW))
  8368             FORMAT(////,1X,'!!!!!!!!!!  FATAL INPUT ERROR   !!!'
      &                 ,'!!!!!!!!!',//,
-     &                 1X,'AT BOUNDARY NODE NO.',I6,' (GLOBAL NODE NO. ',
+     &                1X,'AT BOUNDARY NODE NO.',I6,' (GLOBAL NODE NO. ',
      &                 I6,' AND OF INTERNAL BARRIER TYPE) ',/,
      &                 2X,'THE INTERNAL BARRIER HEIGHT = ',E12.5,
      &                 2X,'IS EXCEEDED BY THE DEPTH SPECIFIED AT ',/,2X
@@ -2717,7 +2780,7 @@ C...........CHECK INTERNAL BARRIER WITH PIPES BARRIER HEIGHTS AGAINST DEPTHS
                   WRITE(16,8370) JGW,NBV(JGW),BARINHT(JGW),DP(NBV(JGW))
  8370             FORMAT(////,1X,'!!!!!!!!!!  FATAL INPUT ERROR   !!!'
      &                 ,'!!!!!!!!!',//,
-     &                 1X,'AT BOUNDARY NODE NO.',I6,' (GLOBAL NODE NO. ',
+     &                1X,'AT BOUNDARY NODE NO.',I6,' (GLOBAL NODE NO. ',
      &                 I6,' AND OF INTERNAL BARRIER TYPE) ',/,
      &                 2X,'THE INTERNAL BARRIER HEIGHT = ',E12.5,
      &                 2X,'IS EXCEEDED BY THE DEPTH SPECIFIED AT ',/,2X
@@ -2737,7 +2800,7 @@ C...........CHECK INTERNAL BARRIER WITH PIPES PIPE HEIGHTS AGAINST DEPTHS
                   WRITE(16,8372) JGW,NBV(JGW),BARINHT(JGW),DP(NBV(JGW))
  8372             FORMAT(////,1X,'!!!!!!!!!!  FATAL INPUT ERROR   !!!'
      &                 ,'!!!!!!!!!',//,
-     &                 1X,'AT BOUNDARY NODE NO.',I6,' (GLOBAL NODE NO. ',
+     &                1X,'AT BOUNDARY NODE NO.',I6,' (GLOBAL NODE NO. ',
      &                 I6,' AND OF INTERNAL BARRIER TYPE) ',/,
      &                 2X,'THE BARRIER PIPE HEIGHT = ',E12.5,
      &                 2X,'IS EXCEEDED BY THE DEPTH SPECIFIED AT ',/,2X
@@ -2760,18 +2823,18 @@ C...............CHECK IF OVERLAP EXISTS
                   IF(NBV(ICK).EQ.NBV(JGW)) THEN
 C.................CHECK FOR ILLEGAL OVERLAPS
                      IF((LBCODEI(ICK).EQ.2).OR.(LBCODEI(ICK).EQ.3).OR.
-     &                    (LBCODEI(ICK).EQ.12).OR.(LBCODEI(ICK).EQ.13)) THEN 
+     &                (LBCODEI(ICK).EQ.12).OR.(LBCODEI(ICK).EQ.13)) THEN
                         IF(NSCREEN.EQ.1.AND.MYPROC.EQ.0) WRITE(6,8567) 
      &                       JGW,NBV(JGW),ICK,NBV(ICK)
                         WRITE(16,8567) JGW,NBV(JGW),ICK,NBV(ICK)
- 8567                   FORMAT(////,1X,'!!!!!!!!!!  FATAL INPUT ERROR   !!!'
+ 8567               FORMAT(////,1X,'!!!!!!!!!!  FATAL INPUT ERROR   !!!'
      &                       ,'!!!!!!!!!',//,
-     &                       1X,'BOUNDARY NODE NO. ',I6,' (GLOBAL NODE NO. ',
+     &                  1X,'BOUNDARY NODE NO. ',I6,' (GLOBAL NODE NO. ',
      &                       I9, 'AND OF INTERNAL BARRIER TYPE) ',/,
-     &                       2X,'OVERLAPS BOUNDARY NODE NO.',I6,' (GLOBAL NODE'
+     &                2X,'OVERLAPS BOUNDARY NODE NO.',I6,' (GLOBAL NODE'
      &                       ,' NO.',I6,' )',/,
-     &                       2X,'THIS IS AN ILLEGAL TYPE OVERLAP !! - INTERNAL '
-     &                       ,'BARRIER BOUNDARIES CAN ONLY OVERLAP WITH ',
+     &               2X,'THIS IS AN ILLEGAL TYPE OVERLAP !! - INTERNAL '
+     &                   ,'BARRIER BOUNDARIES CAN ONLY OVERLAP WITH ',
      &                       'NO NORMAL FLOW EXTERNAL BOUNDARIES',/
      &                       2X,'(I.E. IBTYPE=0,10,20)')
                         IF(NSCREEN.EQ.1.AND.MYPROC.EQ.0) WRITE(6,9973)
@@ -2781,45 +2844,45 @@ C.................CHECK FOR ILLEGAL OVERLAPS
 C.................CHECK FOR OVERLAPS WHICH REQUIRE ADJUSTMENTS OF BOUNDARY
 C..................CODE ON THE EXTERNAL BOUNDARY
                      IF(((IBTYPE.EQ.4).AND.(LBCODEI(ICK).EQ.0))
-     &                    .OR.((IBTYPE.EQ.5).AND.(LBCODEI(ICK).EQ.0))) THEN
+     &                .OR.((IBTYPE.EQ.5).AND.(LBCODEI(ICK).EQ.0))) THEN
                         WRITE(16,8568) JGW,ICK,ICK
  8568                   FORMAT(1X,'DUE TO LEGAL OVERLAPPING OF ',
-     &                       'BOUNDARY NODE',I7,' (WHICH IS AN ESSENTIAL INTER'
+     &                'BOUNDARY NODE',I7,' (WHICH IS AN ESSENTIAL INTER'
      &                       ,'NAL BARRIER BOUNDARY NODE)', /,2X,
-     &                       'AND BOUNDARY NODE',I7,' (WHICH IS AN ESSENTIAL ',
-     &                       'EXTERNAL NO NORMAL FLOW WITH SLIP BOUNDARY',
+     &                'AND BOUNDARY NODE',I7,' (WHICH IS AN ESSENTIAL ',
+     &                     'EXTERNAL NO NORMAL FLOW WITH SLIP BOUNDARY',
      &                       ' NODE),',/,2X,
      &                       'THE BOUNDARY TYPE FOR BOUNDARY NODE ',I7,
      &                       ' IS BEING RESET TO IBTYPE=20',/,2X,
-     &                       '(NATURAL NO NORMAL FLOW WITH SLIP BOUNDARY) ')
+     &                   '(NATURAL NO NORMAL FLOW WITH SLIP BOUNDARY) ')
                         LBCODEI(ICK)=20
                      ENDIF
                      IF(((IBTYPE.EQ.4).AND.(LBCODEI(ICK).EQ.10)) 
-     &                    .OR.((IBTYPE.EQ.5).AND.(LBCODEI(ICK).EQ.10))) THEN
+     &                .OR.((IBTYPE.EQ.5).AND.(LBCODEI(ICK).EQ.10))) THEN
                         WRITE(16,8569) JGW,ICK,ICK
- 8569                   FORMAT(1X,'DUE TO LEGAL OVERLAPPING OF ',
-     &                       'BOUNDARY NODE ',I7,' (WHICH IS AN ESSENTIAL INTER'
+ 8569                 FORMAT(1X,'DUE TO LEGAL OVERLAPPING OF ',
+     &               'BOUNDARY NODE ',I7,' (WHICH IS AN ESSENTIAL INTER'
      &                       ,'NAL BARRIER BOUNDARY NODE)', /,2X,
-     &                       'AND BOUNDARY NODE',I7,' (WHICH IS AN ESSENTIAL ',
-     &                       'EXTERNAL NO NORMAL FLOW WITH NO SLIP BOUNDARY',
+     &                'AND BOUNDARY NODE',I7,' (WHICH IS AN ESSENTIAL ',
+     &                  'EXTERNAL NO NORMAL FLOW WITH NO SLIP BOUNDARY',
      &                       ' NODE),',/,2X,
      &                       'THE BOUNDARY TYPE FOR BOUNDARY NODE ',I7,
      &                       ' IS BEING RESET TO IBTYPE=20',/,2X,
-     &                       '(NATURAL NO NORMAL FLOW WITH SLIP BOUNDARY) ')
+     &                   '(NATURAL NO NORMAL FLOW WITH SLIP BOUNDARY) ')
                         LBCODEI(ICK)=20
                      ENDIF
                      IF(((IBTYPE.EQ.24).AND.(LBCODEI(ICK).EQ.10))  
-     &                    .OR.((IBTYPE.EQ.25).AND.(LBCODEI(ICK).EQ.10))) THEN
+     &              .OR.((IBTYPE.EQ.25).AND.(LBCODEI(ICK).EQ.10))) THEN
                         WRITE(16,8570) JGW,ICK,ICK
  8570                   FORMAT(1X,'DUE TO LEGAL OVERLAPPING OF ',
-     &                       'BOUNDARY NODE',I7,' (WHICH IS A NATURAL INTERNAL'
+     &                'BOUNDARY NODE',I7,' (WHICH IS A NATURAL INTERNAL'
      &                       ,' BARRIER BOUNDARY NODE)', /,2X,
-     &                       'AND BOUNDARY NODE',I7,' (WHICH IS AN ESSENTIAL ',
-     &                       'EXTERNAL NO NORMAL FLOW WITH NO SLIP BOUNDARY',
+     &                'AND BOUNDARY NODE',I7,' (WHICH IS AN ESSENTIAL ',
+     &                  'EXTERNAL NO NORMAL FLOW WITH NO SLIP BOUNDARY',
      &                       ' NODE),',/,2X,
      &                       'THE BOUNDARY TYPE FOR BOUNDARY NODE',I7,
      &                       ' IS BEING RESET TO IBTYPE=0',/,2X,
-     &                       '(ESSENTIAL NO NORMAL FLOW WITH SLIP BOUNDARY) ')
+     &                 '(ESSENTIAL NO NORMAL FLOW WITH SLIP BOUNDARY) ')
                         LBCODEI(ICK)=0
                      ENDIF
                   ENDIF
@@ -2839,12 +2902,26 @@ C.......Put barrier data into arrays more amiable to DG data structure
          ENDDO
       ENDIF
       
-      IF ((IBTYPE.EQ.4).OR.(IBTYPE.EQ.24)) THEN
+      IF ((IBTYPE.EQ.4).OR.(IBTYPE.EQ.24).OR.
+     &    (IBTYPE.EQ.5).OR.(IBTYPE.EQ.25)) THEN
          DO I = 1,NVELL(K)-1
             NIBSEG = NIBSEG + 1
+            X1=X(NBVV(K,I))
+            X2=X(NBVV(K,I+1))
+            Y1=Y(NBVV(K,I))
+            Y2=Y(NBVV(K,I+1))
+            IBL(NIBSEG)=SQRT((X1-X2)**2+(Y1-Y2)**2)
             IBHT(NIBSEG)   = 0.5D0*( BARINHTR(I)   + BARINHTR(I+1)   )
             IBCFSB(NIBSEG) = 0.5D0*( BARINCFSBR(I) + BARINCFSBR(I+1) )
             IBCFSP(NIBSEG) = 0.5D0*( BARINCFSPR(I) + BARINCFSPR(I+1) )
+            IF ((IBTYPE.EQ.5).OR.(IBTYPE.EQ.25)) THEN
+               PIHT(NIBSEG,1) = PIPEHTR(I)   
+               PIHT(NIBSEG,2) = PIPEHTR(I+1)
+               PICF(NIBSEG,1) = PIPECOEFR(I)  
+               PICF(NIBSEG,2) = PIPECOEFR(I+1)
+               PIDI(NIBSEG,1) = PIPEDIAMR(I)  
+               PIDI(NIBSEG,2) = PIPEDIAMR(I+1) 
+            ENDIF 
             BACKNODES(1,NIBSEG) = IBCONNR(I)
             BACKNODES(2,NIBSEG) = IBCONNR(I+1)
          ENDDO
@@ -2883,7 +2960,7 @@ C     node itself
 C     and in case the maximum number of nodes occurs at a boundary
 C     node
 
-      MNei = MNei+3
+      MNei = MNei+4
 
 
 C.....TRANSFER FLOW BOUNDARY INFORMATION INTO NODAL ARRAYS
@@ -2939,7 +3016,7 @@ C.....READ IN AND WRITE OUT INFO ON SPECIFIED NORMAL FLOW BOUNDARIES
  2202       FORMAT(/,5X,'NUMBER OF PERIODIC NORMAL FLOW CONSTITUENTS =',
      &           I5)
             WRITE(16,2203)
- 2203       FORMAT(/,7X,'CONSTITUENT #',4X,'FREQUENCY',4X,'NODAL FACTOR',
+ 2203      FORMAT(/,7X,'CONSTITUENT #',4X,'FREQUENCY',4X,'NODAL FACTOR',
      &           3X,'EQU.ARG (DEG)',2X,'CONSTITUENT',/)
             DO I=1,NFFR
                READ(15,'(A5)') FBOUNTAG(I)
@@ -3205,28 +3282,61 @@ C.... THE ELEMENT NO. THE STATION LIES IN
          ENDIF
          AEMIN=1.0E+25
          KMIN=0
+
          DO K=1,NE
-            N1=NM(K,1)
-            N2=NM(K,2)
-            N3=NM(K,3)
-            X1=X(N1)
-            X2=X(N2)
-            X3=X(N3)
-            X4=XEL(I)
-            Y1=Y(N1)
-            Y2=Y(N2)
-            Y3=Y(N3)
-            Y4=YEL(I)
-            A1=(X4-X3)*(Y2-Y3)+(X2-X3)*(Y3-Y4)
-            A2=(X4-X1)*(Y3-Y1)-(Y4-Y1)*(X3-X1)
-            A3=(Y4-Y1)*(X2-X1)-(X4-X1)*(Y2-Y1)
-            AA=ABS(A1)+ABS(A2)+ABS(A3)
-            AE=ABS(AA-AREAS(K))/AREAS(K)
-            IF(AE.LT.AEMIN) THEN
-               AEMIN=AE
-               KMIN=K
+            IF (EDN(K) .EQ. 3) THEN 
+               N1=NM(K,1)
+               N2=NM(K,2)
+               N3=NM(K,3)
+               X1=X(N1)
+               X2=X(N2)
+               X3=X(N3)
+               X4=XEL(I)
+               Y1=Y(N1)
+               Y2=Y(N2)
+               Y3=Y(N3)
+               Y4=YEL(I)
+               A1=(X4-X3)*(Y2-Y3)+(X2-X3)*(Y3-Y4)
+               A2=(X4-X1)*(Y3-Y1)-(Y4-Y1)*(X3-X1)
+               A3=(Y4-Y1)*(X2-X1)-(X4-X1)*(Y2-Y1)
+               AA=ABS(A1)+ABS(A2)+ABS(A3)
+               AE=ABS(AA-AREAS(K))/AREAS(K)
+               IF(AE.LT.AEMIN) THEN
+                  AEMIN=AE
+                  KMIN=K
+               ENDIF
+               IF(AE.LT.1.0E-5) NNE(I)=K
+            ELSEIF (EDN(K) .EQ. 4) THEN
+               N1=NM(K,1)
+               N2=NM(K,2)
+               N3=NM(K,3)
+               N4=NM(K,4)
+               X1=X(N1)
+               X2=X(N2)
+               X3=X(N3)
+               X4=X(N4)
+               X5=XEL(I)
+               Y1=Y(N1)
+               Y2=Y(N2)
+               Y3=Y(N3)
+               Y4=Y(N4)
+               Y5=YEL(I)
+               A1=x5*y2 + x2*y3 + x3*y4 + x4*y5 - x2*y5 - x3*y2
+     &                                                  - x4*y3 - x5*y4
+               A2=x5*y3 + x3*y4 + x4*y1 + x1*y5 - x3*y5 - x4*y3
+     &                                                  - x1*y4 - x5*y1
+               A3=x5*y4 + x4*y1 + x1*y2 + x2*y5 - x4*y5 - x1*y4
+     &                                                  - x2*y1 - x5*y2
+               A4=x5*y1 + x1*y2 + x2*y3 + x3*y5 - x1*y5 - x2*y1
+     &                                                  - x3*y2 - x5*y3
+               AA=ABS(A1)+ABS(A2)+ABS(A3)+ABS(A4)
+               AE=ABS(AA-AREAS(K))/AREAS(K)
+               IF(AE.LT.AEMIN) THEN
+                  AEMIN=AE
+                  KMIN=K
+               ENDIF
+               IF(AE.LT.1.0E-5) NNE(I)=K
             ENDIF
-            IF(AE.LT.1.0E-5) NNE(I)=K
          END DO
 
          IF(NNE(I).EQ.0) THEN
@@ -3242,7 +3352,7 @@ C.... THE ELEMENT NO. THE STATION LIES IN
                IF(NSCREEN.EQ.1.AND.MYPROC.EQ.0) WRITE(6,9790) AEMIN
                WRITE(16,9790) AEMIN
  9790          FORMAT(/,1X,'PROGRAM WILL ESTIMATE NEAREST ELEMENT',
-     &              /,1X,'PROXIMITY INDEX FOR THIS STATION EQUALS ',E15.6,
+     &            /,1X,'PROXIMITY INDEX FOR THIS STATION EQUALS ',E15.6,
      &              //,1X,'!!!!!! EXECUTION WILL CONTINUE !!!!!!',//)
                NNE(I)=KMIN
             ELSE
@@ -3268,22 +3378,45 @@ C.... THE ELEMENT NO. THE STATION LIES IN
          ENDIF
 
 C.... PRE-COMPUTE INFORMATION REQUIRED TO INTERPOLATE AT ELEV. RECORDING STATIONS
-
-         N1=NM(NNE(I),1)
-         N2=NM(NNE(I),2)
-         N3=NM(NNE(I),3)
-         X1=X(N1)
-         X2=X(N2)
-         X3=X(N3)
-         X4=XEL(I)
-         Y1=Y(N1)
-         Y2=Y(N2)
-         Y3=Y(N3)
-         Y4=YEL(I)
-         STAIE1(I)=((X4-X3)*(Y2-Y3)+(X2-X3)*(Y3-Y4))/AREAS(NNE(I))
-         STAIE2(I)=((X4-X1)*(Y3-Y1)-(Y4-Y1)*(X3-X1))/AREAS(NNE(I))
-         STAIE3(I)=(-(X4-X1)*(Y2-Y1)+(Y4-Y1)*(X2-X1))/AREAS(NNE(I))
-
+         IF (EDN(NNE(I)) .EQ. 3) THEN
+            N1=NM(NNE(I),1)
+            N2=NM(NNE(I),2)
+            N3=NM(NNE(I),3)
+            X1=X(N1)
+            X2=X(N2)
+            X3=X(N3)
+            X4=XEL(I)
+            Y1=Y(N1)
+            Y2=Y(N2)
+            Y3=Y(N3)
+            Y4=YEL(I)
+            STAIE1(I)=((X4-X3)*(Y2-Y3)+(X2-X3)*(Y3-Y4))/AREAS(NNE(I))
+            STAIE2(I)=((X4-X1)*(Y3-Y1)-(Y4-Y1)*(X3-X1))/AREAS(NNE(I))
+            STAIE3(I)=(-(X4-X1)*(Y2-Y1)+(Y4-Y1)*(X2-X1))/AREAS(NNE(I))
+         ELSEIF (EDN(NNE(I)) .EQ. 4) THEN
+            N1=NM(NNE(I),1)
+            N2=NM(NNE(I),2)
+            N3=NM(NNE(I),3)
+            N4=NM(NNE(I),4)
+            X1=X(N1)
+            X2=X(N2)
+            X3=X(N3)
+            X4=X(N4)
+            X5=XEL(I)
+            Y1=Y(N1)
+            Y2=Y(N2)
+            Y3=Y(N3)
+            Y4=Y(N4)
+            Y5=YEL(I)
+            STAIE1(I)=(x5*y2 + x2*y3 + x3*y4 + x4*y5 - x2*y5 - x3*y2
+     &                                    - x4*y3 - x5*y4)/AREAS(NNE(I))
+            STAIE2(I)=(x5*y3 + x3*y4 + x4*y1 + x1*y5 - x3*y5 - x4*y3
+     &                                    - x1*y4 - x5*y1)/AREAS(NNE(I))
+            STAIE3(I)=(x5*y4 + x4*y1 + x1*y2 + x2*y5 - x4*y5 - x1*y4
+     &                                    - x2*y1 - x5*y2)/AREAS(NNE(I))
+            STAIE4(I)=(x5*y1 + x1*y2 + x2*y3 + x3*y5 - x1*y5 - x2*y1
+     &                                    - x3*y2 - x5*y3)/AREAS(NNE(I))
+         ENDIF
       END DO
 
 C...  
@@ -3390,27 +3523,59 @@ C.... THEN COMPUTE ELEMENT NO. WITHIN WHICH STATION LIES
          AEMIN=1.0E+25
          KMIN=0
          DO K=1,NE
-            N1=NM(K,1)
-            N2=NM(K,2)
-            N3=NM(K,3)
-            X1=X(N1)
-            X2=X(N2)
-            X3=X(N3)
-            X4=XEV(I)
-            Y1=Y(N1)
-            Y2=Y(N2)
-            Y3=Y(N3)
-            Y4=YEV(I)
-            A1=(X4-X3)*(Y2-Y3)+(X2-X3)*(Y3-Y4)
-            A2=(X4-X1)*(Y3-Y1)-(Y4-Y1)*(X3-X1)
-            A3=(Y4-Y1)*(X2-X1)-(X4-X1)*(Y2-Y1)
-            AA=ABS(A1)+ABS(A2)+ABS(A3)
-            AE=ABS(AA-AREAS(K))/AREAS(K)
-            IF(AE.LT.AEMIN) THEN
-               AEMIN=AE
-               KMIN=K
+            IF (EDN(K) .EQ. 3) THEN 
+               N1=NM(K,1)
+               N2=NM(K,2)
+               N3=NM(K,3)
+               X1=X(N1)
+               X2=X(N2)
+               X3=X(N3)
+               X4=XEV(I)
+               Y1=Y(N1)
+               Y2=Y(N2)
+               Y3=Y(N3)
+               Y4=YEV(I)
+               A1=(X4-X3)*(Y2-Y3)+(X2-X3)*(Y3-Y4)
+               A2=(X4-X1)*(Y3-Y1)-(Y4-Y1)*(X3-X1)
+               A3=(Y4-Y1)*(X2-X1)-(X4-X1)*(Y2-Y1)
+               AA=ABS(A1)+ABS(A2)+ABS(A3)
+               AE=ABS(AA-AREAS(K))/AREAS(K)
+               IF(AE.LT.AEMIN) THEN
+                  AEMIN=AE
+                  KMIN=K
+               ENDIF
+               IF(AE.LT.1.0E-5) NNV(I)=K
+            ELSEIF (EDN(K) .EQ. 4) THEN
+               N1=NM(K,1)
+               N2=NM(K,2)
+               N3=NM(K,3)
+               N4=NM(K,4)
+               X1=X(N1)
+               X2=X(N2)
+               X3=X(N3)
+               X4=X(N4)
+               X5=XEV(I)
+               Y1=Y(N1)
+               Y2=Y(N2)
+               Y3=Y(N3)
+               Y4=Y(N4)
+               Y5=YEV(I)
+               A1=x5*y2 + x2*y3 + x3*y4 + x4*y5 - x2*y5 - x3*y2
+     &                                                  - x4*y3 - x5*y4
+               A2=x5*y3 + x3*y4 + x4*y1 + x1*y5 - x3*y5 - x4*y3
+     &                                                  - x1*y4 - x5*y1
+               A3=x5*y4 + x4*y1 + x1*y2 + x2*y5 - x4*y5 - x1*y4
+     &                                                  - x2*y1 - x5*y2
+               A4=x5*y1 + x1*y2 + x2*y3 + x3*y5 - x1*y5 - x2*y1
+     &                                                  - x3*y2 - x5*y3
+               AA=ABS(A1)+ABS(A2)+ABS(A3)+ABS(A4)
+               AE=ABS(AA-AREAS(K))/AREAS(K)
+               IF(AE.LT.AEMIN) THEN
+                  AEMIN=AE
+                  KMIN=K
+               ENDIF
+               IF(AE.LT.1.0E-5) NNV(I)=K
             ENDIF
-            IF(AE.LT.1.0E-5) NNV(I)=K
          END DO
 
          IF(NNV(I).EQ.0) THEN
@@ -3442,20 +3607,45 @@ C.... THEN COMPUTE ELEMENT NO. WITHIN WHICH STATION LIES
 
 C.... PRE-COMPUTE INFORMATION REQUIRED TO INTERPOLATE AT VEL. RECORDING STATIONS
 
-         N1=NM(NNV(I),1)
-         N2=NM(NNV(I),2)
-         N3=NM(NNV(I),3)
-         X1=X(N1)
-         X2=X(N2)
-         X3=X(N3)
-         X4=XEV(I)
-         Y1=Y(N1)
-         Y2=Y(N2)
-         Y3=Y(N3)
-         Y4=YEV(I)
-         STAIV1(I)=((X4-X3)*(Y2-Y3)+(X2-X3)*(Y3-Y4))/AREAS(NNV(I))
-         STAIV2(I)=((X4-X1)*(Y3-Y1)-(Y4-Y1)*(X3-X1))/AREAS(NNV(I))
-         STAIV3(I)=(-(X4-X1)*(Y2-Y1)+(Y4-Y1)*(X2-X1))/AREAS(NNV(I))
+         IF (EDN(NNV(I)) .EQ. 3) THEN
+            N1=NM(NNV(I),1)
+            N2=NM(NNV(I),2)
+            N3=NM(NNV(I),3)
+            X1=X(N1)
+            X2=X(N2)
+            X3=X(N3)
+            X4=XEV(I)
+            Y1=Y(N1)
+            Y2=Y(N2)
+            Y3=Y(N3)
+            Y4=YEV(I)
+            STAIV1(I)=((X4-X3)*(Y2-Y3)+(X2-X3)*(Y3-Y4))/AREAS(NNV(I))
+            STAIV2(I)=((X4-X1)*(Y3-Y1)-(Y4-Y1)*(X3-X1))/AREAS(NNV(I))
+            STAIV3(I)=(-(X4-X1)*(Y2-Y1)+(Y4-Y1)*(X2-X1))/AREAS(NNV(I))
+         ELSEIF (EDN(NNV(I)) .EQ. 4) THEN
+            N1=NM(NNV(I),1)
+            N2=NM(NNV(I),2)
+            N3=NM(NNV(I),3)
+            N4=NM(NNV(I),4)
+            X1=X(N1)
+            X2=X(N2)
+            X3=X(N3)
+            X4=X(N4)
+            X5=XEV(I)
+            Y1=Y(N1)
+            Y2=Y(N2)
+            Y3=Y(N3)
+            Y4=Y(N4)
+            Y5=YEV(I)
+            STAIV1(I)=(x5*y2 + x2*y3 + x3*y4 + x4*y5 - x2*y5 - x3*y2
+     &                                    - x4*y3 - x5*y4)/AREAS(NNV(I))
+            STAIV2(I)=(x5*y3 + x3*y4 + x4*y1 + x1*y5 - x3*y5 - x4*y3
+     &                                    - x1*y4 - x5*y1)/AREAS(NNV(I))
+            STAIV3(I)=(x5*y4 + x4*y1 + x1*y2 + x2*y5 - x4*y5 - x1*y4
+     &                                    - x2*y1 - x5*y2)/AREAS(NNV(I))
+            STAIV4(I)=(x5*y1 + x1*y2 + x2*y3 + x3*y5 - x1*y5 - x2*y1
+     &                                    - x3*y2 - x5*y3)/AREAS(NNV(I))
+         ENDIF
 
       END DO
 
@@ -3480,7 +3670,7 @@ C.....CHECK INPUT PARAMETER NOUTC
          IF(ABS(NOUTC).GT.2) THEN
             IF(NSCREEN.EQ.1.AND.MYPROC.EQ.0) WRITE(6,3202)
             WRITE(16,3202)
- 3202       FORMAT(////,1X,'!!!!!!!!!!  WARNING - FATAL ERROR !!!!!!!!!',
+ 3202      FORMAT(////,1X,'!!!!!!!!!!  WARNING - FATAL ERROR !!!!!!!!!',
      &           //,1X,'YOUR SELECTION OF THE UNIT 15 INPUT PARAMETER',
      &           ' NOUTC',
      &           /,1X,'IS NOT AN ALLOWABLE VALUE.  CHECK YOUR INPUT!!')
@@ -3566,33 +3756,65 @@ C.....THEN COMPUTE ELEMENT NO. WITHIN WHICH STATION LIES
             AEMIN=1.0E+25
             KMIN=0
             DO K=1,NE
-               N1=NM(K,1)
-               N2=NM(K,2)
-               N3=NM(K,3)
-               X1=X(N1)
-               X2=X(N2)
-               X3=X(N3)
-               X4=XEC(I)
-               Y1=Y(N1)
-               Y2=Y(N2)
-               Y3=Y(N3)
-               Y4=YEC(I)
-               A1=(X4-X3)*(Y2-Y3)+(X2-X3)*(Y3-Y4)
-               A2=(X4-X1)*(Y3-Y1)-(Y4-Y1)*(X3-X1)
-               A3=(Y4-Y1)*(X2-X1)-(X4-X1)*(Y2-Y1)
-               AA=ABS(A1)+ABS(A2)+ABS(A3)
-               AE=ABS(AA-AREAS(K))/AREAS(K)
-               IF(AE.LT.AEMIN) THEN
-                  AEMIN=AE
-                  KMIN=K
+               IF (EDN(K) .EQ. 3) THEN 
+                  N1=NM(K,1)
+                  N2=NM(K,2)
+                  N3=NM(K,3)
+                  X1=X(N1)
+                  X2=X(N2)
+                  X3=X(N3)
+                  X4=XEC(I)
+                  Y1=Y(N1)
+                  Y2=Y(N2)
+                  Y3=Y(N3)
+                  Y4=YEC(I)
+                  A1=(X4-X3)*(Y2-Y3)+(X2-X3)*(Y3-Y4)
+                  A2=(X4-X1)*(Y3-Y1)-(Y4-Y1)*(X3-X1)
+                  A3=(Y4-Y1)*(X2-X1)-(X4-X1)*(Y2-Y1)
+                  AA=ABS(A1)+ABS(A2)+ABS(A3)
+                  AE=ABS(AA-AREAS(K))/AREAS(K)
+                  IF(AE.LT.AEMIN) THEN
+                     AEMIN=AE
+                     KMIN=K
+                  ENDIF
+                  IF(AE.LT.1.0E-5) NNC(I)=K
+               ELSEIF (EDN(K) .EQ. 4) THEN
+                  N1=NM(K,1)
+                  N2=NM(K,2)
+                  N3=NM(K,3)
+                  N4=NM(K,4)
+                  X1=X(N1)
+                  X2=X(N2)
+                  X3=X(N3)
+                  X4=X(N4)
+                  X5=XEC(I)
+                  Y1=Y(N1)
+                  Y2=Y(N2)
+                  Y3=Y(N3)
+                  Y4=Y(N4)
+                  Y5=YEC(I)
+						A1=x5*y2 + x2*y3 + x3*y4 + x4*y5 - x2*y5 - x3*y2
+     &                                                  - x4*y3 - x5*y4
+						A2=x5*y3 + x3*y4 + x4*y1 + x1*y5 - x3*y5 - x4*y3
+     &                                                  - x1*y4 - x5*y1
+						A3=x5*y4 + x4*y1 + x1*y2 + x2*y5 - x4*y5 - x1*y4
+     &                                                  - x2*y1 - x5*y2
+						A4=x5*y1 + x1*y2 + x2*y3 + x3*y5 - x1*y5 - x2*y1
+     &                                                  - x3*y2 - x5*y3
+                  AA=ABS(A1)+ABS(A2)+ABS(A3)+ABS(A4)
+                  AE=ABS(AA-AREAS(K))/AREAS(K)
+                  IF(AE.LT.AEMIN) THEN
+                     AEMIN=AE
+                     KMIN=K
+                  ENDIF
+                  IF(AE.LT.1.0E-5) NNC(I)=K
                ENDIF
-               IF(AE.LT.1.0E-5) NNC(I)=K
             END DO
 
             IF(NNC(I).EQ.0) THEN
                IF(NSCREEN.EQ.1.AND.MYPROC.EQ.0) WRITE(6,9785) I
                WRITE(16,9785) I
- 9785          FORMAT(///,1X,'!!!!!!!!!!  WARNING - NONFATAL INPUT ERROR ',
+ 9785       FORMAT(///,1X,'!!!!!!!!!!  WARNING - NONFATAL INPUT ERROR ',
      &          '!!!!!!!!!',//,
      &          ' CONCENTRATION RECORDING STATION ',I6,' DOES NOT LIE'
      &          ,' WITHIN ANY ELEMENT IN THE DEFINED',/,
@@ -3619,20 +3841,45 @@ C.....THEN COMPUTE ELEMENT NO. WITHIN WHICH STATION LIES
 C.....PRE-COMPUTE INFORMATION REQUIRED TO INTERPOLATE AT CONCENTRATION
 C.....RECORDING STATIONS
 
-            N1=NM(NNC(I),1)
-            N2=NM(NNC(I),2)
-            N3=NM(NNC(I),3)
-            X1=X(N1)
-            X2=X(N2)
-            X3=X(N3)
-            X4=XEL(I)
-            Y1=Y(N1)
-            Y2=Y(N2)
-            Y3=Y(N3)
-            Y4=YEL(I)
-            STAIC1(I)=((X4-X3)*(Y2-Y3)+(X2-X3)*(Y3-Y4))/AREAS(NNC(I))
-            STAIC2(I)=((X4-X1)*(Y3-Y1)-(Y4-Y1)*(X3-X1))/AREAS(NNC(I))
-            STAIC3(I)=(-(X4-X1)*(Y2-Y1)+(Y4-Y1)*(X2-X1))/AREAS(NNC(I))
+            IF (EDN(NNC(I)) .EQ. 3) THEN
+               N1=NM(NNC(I),1)
+               N2=NM(NNC(I),2)
+               N3=NM(NNC(I),3)
+               X1=X(N1)
+               X2=X(N2)
+               X3=X(N3)
+               X4=XEC(I)
+               Y1=Y(N1)
+               Y2=Y(N2)
+               Y3=Y(N3)
+               Y4=YEC(I)
+               STAIC1(I)=((X4-X3)*(Y2-Y3)+(X2-X3)*(Y3-Y4))/AREAS(NNC(I))
+               STAIC2(I)=((X4-X1)*(Y3-Y1)-(Y4-Y1)*(X3-X1))/AREAS(NNC(I))
+              STAIC3(I)=(-(X4-X1)*(Y2-Y1)+(Y4-Y1)*(X2-X1))/AREAS(NNC(I))
+            ELSEIF (EDN(NNC(I)) .EQ. 4) THEN
+               N1=NM(NNC(I),1)
+               N2=NM(NNC(I),2)
+               N3=NM(NNC(I),3)
+               N4=NM(NNC(I),4)
+               X1=X(N1)
+               X2=X(N2)
+               X3=X(N3)
+               X4=X(N4)
+               X5=XEC(I)
+               Y1=Y(N1)
+               Y2=Y(N2)
+               Y3=Y(N3)
+               Y4=Y(N4)
+               Y5=YEC(I)
+               STAIC1(I)=(x5*y2 + x2*y3 + x3*y4 + x4*y5 - x2*y5 - x3*y2
+     &                                    - x4*y3 - x5*y4)/AREAS(NNC(I))
+               STAIC2(I)=(x5*y3 + x3*y4 + x4*y1 + x1*y5 - x3*y5 - x4*y3
+     &                                    - x1*y4 - x5*y1)/AREAS(NNC(I))
+               STAIC3(I)=(x5*y4 + x4*y1 + x1*y2 + x2*y5 - x4*y5 - x1*y4
+     &                                    - x2*y1 - x5*y2)/AREAS(NNC(I))
+               STAIC4(I)=(x5*y1 + x1*y2 + x2*y3 + x3*y5 - x1*y5 - x2*y1
+     &                                    - x3*y2 - x5*y3)/AREAS(NNC(I))
+            ENDIF
 
          END DO
       ENDIF
@@ -3661,7 +3908,7 @@ C.....CHECK INPUT PARAMETER NOUTM
          IF(ABS(NOUTM).GT.2) THEN
             IF(NSCREEN.EQ.1.AND.MYPROC.EQ.0) WRITE(6,3212)
             WRITE(16,3202)
- 3212       FORMAT(////,1X,'!!!!!!!!!!  WARNING - FATAL ERROR !!!!!!!!!',
+ 3212      FORMAT(////,1X,'!!!!!!!!!!  WARNING - FATAL ERROR !!!!!!!!!',
      &           //,1X,'YOUR SELECTION OF THE UNIT 15 INPUT PARAMETER',
      &           ' NOUTC',
      &           /,1X,'IS NOT AN ALLOWABLE VALUE.  CHECK YOUR INPUT!!')
@@ -3746,33 +3993,65 @@ C.....THEN COMPUTE ELEMENT NO. WITHIN WHICH STATION LIES
             AEMIN=1.0E+25
             KMIN=0
             DO K=1,NE
-               N1=NM(K,1)
-               N2=NM(K,2)
-               N3=NM(K,3)
-               X1=X(N1)
-               X2=X(N2)
-               X3=X(N3)
-               X4=XEM(I)
-               Y1=Y(N1)
-               Y2=Y(N2)
-               Y3=Y(N3)
-               Y4=YEM(I)
-               A1=(X4-X3)*(Y2-Y3)+(X2-X3)*(Y3-Y4)
-               A2=(X4-X1)*(Y3-Y1)-(Y4-Y1)*(X3-X1)
-               A3=(Y4-Y1)*(X2-X1)-(X4-X1)*(Y2-Y1)
-               AA=ABS(A1)+ABS(A2)+ABS(A3)
-               AE=ABS(AA-AREAS(K))/AREAS(K)
-               IF(AE.LT.AEMIN) THEN
-                  AEMIN=AE
-                  KMIN=K
+               IF (EDN(K) .EQ. 3) THEN 
+                  N1=NM(K,1)
+                  N2=NM(K,2)
+                  N3=NM(K,3)
+                  X1=X(N1)
+                  X2=X(N2)
+                  X3=X(N3)
+                  X4=XEM(I)
+                  Y1=Y(N1)
+                  Y2=Y(N2)
+                  Y3=Y(N3)
+                  Y4=YEM(I)
+                  A1=(X4-X3)*(Y2-Y3)+(X2-X3)*(Y3-Y4)
+                  A2=(X4-X1)*(Y3-Y1)-(Y4-Y1)*(X3-X1)
+                  A3=(Y4-Y1)*(X2-X1)-(X4-X1)*(Y2-Y1)
+                  AA=ABS(A1)+ABS(A2)+ABS(A3)
+                  AE=ABS(AA-AREAS(K))/AREAS(K)
+                  IF(AE.LT.AEMIN) THEN
+                     AEMIN=AE
+                     KMIN=K
+                  ENDIF
+                  IF(AE.LT.1.0E-5) NNM(I)=K
+               ELSEIF (EDN(K) .EQ. 4) THEN
+                  N1=NM(K,1)
+                  N2=NM(K,2)
+                  N3=NM(K,3)
+                  N4=NM(K,4)
+                  X1=X(N1)
+                  X2=X(N2)
+                  X3=X(N3)
+                  X4=X(N4)
+                  X5=XEM(I)
+                  Y1=Y(N1)
+                  Y2=Y(N2)
+                  Y3=Y(N3)
+                  Y4=Y(N4)
+                  Y5=YEM(I)
+					   A1=x5*y2 + x2*y3 + x3*y4 + x4*y5 - x2*y5 - x3*y2
+     &                                                  - x4*y3 - x5*y4
+					   A2=x5*y3 + x3*y4 + x4*y1 + x1*y5 - x3*y5 - x4*y3
+     &                                                  - x1*y4 - x5*y1
+						A3=x5*y4 + x4*y1 + x1*y2 + x2*y5 - x4*y5 - x1*y4
+     &                                                  - x2*y1 - x5*y2
+						A4=x5*y1 + x1*y2 + x2*y3 + x3*y5 - x1*y5 - x2*y1
+     &                                                  - x3*y2 - x5*y3
+                  AA=ABS(A1)+ABS(A2)+ABS(A3)+ABS(A4)
+                  AE=ABS(AA-AREAS(K))/AREAS(K)
+                  IF(AE.LT.AEMIN) THEN
+                     AEMIN=AE
+                     KMIN=K
+                  ENDIF
+                  IF(AE.LT.1.0E-5) NNM(I)=K
                ENDIF
-               IF(AE.LT.1.0E-5) NNM(I)=K
             END DO
 
             IF(NNM(I).EQ.0) THEN
                IF(NSCREEN.EQ.1.AND.MYPROC.EQ.0) WRITE(6,9942) I
                WRITE(16,9942) I
- 9942          FORMAT(///,1X,'!!!!!!!!!!  WARNING - NONFATAL INPUT ERROR ',
+ 9942       FORMAT(///,1X,'!!!!!!!!!!  WARNING - NONFATAL INPUT ERROR ',
      &          '!!!!!!!!!',//,
      &          ' METEOROLOGICAL RECORDING STATION ',I6,' DOES NOT LIE'
      &          ,' WITHIN ANY ELEMENT IN THE DEFINED',/,
@@ -3799,20 +4078,45 @@ C.....THEN COMPUTE ELEMENT NO. WITHIN WHICH STATION LIES
 C.....PRE-COMPUTE INFORMATION REQUIRED TO INTERPOLATE AT METEOROLOGICAL
 C.....RECORDING STATIONS
 
-            N1=NM(NNM(I),1)
-            N2=NM(NNM(I),2)
-            N3=NM(NNM(I),3)
-            X1=X(N1)
-            X2=X(N2)
-            X3=X(N3)
-            X4=XEM(I)
-            Y1=Y(N1)
-            Y2=Y(N2)
-            Y3=Y(N3)
-            Y4=YEM(I)
-            STAIM1(I)=((X4-X3)*(Y2-Y3)+(X2-X3)*(Y3-Y4))/AREAS(NNM(I))
-            STAIM2(I)=((X4-X1)*(Y3-Y1)-(Y4-Y1)*(X3-X1))/AREAS(NNM(I))
-            STAIM3(I)=(-(X4-X1)*(Y2-Y1)+(Y4-Y1)*(X2-X1))/AREAS(NNM(I))
+            IF (EDN(NNM(I)) .EQ. 3) THEN
+               N1=NM(NNM(I),1)
+               N2=NM(NNM(I),2)
+               N3=NM(NNM(I),3)
+               X1=X(N1)
+               X2=X(N2)
+               X3=X(N3)
+               X4=XEM(I)
+               Y1=Y(N1)
+               Y2=Y(N2)
+               Y3=Y(N3)
+               Y4=YEM(I)
+               STAIM1(I)=((X4-X3)*(Y2-Y3)+(X2-X3)*(Y3-Y4))/AREAS(NNM(I))
+               STAIM2(I)=((X4-X1)*(Y3-Y1)-(Y4-Y1)*(X3-X1))/AREAS(NNM(I))
+              STAIM3(I)=(-(X4-X1)*(Y2-Y1)+(Y4-Y1)*(X2-X1))/AREAS(NNM(I))
+            ELSEIF (EDN(NNM(I)) .EQ. 4) THEN
+               N1=NM(NNM(I),1)
+               N2=NM(NNM(I),2)
+               N3=NM(NNM(I),3)
+               N4=NM(NNM(I),4)
+               X1=X(N1)
+               X2=X(N2)
+               X3=X(N3)
+               X4=X(N4)
+               X5=XEM(I)
+               Y1=Y(N1)
+               Y2=Y(N2)
+               Y3=Y(N3)
+               Y4=Y(N4)
+               Y5=YEM(I)
+               STAIM1(I)=(x5*y2 + x2*y3 + x3*y4 + x4*y5 - x2*y5 - x3*y2
+     &                                    - x4*y3 - x5*y4)/AREAS(NNM(I))
+               STAIM2(I)=(x5*y3 + x3*y4 + x4*y1 + x1*y5 - x3*y5 - x4*y3
+     &                                    - x1*y4 - x5*y1)/AREAS(NNM(I))
+               STAIM3(I)=(x5*y4 + x4*y1 + x1*y2 + x2*y5 - x4*y5 - x1*y4
+     &                                    - x2*y1 - x5*y2)/AREAS(NNM(I))
+               STAIM4(I)=(x5*y1 + x1*y2 + x2*y3 + x3*y5 - x1*y5 - x2*y1
+     &                                    - x3*y2 - x5*y3)/AREAS(NNM(I))
+            ENDIF
 
          END DO
       ENDIF
@@ -3963,7 +4267,7 @@ C.....BETWEEN TIMES TOUTSGC AND TOUTFGC; IF ABS(NOUTGC)=2, OUTPUT WILL BE BINARY
 
          READ(15,*) NOUTGC,TOUTSGC,TOUTFGC,NSPOOLGC
          WRITE(16,3401) NOUTGC
- 3401    FORMAT(////,1X,'GLOBAL NODAL CONCENTRATION INFORMATION OUTPUT:',
+ 3401   FORMAT(////,1X,'GLOBAL NODAL CONCENTRATION INFORMATION OUTPUT:',
      &        //,5X,'NOUTGC = ',I2)
 
 C.....CHECK INPUT PARAMETER NOUTGC
@@ -3971,7 +4275,7 @@ C.....CHECK INPUT PARAMETER NOUTGC
          IF(ABS(NOUTGC).GT.2) THEN
             IF(NSCREEN.EQ.1.AND.MYPROC.EQ.0) WRITE(6,3402)
             WRITE(16,3402)
- 3402       FORMAT(////,1X,'!!!!!!!!!!  WARNING - FATAL ERROR !!!!!!!!!',
+ 3402      FORMAT(////,1X,'!!!!!!!!!!  WARNING - FATAL ERROR !!!!!!!!!',
      &           //,1X,'YOUR SELECTION OF THE UNIT 15 INPUT PARAMETER',
      &           ' NOUTGC',
      &           /,1X,'IS NOT AN ALLOWABLE VALUE.  CHECK YOUR INPUT!!')
@@ -4041,7 +4345,7 @@ C......CHECK INPUT PARAMETER NOUTGW
          IF(ABS(NOUTGW).GT.2) THEN
             IF(NSCREEN.EQ.1.AND.MYPROC.EQ.0) WRITE(6,3452)
             WRITE(16,3452)
- 3452       FORMAT(////,1X,'!!!!!!!!!!  WARNING - FATAL ERROR !!!!!!!!!',
+ 3452      FORMAT(////,1X,'!!!!!!!!!!  WARNING - FATAL ERROR !!!!!!!!!',
      &           //,1X,'YOUR SELECTION OF THE UNIT 15 INPUT PARAMETER',
      &           ' NOUTGW',
      &           /,1X,'IS NOT AN ALLOWABLE VALUE.  CHECK YOUR INPUT!!')
@@ -4054,7 +4358,7 @@ C......IF GLOBAL WIND STRESS OUTPUT WILL NOT BE GENERATED
 
          IF(NOUTGW.EQ.0) THEN
             WRITE(16,3453)
- 3453       FORMAT(///,5X,'NO GLOBAL WIND STRESS OUTPUT WILL BE SPOOLED')
+ 3453      FORMAT(///,5X,'NO GLOBAL WIND STRESS OUTPUT WILL BE SPOOLED')
          ENDIF
 
 C........IF GLOBAL WIND STRESS OUTPUT WILL BE GENERATED
@@ -4097,7 +4401,7 @@ C...
       READ(15,*) NFREQ 
       WRITE(16,99392) NFREQ  
 99392 FORMAT(////,1X,'HARMONIC ANALYSIS INFORMATION OUTPUT : ',
-     &     //,5X,'HARMONIC ANALYSIS PERFORMED FOR ',I4,' CONSTITUENTS',/)
+     &    //,5X,'HARMONIC ANALYSIS PERFORMED FOR ',I4,' CONSTITUENTS',/)
       MNHARF = NFREQ
 
       IF (NFREQ.EQ.0) MNHARF = 1
@@ -4384,7 +4688,8 @@ C...
       WRITE(16,1196)
  1196 FORMAT(/,1X,'THE NEIGHBOR TABLE IS BEING COMPUTED ',/)
 C     
-      CALL NEIGHB(NE,NP,NM,NNEIGH,NEITAB,NEIMIN,NEIMAX,X,Y,NSCREEN,NNEIGH_ELEM,NEIGH_ELEM)
+      CALL NEIGHB(NE,NP,NM,NNEIGH,NEITAB,NEIMIN,NEIMAX,X,Y,NSCREEN,
+     & NNEIGH_ELEM,NEIGH_ELEM,EDN)
 C     
       IF(NSCREEN.EQ.1.AND.MYPROC.EQ.0) 
      &     WRITE(6,1195) NEIMIN,NEIMAX,NEIMAX
@@ -4411,10 +4716,18 @@ C.....Count maximum of the number of the elements associated with a node
       DO I = 1,MNP
          NNDEL(I) = 0
       ENDDO
+
       DO IK=1,MNE
-         NNDEL(NM(IK,1)) = NNDEL(NM(IK,1)) + 1
-         NNDEL(NM(IK,2)) = NNDEL(NM(IK,2)) + 1
-         NNDEL(NM(IK,3)) = NNDEL(NM(IK,3)) + 1
+         IF (EDN(IK) .EQ. 3) THEN
+            NNDEL(NM(IK,1)) = NNDEL(NM(IK,1)) + 1
+            NNDEL(NM(IK,2)) = NNDEL(NM(IK,2)) + 1
+            NNDEL(NM(IK,3)) = NNDEL(NM(IK,3)) + 1
+         ELSEIF (EDN(IK) .EQ. 4) THEN
+            NNDEL(NM(IK,1)) = NNDEL(NM(IK,1)) + 1
+            NNDEL(NM(IK,2)) = NNDEL(NM(IK,2)) + 1
+            NNDEL(NM(IK,3)) = NNDEL(NM(IK,3)) + 1
+            NNDEL(NM(IK,4)) = NNDEL(NM(IK,4)) + 1
+         ENDIF
       ENDDO
       MNNDEL = 0
       DO IK=1,MNP
@@ -4432,25 +4745,44 @@ C.....Make node-to-elements table
 
 
       DO IK=1,MNE
-         NM1 = NM(IK,1)
-         NM2 = NM(IK,2)
-         NM3 = NM(IK,3)
-         
-         NNDEL(NM1) = NNDEL(NM1) + 1
-         NDEL(NM1,NNDEL(NM1)) = IK
-
-         NNDEL(NM2) = NNDEL(NM2) + 1
-         NDEL(NM2,NNDEL(NM2)) = IK
-
-         NNDEL(NM3) = NNDEL(NM3) + 1
-         NDEL(NM3,NNDEL(NM3)) = IK
+         IF (EDN(IK) .EQ. 3) THEN
+            NM1 = NM(IK,1)
+            NM2 = NM(IK,2)
+            NM3 = NM(IK,3)
+            
+            NNDEL(NM1) = NNDEL(NM1) + 1
+            NDEL(NM1,NNDEL(NM1)) = IK
+   
+            NNDEL(NM2) = NNDEL(NM2) + 1
+            NDEL(NM2,NNDEL(NM2)) = IK
+   
+            NNDEL(NM3) = NNDEL(NM3) + 1
+            NDEL(NM3,NNDEL(NM3)) = IK
+         ELSEIF (EDN(IK) .EQ. 4) THEN
+            NM1 = NM(IK,1)
+            NM2 = NM(IK,2)
+            NM3 = NM(IK,3)
+            NM4 = NM(IK,4)
+            
+            NNDEL(NM1) = NNDEL(NM1) + 1
+            NDEL(NM1,NNDEL(NM1)) = IK
+   
+            NNDEL(NM2) = NNDEL(NM2) + 1
+            NDEL(NM2,NNDEL(NM2)) = IK
+   
+            NNDEL(NM3) = NNDEL(NM3) + 1
+            NDEL(NM3,NNDEL(NM3)) = IK
+            
+            NNDEL(NM4) = NNDEL(NM4) + 1
+            NDEL(NM4,NNDEL(NM4)) = IK
+         ENDIF
       ENDDO
 C--   
 
 C.....Write table of parameter sizes (vjp 11/28/99)
 
       WRITE(16,4010) MNPROC,MNE,MNP,MNEI,MNOPE,MNETA,MNBOU,MNVEL,
-     &     MNTIF,MNBFR,MNSTAE,MNSTAV,MNSTAC,MNSTAM,NWLAT,NWLON,MNHARF,MNFFR
+     &  MNTIF,MNBFR,MNSTAE,MNSTAV,MNSTAC,MNSTAM,NWLAT,NWLON,MNHARF,MNFFR
       IF (NWS.EQ.0) WRITE(16,4011)
       IF (NWS.EQ.1) WRITE(16,4012)
       IF (ABS(NWS).EQ.2) WRITE(16,4013)
@@ -4507,10 +4839,24 @@ C.....Write table of parameter sizes (vjp 11/28/99)
  4105 FORMAT(' *   and an iterative solver will be used            *')
  4108 FORMAT(' *****************************************************',/)
 
-C.....Close fort.15, fort.14, and fort.dg files
-
+C.....Close fort.15, fort.14 files
       CLOSE(14)
       CLOSE(15)
+        
+C.....Read in the fort.dg file
+
+      !srb - check fort.dg format (for backwards compatibility)
+      READ(25,*) LINE
+      
+C.....Close fort.dg file
+      CLOSE(25)
+      LINE2 = ADJUSTL(LINE)
+      
+      IF (LINE2(1:1) .EQ. "1") THEN
+        CALL read_fixed_fort_dg()   ! first line of old fort.dg is a 1 for the dgswe option
+      ELSE
+        CALL read_keyword_fort_dg() ! otherwise assume keyword format
+      ENDIF  
 
       RETURN 
       END SUBROUTINE

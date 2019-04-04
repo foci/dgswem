@@ -166,7 +166,7 @@ C.....Compute the x and y derivatives of the P1 part of iota & iota2
 
 #ifdef TRACE     
             DiotaDR = iota(3,L,NRK+2)
-            DiotaDS = 3.D0/2.D0*iota(2,L,NRK+2) + 1.D0/2.D0*iota(3,L,NRK+2)
+            DiotaDS =3.D0/2.D0*iota(2,L,NRK+2)+1.D0/2.D0*iota(3,L,NRK+2)
 
             DiotaDX(4) = DiotaDR*DRDX(L) + DiotaDS*DSDX(L)
             DiotaDY(4) = DiotaDR*DRDY(L) + DiotaDS*DSDY(L)
@@ -176,10 +176,11 @@ C.....Compute the x and y derivatives of the P1 part of iota & iota2
 
 #ifdef CHEM
             DiotaDR = iota(3,L,NRK+2)
-            DiotaDS = 3.D0/2.D0*iota(2,L,NRK+2) + 1.D0/2.D0*iota(3,L,NRK+2)
+            DiotaDS =3.D0/2.D0*iota(2,L,NRK+2)+1.D0/2.D0*iota(3,L,NRK+2)
 
             Diota2DR = iota2(3,L,NRK+2)
-            Diota2DS = 3.D0/2.D0*iota2(2,L,NRK+2) + 1.D0/2.D0*iota2(3,L,NRK+2)
+            Diota2DS = 3.D0/2.D0*iota2(2,L,NRK+2) + 1.D0/2.D0*
+     &         iota2(3,L,NRK+2)
 
             DiotaDX(4) = DiotaDR*DRDX(L) + DiotaDS*DSDX(L)
             DiotaDY(4) = DiotaDR*DRDY(L) + DiotaDS*DSDY(L)
@@ -266,10 +267,10 @@ C.....Compute limiting slopes for the Y flow
 C.....Compute limiting slopes for the concentrations
 
 #ifdef TRACE
-               SL1 = iota(1,L,NRK+2)*(Y3 - Y2) + iota(1,EL2,NRK+2)*(Y1 - Y3)
+               SL1 = iota(1,L,NRK+2)*(Y3 - Y2)+iota(1,EL2,NRK+2)*(Y1-Y3)
      &              + iota(1,EL3,NRK+2)*(Y2 - Y1)
                
-               SL2 = iota(1,L,NRK+2)*(X2 - X3) + iota(1,EL2,NRK+2)*(X3 - X1)
+               SL2 = iota(1,L,NRK+2)*(X2 - X3)+iota(1,EL2,NRK+2)*(X3-X1)
      &              + iota(1,EL3,NRK+2)*(X1 - X2)
                
                DiotaDX(I) = -SL1/SL3(I,L)
@@ -280,10 +281,10 @@ C.....Compute limiting slopes for the concentrations
 #endif
 
 #ifdef CHEM
-               SL1 = iota(1,L,NRK+2)*(Y3 - Y2) + iota(1,EL2,NRK+2)*(Y1 - Y3)
+               SL1 = iota(1,L,NRK+2)*(Y3 - Y2)+iota(1,EL2,NRK+2)*(Y1-Y3)
      &              + iota(1,EL3,NRK+2)*(Y2 - Y1)
                
-               SL2 = iota(1,L,NRK+2)*(X2 - X3) + iota(1,EL2,NRK+2)*(X3 - X1)
+               SL2 = iota(1,L,NRK+2)*(X2 - X3)+iota(1,EL2,NRK+2)*(X3-X1)
      &              + iota(1,EL3,NRK+2)*(X1 - X2)
                
                DiotaDX(I) = -SL1/SL3(I,L)
@@ -292,17 +293,17 @@ C.....Compute limiting slopes for the concentrations
                
                GRADiota(I) = SQRT(DiotaDX(I)**2.D0 + DiotaDY(I)**2.D0)
 
-               SL1 = iota2(1,L,NRK+2)*(Y3 - Y2) + iota2(1,EL2,NRK+2)*(Y1 - Y3)
+               SL1=iota2(1,L,NRK+2)*(Y3 - Y2)+iota2(1,EL2,NRK+2)*(Y1-Y3)
      &              + iota2(1,EL3,NRK+2)*(Y2 - Y1)
                
-               SL2 = iota2(1,L,NRK+2)*(X2 - X3) + iota2(1,EL2,NRK+2)*(X3 - X1)
+               SL2=iota2(1,L,NRK+2)*(X2 - X3)+iota2(1,EL2,NRK+2)*(X3-X1)
      &              + iota2(1,EL3,NRK+2)*(X1 - X2)
                
                Diota2DX(I) = -SL1/SL3(I,L)
                
                Diota2DY(I) = -SL2/SL3(I,L)
                
-               GRADiota2(I) = SQRT(Diota2DX(I)**2.D0 + Diota2DY(I)**2.D0)
+               GRADiota2(I) = SQRT(Diota2DX(I)**2.D0+Diota2DY(I)**2.D0)
 #endif
 
             ENDDO
@@ -314,12 +315,15 @@ C.....Compute the (possibly) limited gradient
             QYLIM = MIN( GRADQY(1), GRADQY(2), GRADQY(3), GRADQY(4) )
 
 #ifdef TRACE
-            iotaLIM = MIN( GRADiota(1), GRADiota(2), GRADiota(3), GRADiota(4) )
+           iotaLIM = MIN(GRADiota(1), GRADiota(2), GRADiota(3),
+     &         GRADiota(4))
 #endif
 
 #ifdef CHEM
-            iotaLIM = MIN( GRADiota(1), GRADiota(2), GRADiota(3), GRADiota(4) )
-            iota2LIM = MIN( GRADiota2(1), GRADiota2(2), GRADiota2(3), GRADiota2(4) )
+            iotaLIM = MIN( GRADiota(1), GRADiota(2), GRADiota(3), 
+     &         GRADiota(4) )
+            iota2LIM = MIN( GRADiota2(1), GRADiota2(2), GRADiota2(3), 
+     &         GRADiota2(4) )
 #endif
             
             DO I = 1,4
@@ -362,11 +366,11 @@ C.....Compute the (possibly) limited gradient
             DEN = DRDX(L)*DSDY(L) - DRDY(L)*DSDX(L)
 
             ZE(2,L,IRK+1) = 1.D0/3.D0*(2.D0*ZELIMY*DRDX(L)
-     &           - 2.D0*DRDY(L)*ZELIMX - ZELIMX*DSDY(L) + DSDX(L)*ZELIMY)/DEN
+     &           -2.D0*DRDY(L)*ZELIMX-ZELIMX*DSDY(L)+DSDX(L)*ZELIMY)/DEN
             QX(2,L,IRK+1) = 1.D0/3.D0*(2.D0*QXLIMY*DRDX(L)
-     &           - 2.D0*DRDY(L)*QXLIMX - QXLIMX*DSDY(L) + DSDX(L)*QXLIMY)/DEN
+     &           -2.D0*DRDY(L)*QXLIMX-QXLIMX*DSDY(L)+DSDX(L)*QXLIMY)/DEN
             QY(2,L,IRK+1) = 1.D0/3.D0*(2.D0*QYLIMY*DRDX(L)
-     &           - 2.D0*DRDY(L)*QYLIMX - QYLIMX*DSDY(L) + DSDX(L)*QYLIMY)/DEN
+     &           -2.D0*DRDY(L)*QYLIMX-QYLIMX*DSDY(L)+DSDX(L)*QYLIMY)/DEN
 
             ZE(3,L,IRK+1) = (ZELIMX*DSDY(L) - DSDX(L)*ZELIMY)/DEN
             QX(3,L,IRK+1) = (QXLIMX*DSDY(L) - DSDX(L)*QXLIMY)/DEN
@@ -374,19 +378,22 @@ C.....Compute the (possibly) limited gradient
 
 #ifdef TRACE
             iota(2,L,IRK+1) = 1.D0/3.D0*(2.D0*iotaLIMY*DRDX(L)
-     &           - 2.D0*DRDY(L)*iotaLIMX - iotaLIMX*DSDY(L) + DSDX(L)*iotaLIMY)/DEN
+     &           - 2.D0*DRDY(L)*iotaLIMX - iotaLIMX*DSDY(L) + DSDX(L)*
+     &           iotaLIMY)/DEN
 
             iota(3,L,IRK+1) = (iotaLIMX*DSDY(L) - DSDX(L)*iotaLIMY)/DEN
 #endif
 
 #ifdef CHEM
             iota(2,L,IRK+1) = 1.D0/3.D0*(2.D0*iotaLIMY*DRDX(L)
-     &           - 2.D0*DRDY(L)*iotaLIMX - iotaLIMX*DSDY(L) + DSDX(L)*iotaLIMY)/DEN
+     &           - 2.D0*DRDY(L)*iotaLIMX - iotaLIMX*DSDY(L) + DSDX(L)*
+     &           iotaLIMY)/DEN
             iota2(2,L,IRK+1) = 1.D0/3.D0*(2.D0*iota2LIMY*DRDX(L)
-     &           - 2.D0*DRDY(L)*iota2LIMX - iota2LIMX*DSDY(L) + DSDX(L)*iota2LIMY)/DEN
+     &           - 2.D0*DRDY(L)*iota2LIMX - iota2LIMX*DSDY(L) + DSDX(L)*
+     &           iota2LIMY)/DEN
 
             iota(3,L,IRK+1) = (iotaLIMX*DSDY(L) - DSDX(L)*iotaLIMY)/DEN
-            iota2(3,L,IRK+1) = (iota2LIMX*DSDY(L) - DSDX(L)*iota2LIMY)/DEN
+            iota2(3,L,IRK+1) = (iota2LIMX*DSDY(L)-DSDX(L)*iota2LIMY)/DEN
 #endif
             
  111        continue
@@ -495,10 +502,10 @@ C.....Retrieve the nodal info
             QXC(K) = QX(1,L,IRK+1)
             QYC(K) = QY(1,L,IRK+1)
             DO KK = 2,3         ! This slope limiter assumes the functions to limit as a linear function.
-               ZC(K) = ZC(K) + PHI_CORNER(KK,K,pa)*ZE(KK,L,IRK+1)
-               DC(K) = DC(K) + PHI_CORNER(KK,K,pa)*HB(KK,L,1)
-               QXC(K) = QXC(K) + PHI_CORNER(KK,K,pa)*QX(KK,L,IRK+1)
-               QYC(K) = QYC(K) + PHI_CORNER(KK,K,pa)*QY(KK,L,IRK+1)
+               ZC(K) = ZC(K) + PHI_CORNER(KK,K,pa,1)*ZE(KK,L,IRK+1)
+               DC(K) = DC(K) + PHI_CORNER(KK,K,pa,1)*HB(KK,L,1)
+               QXC(K) = QXC(K) + PHI_CORNER(KK,K,pa,1)*QX(KK,L,IRK+1)
+               QYC(K) = QYC(K) + PHI_CORNER(KK,K,pa,1)*QY(KK,L,IRK+1)
             ENDDO
          ENDDO
 
@@ -593,11 +600,11 @@ C.......Set variable vectors
 C.......Transform original variables into the characteristic space
             DO J = 0,2
                WB_C(1,J)
-     &              = LE(1,1)*WB_O(1,J) + LE(1,2)*WB_O(2,J) + LE(1,3)*WB_O(3,J)
+     &            =LE(1,1)*WB_O(1,J)+LE(1,2)*WB_O(2,J)+LE(1,3)*WB_O(3,J)
                WB_C(2,J)
-     &              = LE(2,1)*WB_O(1,J) + LE(2,2)*WB_O(2,J) + LE(2,3)*WB_O(3,J)
+     &            =LE(2,1)*WB_O(1,J)+LE(2,2)*WB_O(2,J)+LE(2,3)*WB_O(3,J)
                WB_C(3,J)
-     &              = LE(3,1)*WB_O(1,J) + LE(3,2)*WB_O(2,J) + LE(3,3)*WB_O(3,J)
+     &            =LE(3,1)*WB_O(1,J)+LE(3,2)*WB_O(2,J)+LE(3,3)*WB_O(3,J)
             ENDDO
             WM_C(1)= LE(1,1)*WM_O(1) + LE(1,2)*WM_O(2) + LE(1,3)*WM_O(3)
             WM_C(2)= LE(2,1)*WM_O(1) + LE(2,2)*WM_O(2) + LE(2,3)*WM_O(3)
@@ -869,10 +876,10 @@ C.....Retrieve the nodal info
          QYC(K) = QY(1,L,IRK+1)         
 
          DO KK = 2,3            ! This slope limiter assumes the functions to limit as a linear function.
-            ZC(K) = ZC(K) + PHI_CORNER(KK,K,pa)*ZE(KK,L,IRK+1)
-            DC(K) = DC(K) + PHI_CORNER(KK,K,pa)*HB(KK,L,1)
-            QXC(K) = QXC(K) + PHI_CORNER(KK,K,pa)*QX(KK,L,IRK+1)
-            QYC(K) = QYC(K) + PHI_CORNER(KK,K,pa)*QY(KK,L,IRK+1)
+            ZC(K) = ZC(K) + PHI_CORNER(KK,K,pa,1)*ZE(KK,L,IRK+1)
+            DC(K) = DC(K) + PHI_CORNER(KK,K,pa,1)*HB(KK,L,1)
+            QXC(K) = QXC(K) + PHI_CORNER(KK,K,pa,1)*QX(KK,L,IRK+1)
+            QYC(K) = QYC(K) + PHI_CORNER(KK,K,pa,1)*QY(KK,L,IRK+1)
 
          ENDDO
       ENDDO
@@ -1004,11 +1011,11 @@ C.......Transform original variables into the characteristic space
 
          DO J = 0,2
             WB_C(1,J)
-     &           = LE(1,1)*WB_O(1,J) + LE(1,2)*WB_O(2,J) + LE(1,3)*WB_O(3,J)
+     &       = LE(1,1)*WB_O(1,J) + LE(1,2)*WB_O(2,J) + LE(1,3)*WB_O(3,J)
             WB_C(2,J)
-     &           = LE(2,1)*WB_O(1,J) + LE(2,2)*WB_O(2,J) + LE(2,3)*WB_O(3,J)
+     &       = LE(2,1)*WB_O(1,J) + LE(2,2)*WB_O(2,J) + LE(2,3)*WB_O(3,J)
             WB_C(3,J)
-     &           = LE(3,1)*WB_O(1,J) + LE(3,2)*WB_O(2,J) + LE(3,3)*WB_O(3,J)
+     &       = LE(3,1)*WB_O(1,J) + LE(3,2)*WB_O(2,J) + LE(3,3)*WB_O(3,J)
          ENDDO
          WM_C(1)= LE(1,1)*WM_O(1) + LE(1,2)*WM_O(2) + LE(1,3)*WM_O(3)
          WM_C(2)= LE(2,1)*WM_O(1) + LE(2,2)*WM_O(2) + LE(2,3)*WM_O(3)
@@ -1229,10 +1236,10 @@ C.....Retrieve the nodal info
          QXC(K) = QX(1,L,IRK+1)
          QYC(K) = QY(1,L,IRK+1)
          DO KK = 2,3            ! This slope limiter assumes the functions to limit as a linear function.
-            ZC(K) = ZC(K) + PHI_CORNER(KK,K,pa)*ZE(KK,L,IRK+1)
-            DC(K) = DC(K) + PHI_CORNER(KK,K,pa)*HB(KK,L,1)
-            QXC(K) = QXC(K) + PHI_CORNER(KK,K,pa)*QX(KK,L,IRK+1)
-            QYC(K) = QYC(K) + PHI_CORNER(KK,K,pa)*QY(KK,L,IRK+1)
+            ZC(K) = ZC(K) + PHI_CORNER(KK,K,pa,1)*ZE(KK,L,IRK+1)
+            DC(K) = DC(K) + PHI_CORNER(KK,K,pa,1)*HB(KK,L,1)
+            QXC(K) = QXC(K) + PHI_CORNER(KK,K,pa,1)*QX(KK,L,IRK+1)
+            QYC(K) = QYC(K) + PHI_CORNER(KK,K,pa,1)*QY(KK,L,IRK+1)
          ENDDO
       ENDDO
 
@@ -1339,11 +1346,11 @@ C.......Set variable vectors
 C.......Transform original variables into the characteristic space
          DO J = 0,2
             WB_C(1,J)
-     &           = LE(1,1)*WB_O(1,J) + LE(1,2)*WB_O(2,J) + LE(1,3)*WB_O(3,J)
+     &       = LE(1,1)*WB_O(1,J) + LE(1,2)*WB_O(2,J) + LE(1,3)*WB_O(3,J)
             WB_C(2,J)
-     &           = LE(2,1)*WB_O(1,J) + LE(2,2)*WB_O(2,J) + LE(2,3)*WB_O(3,J)
+     &       = LE(2,1)*WB_O(1,J) + LE(2,2)*WB_O(2,J) + LE(2,3)*WB_O(3,J)
             WB_C(3,J)
-     &           = LE(3,1)*WB_O(1,J) + LE(3,2)*WB_O(2,J) + LE(3,3)*WB_O(3,J)
+     &       = LE(3,1)*WB_O(1,J) + LE(3,2)*WB_O(2,J) + LE(3,3)*WB_O(3,J)
          ENDDO
          WM_C(1)= LE(1,1)*WM_O(1) + LE(1,2)*WM_O(2) + LE(1,3)*WM_O(3)
          WM_C(2)= LE(2,1)*WM_O(1) + LE(2,2)*WM_O(2) + LE(2,3)*WM_O(3)
@@ -1553,10 +1560,10 @@ C.....Retrieve the nodal info
          QXC(K) = QX(1,L,IRK+1)
          QYC(K) = QY(1,L,IRK+1)
          DO KK = 2,3            ! This slope limiter assumes the functions to limit as a linear function.
-            ZC(K) = ZC(K) + PHI_CORNER(KK,K,pa)*ZE(KK,L,IRK+1)
-            DC(K) = DC(K) + PHI_CORNER(KK,K,pa)*HB(KK,L,1)
-            QXC(K) = QXC(K) + PHI_CORNER(KK,K,pa)*QX(KK,L,IRK+1)
-            QYC(K) = QYC(K) + PHI_CORNER(KK,K,pa)*QY(KK,L,IRK+1)
+            ZC(K) = ZC(K) + PHI_CORNER(KK,K,pa,1)*ZE(KK,L,IRK+1)
+            DC(K) = DC(K) + PHI_CORNER(KK,K,pa,1)*HB(KK,L,1)
+            QXC(K) = QXC(K) + PHI_CORNER(KK,K,pa,1)*QX(KK,L,IRK+1)
+            QYC(K) = QYC(K) + PHI_CORNER(KK,K,pa,1)*QY(KK,L,IRK+1)
          ENDDO
       ENDDO
 
@@ -1657,11 +1664,11 @@ C.......Set variable vectors
 C.......Transform original variables into the characteristic space
          DO J = 0,2
             WB_C(1,J)
-     &           = LE(1,1)*WB_O(1,J) + LE(1,2)*WB_O(2,J) + LE(1,3)*WB_O(3,J)
+     &       = LE(1,1)*WB_O(1,J) + LE(1,2)*WB_O(2,J) + LE(1,3)*WB_O(3,J)
             WB_C(2,J)
-     &           = LE(2,1)*WB_O(1,J) + LE(2,2)*WB_O(2,J) + LE(2,3)*WB_O(3,J)
+     &       = LE(2,1)*WB_O(1,J) + LE(2,2)*WB_O(2,J) + LE(2,3)*WB_O(3,J)
             WB_C(3,J)
-     &           = LE(3,1)*WB_O(1,J) + LE(3,2)*WB_O(2,J) + LE(3,3)*WB_O(3,J)
+     &       = LE(3,1)*WB_O(1,J) + LE(3,2)*WB_O(2,J) + LE(3,3)*WB_O(3,J)
          ENDDO
          WM_C(1)= LE(1,1)*WM_O(1) + LE(1,2)*WM_O(2) + LE(1,3)*WM_O(3)
          WM_C(2)= LE(2,1)*WM_O(1) + LE(2,2)*WM_O(2) + LE(2,3)*WM_O(3)
@@ -2418,17 +2425,23 @@ C.....Convert initial values to the Taylor basis (multiply by Nmatrix) on base e
                
                do ss=1,dofs(k)
 
-                  ZEtaylor(k,ll,1) = ZEtaylor(k,ll,1) + Nmatrix(k,ll,ss,dofs(k)) * ZE(ss,k,nrk+2)
-                  QXtaylor(k,ll,1) = QXtaylor(k,ll,1) + Nmatrix(k,ll,ss,dofs(k))* QX(ss,k,nrk+2)
-                  QYtaylor(k,ll,1) = QYtaylor(k,ll,1) + Nmatrix(k,ll,ss,dofs(k)) * QY(ss,k,nrk+2)
+                  ZEtaylor(k,ll,1) = ZEtaylor(k,ll,1) + Nmatrix(k,ll,ss,
+     &               dofs(k)) * ZE(ss,k,nrk+2)
+                  QXtaylor(k,ll,1) = QXtaylor(k,ll,1) + Nmatrix(k,ll,ss,
+     &               dofs(k))* QX(ss,k,nrk+2)
+                  QYtaylor(k,ll,1) = QYtaylor(k,ll,1) + Nmatrix(k,ll,ss,
+     &               dofs(k)) * QY(ss,k,nrk+2)
 
 #ifdef TRACE
-                  iotataylor(k,ll,1) = iotataylor(k,ll,1) + Nmatrix(k,ll,ss,dofs(k)) * iota(ss,k,nrk+2)
+                  iotataylor(k,ll,1) = iotataylor(k,ll,1)+ Nmatrix(k,ll,
+     &               ss,dofs(k)) * iota(ss,k,nrk+2)
 #endif                     
                   
 #ifdef CHEM
-                  iotataylor(k,ll,1) = iotataylor(k,ll,1) + Nmatrix(k,ll,ss,dofs(k)) * iota(ss,k,nrk+2)
-                  iota2taylor(k,ll,1) = iota2taylor(k,ll,1) + Nmatrix(k,ll,ss,dofs(k)) * iota2(ss,k,nrk+2)
+                  iotataylor(k,ll,1) = iotataylor(k,ll,1)+ Nmatrix(k,ll,
+     &               ss,dofs(k)) * iota(ss,k,nrk+2)
+                  iota2taylor(k,ll,1) = iota2taylor(k,ll,1) + Nmatrix(k,
+     &               ll,ss,dofs(k)) * iota2(ss,k,nrk+2)
 #endif
                   
                enddo
@@ -2505,10 +2518,10 @@ C.....Find values at vertices of base elements and neighbors
 
 C.....Find max and min values over polynomial coefficients
 
-            ZEmax(ell,ll) = max(maxval( ZEtaylor(NEIGH_ELEM(ell,1:nneigh_elem(ell)),ll,1) )
-     &           , ZEmax(ell,ll))
-            QXmax(ell,ll) = max(maxval( QXtaylor(NEIGH_ELEM(ell,1:nneigh_elem(ell)),ll,1) )
-     &           , QXmax(ell,ll))
+            ZEmax(ell,ll) = max(maxval( ZEtaylor(NEIGH_ELEM(ell,
+     &         1:nneigh_elem(ell)),ll,1) ), ZEmax(ell,ll))
+            QXmax(ell,ll) = max(maxval( QXtaylor(NEIGH_ELEM(ell,
+     &         1:nneigh_elem(ell)),ll,1) ) , QXmax(ell,ll))
             QYmax(ell,ll) = max(maxval( QYtaylor(NEIGH_ELEM(ell,1:nneigh_elem(ell)),ll,1) )
      &           , QYmax(ell,ll))
             ZEmin(ell,ll) = min(minval( ZEtaylor(NEIGH_ELEM(ell,1:nneigh_elem(ell)),ll,1) )
@@ -3553,9 +3566,9 @@ C     COMPUTE THE VERTEX VALUES
             ZEVERTEX(2)=ZEC(1)
             ZEVERTEX(3)=ZEC(1)
             DO KK=2,3
-               ZEVERTEX(1)=ZEVERTEX(1)+ PHI_CORNER(KK,1,1)*ZEC(KK)
-               ZEVERTEX(2)=ZEVERTEX(2)+ PHI_CORNER(KK,2,1)*ZEC(KK)
-               ZEVERTEX(3)=ZEVERTEX(3)+ PHI_CORNER(KK,3,1)*ZEC(KK)
+               ZEVERTEX(1)=ZEVERTEX(1)+ PHI_CORNER(KK,1,1,1)*ZEC(KK)
+               ZEVERTEX(2)=ZEVERTEX(2)+ PHI_CORNER(KK,2,1,1)*ZEC(KK)
+               ZEVERTEX(3)=ZEVERTEX(3)+ PHI_CORNER(KK,3,1,1)*ZEC(KK)
             ENDDO
 
             
@@ -4096,9 +4109,9 @@ C     COMPUTE THE VERTEX VALUES
             ZEVERTEX(2)=ZEC(1)
             ZEVERTEX(3)=ZEC(1)
             DO KK=2,3
-               ZEVERTEX(1)=ZEVERTEX(1)+ PHI_CORNER(KK,1,1)*ZEC(KK)
-               ZEVERTEX(2)=ZEVERTEX(2)+ PHI_CORNER(KK,2,1)*ZEC(KK)
-               ZEVERTEX(3)=ZEVERTEX(3)+ PHI_CORNER(KK,3,1)*ZEC(KK)
+               ZEVERTEX(1)=ZEVERTEX(1)+ PHI_CORNER(KK,1,1,1)*ZEC(KK)
+               ZEVERTEX(2)=ZEVERTEX(2)+ PHI_CORNER(KK,2,1,1)*ZEC(KK)
+               ZEVERTEX(3)=ZEVERTEX(3)+ PHI_CORNER(KK,3,1,1)*ZEC(KK)
             ENDDO
 
             
@@ -4643,9 +4656,9 @@ C     COMPUTE THE VERTEX VALUES
             ZEVERTEX(2)=ZEC(1)
             ZEVERTEX(3)=ZEC(1)
             DO KK=2,3
-               ZEVERTEX(1)=ZEVERTEX(1)+ PHI_CORNER(KK,1,1)*ZEC(KK)
-               ZEVERTEX(2)=ZEVERTEX(2)+ PHI_CORNER(KK,2,1)*ZEC(KK)
-               ZEVERTEX(3)=ZEVERTEX(3)+ PHI_CORNER(KK,3,1)*ZEC(KK)
+               ZEVERTEX(1)=ZEVERTEX(1)+ PHI_CORNER(KK,1,1,1)*ZEC(KK)
+               ZEVERTEX(2)=ZEVERTEX(2)+ PHI_CORNER(KK,2,1,1)*ZEC(KK)
+               ZEVERTEX(3)=ZEVERTEX(3)+ PHI_CORNER(KK,3,1,1)*ZEC(KK)
             ENDDO
 
             
@@ -9022,9 +9035,12 @@ C
             ZEVERTEX2(3)=iota(1,I,IRK+1)
 
             DO KK=2,3
-               ZEVERTEX2(1)=ZEVERTEX2(1)+ PHI_CORNER(KK,1,1)*iota(kk,I,IRK+1)
-               ZEVERTEX2(2)=ZEVERTEX2(2)+ PHI_CORNER(KK,2,1)*iota(kk,I,IRK+1)
-               ZEVERTEX2(3)=ZEVERTEX2(3)+ PHI_CORNER(KK,3,1)*iota(kk,I,IRK+1)
+               ZEVERTEX2(1)=ZEVERTEX2(1)+ PHI_CORNER(KK,1,1,1)
+	  &                                                 *iota(kk,I,IRK+1)
+               ZEVERTEX2(2)=ZEVERTEX2(2)+ PHI_CORNER(KK,2,1,1)
+	  &                                                 *iota(kk,I,IRK+1)
+               ZEVERTEX2(3)=ZEVERTEX2(3)+ PHI_CORNER(KK,3,1,1)
+	  &                                                 *iota(kk,I,IRK+1)
             ENDDO
 
 C     

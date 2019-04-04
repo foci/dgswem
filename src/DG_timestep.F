@@ -70,14 +70,15 @@ C.....Use appropriate modules
 #else
       USE SIZES, ONLY : SZ,layers
 #endif
-      USE GLOBAL, ONLY : NE,NM,DP,X,Y,SLAM,SFEA,DEG2RAD,tracer_flag,chem_flag,pdg_el
+      USE GLOBAL, ONLY : NE,NM,DP,X,Y,SLAM,SFEA,DEG2RAD,tracer_flag,
+     & chem_flag,pdg_el,EDN
       USE DG, ONLY : DOF,ZE,QX,QY,iota,iota2,dynP,bed,ncheck,dp_node
 
       IMPLICIT NONE
       
 C.....Declare local variables
 
-      INTEGER IT,J,K,l
+      INTEGER IT,J,K,l,jj
       LOGICAL Detected
       REAL(SZ) DPAVG
 
@@ -86,7 +87,10 @@ C.....Declare local variables
 C.....Detect negative mass
       ErrorElevExceeded=0
       DO J = 1,NE
-         DPAVG =  1.D0/ncheck(pdg_el(j)) * (sum(DP_NODE(:,J,pdg_el(j)))) !(DP(NM(J,1))+DP(NM(J,2))+DP(NM(J,3)))/3.D0
+         jj = EDN(J) - 2
+         DPAVG =  1.D0/ncheck(pdg_el(j),jj) 
+     &                                   * (sum(DP_NODE(:,J,pdg_el(j))))
+         !(DP(NM(J,1))+DP(NM(J,2))+DP(NM(J,3)))/3.D0
          Detected = .FALSE.
          IF((ZE(1,J,1)+DPAVG).LE.0.D0) THEN
             PRINT *, ''
@@ -95,7 +99,12 @@ C.....Detect negative mass
 #endif
             PRINT *, '  ZE(',1,',',J,',1) = ',ZE(1,J,1)
             PRINT *, '  HE(',1,',',J,',1) = ',ZE(1,J,1)+DPAVG
-            PRINT *, '  DP = ',DP(NM(J,1)),DP(NM(J,2)),DP(NM(J,3))
+            if (EDN(J) .eq. 3) then
+               PRINT *, '  DP = ',DP(NM(J,1)),DP(NM(J,2)),DP(NM(J,3))
+            elseif (EDN(J) .eq. 4) then
+               PRINT *, '  DP = ',DP(NM(J,1)),DP(NM(J,2)),DP(NM(J,3)),
+     &                                                       DP(NM(J,4))
+            endif
             PRINT *, '  DPAVG = ',DPAVG
             PRINT *, ' x,  y ',SLAM(NM(J,1))/DEG2RAD,
      $           SFEA(NM(J,1))/DEG2RAD
@@ -241,7 +250,7 @@ C.....Detect NaN
 #ifdef CMPI
                   PRINT *, 'IN SUBDOMAIN ',MYPROC
 #endif
-                  PRINT *, '  bed(',K,',',J,',1,',l,') IS ', bed(K,J,1,l)
+                 PRINT *, '  bed(',K,',',J,',1,',l,') IS ', bed(K,J,1,l)
                   PRINT *, ' x,  y ',X(NM(J,1)),Y(NM(J,1))
                   Detected = .TRUE.
                   ErrorElevExceeded = 1
