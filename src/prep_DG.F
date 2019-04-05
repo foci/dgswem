@@ -52,7 +52,7 @@ C.....Declare local variables
 
       real(sz) checkarea,arint(2,2),rhsint(2),edgeint,dpsdx,psimid,
      $     determ,sfacdub2max,sfacdub3max,R,Jac,XX,YY
-      integer i1,i2,sfac_flag,led,ADDGP(2)
+      integer i1,i2,sfac_flag,led,ADDGP(2),NQEDS
       integer ifac2max,ifac3max,phh,ELT,pp,NN,KI(MNP)
       logical Logi
 
