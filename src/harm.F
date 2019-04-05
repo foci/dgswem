@@ -435,7 +435,7 @@ c        Decomposition of matrix a
                do 40 k=ire,mm
    40             ha(k,j)=ha(k,j)-ha(k,ir)*ha(ir,j)
             do 50 j=ire,mm
-   50          ha(j,ir)=0.0
+   50          ha(j,ir)=0.d0
   100       continue
          return
        endif
@@ -517,19 +517,19 @@ c        phase is between 0 and 360 deg.  Then write output.
          do i=1,nfreq+nf
             if((nf.eq.1).and.(i.eq.1)) then
                emag=hax(i)/haff(i)
-               phasee=0.
+               phasee=0.d0
                else
                i1=2*i-1-nf
                i2=i1+1
                emag=sqrt(hax(i1)*hax(i1)+hax(i2)*hax(i2))/haff(i)
-               if((hax(i1).eq.0.).and.(hax(i2).eq.0.)) then
-                  phasee=0.
+               if((hax(i1).eq.0.d0).and.(hax(i2).eq.0.d0)) then
+                  phasee=0.d0
                   else
                   phasee = atan2(hax(i2),hax(i1))
                   endif
                endif
             phasede=convrd*phasee+haface(i)
-            if(phasede.lt.0.) phasede=phasede+360.d0
+            if(phasede.lt.0.d0) phasede=phasede+360.d0
             if(phasede.ge.360.d0) phasede=phasede-360.d0
 
             write(51,6635) emag,phasede
@@ -602,29 +602,29 @@ c        phase is between 0 and 360 deg.  Then write output.
             if((nf.eq.1).and.(i.eq.1)) then
                umag=hax(i)/haff(i)
                vmag=y(i)/haff(i)
-               phaseu=0.
-               phasev=0.
+               phaseu=0.d0
+               phasev=0.d0
                else
                i1=2*i-1-nf
                i2=i1+1
                umag=sqrt(hax(i1)*hax(i1)+hax(i2)*hax(i2))/haff(i)
                vmag=sqrt(y(i1)*y(i1)+y(i2)*y(i2))/haff(i)
-               if((hax(i1).eq.0.).and.(hax(i2).eq.0.)) then
-                  phaseu=0.
+               if((hax(i1).eq.0.d0).and.(hax(i2).eq.0.d0)) then
+                  phaseu=0.d0
                   else
                   phaseu = atan2(hax(i2),hax(i1))
                   endif
-               if((y(i1).eq.0.).and.(y(i2).eq.0.)) then
-                  phasev=0.
+               if((y(i1).eq.0.d0).and.(y(i2).eq.0.d0)) then
+                  phasev=0.d0
                   else
                   phasev = atan2(y(i2),y(i1))
                   endif
                endif
             phasedu=convrd*phaseu+haface(i)
-            if(phasedu.lt.0.) phasedu=phasedu+360.d0
+            if(phasedu.lt.0.d0) phasedu=phasedu+360.d0
             if(phasedu.ge.360.d0) phasedu=phasedu-360.d0
             phasedv=convrd*phasev+haface(i)
-            if(phasedv.lt.0.) phasedv=phasedv+360.d0
+            if(phasedv.lt.0.d0) phasedv=phasedv+360.d0
             if(phasedv.ge.360.d0) phasedv=phasedv-360.d0
 
             write(52,6636) umag,phasedu,vmag,phasedv
@@ -682,10 +682,10 @@ c
       write(53,*) NP
 C
       if (CHARMV) then
-        EAVMAX=-999.
-        EVAMAX=-999.
-        EAVMIN= 999.
-        EVAMIN= 999.
+        EAVMAX=-999.d0
+        EVAMAX=-999.d0
+        EAVMIN= 999.d0
+        EVAMIN= 999.d0
       end if
 c
 c***** AT each node transfer each load vector to p, solve and write output
@@ -704,31 +704,31 @@ c
             if((nf.eq.1).and.(i.eq.1)) then
                emag(i)=hax(i)
                emagt=emag(i)/haff(i)
-               phasee(i)=0.
+               phasee(i)=0.d0
                else
                i1=2*i-1-nf
                i2=i1+1
                emag(i)=sqrt(hax(i1)*hax(i1)+hax(i2)*hax(i2))
                emagt=emag(i)/haff(i)
-               if((hax(i1).eq.0.).and.(hax(i2).eq.0.)) then
-                  phasee(i)=0.
+               if((hax(i1).eq.0.d0).and.(hax(i2).eq.0.d0)) then
+                  phasee(i)=0.d0
                   else
                   phasee(i) = atan2(hax(i2),hax(i1))
                   endif
                endif
             phasede=convrd*phasee(i)+haface(i)
-            if(phasede.lt.0.) phasede=phasede+360.d0
+            if(phasede.lt.0.d0) phasede=phasede+360.d0
             if(phasede.ge.360.d0) phasede=phasede-360.d0
             write(53,6635) emagt,phasede
  6635       format(2x,e16.8,1x,f11.4)
             end do
 
         if (CHARMV) then
-         eav = 0.
-         esq = 0.
+         eav = 0.d0
+         esq = 0.d0
          do it=1,ntsteps
             TIME=TIMEBEG+DT*IT
-            rse=0.
+            rse=0.d0
             do ifr=1,nfreq+nf
                ftime=hafreq(ifr)*time
                rse=rse+emag(ifr)*cos(ftime-phasee(ifr))
@@ -739,15 +739,15 @@ c
 
          eav=eav/ntsteps
          esq=esq/ntsteps-eav*eav
-         if(elav(n).eq.0.) then
-            if(eav.eq.0.) eavdif=1.0d0
-            if(eav.ne.0.) eavdif=99d19
+         if(elav(n).eq.0.d0) then
+            if(eav.eq.0.d0) eavdif=1.0d0
+            if(eav.ne.0.d0) eavdif=99d19
             else
             eavdif=eav/elav(n)
             endif
-         if(elva(n).eq.0.) then
-            if(esq.eq.0.) evadif=1.0d0
-            if(esq.ne.0.) evadif=99e19
+         if(elva(n).eq.0.d0) then
+            if(esq.eq.0.d0) evadif=1.0d0
+            if(esq.ne.0.d0) evadif=99e19
             else
             evadif=esq/elva(n)
             endif
@@ -847,14 +847,14 @@ c
       write(54,*) NP
 
       if ( charmv ) then
-        UAVMAX=-999.
-        VAVMAX=-999.
-        UVAMAX=-999.
-        VVAMAX=-999.
-        UAVMIN= 999.
-        VAVMIN= 999.
-        UVAMIN= 999.
-        VVAMIN= 999.
+        UAVMAX=-999.d0
+        VAVMAX=-999.d0
+        UVAMAX=-999.d0
+        VVAMAX=-999.d0
+        UAVMIN= 999.d0
+        VAVMIN= 999.d0
+        UVAMIN= 999.d0
+        VVAMIN= 999.d0
       endif ! charmv
 c
 c***** AT each node transfer each load vector to p, solve and write output
@@ -878,8 +878,8 @@ c
                umagt=umag(i)/haff(i)
                vmag(i)=y(i)
                vmagt=vmag(i)/haff(i)
-               phaseu(i)=0.
-               phasev(i)=0.
+               phaseu(i)=0.d0
+               phasev(i)=0.d0
                else
                i1=2*i-1-nf
                i2=i1+1
@@ -887,22 +887,22 @@ c
                umagt=umag(i)/haff(i)
                vmag(i)=sqrt(y(i1)*y(i1)+y(i2)*y(i2))
                vmagt=vmag(i)/haff(i)
-               if((hax(i1).eq.0.).and.(hax(i2).eq.0.)) then
-                  phaseu(i)=0.
+               if((hax(i1).eq.0.d0).and.(hax(i2).eq.0.d0)) then
+                  phaseu(i)=0.d0
                   else
                   phaseu(i)=atan2(hax(i2),hax(i1))
                   endif
-               if((y(i1).eq.0.).and.(y(i2).eq.0.)) then
-                  phasev(i)=0.
+               if((y(i1).eq.0.d0).and.(y(i2).eq.0.d0)) then
+                  phasev(i)=0.d0
                   else
                   phasev(i)=atan2(y(i2),y(i1))
                   endif
                endif
             phasedu=convrd*phaseu(i)+haface(i)
-            if(phasedu.lt.0.) phasedu=phasedu+360.d0
+            if(phasedu.lt.0.d0) phasedu=phasedu+360.d0
             if(phasedu.ge.360.d0) phasedu=phasedu-360.d0
             phasedv=convrd*phasev(i)+haface(i)
-            if(phasedv.lt.0.) phasedv=phasedv+360.d0
+            if(phasedv.lt.0.d0) phasedv=phasedv+360.d0
             if(phasedv.ge.360.d0) phasedv=phasedv-360.d0
 
             write(54,6636) umagt,phasedu,vmagt,phasedv
@@ -914,14 +914,14 @@ CHARMV...FOR CHECKING THE HARMONIC ANALYSIS RESULTS.
 CHARMV...Resynthesize the time series to compute the average and variances.
 CHARMV...Compare resynthesized values with those computed during time stepping.
          if ( charmv ) then
-         uav = 0.
-         vav = 0.
-         usq = 0.
-         vsq = 0.
+         uav = 0.d0
+         vav = 0.d0
+         usq = 0.d0
+         vsq = 0.d0
          do it=1,ntsteps
             TIME=TIMEBEG+DT*IT
-            rsu=0.
-            rsv=0.
+            rsu=0.d0
+            rsv=0.d0
             do ifr=1,nfreq+nf
                ftime=hafreq(ifr)*time
                rsu=rsu+umag(ifr)*cos(ftime-phaseu(ifr))
@@ -1043,7 +1043,7 @@ c
       INTEGER I,J
       REAL(SZ) HAFREQ(MNHARF)
 C
-      if (hafreq(1).eq.0.0) then
+      if (hafreq(1).eq.0.0d0) then
          nz=0
          nf=1
          else
@@ -1056,7 +1056,7 @@ c
 c
       do i=1,mm
          do j=1,mm
-            ha(i,j)=0.
+            ha(i,j)=0.d0
          end do
       end do
       icall=0
@@ -1078,7 +1078,7 @@ c
 c
       do i=1,mm
          do N=1,NP
-            GLOELV(I,N)=0.
+            GLOELV(I,N)=0.d0
          end do
       end do
 C
@@ -1100,7 +1100,7 @@ c
 C
       do i=1,mm
          do N=1,NSTAE
-            STAELV(I,N)=0.
+            STAELV(I,N)=0.d0
          end do
       end do
 C
@@ -1121,8 +1121,8 @@ c
 C
       do i=1,mm
          do N=1,NP
-            GLOULV(I,N)=0.
-            GLOVLV(I,N)=0.
+            GLOULV(I,N)=0.d0
+            GLOVLV(I,N)=0.d0
          end do
       end do
 C
@@ -1143,8 +1143,8 @@ c
 c
       do i=1,mm
          do N=1,NSTAV
-            STAULV(I,N)=0.
-            STAVLV(I,N)=0.
+            STAULV(I,N)=0.d0
+            STAVLV(I,N)=0.d0
          enddo
       enddo
 C

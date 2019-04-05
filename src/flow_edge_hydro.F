@@ -139,16 +139,19 @@ C.....Compute ZE, QX, QY, and HB at each edge Gauss quadrature point
 C.....Compute the specified flow boundaries for the exterior state
 
             Q_N_EXT = 0.D0
-            DO JJ = 1,NFFR
-               
-               IF(FPER(JJ).EQ.0.D0) THEN
+            DO JJ = 1,MNFFR
+               IF (NFFR.EQ.0) THEN
+                  ARGJ = 0.D0
+                  RFF = RAMPDG
+               ELSEIF (FPER(JJ).EQ.0.D0) THEN
                   NCYC = 0.D0
+                  ARGJ = FAMIG(JJ)*(TIMEDG - NCYC*FPER(JJ)) + FFACE(JJ)
+                  RFF  = FFF(JJ)*RAMPDG
                ELSE
                   NCYC = INT(TIMEDG/FPER(JJ))
+                  ARGJ = FAMIG(JJ)*(TIMEDG - NCYC*FPER(JJ)) + FFACE(JJ)
+                  RFF  = FFF(JJ)*RAMPDG
                ENDIF
-
-               ARGJ = FAMIG(JJ)*(TIMEDG - NCYC*FPER(JJ)) + FFACE(JJ)
-               RFF  = FFF(JJ)*RAMPDG
                
                QNAM_GP = 0.5D0*(QNAM_DG(JJ,L,1) + QNAM_DG(JJ,L,2))
      &            + 0.5D0*(QNAM_DG(JJ,L,2) - QNAM_DG(JJ,L,1))*XEGP(I,PA)
@@ -158,12 +161,12 @@ C.....Compute the specified flow boundaries for the exterior state
                ARG = ARGJ - QNPH_GP
                
                Q_N_EXT = Q_N_EXT + QNAM_GP*RFF*COS(ARG)
-                                !Q_N_EXT = Q_N_EXT + QNAM_GP*RFF*COS(ARG)+rff*RAMPExtFlux*0.05D0 
+        !Q_N_EXT = Q_N_EXT + QNAM_GP*RFF*COS(ARG)+rff*RAMPExtFlux*0.05D0 
                Q_T_EXT =  0.D0
-
+               
                QX_EX = -( TY*Q_N_EXT - NY*Q_T_EXT)/(NX*TY - NY*TX)
                QY_EX = -(-TX*Q_N_EXT + NX*Q_T_EXT)/(NX*TY - NY*TX)
-
+                 
             ENDDO
             
 C.....Compute the solution at the interior state
@@ -279,7 +282,7 @@ C.....Compute the edge integral
             DO K = 1,DOFS(EL_IN)
 
                if (J .eq. 1) then
-                  W_IN = 2.0*M_INV(K,pa)/AREAS(EL_IN)*XLEN(GED)*
+                  W_IN = 2.0d0*M_INV(K,pa)/AREAS(EL_IN)*XLEN(GED)*
      &               PHI_EDGE(K,I,LED,pa,J)*WEGP(I,pa)
                elseif (J .eq. 2) then
                   do kk = 1,DOFS(EL_IN)
@@ -317,7 +320,8 @@ C.....Compute the edge integral
             ENDDO
 
 c$$$  DO K = 1,DOFS(EL_IN)
-c$$$  CALL EDGE_INT_HYDRO(EL_IN, LED, GED, I, F_HAT, G_HAT, H_HAT,i_hat,j_hat,k,pa)
+c$$$  CALL EDGE_INT_HYDRO(EL_IN, LED, GED, I, F_HAT, G_HAT, H_HAT,i_hat,
+c$$$     &                                                   j_hat,k,pa)
 c$$$  ENDDO
             
          ENDDO

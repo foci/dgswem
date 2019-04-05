@@ -34,7 +34,7 @@ C.....Declare local variables
       
 C.....Transform from modal coordinates to nodal coordinates and average
 C.....to single nodal values
-
+      
       DO I = 1,MNP
 
         NO_NBORS = EL_COUNT(I)
@@ -590,7 +590,7 @@ C...
       endif
 
       if (it.eq.nt) then
-         open(963,FILE=DIRNAME//'/'//'maxele.63')
+         open(963,FILE=DIRNAME//'/'//'maxele.63',STATUS="REPLACE")
          write(963,*) np
          write(778,*) 'TITLE = "PADCIRC-DG output"'
          write(778,*) 
@@ -899,13 +899,15 @@ C....IF ELMAX EXCEEDS THRESHOLD, PRINT INFORMATION ON ALL PROCESSORS WHERE
 C....THIS OCCURS 
 C...
         IF(NSCREEN.EQ.1) THEN
-          ELMAX=0.0
-          VELMAX=0.0
+          ELMAX=0.0d0
+          VELMAX=0.0d0
           KEMAX = 0
           KVMAX = 0
 c
-          elmaxe=0.0
-          qmaxe=0.0
+          imaxze=0.0d0
+          elmaxe=0.0d0
+          qmaxe=0.0d0
+          imaxq = 0.0d0
           DO I=1,NP
              IF((NODECODE(I).EQ.1).AND.(ABS(ETA2(I)).GT.ELMAX))THEN
                 ELMAX=ABS(ETA2(I))
@@ -943,8 +945,8 @@ C
              WRITE(6,1991) IT,TIME_A/86400.,
      $            ETA2(KEMAX),KEMAX,VELMAX,KVMAX,MYPROC
  1991        FORMAT(1X,'TIME STEP =',I8,5X,'TIME = ',F12.6,
-     &            /,2X,'ELMAX = ', E10.4,' AT NODE',I7,
-     &            2X,'SPEEDMAX = ',E10.4,' AT NODE',I7,
+     &            /,2X,'ELMAX = ', E11.4,' AT NODE',I7,
+     &            2X,'SPEEDMAX = ',E11.4,' AT NODE',I7,
      &            2X,'ON MYPRnOC = ',I4)
              write(6,*) 'elmaxe, imaxze, qmaxe, imaxq ',elmaxe,imaxze,
      $            qmaxe,imaxq,qx(2,imaxq,1),qx(3,imaxq,1),
@@ -984,8 +986,8 @@ C
             WRITE(16,1994) IT,TIME_A/86400.,
      $           ETA2(KEMAX),KEMAX,VELMAX,KVMAX
  1994       FORMAT(1X,'TIME STEP =',I8,6X,'TIME =',F12.6,
-     &           /,2X,'ELMAX = ', E10.4,' AT NODE',I7,
-     &           2X,'SPEEDMAX = ',E10.4,' AT NODE',I7,
+     &           /,2X,'ELMAX = ', E11.4,' AT NODE',I7,
+     &           2X,'SPEEDMAX = ',E11.4,' AT NODE',I7,
      &           2X,' !!! WARNING - HIGH ELEVATION !!!')
             STOP
          ENDIF
@@ -1112,8 +1114,8 @@ C        CLOSE(652)
 C      ENDIF
 
 2120  FORMAT(2X,E20.10,5X,I10)
-2453  FORMAT(2X,I8,2X,E15.8E3)
-2454  FORMAT(2X,I8,2(2X,E15.8E3))
+2453  FORMAT(2X,I8,2X,E16.8E3)
+2454  FORMAT(2X,I8,2(2X,E16.8E3))
 2455  FORMAT(2X,I8,2X,I2)
 3220  FORMAT(1X,A32,2X,A24,2X,A24)
 3645  FORMAT(1X,I10,1X,I10,1X,E15.7,1X,I5,1X,I5)

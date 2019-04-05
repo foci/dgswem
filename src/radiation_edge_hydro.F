@@ -222,7 +222,7 @@ C.....Compute the edge integral
             DO K = 1,DOFS(EL_IN)
             
                if (J .eq. 1) then
-                  W_IN = 2.0*M_INV(K,pa)/AREAS(EL_IN)*XLEN(GED)*
+                  W_IN = 2.0d0*M_INV(K,pa)/AREAS(EL_IN)*XLEN(GED)*
      &               PHI_EDGE(K,I,LED,pa,J)*WEGP(I,pa)
                elseif (J .eq. 2) then
                   do kk = 1,DOFS(EL_IN)

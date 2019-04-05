@@ -12,7 +12,8 @@ C     mod history of hp_ADCIRC since v9
 C     
 C     v9_sb1       - Aug 05 - sb - parallelized
 C     v9_sb2       - Aug 05 - sb - wetting/drying
-C     v10_sb1      - Aug 05 - sb - reflect fort.12as an initial surface elevation
+C     v10_sb1      - Aug 05 - sb - reflect fort.12as an initial surface 
+C                                  elevation
 C     v10_sb5      - Oct 03 - sb - consolidate Ethan's slope limiter
 C     v10_sb5      - Oct 24 - sb - DG.65 output is added
 C     - Aug 29, 2007 - Fixed bug for startdry = 1
@@ -220,23 +221,42 @@ C.....Re-arrange non-zero flow specified boundary segment data for DG
          CALL ALLOC_DG2(MNFFR)
          II = 1
          JJ = 1
-         DO I = 1,NFFR
-            DO J = 1,NBOU
-               IF ( (SEGTYPE(J).EQ.2 ).OR.(SEGTYPE(J).EQ.12)
-     &              .OR.(SEGTYPE(J).EQ.22) ) THEN
-                  DO K = 1,NVELL(J)-1
-                     QNAM_DG(I,II,1) = QNAM(I,JJ)
-                     QNAM_DG(I,II,2) = QNAM(I,JJ+1)
-                     QNPH_DG(I,II,1) = QNPH(I,JJ)
-                     QNPH_DG(I,II,2) = QNPH(I,JJ+1)
-                     II = II + 1
+         DO I = 1,MNFFR
+            IF (NFFR .EQ. 0) THEN
+               QTRATIO = (TIMEDG - QTIME1)/FTIMINC
+               NQEDS = 0
+               DO J = 1,NVEL
+                  IF((LBCODEI(J).EQ.2).OR.(LBCODEI(J).EQ.12)
+     &                                .OR.(LBCODEI(J).EQ.22)) THEN 
+                     NQEDS = NQEDS + 1
+                     IF (NQEDS .LE. NFEDS) THEN
+                        QNAM_DG(1,NQEDS,1) = RAMPDG*( QNIN1(J) + 
+     &                                 QTRATIO*( QNIN2(J) - QNIN1(J) ) )
+                        QNPH_DG(1,NQEDS,1) = 0.D0
+                        QNAM_DG(1,NQEDS,2) = RAMPDG*( QNIN1(J+1) + 
+     &                             QTRATIO*( QNIN2(J+1) - QNIN1(J+1) ) )
+                        QNPH_DG(1,NQEDS,2) = 0.D0
+                     ENDIF
+                  ENDIF
+               ENDDO
+            ELSE
+               DO J = 1,NBOU
+                  IF ( (SEGTYPE(J).EQ.2 ).OR.(SEGTYPE(J).EQ.12)
+     &                                  .OR.(SEGTYPE(J).EQ.22) ) THEN
+                     DO K = 1,NVELL(J)-1
+                        QNAM_DG(I,II,1) = QNAM(I,JJ)
+                        QNAM_DG(I,II,2) = QNAM(I,JJ+1)
+                        QNPH_DG(I,II,1) = QNPH(I,JJ)
+                        QNPH_DG(I,II,2) = QNPH(I,JJ+1)
+                        II = II + 1
+                        JJ = JJ + 1
+                     ENDDO
                      JJ = JJ + 1
-                  ENDDO
-                  JJ = JJ + 1
-               ENDIF
-            ENDDO
-            II = 1
-            JJ = 1
+                  ENDIF
+               ENDDO
+               II = 1
+               JJ = 1
+            ENDIF
          ENDDO
       ENDIF
       
@@ -563,6 +583,10 @@ C.....if wetting-and-drying is enabled and the initial water depth is
 C.....not specified by fort.12
 C.....2. Set wet-and-dry elemental flags
 C.....3. Set the DOF at dry elements = 1
+      do j=1,ph
+          jj = 2*j
+          NEGP(j)  = CEILING((jj+3)/2.0d0)
+      enddo
 
       NCHECK(1,1) = MNEDGS
       NCHECK(1,2) = MXEDGS
@@ -591,81 +615,53 @@ C.....Retrieve the area integral gauss quadrature points
             phh = 2*ph
             do ELT = MNEDGS,MXEDGS
                if (ELT.eq.3 .and. DIM.eq.2) then
-                  if (phh.le.1) then
+                  if (phh.le.0) then
                      NAGP(ph,1) = 1
                   elseif (phh.le.2) then
                      NAGP(ph,1) = 3
                   elseif (phh.le.4) then
                      NAGP(ph,1) = 6
-                  elseif (phh.le.5) then
-                     NAGP(ph,1) = 7
                   elseif (phh.le.6) then
                      NAGP(ph,1) = 12
                   elseif (phh.le.8) then
                      NAGP(ph,1) = 16
-                  elseif (phh.le.9) then
-                     NAGP(ph,1) = 19
                   elseif (phh.le.10) then
                      NAGP(ph,1) = 25
-                  elseif (phh.le.11) then
-                     NAGP(ph,1) = 28
                   elseif (phh.le.12) then
                      NAGP(ph,1) = 33
-                  elseif (phh.le.13) then
-                     NAGP(ph,1) = 37
                   elseif (phh.le.14) then
                      NAGP(ph,1) = 42
-                  elseif (phh.le.15) then
-                     NAGP(ph,1) = 52
                   elseif (phh.le.16) then
                      NAGP(ph,1) = 55
-                  elseif (phh.le.17) then
-                     NAGP(ph,1) = 61
                   elseif (phh.le.18) then
                      NAGP(ph,1) = 72
-                  elseif (phh.le.19) then   
-                     NAGP(ph,1) = 73
                   elseif (phh.le.20) then
                      NAGP(ph,1) = 88
-                  elseif (phh.le.21) then
-                     NAGP(ph,1) = 91
                   endif
                elseif (ELT.eq.4 .and. DIM.eq.2) then
-                  if (phh.le.1) then
+                  if (phh.le.0) then
                      NAGP(ph,2) = 1
                   elseif (phh.le.2) then
                      NAGP(ph,2) = 3
-                  elseif (phh.le.3) then
-                     NAGP(ph,2) = 4
                   elseif (phh.le.4) then
                      NAGP(ph,2) = 6
-                  elseif (phh.le.5) then
-                     NAGP(ph,2) = 7
                   elseif (phh.le.6) then
                      NAGP(ph,2) = 10
-                  elseif (phh.le.7) then
-                     NAGP(ph,2) = 8
                   elseif (phh.le.8) then
                      NAGP(ph,2) = 16
-                  elseif (phh.le.9) then
-                     NAGP(ph,2) = 17
                   elseif (phh.le.10) then
                      NAGP(ph,2) = 22
-                  elseif (phh.le.11) then
-                     NAGP(ph,2) = 24
                   elseif (phh.le.12) then
                      NAGP(ph,2) = 31
-                  elseif (phh.le.13) then
-                     NAGP(ph,2) = 33
-                  elseif (phh.le.15) then
+                  elseif (phh.le.14) then
                      NAGP(ph,2) = 44
-                  elseif (phh.le.17) then
+                  elseif (phh.le.16) then
                      NAGP(ph,2) = 56
-                  elseif (phh.le.19) then
+                  elseif (phh.le.18) then
                      NAGP(ph,2) = 68
-                  elseif (phh.le.21) then
+                  elseif (phh.le.20) then
                      NAGP(ph,2) = 81
-                  elseif (phh.le.23) then
+                  elseif (phh.le.22) then
                      NAGP(ph,2) = 100
                   endif
                endif
@@ -678,82 +674,54 @@ C...........Allocate XaGP, YaGP, and WaGP
 			   jj = 2*j
             if (ELT.eq.3 .and. DIM.eq.2) then
                REGION = 'TRIANGLE'
-               if (jj.le.1) then
+               if (jj.le.0) then
                   SZ2 = 1
                elseif (jj.le.2) then
                   SZ2 = 3
                elseif (jj.le.4) then
                   SZ2 = 6
-               elseif (jj.le.5) then
-                  SZ2 = 7
                elseif (jj.le.6) then
                   SZ2 = 12
                elseif (jj.le.8) then
                   SZ2 = 16
-               elseif (jj.le.9) then
-                  SZ2 = 19
                elseif (jj.le.10) then
                   SZ2 = 25
-               elseif (jj.le.11) then
-                  SZ2 = 28
                elseif (jj.le.12) then
                   SZ2 = 33
-               elseif (jj.le.13) then
-                  SZ2 = 37
                elseif (jj.le.14) then
                   SZ2 = 42
-               elseif (jj.le.15) then
-                  SZ2 = 52
                elseif (jj.le.16) then
                   SZ2 = 55
-               elseif (jj.le.17) then
-                  SZ2 = 61
                elseif (jj.le.18) then
                   SZ2 = 72
-               elseif (jj.le.19) then
-                  SZ2 = 73
                elseif (jj.le.20) then
                   SZ2 = 88
-               elseif (jj.le.21) then
-                  SZ2 = 91
                endif 
             elseif (ELT.eq.4 .and. DIM.eq.2) then
                REGION = 'SQUARE  '
-               if (jj.le.1) then
+               if (jj.le.0) then
                   SZ2 = 1
                elseif (jj.le.2) then
                   SZ2 = 3
-               elseif (jj.le.3) then
-                  SZ2 = 4
                elseif (jj.le.4) then
                   SZ2 = 6
-               elseif (jj.le.5) then
-                  SZ2 = 7
                elseif (jj.le.6) then
                   SZ2 = 10
-               elseif (jj.le.7) then
-                  SZ2 = 8
                elseif (jj.le.8) then
                   SZ2 = 16
-               elseif (jj.le.9) then
-                  SZ2 = 17
                elseif (jj.le.10) then
                   SZ2 = 22
-               elseif (jj.le.11) then
-                  SZ2 = 24
                elseif (jj.le.12) then
                   SZ2 = 31
-               elseif (jj.le.13) then
-                  SZ2 = 33
-               elseif (jj.le.15) then
+               elseif (jj.le.14) then
                   SZ2 = 44
-               elseif (jj.le.17) then
+               elseif (jj.le.16) then
                   SZ2 = 56
-               elseif (jj.le.19) then
+               elseif (jj.le.18) then
                   SZ2 = 68
-               elseif (jj.le.21) then
+               elseif (jj.le.20) then
                   SZ2 = 81
-               elseif (jj.le.23) then
+               elseif (jj.le.22) then
                   SZ2 = 100
                endif
             endif
@@ -1204,7 +1172,7 @@ c$$$      enddo
 #endif      
 
 #ifdef ARTDIF
-      !Set up the artififical diffusion stuff
+      !Set up the artificial diffusion stuff
       e1(:) = 0.D0
       balance(:) = 0.D0
       entrop(:,:) = -100.D0

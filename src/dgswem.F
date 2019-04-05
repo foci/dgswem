@@ -31,7 +31,7 @@ Casey 101118: We need the following information to couple to unstructured SWAN.
 C--   
       IMPLICIT NONE
       
-      INTEGER TESTFLAG,OUTITER,istop,i,ModetoNode
+      INTEGER TESTFLAG,OUTITER,istop,i
 C     sb-PDG1
       REAL(4) CPU_TIME,CPU_SEC(2)
       REAL(4) TARRAY(2)
@@ -49,10 +49,9 @@ c     nd
 #else
       IMPLICIT NONE
       
-
       REAL(4) CPU_TIME,CPU_SEC(2)
       REAL(4) TARRAY(2)
-      INTEGER TESTFLAG,OUTITER,i,ModetoNode
+      INTEGER TESTFLAG,OUTITER,i
       character*80 tecfile, tecfile_max
 
       CALL MAKE_DIRNAME()       ! Establish Working Directory Name
@@ -63,7 +62,14 @@ c     nd
 C...  
 C...  ******************* START PROGRAM SETUP SECTION ****************************
 C...  
-C     
+C
+      ModetoNode = 1
+#ifdef OUT_TEC
+      ! If tecplot is used then do not convert from modal to nodal values
+      ModetoNode = 0
+      
+#endif
+
       IF (IHOT.EQ.0) THEN
          CALL COLDSTART()
       ELSE
@@ -194,7 +200,6 @@ c     write(200+myproc,*) 'back from prep_dg'
 !Casey 120813: Begin the OUT_TEC conditional.
 #ifdef OUT_TEC
       
-      ModetoNode = 0
 
 #ifdef CMPI
       !CALL SYSTEM('mkdir'//'/'//'tecplot_output{00..'//'4'//'}')
@@ -219,12 +224,12 @@ c     write(200+myproc,*) 'back from prep_dg'
 
       if (ModetoNode.eq.0) then
          write(777,*) 
-C     $        'VARIABLES = "x", "y", "b", "ze", "H", "u", "v", "|v|","|w|","p","iota","iota2","sum","diff"'
+     $        'VARIABLES = "x", "y", "b", "ze", "H", "u", "v", "|v|","|w|","p","iota","iota2","sum","diff"'
          write(777,*) 'ZONE ZONETYPE=FETRIANGLE ',
      $        'NODES=', np, 
      $        ' ELEMENTS=', ne, 
 !     $     ' DATAPACKING=POINT ','SOLUTIONTIME=',time_a
-C     $        ' DATAPACKING=BLOCK ',' VARLOCATION=([3,4,5,6,7,8,10,11,12,13,14]=CELLCENTERED) ',
+     $        ' DATAPACKING=BLOCK ',' VARLOCATION=([3,4,5,6,7,8,10,11,12,13,14]=CELLCENTERED) ',
      $        'SOLUTIONTIME=',time_a 
 
 c$$$  write(777,7777) x(i), y(i),  
@@ -240,22 +245,22 @@ c$$$  enddo
          do i=1,np
             write(777,7777)  y(i)
          enddo
-         do i=1,np
-            write(777,7777)  dp(i)
+         do i=1,ne
+            write(777,7777)  dpe(i)
          enddo
-         do i=1,np
+         do i=1,ne
             write(777,7777)  eta2(i)
          enddo
-         do i=1,np 
-            write(777,7777)  eta2(i)+dp(i)
+         do i=1,ne 
+            write(777,7777)  eta2(i)+dpe(i)
          enddo
-         do i=1,np 
+         do i=1,ne 
             write(777,7777)  uu2(i)
          enddo
-         do i=1,np 
+         do i=1,ne 
             write(777,7777)  vv2(i)
          enddo
-         do i=1,np 
+         do i=1,ne 
             write(777,7777)  sqrt(uu2(i)**2+vv2(i)**2)
          enddo
          do i=1,np 
@@ -264,16 +269,16 @@ c$$$  enddo
          do i=1,ne 
             write(777,7777)  DBLE(pdg_el(i))
          enddo
-         do i=1,np 
+         do i=1,ne 
             write(777,7777)  tracer(i)
          enddo
-         do i=1,np 
+         do i=1,ne 
             write(777,7777)  tracer2(i)
          enddo
-         do i=1,np 
+         do i=1,ne 
             write(777,7777)  abs(tracer(i)+tracer2(i))
          enddo
-         do i=1,np 
+         do i=1,ne 
             write(777,7777)  abs(tracer(i)-tracer2(i))    
          enddo
       else

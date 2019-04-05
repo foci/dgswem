@@ -69,7 +69,7 @@ C.....Update ETA1 (shintaro: do we need this?)
 
 C.....Begin Runge-Kutta time stepper
 
-       DO 100 IRK = 1,NRK
+      DO 100 IRK = 1,NRK
          
 C.......Compute the DG time and DG ramp
 
@@ -81,15 +81,15 @@ C.......Compute the DG time and DG ramp
          IF (NRAMP.GE.1) THEN
             IF (NRAMP.EQ.1) THEN
                RAMPDG = TANH((2.D0*((IT-1) +
-     &                                  DTVD(IRK))*DTDP/86400.D0)/DRAMP)
+     & DTVD(IRK))*DTDP/86400.D0)/DRAMP)
                RAMPExtFlux = TANH((2.D0*((IT-1) +
-     &                           DTVD(IRK))*DTDP/86400.D0)/DRAMPExtFlux)
+     & DTVD(IRK))*DTDP/86400.D0)/DRAMPExtFlux)
             ENDIF
             IF (NRAMP.EQ.2) THEN
                RAMPDG = TANH((2.D0*((IT-1) +
-     &                                  DTVD(IRK))*DTDP/86400.D0)/DRAMP)
+     & DTVD(IRK))*DTDP/86400.D0)/DRAMP)
                RAMPExtFlux = TANH((2.D0*((IT-1) +
-     &                           DTVD(IRK))*DTDP/86400.D0)/DRAMPExtFlux)
+     & DTVD(IRK))*DTDP/86400.D0)/DRAMPExtFlux)
             ENDIF
             IF (NRAMP.EQ.3) THEN
                WRITE(*,*) 'NRAMP = 3 not supported '
@@ -102,52 +102,104 @@ C.......Obtain the meteorological forcing
 
          IF (NWS.NE.0) CALL MET_FORCING(IT)
         
-         IF(NRS.GE.1) THEN
-           IF(TIME_A.GT.RSTIME2) THEN
-             RSTIME1=RSTIME2
-             RSTIME2=RSTIME2+RSTIMINC
+        IF(NRS.GE.1) THEN
+          IF(TIME_A.GT.RSTIME2) THEN
+            RSTIME1=RSTIME2
+            RSTIME2=RSTIME2+RSTIMINC
            !DO I=1,NP
            !  RSNX1(I)=RSNX2(I)
            !  RSNY1(I)=RSNY2(I)
            !END DO
 #ifdef SWAN
 Casey 090302: Added for coupling to SWAN.
-             IF((NRS.EQ.3).AND.(IRK.EQ.1)) THEN
-               InterpoWeight = 1.0
-               CALL ComputeWaveDrivenForces
-Casey 090707: We want to extrapolate forward in time.  Load the latest (current) forces
-C             into RSNX1/RSNY1, and then load the future forces into RSNX2/RSNY2.
-               DO I=1,NP
-                 RSX = RSNX1(I)
-                 RSY = RSNY1(I)
-                 RSNX1(I) = RSNX2(I)
-                 RSNY1(I) = RSNY2(I)
-                 RSNX2(I) = RSNX2(I) + (RSNX2(I)-RSX)
-                 RSNY2(I) = RSNY2(I) + (RSNY2(I)-RSY)
-               ENDDO
-             ENDIF
+            IF((NRS.EQ.3).AND.(IRK.EQ.1)) THEN
+              InterpoWeight = 1.0
+              CALL ComputeWaveDrivenForces
+Casey 090707: We want to extrapolate forward in time.  Load the latest 
+C             (current) forces into RSNX1/RSNY1, and then load the 
+C             future forces into RSNX2/RSNY2.
+              DO I=1,NP
+                RSX = RSNX1(I)
+                RSY = RSNY1(I)
+                RSNX1(I) = RSNX2(I)
+                RSNY1(I) = RSNY2(I)
+                RSNX2(I) = RSNX2(I) + (RSNX2(I)-RSX)
+                RSNY2(I) = RSNY2(I) + (RSNY2(I)-RSY)
+              ENDDO
+            ENDIF
 #endif
-           ENDIF
-           RStRatio=(TIME_A-RSTIME1)/RSTIMINC
-           DO I=1,NP
-             RSX = RampMete*(RSNX1(I) + RStRatio*(RSNX2(I)-RSNX1(I)))
-             RSY = RampMete*(RSNY1(I) + RStRatio*(RSNY2(I)-RSNY1(I)))
-             WSX2(I) = WSX2(I) + RSX
-             WSY2(I) = WSY2(I) + RSY
+          ENDIF
+          RStRatio=(TIME_A-RSTIME1)/RSTIMINC
+          DO I=1,NP
+            RSX = RampMete*(RSNX1(I) + RStRatio*(RSNX2(I)-RSNX1(I)))
+            RSY = RampMete*(RSNY1(I) + RStRatio*(RSNY2(I)-RSNY1(I)))
+            WSX2(I) = WSX2(I) + RSX
+            WSY2(I) = WSY2(I) + RSY
 #ifdef SWAN
 Casey 090302: Added these lines for output to the rads.64 file.
-             RSNXOUT(I) = RSX
-             RSNYOUT(I) = RSY
+            RSNXOUT(I) = RSX
+            RSNYOUT(I) = RSY
 #endif
-           ENDDO
-         ENDIF
+         ENDDO
+      ENDIF
  
 C.......Compute tidal potential terms
 
          IF (NTIP.NE.0) CALL TIDAL_POTENTIAL()
 
-C.......Compute LDG auxiliary equations
+C.......For non-periodic elevation bcs
 
+         IF ((NBFR.EQ.0).AND.(NOPE.GT.0)) THEN
+           IF (TIME_A.GT.ETIME2) THEN
+             ETIME1 = ETIME2
+             ETIME2 = ETIME1 + ETIMINC
+             DO J = 1,NETA
+               ESBIN1(J) = ESBIN2(J)
+               READ(19,*) ESBIN2(J)
+             ENDDO
+           ENDIF
+           ETRATIO = (TIMEDG - ETIME1)/ETIMINC
+           DO I = 1,NETA
+             NBDI = NBD(I)
+             ETA2(NBDI) = RAMPDG*( ESBIN1(I) + ETRATIO*( ESBIN2(I) -
+     &                                                   ESBIN1(I) ) )
+           ENDDO
+         ENDIF
+         
+C.......For non-periodic flux bcs
+
+         IF (MNFFR.EQ.1 .AND. NFFR.EQ.0) THEN
+           IF (TIME_A.GT.QTIME2) THEN
+             QTIME1 = QTIME2
+             QTIME2 = QTIME1 + FTIMINC
+             DO J=1,NVEL
+               QNIN1(J)=QNIN2(J)
+               QNIN2(J)=0.D0
+               IF((LBCODEI(J).EQ.2).OR.(LBCODEI(J).EQ.12)
+     &                             .OR.(LBCODEI(J).EQ.22))    
+     &         READ(20,*) QNIN2(J)
+             END DO
+           ENDIF
+           QTRATIO = (TIMEDG - QTIME1)/FTIMINC
+           NQEDS = 0
+           DO I = 1,NVEL
+             IF((LBCODEI(I).EQ.2).OR.(LBCODEI(I).EQ.12)
+     &                             .OR.(LBCODEI(I).EQ.22)) THEN 
+               NQEDS = NQEDS + 1
+               IF (NQEDS .LE. NFEDS) THEN
+                 QNAM_DG(1,NQEDS,1) = RAMPDG*( QNIN1(I) + QTRATIO*
+     &                                         ( QNIN2(I) - QNIN1(I) ) )
+                 QNPH_DG(1,NQEDS,1) = 0.D0
+                 QNAM_DG(1,NQEDS,2) = RAMPDG*( QNIN1(I+1) + QTRATIO*
+     &                                     ( QNIN2(I+1) - QNIN1(I+1) ) )
+                 QNPH_DG(1,NQEDS,2) = 0.D0
+               ENDIF
+             ENDIF
+           ENDDO
+         ENDIF       
+
+C.......Compute LDG auxiliary equations
+         
          IF (EVMSUM.NE.0.D0.or.artdif.eq.1) CALL LDG_HYDRO(IT)
          
 C.......Compute elevation specified edges
@@ -160,8 +212,7 @@ C.......Compute no-normal flow edges
 
 C.......Compute non-zero flow edges
 
-         IF (NFEDS.GT.0)  CALL FLOW_EDGE_HYDRO(IT)
-         
+         IF (NFEDS.GT.0)  CALL FLOW_EDGE_HYDRO(IT)    
 C.......Compute radiation edges
 
          IF (NREDS.GT.0)  CALL RADIATION_EDGE_HYDRO(IT)
@@ -192,8 +243,7 @@ C.......SSP Runge-Kutta Time Scheme
 
 #ifdef SED_LAY
 
-                  do l = 1,layers
-                     
+                  do l = 1,layers                
                      bed(K,J,IRK+1,l) = bed(K,J,irk+1,l) 
      &                  + ARK*bed(K,J,I,l) + BRK*RHS_bed(K,J,I,l)
 
@@ -210,8 +260,6 @@ C.......SSP Runge-Kutta Time Scheme
      &                 + BRK*RHS_QX(K,J,I)
                   QY(K,J,IRK+1) = QY(K,J,irk+1) + ATVD(IRK,I)*QY(K,J,I)
      &                 + BRK*RHS_QY(K,J,I)
-
-
 C.......Compute the transported tracer term if flagged
 
 #ifdef TRACE
@@ -393,7 +441,6 @@ C.......Compute the dynamic pressure if flagged
                      
                   enddo
 #endif
-
                   ZE(K,J,IRK+1) = ZE(K,J,irk+1) + ARK*ZE(K,J,1) 
      &                + CRK*ZE(K,J,irk) + DRK*ZE(K,J,irk-1) 
      &                + BRK*RHS_ZE(K,J,irk) + ERK*RHS_ZE(K,J,1)
@@ -489,7 +536,7 @@ C.......Apply the wet-dry algorithm if appropriate
          CALL WETDRY()
       ENDIF
 
-c$$$C.......Apply the slopelimiter again if auxiliary variable is being used
+c$$$C...Apply the slopelimiter again if auxiliary variable is being used
 c$$$
 c$$$         if (EVMSUM.NE.0.D0.or.artdif.eq.1) then
 c$$$#ifdef SLOPEALL
@@ -501,8 +548,8 @@ c$$$            CALL SLOPELIMITER()
 c$$$#endif
 c$$$         endif
 
-C.......For parallel run update for dofs if slope limiter and/or wetting and
-C.......drying is being used
+C...For parallel run update for dofs if slope limiter and/or wetting and
+C...drying is being used
 
 #ifdef CMPI
          if (SLOPEFLAG.NE.0.OR.NOLIFA.GE.2) THEN

@@ -67,9 +67,9 @@ C....OF THE UNIT 19 FILE.
 C...
 
         IF((NOPE.GT.0).AND.(NBFR.EQ.0)) THEN
-          IF(NSCREEN.EQ.1) WRITE(6,1112)
+          IF(NSCREEN.EQ.1.AND.MYPROC.EQ.0) WRITE(6,1112)
           WRITE(16,1112)
-          IF(NSCREEN.EQ.1) WRITE(6,1977)
+          IF(NSCREEN.EQ.1.AND.MYPROC.EQ.0) WRITE(6,1977)
           WRITE(16,1977)
  1977     FORMAT(/,1X,'ELEVATION SPECIFIED INFORMATION READ FROM UNIT ',
      &           '19',/)
@@ -87,16 +87,10 @@ C...
 
 C....INITIALIZE THE NORMAL FLOW BOUNDARY CONDITION
 
-        DO I=1,NVEL
-          QN2(I)=0.D0
-          QN1(I)=0.D0
-          QN0(I)=0.D0
-        END DO
-
         IF((NFLUXF.EQ.1).AND.(NFFR.EQ.0)) THEN
-          IF(NSCREEN.EQ.1) WRITE(6,1112)
+          IF(NSCREEN.EQ.1 .AND.MYPROC.EQ.0) WRITE(6,1112)
           WRITE(16,1112)
-          IF(NSCREEN.EQ.1) WRITE(6,1979)
+          IF(NSCREEN.EQ.1 .AND.MYPROC.EQ.0) WRITE(6,1979)
           WRITE(16,1979)
  1979     FORMAT(/,1X,'NORMAL FLOW INFORMATION READ FROM UNIT 20',/)
           OPEN(20,FILE=DIRNAME//'/'//'fort.20')
@@ -105,17 +99,17 @@ C....INITIALIZE THE NORMAL FLOW BOUNDARY CONDITION
             QNIN1(J)=0.D0
             IF((LBCODEI(J).EQ.2).OR.(LBCODEI(J).EQ.12)
      &                          .OR.(LBCODEI(J).EQ.22))
-     &                                          READ(20,*) QNIN1(J)
-            END DO
+     &      READ(20,*) QNIN1(J)
+          END DO
           DO J=1,NVEL
             QNIN2(J)=0.D0
             IF((LBCODEI(J).EQ.2).OR.(LBCODEI(J).EQ.12)
      &                          .OR.(LBCODEI(J).EQ.22))
-     &                                          READ(20,*) QNIN2(J)
-            END DO
+     &      READ(20,*) QNIN2(J)
+          END DO
           QTIME1 = STATIM*86400.D0
           QTIME2 = QTIME1 + FTIMINC
-          ENDIF
+        ENDIF
 
 C...INPUT METEOROLOGICAL INFORMATION FROM UNIT 22 OR UNIT 200 SERIES
 C....IF FLEET NUMERIC WIND DATA IS USED, FIND BEGINNING TIME IN FILE,
@@ -133,9 +127,9 @@ C....TIME LEVEL 1 AND LEVEL 2 WIND FIELDS
             PR2(I) =0.D0
             ENDDO
 
-          IF(NSCREEN.EQ.1) WRITE(6,1112)
+          IF(NSCREEN.EQ.1 .AND.MYPROC.EQ.0) WRITE(6,1112)
           WRITE(16,1112)
-          IF(NSCREEN.EQ.1) WRITE(6,1980)
+          IF(NSCREEN.EQ.1 .AND.MYPROC.EQ.0) WRITE(6,1980)
           WRITE(16,1980)
  1980     FORMAT(/,1X,'WIND (AND PRESSURE) INFORMATION READ.',/)
           ENDIF
@@ -173,13 +167,13 @@ C....TIME LEVEL 1 AND LEVEL 2 WIND FIELDS
               END DO
             GOTO 2222
             ENDIF
-          IF(NSCREEN.EQ.1) 
+          IF(NSCREEN.EQ.1 .AND.MYPROC.EQ.0) 
      &         WRITE(6,*)'FOUND WIND DATA AT TIME= ',IWTIMEP
           WRITE(16,*) 'FOUND WIND DATA AT TIME= ',IWTIMEP
-          IF(NSCREEN.EQ.1) 
+          IF(NSCREEN.EQ.1 .AND.MYPROC.EQ.0) 
      &         WRITE(6,*)'FOUND WIND DATA AT TIME= ',IWTIME
           WRITE(16,*) 'FOUND WIND DATA AT TIME= ',IWTIME
-          WTIME2=WTIMED-WREFTIM                  !CAST INTO MODEL TIME REFRENCE
+          WTIME2=WTIMED-WREFTIM           !CAST INTO MODEL TIME REFRENCE
           WTIME1=WTIME2-WTIMINC
           ENDIF
 
@@ -214,10 +208,10 @@ C....TIME LEVEL 1 AND LEVEL 2 WIND FIELDS
           WTIME2=WTIME1+WTIMINC
           NWSGGWI=-1
           CALL NWS10GET(NWSGGWI,SLAM,SFEA,WVNX1,WVNY1,PRN1,NP,RHOWAT0,G,
-     &                  NWLON,NWLAT,WTIMINC) !JUST COMPUTE INTERPOLATING FACTORS
+     &          NWLON,NWLAT,WTIMINC) !JUST COMPUTE INTERPOLATING FACTORS
           NWSGGWI=1
           CALL NWS10GET(NWSGGWI,SLAM,SFEA,WVNX2,WVNY2,PRN2,NP,RHOWAT0,G,
-     &                  NWLON,NWLAT,WTIMINC) !NOW INTERPOLATE 1st WIND FIELD
+     &              NWLON,NWLAT,WTIMINC) !NOW INTERPOLATE 1st WIND FIELD
           ENDIF
 
         IF(NWS.EQ.11) THEN
@@ -225,13 +219,13 @@ C....TIME LEVEL 1 AND LEVEL 2 WIND FIELDS
           WTIME2=WTIME1+WTIMINC
           NWSEGWI=0
           IDSETFLG=0
-          IF(NSCREEN.EQ.1) WRITE(6,1197)
+          IF(NSCREEN.EQ.1 .AND.MYPROC.EQ.0) WRITE(6,1197)
           WRITE(16,1197)
  1197     FORMAT(/,1X,'THE E29 MET GRID INTERPOLATING FACTORS ARE ',
      &                'BEING COMPUTED ')
           CALL NWS11GET(NWSEGWI,IDSETFLG,SLAM,SFEA,WVNX1,WVNY1,PRN1,NP,
      &                  RHOWAT0,G)  !JUST COMPUTE INTERPOLATING FACTORS
-          IF(NSCREEN.EQ.1) WRITE(6,1198)
+          IF(NSCREEN.EQ.1 .AND.MYPROC.EQ.0) WRITE(6,1198)
           WRITE(16,1198)
  1198     FORMAT(1X,'FINISHED COMPUTING E29 INTERPOLATING FACTORS',/)
           NWSEGWI=1
@@ -279,7 +273,7 @@ C     &                                                  WAVE_D2,NP)
             
           ENDIF
 #ifdef SWAN   
-Casey 101118: Added this call to initialize the radiation stress gradients.
+Casey 101118: Added this call to initialize radiation stress gradients.
          IF(NRS.EQ.3) THEN
            IF(.NOT.ALLOCATED(RSNX1)) ALLOCATE(RSNX1(1:NP))
            IF(.NOT.ALLOCATED(RSNX2)) ALLOCATE(RSNX2(1:NP))
@@ -293,9 +287,9 @@ Casey 101118: Added this call to initialize the radiation stress gradients.
            ENDDO
          ENDIF
 #endif
-          IF(NSCREEN.EQ.1) WRITE(6,1112)
+          IF(NSCREEN.EQ.1 .AND.MYPROC.EQ.0) WRITE(6,1112)
           WRITE(16,1112)
-          IF(NSCREEN.EQ.1) WRITE(6,1981)
+          IF(NSCREEN.EQ.1 .AND.MYPROC.EQ.0) WRITE(6,1981)
           WRITE(16,1981)
  1981     FORMAT(/,1X,'RADIATION STRESS INFORMATION READ.',/)
           ENDIF
@@ -312,10 +306,11 @@ C...
 
 CWET...
 CWET...THE FOLLOWING LINES ARE FOR WETTING AND DRYING
-CWET...Dry any landlocked nodes by checking that they are connected to at
-CWET...least 1 functioning element.
+CWET...Dry any landlocked nodes by checking that they are connected to 
+CWET...at least 1 functioning element.
 CWET...
         IF(NOLIFA.EQ.2) THEN
+9883      FORMAT(' !!! NODE ',I8,' DRIED (LANDLOCKING)')
           DO I=1,NP
             MJU(I)=0
           ENDDO
@@ -351,8 +346,9 @@ CWET...
           DO I=1,NP
             IF((NNODECODE(I).EQ.1).AND.(MJU(I).EQ.0)) THEN
               NNODECODE(I)=0
-              IF (NSCREEN.EQ.1) WRITE(*,9883) I
-              WRITE(16,9883) I
+
+              IF (NSCREEN.EQ.1 .AND.MYPROC.EQ.0) WRITE(*,9883) I
+              IF (NABOUT .EQ. 0) WRITE(16,9883) I
             ENDIF
           ENDDO
         ENDIF
@@ -376,8 +372,8 @@ c       CALL DSSSTUP(DT,STATIM,NBYTE,RUNDES,RUNID,AGRID,NT)
 C...
 C....INITILIZE ELEVATION STATION SPOOL COUNTER
 C....OPEN ELEVATION STATION OUTPUT FILE
-C....WRITE OUT HEADER INFORMATION INCLUDING NTRSPE (NO. OF DATA PTS. AT EACH
-C....ELEVATION STATION), NSTAE, DT*NSPOOLE, NSPOOLE, IRTYPE
+C....WRITE OUT HEADER INFORMATION INCLUDING NTRSPE (NO. OF DATA PTS. AT
+C....EACH ELEVATION STATION), NSTAE, DT*NSPOOLE, NSPOOLE, IRTYPE
 C...
         NSCOUE=0
         IESTP=0
@@ -429,7 +425,7 @@ C...
           WRITE(61,REC=IESTP+4) NSPOOLE
           WRITE(61,REC=IESTP+5) 1
           IESTP=IESTP+5
-          CLOSE(61)                    ! DO THIS TO FLUSH THE WRITE BUFFER
+          CLOSE(61)                  ! DO THIS TO FLUSH THE WRITE BUFFER
           OPEN(61,FILE=DIRNAME//'/'//'fort.61',
      &         ACCESS='DIRECT',RECL=NBYTE)
           ENDIF
@@ -437,8 +433,8 @@ C...
 C...
 C....INITILIZE VELOCITY STATION SPOOL COUNTER
 C....OPEN VELOCITY STATION OUTPUT FILE
-C....WRITE OUT HEADER INFORMATION INCLUDING NTRSPV (NO. OF DATA PTS. AT EACH
-C....VELOCITY STATION), NSTAV, DT*NSPOOLV, NSPOOLV, IRTYPE
+C....WRITE OUT HEADER INFORMATION INCLUDING NTRSPV (NO. OF DATA PTS. AT 
+C....EACH VELOCITY STATION), NSTAV, DT*NSPOOLV, NSPOOLV, IRTYPE
 C...
         NSCOUV=0
         IVSTP=0
@@ -487,7 +483,7 @@ C...
           WRITE(62,REC=IVSTP+4) NSPOOLV
           WRITE(62,REC=IVSTP+5) 2
           IVSTP=IVSTP+5
-          CLOSE(62)                    ! DO THIS TO FLUSH THE WRITE BUFFER
+          CLOSE(62)                  ! DO THIS TO FLUSH THE WRITE BUFFER
           OPEN(62,FILE=DIRNAME//'/'//'fort.62',
      &         ACCESS='DIRECT',RECL=NBYTE)
           ENDIF
@@ -495,8 +491,8 @@ C...
 C...
 C....INITILIZE CONCENTRATION STATION SPOOL COUNTER
 C....OPEN ELEVATION STATION OUTPUT FILE
-C....WRITE OUT HEADER INFORMATION INCLUDING NTRSPC (NO. OF DATA PTS. AT EACH
-C....CONCENTRATION STATION), NSTAC, DT*NSPOOLC, NSPOOLC, IRTYPE
+C....WRITE OUT HEADER INFORMATION INCLUDING NTRSPC (NO. OF DATA PTS. AT 
+C....EACH CONCENTRATION STATION), NSTAC, DT*NSPOOLC, NSPOOLC, IRTYPE
 C...
         NSCOUC=0
         ICSTP=0
@@ -545,7 +541,7 @@ C...
           WRITE(81,REC=ICSTP+4) NSPOOLC
           WRITE(81,REC=ICSTP+5) 1
           ICSTP=ICSTP+5
-          CLOSE(81)                    ! DO THIS TO FLUSH THE WRITE BUFFER
+          CLOSE(81)                  ! DO THIS TO FLUSH THE WRITE BUFFER
           OPEN(81,FILE=DIRNAME//'/'//'fort.81',
      &         ACCESS='DIRECT',RECL=NBYTE)
           ENDIF
@@ -554,8 +550,8 @@ C...
 C...
 C....INITILIZE BATHYMETRY STATION SPOOL COUNTER
 C....OPEN ELEVATION STATION OUTPUT FILE
-C....WRITE OUT HEADER INFORMATION INCLUDING NTRSPE (NO. OF DATA PTS. AT EACH
-C....ELEVATION STATION), NSTAE, DT*NSPOOLE, NSPOOLE, IRTYPE
+C....WRITE OUT HEADER INFORMATION INCLUDING NTRSPE (NO. OF DATA PTS. AT 
+C....EACH ELEVATION STATION), NSTAE, DT*NSPOOLE, NSPOOLE, IRTYPE
 C...
         NSCOUE=0
         IESTP=0
@@ -604,7 +600,7 @@ C...
           WRITE(82,REC=IESTP+4) NSPOOLE
           WRITE(82,REC=IESTP+5) 1
           IESTP=IESTP+5
-          CLOSE(82)                    ! DO THIS TO FLUSH THE WRITE BUFFER
+          CLOSE(82)                  ! DO THIS TO FLUSH THE WRITE BUFFER
           OPEN(82,FILE=DIRNAME//'/'//'fort.82',
      &         ACCESS='DIRECT',RECL=NBYTE)
           ENDIF
@@ -613,8 +609,8 @@ C...
 C...
 C....INITILIZE METEOROLOGICAL STATION SPOOL COUNTERS
 C....OPEN METEOROLOGICAL STATION OUTPUT FILES
-C....WRITE OUT HEADER INFORMATION INCLUDING NTRSPM (NO. OF DATA PTS. AT EACH
-C....METEOROLOGICAL STATION), NSTAM, DT*NSPOOLM, NSPOOLM, IRTYPE
+C....WRITE OUT HEADER INFORMATION INCLUDING NTRSPM (NO. OF DATA PTS. AT 
+C....EACH METEOROLOGICAL STATION), NSTAM, DT*NSPOOLM, NSPOOLM, IRTYPE
 C...
         NSCOUM=0
         IPSTP=0
@@ -688,8 +684,8 @@ C...
           WRITE(72,REC=IWSTP+5) 2
           IPSTP=IPSTP+5
           IWSTP=IWSTP+5
-          CLOSE(71)                    ! DO THIS TO FLUSH THE WRITE BUFFER
-          CLOSE(72)                    ! DO THIS TO FLUSH THE WRITE BUFFER
+          CLOSE(71)                  ! DO THIS TO FLUSH THE WRITE BUFFER
+          CLOSE(72)                  ! DO THIS TO FLUSH THE WRITE BUFFER
           OPEN(71,FILE=DIRNAME//'/'//'fort.71',
      &         ACCESS='DIRECT',RECL=NBYTE)
           OPEN(72,FILE=DIRNAME//'/'//'fort.72',
@@ -709,7 +705,11 @@ C...
         IF(ABS(NOUTGE).EQ.1) THEN
           OPEN(63,FILE=DIRNAME//'/'//'fort.63')
           WRITE(63,3220) RUNDES,RUNID,AGRID
-          WRITE(63,3645) NDSETSE,NP,DTDP*NSPOOLGE,NSPOOLGE,1
+          if (ModetoNode .eq. 1) then
+            WRITE(63,3645) NDSETSE,NP,DTDP*NSPOOLGE,NSPOOLGE,1
+          else
+            WRITE(63,3645) NDSETSE,NE,DTDP*NSPOOLGE,NSPOOLGE,1
+          endif
           IGEP=2
           ENDIF
 
@@ -730,7 +730,11 @@ C...
         IF(ABS(NOUTGE).EQ.1) THEN
           OPEN(4441,FILE=DIRNAME//'/'//'fort.4l')
           WRITE(4441,3220) RUNDES,RUNID,AGRID
-          WRITE(4441,3645) NDSETSE,NP,DTDP*NSPOOLGE,NSPOOLGE,1
+          if (ModetoNode .eq. 1) then
+            WRITE(4441,3645) NDSETSE,NP,DTDP*NSPOOLGE,NSPOOLGE,1
+          else
+            WRITE(4441,3645) NDSETSE,NE,DTDP*NSPOOLGE,NSPOOLGE,1
+          endif
           IGEP=2
           ENDIF
 
@@ -766,12 +770,16 @@ C...
             IGEP=IGEP+3
             ENDIF
           WRITE(63,REC=IGEP+1) NDSETSE
-          WRITE(63,REC=IGEP+2) NP
+          if (ModetoNode .eq. 1) then
+            WRITE(63,REC=IGEP+2) NP
+          else
+            WRITE(63,REC=IGEP+2) NE
+          endif
           WRITE(63,REC=IGEP+3) DT*NSPOOLGE
           WRITE(63,REC=IGEP+4) NSPOOLGE
           WRITE(63,REC=IGEP+5) 1
           IGEP=IGEP+5
-          CLOSE(63)                    ! DO THIS TO FLUSH THE WRITE BUFFER
+          CLOSE(63)                  ! DO THIS TO FLUSH THE WRITE BUFFER
           OPEN(63,FILE=DIRNAME//'/'//'fort.63',
      &         ACCESS='DIRECT',RECL=NBYTE)
           ENDIF
@@ -789,7 +797,11 @@ C...
         IF(ABS(NOUTGV).EQ.1) THEN
           OPEN(64,FILE=DIRNAME//'/'//'fort.64')
           WRITE(64,3220) RUNDES,RUNID,AGRID
-          WRITE(64,3645) NDSETSV,NP,DTDP*NSPOOLGV,NSPOOLGV,2
+          if (ModetoNode .eq. 1) then
+            WRITE(64,3645) NDSETSV,NP,DTDP*NSPOOLGV,NSPOOLGV,2
+          else
+            WRITE(64,3645) NDSETSV,NE,DTDP*NSPOOLGV,NSPOOLGV,2
+          endif
           IGVP=2
           ENDIF
 
@@ -825,12 +837,16 @@ C...
             IGVP=IGVP+3
             ENDIF
           WRITE(64,REC=IGVP+1) NDSETSV
-          WRITE(64,REC=IGVP+2) NP
+          if (ModetoNode .eq. 1) then
+            WRITE(64,REC=IGVP+2) NP
+          else
+            WRITE(64,REC=IGVP+2) NE
+          endif
           WRITE(64,REC=IGVP+3) DT*NSPOOLGV
           WRITE(64,REC=IGVP+4) NSPOOLGV
           WRITE(64,REC=IGVP+5) 2
           IGVP=IGVP+5
-          CLOSE(64)                    ! DO THIS TO FLUSH THE WRITE BUFFER
+          CLOSE(64)                  ! DO THIS TO FLUSH THE WRITE BUFFER
           OPEN(64,FILE=DIRNAME//'/'//'fort.64',
      &         ACCESS='DIRECT',RECL=NBYTE)
           ENDIF
@@ -908,7 +924,7 @@ C...
           write(73,rec=igpp+4) nspoolgw
           write(73,rec=igpp+5) 2
           igpp=igpp+5
-          close(73)                    ! DO THIS TO FLUSH THE WRITE BUFFER
+          close(73)                  ! DO THIS TO FLUSH THE WRITE BUFFER
           open(73,file=dirname//'/'//'fort.73',
      &         access='direct',recl=nbyte)
           WRITE(74,REC=IGWP+1) NDSETSW
@@ -917,7 +933,7 @@ C...
           WRITE(74,REC=IGWP+4) NSPOOLGW
           WRITE(74,REC=IGWP+5) 2
           IGWP=IGWP+5
-          CLOSE(74)                    ! DO THIS TO FLUSH THE WRITE BUFFER
+          CLOSE(74)                  ! DO THIS TO FLUSH THE WRITE BUFFER
           OPEN(74,FILE=DIRNAME//'/'//'fort.74',
      &         ACCESS='DIRECT',RECL=NBYTE)
           ENDIF
@@ -1025,7 +1041,7 @@ C...
           WRITE(83,REC=IGCP+4) NSPOOLGC
           WRITE(83,REC=IGCP+5) 1
           IGCP=IGCP+5
-          CLOSE(83)                    ! DO THIS TO FLUSH THE WRITE BUFFER
+          CLOSE(83)                  ! DO THIS TO FLUSH THE WRITE BUFFER
           OPEN(83,FILE=DIRNAME//'/'//'fort.83',
      &         ACCESS='DIRECT',RECL=NBYTE)
           ENDIF
@@ -1128,8 +1144,8 @@ C.....NP, DT*NSPOOLGE, NSPOOLGE, IRTYPE
             WRITE(85,REC=IGEP+4) NSPOOLGE
             WRITE(85,REC=IGEP+5) 1
             IGEP=IGEP+5
-            CLOSE(84)                    ! DO THIS TO FLUSH THE WRITE BUFFER
-            CLOSE(85)                    ! DO THIS TO FLUSH THE WRITE BUFFER
+            CLOSE(84)                ! DO THIS TO FLUSH THE WRITE BUFFER
+            CLOSE(85)                ! DO THIS TO FLUSH THE WRITE BUFFER
             OPEN(84,FILE=DIRNAME//'/'//'fort.84',
      &         ACCESS='DIRECT',RECL=NBYTE)
             OPEN(85,FILE=DIRNAME//'/'//'fort.85',
@@ -1138,8 +1154,8 @@ C.....NP, DT*NSPOOLGE, NSPOOLGE, IRTYPE
 C...
 C.....INITILIZE BATHYMETRY STATION SPOOL COUNTER
 C.....OPEN ELEVATION STATION OUTPUT FILE
-C.....WRITE OUT HEADER INFORMATION INCLUDING NTRSPE (NO. OF DATA PTS. AT EACH
-C.....ELEVATION STATION), NSTAE, DT*NSPOOLE, NSPOOLE, IRTYPE
+C.....WRITE OUT HEADER INFORMATION INCLUDING NTRSPE (NO. OF DATA PTS. AT
+C.....EACH ELEVATION STATION), NSTAE, DT*NSPOOLE, NSPOOLE, IRTYPE
 C...
           NSCOUE=0
           IESTP=0
@@ -1188,7 +1204,7 @@ C...
             WRITE(82,REC=IESTP+4) NSPOOLE
             WRITE(82,REC=IESTP+5) 1
             IESTP=IESTP+5
-            CLOSE(82)                    ! DO THIS TO FLUSH THE WRITE BUFFER
+            CLOSE(82)                ! DO THIS TO FLUSH THE WRITE BUFFER
             OPEN(82,FILE=DIRNAME//'/'//'fort.82',
      &         ACCESS='DIRECT',RECL=NBYTE)
           ENDIF
@@ -1246,7 +1262,7 @@ C...
             WRITE(94,REC=IGVP+4) NSPOOLGV
             WRITE(94,REC=IGVP+5) 2
             IGVP=IGVP+5
-            CLOSE(94)                    ! DO THIS TO FLUSH THE WRITE BUFFER
+            CLOSE(94)                ! DO THIS TO FLUSH THE WRITE BUFFER
             OPEN(94,FILE=DIRNAME//'/'//'fort.94',
      &         ACCESS='DIRECT',RECL=NBYTE)
           ENDIF
@@ -1304,17 +1320,12 @@ C...
             WRITE(96,REC=IGVP+4) NSPOOLGV
             WRITE(96,REC=IGVP+5) 2
             IGVP=IGVP+5
-            CLOSE(96)                    ! DO THIS TO FLUSH THE WRITE BUFFER
+            CLOSE(96)                ! DO THIS TO FLUSH THE WRITE BUFFER
             OPEN(96,FILE=DIRNAME//'/'//'fort.96',
      &         ACCESS='DIRECT',RECL=NBYTE)
           ENDIF
 
         ENDIF
-        
-      DO I=1,NP
-         write(99,*) I, NNODECODE(I)
-         write(98,*) I, HTOT
-      ENDDO
           
       RETURN
       END

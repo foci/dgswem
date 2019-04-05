@@ -74,7 +74,7 @@ C
 C.....Declare variables used in sediment transport section
 C
       INTEGER, TARGET :: SEDFLAG
-      INTEGER MAXEL, ELEM_ED, NBOR_ED, NBOR_EL,ITDG
+      INTEGER MAXEL, ELEM_ED, NBOR_ED, NBOR_EL,ITDG,ModetoNode
       Integer tracer_flag, chem_flag,MXEDGS,MNEDGS,NEDGS
       INTEGER N1,N2,NO_NBORS,NBOR,SEDFLAG_W, OPEN_INDEX
       INTEGER, TARGET :: DG_TO_CG
@@ -443,8 +443,10 @@ C      ALLOCATE ( TAU0VAR(MNP))
       ALLOCATE ( YDUB(36,MNE,8))
       ALLOCATE ( UU2(max(MNP,MNE)))
       ALLOCATE ( VV2(max(MNP,MNE)))
-      ALLOCATE ( ETA1(max(MNP,MNE)),ETA2(max(MNP,MNE)), ETAMAX(MNP), MassMax(MNE) )
-      Allocate ( tracer(max(MNP,MNE)), tracer2(max(MNP,MNE)), bed_int(max(mnp,mne),layers), entrop(5,MNE) )
+      ALLOCATE ( ETA1(max(MNP,MNE)),ETA2(max(MNP,MNE)), ETAMAX(MNP),
+     &  MassMax(MNE) )
+      Allocate ( tracer(max(MNP,MNE)), tracer2(max(MNP,MNE)),
+     &  bed_int(max(mnp,mne),layers), entrop(5,MNE) )
       ALLOCATE ( CORIF(MNP), dyn_P(max(MNP,MNE)), pdg_el(MNE) )
       ALLOCATE ( QU(MNP),QV(MNP))
       ALLOCATE ( LBCODE(MNP))
@@ -699,7 +701,7 @@ C
       SUBROUTINE ALLOC_NNOEL2(MNP,MAXEL)
       ALLOCATE ( DP_DG(MAXEL),DG_ANG(MAXEL) )
       ALLOCATE ( NNOEL(MNP,MAXEL),CENTAB(MNP,MAXEL+1) )
-      ALLOCATE (ELETAB(MNP,10),ANGTAB(MNP,10),dynP_DG(MAXEL) )
+      ALLOCATE (ELETAB(MNP,MAXEL+1),ANGTAB(MNP,MAXEL+1),dynP_DG(MAXEL) )
       ALLOCATE ( ZE_DG(MAXEL), QX_DG(MAXEL), QY_DG(MAXEL), HB_DG(MAXEL))
       Allocate ( iota2_DG(MAXEL), iota_DG(MAXEL), iotaa_DG(MAXEL) )
       Allocate(bed_DG(MAXEL,layers),bed_N_int(layers),bed_N_ext(layers))

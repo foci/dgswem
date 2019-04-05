@@ -725,7 +725,7 @@ C
       IF (NABOUT.EQ.0) WRITE(16,1005) 
       DO i=1, NumNodesNotDef
          READ(13,*) NodeNum, AttributeData(NodeNum)
-         IF (NABOUT.EQ.0) WRITE(16,1010) NodeNum, AttributeData(NodeNum)
+         IF (NABOUT.EQ.0) WRITE(16,1010) NodeNum, AttributeData(NodeNum)     
       END DO
 C
  1001 FORMAT(/,10X,'Set all nodes to the default value of ',E16.8,/)
@@ -875,12 +875,12 @@ C     jgf46.25 If input tau0 is positive, set all nodes to that value.
                WRITE(16,6) ! spatially vary tau0 according to hard coded scheme
                WRITE(16,62) ! description of scheme
  62            FORMAT(/,5X,'IF DEPTH > 200           Tau0 = 0.005',    
-     &              /,5X,'IF 200   > DEPTH > 1     Tau0 = 1/DEPTH  ',   
+     &              /,5X,'IF 200   > DEPTH > 1     Tau0 = 1/DEPTH  ',    
      &              /,5X,'IF 1     > DEPTH         Tau0 = 1.0 ')
             ELSE
                WRITE(16,6) ! spatially vary tau0 according to hard coded scheme
                WRITE(16,61) ! description of scheme
- 61            FORMAT(/,5X,' IF DEPTH GE 10           -> TAU0 = 0.005',
+ 61            FORMAT(/,5X,' IF DEPTH GE 10           -> TAU0 = 0.005',    
      &              /,5X,' IF DEPTH LT 10           -> TAU0 = 0.020',/)
             ENDIF
          ENDIF
@@ -963,9 +963,9 @@ C
 C
 C     I N I T   E D D Y   V I S C O S I T Y  &  D I F F U S I V I T Y
       IF (.not.LoadEVM) THEN
-C   IF (NWP .eq. 0) THEN
+C    IF (NWP .eq. 0) THEN
 C           ALLOCATE(EVM(NP))
-C   ENDIF
+C    ENDIF
          DO I=1,NP
             EVM(I)=ESLM
          END DO

@@ -620,16 +620,20 @@ C.....Compute ZE, QX, QY, and HB at each edge Gauss quadrature point
 C.....Compute the specified flow boundaries for the exterior state
 
             Q_N_EXT = 0.D0
-            DO JJ = 1,NFFR
-               
-               IF(FPER(JJ).EQ.0.D0) THEN
+            DO JJ = 1,MNFFR
+               IF (NFFR.EQ.0) THEN
                   NCYC = 0.D0
+                  ARGJ = 0.D0
+                  RFF = RAMPExtFlux
+               ELSEIF (FPER(JJ).EQ.0.D0) THEN
+                  NCYC = 0.D0
+                  ARGJ = FAMIG(JJ)*(TIMEDG - NCYC*FPER(JJ)) + FFACE(JJ)
+                  RFF  = FFF(JJ)*RAMPExtFlux
                ELSE
                   NCYC = INT(TIMEDG/FPER(JJ))
+                  ARGJ = FAMIG(JJ)*(TIMEDG - NCYC*FPER(JJ)) + FFACE(JJ)
+                  RFF  = FFF(JJ)*RAMPExtFlux
                ENDIF
-
-               ARGJ = FAMIG(JJ)*(TIMEDG - NCYC*FPER(JJ)) + FFACE(JJ)
-               RFF  = FFF(JJ)*RAMPExtFlux
                
                QNAM_GP = 0.5D0*(QNAM_DG(JJ,L,1) + QNAM_DG(JJ,L,2))
      &            + 0.5D0*(QNAM_DG(JJ,L,2) - QNAM_DG(JJ,L,1))*XEGP(I,pa)
