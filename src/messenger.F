@@ -51,8 +51,8 @@ Casey 121126: Changed some variables to public.
 C
       INTEGER, PRIVATE, ALLOCATABLE :: REQ_I1(:), REQ_I2(:)
       INTEGER, PRIVATE, ALLOCATABLE :: STAT_I1(:,:), STAT_I2(:,:)
-      INTEGER, PRIVATE, ALLOCATABLE :: REQ_R1(:), REQ_R2(:), REQ_R3(:)
-	  &										   REQ_R4(:)
+      INTEGER, PRIVATE, ALLOCATABLE :: REQ_R1(:), REQ_R2(:), REQ_R3(:),
+     &                      REQ_R4(:)
       INTEGER, PRIVATE, ALLOCATABLE :: STAT_R1(:,:), STAT_R2(:,:), 
      &                                 STAT_R3(:,:),STAT_R4(:,:)
       INTEGER, PRIVATE, ALLOCATABLE :: REQ_R3D(:), STAT_R3D(:,:)
@@ -206,8 +206,8 @@ C
 C  vjp  8/06/1999
 C--------------------------------------------------------------------------
 C
+      USE GLOBAL, ONLY : MXEDGS
       IMPLICIT NONE
-		USE GLOBAL, ONLY : MXEDGS
 #ifndef HAVE_MPI_MOD
       include 'mpif.h'
 #endif
@@ -225,9 +225,9 @@ C
 C
       ALLOCATE ( REQ_I1(RDIM),REQ_I2(RDIM) )
       ALLOCATE ( REQ_R1(RDIM),REQ_R2(RDIM),REQ_R3(RDIM) )
-		if (MXEDGS .eq. 4) then
-			ALLOCATE(REQ_R4(RDIM))
-	   end
+      if (MXEDGS .eq. 4) then
+        ALLOCATE(REQ_R4(RDIM))
+      endif
 C
       ALLOCATE ( STAT_I1(MPI_STATUS_SIZE,RDIM),       
      &           STAT_I2(MPI_STATUS_SIZE,RDIM) )
@@ -235,9 +235,9 @@ C
       ALLOCATE ( STAT_R1(MPI_STATUS_SIZE,RDIM),       
      &           STAT_R2(MPI_STATUS_SIZE,RDIM),
      &           STAT_R3(MPI_STATUS_SIZE,RDIM) )
-	   if (MXEDGS .eq. 4) then
-			ALLOCATE(STAT_R4(MPI_STATUS_SIZE,RDIM))
-	   end
+      if (MXEDGS .eq. 4) then
+        ALLOCATE(STAT_R4(MPI_STATUS_SIZE,RDIM))
+      endif
 C
       IF (C3D) THEN
          ALLOCATE ( REQ_R3D(RDIM) )
@@ -307,17 +307,17 @@ C
       ENDDO
 C
       if (MXEDGS .eq. 4) then
-			DO J=1,NEIGHPROC  
-				CALL MPI_RECV_INIT ( RECVBUF(1,J), 4*NNODRECV(J), 
-     &     		REALTYPE,IPROC(J), TAG, MPI_COMM_WORLD,
-     &     		REQ_R4(J),IERR)
-			ENDDO
-			DO J=1,NEIGHPROC  
-				CALL MPI_SEND_INIT ( SENDBUF(1,J), 4*NNODSEND(J), 
-     &     		REALTYPE,IPROC(J), TAG, MPI_COMM_WORLD,
-     &     		REQ_R4(J+NEIGHPROC),IERR)
-			ENDDO
-		end
+        DO J=1,NEIGHPROC  
+          CALL MPI_RECV_INIT ( RECVBUF(1,J), 4*NNODRECV(J), 
+     &          REALTYPE,IPROC(J), TAG, MPI_COMM_WORLD,
+     &          REQ_R4(J),IERR)
+        ENDDO
+        DO J=1,NEIGHPROC  
+          CALL MPI_SEND_INIT ( SENDBUF(1,J), 4*NNODSEND(J), 
+     &          REALTYPE,IPROC(J), TAG, MPI_COMM_WORLD,
+     &          REQ_R4(J+NEIGHPROC),IERR)
+        ENDDO
+      endif
 C
       IF (C3D) THEN
          DO J=1,NEIGHPROC  
@@ -486,9 +486,9 @@ C
         CALL MPI_STARTALL ( RDIM, REQ_R1, IERR )
       ELSEIF (NMSG.EQ.2) THEN
         CALL MPI_STARTALL ( RDIM, REQ_R2, IERR )
-      ELSEIF (NMSG.EQ.3)
+      ELSEIF (NMSG.EQ.3) THEN
         CALL MPI_STARTALL ( RDIM, REQ_R3, IERR )
-		ELSE
+      ELSE
         CALL MPI_STARTALL ( RDIM, REQ_R4, IERR )
       ENDIF
               !..Unpack Received messages as they arrive     
