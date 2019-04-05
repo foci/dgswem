@@ -1069,7 +1069,6 @@ C...
         ENDIF
 C
  1112 FORMAT(/,1X,79('_'))
- 9883 FORMAT(' !!! NODE ',I6,' DRIED (LANDLOCKING)')
 
 C.....Added sediment transport output files (Ethan Kubatko, 8-1-2003)
 
