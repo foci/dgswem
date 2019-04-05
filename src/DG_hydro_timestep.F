@@ -43,7 +43,7 @@ Casey 101118: Add variables for coupling to SWAN.
 C.....Declare local variables
 
 
-      INTEGER IT,L,GED,NBOREL,NNBORS,NDRYNBORS,Istop,k,j,kk,i,mm
+      INTEGER IT,L,GED,NBOREL,NNBORS,NDRYNBORS,NQEDS,Istop,k,j,kk,i,mm
       INTEGER Detected,flagger,store
       REAL(SZ) QBCT1,QBCT2,QBC1,QBC2,ZP(NEDGS),QXP(NEDGS),
      $            QXP_OLD(NEDGS),QYP(NEDGS),QYP_OLD(NEDGS),ZP_OLD(NEDGS)
