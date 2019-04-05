@@ -103,15 +103,15 @@ PREP_SRC   =  adcprep.F  decomp.F   read_global.F   prep.F   interp.F  machdep.F
 POST_SRC   =  adcpost.F    post.F  compare.F  diffmerge.F
 ADC_SRC    =  dgswem.F owiwind.F read_input.F cstart.F hstart.F radiation_edge_hydro.F \
 	ibarrier_edge_hydro.F ebarrier_edge_hydro.F  \
-	calc_normal.F create_edge_data.F detector.F \
+	calc_normal.F create_edge_data.F \
 	DG_timestep.F DG_hydro_timestep.F \
-	edge_int_hydro.F flow_edge_hydro.F \
+	flow_edge_hydro.F \
 	internal_edge_hydro.F land_edge_hydro.F \
 	ocean_edge_hydro.F  \
 	orthogonal_basis_v1.F p_enrichment.F prep_DG.F quadrature_v1.F \
 	radiation_edge_hydro.F read_input.F rhs_dg_hydro.F quad_rules_general.F \
 	numerical_flux.F tidal_potential.F write_results.F \
-	slopelimiter.F prep_slopelim.F ocean_edge_hydro_post.F ocean_flow_edge_hydro.F \
+	slopelimiter.F prep_slopelim.F \
 	wetdry.F LDG_hydro.F met_forcing.F sta_basis.F modal2nodal.F write_output.F
 #Casey 121126: Added modal2nodal.F and write_output.F to the previous line.
 
@@ -314,10 +314,8 @@ $(O_DIR)hstart.o      			:  hstart.F $(ADC_MOBJ)  $(HARM_MOBJ)  $(WIND_MOBJ)
 $(O_DIR)dgswem.o      			:  dgswem.F $(ADC_MOBJ)  $(HARM_MOBJ) $(WIND_MOBJ) 
 $(O_DIR)calc_normal.o         	:  calc_normal.F $(ADC_MOBJ)
 $(O_DIR)create_edge_data.o    	:  create_edge_data.F $(ADC_MOBJ)
-$(O_DIR)detector.o	      	:  detector.F $(ADC_MOBJ)
 $(O_DIR)DG_timestep.o         	:  DG_timestep.F $(ADC_MOBJ)
 $(O_DIR)DG_hydro_timestep.o   	:  DG_hydro_timestep.F $(ADC_MOBJ)
-$(O_DIR)edge_int_hydro.o      	:  edge_int_hydro.F $(ADC_MOBJ)
 $(O_DIR)flow_edge_hydro.o     	:  flow_edge_hydro.F $(ADC_MOBJ)
 $(O_DIR)internal_edge_hydro.o 	:  internal_edge_hydro.F $(ADC_MOBJ)
 $(O_DIR)land_edge_hydro.o     	:  land_edge_hydro.F $(ADC_MOBJ)
@@ -339,8 +337,6 @@ $(O_DIR)pdg_debug.o                 :  pdg_debug.F  $(ADC_MOBJ) $(MSG_MOBJ)
 $(O_DIR)ghost_internal_edge_hydro.o :  ghost_internal_edge_hydro.F  $(ADC_MOBJ) $(MSG_MOBJ)
 $(O_DIR)slopelimiter.o              :  slopelimiter.F  $(ADC_MOBJ)
 $(O_DIR)prep_slopelim.o             :  prep_slopelim.F  $(ADC_MOBJ)
-$(O_DIR)ocean_edge_hydro_post.o     :  ocean_edge_hydro_post.F $(ADC_MOBJ)
-$(O_DIR)ocean_flow_edge_hydro.o     :  ocean_flow_edge_hydro.F $(ADC_MOBJ)
 $(O_DIR)wetdry.o                    :  wetdry.F  $(ADC_MOBJ)
 $(O_DIR)LDG_hydro.o                 :  LDG_hydro.F  $(ADC_MOBJ)
 $(O_DIR)met_forcing.o               :  met_forcing.F  $(ADC_MOBJ)
