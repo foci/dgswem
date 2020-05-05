@@ -1,0 +1,896 @@
+
+ _______________________________________________________________________________
+
+ _______________________________________________________________________________
+
+
+                   dgswem.11.13 
+
+     A disconintuous Galerkin shallow water equation model
+          for coastal seas and estuarine research
+
+
+       -  Based off of the ADCIRC model created by
+
+          R.A. Luettich, Jr., University of North Carolina
+          J.J. Westerink, University of Notre Dame
+
+       -  The ADCIRC source code has been copyrighted by
+          R.A. Luettich, Jr. & J.J. Westerink, 1994-2001
+          No part of the adcirc base code may be reproduced
+          or redistributed without the written permission of
+          the above authors.
+
+
+     The DG version was written largely ab initio,
+     though some data structures from the CG version were used.
+
+       Developed by:
+          Ethan J. Kubatko, The Ohio State University (EJK)
+          Clint N. Dawson, UT ICES (cnd)
+          Shintaro Bunya, The University of Tokyo (sb)
+          Craig Michoski, UT ICES (cem)
+          Christopher Mirabito, MIT
+          Damrongsak Wirasaet, University of Notre Dame
+          Casey Dietrich, North Carolina State University
+
+
+
+ _______________________________________________________________________________
+
+
+ THE SOURCE CODE HAS BEEN CONFIGURED BY THE PREPROCESSOR AS FOLLOWS:
+
+       - 2D DEPTH INTEGRATED MODEL OPTION
+       - CODE SETUP TO RUN WITH 8 byte REALS
+       - CODE OPTIMIZED FOR A SCALAR COMPUTER
+       - NONVECTORIZABLE PARTS OF CODE OPTIMIZED FOR MEMORY
+       - CODE WILL USE JCG ITERATIVE GWCE SOLVER
+
+ _______________________________________________________________________________
+
+
+ RUN DESCRIPTION :  pseudo_1d_x1_t1                
+
+ RUN IDENTIFICATION :  M2,M4,M6, and STEADY, m
+
+ _______________________________________________________________________________
+
+
+ GENERAL RUN INFORMATION
+
+     NFOVER =  1
+         IF NON-FATAL ERRORS ARE DETECTED, THEY WILL BE CORRECTED AND EXECUTION CONTINUED
+
+     NABOUT =   0
+         DETAILED OUTPUT WILL BE PROVIDED TO UNIT 16
+         UNIT 14, 15, 21, 22 INPUT DATA WILL BE ECHO PRINTED
+
+     NSCREEN =  1
+         SCREEN OUTPUT WILL BE PROVIDED TO UNIT 6
+
+
+     dgswem will be cold started
+
+     ICS =  1
+         Governing equations are in Cartesian coordinates
+
+     NOLIBF =   1
+         THE MODEL WILL USE STANDARD QUADRATIC BOTTOM FRICTION
+
+     NOLIFA =   1
+         THE MODEL WILL USE FINITE AMPLITUDE TERMS BUT NO WETTING AND DRYING
+
+     NOLICA =   0
+         THE MODEL WILL NOT USE SPATIAL DERIVATIVE COMPONENTS OF THE ADVECTIVE TERMS
+
+
+
+
+ !!!!!!!!!! INPUT ERROR !!!!!!!!!
+
+ NOLICAT =           0
+
+ Your selection of NOLICAT (a UNIT 15 input parameter) is inconsistent with your 
+ selection of NOLIFA and may lead to mass balance problems
+
+ !!!!!! EXECUTION WILL CONTINUE !!!!!!!!
+
+
+
+     NOLICAT =   0
+         THE MODEL WILL NOT USE TIME DERIVATIVE COMPONENTS 
+         OF THE ADVECTIVE TERMS IN THE GWCE
+
+     NWP =  0
+         A Nodal Attributes File (unit 13)
+         will not be used.
+
+     NCOR =  0
+         A CONSTANT VALUE OF THE CORIOLIS PARAMETER WILL BE 
+         USED THROUGHOUT THE DOMAIN
+
+     NTIP =  0
+         TIDAL POTENTIAL FORCING IS NOT USED IN THE COMPUTATION
+
+     NWS =  0
+         WIND STRESS OR SURFACE PRESSURE ARE NOT USED TO FORCETHE COMPUTATION
+
+     NRS =  0
+         WAVE RADIATION STRESS IS NOT USED TO FORCE THE COMPUTATION
+
+     NRAMP =  1
+         A HYPERBOLIC TANGENT RAMP IS APPLIED TO THE FORCING FUNCTIONS
+
+
+
+     GRAVITATIONAL CONSTANT G =   9.81000
+
+
+     WEIGHTING COEFFICIENT FOR THE GENERALIZED WAVE CONTINUITY EQUATION :
+     TAU0 =  0.50000000E-02  1/sec
+
+
+ _______________________________________________________________________________
+
+
+ TIME INTEGRATION INFORMATION
+
+
+     TIME STEP =   10.000000     SECONDS
+
+     STARTING TIME FOR SIMULATION =       0.000000 DAYS
+
+     Harmonic REFERENCE TIME =       0.000000 DAYS
+
+     TOTAL LENGTH OF NUMERICAL SIMULATION =      1.0000     DAYS
+
+     NUMBER OF TIME STEPS  =    8640
+
+
+
+     TIME WEIGHTING FACTORS IN THE WAVE EQUATION :
+
+         AT TIME LEVEL K+1 :  0.35000
+         AT TIME LEVEL K   :  0.30000
+         AT TIME LEVEL K-1 :  0.35000
+
+
+
+     THE BATHYMETRIC DEPTH AT ALL NODES WILL BE INCREASED TO H0=       0.0100 IF NECESSARY
+
+
+ _______________________________________________________________________________
+
+
+ GRID INFORMATION
+
+
+
+     GRID IDENTIFICATION : ADCIRC Model            
+
+     TOTAL NUMBER OF NODES =   130
+
+     TOTAL NUMBER OF ELEMENTS =   200
+
+
+ NODAL COORDINATES AND BATHYMETRY :
+
+          NODE NO.          X                    Y               DP
+
+          1                  0.00               8000.00          5.00
+          2                  0.00               6000.00          5.00
+          3                  0.00               4000.00          5.00
+          4                  0.00               2000.00          5.00
+          5                  0.00                  0.00          5.00
+          6               2000.00               6000.00          5.00
+          7               2000.00               8000.00          5.00
+          8               2000.00               4000.00          5.00
+          9               2000.00               2000.00          5.00
+         10               2000.00                  0.00          5.00
+         11               4000.00               6000.00          5.00
+         12               4000.00               4000.00          5.00
+         13               4000.00               8000.00          5.00
+         14               4000.00               2000.00          5.00
+         15               4000.00                  0.00          5.00
+         16               6000.00               6000.00          5.00
+         17               6000.00               4000.00          5.00
+         18               6000.00               8000.00          5.00
+         19               6000.00               2000.00          5.00
+         20               6000.00                  0.00          5.00
+         21               8000.00               6000.00          5.00
+         22               8000.00               4000.00          5.00
+         23               8000.00               8000.00          5.00
+         24               8000.00               2000.00          5.00
+         25               8000.00                  0.00          5.00
+         26              10000.00               6000.00          5.00
+         27              10000.00               4000.00          5.00
+         28              10000.00               8000.00          5.00
+         29              10000.00               2000.00          5.00
+         30              10000.00                  0.00          5.00
+         31              12000.00               6000.00          5.00
+         32              12000.00               4000.00          5.00
+         33              12000.00               8000.00          5.00
+         34              12000.00               2000.00          5.00
+         35              12000.00                  0.00          5.00
+         36              14000.00               6000.00          5.00
+         37              14000.00               4000.00          5.00
+         38              14000.00               8000.00          5.00
+         39              14000.00               2000.00          5.00
+         40              14000.00                  0.00          5.00
+         41              16000.00               6000.00          5.00
+         42              16000.00               4000.00          5.00
+         43              16000.00               8000.00          5.00
+         44              16000.00               2000.00          5.00
+         45              16000.00                  0.00          5.00
+         46              18000.00               6000.00          5.00
+         47              18000.00               4000.00          5.00
+         48              18000.00               8000.00          5.00
+         49              18000.00               2000.00          5.00
+         50              18000.00                  0.00          5.00
+         51              20000.00               6000.00          5.00
+         52              20000.00               4000.00          5.00
+         53              20000.00               8000.00          5.00
+         54              20000.00               2000.00          5.00
+         55              20000.00                  0.00          5.00
+         56              22000.00               6000.00          5.00
+         57              22000.00               4000.00          5.00
+         58              22000.00               8000.00          5.00
+         59              22000.00               2000.00          5.00
+         60              22000.00                  0.00          5.00
+         61              24000.00               6000.00          5.00
+         62              24000.00               4000.00          5.00
+         63              24000.00               8000.00          5.00
+         64              24000.00               2000.00          5.00
+         65              24000.00                  0.00          5.00
+         66              26000.00               6000.00          5.00
+         67              26000.00               4000.00          5.00
+         68              26000.00               8000.00          5.00
+         69              26000.00               2000.00          5.00
+         70              26000.00                  0.00          5.00
+         71              28000.00               6000.00          5.00
+         72              28000.00               4000.00          5.00
+         73              28000.00               8000.00          5.00
+         74              28000.00               2000.00          5.00
+         75              28000.00                  0.00          5.00
+         76              30000.00               6000.00          5.00
+         77              30000.00               4000.00          5.00
+         78              30000.00               8000.00          5.00
+         79              30000.00               2000.00          5.00
+         80              30000.00                  0.00          5.00
+         81              32000.00               6000.00          5.00
+         82              32000.00               4000.00          5.00
+         83              32000.00               8000.00          5.00
+         84              32000.00               2000.00          5.00
+         85              32000.00                  0.00          5.00
+         86              34000.00               6000.00          5.00
+         87              34000.00               4000.00          5.00
+         88              34000.00               8000.00          5.00
+         89              34000.00               2000.00          5.00
+         90              34000.00                  0.00          5.00
+         91              36000.00               6000.00          5.00
+         92              36000.00               4000.00          5.00
+         93              36000.00               8000.00          5.00
+         94              36000.00               2000.00          5.00
+         95              36000.00                  0.00          5.00
+         96              38000.00               6000.00          5.00
+         97              38000.00               4000.00          5.00
+         98              38000.00               8000.00          5.00
+         99              38000.00               2000.00          5.00
+        100              38000.00                  0.00          5.00
+        101              40000.00               6000.00          5.00
+        102              40000.00               4000.00          5.00
+        103              40000.00               8000.00          5.00
+        104              40000.00               2000.00          5.00
+        105              40000.00                  0.00          5.00
+        106              42000.00               6000.00          5.00
+        107              42000.00               4000.00          5.00
+        108              42000.00               8000.00          5.00
+        109              42000.00               2000.00          5.00
+        110              42000.00                  0.00          5.00
+        111              44000.00               6000.00          5.00
+        112              44000.00               4000.00          5.00
+        113              44000.00               8000.00          5.00
+        114              44000.00               2000.00          5.00
+        115              44000.00                  0.00          5.00
+        116              46000.00               6000.00          5.00
+        117              46000.00               4000.00          5.00
+        118              46000.00               8000.00          5.00
+        119              46000.00               2000.00          5.00
+        120              46000.00                  0.00          5.00
+        121              48000.00               6000.00          5.00
+        122              48000.00               4000.00          5.00
+        123              48000.00               8000.00          5.00
+        124              48000.00               2000.00          5.00
+        125              48000.00                  0.00          5.00
+        126              50000.00               6000.00          5.00
+        127              50000.00               4000.00          5.00
+        128              50000.00               8000.00          5.00
+        129              50000.00               2000.00          5.00
+        130              50000.00                  0.00          5.00
+
+
+     GLOBAL NODE NUMBERS FOR EACH ELEMENT :
+
+         ELEMENT        N1         N2          N3
+
+              1          1          6          7
+              2          2          6          1
+              3          3          8          6
+              4          3          6          2
+              5          9          8          3
+              6          9          3          4
+              7         10          9          5
+              8          9         10         14
+              9         11          7          6
+             10         12         11          8
+             11          8         11          6
+             12         11         13          7
+             13          8         14         12
+             14         12         19         17
+             15          9          4          5
+             16         10         15         14
+             17         11         16         13
+             18         12         17         16
+             19         12         16         11
+             20         14          8          9
+             21         13         16         18
+             22         22         17         24
+             23         14         15         19
+             24         15         20         19
+             25         16         21         18
+             26         21         17         22
+             27         17         21         16
+             28         12         14         19
+             29         23         18         21
+             30         19         24         17
+             31         19         20         24
+             32         24         20         25
+             33         21         26         23
+             34         22         27         26
+             35         22         26         21
+             36         22         29         27
+             37         26         28         23
+             38         29         22         24
+             39         24         25         29
+             40         25         30         29
+             41         31         28         26
+             42         27         32         31
+             43         31         26         27
+             44         32         27         34
+             45         33         28         31
+             46         29         34         27
+             47         34         29         30
+             48         30         35         34
+             49         33         31         36
+             50         32         37         36
+             51         32         36         31
+             52         37         32         39
+             53         36         38         33
+             54         34         39         32
+             55         35         39         34
+             56         39         35         40
+             57         36         41         38
+             58         41         37         42
+             59         41         36         37
+             60         37         44         42
+             61         41         43         38
+             62         44         37         39
+             63         44         39         40
+             64         40         45         44
+             65         41         46         43
+             66         51         46         47
+             67         42         46         41
+             68         47         42         49
+             69         43         46         48
+             70         42         44         49
+             71         44         45         49
+             72         49         45         50
+             73         46         51         48
+             74         47         52         51
+             75         46         42         47
+             76         47         54         52
+             77         51         53         48
+             78         47         49         54
+             79         54         49         50
+             80         54         50         55
+             81         56         53         51
+             82         52         57         56
+             83         51         52         56
+             84         57         52         59
+             85         58         53         56
+             86         52         54         59
+             87         54         55         59
+             88         59         55         60
+             89         56         61         58
+             90         62         61         57
+             91         56         57         61
+             92         57         64         62
+             93         63         58         61
+             94         57         59         64
+             95         64         59         60
+             96         64         60         65
+             97         66         63         61
+             98         67         66         62
+             99         61         62         66
+            100         69         67         62
+            101         63         66         68
+            102         69         62         64
+            103         65         69         64
+            104         70         69         65
+            105         66         71         68
+            106         67         72         71
+            107         67         71         66
+            108         74         72         67
+            109         68         71         73
+            110         69         74         67
+            111         74         69         70
+            112         70         75         74
+            113         71         76         73
+            114         77         76         72
+            115         72         76         71
+            116         72         79         77
+            117         76         78         73
+            118         72         74         79
+            119         74         75         79
+            120         79         75         80
+            121         76         81         78
+            122         77         82         81
+            123         77         81         76
+            124         84         82         77
+            125         78         81         83
+            126         84         77         79
+            127         79         80         84
+            128         84         80         85
+            129         81         86         83
+            130         86         82         87
+            131         82         86         81
+            132         87         82         89
+            133         88         83         86
+            134         84         89         82
+            135         89         84         85
+            136         89         85         90
+            137         86         91         88
+            138         87         92         91
+            139         87         91         86
+            140         87         94         92
+            141         91         93         88
+            142         94         87         89
+            143         89         90         94
+            144         90         95         94
+            145         96         93         91
+            146         92         97         96
+            147         96         91         92
+            148         97         92         99
+            149         98         93         96
+            150         94         99         92
+            151         99         94         95
+            152         95        100         99
+            153         98         96        101
+            154         97        102        101
+            155         97        101         96
+            156        104        102         97
+            157        101        103         98
+            158         97         99        104
+            159        104         99        100
+            160        100        105        104
+            161        101        106        103
+            162        106        102        107
+            163        106        101        102
+            164        102        109        107
+            165        106        108        103
+            166        109        102        104
+            167        104        105        109
+            168        110        109        105
+            169        106        111        108
+            170        112        111        107
+            171        107        111        106
+            172        112        107        114
+            173        108        111        113
+            174        107        109        114
+            175        109        110        114
+            176        114        110        115
+            177        111        116        113
+            178        112        117        116
+            179        116        111        112
+            180        112        119        117
+            181        116        118        113
+            182        112        114        119
+            183        119        114        115
+            184        119        115        120
+            185        121        118        116
+            186        117        122        121
+            187        117        121        116
+            188        122        117        124
+            189        123        118        121
+            190        119        120        124
+            191        119        124        117
+            192        124        120        125
+            193        121        126        123
+            194        126        122        127
+            195        121        122        126
+            196        122        129        127
+            197        128        123        126
+            198        124        125        129
+            199        122        124        129
+            200        129        125        130
+
+ _______________________________________________________________________________
+
+
+ BOTTOM FRICTION INFORMATION
+
+
+     NONLINEAR FRICTION COEFFICIENT CF =  0.00100000
+
+     EVM, EDDY VISCOSITY COEFFICIENT = 0.00000000E+00
+
+
+
+ _______________________________________________________________________________
+
+
+ CORIOLIS INFORMATION 
+
+
+     CONSTANT CORIOLIS COEFFICIENT = 0.00000000E+00     1/SEC
+
+
+ _______________________________________________________________________________
+
+
+ TIDAL POTENTIAL FORCING INFORMATION 
+
+
+
+ TIDAL POTENTIAL IS FORCED FOR     0 CONSTITUENT(S) 
+
+ _______________________________________________________________________________
+
+
+ ELEVATION SPECIFIED BOUNDARY FORCING INFORMATION 
+
+
+
+     NUMBER OF PERIODIC, ELEVATION SPECIFIED CONSTITUENTS =    1
+
+       CONSTITUENT #    FREQUENCY    NODAL FACTOR   EQU.ARG (DEG)  CONSTITUENT
+
+             1        0.000000000000   1.0000000       0.000           STEA
+
+
+
+     TOTAL NUMBER OF ELEVATION BOUNDARY FORCING SEGMENTS  =     1
+
+     TOTAL NUMBER OF ELEVATION SPECIFIED BOUNDARY NODES =     5
+
+
+     TOTAL NUMBER OF NODES ON ELEVATION SPECIFIED BOUNDARY SEGMENT    1  =     5
+
+             1
+             2
+             3
+             4
+             5
+
+
+
+
+     ELEVATION BOUNDARY TIDAL FORCING FOR CONSTITUENT NUMBER   1 DESIGNATED :  STEA
+         VERIFICATION OF CONSTITUENT :  STEADY   
+
+              NODE           AMPL.         PHASE(DEG)
+
+                 1           0.00000           0.000
+                 2           0.00000           0.000
+                 3           0.00000           0.000
+                 4           0.00000           0.000
+                 5           0.00000           0.000
+
+ _______________________________________________________________________________
+
+
+     ANGINN =   110.00 DEGREES
+     ALL FLOW BOUNDARY NODES WITH NORMAL FLOW AS AN ESSENTIAL B.C. AND 
+         INNER ANGLES LESS THAN ANGINN WILL HAVE BOTH NORMAL 
+         AND TANGENTIAL VELOCITY COMPONENTS ZEROED
+
+
+ _______________________________________________________________________________
+
+
+ FLOW BOUNDARY INFORMATION 
+
+
+
+     THE TOTAL NUMBER OF FLOW BOUNDARY SEGMENTS =     3
+
+     THE TOTAL NUMBER OF FLOW BOUNDARY NODES =    55
+
+
+
+     TOTAL NUMBER OF NODES FOR FLOW BOUNDARY SEGMENT   1  =     26
+     THIS SEGMENT IS AN EXTERNAL BOUNDARY WITH:
+       NO NORMAL FLOW AS AN ESSENTIAL B.C.
+       AND FREE TANGENTIAL SLIP
+
+    JGW    JME    ME2GW   NODE #  BNDRY CODE   INNER ANGLE       COS             SIN         0.667*BNDRY LEN
+
+      1      1      1        5      0         ********    0.00000000E+00  -0.10000000E+01    0.13333333E+04
+      2      2      2       10      0           180.00    0.00000000E+00  -0.10000000E+01    0.13333333E+04
+      3      3      3       15      0           180.00    0.00000000E+00  -0.10000000E+01    0.13333333E+04
+      4      4      4       20      0           180.00    0.00000000E+00  -0.10000000E+01    0.13333333E+04
+      5      5      5       25      0           180.00    0.00000000E+00  -0.10000000E+01    0.13333333E+04
+      6      6      6       30      0           180.00    0.00000000E+00  -0.10000000E+01    0.13333333E+04
+      7      7      7       35      0           180.00    0.00000000E+00  -0.10000000E+01    0.13333333E+04
+      8      8      8       40      0           180.00    0.00000000E+00  -0.10000000E+01    0.13333333E+04
+      9      9      9       45      0           180.00    0.00000000E+00  -0.10000000E+01    0.13333333E+04
+     10     10     10       50      0           180.00    0.00000000E+00  -0.10000000E+01    0.13333333E+04
+     11     11     11       55      0           180.00    0.00000000E+00  -0.10000000E+01    0.13333333E+04
+     12     12     12       60      0           180.00    0.00000000E+00  -0.10000000E+01    0.13333333E+04
+     13     13     13       65      0           180.00    0.00000000E+00  -0.10000000E+01    0.13333333E+04
+     14     14     14       70      0           180.00    0.00000000E+00  -0.10000000E+01    0.13333333E+04
+     15     15     15       75      0           180.00    0.00000000E+00  -0.10000000E+01    0.13333333E+04
+     16     16     16       80      0           180.00    0.00000000E+00  -0.10000000E+01    0.13333333E+04
+     17     17     17       85      0           180.00    0.00000000E+00  -0.10000000E+01    0.13333333E+04
+     18     18     18       90      0           180.00    0.00000000E+00  -0.10000000E+01    0.13333333E+04
+     19     19     19       95      0           180.00    0.00000000E+00  -0.10000000E+01    0.13333333E+04
+     20     20     20      100      0           180.00    0.00000000E+00  -0.10000000E+01    0.13333333E+04
+     21     21     21      105      0           180.00    0.00000000E+00  -0.10000000E+01    0.13333333E+04
+     22     22     22      110      0           180.00    0.00000000E+00  -0.10000000E+01    0.13333333E+04
+     23     23     23      115      0           180.00    0.00000000E+00  -0.10000000E+01    0.13333333E+04
+     24     24     24      120      0           180.00    0.00000000E+00  -0.10000000E+01    0.13333333E+04
+     25     25     25      125      0           180.00    0.00000000E+00  -0.10000000E+01    0.13333333E+04
+     26     26     26      130      0         ********    0.00000000E+00  -0.10000000E+01    0.00000000E+00
+
+
+
+     TOTAL NUMBER OF NODES FOR FLOW BOUNDARY SEGMENT   2  =     26
+     THIS SEGMENT IS AN EXTERNAL BOUNDARY WITH:
+       NO NORMAL FLOW AS AN ESSENTIAL B.C.
+       AND FREE TANGENTIAL SLIP
+
+    JGW    JME    ME2GW   NODE #  BNDRY CODE   INNER ANGLE       COS             SIN         0.667*BNDRY LEN
+
+     27     27     27      128      0         ********    0.00000000E+00   0.10000000E+01    0.13333333E+04
+     28     28     28      123      0           180.00    0.00000000E+00   0.10000000E+01    0.13333333E+04
+     29     29     29      118      0           180.00    0.00000000E+00   0.10000000E+01    0.13333333E+04
+     30     30     30      113      0           180.00    0.00000000E+00   0.10000000E+01    0.13333333E+04
+     31     31     31      108      0           180.00    0.00000000E+00   0.10000000E+01    0.13333333E+04
+     32     32     32      103      0           180.00    0.00000000E+00   0.10000000E+01    0.13333333E+04
+     33     33     33       98      0           180.00    0.00000000E+00   0.10000000E+01    0.13333333E+04
+     34     34     34       93      0           180.00    0.00000000E+00   0.10000000E+01    0.13333333E+04
+     35     35     35       88      0           180.00    0.00000000E+00   0.10000000E+01    0.13333333E+04
+     36     36     36       83      0           180.00    0.00000000E+00   0.10000000E+01    0.13333333E+04
+     37     37     37       78      0           180.00    0.00000000E+00   0.10000000E+01    0.13333333E+04
+     38     38     38       73      0           180.00    0.00000000E+00   0.10000000E+01    0.13333333E+04
+     39     39     39       68      0           180.00    0.00000000E+00   0.10000000E+01    0.13333333E+04
+     40     40     40       63      0           180.00    0.00000000E+00   0.10000000E+01    0.13333333E+04
+     41     41     41       58      0           180.00    0.00000000E+00   0.10000000E+01    0.13333333E+04
+     42     42     42       53      0           180.00    0.00000000E+00   0.10000000E+01    0.13333333E+04
+     43     43     43       48      0           180.00    0.00000000E+00   0.10000000E+01    0.13333333E+04
+     44     44     44       43      0           180.00    0.00000000E+00   0.10000000E+01    0.13333333E+04
+     45     45     45       38      0           180.00    0.00000000E+00   0.10000000E+01    0.13333333E+04
+     46     46     46       33      0           180.00    0.00000000E+00   0.10000000E+01    0.13333333E+04
+     47     47     47       28      0           180.00    0.00000000E+00   0.10000000E+01    0.13333333E+04
+     48     48     48       23      0           180.00    0.00000000E+00   0.10000000E+01    0.13333333E+04
+     49     49     49       18      0           180.00    0.00000000E+00   0.10000000E+01    0.13333333E+04
+     50     50     50       13      0           180.00    0.00000000E+00   0.10000000E+01    0.13333333E+04
+     51     51     51        7      0           180.00    0.00000000E+00   0.10000000E+01    0.13333333E+04
+     52     52     52        1      0         ********    0.00000000E+00   0.10000000E+01    0.00000000E+00
+
+
+
+     TOTAL NUMBER OF NODES FOR FLOW BOUNDARY SEGMENT   3  =      5
+     THIS SEGMENT IS A EXTERNAL BOUNDARY WITH:
+       SPECIFIED NORMAL FLOW AS A NATURAL B.C.
+       AND FREE TANGENTIAL SLIP
+
+    JGW    JME    ME2GW   NODE #  BNDRY CODE   INNER ANGLE       COS             SIN         0.667*BNDRY LEN
+
+     53     53     53      130     22         ********    0.10000000E+01   0.00000000E+00    0.13333333E+04
+     54     54     54      129     22           180.00    0.10000000E+01   0.00000000E+00    0.13333333E+04
+     55     55     55      127     22           180.00    0.10000000E+01   0.00000000E+00    0.13333333E+04
+     56     56     56      126     22           180.00    0.10000000E+01   0.00000000E+00    0.13333333E+04
+     57     57     57      128     22         ********    0.10000000E+01   0.00000000E+00    0.00000000E+00
+
+ _______________________________________________________________________________
+
+
+ NORMAL FLOW BOUNDARY FORCING INFORMATION 
+
+
+
+     NORMAL FLOW VALUES WILL BE READ FROM UNIT 20 
+         INTERPOLATION IN TIME IS DONE TO SYNC THE FLOW DATA 
+         WITH THE MODEL TIME STEP.
+
+ _______________________________________________________________________________
+
+
+ OUTPUT INFORMATION WILL BE PROVIDED AS FOLLOWS :
+
+
+
+ ELEVATION RECORDING STATION OUTPUT : 
+
+     NOUTE =  1
+
+     DATA RECORDS WILL START AFTER TOUTSE =   6.000 DAY(S) RELATIVE
+         TO THE STARTING TIME OR    51840 TIME STEPS INTO THE SIMULATION
+
+     DATA RECORDS WILL STOP AFTER TOUTFE =   8.000 DAY(S) RELATIVE
+         TO THE STARTING TIME OR     8640 TIME STEPS INTO THE SIMULATION
+
+     INFORMATION WILL BE SPOOLED TO UNIT 61 EVERY NSPOOLE =      30 TIME STEPS
+
+     UNIT 61 FORMAT WILL BE ASCII
+
+
+
+     NUMBER OF INPUT ELEVATION RECORDING STATIONS =     0
+
+
+
+
+ VELOCITY RECORDING STATION OUTPUT : 
+
+     NOUTV =  1
+
+     DATA RECORDS WILL START AFTER TOUTSV =   6.000 DAY(S) RELATIVE
+         TO THE STARTING TIME OR    51840 TIME STEPS INTO THE SIMULATION
+
+     DATA RECORDS WILL STOP AFTER TOUTFV =   8.000 DAY(S) RELATIVE
+         TO THE STARTING TIME OR     8640 TIME STEPS INTO THE SIMULATION
+
+     INFORMATION WILL BE SPOOLED TO UNIT 62 EVERY  NSPOOLV =      30 TIME STEPS
+
+     UNIT 62 FORMAT WILL BE ASCII
+
+
+
+
+     NUMBER OF INPUT VELOCITY RECORDING STATIONS =     0
+
+
+
+
+ GLOBAL NODAL ELEVATION INFORMATION OUTPUT: 
+
+     NOUTGE =  1
+
+     DATA RECORDS WILL START AFTER TOUTSGE =   0.000 DAY(S) RELATIVE
+         TO THE STARTING TIME OR        0 TIME STEPS INTO THE SIMULATION
+
+     DATA RECORDS WILL STOP AFTER TOUTFGE =  12.420 DAY(S) RELATIVE
+         TO THE STARTING TIME OR     8640 TIME STEPS INTO THE SIMULATION
+
+     INFORMATION WILL BE SPOOLED TO UNIT 63 EVERY NSPOOLGE =      20 TIME STEPS
+
+     UNIT 63 FORMAT WILL BE ASCII
+
+
+
+
+ GLOBAL NODAL VELOCITY INFORMATION OUTPUT : 
+
+     NOUTGV =  1
+
+     DATA RECORDS WILL START AFTER TOUTSGV =   0.000 DAY(S) RELATIVE
+         TO THE STARTING TIME OR        0 TIME STEPS INTO THE SIMULATION
+
+     DATA RECORDS WILL STOP AFTER TOUTFGV =  12.420 DAY(S) RELATIVE
+         TO THE STARTING TIME OR     8640 TIME STEPS INTO THE SIMULATION
+
+     INFORMATION WILL BE SPOOLED TO UNIT 64 EVERY NSPOOLGV =      20 TIME STEPS
+
+     UNIT 64 FORMAT WILL BE ASCII
+
+
+
+
+ HARMONIC ANALYSIS INFORMATION OUTPUT : 
+
+     HARMONIC ANALYSIS PERFORMED FOR   10 CONSTITUENTS
+
+
+       FREQUENCY    NODAL FACTOR      EQU.ARG(DEG) CONSTITUENT
+
+     0.000000000000   1.0000000          0.000        steady   
+     0.000140525705   1.0000000          0.000        M2       
+     0.000281051409   1.0000000          0.000        M4       
+     0.000421577114   1.0000000          0.000        M6       
+     0.000562102819   1.0000000          0.000        M8       
+     0.000702628523   1.0000000          0.000        M10      
+     0.000843154228   1.0000000          0.000        M12      
+     0.000983679933   1.0000000          0.000        M14      
+     0.001124205637   1.0000000          0.000        M16      
+     0.001264731342   1.0000000          0.000        M18      
+
+     HARMONIC ANALYSIS WILL START AFTER THAS =  10.350 DAY(S) RELATIVE
+         TO THE STARTING TIME OR    89424 TIME STEPS INTO THE SIMULATION
+
+     HARMONIC ANALYSIS WILL STOP AFTER THAF =  12.420 DAY(S) RELATIVE
+         TO THE STARTING TIME OR   107309 TIME STEPS INTO THE SIMULATION
+
+     INFORMATION WILL BE ANALYZED EVERY NHAINC =      20 TIME STEPS.
+
+     MEANS AND VARIANCES WILL BE COMPUTED FOR THE FINAL    0.00000 %
+         OF THE HARMONIC ANALYSIS PERIOD OR AFTER    107309 TIME STEPS INTO THE SIMULATION.
+          RESULTS ARE WRITTEN TO UNIT 55.
+
+
+
+     GLOBAL ELEVATION HARMONIC ANAL WILL BE WRITTEN TO UNIT 53
+
+
+
+     GLOBAL VELOCITY HARMONIC ANAL WILL BE WRITTEN TO UNIT 54
+
+
+
+
+ HOT START OUTPUT INFORMATION OUTPUT : 
+
+     HOT START OUTPUT WILL BE WRITTEN TO UNIT 67 OR 68 EVERY  8600 TIME STEPS
+
+
+ SOLVER INFORMATION OUTPUT : 
+
+ THE NEIGHBOR TABLE IS BEING COMPUTED 
+
+ THE NEIGHBOR TABLE IS COMPLETED 
+     THE MINIMUM NUMBER OF NEIGHBORS FOR ANY NODE =   3
+     1+THE MAXIMUM NUMBER OF NEIGHBORS FOR ANY NODE =   7
+     THE PARAMETER MNEI CAN BE SET AS SMALL AS   7
+
+ *****************************************************
+ *   Based on information extracted from the ADCIRC  *
+ *   UNIT 14 and 15 (grid and horiz run info) files  *
+ *   the following paramter values will be set:      *
+ *                                                   *
+ *       MNPROC =     1                              *
+ *       MNE =      200      MNP  =      130         *
+ *       MNEI =      10                              *
+ *       MNOPE =      1      MNETA =      5          *
+ *       MNBOU =      3      MNVEL =    110          *
+ *       MNTIF =      1      MNBFR =      1          *
+ *       MNSTAE =     1      MNSTAV =     1          *
+ *       MNSTAC =     1      MNSTAM =     1          *
+ *       MNWLAT =     0      MNWLON =     0          *
+ *       MNHARF =    10      MNFFR =      1          *
+ *                                                   *
+ *   Also, NO wind forcing will be used,             *
+ *   means and variance calculation will NOT be made,*
+ *   the GWCE matrix will be left in consistent form *
+ *   the model will be set up for a 2DDI run,        *
+ *   and an iterative solver will be used            *
+ *****************************************************
+
+
+ _______________________________________________________________________________
+
+ NORMAL FLOW INFORMATION READ FROM UNIT 20
+
+   
+ TOTAL NO. OF EDGES =          329
+   
+ NO. OF INTERNAL (NON-BOUNDARY) EDGES =          271
+ NO. OF NO-NORMAL FLOW EDGES =           50
+ NO. OF NON-ZERO NORMAL FLOW EDGES =            4
+ NO. OF ELEVATION SPECIFIED EDGES =            4
+ NO. OF EXTERNAL BARRIER EDGES =            0
+ NO. OF INTERNAL BARRIER EDGES =            0
+ NO. OF RADIATION EDGES =            0
+ -----------------------------------------------------
+ NO. OF MISSING EDGES =            0
+ 
+ HOT START OUTPUT WRITTEN TO UNIT 67 AT TIME STEP =         0 TIME =   0.00000000E+00
+
+ _______________________________________________________________________________
+
+
+ LIMITED RUNTIME INFORMATION SECTION 
+
+
+ HOT START OUTPUT WRITTEN TO UNIT 68 AT TIME STEP =      8600 TIME =   0.86000000E+05
