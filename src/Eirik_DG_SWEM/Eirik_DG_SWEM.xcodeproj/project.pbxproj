@@ -1,0 +1,185 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 50;
+	objects = {
+
+/* Begin PBXFileReference section */
+		E5BA21EB246210AE005BC4E2 /* prep_DG.F */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.fortran; name = prep_DG.F; path = ../prep_DG.F; sourceTree = "<group>"; };
+		E5BA21EC246210B1005BC4E2 /* write_results.F */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.fortran; name = write_results.F; path = ../write_results.F; sourceTree = "<group>"; };
+		E5BA21ED246210B4005BC4E2 /* land_edge_hydro.F */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.fortran; name = land_edge_hydro.F; path = ../land_edge_hydro.F; sourceTree = "<group>"; };
+		E5BA21EE246210BA005BC4E2 /* write_output.F */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.fortran; name = write_output.F; path = ../write_output.F; sourceTree = "<group>"; };
+		E5BA21EF246210BC005BC4E2 /* orthobasis.F */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.fortran; name = orthobasis.F; path = ../orthobasis.F; sourceTree = "<group>"; };
+		E5BA21F0246210C0005BC4E2 /* flow_edge_sed.F */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.fortran; name = flow_edge_sed.F; path = ../flow_edge_sed.F; sourceTree = "<group>"; };
+		E5BA21F1246210C2005BC4E2 /* read_input.F */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.fortran; name = read_input.F; path = ../read_input.F; sourceTree = "<group>"; };
+		E5BA21F2246210C6005BC4E2 /* ocean_edge_hydro.F */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.fortran; name = ocean_edge_hydro.F; path = ../ocean_edge_hydro.F; sourceTree = "<group>"; };
+		E5BA21F3246210CD005BC4E2 /* flow_edge_hydro.F */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.fortran; name = flow_edge_hydro.F; path = ../flow_edge_hydro.F; sourceTree = "<group>"; };
+		E5BA21F4246210D0005BC4E2 /* harm.F */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.fortran; name = harm.F; path = ../harm.F; sourceTree = "<group>"; };
+		E5BA21F5246210D3005BC4E2 /* dg.F */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.fortran; name = dg.F; path = ../dg.F; sourceTree = "<group>"; };
+		E5BA21F6246210D7005BC4E2 /* detector.F */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.fortran; name = detector.F; path = ../detector.F; sourceTree = "<group>"; };
+		E5BA21F7246210D9005BC4E2 /* rhs_dg_hydro.F */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.fortran; name = rhs_dg_hydro.F; path = ../rhs_dg_hydro.F; sourceTree = "<group>"; };
+		E5BA21F8246210DE005BC4E2 /* quad_rules_general.F */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.fortran; name = quad_rules_general.F; path = ../quad_rules_general.F; sourceTree = "<group>"; };
+		E5BA21F9246210E2005BC4E2 /* met_forcing.F */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.fortran; name = met_forcing.F; path = ../met_forcing.F; sourceTree = "<group>"; };
+		E5BA21FA246210E6005BC4E2 /* ibarrier_edge_hydro.F */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.fortran; name = ibarrier_edge_hydro.F; path = ../ibarrier_edge_hydro.F; sourceTree = "<group>"; };
+		E5BA21FB246210E9005BC4E2 /* sizes.F */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.fortran; name = sizes.F; path = ../sizes.F; sourceTree = "<group>"; };
+		E5BA21FC246210EF005BC4E2 /* pdg_debug.F */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.fortran; name = pdg_debug.F; path = ../pdg_debug.F; sourceTree = "<group>"; };
+		E5BA21FD246210F1005BC4E2 /* internal_edge_hydro.F */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.fortran; name = internal_edge_hydro.F; path = ../internal_edge_hydro.F; sourceTree = "<group>"; };
+		E5BA21FE246210F4005BC4E2 /* DG_timestep.F */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.fortran; name = DG_timestep.F; path = ../DG_timestep.F; sourceTree = "<group>"; };
+		E5BA21FF246210F6005BC4E2 /* parameters.f90 */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.fortran.f90; name = parameters.f90; path = ../parameters.f90; sourceTree = "<group>"; };
+		E5BA2200246210FA005BC4E2 /* ebarrier_edge_hydro.F */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.fortran; name = ebarrier_edge_hydro.F; path = ../ebarrier_edge_hydro.F; sourceTree = "<group>"; };
+		E5BA2201246210FD005BC4E2 /* calc_normal.F */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.fortran; name = calc_normal.F; path = ../calc_normal.F; sourceTree = "<group>"; };
+		E5BA2202246210FF005BC4E2 /* quadrature_v1.F */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.fortran; name = quadrature_v1.F; path = ../quadrature_v1.F; sourceTree = "<group>"; };
+		E5BA220324621101005BC4E2 /* cstart.F */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.fortran; name = cstart.F; path = ../cstart.F; sourceTree = "<group>"; };
+		E5BA220424621106005BC4E2 /* p_enrichment.F */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.fortran; name = p_enrichment.F; path = ../p_enrichment.F; sourceTree = "<group>"; };
+		E5BA220524621108005BC4E2 /* modal2nodal.F */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.fortran; name = modal2nodal.F; path = ../modal2nodal.F; sourceTree = "<group>"; };
+		E5BA22062462110A005BC4E2 /* LDG_hydro.F */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.fortran; name = LDG_hydro.F; path = ../LDG_hydro.F; sourceTree = "<group>"; };
+		E5BA22072462110D005BC4E2 /* global.F */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.fortran; name = global.F; path = ../global.F; sourceTree = "<group>"; };
+		E5BA220824621112005BC4E2 /* create_edge_data.F */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.fortran; name = create_edge_data.F; path = ../create_edge_data.F; sourceTree = "<group>"; };
+		E5BA220924621114005BC4E2 /* slopelimiter.F */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.fortran; name = slopelimiter.F; path = ../slopelimiter.F; sourceTree = "<group>"; };
+		E5BA220A2462111A005BC4E2 /* wetdry.F */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.fortran; name = wetdry.F; path = ../wetdry.F; sourceTree = "<group>"; };
+		E5BA220B2462111D005BC4E2 /* edge_int_hydro.F */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.fortran; name = edge_int_hydro.F; path = ../edge_int_hydro.F; sourceTree = "<group>"; };
+		E5BA220C24621120005BC4E2 /* owiwind.F */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.fortran; name = owiwind.F; path = ../owiwind.F; sourceTree = "<group>"; };
+		E5BA220D24621123005BC4E2 /* hstart.F */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.fortran; name = hstart.F; path = ../hstart.F; sourceTree = "<group>"; };
+		E5BA220E24621126005BC4E2 /* numerical_flux.F */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.fortran; name = numerical_flux.F; path = ../numerical_flux.F; sourceTree = "<group>"; };
+		E5BA220F24621129005BC4E2 /* DG_hydro_timestep.F */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.fortran; name = DG_hydro_timestep.F; path = ../DG_hydro_timestep.F; sourceTree = "<group>"; };
+		E5BA22102462112B005BC4E2 /* diff45_41.F */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.fortran; name = diff45_41.F; path = ../diff45_41.F; sourceTree = "<group>"; };
+		E5BA22112462112E005BC4E2 /* fparser2.F90 */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.fortran.f90; name = fparser2.F90; path = ../fparser2.F90; sourceTree = "<group>"; };
+		E5BA221224621131005BC4E2 /* dgswem.F */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.fortran; name = dgswem.F; path = ../dgswem.F; sourceTree = "<group>"; };
+		E5BA221324621133005BC4E2 /* messenger_elem.F */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.fortran; name = messenger_elem.F; path = ../messenger_elem.F; sourceTree = "<group>"; };
+		E5BA221424621135005BC4E2 /* radiation_edge_hydro.F */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.fortran; name = radiation_edge_hydro.F; path = ../radiation_edge_hydro.F; sourceTree = "<group>"; };
+		E5BA221524621138005BC4E2 /* sta_basis.F */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.fortran; name = sta_basis.F; path = ../sta_basis.F; sourceTree = "<group>"; };
+		E5BA22162462113C005BC4E2 /* wind.F */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.fortran; name = wind.F; path = ../wind.F; sourceTree = "<group>"; };
+		E5BA22172462113E005BC4E2 /* fparser.F90 */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.fortran.f90; name = fparser.F90; path = ../fparser.F90; sourceTree = "<group>"; };
+		E5BA221824621140005BC4E2 /* prep_slopelim.F */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.fortran; name = prep_slopelim.F; path = ../prep_slopelim.F; sourceTree = "<group>"; };
+		E5BA221924621142005BC4E2 /* sta_location.F */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.fortran; name = sta_location.F; path = ../sta_location.F; sourceTree = "<group>"; };
+		E5BA221A24621146005BC4E2 /* couple2swan.F */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.fortran; name = couple2swan.F; path = ../couple2swan.F; sourceTree = "<group>"; };
+		E5BA221B24621148005BC4E2 /* orthogonal_basis_v1.F */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.fortran; name = orthogonal_basis_v1.F; path = ../orthogonal_basis_v1.F; sourceTree = "<group>"; };
+		E5BA221C2462114A005BC4E2 /* nodalattr.F */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.fortran; name = nodalattr.F; path = ../nodalattr.F; sourceTree = "<group>"; };
+		E5BA221D2462114C005BC4E2 /* global_3dvs.F */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.fortran; name = global_3dvs.F; path = ../global_3dvs.F; sourceTree = "<group>"; };
+		E5BA221E24621150005BC4E2 /* ibarrier_fluxes.F */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.fortran; name = ibarrier_fluxes.F; path = ../ibarrier_fluxes.F; sourceTree = "<group>"; };
+		E5BA221F24621154005BC4E2 /* tidal_potential.F */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.fortran; name = tidal_potential.F; path = ../tidal_potential.F; sourceTree = "<group>"; };
+		E5BA222024621159005BC4E2 /* read_fort_dg.F90 */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.fortran.f90; name = read_fort_dg.F90; path = ../read_fort_dg.F90; sourceTree = "<group>"; };
+		E5BA22212462115B005BC4E2 /* messenger.F */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.fortran; name = messenger.F; path = ../messenger.F; sourceTree = "<group>"; };
+		E5BA22222462115D005BC4E2 /* globalio.F */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.fortran; name = globalio.F; path = ../globalio.F; sourceTree = "<group>"; };
+		E5BA222324621160005BC4E2 /* vortex.F */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.fortran; name = vortex.F; path = ../vortex.F; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXGroup section */
+		E5BA21E424621053005BC4E2 = {
+			isa = PBXGroup;
+			children = (
+				E5BA2201246210FD005BC4E2 /* calc_normal.F */,
+				E5BA221A24621146005BC4E2 /* couple2swan.F */,
+				E5BA220824621112005BC4E2 /* create_edge_data.F */,
+				E5BA220324621101005BC4E2 /* cstart.F */,
+				E5BA21F6246210D7005BC4E2 /* detector.F */,
+				E5BA220F24621129005BC4E2 /* DG_hydro_timestep.F */,
+				E5BA21FE246210F4005BC4E2 /* DG_timestep.F */,
+				E5BA21F5246210D3005BC4E2 /* dg.F */,
+				E5BA221224621131005BC4E2 /* dgswem.F */,
+				E5BA22102462112B005BC4E2 /* diff45_41.F */,
+				E5BA2200246210FA005BC4E2 /* ebarrier_edge_hydro.F */,
+				E5BA220B2462111D005BC4E2 /* edge_int_hydro.F */,
+				E5BA21F3246210CD005BC4E2 /* flow_edge_hydro.F */,
+				E5BA21F0246210C0005BC4E2 /* flow_edge_sed.F */,
+				E5BA22172462113E005BC4E2 /* fparser.F90 */,
+				E5BA22112462112E005BC4E2 /* fparser2.F90 */,
+				E5BA221D2462114C005BC4E2 /* global_3dvs.F */,
+				E5BA22072462110D005BC4E2 /* global.F */,
+				E5BA22222462115D005BC4E2 /* globalio.F */,
+				E5BA21F4246210D0005BC4E2 /* harm.F */,
+				E5BA220D24621123005BC4E2 /* hstart.F */,
+				E5BA21FA246210E6005BC4E2 /* ibarrier_edge_hydro.F */,
+				E5BA221E24621150005BC4E2 /* ibarrier_fluxes.F */,
+				E5BA21FD246210F1005BC4E2 /* internal_edge_hydro.F */,
+				E5BA21ED246210B4005BC4E2 /* land_edge_hydro.F */,
+				E5BA22062462110A005BC4E2 /* LDG_hydro.F */,
+				E5BA221324621133005BC4E2 /* messenger_elem.F */,
+				E5BA22212462115B005BC4E2 /* messenger.F */,
+				E5BA21F9246210E2005BC4E2 /* met_forcing.F */,
+				E5BA220524621108005BC4E2 /* modal2nodal.F */,
+				E5BA221C2462114A005BC4E2 /* nodalattr.F */,
+				E5BA220E24621126005BC4E2 /* numerical_flux.F */,
+				E5BA21F2246210C6005BC4E2 /* ocean_edge_hydro.F */,
+				E5BA21EF246210BC005BC4E2 /* orthobasis.F */,
+				E5BA221B24621148005BC4E2 /* orthogonal_basis_v1.F */,
+				E5BA220C24621120005BC4E2 /* owiwind.F */,
+				E5BA220424621106005BC4E2 /* p_enrichment.F */,
+				E5BA21FF246210F6005BC4E2 /* parameters.f90 */,
+				E5BA21FC246210EF005BC4E2 /* pdg_debug.F */,
+				E5BA21EB246210AE005BC4E2 /* prep_DG.F */,
+				E5BA221824621140005BC4E2 /* prep_slopelim.F */,
+				E5BA21F8246210DE005BC4E2 /* quad_rules_general.F */,
+				E5BA2202246210FF005BC4E2 /* quadrature_v1.F */,
+				E5BA221424621135005BC4E2 /* radiation_edge_hydro.F */,
+				E5BA222024621159005BC4E2 /* read_fort_dg.F90 */,
+				E5BA21F1246210C2005BC4E2 /* read_input.F */,
+				E5BA21F7246210D9005BC4E2 /* rhs_dg_hydro.F */,
+				E5BA21FB246210E9005BC4E2 /* sizes.F */,
+				E5BA220924621114005BC4E2 /* slopelimiter.F */,
+				E5BA221524621138005BC4E2 /* sta_basis.F */,
+				E5BA221924621142005BC4E2 /* sta_location.F */,
+				E5BA221F24621154005BC4E2 /* tidal_potential.F */,
+				E5BA222324621160005BC4E2 /* vortex.F */,
+				E5BA220A2462111A005BC4E2 /* wetdry.F */,
+				E5BA22162462113C005BC4E2 /* wind.F */,
+				E5BA21EE246210BA005BC4E2 /* write_output.F */,
+				E5BA21EC246210B1005BC4E2 /* write_results.F */,
+			);
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXProject section */
+		E5BA21E524621055005BC4E2 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				LastUpgradeCheck = 1140;
+			};
+			buildConfigurationList = E5BA21E824621055005BC4E2 /* Build configuration list for PBXProject "Eirik_DG_SWEM" */;
+			compatibilityVersion = "Xcode 9.3";
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+			);
+			mainGroup = E5BA21E424621053005BC4E2;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+			);
+		};
+/* End PBXProject section */
+
+/* Begin XCBuildConfiguration section */
+		E5BA21E924621057005BC4E2 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+			};
+			name = Debug;
+		};
+		E5BA21EA24621057005BC4E2 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		E5BA21E824621055005BC4E2 /* Build configuration list for PBXProject "Eirik_DG_SWEM" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				E5BA21E924621057005BC4E2 /* Debug */,
+				E5BA21EA24621057005BC4E2 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = E5BA21E524621055005BC4E2 /* Project object */;
+}
