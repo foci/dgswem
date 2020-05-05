@@ -387,6 +387,7 @@ C.........Build the rhs
 
             RHS_QX(1,L,IRK) = RHS_QX(1,L,IRK) + SRFAC(1,I,L,pa)*SOURCE_X
             RHS_QY(1,L,IRK) = RHS_QY(1,L,IRK) + SRFAC(1,I,L,pa)*SOURCE_Y
+C......... This is where we'll add rainfall
             
             DO K = 2,DOFS(L)
 
