@@ -398,8 +398,9 @@ C.........Build the rhs
 
             RHS_QX(1,L,IRK) = RHS_QX(1,L,IRK) + SRFAC(1,I,L,pa)*SOURCE_X
             RHS_QY(1,L,IRK) = RHS_QY(1,L,IRK) + SRFAC(1,I,L,pa)*SOURCE_Y
-C......... This is where we'll add rainfall
-C          X,Y,SLAM,SFEA,DEG2RAD
+C..........This is where we'll add rainfall
+C..........X,Y,SLAM,SFEA,DEG2RAD
+C.......... 
             WRITE(6,*) 'RAIN =',RAIN_INTENSITY
             
             DO K = 2,DOFS(L)
