@@ -40,11 +40,16 @@ C.....Declare local variables
       REAL(SZ) DEPTH_C, FH_NL_C, UX_C, UY_C, UMAG_C, DTDPH,SFACQUAD
       Real(SZ) discharge_modelX_IN,discharge_modelY_IN
       Real(SZ) DH_X,DH_Y,phi_tot,C_0,HZ_X,HZ_Y,TZ_X,TZ_Y
+ 
+C.....Rainfall intensity (m/s)
+      REAL(SZ) RAIN_INTENSITY
 
       Real(SZ),allocatable :: XBCbt(:),YBCbt(:)
 
       Allocate ( XBCbt(MNE),YBCbt(MNE) )
 
+C.....Initial harcoding of this value
+      RAIN_INTENSITY = 0.1D0
       DTDPH = 1.D0/DTDP
       DO 1000 L = 1, NE
 c     nd
@@ -297,6 +302,12 @@ C     half a time step.  S.B. 9-Feb-2008
                TAU = MIN(TAU, .9D0*DTDPH)
             ENDIF
 
+C.........Compute the continuity source
+C.........i.e. rainfall
+    
+            SOURCE_RAIN = 0.D0
+
+
 C.........Compute the x momentum source/sink terms
 
             SOURCE_X =
@@ -388,6 +399,8 @@ C.........Build the rhs
             RHS_QX(1,L,IRK) = RHS_QX(1,L,IRK) + SRFAC(1,I,L,pa)*SOURCE_X
             RHS_QY(1,L,IRK) = RHS_QY(1,L,IRK) + SRFAC(1,I,L,pa)*SOURCE_Y
 C......... This is where we'll add rainfall
+C          X,Y,SLAM,SFEA,DEG2RAD
+            WRITE(6,*) 'RAIN =',RAIN_INTENSITY
             
             DO K = 2,DOFS(L)
 
