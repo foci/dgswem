@@ -64,7 +64,7 @@ C.....Declare real variables
       REAL(SZ), TARGET :: kappa,s0,uniform_dif
       REAL(SZ) SFAC_IN,SFAC_EX
       REAL(SZ) RAMPDG
-      REAL(SZ) S1, S2, SAV, SOURCE_X, SOURCE_Y, SOURCE_RAIN
+      REAL(SZ) S1, S2, SAV, SOURCE_X, SOURCE_Y, SOURCE_CONT
       REAL(SZ) TIMEDG, TIMEH_DG, TK
       REAL(SZ) QX_EX, QX_IN, QY_EX, QY_IN
       REAL(SZ) QNAM_GP, QNPH_GP

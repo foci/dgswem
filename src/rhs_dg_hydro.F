@@ -305,7 +305,7 @@ C     half a time step.  S.B. 9-Feb-2008
 C.........Compute the continuity source
 C.........i.e. rainfall
     
-            SOURCE_RAIN = 0.D0
+            SOURCE_CONT = 0.D0 + RAIN_INTENSITY
 
 
 C.........Compute the x momentum source/sink terms
