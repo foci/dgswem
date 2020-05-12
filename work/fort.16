@@ -75,28 +75,14 @@
      ICS =  1
          Governing equations are in Cartesian coordinates
 
-     NOLIBF =   1
-         THE MODEL WILL USE STANDARD QUADRATIC BOTTOM FRICTION
+     NOLIBF =   0
+         THE MODEL WILL USE LINEAR BOTTOM FRICTION
 
-     NOLIFA =   1
-         THE MODEL WILL USE FINITE AMPLITUDE TERMS BUT NO WETTING AND DRYING
+     NOLIFA =   0
+         THE MODEL WILL NOT USE FINITE AMPLITUDE TERMS OR WETTING AND DRYING
 
      NOLICA =   0
          THE MODEL WILL NOT USE SPATIAL DERIVATIVE COMPONENTS OF THE ADVECTIVE TERMS
-
-
-
-
- !!!!!!!!!! INPUT ERROR !!!!!!!!!
-
- NOLICAT =           0
-
- Your selection of NOLICAT (a UNIT 15 input parameter) is inconsistent with your 
- selection of NOLIFA and may lead to mass balance problems
-
- !!!!!! EXECUTION WILL CONTINUE !!!!!!!!
-
-
 
      NOLICAT =   0
          THE MODEL WILL NOT USE TIME DERIVATIVE COMPONENTS 
@@ -128,7 +114,7 @@
 
 
      WEIGHTING COEFFICIENT FOR THE GENERALIZED WAVE CONTINUITY EQUATION :
-     TAU0 =  0.50000000E-02  1/sec
+     TAU0 =  0.00000000E+00  1/sec
 
 
  _______________________________________________________________________________
@@ -143,9 +129,9 @@
 
      Harmonic REFERENCE TIME =       0.000000 DAYS
 
-     TOTAL LENGTH OF NUMERICAL SIMULATION =      0.0500     DAYS
+     TOTAL LENGTH OF NUMERICAL SIMULATION =      1.0000     DAYS
 
-     NUMBER OF TIME STEPS  =     432
+     NUMBER OF TIME STEPS  =    8640
 
 
 
@@ -521,8 +507,15 @@
  BOTTOM FRICTION INFORMATION
 
 
-     NONLINEAR FRICTION COEFFICIENT CF =  0.00100000
+     LINEAR BOTTOM FRICTION TAU =  0.00100000     1/sec
 
+
+
+
+
+ !!!!!!!!!!  WARNING - NONFATAL INPUT ERROR  !!!!!!!!!
+
+ TYPICALLY YOUR INPUT VALUE FOR TAU0 SHOULD BE SET EQUAL TO TAU
      EVM, EDDY VISCOSITY COEFFICIENT = 0.00000000E+00
 
 
@@ -552,40 +545,13 @@
 
 
 
-     NUMBER OF PERIODIC, ELEVATION SPECIFIED CONSTITUENTS =    1
-
-       CONSTITUENT #    FREQUENCY    NODAL FACTOR   EQU.ARG (DEG)  CONSTITUENT
-
-             1        0.000000000000   1.0000000       0.000           STEA
+     NUMBER OF PERIODIC, ELEVATION SPECIFIED CONSTITUENTS =    0
 
 
 
-     TOTAL NUMBER OF ELEVATION BOUNDARY FORCING SEGMENTS  =     1
+     TOTAL NUMBER OF ELEVATION BOUNDARY FORCING SEGMENTS  =     0
 
-     TOTAL NUMBER OF ELEVATION SPECIFIED BOUNDARY NODES =     5
-
-
-     TOTAL NUMBER OF NODES ON ELEVATION SPECIFIED BOUNDARY SEGMENT    1  =     5
-
-             1
-             2
-             3
-             4
-             5
-
-
-
-
-     ELEVATION BOUNDARY TIDAL FORCING FOR CONSTITUENT NUMBER   1 DESIGNATED :  STEA
-         VERIFICATION OF CONSTITUENT :  STEADY   
-
-              NODE           AMPL.         PHASE(DEG)
-
-                 1           0.00000           0.000
-                 2           0.00000           0.000
-                 3           0.00000           0.000
-                 4           0.00000           0.000
-                 5           0.00000           0.000
+     TOTAL NUMBER OF ELEVATION SPECIFIED BOUNDARY NODES =     0
 
  _______________________________________________________________________________
 
@@ -603,9 +569,9 @@
 
 
 
-     THE TOTAL NUMBER OF FLOW BOUNDARY SEGMENTS =     3
+     THE TOTAL NUMBER OF FLOW BOUNDARY SEGMENTS =     4
 
-     THE TOTAL NUMBER OF FLOW BOUNDARY NODES =    55
+     THE TOTAL NUMBER OF FLOW BOUNDARY NODES =    59
 
 
 
@@ -681,29 +647,29 @@
 
 
 
-     TOTAL NUMBER OF NODES FOR FLOW BOUNDARY SEGMENT   3  =      5
-     THIS SEGMENT IS A EXTERNAL BOUNDARY WITH:
-       SPECIFIED NORMAL FLOW AS A NATURAL B.C.
+     TOTAL NUMBER OF NODES FOR FLOW BOUNDARY SEGMENT   3  =      3
+     THIS SEGMENT IS AN EXTERNAL BOUNDARY WITH:
+       NO NORMAL FLOW AS AN ESSENTIAL B.C.
        AND FREE TANGENTIAL SLIP
 
     JGW    JME    ME2GW   NODE #  BNDRY CODE   INNER ANGLE       COS             SIN         0.667*BNDRY LEN
 
-     53     53     53      130     22         ********    0.10000000E+01   0.00000000E+00    0.13333333E+04
-     54     54     54      129     22           180.00    0.10000000E+01   0.00000000E+00    0.13333333E+04
-     55     55     55      127     22           180.00    0.10000000E+01   0.00000000E+00    0.13333333E+04
-     56     56     56      126     22           180.00    0.10000000E+01   0.00000000E+00    0.13333333E+04
-     57     57     57      128     22         ********    0.10000000E+01   0.00000000E+00    0.00000000E+00
-
- _______________________________________________________________________________
-
-
- NORMAL FLOW BOUNDARY FORCING INFORMATION 
+     53     53     53      129      0         ********    0.10000000E+01   0.00000000E+00    0.13333333E+04
+     54     54     54      127      0           180.00    0.10000000E+01   0.00000000E+00    0.13333333E+04
+     55     55     55      126      0         ********    0.10000000E+01   0.00000000E+00    0.00000000E+00
 
 
 
-     NORMAL FLOW VALUES WILL BE READ FROM UNIT 20 
-         INTERPOLATION IN TIME IS DONE TO SYNC THE FLOW DATA 
-         WITH THE MODEL TIME STEP.
+     TOTAL NUMBER OF NODES FOR FLOW BOUNDARY SEGMENT   4  =      3
+     THIS SEGMENT IS AN EXTERNAL BOUNDARY WITH:
+       NO NORMAL FLOW AS AN ESSENTIAL B.C.
+       AND FREE TANGENTIAL SLIP
+
+    JGW    JME    ME2GW   NODE #  BNDRY CODE   INNER ANGLE       COS             SIN         0.667*BNDRY LEN
+
+     56     56     56        2      0         ********   -0.10000000E+01   0.00000000E+00    0.13333333E+04
+     57     57     57        3      0           180.00   -0.10000000E+01   0.00000000E+00    0.13333333E+04
+     58     58     58        4      0         ********   -0.10000000E+01   0.00000000E+00    0.00000000E+00
 
  _______________________________________________________________________________
 
@@ -720,7 +686,7 @@
          TO THE STARTING TIME OR    51840 TIME STEPS INTO THE SIMULATION
 
      DATA RECORDS WILL STOP AFTER TOUTFE =   8.000 DAY(S) RELATIVE
-         TO THE STARTING TIME OR      432 TIME STEPS INTO THE SIMULATION
+         TO THE STARTING TIME OR     8640 TIME STEPS INTO THE SIMULATION
 
      INFORMATION WILL BE SPOOLED TO UNIT 61 EVERY NSPOOLE =      30 TIME STEPS
 
@@ -741,7 +707,7 @@
          TO THE STARTING TIME OR    51840 TIME STEPS INTO THE SIMULATION
 
      DATA RECORDS WILL STOP AFTER TOUTFV =   8.000 DAY(S) RELATIVE
-         TO THE STARTING TIME OR      432 TIME STEPS INTO THE SIMULATION
+         TO THE STARTING TIME OR     8640 TIME STEPS INTO THE SIMULATION
 
      INFORMATION WILL BE SPOOLED TO UNIT 62 EVERY  NSPOOLV =      30 TIME STEPS
 
@@ -762,8 +728,8 @@
      DATA RECORDS WILL START AFTER TOUTSGE =   0.000 DAY(S) RELATIVE
          TO THE STARTING TIME OR        0 TIME STEPS INTO THE SIMULATION
 
-     DATA RECORDS WILL STOP AFTER TOUTFGE =  12.420 DAY(S) RELATIVE
-         TO THE STARTING TIME OR      432 TIME STEPS INTO THE SIMULATION
+     DATA RECORDS WILL STOP AFTER TOUTFGE =   1.000 DAY(S) RELATIVE
+         TO THE STARTING TIME OR     8640 TIME STEPS INTO THE SIMULATION
 
      INFORMATION WILL BE SPOOLED TO UNIT 63 EVERY NSPOOLGE =      20 TIME STEPS
 
@@ -780,7 +746,7 @@
          TO THE STARTING TIME OR        0 TIME STEPS INTO THE SIMULATION
 
      DATA RECORDS WILL STOP AFTER TOUTFGV =  12.420 DAY(S) RELATIVE
-         TO THE STARTING TIME OR      432 TIME STEPS INTO THE SIMULATION
+         TO THE STARTING TIME OR     8640 TIME STEPS INTO THE SIMULATION
 
      INFORMATION WILL BE SPOOLED TO UNIT 64 EVERY NSPOOLGV =      20 TIME STEPS
 
@@ -852,13 +818,13 @@
  *       MNPROC =     1                              *
  *       MNE =      200      MNP  =      130         *
  *       MNEI =      10                              *
- *       MNOPE =      1      MNETA =      5          *
- *       MNBOU =      3      MNVEL =    110          *
+ *       MNOPE =      1      MNETA =      1          *
+ *       MNBOU =      4      MNVEL =    118          *
  *       MNTIF =      1      MNBFR =      1          *
  *       MNSTAE =     1      MNSTAV =     1          *
  *       MNSTAC =     1      MNSTAM =     1          *
  *       MNWLAT =     0      MNWLON =     0          *
- *       MNHARF =    10      MNFFR =      1          *
+ *       MNHARF =    10      MNFFR =      0          *
  *                                                   *
  *   Also, NO wind forcing will be used,             *
  *   means and variance calculation will NOT be made,*
@@ -867,24 +833,35 @@
  *   and an iterative solver will be used            *
  *****************************************************
 
-
- _______________________________________________________________________________
-
- NORMAL FLOW INFORMATION READ FROM UNIT 20
-
    
  TOTAL NO. OF EDGES =          329
    
  NO. OF INTERNAL (NON-BOUNDARY) EDGES =          271
- NO. OF NO-NORMAL FLOW EDGES =           50
- NO. OF NON-ZERO NORMAL FLOW EDGES =            4
- NO. OF ELEVATION SPECIFIED EDGES =            4
+ NO. OF NO-NORMAL FLOW EDGES =           54
+ NO. OF NON-ZERO NORMAL FLOW EDGES =            0
+ NO. OF ELEVATION SPECIFIED EDGES =            0
  NO. OF EXTERNAL BARRIER EDGES =            0
  NO. OF INTERNAL BARRIER EDGES =            0
  NO. OF RADIATION EDGES =            0
  -----------------------------------------------------
- NO. OF MISSING EDGES =            0
+ NO. OF MISSING EDGES =            4
  
+  
+ EDGE           4 ,MADE UP OF NODES           1 AND           2 , IS NOT
+ AN INTERNAL(NON-BOUNDARY) EDGE OR A BOUNDARY EDGE
+ ASSUMING EDGE           4 IS A NO-NORMAL FLOW EDGE !!!
+  
+ EDGE          31 ,MADE UP OF NODES           4 AND           5 , IS NOT
+ AN INTERNAL(NON-BOUNDARY) EDGE OR A BOUNDARY EDGE
+ ASSUMING EDGE          31 IS A NO-NORMAL FLOW EDGE !!!
+  
+ EDGE         324 ,MADE UP OF NODES         126 AND         128 , IS NOT
+ AN INTERNAL(NON-BOUNDARY) EDGE OR A BOUNDARY EDGE
+ ASSUMING EDGE         324 IS A NO-NORMAL FLOW EDGE !!!
+  
+ EDGE         329 ,MADE UP OF NODES         130 AND         129 , IS NOT
+ AN INTERNAL(NON-BOUNDARY) EDGE OR A BOUNDARY EDGE
+ ASSUMING EDGE         329 IS A NO-NORMAL FLOW EDGE !!!
  HOT START OUTPUT WRITTEN TO UNIT 67 AT TIME STEP =         0 TIME =   0.00000000E+00
 
  _______________________________________________________________________________
@@ -893,3 +870,4 @@
  LIMITED RUNTIME INFORMATION SECTION 
 
 
+ HOT START OUTPUT WRITTEN TO UNIT 68 AT TIME STEP =      8600 TIME =   0.86000000E+05
