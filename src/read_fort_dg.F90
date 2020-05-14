@@ -414,7 +414,8 @@
       !     versions of the code because the new options will be ignored
       
       
-      USE global, ONLY: dgswe,dg_to_cg,sedflag,reaction_rate,sed_equationX,sed_equationY
+      USE global, ONLY: dgswe,dg_to_cg,sedflag,reaction_rate,sed_equationX, &
+                        sed_equationY,rainflag
       USE sizes, ONLY: myproc,layers
       USE dg, ONLY: padapt,pflag,gflag,diorism,pl,ph,px,slimit,plimit, &
                     pflag2con1,pflag2con2,lebesgueP,fluxtype,rk_stage,rk_order, &
@@ -481,6 +482,8 @@
       fortdg(33)%key = "tune_by_hand";  fortdg(33)%iptr => tune_by_hand;   fortdg(33)%required = 1;  fortdg(33)%iptr = 0
       fortdg(34)%key = "sed_equationX"; fortdg(34)%cptr => sed_equationX;  fortdg(34)%required = 0;  fortdg(34)%cptr = sedXdef
       fortdg(35)%key = "sed_equationY"; fortdg(35)%cptr => sed_equationY;  fortdg(35)%required = 0;  fortdg(35)%cptr = sedYdef
+      fortdg(36)%key = "rainflag"; fortdg(36)%iptr => rainflag;
+          fortdg(36)%required = 0;  fortdg(36)%iptr = 0
       
       !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
       ! End configuration

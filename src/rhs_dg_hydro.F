@@ -44,7 +44,8 @@ C.....Declare local variables
  
 C.....Rainfall parameters (Some may be made global later)
       REAL(SZ) RAIN_1, RAIN_2, RAIN_3, RAIN_4
-      REAL(SZ) RAIN_INTENSITY, RAIN_STOP
+      REAL(SZ) RAIN_INTENSITY, RAIN_STOP, RAIN_START
+      REAl(SZ) RAIN_RESTART1, RAIN_RESTOP1
       INTEGER rr, NUM_BOXES
       REAL(SZ) BOX1_XMIN, BOX1_XMAX, BOX1_YMIN, BOX1_YMAX
       REAL(SZ) BOX2_XMIN, BOX2_XMAX, BOX2_YMIN, BOX2_YMAX
@@ -63,79 +64,90 @@ C.....Rainfall parameters (Some may be made global later)
 
       Allocate ( XBCbt(MNE),YBCbt(MNE) )
 
+
+
+      IF ((RAINFLAG.EQ.1)) THEN
+C..... these data parameters must be set for rain!!
+
 C.....Initial harcoding of this value
 C.....0.00000350 m/s is approx half an inch rain per hour
-C.....For now set this to zero if no rain is included
-      RAIN_INTENSITY = 0.D0
-      RAIN_1 = 1/(720000.D0)
-      RAIN_2 = 1*0.00000350D0
-      RAIN_3 = 1*0.00000350D0
-      RAIN_4 = 1*0.00000350D0
+C.....For now set these to zero if no rain is included
+         RAIN_INTENSITY = 0.D0
+         RAIN_1 = 10/(720000.D0)
+         RAIN_2 = 1*0.00000350D0
+         RAIN_3 = 1*0.00000350D0
+         RAIN_4 = 1*0.00000350D0
 
 C.....Number of boxes with rainfall
 C.....For now set this to zero if no rain is included
-      NUM_BOXES = 1
-C.....When to stop rainfall
-      RAIN_STOP = 10*3600.D0
+         NUM_BOXES = 1
 
+
+C.....When to stop/start rainfall
+         RAIN_START = 720.D0
+         RAIN_STOP = 10*3600.D0
 
 C.....We also hardcode the box dimensions for now
 
 C..... I we are in cartesian coords
-      IF ((ICS.EQ.1).AND.(NUM_BOXES.GE.0)) THEN
+         IF ((ICS.EQ.1).AND.(NUM_BOXES.GE.0)) THEN
 C.....The first box is ...
-          BOX1_XMIN = 0000.D0
-          BOX1_XMAX = 50000.D0
-          BOX1_YMIN = 0000.D0
-          BOX1_YMAX = 8000.D0
+              BOX1_XMIN = 0000.D0
+              BOX1_XMAX = 50000.D0
+              BOX1_YMIN = 0000.D0
+              BOX1_YMAX = 8000.D0
 
 C.....The second box is ...
-          BOX2_XMIN = 0000.D0
-          BOX2_XMAX = 24000.D0
-          BOX2_YMIN = 4000.D0
-          BOX2_YMAX = 8000.D0
+              BOX2_XMIN = 0000.D0
+              BOX2_XMAX = 24000.D0
+              BOX2_YMIN = 4000.D0
+              BOX2_YMAX = 8000.D0
 
 C.....The third box is ...
-          BOX3_XMIN = 24000.D0
-          BOX3_XMAX = 50000.D0
-          BOX3_YMIN = 0000.D0
-          BOX3_YMAX = 8000.D0
+              BOX3_XMIN = 24000.D0
+              BOX3_XMAX = 50000.D0
+              BOX3_YMIN = 0000.D0
+              BOX3_YMAX = 8000.D0
 
 C.....The fourth box is ..
-          BOX4_XMIN = 24000.D0
-          BOX4_XMAX = 50000.D0
-          BOX4_YMIN = 4000.D0
-          BOX4_YMAX = 8000.D0
-      ENDIF
+              BOX4_XMIN = 24000.D0
+              BOX4_XMAX = 50000.D0
+              BOX4_YMIN = 4000.D0
+              BOX4_YMAX = 8000.D0
+         ENDIF
 
 C..... If we are in long lat
-      IF ((ICS.EQ.2).AND.(RAIN_INTENSITY.NE.0)) then
+         IF ((ICS.EQ.2).AND.(NUM_BOXES.GE.0)) then
 C.....Set the box coordinates
-          BOX1_SLAM_MIN = 0.D0
-          BOX1_SLAM_MAX = 5.D0
-          BOX1_SFEA_MIN = 0.D0
-          BOX1_SFEA_MAX = 5.D0
+              BOX1_SLAM_MIN = 0.D0
+              BOX1_SLAM_MAX = 5.D0
+              BOX1_SFEA_MIN = 0.D0
+              BOX1_SFEA_MAX = 5.D0
 
 C.....Set the box coordinates
-          BOX2_SLAM_MIN = 0.D0
-          BOX2_SLAM_MAX = 5.D0
-          BOX2_SFEA_MIN = 0.D0
-          BOX2_SFEA_MAX = 5.D0
+              BOX2_SLAM_MIN = 0.D0
+              BOX2_SLAM_MAX = 5.D0
+              BOX2_SFEA_MIN = 0.D0
+              BOX2_SFEA_MAX = 5.D0
 
 C.....Set the box coordinates
-          BOX3_SLAM_MIN = 0.D0
-          BOX3_SLAM_MAX = 5.D0
-          BOX3_SFEA_MIN = 0.D0
-          BOX3_SFEA_MAX = 5.D0
+              BOX3_SLAM_MIN = 0.D0
+              BOX3_SLAM_MAX = 5.D0
+              BOX3_SFEA_MIN = 0.D0
+              BOX3_SFEA_MAX = 5.D0
 
 C.....Set the box coordinates
-          BOX4_SLAM_MIN = 0.D0
-          BOX4_SLAM_MAX = 5.D0
-          BOX4_SFEA_MIN = 0.D0
-          BOX4_SFEA_MAX = 5.D0
+              BOX4_SLAM_MIN = 0.D0
+              BOX4_SLAM_MAX = 5.D0
+              BOX4_SFEA_MIN = 0.D0
+              BOX4_SFEA_MAX = 5.D0
 
+         ENDIF
+      ELSE
+C......If we dont habe rain set these to zero
+            NUM_BOXES = 0
+            RAIN_INTENSITY = 0.D0
       ENDIF
-
 
 
 
@@ -177,70 +189,72 @@ C.......the box will get a rain source. This needs to be
 C.......modified moving forward with some type
 C.......of interpolation scheme
 
-c do ll = 1,layers
-c    HB(k,L,irk) = HB(k,L,irk) + bed(k,L,irk,ll)
-c enddo
-         RAIN_INTENSITY = 0.D0
+         IF ((RAINFLAG.EQ.1)) THEN
+         
 C.......If we are in the first box
-         IF ((ICS.EQ.1).AND.(NUM_BOXES.GE.1).AND.
-     &     (RAIN_INTENSITY.EQ.0.D0).AND.(TIME_A.LE.RAIN_STOP)) THEN
-            IF ((X(N1).LE.BOX1_XMAX).AND.(X(N2).LE.BOX1_XMAX).AND.
+            IF ((ICS.EQ.1).AND.(NUM_BOXES.GE.1).AND.
+     &     (RAIN_INTENSITY.EQ.0.D0).AND.
+     &     (TIME_A.LE.RAIN_STOP).AND.(TIME_A.GE.RAIN_START)) THEN
+               IF ((X(N1).LE.BOX1_XMAX).AND.(X(N2).LE.BOX1_XMAX).AND.
      &     (X(N3).LE.BOX1_XMAX).AND.(X(N1).GE.BOX1_XMIN).AND.
      &     (X(N2).GE.BOX1_XMIN).AND.(X(N3).GE.BOX1_XMIN).AND.
      &     (Y(N1).LE.BOX1_YMAX).AND.(Y(N2).LE.BOX1_YMAX).AND.
      &     (Y(N3).LE.BOX1_YMAX).AND.(Y(N1).GE.BOX1_YMIN).AND.
      &     (Y(N2).GE.BOX1_YMIN).AND.(Y(N3).GE.BOX1_YMIN)) THEN
                   RAIN_INTENSITY = RAIN_1
-            ELSE
+               ELSE
                   RAIN_INTENSITY = 0.D0
+               ENDIF
             ENDIF
-         ENDIF
 C.......If we are in the second box
-         IF ((ICS.EQ.1).AND.(NUM_BOXES.GE.2).AND.
-     &     (RAIN_INTENSITY.EQ.0.D0)) THEN
-            IF ((X(N1).LE.BOX2_XMAX).AND.(X(N2).LE.BOX2_XMAX).AND.
+            IF ((ICS.EQ.1).AND.(NUM_BOXES.GE.2).AND.
+     &     (RAIN_INTENSITY.EQ.0.D0).AND.
+     &     (TIME_A.LE.RAIN_STOP)) THEN
+               IF ((X(N1).LE.BOX2_XMAX).AND.(X(N2).LE.BOX2_XMAX).AND.
      &     (X(N3).LE.BOX2_XMAX).AND.(X(N1).GE.BOX2_XMIN).AND.
      &     (X(N2).GE.BOX2_XMIN).AND.(X(N3).GE.BOX2_XMIN).AND.
      &     (Y(N1).LE.BOX2_YMAX).AND.(Y(N2).LE.BOX2_YMAX).AND.
      &     (Y(N3).LE.BOX2_YMAX).AND.(Y(N1).GE.BOX2_YMIN).AND.
      &     (Y(N2).GE.BOX2_YMIN).AND.(Y(N3).GE.BOX2_YMIN)) THEN
                   RAIN_INTENSITY = RAIN_2
-            ELSE
+               ELSE
                   RAIN_INTENSITY = 0.D0
+               ENDIF
             ENDIF
-         ENDIF
 C.......If we are in the third box
-         IF ((ICS.EQ.1).AND.(NUM_BOXES.GE.3).AND.
-     &     (RAIN_INTENSITY.EQ.0.D0)) THEN
-            IF ((X(N1).LE.BOX3_XMAX).AND.(X(N2).LE.BOX3_XMAX).AND.
+            IF ((ICS.EQ.1).AND.(NUM_BOXES.GE.3).AND.
+     &     (RAIN_INTENSITY.EQ.0.D0).AND.
+     &     (TIME_A.LE.RAIN_STOP)) THEN
+               IF ((X(N1).LE.BOX3_XMAX).AND.(X(N2).LE.BOX3_XMAX).AND.
      &     (X(N3).LE.BOX3_XMAX).AND.(X(N1).GE.BOX3_XMIN).AND.
      &     (X(N2).GE.BOX3_XMIN).AND.(X(N3).GE.BOX3_XMIN).AND.
      &     (Y(N1).LE.BOX3_YMAX).AND.(Y(N2).LE.BOX3_YMAX).AND.
      &     (Y(N3).LE.BOX3_YMAX).AND.(Y(N1).GE.BOX3_YMIN).AND.
      &     (Y(N2).GE.BOX3_YMIN).AND.(Y(N3).GE.BOX3_YMIN)) THEN
                   RAIN_INTENSITY = RAIN_3
-            ELSE
+               ELSE
                   RAIN_INTENSITY = 0.D0
+               ENDIF
             ENDIF
-         ENDIF
 C.......If we are in the fourth box
-         IF ((ICS.EQ.1).AND.(NUM_BOXES.GE.4).AND.
-     &     (RAIN_INTENSITY.EQ.0.D0)) THEN
-            IF ((X(N1).LE.BOX4_XMAX).AND.(X(N2).LE.BOX4_XMAX).AND.
+            IF ((ICS.EQ.1).AND.(NUM_BOXES.GE.4).AND.
+     &     (RAIN_INTENSITY.EQ.0.D0).AND.
+     &     (TIME_A.LE.RAIN_STOP)) THEN
+               IF ((X(N1).LE.BOX4_XMAX).AND.(X(N2).LE.BOX4_XMAX).AND.
      &     (X(N3).LE.BOX4_XMAX).AND.(X(N1).GE.BOX4_XMIN).AND.
      &     (X(N2).GE.BOX4_XMIN).AND.(X(N3).GE.BOX4_XMIN).AND.
      &     (Y(N1).LE.BOX4_YMAX).AND.(Y(N2).LE.BOX4_YMAX).AND.
      &     (Y(N3).LE.BOX4_YMAX).AND.(Y(N1).GE.BOX4_YMIN).AND.
      &     (Y(N2).GE.BOX4_YMIN).AND.(Y(N3).GE.BOX4_YMIN)) THEN
                   RAIN_INTENSITY = RAIN_4
-            ELSE
+               ELSE
                   RAIN_INTENSITY = 0.D0
+               ENDIF
             ENDIF
-         ENDIF
 
 C.......Same as above for long lat
-         IF ((ICS.EQ.2).AND.(RAIN_INTENSITY.NE.0)) THEN
-            IF ((SLAM(N1).LE.BOX1_SLAM_MAX).AND.
+            IF ((ICS.EQ.2).AND.(RAIN_INTENSITY.NE.0)) THEN
+               IF ((SLAM(N1).LE.BOX1_SLAM_MAX).AND.
      &     (SLAM(N2).LE.BOX1_SLAM_MAX).AND.
      &     (SLAM(N3).LE.BOX1_SLAM_MAX).AND.
      &     (SLAM(N1).GE.BOX1_SLAM_MIN).AND.
@@ -252,9 +266,10 @@ C.......Same as above for long lat
      &     (SFEA(N1).GE.BOX1_SFEA_MIN).AND.
      &     (SFEA(N2).GE.BOX1_SFEA_MIN).AND.
      &     (SFEA(N3).GE.BOX1_SFEA_MIN)) THEN
-             RAIN_INTENSITY = RAIN_1
-            ELSE
-             RAIN_INTENSITY = 0.D0
+                RAIN_INTENSITY = RAIN_1
+              ELSE
+                RAIN_INTENSITY = 0.D0
+               ENDIF
             ENDIF
          ENDIF
 
