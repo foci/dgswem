@@ -20,7 +20,7 @@
  10.00                                    ! DT - TIME STEP (IN SECONDS)
  0.0    ! STATIM - STARTING TIME (IN DAYS)!!!0  !  NFFR read fort.20 0r not
  0.0    ! REFTIM - REFERENCE TIME (IN DAYS)
- 0.05                                       ! RNDAY - TOTAL LENGTH OF SIMULATION (IN DAYS)
+ 1.0                                       ! RNDAY - TOTAL LENGTH OF SIMULATION (IN DAYS)
  .25                                      ! DRAMP - DURATION OF RAMP FUNCTION (IN DAYS)
  0.350 0.300 0.350                        ! TIME WEIGHTING FACTORS FOR THE GWCE EQUATION
  0.010 0 0 .01                            ! H0, NODEDRYMIN, NODEWETMIN, VELMIN

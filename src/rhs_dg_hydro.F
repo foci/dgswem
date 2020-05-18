@@ -47,6 +47,8 @@ C.....Rainfall parameters (Some may be made global later)
       REAL(SZ) RAIN_INTENSITY, RAIN_STOP, RAIN_START
       REAl(SZ) RAIN_RESTART1, RAIN_RESTOP1
       INTEGER rr, NUM_BOXES, STOP_FLAG1
+      REAL(SZ) RAIN_AREA, ADJUSTED_AREA, RAIN_CORR
+      REAL(SZ) BOX_AREA
       REAL(SZ) BOX1_XMIN, BOX1_XMAX, BOX1_YMIN, BOX1_YMAX
       REAL(SZ) BOX2_XMIN, BOX2_XMAX, BOX2_YMIN, BOX2_YMAX
       REAL(SZ) BOX3_XMIN, BOX3_XMAX, BOX3_YMIN, BOX3_YMAX
@@ -78,6 +80,8 @@ C.....For now set these to zero if no rain is included
          RAIN_3 = 1*0.00000350D0
          RAIN_4 = 1*0.00000350D0
 
+         ADJUSTED_AREA = 0.D0
+
 C.....Number of boxes with rainfall
 C.....For now set this to zero if no rain is included
          NUM_BOXES = 1
@@ -105,26 +109,27 @@ C.....We also hardcode the box dimensions for now
 
 C..... I we are in cartesian coords
          IF ((ICS.EQ.1).AND.(NUM_BOXES.GE.0)) THEN
-C.....The first box is ...
+C.....The first box is ... Something is off here if box is not full domain
               BOX1_XMIN = 0000.D0
-              BOX1_XMAX = 50000.D0
+              BOX1_XMAX = 25000.D0
               BOX1_YMIN = 0000.D0
-              BOX1_YMAX = 8000.D0
+              BOX1_YMAX = 4000.D0
+              BOX_AREA = (BOX1_XMAX-BOX1_XMIN)*(BOX1_YMAX-BOX1_YMIN)
 C.....The second box is ...
               BOX2_XMIN = 0000.D0
-              BOX2_XMAX = 24000.D0
-              BOX2_YMIN = 4000.D0
-              BOX2_YMAX = 8000.D0
+              BOX2_XMAX = 0000.D0
+              BOX2_YMIN = 0000.D0
+              BOX2_YMAX = 0000.D0
 C.....The third box is ...
-              BOX3_XMIN = 24000.D0
-              BOX3_XMAX = 50000.D0
+              BOX3_XMIN = 0000.D0
+              BOX3_XMAX = 0000.D0
               BOX3_YMIN = 0000.D0
-              BOX3_YMAX = 8000.D0
+              BOX3_YMAX = 0000.D0
 C.....The fourth box is ..
-              BOX4_XMIN = 24000.D0
-              BOX4_XMAX = 50000.D0
-              BOX4_YMIN = 4000.D0
-              BOX4_YMAX = 8000.D0
+              BOX4_XMIN = 0000.D0
+              BOX4_XMAX = 0000.D0
+              BOX4_YMIN = 0000.D0
+              BOX4_YMAX = 0000.D0
          ENDIF
 C......If we are in long lat
 C......Convert input to radians
@@ -154,6 +159,38 @@ C.....Set the box coordinates
 C......If we dont have rain set these to zero
             NUM_BOXES = 0
             RAIN_INTENSITY = 0.D0
+      ENDIF
+
+          
+      RAIN_CORR = 1.D0
+      IF (TIME_A.GE.0) THEN
+
+
+           DO rr = 1, NE
+               IF ((X(NM(rr,1)).LE.BOX1_XMAX).AND.
+     &     (X(NM(rr,2)).LE.BOX1_XMAX).AND.
+     &     (X(NM(rr,3)).LE.BOX1_XMAX).AND.
+     &     (X(NM(rr,1)).GE.BOX1_XMIN).AND.
+     &     (X(NM(rr,2)).GE.BOX1_XMIN).AND.
+     &     (X(NM(rr,3)).GE.BOX1_XMIN).AND.
+     &     (Y(NM(rr,1)).LE.BOX1_YMAX).AND.
+     &     (Y(NM(rr,2)).LE.BOX1_YMAX).AND.
+     &     (Y(NM(rr,3)).LE.BOX1_YMAX).AND.
+     &     (Y(NM(rr,1)).GE.BOX1_YMIN).AND.
+     &     (Y(NM(rr,2)).GE.BOX1_YMIN).AND.
+     &     (Y(NM(rr,3)).GE.BOX1_YMIN)) THEN
+                  IF(rr.EQ.1) ADJUSTED_AREA = 0.D0
+
+                  ADJUSTED_AREA = ADJUSTED_AREA + AREAS(rr)
+               ENDIF
+           ENDDO
+
+           IF(0.5D0*ADJUSTED_AREA.NE.BOX_AREA) THEN
+              RAIN_CORR = BOX_AREA/(ADJUSTED_AREA*0.5D0)
+           ELSE
+              RAIN_CORR = 1.D0
+           ENDIF
+
       ENDIF
 
 
@@ -190,13 +227,24 @@ C.......Retrieve the global node numbers for the element
          N2 = NM(L,2)
          N3 = NM(L,3)
 
+
+
 C.......Create box in which rain is falling
 C.......For now any element with all vertices within
 C.......the box will get a rain source. This needs to be
 C.......modified moving forward with some type
 C.......of interpolation scheme
 
+
+C........only ood this on first time
+
          IF ((RAINFLAG.EQ.1)) THEN
+   
+            RAIN_INTENSITY = 0.D0
+C        WRITE(6,*) 'ADJUSTED_AREA',0.5D0*ADJUSTED_AREA
+C        WRITE(6,*) 'BOX_AREA',BOX_AREA
+C        WRITE(6,*) 'RAIN_CORR',RAIN_CORR
+
 C.......If we are in the first box
             IF ((ICS.EQ.1).AND.(NUM_BOXES.GE.1).AND.
      &     (RAIN_INTENSITY.EQ.0.D0).AND.
@@ -207,7 +255,7 @@ C.......If we are in the first box
      &     (Y(N1).LE.BOX1_YMAX).AND.(Y(N2).LE.BOX1_YMAX).AND.
      &     (Y(N3).LE.BOX1_YMAX).AND.(Y(N1).GE.BOX1_YMIN).AND.
      &     (Y(N2).GE.BOX1_YMIN).AND.(Y(N3).GE.BOX1_YMIN)) THEN
-                  RAIN_INTENSITY = RAIN_1
+                  RAIN_INTENSITY = RAIN_1*RAIN_CORR
                ELSE
                   RAIN_INTENSITY = 0.D0
                ENDIF
@@ -342,6 +390,41 @@ C.......Fourth box:
            RAIN_INTENSITY = 0.D0
                ENDIF
             ENDIF
+
+C.......If the element is partially in or outside the box
+C            IF ((ICS.EQ.1).AND.(NUM_BOXES.GE.1).AND.
+C     &     (RAIN_INTENSITY.EQ.0.D0).AND.
+C     &     (TIME_A.LE.RAIN_STOP).AND.
+C     &     (TIME_A.GT.RAIN_START)) THEN
+C               IF ((X(N1).LE.BOX1_XMAX).OR.
+C     &     (X(N2).LE.BOX1_XMAX).OR.
+C     &     (X(N3).LE.BOX1_XMAX).OR.
+C     &     (X(N1).GE.BOX1_XMIN).OR.
+C     &     (X(N2).GE.BOX1_XMIN).OR.
+C     &     (X(N3).GE.BOX1_XMIN).OR.
+C     &     (Y(N1).LE.BOX1_YMAX).OR.
+C     &     (Y(N2).LE.BOX1_YMAX).OR.
+C     &     (Y(N3).LE.BOX1_YMAX).OR.
+C     &     (Y(N1).GE.BOX1_YMIN).OR.
+C     &     (Y(N2).GE.BOX1_YMIN).OR.
+C     &     (Y(N3).GE.BOX1_YMIN)) THEN
+C             RAIN_INTENSITY = RAIN_1
+C.........Here lets compute areas inside or outside box
+C.........Left edge of box first
+C               IF((X(N1).LE.BOX1_XMIN).OR.
+C     &     (X(N2).LE.BOX1_XMIN).OR.
+C     &     (X(N3).LE.BOX1_XMIN)) THEN
+C
+C               ENDIF
+C
+C
+C               ELSE
+C             RAIN_INTENSITY = 0.D0
+C               ENDIF
+C            ENDIF
+
+C AREAS is twice  the area   WRITE(6,*) 'AREA',AREAS(L)
+
          ENDIF
 
 C.......Compute avaraged values
@@ -670,8 +753,10 @@ C..........X,Y,SLAM,SFEA,DEG2RAD
 C..........
 
 
-C..........IF (TIME_A==10.D0) THEN
-C..........    WRITE(6,*) 'long SLAM(N1)=',SLAM(N1)
+C..........IF (TIME_A.EQ.110.D0) THEN
+C..........     WRITE(6,*) 'X',X(N1)
+C..........     WRITE(6,*) 'ELEMENT',L
+C..........     WRITE(6,*) 'SOURCE_CONT',SOURCE_CONT
 C..........ENDIF
             
             
