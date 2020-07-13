@@ -19,7 +19,7 @@
 		E5BA21F4246210D0005BC4E2 /* harm.F */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.fortran; name = harm.F; path = ../harm.F; sourceTree = "<group>"; };
 		E5BA21F5246210D3005BC4E2 /* dg.F */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.fortran; name = dg.F; path = ../dg.F; sourceTree = "<group>"; };
 		E5BA21F6246210D7005BC4E2 /* detector.F */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.fortran; name = detector.F; path = ../detector.F; sourceTree = "<group>"; };
-		E5BA21F7246210D9005BC4E2 /* rhs_dg_hydro.F */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.fortran; name = rhs_dg_hydro.F; path = ../rhs_dg_hydro.F; sourceTree = "<group>"; };
+		E5BA21F7246210D9005BC4E2 /* rhs_dg_hydro.F */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.fortran; name = rhs_dg_hydro.F; path = ../rhs_dg_hydro.F; sourceTree = "<group>"; wrapsLines = 1; };
 		E5BA21F8246210DE005BC4E2 /* quad_rules_general.F */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.fortran; name = quad_rules_general.F; path = ../quad_rules_general.F; sourceTree = "<group>"; };
 		E5BA21F9246210E2005BC4E2 /* met_forcing.F */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.fortran; name = met_forcing.F; path = ../met_forcing.F; sourceTree = "<group>"; };
 		E5BA21FA246210E6005BC4E2 /* ibarrier_edge_hydro.F */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.fortran; name = ibarrier_edge_hydro.F; path = ../ibarrier_edge_hydro.F; sourceTree = "<group>"; };

@@ -88,6 +88,10 @@ C.....Days to seconds conversion
 C.....parameters used in barrier overflow
       REAL(SZ), PARAMETER ::  BARMIN=0.01D0
       REAL(SZ) DEPAVG,DEPMAX,DEPMIN
+
+C.....parameters for rainfall rainflag
+      INTEGER, TARGET :: RAINFLAG
+    
 C
 C.....Sediment Transport stuff added (Ethan Kubatko 8-1-2003)
 C

@@ -1,19 +1,20 @@
 C***********************************************************************
-C     
+C
 C     SUBROUTINE RHS_DG_HYDRO()
-C     
+C
 C     This subroutine computes the area integrals for the DG hydro and
 C     adds them into the RHS.
-C     
+C
 C     Written by Ethan Kubatko (06-11-2004)
-C     
+C
 C-----------------------------------------------------------------------
-C     
+C
 C     Feb 23, 2007, sb, Modified for better performance
 C     Jan 02, 2007, sb, Modified for LDG
 C     Aug xx, 2005, sb, Modified for wetting/drying
 C     01-10-2011 - cem - adapted for p_enrichment and multicomponent
-C     
+C     May xx,   2020 ev - adding rainfall
+C
 C***********************************************************************
       SUBROUTINE RHS_DG_HYDRO()
       
@@ -40,10 +41,159 @@ C.....Declare local variables
       REAL(SZ) DEPTH_C, FH_NL_C, UX_C, UY_C, UMAG_C, DTDPH,SFACQUAD
       Real(SZ) discharge_modelX_IN,discharge_modelY_IN
       Real(SZ) DH_X,DH_Y,phi_tot,C_0,HZ_X,HZ_Y,TZ_X,TZ_Y
+ 
+C.....Rainfall parameters (Some may be made global later)
+      REAL(SZ) RAIN_1, RAIN_2, RAIN_3, RAIN_4
+      REAL(SZ) RAIN_INTENSITY, RAIN_STOP, RAIN_START
+      REAl(SZ) RAIN_RESTART1, RAIN_RESTOP1
+      INTEGER rr, NUM_BOXES, STOP_FLAG1
+      REAL(SZ) RAIN_AREA, ADJUSTED_AREA, RAIN_CORR
+      REAL(SZ) BOX_AREA
+      REAL(SZ) BOX1_XMIN, BOX1_XMAX, BOX1_YMIN, BOX1_YMAX
+      REAL(SZ) BOX2_XMIN, BOX2_XMAX, BOX2_YMIN, BOX2_YMAX
+      REAL(SZ) BOX3_XMIN, BOX3_XMAX, BOX3_YMIN, BOX3_YMAX
+      REAL(SZ) BOX4_XMIN, BOX4_XMAX, BOX4_YMIN, BOX4_YMAX
+      REAL(SZ) BOX1_SLAM_MIN, BOX1_SLAM_MAX, BOX1_SFEA_MIN,
+     &          BOX1_SFEA_MAX
+      REAL(SZ) BOX2_SLAM_MIN, BOX2_SLAM_MAX, BOX2_SFEA_MIN,
+     &          BOX2_SFEA_MAX
+      REAL(SZ) BOX3_SLAM_MIN, BOX3_SLAM_MAX, BOX3_SFEA_MIN,
+     &          BOX3_SFEA_MAX
+      REAL(SZ) BOX4_SLAM_MIN, BOX4_SLAM_MAX, BOX4_SFEA_MIN,
+     &          BOX4_SFEA_MAX
 
       Real(SZ),allocatable :: XBCbt(:),YBCbt(:)
 
       Allocate ( XBCbt(MNE),YBCbt(MNE) )
+
+
+
+      IF ((RAINFLAG.EQ.1)) THEN
+C..... these data parameters must be set for rain!!
+
+C.....Initial harcoding of this value
+C.....0.00000350 m/s is approx half an inch rain per hour
+C.....For now set these to zero if no rain is included
+         RAIN_INTENSITY = 0.D0
+         RAIN_1 = 10/(720000.D0)
+         RAIN_2 = 1*0.00000350D0
+         RAIN_3 = 1*0.00000350D0
+         RAIN_4 = 1*0.00000350D0
+
+         ADJUSTED_AREA = 0.D0
+
+C.....Number of boxes with rainfall
+C.....For now set this to zero if no rain is included
+         NUM_BOXES = 1
+
+C.....If rainfall is to be restarted set these
+C.....If not leave as zero or negative
+         RAIN_RESTART1 = 0.D0
+         RAIN_RESTOP1 = 0.D0
+         STOP_FLAG1 = 0
+
+
+C.....When to stop/start rainfall
+         RAIN_START = 100.D0
+         RAIN_STOP = 3700.D0
+
+         IF ((RAIN_RESTART1.GT.0).AND.(RAIN_RESTOP1.GT.0).AND.
+     &     (STOP_FLAG1==0).AND.(TIME_A.GT.RAIN_STOP)) THEN
+            RAIN_START = RAIN_RESTART1
+            RAIN_STOP = RAIN_RESTOP1
+C.....Set this flag to avoid entering this if statement
+            STOP_FLAG1 = 1
+         ENDIF
+
+C.....We also hardcode the box dimensions for now
+
+C..... I we are in cartesian coords
+         IF ((ICS.EQ.1).AND.(NUM_BOXES.GE.0)) THEN
+C.....The first box is ... Something is off here if box is not full domain
+              BOX1_XMIN = 0000.D0
+              BOX1_XMAX = 25000.D0
+              BOX1_YMIN = 0000.D0
+              BOX1_YMAX = 4000.D0
+              BOX_AREA = (BOX1_XMAX-BOX1_XMIN)*(BOX1_YMAX-BOX1_YMIN)
+C.....The second box is ...
+              BOX2_XMIN = 0000.D0
+              BOX2_XMAX = 0000.D0
+              BOX2_YMIN = 0000.D0
+              BOX2_YMAX = 0000.D0
+C.....The third box is ...
+              BOX3_XMIN = 0000.D0
+              BOX3_XMAX = 0000.D0
+              BOX3_YMIN = 0000.D0
+              BOX3_YMAX = 0000.D0
+C.....The fourth box is ..
+              BOX4_XMIN = 0000.D0
+              BOX4_XMAX = 0000.D0
+              BOX4_YMIN = 0000.D0
+              BOX4_YMAX = 0000.D0
+         ENDIF
+C......If we are in long lat
+C......Convert input to radians
+         IF ((ICS.EQ.2).AND.(NUM_BOXES.GE.0)) then
+C.....Set the box coordinates
+              BOX1_SLAM_MIN = 0.D0*DEG2RAD
+              BOX1_SLAM_MAX = 5.D0*DEG2RAD
+              BOX1_SFEA_MIN = 0.D0*DEG2RAD
+              BOX1_SFEA_MAX = 5.D0*DEG2RAD
+C.....Set the box coordinates
+              BOX2_SLAM_MIN = 0.D0*DEG2RAD
+              BOX2_SLAM_MAX = 5.D0*DEG2RAD
+              BOX2_SFEA_MIN = 0.D0*DEG2RAD
+              BOX2_SFEA_MAX = 5.D0*DEG2RAD
+C.....Set the box coordinates
+              BOX3_SLAM_MIN = 0.D0*DEG2RAD
+              BOX3_SLAM_MAX = 5.D0*DEG2RAD
+              BOX3_SFEA_MIN = 0.D0*DEG2RAD
+              BOX3_SFEA_MAX = 5.D0*DEG2RAD
+C.....Set the box coordinates
+              BOX4_SLAM_MIN = 0.D0*DEG2RAD
+              BOX4_SLAM_MAX = 5.D0*DEG2RAD
+              BOX4_SFEA_MIN = 0.D0*DEG2RAD
+              BOX4_SFEA_MAX = 5.D0*DEG2RAD
+         ENDIF
+      ELSE
+C......If we dont have rain set these to zero
+            NUM_BOXES = 0
+            RAIN_INTENSITY = 0.D0
+      ENDIF
+
+          
+      RAIN_CORR = 1.D0
+      IF (TIME_A.GE.0) THEN
+
+
+           DO rr = 1, NE
+               IF ((X(NM(rr,1)).LE.BOX1_XMAX).AND.
+     &     (X(NM(rr,2)).LE.BOX1_XMAX).AND.
+     &     (X(NM(rr,3)).LE.BOX1_XMAX).AND.
+     &     (X(NM(rr,1)).GE.BOX1_XMIN).AND.
+     &     (X(NM(rr,2)).GE.BOX1_XMIN).AND.
+     &     (X(NM(rr,3)).GE.BOX1_XMIN).AND.
+     &     (Y(NM(rr,1)).LE.BOX1_YMAX).AND.
+     &     (Y(NM(rr,2)).LE.BOX1_YMAX).AND.
+     &     (Y(NM(rr,3)).LE.BOX1_YMAX).AND.
+     &     (Y(NM(rr,1)).GE.BOX1_YMIN).AND.
+     &     (Y(NM(rr,2)).GE.BOX1_YMIN).AND.
+     &     (Y(NM(rr,3)).GE.BOX1_YMIN)) THEN
+                  IF(rr.EQ.1) ADJUSTED_AREA = 0.D0
+
+                  ADJUSTED_AREA = ADJUSTED_AREA + AREAS(rr)
+               ENDIF
+           ENDDO
+
+           IF(0.5D0*ADJUSTED_AREA.NE.BOX_AREA) THEN
+              RAIN_CORR = BOX_AREA/(ADJUSTED_AREA*0.5D0)
+           ELSE
+              RAIN_CORR = 1.D0
+           ENDIF
+
+      ENDIF
+
+
 
       DTDPH = 1.D0/DTDP
       DO 1000 L = 1, NE
@@ -69,12 +219,213 @@ C.......If element is dry then skip calculations
          IF (WDFLG(L).EQ.0) then
             GOTO 1000
          endif
+
          
 C.......Retrieve the global node numbers for the element
 
          N1 = NM(L,1)
          N2 = NM(L,2)
          N3 = NM(L,3)
+
+
+
+C.......Create box in which rain is falling
+C.......For now any element with all vertices within
+C.......the box will get a rain source. This needs to be
+C.......modified moving forward with some type
+C.......of interpolation scheme
+
+
+C........only ood this on first time
+
+         IF ((RAINFLAG.EQ.1)) THEN
+   
+            RAIN_INTENSITY = 0.D0
+C        WRITE(6,*) 'ADJUSTED_AREA',0.5D0*ADJUSTED_AREA
+C        WRITE(6,*) 'BOX_AREA',BOX_AREA
+C        WRITE(6,*) 'RAIN_CORR',RAIN_CORR
+
+C.......If we are in the first box
+            IF ((ICS.EQ.1).AND.(NUM_BOXES.GE.1).AND.
+     &     (RAIN_INTENSITY.EQ.0.D0).AND.
+     &     (TIME_A.LE.RAIN_STOP).AND.(TIME_A.GT.RAIN_START)) THEN
+               IF ((X(N1).LE.BOX1_XMAX).AND.(X(N2).LE.BOX1_XMAX).AND.
+     &     (X(N3).LE.BOX1_XMAX).AND.(X(N1).GE.BOX1_XMIN).AND.
+     &     (X(N2).GE.BOX1_XMIN).AND.(X(N3).GE.BOX1_XMIN).AND.
+     &     (Y(N1).LE.BOX1_YMAX).AND.(Y(N2).LE.BOX1_YMAX).AND.
+     &     (Y(N3).LE.BOX1_YMAX).AND.(Y(N1).GE.BOX1_YMIN).AND.
+     &     (Y(N2).GE.BOX1_YMIN).AND.(Y(N3).GE.BOX1_YMIN)) THEN
+                  RAIN_INTENSITY = RAIN_1*RAIN_CORR
+               ELSE
+                  RAIN_INTENSITY = 0.D0
+               ENDIF
+            ENDIF
+C.......If we are in the second box
+            IF ((ICS.EQ.1).AND.(NUM_BOXES.GE.2).AND.
+     &     (RAIN_INTENSITY.EQ.0.D0).AND.
+     &     (TIME_A.LE.RAIN_STOP).AND.(TIME_A.GT.RAIN_START)) THEN
+               IF ((X(N1).LE.BOX2_XMAX).AND.(X(N2).LE.BOX2_XMAX).AND.
+     &     (X(N3).LE.BOX2_XMAX).AND.(X(N1).GE.BOX2_XMIN).AND.
+     &     (X(N2).GE.BOX2_XMIN).AND.(X(N3).GE.BOX2_XMIN).AND.
+     &     (Y(N1).LE.BOX2_YMAX).AND.(Y(N2).LE.BOX2_YMAX).AND.
+     &     (Y(N3).LE.BOX2_YMAX).AND.(Y(N1).GE.BOX2_YMIN).AND.
+     &     (Y(N2).GE.BOX2_YMIN).AND.(Y(N3).GE.BOX2_YMIN)) THEN
+                  RAIN_INTENSITY = RAIN_2
+               ELSE
+                  RAIN_INTENSITY = 0.D0
+               ENDIF
+            ENDIF
+C.......If we are in the third box
+            IF ((ICS.EQ.1).AND.(NUM_BOXES.GE.3).AND.
+     &     (RAIN_INTENSITY.EQ.0.D0).AND.
+     &     (TIME_A.LE.RAIN_STOP).AND.(TIME_A.GT.RAIN_START)) THEN
+               IF ((X(N1).LE.BOX3_XMAX).AND.(X(N2).LE.BOX3_XMAX).AND.
+     &     (X(N3).LE.BOX3_XMAX).AND.(X(N1).GE.BOX3_XMIN).AND.
+     &     (X(N2).GE.BOX3_XMIN).AND.(X(N3).GE.BOX3_XMIN).AND.
+     &     (Y(N1).LE.BOX3_YMAX).AND.(Y(N2).LE.BOX3_YMAX).AND.
+     &     (Y(N3).LE.BOX3_YMAX).AND.(Y(N1).GE.BOX3_YMIN).AND.
+     &     (Y(N2).GE.BOX3_YMIN).AND.(Y(N3).GE.BOX3_YMIN)) THEN
+                  RAIN_INTENSITY = RAIN_3
+               ELSE
+                  RAIN_INTENSITY = 0.D0
+               ENDIF
+            ENDIF
+C.......If we are in the fourth box
+            IF ((ICS.EQ.1).AND.(NUM_BOXES.GE.4).AND.
+     &     (RAIN_INTENSITY.EQ.0.D0).AND.
+     &     (TIME_A.LE.RAIN_STOP).AND.(TIME_A.GT.RAIN_START)) THEN
+               IF ((X(N1).LE.BOX4_XMAX).AND.(X(N2).LE.BOX4_XMAX).AND.
+     &     (X(N3).LE.BOX4_XMAX).AND.(X(N1).GE.BOX4_XMIN).AND.
+     &     (X(N2).GE.BOX4_XMIN).AND.(X(N3).GE.BOX4_XMIN).AND.
+     &     (Y(N1).LE.BOX4_YMAX).AND.(Y(N2).LE.BOX4_YMAX).AND.
+     &     (Y(N3).LE.BOX4_YMAX).AND.(Y(N1).GE.BOX4_YMIN).AND.
+     &     (Y(N2).GE.BOX4_YMIN).AND.(Y(N3).GE.BOX4_YMIN)) THEN
+                  RAIN_INTENSITY = RAIN_4
+               ELSE
+                  RAIN_INTENSITY = 0.D0
+               ENDIF
+            ENDIF
+C.......Same as above for long lat
+C.......First box:
+            IF ((ICS.EQ.2).AND.(RAIN_INTENSITY.NE.0).AND.
+     &     (NUM_BOXES.GE.1).AND.
+     &     (TIME_A.LE.RAIN_STOP).AND.(TIME_A.GT.RAIN_START)) THEN
+               IF ((SLAM(N1).LE.BOX1_SLAM_MAX).AND.
+     &     (SLAM(N2).LE.BOX1_SLAM_MAX).AND.
+     &     (SLAM(N3).LE.BOX1_SLAM_MAX).AND.
+     &     (SLAM(N1).GE.BOX1_SLAM_MIN).AND.
+     &     (SLAM(N2).GE.BOX1_SLAM_MIN).AND.
+     &     (SLAM(N3).GE.BOX1_SLAM_MIN).AND.
+     &     (SFEA(N1).LE.BOX1_SFEA_MAX).AND.
+     &     (SFEA(N2).LE.BOX1_SFEA_MAX).AND.
+     &     (SFEA(N3).LE.BOX1_SFEA_MAX).AND.
+     &     (SFEA(N1).GE.BOX1_SFEA_MIN).AND.
+     &     (SFEA(N2).GE.BOX1_SFEA_MIN).AND.
+     &     (SFEA(N3).GE.BOX1_SFEA_MIN)) THEN
+                RAIN_INTENSITY = RAIN_1
+              ELSE
+                RAIN_INTENSITY = 0.D0
+               ENDIF
+            ENDIF
+C.......Second box:
+            IF ((ICS.EQ.2).AND.(RAIN_INTENSITY.NE.0).AND.
+     &     (NUM_BOXES.GE.2).AND.
+     &     (TIME_A.LE.RAIN_STOP).AND.(TIME_A.GT.RAIN_START)) THEN
+               IF ((SLAM(N1).LE.BOX2_SLAM_MAX).AND.
+     &     (SLAM(N2).LE.BOX2_SLAM_MAX).AND.
+     &     (SLAM(N3).LE.BOX2_SLAM_MAX).AND.
+     &     (SLAM(N1).GE.BOX2_SLAM_MIN).AND.
+     &     (SLAM(N2).GE.BOX2_SLAM_MIN).AND.
+     &     (SLAM(N3).GE.BOX2_SLAM_MIN).AND.
+     &     (SFEA(N1).LE.BOX2_SFEA_MAX).AND.
+     &     (SFEA(N2).LE.BOX2_SFEA_MAX).AND.
+     &     (SFEA(N3).LE.BOX2_SFEA_MAX).AND.
+     &     (SFEA(N1).GE.BOX2_SFEA_MIN).AND.
+     &     (SFEA(N2).GE.BOX2_SFEA_MIN).AND.
+     &     (SFEA(N3).GE.BOX2_SFEA_MIN)) THEN
+           RAIN_INTENSITY = RAIN_2
+               ELSE
+           RAIN_INTENSITY = 0.D0
+               ENDIF
+            ENDIF
+C.......Third box:
+            IF ((ICS.EQ.2).AND.(RAIN_INTENSITY.NE.0).AND.
+     &     (NUM_BOXES.GE.3).AND.
+     &     (TIME_A.LE.RAIN_STOP).AND.(TIME_A.GT.RAIN_START)) THEN
+               IF ((SLAM(N1).LE.BOX3_SLAM_MAX).AND.
+     &     (SLAM(N2).LE.BOX3_SLAM_MAX).AND.
+     &     (SLAM(N3).LE.BOX3_SLAM_MAX).AND.
+     &     (SLAM(N1).GE.BOX3_SLAM_MIN).AND.
+     &     (SLAM(N2).GE.BOX3_SLAM_MIN).AND.
+     &     (SLAM(N3).GE.BOX3_SLAM_MIN).AND.
+     &     (SFEA(N1).LE.BOX3_SFEA_MAX).AND.
+     &     (SFEA(N2).LE.BOX3_SFEA_MAX).AND.
+     &     (SFEA(N3).LE.BOX3_SFEA_MAX).AND.
+     &     (SFEA(N1).GE.BOX3_SFEA_MIN).AND.
+     &     (SFEA(N2).GE.BOX3_SFEA_MIN).AND.
+     &     (SFEA(N3).GE.BOX3_SFEA_MIN)) THEN
+           RAIN_INTENSITY = RAIN_3
+               ELSE
+           RAIN_INTENSITY = 0.D0
+               ENDIF
+            ENDIF
+C.......Fourth box:
+            IF ((ICS.EQ.2).AND.(RAIN_INTENSITY.NE.0).AND.
+     &     (NUM_BOXES.GE.4).AND.
+     &     (TIME_A.LE.RAIN_STOP).AND.(TIME_A.GT.RAIN_START)) THEN
+               IF ((SLAM(N1).LE.BOX4_SLAM_MAX).AND.
+     &     (SLAM(N2).LE.BOX4_SLAM_MAX).AND.
+     &     (SLAM(N3).LE.BOX4_SLAM_MAX).AND.
+     &     (SLAM(N1).GE.BOX4_SLAM_MIN).AND.
+     &     (SLAM(N2).GE.BOX4_SLAM_MIN).AND.
+     &     (SLAM(N3).GE.BOX4_SLAM_MIN).AND.
+     &     (SFEA(N1).LE.BOX4_SFEA_MAX).AND.
+     &     (SFEA(N2).LE.BOX4_SFEA_MAX).AND.
+     &     (SFEA(N3).LE.BOX4_SFEA_MAX).AND.
+     &     (SFEA(N1).GE.BOX4_SFEA_MIN).AND.
+     &     (SFEA(N2).GE.BOX4_SFEA_MIN).AND.
+     &     (SFEA(N3).GE.BOX4_SFEA_MIN)) THEN
+           RAIN_INTENSITY = RAIN_4
+               ELSE
+           RAIN_INTENSITY = 0.D0
+               ENDIF
+            ENDIF
+
+C.......If the element is partially in or outside the box
+C            IF ((ICS.EQ.1).AND.(NUM_BOXES.GE.1).AND.
+C     &     (RAIN_INTENSITY.EQ.0.D0).AND.
+C     &     (TIME_A.LE.RAIN_STOP).AND.
+C     &     (TIME_A.GT.RAIN_START)) THEN
+C               IF ((X(N1).LE.BOX1_XMAX).OR.
+C     &     (X(N2).LE.BOX1_XMAX).OR.
+C     &     (X(N3).LE.BOX1_XMAX).OR.
+C     &     (X(N1).GE.BOX1_XMIN).OR.
+C     &     (X(N2).GE.BOX1_XMIN).OR.
+C     &     (X(N3).GE.BOX1_XMIN).OR.
+C     &     (Y(N1).LE.BOX1_YMAX).OR.
+C     &     (Y(N2).LE.BOX1_YMAX).OR.
+C     &     (Y(N3).LE.BOX1_YMAX).OR.
+C     &     (Y(N1).GE.BOX1_YMIN).OR.
+C     &     (Y(N2).GE.BOX1_YMIN).OR.
+C     &     (Y(N3).GE.BOX1_YMIN)) THEN
+C             RAIN_INTENSITY = RAIN_1
+C.........Here lets compute areas inside or outside box
+C.........Left edge of box first
+C               IF((X(N1).LE.BOX1_XMIN).OR.
+C     &     (X(N2).LE.BOX1_XMIN).OR.
+C     &     (X(N3).LE.BOX1_XMIN)) THEN
+C
+C               ENDIF
+C
+C
+C               ELSE
+C             RAIN_INTENSITY = 0.D0
+C               ENDIF
+C            ENDIF
+
+C AREAS is twice  the area   WRITE(6,*) 'AREA',AREAS(L)
+
+         ENDIF
 
 C.......Compute avaraged values
 C.......These will be used later when bottom friction is computed
@@ -150,7 +501,7 @@ C.......Compute ZE, QX, QY, and HB at each area Gauss quadrature point
             enddo
 #endif
 
-#ifdef WAVE_DIF 
+#ifdef WAVE_DIF
             HZ_X = HZ(1,1,1,L)
             HZ_Y = HZ(1,2,2,L)
 #endif
@@ -175,7 +526,7 @@ C.......Compute ZE, QX, QY, and HB at each area Gauss quadrature point
                QX_IN = QX_IN + QX(K,L,IRK)*PHI_AREA(K,I,pa)
                QY_IN = QY_IN + QY(K,L,IRK)*PHI_AREA(K,I,pa)
 
-#ifdef WAVE_DIF 
+#ifdef WAVE_DIF
                HZ_X = HZ_X + HZ(K,1,1,L)*PHI_AREA(K,I,pa)
                HZ_Y = HZ_Y + HZ(K,2,2,L)*PHI_AREA(K,I,pa)
 #endif
@@ -213,14 +564,14 @@ C.......Compute ZE, QX, QY, and HB at each area Gauss quadrature point
                enddo
                DEPTH = 0.D0
                DEPTH = ZE_IN + HB_IN
-C.........Compute sediment discharge model                                                                           
+C.........Compute sediment discharge model
 
                !Note that the choice of linearization can require this to be changed
           QMag_IN=(QX_IN*QX_IN/(DEPTH**2)+QY_IN*QY_IN/(DEPTH)**2)**(1/2)
             discharge_modelX_IN = porosity * DEPTH**(-1) * QMag_IN**(2)*
-     &         QX_IN*SFACQUAD                             
+     &         QX_IN*SFACQUAD
             discharge_modelY_IN = porosity * DEPTH**(-1) * QMag_IN**(2)*
-     &         QY_IN  
+     &         QY_IN
 
 #endif
                
@@ -230,13 +581,13 @@ C.........Compute continuity fluxes
 
             F1_NL = NLEQ + LEQ*HB_IN
 
-#ifdef WAVE_DIF 
+#ifdef WAVE_DIF
             FX_IN = (QX_IN+HZ_X)*F1_NL*SFACQUAD
 #else
             FX_IN = QX_IN*F1_NL*SFACQUAD
 #endif
 
-#ifdef WAVE_DIF 
+#ifdef WAVE_DIF
             FY_IN = (QY_IN+HZ_Y)*F1_NL
 #else
             FY_IN = QY_IN*F1_NL
@@ -284,7 +635,7 @@ C     small. S.B. 9-Feb-2008
 
             IF (IFLINBF.EQ.0) THEN
                UMAG = SQRT( U_IN*U_IN + V_IN*V_IN )
-c     cnd modified 4/23/10 to test friction 
+c     cnd modified 4/23/10 to test friction
                TAU  = TAU*UMAG*FH_NL
                IF (IFHYBF.EQ.1) TAU = TAU*
      &              (1.D0  + (HBREAK*FH_NL_C)**FTHETA)**(FGAMMA/FTHETA)
@@ -296,6 +647,12 @@ C     TAU so the bottom friction force does not reverse the currents within
 C     half a time step.  S.B. 9-Feb-2008
                TAU = MIN(TAU, .9D0*DTDPH)
             ENDIF
+
+C.........Compute the continuity source
+C.........i.e. rainfall infiltration
+    
+            SOURCE_CONT = RAIN_INTENSITY
+
 
 C.........Compute the x momentum source/sink terms
 
@@ -350,7 +707,7 @@ C.........5) Tidal potential forcing (in x and y)
 
             IF (NTIP.NE.0) THEN
 
-               SOURCE_X = SOURCE_X + 
+               SOURCE_X = SOURCE_X +
      $              RAMPDG*G*DEPTH*SFACQUAD*( DPSIDX(1)*TIP2(N1)
      &              + DPSIDX(2)*TIP2(N2) + DPSIDX(3)*TIP2(N3) )
                
@@ -361,9 +718,9 @@ C.........5) Tidal potential forcing (in x and y)
             sourceqx(l)=sourceqx(l)+source_x
             sourceqy(l)=sourceqy(l)+source_y
 
-C.........6) Chemical mass action  
+C.........6) Chemical mass action
 
-#ifdef CHEM     
+#ifdef CHEM
             MassAction1st = 0.D0
             MassAction2nd = 0.D0
 
@@ -378,21 +735,35 @@ C.........6) Chemical mass action
 
 C.........Build the rhs
 
-            RHS_iota(1,L,IRK) = RHS_iota(1,L,IRK) 
+            RHS_iota(1,L,IRK) = RHS_iota(1,L,IRK)
      &           + MassAction1st*SRFAC(1,I,L,pa)*FH_NL
-            RHS_iota2(1,L,IRK) = RHS_iota2(1,L,IRK) 
-     &           + MassAction2nd*SRFAC(1,I,L,pa)*FH_NL  
+            RHS_iota2(1,L,IRK) = RHS_iota2(1,L,IRK)
+     &           + MassAction2nd*SRFAC(1,I,L,pa)*FH_NL
 #endif
 
-
+           
+            RHS_ZE(1,L,IRK) = RHS_ZE(1,L,IRK)
+     &           + SRFAC(1,I,L,pa)*SOURCE_CONT
             RHS_QX(1,L,IRK) = RHS_QX(1,L,IRK) + SRFAC(1,I,L,pa)*SOURCE_X
             RHS_QY(1,L,IRK) = RHS_QY(1,L,IRK) + SRFAC(1,I,L,pa)*SOURCE_Y
-C......... This is where we'll add rainfall
+            
+
+C..........This is where we'll add rainfall
+C..........X,Y,SLAM,SFEA,DEG2RAD
+C..........
+
+
+C..........IF (TIME_A.EQ.110.D0) THEN
+C..........     WRITE(6,*) 'X',X(N1)
+C..........     WRITE(6,*) 'ELEMENT',L
+C..........     WRITE(6,*) 'SOURCE_CONT',SOURCE_CONT
+C..........ENDIF
+            
             
             DO K = 2,DOFS(L)
 
                RHS_ZE(K,L,IRK) = RHS_ZE(K,L,IRK) + XFAC(K,I,L,pa)*FX_IN
-     &              + YFAC(K,I,L,pa)*FY_IN 
+     &              + YFAC(K,I,L,pa)*FY_IN + SRFAC(K,I,L,pa)*SOURCE_CONT
                RHS_QX(K,L,IRK) = RHS_QX(K,L,IRK) + XFAC(K,I,L,pa)*GX_IN
      &              + YFAC(K,I,L,pa)*GY_IN + SRFAC(K,I,L,pa)*SOURCE_X
                RHS_QY(K,L,IRK) = RHS_QY(K,L,IRK) + XFAC(K,I,L,pa)*HX_IN
@@ -402,7 +773,7 @@ C......... This is where we'll add rainfall
 
                do ll = 1,layers !only really makes sense for single layer
 
-                  RHS_bed(K,L,IRK,ll) = RHS_bed(K,L,IRK,ll) 
+                  RHS_bed(K,L,IRK,ll) = RHS_bed(K,L,IRK,ll)
      &                 + XFAC(K,I,L,pa)*(discharge_modelX_IN+MZ_X(ll)*
      &                 SFACQUAD) + YFAC(K,I,L,pa)*
      &                 (discharge_modelY_IN+MZ_Y(ll))
@@ -411,35 +782,35 @@ C......... This is where we'll add rainfall
 #endif
 
 #ifdef TRACE
-               RHS_iota(K,L,IRK) = RHS_iota(K,L,IRK) 
-     &             + XFAC(K,I,L,pa)*(iota_IN*QX_IN*FH_NL+TZ_X*SFACQUAD) 
-     &             + YFAC(K,I,L,pa)*(iota_IN*QY_IN*FH_NL+TZ_Y) 
+               RHS_iota(K,L,IRK) = RHS_iota(K,L,IRK)
+     &             + XFAC(K,I,L,pa)*(iota_IN*QX_IN*FH_NL+TZ_X*SFACQUAD)
+     &             + YFAC(K,I,L,pa)*(iota_IN*QY_IN*FH_NL+TZ_Y)
 #endif
 
 #ifdef CHEM
-               RHS_iota(K,L,IRK) = RHS_iota(K,L,IRK) 
-     &              + XFAC(K,I,L,pa)*iota_IN*QX_IN*FH_NL 
-     &              + YFAC(K,I,L,pa)*iota_IN*QY_IN*FH_NL 
-     &              + MassAction1st*SRFAC(K,I,L,pa)*FH_NL 
+               RHS_iota(K,L,IRK) = RHS_iota(K,L,IRK)
+     &              + XFAC(K,I,L,pa)*iota_IN*QX_IN*FH_NL
+     &              + YFAC(K,I,L,pa)*iota_IN*QY_IN*FH_NL
+     &              + MassAction1st*SRFAC(K,I,L,pa)*FH_NL
                
-               RHS_iota2(K,L,IRK) = RHS_iota2(K,L,IRK) 
-     &              + XFAC(K,I,L,pa)*iota2_IN*QX_IN*FH_NL      
-     &              + YFAC(K,I,L,pa)*iota2_IN*QY_IN*FH_NL 
-     &              + MassAction2nd*SRFAC(K,I,L,pa)*FH_NL 
+               RHS_iota2(K,L,IRK) = RHS_iota2(K,L,IRK)
+     &              + XFAC(K,I,L,pa)*iota2_IN*QX_IN*FH_NL
+     &              + YFAC(K,I,L,pa)*iota2_IN*QY_IN*FH_NL
+     &              + MassAction2nd*SRFAC(K,I,L,pa)*FH_NL
 #endif
 
 #ifdef DYNP
-               RHS_dynP(K,L,IRK) = RHS_dynP(K,L,IRK) 
-     &              + XFAC(K,I,L,pa)*dynP_IN*QX_IN*FH_NL 
+               RHS_dynP(K,L,IRK) = RHS_dynP(K,L,IRK)
+     &              + XFAC(K,I,L,pa)*dynP_IN*QX_IN*FH_NL
      &              + YFAC(K,I,L,pa)*dynP_IN*QY_IN*FH_NL
-     &              + subphi_IN*SRFAC(K,I,L,pa)*FH_NL 
+     &              + subphi_IN*SRFAC(K,I,L,pa)*FH_NL
 #endif
                
             ENDDO
             
-         ENDDO  
+         ENDDO
 
          
- 1000 CONTINUE      
+ 1000 CONTINUE
       RETURN
       END SUBROUTINE
