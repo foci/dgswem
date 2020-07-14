@@ -31,7 +31,7 @@ dghot = 0
 dghotspool = 86400
 
 ! slopelimiting options
-slopeflag = 0        ! only 1,4-10 work; 5 is best/fast!
+slopeflag = 5        ! only 1,4-10 work; 5 is best/fast!
 weight = 1
 
 ! sediment options
