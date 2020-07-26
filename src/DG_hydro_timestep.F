@@ -195,7 +195,7 @@ C.......For non-periodic flux bcs
                ENDIF
              ENDIF
            ENDDO
-         ENDIF       
+         ENDIF
 
 C.......Compute LDG auxiliary equations
          
@@ -205,13 +205,81 @@ C.......Compute elevation specified edges
 
          IF (NEEDS.GT.0)  CALL OCEAN_EDGE_HYDRO(IT)
 
+C.......If we need to look for a NaN
+         DO J = 1,NE
+           DO K = 1,DOFS(J)
+             DO I = 1, IRK
+               IF ((ZE(K,J,I).NE.ZE(K,J,I)).OR.((QX(K,J,I).NE.
+     &             QX(K,J,I)).OR.((QY(K,J,I).NE.QY(K,J,I))))) THEN
+                 WRITE(6,*) 'After OCEAN_EDGE_HYDRO'
+                 WRITE(6,*) 'ZE(K,J,I)',ZE(K,J,I)
+                 WRITE(6,*) 'ZE(K,J,IRK+1)',ZE(K,J,IRK+1)
+                 WRITE(6,*) 'RHS_ZE(K,J,I)',RHS_ZE(K,J,I)
+                 WRITE(6,*) 'QX(K,J,I)',QX(K,J,I)
+                 WRITE(6,*) 'RHS_QX(K,J,I)',RHS_QX(K,J,I)
+                 WRITE(6,*) 'QY(K,J,I)',QX(K,J,I)
+                 WRITE(6,*) 'RHS_QY(K,J,I)(',RHS_QX(K,J,I)
+                 WRITE(6,*) 'K - dof',K
+                 WRITE(6,*) 'J - elem ',J
+                 WRITE(6,*) 'I - RK stage',I
+               ENDIF
+             ENDDO
+           ENDDO
+         ENDDO
+
 C.......Compute no-normal flow edges
 
          IF (NLEDS.GT.0)  CALL LAND_EDGE_HYDRO(IT)
 
+C.......If we need to look for a NaN
+         DO J = 1,NE
+           DO K = 1,DOFS(J)
+             DO I = 1, IRK
+               IF ((ZE(K,J,I).NE.ZE(K,J,I)).OR.((QX(K,J,I).NE.
+     &             QX(K,J,I)).OR.((QY(K,J,I).NE.QY(K,J,I))))) THEN
+                 WRITE(6,*) 'After LAND_EDGE_HYDRO'
+                 WRITE(6,*) 'ZE(K,J,I)',ZE(K,J,I)
+                 WRITE(6,*) 'ZE(K,J,IRK+1)',ZE(K,J,IRK+1)
+                 WRITE(6,*) 'RHS_ZE(K,J,I)',RHS_ZE(K,J,I)
+                 WRITE(6,*) 'QX(K,J,I)',QX(K,J,I)
+                 WRITE(6,*) 'RHS_QX(K,J,I)',RHS_QX(K,J,I)
+                 WRITE(6,*) 'QY(K,J,I)',QX(K,J,I)
+                 WRITE(6,*) 'RHS_QY(K,J,I)(',RHS_QX(K,J,I)
+                 WRITE(6,*) 'K - dof',K
+                 WRITE(6,*) 'J - elem ',J
+                 WRITE(6,*) 'I - RK stage',I
+               ENDIF
+             ENDDO
+           ENDDO
+         ENDDO
+
 C.......Compute non-zero flow edges
 
-         IF (NFEDS.GT.0)  CALL FLOW_EDGE_HYDRO(IT)    
+         IF (NFEDS.GT.0)  CALL FLOW_EDGE_HYDRO(IT)
+
+C.......If we need to look for a NaN
+         DO J = 1,NE
+           DO K = 1,DOFS(J)
+             DO I = 1, IRK
+               IF ((ZE(K,J,I).NE.ZE(K,J,I)).OR.((QX(K,J,I).NE.
+     &             QX(K,J,I)).OR.((QY(K,J,I).NE.QY(K,J,I))))) THEN
+                 WRITE(6,*) 'After FLOW_EDGE_HYDRO'
+                 WRITE(6,*) 'ZE(K,J,I)',ZE(K,J,I)
+                 WRITE(6,*) 'ZE(K,J,IRK+1)',ZE(K,J,IRK+1)
+                 WRITE(6,*) 'RHS_ZE(K,J,I)',RHS_ZE(K,J,I)
+                 WRITE(6,*) 'QX(K,J,I)',QX(K,J,I)
+                 WRITE(6,*) 'RHS_QX(K,J,I)',RHS_QX(K,J,I)
+                 WRITE(6,*) 'QY(K,J,I)',QX(K,J,I)
+                 WRITE(6,*) 'RHS_QY(K,J,I)(',RHS_QX(K,J,I)
+                 WRITE(6,*) 'K - dof',K
+                 WRITE(6,*) 'J - elem ',J
+                 WRITE(6,*) 'I - RK stage',I
+               ENDIF
+             ENDDO
+           ENDDO
+         ENDDO
+
+
 C.......Compute radiation edges
 
          IF (NREDS.GT.0)  CALL RADIATION_EDGE_HYDRO(IT)
@@ -219,18 +287,104 @@ C.......Compute radiation edges
 C.......Compute internal barrier edges
 
          IF (NIBEDS.GT.0) CALL IBARRIER_EDGE_HYDRO(IT)
-         
+
+C.......If we need to look for a NaN
+         DO J = 1,NE
+           DO K = 1,DOFS(J)
+             DO I = 1, IRK
+               IF ((ZE(K,J,I).NE.ZE(K,J,I)).OR.((QX(K,J,I).NE.
+     &             QX(K,J,I)).OR.((QY(K,J,I).NE.QY(K,J,I))))) THEN
+                 WRITE(6,*) 'After IBARRIER_EDGE_HYDRO'
+                 WRITE(6,*) 'ZE(K,J,I)',ZE(K,J,I)
+                 WRITE(6,*) 'ZE(K,J,IRK+1)',ZE(K,J,IRK+1)
+                 WRITE(6,*) 'RHS_ZE(K,J,I)',RHS_ZE(K,J,I)
+                 WRITE(6,*) 'QX(K,J,I)',QX(K,J,I)
+                 WRITE(6,*) 'RHS_QX(K,J,I)',RHS_QX(K,J,I)
+                 WRITE(6,*) 'QY(K,J,I)',QX(K,J,I)
+                 WRITE(6,*) 'RHS_QY(K,J,I)(',RHS_QX(K,J,I)
+                 WRITE(6,*) 'K - dof',K
+                 WRITE(6,*) 'J - elem ',J
+                 WRITE(6,*) 'I - RK stage',I
+               ENDIF
+             ENDDO
+           ENDDO
+         ENDDO
 C.......Compute external barrier edges
 
          IF (NEBEDS.GT.0) CALL EBARRIER_EDGE_HYDRO(IT)
          
+C.......If we need to look for a NaN
+         DO J = 1,NE
+           DO K = 1,DOFS(J)
+             DO I = 1, IRK
+               IF ((ZE(K,J,I).NE.ZE(K,J,I)).OR.((QX(K,J,I).NE.
+     &             QX(K,J,I)).OR.((QY(K,J,I).NE.QY(K,J,I))))) THEN
+                 WRITE(6,*) 'After EBARRIER_EDGE_HYDRO'
+                 WRITE(6,*) 'ZE(K,J,I)',ZE(K,J,I)
+                 WRITE(6,*) 'ZE(K,J,IRK+1)',ZE(K,J,IRK+1)
+                 WRITE(6,*) 'RHS_ZE(K,J,I)',RHS_ZE(K,J,I)
+                 WRITE(6,*) 'QX(K,J,I)',QX(K,J,I)
+                 WRITE(6,*) 'RHS_QX(K,J,I)',RHS_QX(K,J,I)
+                 WRITE(6,*) 'QY(K,J,I)',QX(K,J,I)
+                 WRITE(6,*) 'RHS_QY(K,J,I)(',RHS_QX(K,J,I)
+                 WRITE(6,*) 'K - dof',K
+                 WRITE(6,*) 'J - elem ',J
+                 WRITE(6,*) 'I - RK stage',I
+               ENDIF
+             ENDDO
+           ENDDO
+         ENDDO
+
 C.......Compute internal edges
 
          CALL INTERNAL_EDGE_HYDRO(IT)
 
+C.......If we need to look for a NaN
+         DO J = 1,NE
+           DO K = 1,DOFS(J)
+             DO I = 1, IRK
+               IF ((ZE(K,J,I).NE.ZE(K,J,I)).OR.((QX(K,J,I).NE.
+     &             QX(K,J,I)).OR.((QY(K,J,I).NE.QY(K,J,I))))) THEN
+                 WRITE(6,*) 'After INTERNAL_EDGE_HYDRO'
+                 WRITE(6,*) 'ZE(K,J,I)',ZE(K,J,I)
+                 WRITE(6,*) 'ZE(K,J,IRK+1)',ZE(K,J,IRK+1)
+                 WRITE(6,*) 'RHS_ZE(K,J,I)',RHS_ZE(K,J,I)
+                 WRITE(6,*) 'QX(K,J,I)',QX(K,J,I)
+                 WRITE(6,*) 'RHS_QX(K,J,I)',RHS_QX(K,J,I)
+                 WRITE(6,*) 'QY(K,J,I)',QX(K,J,I)
+                 WRITE(6,*) 'RHS_QY(K,J,I)(',RHS_QX(K,J,I)
+                 WRITE(6,*) 'K - dof',K
+                 WRITE(6,*) 'J - elem ',J
+                 WRITE(6,*) 'I - RK stage',I
+               ENDIF
+             ENDDO
+           ENDDO
+         ENDDO
+
 C.......Compute elements to finish building the rhs
          
          CALL RHS_DG_HYDRO()
+
+C.......If we need to look for a NaN
+         DO J = 1,NE
+           DO K = 1,DOFS(J)
+             DO I = 1, IRK
+               IF (RHS_ZE(K,J,I).NE.RHS_ZE(K,J,I)) THEN
+                 WRITE(6,*) 'After RHS_DG_HYDRO'
+                 WRITE(6,*) 'ZE(K,J,I)',ZE(K,J,I)
+                 WRITE(6,*) 'ZE(K,J,IRK+1)',ZE(K,J,IRK+1)
+                 WRITE(6,*) 'RHS_ZE(K,J,I)',RHS_ZE(K,J,I)
+                 WRITE(6,*) 'QX(K,J,I)',QX(K,J,I)
+                 WRITE(6,*) 'RHS_QX(K,J,I)',RHS_QX(K,J,I)
+                 WRITE(6,*) 'QY(K,J,I)',QX(K,J,I)
+                 WRITE(6,*) 'RHS_QY(K,J,I)(',RHS_QX(K,J,I)
+                 WRITE(6,*) 'K - dof',K
+                 WRITE(6,*) 'J - elem ',J
+                 WRITE(6,*) 'I - RK stage',I
+               ENDIF
+             ENDDO
+           ENDDO
+         ENDDO
 
 C.......SSP Runge-Kutta Time Scheme
 

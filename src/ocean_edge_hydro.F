@@ -234,6 +234,9 @@ C.....Compute the solution at the interior state
 
 C.....Set the exterior value of the bathymetry equal to the interior
 
+C remove these comments once proper test case arrives
+C            WRITE(6,*) 'HB_EX', HB_EX
+C            WRITE(6,*) 'HB_IN',HB_IN
             HB_EX = HB_IN
 
 #ifdef SED_LAY
@@ -245,7 +248,9 @@ C.....Set the exterior value of the bathymetry equal to the interior
                ZE_EX = ZE_EX + .5*(GeoidOffset(N1)+GeoidOffset(N2))
             endif
 
-
+            IF ((ZE_EX*IFNLFA + HB_EX).LE.0) then
+               ZE_EX =  ABS(HB_EX) + H0
+            endif
             !ZE_EX = ZE_IN !this was added
 
 #ifdef TRACE
@@ -274,6 +279,38 @@ C.....Set the exterior state flows equal to the interior state flows
 C.....Compute the Roe flux
 
             CALL NUMERICAL_FLUX(IT,test_el)
+
+C remove these writes once new test case is confirmed
+            IF ((F_HAT.NE.F_HAT).OR.(G_HAT.NE.G_HAT).OR.
+     & (G_HAT.NE.G_HAT)) THEN
+c            IF ((EL_IN.EQ.158).OR.(EL_IN.EQ.11757)) THEN
+              WRITE(6,*) 'Call originated in OCEAN_EDGE_HYDRO'
+              WRITE(6,*) 'LED ', LED
+              WRITE(6,*) 'GED ', GED
+              WRITE(6,*) 'N1 ', N1
+              WRITE(6,*) 'N2 ', N2
+              WRITE(6,*) 'SLAM(N1)',SLAM(N1)/DEG2RAD
+              WRITE(6,*) 'SFEA(N1)',SFEA(N1)/DEG2RAD
+              WRITE(6,*) 'SLAM(N2)',SLAM(N2)/DEG2RAD
+              WRITE(6,*) 'SFEA(N2)',SFEA(N2)/DEG2RAD
+              WRITE(6,*) 'F_HAT',F_HAT
+c              WRITE(6,*) 'ETA2(N1)',ETA2(N1)
+c              WRITE(6,*) 'ETA2(N2)',ETA2(N2)
+c              WRITE(6,*) 'halfsum',0.5D0*(ETA2(N1) + ETA2(N2))
+c              WRITE(6,*) 'halfdif',0.5D0*(ETA2(N2) - ETA2(N1))*XEGP(I,pa)
+c              WRITE(6,*) 'offsetrate',0.5*(GeoidOffset(N1)+GeoidOffset(N2))
+c              WRITE(6,*) 'WDFLG(EL_IN)',WDFLG(EL_IN)
+              WRITE(6,*) 'test_el',test_el
+              WRITE(6,*) 'EL_IN',EL_IN
+              WRITE(6,*) 'SLAM(NM(EL_IN,1))',SLAM(NM(EL_IN,1))/DEG2RAD
+              WRITE(6,*) 'SFEA(NM(EL_IN,1))',SFEA(NM(EL_IN,1))/DEG2RAD
+              WRITE(6,*) 'SLAM(NM(EL_IN,2))',SLAM(NM(EL_IN,2))/DEG2RAD
+              WRITE(6,*) 'SFEA(NM(EL_IN,2))',SFEA(NM(EL_IN,2))/DEG2RAD
+c              WRITE(6,*) 'SLAM(NM(EL_IN,3))',SLAM(NM(EL_IN,3))/DEG2RAD
+c              WRITE(6,*) 'SFEA(NM(EL_IN,3))',SFEA(NM(EL_IN,3))/DEG2RAD
+              WRITE(6,*) 'Bathymetry',HB_EX
+              WRITE(6,*) 'quadrature pt',I
+            ENDIF
 
 C.....Add LDG terms
             
