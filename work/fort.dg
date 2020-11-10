@@ -51,7 +51,7 @@ kappa = -1.0
 s0 = 0.0
 uniform_dif = 2.5e-6
 tune_by_hand = 0
-rainflag = 1 
+rainflag = 0 
 
 
 
