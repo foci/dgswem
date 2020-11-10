@@ -800,7 +800,7 @@
          269         323         122         129
          270         326         125         129
          271         327         129         124
-          58        ! NUMBER OF NO-NORMAL FLOW EDGES
+          50        ! NUMBER OF NO-NORMAL FLOW EDGES
            1          15           5          10
            2          33          10          15
            3          46          15          20
@@ -851,16 +851,16 @@
           48          39          18          13
           49          24          13           7
           50           2           7           1
-          51         322         129         127
-          52         320         127         126
-          53           9           2           3
-          54          12           3           4
-          55           4           1           2
-          56          31           4           5
-          57         324         126         128
-          58         329         130         129
-           0        ! NUMBER OF ELEVATION SPECIFIED EDGES
-           0        ! NUMBER OF FLOW SPECIFIED EDGES
+           4        ! NUMBER OF ELEVATION SPECIFIED EDGES
+           1           4
+           2           9
+           3          12
+           4          31
+           4        ! NUMBER OF FLOW SPECIFIED EDGES
+           1         329
+           2         322
+           3         320
+           4         324
            0        ! NUMBER OF EXTERNAL BARRIER EDGES
            0        ! NUMBER OF INTERNAL BARRIER EDGES
            0       ! NUMBER OF RADIATION EDGES

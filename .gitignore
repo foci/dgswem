@@ -6,3 +6,7 @@ adcpost
 adcprep
 dgswem
 dgswem_serial
+PE0*
+river_bc_BENCHMARK_DO_NOT_CHANGE
+src/Eirik_DG_SWEM
+.DS_Store

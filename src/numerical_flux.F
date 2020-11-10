@@ -95,6 +95,31 @@ C.....Compute the Roe averaged variables
       U_ROE = T4*(U_IN*T1 + U_EX*T2)
       V_ROE = T4*(V_IN*T1 + V_EX*T2)
 
+C.....If we detetct NaN print error message
+      IF ((C_ROE.NE.C_ROE).OR.(U_ROE.NE.U_ROE).OR.(V_ROE.NE.V_ROE)) THEN
+c      IF ((MM.EQ.1).OR.(MM.EQ.83)) THEN
+        WRITE(6,*) 'U_ROE',U_ROE
+        WRITE(6,*) 'V_ROE',V_ROE
+        WRITE(6,*) 'C_ROE',C_ROE
+        WRITE(6,*) 'NaN detected Inside Roe numerical flux'
+        WRITE(6,*) 'Possible negative water column'
+C remove these once we have correct input
+        WRITE(6,*) 'NX',NX
+        WRITE(6,*) 'NX',NX
+        WRITE(6,*) 'T1=SQRT(HT_IN)',T1
+        WRITE(6,*) 'T2= SQRT(HT_EX)',T2
+        WRITE(6,*) 'T3=SQRT(HT_IN + HT_EX)',T3
+        WRITE(6,*) 'T4= 1.0D0/(T1 + T2)',T4
+        WRITE(6,*) 'HT_EX = ZE_EX*IFNLFA + HB_EX',HT_EX
+        WRITE(6,*) 'HT_IN = ZE_IN*IFNLFA + HB_IN',HT_IN
+        WRITE(6,*) 'HB_IN',HB_IN
+        WRITE(6,*) 'HB_EX',HB_EX
+        WRITE(6,*) 'IFNLFA',IFNLFA
+        WRITE(6,*) 'ZE_IN',ZE_IN
+        WRITE(6,*) 'ZE_EX',ZE_EX
+      ENDIF
+
+
 C.....Evaluate the eigenvalues at the Roe averaged variables
 
       EIGVAL(2) = (U_ROE*NX + V_ROE*NY)*IFNLCT
