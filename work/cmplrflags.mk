@@ -332,6 +332,7 @@ ifeq ($(compiler),intel-lonestar)
   DP            :=  -DREAL8 -DLINUX -DCSCA -DCMPI -DRKSSP -DSLOPE5 #-DOUT_TEC #-DARTDIF #-DWETDR  # -DSED_LAY -DRKC -DTRACE -DSED_LAY -DCHEM -DP0 -DP_AD -DSLOPEALL
   DPRE          :=  -DREAL8 -DLINUX -DRKSSP -DSLOPE5 #-DOUT_TEC #-DSWAN #-DARTDIF  # -DWETDR #-DSED_LAY -DSWAN #-DOUT_TEC #-DSWAN -DRKC -DTRACE -DSED_LAY -DCHEM -DP0 -DP_AD -DSLOPEALL
   DPRE2         :=  -DREAL8 -DLINUX -DCMPI 
+  CCBE		:= $(CC)
   CFLAGS        :=  -O3 -xSSSE3 -I.
   IMODS         :=  -I
   LIBS          :=  -L ../metis -lmetis

@@ -15,6 +15,8 @@ include cmplrflags.mk
 #Casey 121126: Include variables/flags from SWAN.
 include ../swan/macros.inc
 
+LIBDGSWEM   := libdgswem.a
+
 ######################## Target Specific Rules ###################################
 
 #                                      adcprep   
@@ -58,6 +60,15 @@ ifeq ($(BUILDTYPE),dgswem)
   MSG_MOBJ:= $(O_DIR)messenger_elem.o $(O_DIR)messenger.o
   MSG_OBJ:= 
 endif
+#                                    libdgswem.a
+ifeq ($(BUILDTYPE),$(LIBDGSWEM))
+  CF:= $(PFC)
+  O_DIR:=odir5/
+  FFLAGS:= $(FFLAGS4) $(DP) $(IMODS)$(O_DIR)
+  VPATH :=  ../src 
+  MSG_MOBJ:= $(O_DIR)messenger_elem.o $(O_DIR)messenger.o
+  MSG_OBJ:= 
+endif
 #Casey 121126: Add rules for the parallel SWAN+ADCIRC.
 #                                      padcswan
 ifeq ($(BUILDTYPE),dgswemswan)
@@ -68,6 +79,7 @@ ifeq ($(BUILDTYPE),dgswemswan)
   MSG_MOBJ:= $(O_DIR)messenger_elem.o $(O_DIR)messenger.o $(O_DIR)globalio.o
   MSG_OBJ:=
 endif
+
 
 $(O_DIR):
 	mkdir -p $@
@@ -172,7 +184,7 @@ $(O_DIR)%.o  : %.f90
 
 ########################## Executable Targets ##################################
 
-.PHONY: all metis adcprep adcpost dgswem_serial dgswem #winds
+.PHONY: all libdgswem metis adcprep adcpost dgswem_serial dgswem #winds
 
 all :  metis adcprep adcpost dgswem_serial dgswem #winds
  
@@ -195,6 +207,10 @@ ifeq ($(MAKELEVEL),0)
 	$(MAKE) BUILDTYPE=dgswem_serial  $@
    dgswem:
 	$(MAKE) BUILDTYPE=dgswem $@
+   libdgswem: $(LIBDGSWEM)
+   $(LIBDGSWEM):
+	@echo $(MAKE) LIBDGSWEM =$@ BUILDTYPE=$(LIBDGSWEM) CC="$(CCBE)" CFLAGS="$(CFLAGS)" $@
+	$(MAKE) LIBDGSWEM=$@ BUILDTYPE=$(LIBDGSWEM) CC="$(CCBE)" CFLAGS="$(CFLAGS)" $@
 #Casey 121126: Added the following lines for coupling to unstructured SWAN.
    swemswan:
 	@perl ../swan/switch.pl -unix -f95 -adcirc ../swan/*.ftn ../swan/*.ftn90
@@ -208,6 +224,7 @@ else
    adcpost::  $(O_DIR)
    dgswem_serial::   $(O_DIR)
    dgswem::  $(O_DIR)
+   $(LIBDGSWEM)::  $(O_DIR)
 
    adcprep ::  $(METIS1_OBJ) $(PREP_OBJ) 
 	$(CF) $(FFLAGS) -o $@  $(O_DIR)*.o  $(LIBS) $(LDFLAGS)
@@ -223,6 +240,10 @@ else
 
    dgswem ::  $(MSG_MOBJ) $(MSG_OBJ) $(ADC_OBJ) 
 	$(CF) $(FFLAGS) -o $@  $(O_DIR)*.o  $(MSGLIBS)
+
+   $(LIBDGSWEM) :: $(MSG_MOBJ) $(MSG_OBJ) $(ADC_OBJ)
+	ar $(ARFLAGS) $@   $(MSG_MOBJ) $(MSG_OBJ) $(ADC_OBJ)
+	ar -ts $@
 
 #Casey 121126: Added the following lines for coupling to unstructured SWAN.
    swemswan :: $(O_DIR)
@@ -241,7 +262,7 @@ clean:
 clobber:
 	rm -r -f odir*
 	rm -f  graphchk adcprep adcprep2 adcpost dgswem_serial dgswem swemswan dgswemswan \
-                ../metis/Lib/*.o  ../metis/libmetis.a ../metis/Programs/*.o
+                ../metis/Lib/*.o  ../metis/libmetis.a ../metis/Programs/*.o libdgswem.a
 help:
 	@echo "This makefile supports the following:"
 	@echo "make all      - makes all six targets"
@@ -253,6 +274,7 @@ help:
 #Casey 121126: Add text for the SWAN+ADCIRC targets.
 	@echo "make swemswan  - makes the serial SWAN+ADCIRC executable"
 	@echo "make dgswemswan - makes the parallel SWAN+ADCIRC executable"
+	@echo "make all      - makes libdgswem.a" 
 
 
 ########################## Defining the DAG  ####################################
