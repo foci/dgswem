@@ -2646,11 +2646,13 @@ C     ----------------------------------------------------------------
       !     http://www.unc.edu/~cmattock/ncfs/NCFSreport.pdf
       !=================================================================
       SUBROUTINE NWS19GET(slam,sfea, wvnx,wvny, press, np, TIMELOC, ics)
-      USE VORTEX, ONLY : newVortex, setRmaxes, fitRmaxes, uvp,
-     &                   getLatestRmax, getLatestAngle
+      USE VORTEX
+C      , ONLY : newVortex, setRmaxes,
+C     &  fitRmaxes, uvp, getLatestRmax, getLatestAngle
       USE GLOBAL, ONLY : ScreenUnit,
      &    Rearth, pi, deg2rad, rad2deg, e, PRBCKGRND, g, rhoWat0,
      &    sphericalDistance, rhoAir, one2ten, windReduction
+      USE DG, ONLY : PREC2, PREC3
       IMPLICIT NONE
 
       INTEGER  :: np, ics
@@ -3033,14 +3035,14 @@ C     &      "The simulation has run out of meteorological data.")
       stormMotionV=cos(dir(icyc)/rad2deg)*stormMotion
       DO i=1,np
          CALL uvp(ycoor(i),xcoor(i),stormMotionU,stormMotionV,
-     &        wvnx(i),wvny(i), press(i)) !
+     &        wvnx(i),wvny(i), press(i),PREC2(i)) !
          !-------------------------------------------
          ! Convert atmospheric pressure (Pascals) to
          ! atmospheric pressure-induced water surface
          ! elevation (meters).
          !-------------------------------------------
          press(i) = press(i) / RhoWatG
-
+         PREC3(i) = PREC3(i) + PREC2(i)
          if (writeFullCircleRmaxes.eqv..true.) then
             write(444,*) getLatestRmax(), getLatestAngle()
          endif

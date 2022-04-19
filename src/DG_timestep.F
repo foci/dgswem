@@ -13,7 +13,7 @@ C***********************************************************************
 C.....Use appropriate modules
       
       USE SIZES, ONLY : SZ,layers
-      USE GLOBAL, ONLY : SEDFLAG, dgsake
+      USE GLOBAL, ONLY : SEDFLAG, dgsake, METONLY
 
 #ifdef CMPI
       USE MESSENGER_ELEM
@@ -46,8 +46,9 @@ C.....Write out results
       CALL MSG_BLOCKSYNC_FINISH()
 #endif
 #endif
-
+      IF (.NOT.METONLY) THEN
       CALL SCRUTINIZE_SOLUTION()
+      ENDIF
 
       RETURN
       END SUBROUTINE

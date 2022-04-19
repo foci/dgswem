@@ -15,7 +15,7 @@ C     Aug xx, 2005, sb, Modified for wetting/drying
 C     01-10-2011 - cem - adapted for p_enrichment and multicomponent
 C     
 C***********************************************************************
-      SUBROUTINE RHS_DG_HYDRO()
+      SUBROUTINE RHS_DG_HYDRO(IT)
       
 C.....Use appropriate modules
 
@@ -29,7 +29,7 @@ C.....Use appropriate modules
       IMPLICIT NONE
       
 C.....Declare local variables
-
+      INTEGER IT
       INTEGER L,k,i,ll
       REAL(SZ) DPSIDX(3), DPSIDY(3)
       REAL(SZ) AREA, IMASS, TKX, TKY, Xpart, Ypart,H_0,C_1
@@ -63,7 +63,18 @@ C.......Adjust the p values for constants
             pa = 1
          endif
 #endif
-         
+         IF (RAINFALL.GT.0) THEN
+            CALL PRECIPITATION(IT*DTDP,L,SOURCE_R)
+            IF (SOURCE_R.GT.0.d0) THEN
+               DO I = 1,NAGP(pa)
+                  DO K = 1,DOFS(L)
+                     RHS_ZE(K,L,IRK) = RHS_ZE(K,L,IRK)
+     &                           + SRFAC(K,I,L,pa)*SOURCE_R
+                  ENDDO
+               ENDDO
+            ENDIF
+         ENDIF
+                     
 C.......If element is dry then skip calculations
          
          IF (WDFLG(L).EQ.0) then

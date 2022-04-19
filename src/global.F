@@ -441,6 +441,8 @@ C...Younghun added follow arrays for open-channels
       REAL(SZ), ALLOCATABLE :: CDEPTHR(:,:),CTWIDTHR(:,:),CBWIDTHR(:,:)
       REAL(SZ), ALLOCATABLE :: CDEPTH(:,:),CTWIDTH(:,:),CBWIDTH(:,:),
      & CSSLOPE(:,:)
+      LOGICAL :: METONLY
+      
 
 C-------------------end of data declarations----------------------------------C
 

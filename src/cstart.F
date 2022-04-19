@@ -253,7 +253,8 @@ C     RJW Merged:
         IF(NWS.EQ.19) THEN
            AsymmetricTime = STATIM*86400.D0
            OPEN(22,FILE=TRIM(GBLINPUTDIR)//'/'//'fort.22',STATUS='OLD')
-          CALL NWS19GET(SLAM,SFEA,WVNX2,WVNY2,PRN2,NP,AsymmetricTime,ICS)
+          CALL NWS19GET(SLAM,SFEA,WVNX2,WVNY2,PRN2,NP,AsymmetricTime,
+     &     ICS)
         ENDIF
 
       ! jgf52.14: Implementing Casey's fix for uninitialized
@@ -906,7 +907,14 @@ C...
           WRITE(74,3645) NDSETSW,NP,DTDP*NSPOOLGW,NSPOOLGW,2
           IGWP=2
           ENDIF
-
+          
+          !...Younghun:
+          IF (RAINFALL.EQ.3) THEN
+            OPEN(99,FILE=DIRNAME//'/'//'fort.99')
+            WRITE(99,3220) RUNDES,RUNID,AGRID
+            WRITE(99,3645) NDSETSW,NP,DTDP*NSPOOLGW,NSPOOLGW,1
+          ENDIF
+          
         IF(ABS(NOUTGW).EQ.2) THEN
           open(73,file=dirname//'/'//'fort.73',
      &          access='direct',recl=nbyte)
@@ -1360,5 +1368,12 @@ C...
 
         ENDIF
           
+      IF (NOUTE.EQ.0 .AND. NOUTGE.EQ.0 .AND. 
+     &    NOUTV.EQ.0 .AND. NOUTGV.EQ.0 .AND.
+     &    (NOUTM.NE.0 .OR. NOUTGW.NE.0)) THEN
+         METONLY = .true.
+      ELSE
+         METONLY = .false.
+      ENDIF
       RETURN
       END

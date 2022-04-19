@@ -73,7 +73,11 @@ C.....Begin Runge-Kutta time stepper
 C.......Compute the DG time and DG ramp
 
 #ifdef RKSSP
- 
+         IF (METONLY.AND. NWS.NE.0) THEN
+            CALL MET_FORCING(IT)
+            CYCLE
+         ENDIF
+         
          TIMEDG = TIME_A - DTDP + DTVD(IRK)*DTDP
          RAMPDG = 1.D0
          RAMPExtFlux = 1.0d0
@@ -230,7 +234,7 @@ C.......Compute internal edges
 
 C.......Compute elements to finish building the rhs
          
-         CALL RHS_DG_HYDRO()
+         CALL RHS_DG_HYDRO(IT)
 
 C.......SSP Runge-Kutta Time Scheme
 
@@ -290,7 +294,11 @@ C.......Compute the dynamic pressure if flagged
 #endif
 
 #ifdef RKC
-
+         IF (METONLY.AND. NWS.NE.0) THEN
+            CALL MET_FORCING(IT)
+            CYCLE
+         ENDIF
+         
          TIMEDG = TIME_A - DTDP + RKC_c(IRK)*DTDP
          RAMPDG = 1.D0
          RAMPExtFlux = 1.0d0
@@ -358,7 +366,7 @@ C.......Compute internal edges
 
 C.......Compute elements to finish building the rhs
          
-         CALL RHS_DG_HYDRO()
+         CALL RHS_DG_HYDRO(IT)
 
 C.......RKC Time Scheme
 
