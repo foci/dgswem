@@ -391,6 +391,20 @@ C...
           OPEN(61,FILE=DIRNAME//'/'//'fort.61')
           WRITE(61,3220) RUNDES,RUNID,AGRID
           WRITE(61,3645) NTRSPE,NSTAE,DTDP*NSPOOLE,NSPOOLE,1
+          
+          !...Younghun: open output files for DG-SAKE
+          IF (DGSAKE.EQ.1) THEN
+             OPEN(91,FILE=DIRNAME//'/'//'fort.91')
+             WRITE(91,3220) RUNDES,RUNID,AGRID
+             WRITE(91,3645) NTRSPE,NSTAE,DTDP*NSPOOLE,NSPOOLE,1
+             
+             ! IF(NCEDS.GT.0) THEN
+                OPEN(95,FILE=DIRNAME//'/'//'fort.95')
+                WRITE(95,3220) RUNDES,RUNID,AGRID
+                WRITE(95,3645) NTRSPE,NSTAE,DTDP*NSPOOLE,NSPOOLE,1
+             ! ENDIF
+          ENDIF
+          
           IESTP=2
           ENDIF
 
@@ -449,6 +463,20 @@ C...
           OPEN(62,FILE=DIRNAME//'/'//'fort.62')
           WRITE(62,3220) RUNDES,RUNID,AGRID
           WRITE(62,3645) NTRSPV,NSTAV,DTDP*NSPOOLV,NSPOOLV,2
+          
+          !...Younghun: open output files for DG-SAKE
+          IF (DGSAKE.EQ.1) THEN
+             OPEN(92,FILE=DIRNAME//'/'//'fort.92')
+             WRITE(92,3220) RUNDES,RUNID,AGRID
+             WRITE(92,3645) NTRSPV,NSTAV,DTDP*NSPOOLV,NSPOOLV,2
+             
+             ! IF(NCEDS.GT.0) THEN
+                OPEN(96,FILE=DIRNAME//'/'//'fort.96')
+                WRITE(96,3220) RUNDES,RUNID,AGRID
+                WRITE(96,3645) NTRSPV,NSTAV,DTDP*NSPOOLV,NSPOOLV,2
+             ! ENDIF
+          ENDIF
+          
           IVSTP=2
           ENDIF
 

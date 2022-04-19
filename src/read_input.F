@@ -28,7 +28,7 @@ C.....Use appropriate modules
 Casey 101118: Enable hot-start file generation by SWAN.
       USE Couple2Swan, ONLY: SwanHotStartUnit
 #endif
-
+      USE KWEAttr
       IMPLICIT NONE
       
 C.....Declare local variables
@@ -36,6 +36,7 @@ C.....Declare local variables
       INTEGER NIBP, IBN1, IK, NDISC, NBBN, NVEL2, II, i,j,jj,k
       CHARACTER(256) LINE,LINE2
       
+
 C     sb-PDG1 added
 #ifdef CMPI
       INTEGER IDUM80
@@ -2148,6 +2149,7 @@ C.....AND THE BOUNDARY TYPE
       NVELEXT=0
       NIBSEG = 0
       NEBSEG = 0
+      NCEDS = 0
       
       CALL ALLOC_EDGES0()
 
@@ -2163,7 +2165,9 @@ C.......CHECK THAT IBTYPE PARAMETER HAS BEEN SET PROPERLY
 cjj   wm001 - following 2 lines modified 
      &        .AND.(IBTYPE.NE.4).AND.(IBTYPE.NE.24)
      &        .AND.(IBTYPE.NE.5).AND.(IBTYPE.NE.25)
-     &        .AND.(IBTYPE.NE.30)) THEN
+     &        .AND.(IBTYPE.NE.30)
+C...Younghun added follow line     
+     &        .AND.(IBTYPE.NE.6)) THEN
          IF(NSCREEN.EQ.1.AND.MYPROC.EQ.0) WRITE(6,9985) K
          WRITE(16,9985) K
  9985    FORMAT(////,1X,'!!!!!!!!!!  WARNING - FATAL ERROR !!!!!!!!!',
@@ -2367,7 +2371,8 @@ C.....INPUT INFORMATION FOR VARIOUS TYPES OF FLOW BOUNDARY SEGMENTS
 C.....INPUT THE STANDARD NODE NUMBERS FOR THE Kth FLOW BOUNDARY SEGMENT
       IF((IBTYPE.NE.3).AND.(IBTYPE.NE.13).AND.(IBTYPE.NE.23).AND.
      &     (IBTYPE.NE.4).AND.(IBTYPE.NE.24).AND.
-     &     (IBTYPE.NE.5).AND.(IBTYPE.NE.25)) THEN
+     &     (IBTYPE.NE.5).AND.(IBTYPE.NE.25).AND.
+     &     (IBTYPE.NE.6)) THEN
          DO I=1,NVELL(K)
             READ(14,*) NBVV(K,I)
          END DO
@@ -2413,6 +2418,35 @@ C...COEFFICIENT AND CROSS BARRIER PIPE DIAMETER
          END DO
          NPRBI=2
          NPIPE=1
+      ENDIF
+      
+C...Younghun added follow lines
+      IF(IBTYPE.EQ.6) THEN
+         ! NCEDS = NCEDS + NVELL(K)-1
+         DO I=1,NVELL(K)
+            READ(14,*) NBVV(K,I),CDEPTHR(K,I),CTWIDTHR(K,I),CBWIDTHR(K,I)
+         END DO
+         
+C         DO I=1, NVELL(K)-1
+C            NCEDS = NCEDS + 1
+C            J = NCEDS
+C            CDEPTH(1,J) = CDEPTHR(I)
+C            CDEPTH(2,J) = CDEPTHR(I+1)
+C            CTWIDTH(1,J) = CTWIDTHR(I)
+C            CTWIDTH(2,J) = CTWIDTHR(I+1)
+C            CBWIDTH(1,J) = CBWIDTHR(I)
+C            CBWIDTH(2,J) = CBWIDTHR(I+1)
+C            
+C            ! Compute the side slope
+C            do JJ=1,2
+C               if (CTWIDTH(JJ,J).eq.CBWIDTH(JJ,J)) then
+C                  CSSLOPE(JJ,J) = 1e8
+C               else
+C                  CSSLOPE(JJ,J) = 2*CDEPTH(JJ,J)/
+C     &             (CTWIDTH(JJ,J) - CBWIDTH(JJ,J))
+C               endif
+C            enddo
+C         ENDDO
       ENDIF
 
 C.....PROCESS INFORMATION FOR VARIOUS TYPES OF FLOW BOUNDARY SEGMENTS
@@ -4403,6 +4437,45 @@ C--
 #else
       MNPROC = 1
 #endif
+      
+      IF (RAINFALL.GT.0) THEN
+         IF (RAINFALL.EQ.1 .OR. RAINFALL.EQ.2) THEN
+         OPEN(21,FILE=DIRNAME//'/'//'fort.21',POSITION="rewind")
+         ! Younghun added
+         READ(21,*) NTPREC, I
+         IF (I.ne.NP) THEN
+            print *, '*********** Execution terminated ***********'
+            print *, 'The number of nodes in precipitation file'
+            print *, ' does not match with mesh'
+            stop
+         ENDIF
+         
+         ALLOCATE (PREC1(NP,NTPREC), ITPREC(NTPREC))
+         
+         DO I = 1,NTPREC
+            READ(21,*) ITPREC(I)
+            DO J = 1,NP
+               READ(21,*) PREC1(J,I)
+            ENDDO
+         ENDDO
+         
+         ALLOCATE (PREC(NE,NTPREC))
+         DO I = 1,NTPREC
+            DO J = 1,NE
+               N1 = NM(J,1)
+               N2 = NM(J,2)
+               N3 = NM(J,3)
+               PREC(J,I) =  1.D0/3.D0*(PREC1(N1,I)
+     &                             + PREC1(N2,I) + PREC1(N3,I))
+            ENDDO
+         ENDDO
+         ELSEIF ( RAINFALL.EQ.3) THEN
+            ALLOCATE (PREC2(NP), PREC3(NP))
+            PREC3 = 0.d0
+         ENDIF
+         ! CALL ReadKWEAttr()
+      ENDIF
+
 
 C.....INITIALIZE AVERAGING FOR INTERNAL BARRIER WATER LEVELS
 C......BARAVGWT=0.000 -> NO AVERAGING PERFORMED

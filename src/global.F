@@ -273,6 +273,11 @@ C.....for bridge pilings
       REAL(SZ),ALLOCATABLE ::   BK(:),BALPHA(:),BDELX(:)
       INTEGER, ALLOCATABLE ::   NBNNUM(:)
 
+C.....Younghun added:
+      INTEGER, TARGET :: DGSAKE
+      INTEGER, TARGET :: RAINFALL
+      REAL(SZ),ALLOCATABLE :: HWD00(:), HQX00(:), HQY00(:)
+      REAL(SZ),ALLOCATABLE :: AWD00(:), AQ00(:)
 C...
 C...DECLARE COMMON BLOCKS
 C...
@@ -430,8 +435,12 @@ C.....End (EK)
 
       REAL(8)  RNP_GLOBAL
       REAL(8)  REFSEC   ! required to run in either 32-bit or 64-bit
-      
 
+C...Younghun added follow arrays for open-channels
+
+      REAL(SZ), ALLOCATABLE :: CDEPTHR(:,:),CTWIDTHR(:,:),CBWIDTHR(:,:)
+      REAL(SZ), ALLOCATABLE :: CDEPTH(:,:),CTWIDTH(:,:),CBWIDTH(:,:),
+     & CSSLOPE(:,:)
 
 C-------------------end of data declarations----------------------------------C
 
@@ -569,7 +578,11 @@ C
       ALLOCATE ( NBVV(MNBOU,0:MNVEL))
       ALLOCATE ( NVELL(MNBOU))
       ALLOCATE ( SEGTYPE(MNBOU))
-
+      
+C...Younghun added
+      ALLOCATE (CDEPTH(2,MNVEL),CTWIDTH(2,MNVEL),CBWIDTH(2,MNVEL),
+     & CSSLOPE(2,MNVEL))
+      ALLOCATE (CDEPTHR(MNBOU,MNVEL),CTWIDTHR(MNBOU,MNVEL),CBWIDTHR(MNBOU,MNVEL))
       RETURN
       END SUBROUTINE
 
@@ -631,6 +644,8 @@ C
       ALLOCATE ( NNE(MNSTAE),ET00(MNSTAE),BT00(MNSTAE))
       ALLOCATE ( STAIE1(MNSTAE),STAIE2(MNSTAE),STAIE3(MNSTAE))
       ALLOCATE ( XEL(MNSTAE),YEL(MNSTAE),SLEL(MNSTAE),SFEL(MNSTAE))
+      ALLOCATE ( HWD00(MNSTAE))  ! Younghun added
+      ALLOCATE ( AWD00(MNSTAE))
       RETURN
       END SUBROUTINE
 
@@ -643,7 +658,8 @@ C
       ALLOCATE ( NNV(MNSTAV))
       ALLOCATE ( UU00(MNSTAV),VV00(MNSTAV))
       ALLOCATE ( STAIV1(MNSTAV),STAIV2(MNSTAV),STAIV3(MNSTAV))
-
+      ALLOCATE ( HQX00(MNSTAV), HQY00(MNSTAV))
+      ALLOCATE ( AQ00(MNSTAV) )
       RETURN
       END SUBROUTINE
 

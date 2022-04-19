@@ -51,6 +51,9 @@ C--
       INTEGER NERR, NN1, NN2
       INTEGER IC1, IC2, IC3
       INTEGER IERROR
+      
+      REAL(SZ) mX, mY, diff
+      LOGICAL INFLAG1, INFLAG2, ONFLAG1, ONFLAG2
 
 C.....Compute maximum number of edges
 
@@ -200,6 +203,13 @@ C.....Zero out internal and external barrier counters and arrays
       NEBEDN  = 0
       NIBSEGN = 0
       NEBSEGN = 0
+
+C.....Younghun: Zero out channel edge counter and array
+      NCEDS = 0
+      NCEDN = 0
+      NCEDNO = 0
+      NCEDED = 0
+      NEDCEDN = 0
 
 C.....Find node pairs that are not edges of elements (eg. an internal
 C.....barrier against a land boundary)
@@ -392,6 +402,53 @@ c                  endif
                   NREDN(NREDS) = JED
                 ENDIF
                 
+                ! Younghun added
+                IF (SEGTYPE(K).eq.6) THEN
+                   NCEDS = NCEDS + 1
+                   NCEDN(NCEDS) = JED
+                   ! NEDCEDN(JED) = NCEDS
+                   
+                   NCEDNO(1,NCEDS) = N1
+                   NCEDNO(2,NCEDS) = N2
+                   
+                   ! write(9998,*) K,JED,N1,N2
+                   if (J1.eq.N1 .AND. J2.eq.N2) then
+                      NCEDNO(3,NCEDS) = 0 ! Flag for nonflip NEDNO direction
+                   elseif (J2.eq.N1 .AND. J1.eq.N2) then
+                      NCEDNO(3,NCEDS) = 1 ! Flag for flip NEDNO direction
+                   endif
+
+                   ! HYDR_INFO(1,N1) = CBWIDTH(IED)
+                   ! HYDR_INFO(2,N1) = (CTWIDTH(IED) - CBWIDTH(IED))/(2.D0*CDEPTH(IED))
+                   
+                   ! HYDR_INFO(1,N2) = CBWIDTH(IED+1)
+                   ! HYDR_INFO(2,N2) = (CTWIDTH(IED+1) - CBWIDTH(IED+1))/(2.D0*CDEPTH(IED+1))
+                   
+                   ! print*, HYDR_INFO(1,N1), HYDR_INFO(2,N1)
+                   ! print*, HYDR_INFO(1,N2), HYDR_INFO(2,N2)
+
+                   CDEPTH(1,NCEDS)  = CDEPTHR(K,IED)
+                   CDEPTH(2,NCEDS)  = CDEPTHR(K,IED+1)
+                   CTWIDTH(1,NCEDS) = CTWIDTHR(K,IED)
+                   CTWIDTH(2,NCEDS) = CTWIDTHR(K,IED+1)
+                   CBWIDTH(1,NCEDS) = CBWIDTHR(K,IED)
+                   CBWIDTH(2,NCEDS) = CBWIDTHR(K,IED+1)
+                   ! Compute the side slope
+                   do J=1,2
+                      if (CTWIDTH(J,NCEDS).eq.CBWIDTH(J,NCEDS)) then
+                         CSSLOPE(J,NCEDS) = 1e8
+                      else
+                         CSSLOPE(J,NCEDS) = 2*CDEPTH(J,NCEDS)/
+     &                    (CTWIDTH(J,NCEDS) - CBWIDTH(J,NCEDS))
+                      endif
+                   enddo
+                   CEDSLOPE(NCEDS) = abs( (CDEPTH(1,NCEDS)-DP(N1)) -
+     &              (CDEPTH(2,NCEDS)-DP(N2)) )/sqrt((X(N1)-X(N2))**2.D0
+     &                                      + (Y(N1)-Y(N2))**2.D0)
+                   ! print *, CEDSLOPE(NCEDS)
+                ENDIF
+                
+                
               ENDIF
             ENDIF
 Csb-
@@ -416,6 +473,45 @@ C             STOP 'ERROR IN PROCESSING LAND SEGMENT'
 C--
 10133   CONTINUE
 10132 CONTINUE
+
+
+C.....Younghun added
+      ALLOCATE (NCEDIN(MNED,NCEDS+1), NCEDEX(MNED,NCEDS+1))
+      NCEDIN = 0
+      NCEDEX = 0
+      
+      DO I = 1,NCEDS
+         N1 = NCEDNO(1,I)
+         N2 = NCEDNO(2,I)
+         
+         DO J = 1,NCEDS
+            IF (NCEDNO(2,J).eq.N1) THEN
+               NCEDED(1,I) = NCEDN(J)
+            
+               NCEDIN(1,I) = NCEDIN(1,I) + 1
+               K = NCEDIN(1,I)
+               NCEDIN(K+1,I) = NCEDN(J)
+            ENDIF
+            IF (NCEDNO(1,J).eq.N2) THEN
+               NCEDED(2,I) = NCEDN(J)
+               
+               NCEDEX(1,I) = NCEDEX(1,I) + 1
+               K = NCEDEX(1,I)
+               NCEDEX(K+1,I) = NCEDN(J)
+               
+            ENDIF
+         ENDDO
+         
+         GED = NCEDN(I)
+         if (CBWIDTH(1,I).ne.0 .and. CBWIDTH(2,I).ne.0) then
+            NEDCEDN(GED) = I
+         endif
+         ! write(*,*) NCEDED(1,I), NCEDED(2,I)
+         ! WRITE(*,*) x(N1), y(N1)
+         ! WRITE(*,*) x(N2), y(N2)
+         ! print*,NCEDIN(1,I), NCEDEX(1,I)
+         
+      ENDDO
 
 C.....Check the order of the nodes assigned to an edge - important in
 C.....the calculation of the unit normal
@@ -590,6 +686,193 @@ C.....Construct global edge to local edge (1,2, or 3) table
           ENDIF
         ENDDO
       ENDDO
+      
+C.....Younghun: Assign Edge type to identify open channel edges
+      CALL CALC_TRISLOPE()
+      
+      DO I = 1,NEDGES
+        ET(I) = -1
+        flipNEDEL(I) = 0
+        
+        if (NEDCEDN(I).gt.0) then
+           ! ET(I) = -2
+        endif
+        N1 = NEDNO(1,I)
+        N2 = NEDNO(2,I)
+        
+        mX = (X(N1) + X(N2))/2
+        mY = (Y(N1) + Y(N2))/2
+        
+        IEL1 = NEDEL(1,I)
+        IEL2 = NEDEL(2,I)
+        
+        IF (IEL1 * IEL2.EQ.0) THEN
+            CALL pointInTri(mX + S0X(IEL1), mY + S0Y(IEL1),IEL1,
+     &       INFLAG1,ONFLAG1)     
+            IF (INFLAG1.OR.ONFLAG1) THEN
+                ET(I) = 0
+            ELSE
+                ET(I) = 1
+            ENDIF 
+               
+        ELSE
+            CALL pointInTri(mX + S0X(IEL1), mY + S0Y(IEL1),IEL1,INFLAG1,
+     &       ONFLAG1)
+            CALL pointInTri(mX + S0X(IEL2), mY + S0Y(IEL2),IEL2,INFLAG2,
+     &       ONFLAG2)
+            
+            IF (INFLAG1.eq.0 .AND. ONFLAG1.eq.0 .AND. INFLAG2.eq.0 .AND.
+     &       ONFLAG2.eq.0) THEN
+                diff = max(abs(abs(mX+S0X(IEL1)) - abs(mX+S0X(IEL2))),
+     &           abs(abs(mY+S0Y(IEL1)) - abs(mY+S0Y(IEL2))))
+                
+                IF (diff .lt. 0) THEN ! Do we need this?
+                    ET(I) = -1
+                ELSE
+                    ET(I) = -2
+                    ! flipNEDEL(I) = 1 ! test
 
+                    ! DG-SAKE in MALTAB handles "flowMap" variable here
+                ENDIF
+            ELSEIF (ONFLAG1 .AND. INFLAG2.eq.0 .AND. ONFLAG2.eq.0) THEN
+                ET(I) = -2
+                flipNEDEL(I) = 1
+
+                ! DG-SAKE in MALTAB handles "flowMap" variable here
+                
+            ELSEIF (INFLAG1.eq.0 .AND. ONFLAG1.eq.0 .AND. ONFLAG2) THEN
+                ET(I) = -2
+
+                ! DG-SAKE in MALTAB handles "flowMap" variable here
+                
+            ELSEIF (INFLAG1 .AND. INFLAG2) THEN
+                ET(I) = 0
+                
+            ELSEIF (INFLAG1 .AND. INFLAG2.eq.0) THEN
+                flipNEDEL(I) = 1     
+                
+                ! DG-SAKE in MALTAB handles "flowMap" variable here
+            ! ELSEIF (ONFLAG1 .AND. ONFLAG2) THEN
+               ! ET(I) = 0    
+                ! DG-SAKE in MALTAB handles "flowMap" variable here
+            ENDIF
+            
+CC......Younghun's classification
+C            
+C            IF (INFLAG1.eq.0 .AND. ONFLAG1.eq.0) THEN
+C               if (INFLAG2.eq.0 .AND. ONFLAG2.eq.0) then
+C                  ET(I) = -2
+C               else
+C                  ET(I) = -1
+C               endif
+C               
+C            ELSEIF (INFLAG1.eq.0 .AND. ONFLAG1.eq.1) then
+C               if (INFLAG2.eq.0 .AND. ONFLAG2.eq.0) then
+C                  ET(I) = -1
+C                  flipNEDEL(I) = 1
+C               else
+C                  ET(I) = -1
+C               endif
+C               
+C            ELSEIF (INFLAG1.eq.1 .AND. ONFLAG1.eq.0) then
+C               if (INFLAG2.eq.1 .AND. ONFLAG2.eq.0) then
+C                  ET(I) = 0
+C               else
+C                  ET(I) = -1
+C                  flipNEDEL(I) = 1
+C               endif
+C            ENDIF
+                
+        ENDIF
+        
+
+        ! DO J = 1, NCEDS
+           ! IF (NCEDN(J).eq.I .AND. ET(I).ne.-2) THEN
+              ! ET(I) = -2
+           ! ENDIF
+        ! ENDDO 
+        
+                
+        ! DO II = 1, NCEDS
+           ! I1 = NCEDN(II)
+           ! I2 = NCEDED(1,II)
+           ! I3 = NCEDED(2,II)
+           
+           ! IF (I2*I3.ne.0) THEN
+              ! IF (ET(I2).eq.ET(I3)) THEN
+                 ! ET(I1) = ET(I2)
+              ! ENDIF
+           ! ENDIF
+        ! ENDDO
+        ! WRITE(99999,*) I, mx, my, ET(I)
+        
+      ENDDO
+      
+      ! DO I = 1, NCEDS
+         ! GED = NCEDN(I)
+         ! IF (ET(GED).eq.0 .AND. NEDCEDN(GED).eq.0) THEN
+            ! ET(GED) = -1
+         ! ENDIF
+      ! ENDDO
+      
+      ! do ii = 1, nceds
+         ! i1 = ncedn(ii)
+         ! ! write(9999,*) et(i1)
+         ! if (et(i1).eq.0) then
+            ! et(i1) = -1
+         ! endif
+      ! enddo
+      
+      ! DO II = 1, NCEDS
+         ! I1 = NCEDN(II)
+         ! I2 = NCEDED(1,II)
+         ! I3 = NCEDED(2,II)
+         
+         ! IF (I2*I3.ne.0) THEN
+            ! IF (ET(I2).eq.ET(I3) .AND. ET(I2).lt.ET(I1)) THEN
+               ! ET(I1) = ET(I2)
+            ! ENDIF
+         ! ENDIF
+      ! ENDDO
+      
+      ! DO I = 1, NEDGES
+         ! READ(164,*) ET(I)
+      ! ENDDO
+      
+      
+      ! DO I = 1, NEDGES
+         ! N1 = NEDNO(1,I)
+         ! N2 = NEDNO(2,I)
+         
+         ! mX = (X(N1) + X(N2))/2
+         ! mY = (Y(N1) + Y(N2))/2
+         ! WRITE(9993,*) I, mX, mY, ET(I)
+      ! ENDDO
+      
+      ! DO I = 1, NEDGES
+         ! N1 = NEDNO(1,I)
+         ! N2 = NEDNO(2,I)
+         
+         ! mX = (X(N1) + X(N2))/2
+         ! mY = (Y(N1) + Y(N2))/2
+         ! WRITE(9996,*) I, mX, mY, flipNEDEL(I)
+      ! ENDDO
+      ! stop
+      
+C      READ(163,*) I
+C      IF (I.ne.NCEDS) THEN
+C         print *, '*********** Execution terminated ***********'
+C         print *, 'The number of open-channels in fort.163 file does not match with mesh'
+C         stop
+C      ENDIF
+C      
+C      ALLOCATE (manningKWE1(NCEDS))
+C      
+C      DO J = 1,NCEDS
+C         READ(163,*) manningKWE1(J)
+C      ENDDO
+      
+      ! manningKWE1 = 0.15
+      
       RETURN
       END SUBROUTINE CREATE_EDGE_DATA

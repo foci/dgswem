@@ -104,13 +104,14 @@ C.....and construct LBCODE array for read15 routine
      &   .AND.(ITYPE.NE.4).AND.                  (ITYPE.NE.24)
      &   .AND.(ITYPE.NE.5).AND.                  (ITYPE.NE.25)
      &   .AND.                 (ITYPE.NE.30).AND.(ITYPE.NE.32)
-     &   .AND.                 (ITYPE.NE.40).AND.(ITYPE.NE.41)) THEN
+     &   .AND.                 (ITYPE.NE.40).AND.(ITYPE.NE.41)
+     &   .AND.(ITYPE.NE.6)) THEN
           IERROR = 3
           GOTO 1003
         ENDIF
 
         IF ((ITYPE.NE.3).AND.(ITYPE.NE.13).AND.(ITYPE.NE.23).AND.
-     &      (ITYPE.NE.4).AND.(ITYPE.NE.24)) THEN
+     &      (ITYPE.NE.4).AND.(ITYPE.NE.24).AND.(ITYPE.NE.6)) THEN
           DO I = 1,NVELL(K)
             READ(14,*) NBVV(K,I)
             IBCONNR(K,I) = 0
@@ -136,6 +137,13 @@ C.....Construct List of WEIR nodes and their duals
             WEIRD(NWEIR) = IBCONNR(K,I)
           ENDDO
         ENDIF
+        
+        IF ((ITYPE.EQ.6)) THEN
+          DO I = 1,NVELL(K)
+            READ(14,*) NBVV(K,I),BAR1(K,I),BAR2(K,I),BAR3(K,I)
+          ENDDO
+        ENDIF
+
       ENDDO
 
 C.....Close Global Grid file
@@ -600,11 +608,13 @@ C--Determine whether there are any normal flow boundaries.
 C
 C     jgf46.21 Added support for IBTYPE=52.
       NFLUXF = 0
+      NCHANNEL = 0
       DO K=1, NBOU
          IF ((IBTYPE(K).EQ.2).OR.(IBTYPE(K).EQ.12)
      &        .OR.(IBTYPE(K).EQ.22).OR.(IBTYPE(K).EQ.52)) THEN
             NFLUXF = 1
          ENDIF
+         IF (IBTYPE(K).EQ.6) NCHANNEL = NCHANNEL + 1
       ENDDO
 C
 C--If so, read the number of frequencies present and other info.
@@ -1343,3 +1353,40 @@ C-----------------------------------------------------------------------
 C-----------------------------------------------------------------------
       END SUBROUTINE CoordToEle
 C-----------------------------------------------------------------------
+
+C-----------------------------------------------------------------------
+C...2021-04-21 Younghun
+C-----------------------------------------------------------------------
+      SUBROUTINE READPREC()
+      ! USE PRE_GLOBAL
+      ! INTEGER I
+      ! OPEN(21,FILE=DIRNAME//'/../'//'fort.21',POSITION="rewind")
+      
+      ! READ(21,*) NTPREC, I
+      ! IF (I.ne.NNODG) THEN
+         ! print *, '*********** Execution terminated ***********'
+         ! print *, 'The number of nodes in precipitation file does not match with mesh'
+         ! stop
+      ! ENDIF
+      
+      ! ALLOCATE (Precipitation(NNODG,NTPREC), ITPREC(NTPREC))
+      
+      ! DO I = 1,NTPREC
+         ! READ(21,*) ITPREC(I)
+         ! DO J = 1,NNODG
+            ! READ(21,*) Precipitation(J,I)
+         ! ENDDO
+      ! ENDDO
+
+      END SUBROUTINE READPREC
+
+
+
+
+
+
+
+
+
+
+

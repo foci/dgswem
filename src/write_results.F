@@ -31,7 +31,13 @@ C.....Declare local variables
       LOGICAL FORCE_WRITE
       real(sz) qmaxe,elmaxe
       integer :: imaxze,imaxq,ErrorElevExceeded
-      
+
+C.....Younghun added
+      INTEGER :: L, GED, EL1, EL2, NEL1ED, NEL2ED
+      REAL(SZ) :: HWD_IN, HWD_EX, Q1X, Q1Y, Q2X, Q2Y, discharge
+      REAL(SZ) :: AWD_H_IN, P_MINUS, AQ_IN
+      REAL(SZ) :: WCED, CB, CSS
+
 C.....Transform from modal coordinates to nodal coordinates and average
 C.....to single nodal values
 
@@ -327,13 +333,22 @@ C...
                   IF(NCELE.EQ.1) BT00(I)=EE1
                 endif
                 IF(NCELE.EQ.0) BT00(I)=-99999.
+                
+                HWD00(I) = HWD(1,NNE(I),1)
+                DO K = 2, DOF
+                   HWD00(I) = HWD00(I) + HWD(K,NNE(I),1)*PHI_STAE(K,I)
+                ENDDO
+                
+
               END DO
               IF(ABS(NOUTE).EQ.1) THEN
                 WRITE(61,2120) time_A,IT
                 WRITE(82,2120) time_A,IT
+                IF (DGSAKE.EQ.1) WRITE(91,2120) time_A,IT
                 DO I=1,NSTAE
                   WRITE(61,2453) I,ET00(I)
                   WRITE(82,2453) I,BT00(I)
+                  IF (DGSAKE.EQ.1) WRITE(91,2453) I,HWD00(I)
                   END DO
                 IESTP = IESTP+1+NSTAE
                 ENDIF
@@ -350,10 +365,33 @@ C...
                 IESTP = IESTP + NSTAE
                 ENDIF
               NSCOUE=0
+              
+              IF(NCEDS.GT.0 .AND. ABS(NOUTE).EQ.1 .AND. DGSAKE.EQ.1)THEN
+                WRITE(95,2120) time_A,IT
+                DO I=1,NSTAE
+                GED = NCEDN(NNE1(I))
+                ! print*,I,NCEDNO(1,NNE1(I)), NCEDNO(2,NNE1(I))
+                IF (GED.gt.0) then
+                   AWD00(I) = AWD(1,GED,1)
+                   ! write(*,*) 'nne1'
+                   ! write(*,*) NNE1(I)
+                   DO K = 2, ph+1
+                      AWD00(I) = AWD00(I) + AWD(K,GED,1)*PHI_STAE1(K,I)
+                      ! if (I.eq.3) write(*,*) I,PHI_STAE1(K,I)
+                   ENDDO
+                ENDIF
+                
+                
+                  WRITE(95,2453) I,AWD00(I)
+                ENDDO
+              ENDIF
+              
               ENDIF
             ENDIF
           IF(IT.EQ.NTCYFE) CLOSE(61)
           IF(IT.EQ.NTCYFE) CLOSE(82)
+          IF(IT.EQ.NTCYFE) CLOSE(91)
+          IF(IT.EQ.NTCYFE) CLOSE(95)
           ENDIF
 
 C...
@@ -388,12 +426,29 @@ C...
                   V11=VV2(NNV(I))
                   UU00(I)= U11
                   VV00(I)= V11
-                endif                  
+                endif  
+
+                
+                HWD_IN = HWD(1,NNV(I),1)
+                DO K = 2, DOF
+                   HWD_IN = HWD_IN + HWD(K,NNV(I),1)*PHI_STAV(K,I)
+                ENDDO
+                
+                HQX00(I) = S0X(NNV(I))*(HWD_IN**(5.D0/3.D0)) /
+     &                         (manningKWE2(NNV(I))*sqrt(S0mag(NNV(I))))
+                HQY00(I) = S0Y(NNV(I))*(HWD_IN**(5.D0/3.D0)) /
+     &                         (manningKWE2(NNV(I))*sqrt(S0mag(NNV(I))))
+                
               END DO
+              
               IF(ABS(NOUTV).EQ.1) THEN
                 WRITE(62,2120) time_A,IT
+                IF (DGSAKE.EQ.1) WRITE(92,2120) time_A,IT
+                ! WRITE(96,2120) time_A,IT
                 DO I=1,NSTAV
                   WRITE(62,2454) I,UU00(I),VV00(I)
+                  IF (DGSAKE.EQ.1) WRITE(92,2454) I,HQX00(I),HQY00(I)
+                  ! WRITE(96,2454) I,AQ00(I)!/CBWIDTH(2,NNV1(I))
                   END DO
                 IVSTP = IVSTP+1+NSTAV
                 ENDIF
@@ -408,9 +463,59 @@ C...
                 IVSTP = IVSTP + 2*NSTAV
                 ENDIF
               NSCOUV=0
+              
+              IF(NCEDS.GT.0 .AND. ABS(NOUTV).EQ.1 .AND. (DGSAKE.EQ.1)) THEN
+                WRITE(96,2120) time_A,IT
+                DO I=1,NSTAV
+                GED = NCEDN(NNV1(I))
+                if (GED.gt.0) then
+                   AWD_IN = AWD(1,GED,1)
+                   DO K = 2,pa+1
+                      AWD_IN = AWD_IN + AWD(K,GED,1)*PHI_STAV1(K,I)
+                   ENDDO
+                   ! print*,awd_in
+                   if (AWD_IN .lt. 1e-16) then
+                      AWD_IN = 0.D0
+                   endif
+                   
+                   WCED = 1.D0/2.D0
+                   CB = (1.D0 - WCED)*CBWIDTH(1,NNV1(I)) + WCED*CBWIDTH(2,NNV1(I))
+                   CSS = (1.D0 - WCED)*CSSLOPE(1,NNV1(I)) + WCED*CSSLOPE(2,NNV1(I))
+                   
+                   N2 = NCEDNO(2,NNV1(I))
+                   ! write(*,*) X(NEDNO(1,NNV1(I))), Y(NEDNO(1,NNV1(I)))
+                   if (CSS.ge.1e8) then
+                      AWD_H_IN = AWD_IN/CB
+                   else
+                      AWD_H_IN = CSS/2.D0*(-CB
+     &                         + sqrt(CB**2.D0 + 4.D0/CSS*AWD_IN))
+                   endif
+                   
+                   P_MINUS = CB + 2.D0*AWD_H_IN*sqrt(1+1.D0/(CSS**2.D0))
+                   
+                   if (AWD_IN.eq.0.D0) then
+                      AQ00(I) = 0.D0
+                   else
+                      ! manning = 0.15, alpha = 1/n, beta = 2/3
+                      AQ00(I) = (1.D0/manningKWE1(NNV1(I)))*sqrt(CEDSLOPE(NNV1(I)))*((AWD_IN/P_MINUS)**(2.D0/3.D0)) * AWD_IN 
+                   endif
+
+                   
+                   
+                     WRITE(96,2454) I,AQ00(I)!/CBWIDTH(2,NNV1(I))
+                   ENDIF
+
+                enddo
+                ! print*,NNV1(I),CBWIDTH(NNV1(I))
+                
+                
+              ENDIF
+              
               ENDIF
             ENDIF
           IF(IT.EQ.NTCYFV) CLOSE(62)
+          IF(IT.EQ.NTCYFV) CLOSE(92)
+          IF(IT.EQ.NTCYFV) CLOSE(96)
           ENDIF
 
 C...

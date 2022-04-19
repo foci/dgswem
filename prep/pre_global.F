@@ -42,6 +42,8 @@ C   STRING14 section
       CHARACTER(80) NBOUMSG,NVELMSG
       CHARACTER(80),ALLOCATABLE   ::  NVELLMSG(:),NVDLLMSG(:)
 C
+C   DGSAKE section
+      INTEGER NCHANNEL
 C  PARM15  section
       INTEGER  NOUTE,NSPOOLE,NSTAE,NSTAE_MAX
       INTEGER  NOUTV,NSPOOLV,NSTAV,NSTAV_MAX
@@ -251,6 +253,11 @@ C
       INTEGER,ALLOCATABLE  ::  IMAP_3DSD_LG(:,:)
       INTEGER,ALLOCATABLE  ::  IMAP_3DSV_LG(:,:)
       INTEGER,ALLOCATABLE  ::  IMAP_3DST_LG(:,:)
+C
+C--2021-04-21 Younghun: Precipitation section
+C
+      REAL(SZ), ALLOCATABLE :: Precipitation(:,:),ITPREC(:),PREC2(:)
+      INTEGER NTPREC
 
 C-------------------end of data declarations------------------------C
 

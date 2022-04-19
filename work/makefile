@@ -78,7 +78,8 @@ PREP_MSRC  =  presizes.F
 PGLO_MSRC  =  pre_global.F  
 POST_MSRC  =  post_global.F
 ADC_MSRC   =  sizes.F diff45_41.F global.F dg.F global_3dvs.F nodalattr.F fparser.F90 fparser2.F90 \
-              read_fort_dg.F90              
+              read_fort_dg.F90 \
+              KWEAttr.F
 HARM_MSRC  =  harm.F  
 WIND_MSRC  =  vortex.F wind.F  
 #Casey 121126: Add file for coupling to unstructured SWAN.
@@ -112,8 +113,13 @@ ADC_SRC    =  dgswem.F owiwind.F read_input.F cstart.F hstart.F radiation_edge_h
 	radiation_edge_hydro.F read_input.F rhs_dg_hydro.F quad_rules_general.F \
 	numerical_flux.F tidal_potential.F write_results.F \
 	slopelimiter.F prep_slopelim.F \
-	wetdry.F LDG_hydro.F met_forcing.F sta_basis.F modal2nodal.F write_output.F
+	wetdry.F LDG_hydro.F met_forcing.F sta_basis.F modal2nodal.F write_output.F \
+    calc_trislope.F pointInTri.F \
+    precipitation.F DG_runoff_timestep.F internal_edge_runoff.F rhs_dg_runoff.F \
+    land_edge_runoff.F orthogonal_basis_1d.F sta_basis1d.F radiation_edge_runoff.F
 #Casey 121126: Added modal2nodal.F and write_output.F to the previous line.
+#Younghun 191024: Added calc_trislope.F pointInTri.F 
+#Younghun 191107: Added precipitation.F DG_runoff_timestep.F internal_edge_runoff.F
 
 METIS1_OBJ:= $(patsubst %.F, $(O_DIR)%.o, $(METIS1_SRC) )
 METIS2_OBJ:= $(patsubst %.F, $(O_DIR)%.o, $(METIS2_SRC) )
@@ -347,6 +353,19 @@ $(O_DIR)sta_basis.o                 :  sta_basis.F  $(ADC_MOBJ)
 $(O_DIR)modal2nodal.o               :  modal2nodal.F  $(ADC_MOBJ)
 $(O_DIR)write_output.o              :  write_output.F
 #Casey 121126: Added the previous lines for modal2nodal.F and write_output.F.
+
+# Younghun 191107: Added
+$(O_DIR)calc_trislope.O         : calc_trislope.F $(ADC_MOBJ)
+$(O_DIR)pointInTri.O            : pointInTri.F $(ADC_MOBJ)
+$(O_DIR)precipitation.O         : precipitation.F $(ADC_MOBJ)
+$(O_DIR)DG_runoff_timestep.O    : DG_runoff_timestep.F $(ADC_MOBJ)
+$(O_DIR)internal_edge_runoff.O  : internal_edge_runoff.F $(ADC_MOBJ)
+$(O_DIR)land_edge_runoff.O      : land_edge_runoff.F $(ADC_MOBJ)
+$(O_DIR)rhs_dg_runoff.O         : rhs_dg_runoff.F $(ADC_MOBJ)
+$(O_DIR)orthogonal_basis_1d.O   : orthogonal_basis_1d.F $(ADC_MOBJ)
+$(O_DIR)sta_basis1d.O           : sta_basis1d.F $(ADC_MOBJ)
+$(O_DIR)KWEAttr.O            : KWEAttr.F $(ADC_MOBJ)
+$(O_DIR)radiation_edge_runoff.O : radiation_edge_runoff.F $(ADC_MOBJ)
 
 debug:
 	@echo $(ADC_MSRC) 

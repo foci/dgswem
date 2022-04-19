@@ -35,7 +35,9 @@ C.....Declare integer variables
       INTEGER NAGP(8),NCHECK(8), NEGP(8), NEDGES, NRK !42 hardwires for ph=7
       INTEGER NIEDS, NLEDS, NEEDS, NFEDS, NREDS, NEBEDS, NIBEDS
       INTEGER NIBSEG, NEBSEG
+      INTEGER NCEDS ! Younghun added
       INTEGER MNED, MNLED, MNSED, MNRAED, MNRIED
+      INTEGER NTPREC
       INTEGER, TARGET :: MODAL_IC
       INTEGER P_READ, P_READ2
       INTEGER, TARGET :: SLOPEFLAG
@@ -75,6 +77,9 @@ C.....Declare real variables
       REAL(SZ) ZE_EX, ZE_IN, QMag_IN, QMag_EX
       Real(SZ) subphi_IN,subphi_EX
       Real(SZ) iota_EX, iota_IN,iota2_EX, iota2_IN
+C.....Younghun added:
+      INTEGER, TARGET :: dgsake_flag, dgswem_flag
+      REAL(SZ), TARGET :: rainfall_rate                     
 
 C     sb...Wetting and drying
       INTEGER, ALLOCATABLE :: WDFLG(:) ! = 1 if wet, =0 if dry
@@ -114,6 +119,18 @@ C.....Declare allocatable integer arrays
       INTEGER, ALLOCATABLE :: BACKNODES(:,:)
       INTEGER, ALLOCATABLE :: MARK(:)
 
+C.....Younghun Kang 191107: Added below variables
+      INTEGER, ALLOCATABLE :: ET(:), flipNEDEL(:)
+      INTEGER, ALLOCATABLE :: NCEDN(:), NCEDNO(:,:), NCEDED(:,:),
+     &   NCEDIN(:,:), NCEDEX(:,:), NEDCEDN(:)            
+      REAL(SZ), ALLOCATABLE :: CEDSLOPE(:),HYDR_INFO(:,:)
+      REAL(SZ), ALLOCATABLE :: S0X(:), S0Y(:), S0mag(:)
+      REAL(SZ), ALLOCATABLE :: PREC(:,:), ITPREC(:), PREC1(:,:)
+      REAL(SZ), ALLOCATABLE :: PREC2(:), PREC3(:) ! Parametric rainfall
+      REAL(SZ), ALLOCATABLE :: KS(:), HF(:), MD(:), IntDp(:), TotInf(:)
+      REAL(SZ), ALLOCATABLE :: manningKWE1(:), manningKWE2(:)
+      INTEGER, ALLOCATABLE :: NNE1(:), NNV1(:)
+      REAL(SZ), ALLOCATABLE :: PHI_STAE1(:,:), PHI_STAV1(:,:)
 
 C.....Declare allocatable real arrays
       
@@ -184,6 +201,11 @@ C.....Declare allocatable real arrays
       REAL(SZ), ALLOCATABLE :: PHI(:), DPHIDZ1(:), DPHIDZ2(:)
       REAL(SZ), ALLOCATABLE :: PHI_STAE(:,:), PHI_STAV(:,:)
       Real(SZ), Allocatable :: bed_IN(:),bed_EX(:),bed_HAT(:)
+      
+C.....Younghun added
+      REAL(SZ), ALLOCATABLE :: M1D_INV(:,:)
+      REAL(SZ), ALLOCATABLE :: PHI1D(:,:,:), DXDPHI1D(:,:,:)
+      REAL(SZ), ALLOCATABLE :: PHI1D_PLUS(:,:), PHI1D_MINUS(:,:)
 
 C.....These (below) are defined in prep_slopelim.F
 
@@ -205,6 +227,11 @@ C.....These (below) are defined in prep_slopelim.F
       Real(SZ),Allocatable :: Nmatrix(:,:,:,:),NmatrixInv(:,:,:,:)
       Real(SZ),Allocatable :: deltx(:),delty(:),pmatrix(:,:,:)
 
+C.....Younghun: Declare arrays for runoff model
+      REAL(SZ), ALLOCATABLE :: HWD(:,:,:), RHS_HWD(:,:,:)
+      REAL(SZ) :: SOURCE_R
+      REAL(SZ), ALLOCATABLE :: AWD(:,:,:), RHS_AWD(:,:,:), QL(:,:)
+      
 C.....These (below) are defined in slopelimiter.F 
 
 
@@ -259,6 +286,14 @@ C.....Set edge array sizes
       ALLOCATE ( NCOUNT(MNED) )
       ALLOCATE ( COSNX(MNED), SINNX(MNED), XLEN(MNED) )
       ALLOCATE ( Q_HAT(MNED) )
+      ALLOCATE ( ET(MNED), flipNEDEL(MNED) )
+      ALLOCATE ( S0X(MNE), S0Y(MNE), S0mag(MNE) )
+      ! ALLOCATE ( TotInf(MNE) ) 
+      ! ALLOCATE ( PREC(MNP) )! Younghun added
+      ALLOCATE ( NCEDN(MNED), NCEDNO(3,MNED), NCEDED(2,MNED),
+     &    CEDSLOPE(MNED), HYDR_INFO(2,MNP), NEDCEDN(MNED))
+      ALLOCATE ( AWD(DOFH,MNED,NRK+2), RHS_AWD(DOFH,MNED,NRK))
+      ALLOCATE ( QL(NEGP(ph)+1,MNED))
       RETURN
       END SUBROUTINE
       
@@ -319,6 +354,10 @@ C--
       ALLOCATE ( PHI(DOFH), DPHIDZ1(DOFH), DPHIDZ2(DOFH) )
       ALLOCATE ( DOFS(MNE), PCOUNT(MNE) )
       ALLOCATE ( PDG(MNP) )
+      
+C.....Younghun 191107: Added
+      ALLOCATE ( HWD(DOFH,MNE,NRK+2), RHS_HWD(DOFH,MNE,NRK) )
+      
       RETURN
       END SUBROUTINE
 
@@ -360,6 +399,7 @@ C.....Set sizes for arrays for area integrals
       ALLOCATE ( SFAC_ELEM(NAGP(ph),MNE,ph) )
       ALLOCATE ( XFAC(DOFH,NAGP(ph),MNE,ph), YFAC(DOFH,NAGP(ph),MNE,ph))
       ALLOCATE ( SRFAC(DOFH,NAGP(ph),MNE,ph) )
+
       RETURN
       END SUBROUTINE
       
@@ -373,7 +413,16 @@ C.....Set sizes for arrays for edge integrals
       ALLOCATE ( EDGEQ(DOFH,NEGP(ph),3,ph) )
       RETURN
       END SUBROUTINE
-
+      
+C.....Younghun added
+      
+      SUBROUTINE ALLOC_1D_GAUSS()
+      ALLOCATE ( M1D_INV(ph+1,ph) )
+      ALLOCATE ( PHI1D(ph+1,NEGP(ph),ph), DXDPHI1D(ph+1,NEGP(ph),ph) )
+      ALLOCATE ( PHI1D_PLUS(ph+1,ph), PHI1D_MINUS(ph+1,ph) )
+      RETURN
+      END SUBROUTINE
+      
 C.....Set sizes for the arrays for the slope limiter
 C.....slopelim arrays
 
@@ -453,11 +502,13 @@ Csb...Set sizes for arrays for wetting and drying
 
       SUBROUTINE ALLOC_STAE(L)
       ALLOCATE ( PHI_STAE(DOFH,L) )
+      ALLOCATE ( NNE1(L), PHI_STAE1(ph+1,L))
       RETURN
       END SUBROUTINE
       
       SUBROUTINE ALLOC_STAV(L)
       ALLOCATE ( PHI_STAV(DOFH,L) )
+      ALLOCATE ( NNV1(L), PHI_STAV1(ph+1,L))
       RETURN
       END SUBROUTINE
       

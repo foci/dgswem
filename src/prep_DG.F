@@ -29,7 +29,9 @@ C.....Use appropriate modules
       USE GLOBAL
       USE DG
       USE NodalAttributes, ONLY : STARTDRY, FRIC, GeoidOffset,
-     $     LoadGeoidOffset,LoadManningsN,ManningsN
+     $     LoadGeoidOffset,LoadManningsN,ManningsN,
+     $     HydraulicCond, CapillaryP, MoistDecific, IntDepth, ! 2021-04-14 Younghun: Added for DGSAKE
+     $     ManningNEdge,PrecipitationNoOfVals, Precipitation
 #ifdef CMPI
       USE MESSENGER_ELEM
       USE MESSENGER
@@ -45,6 +47,7 @@ C.....Declare local variables
       REAL(SZ) XI, YI, ZE1, ZE2, ZE3, l2er,l2erh2,xcen,ycen,epsl,pi_n
       REAL(SZ) ZP(3), DHBX, ell_1,ell_2,ell_3,int_hb,int_ze,int_yd
       REAL(SZ), Allocatable :: BARY(:), VERT(:,:), BASIS(:), DBASIS(:,:)
+     & , DBASIS1(:)
       REAL(SZ), Allocatable :: PTS(:,:), WTS(:),PT(:)
       real(sz) checkarea,arint(2,2),rhsint(2),edgeint,dpsdx,psimid,
      $     determ,sfacdub2max,sfacdub3max,R
@@ -365,6 +368,14 @@ C.....Initialize the DG arrays
       RHS_iota2 = 0.D0
       WSX2(:) = 0.d0
       WSY2(:) = 0.d0
+      
+      ! Younghun added
+      HWD = 0.D0
+      RHS_HWD = 0.D0
+      
+      AWD = 0.D0
+      RHS_AWD = 0.D0
+      TotInf = 0.D0
 C.....If using modal initial conditions transform the bathymetry from
 C.....nodal coordinates to modal dof
 
@@ -869,6 +880,69 @@ C..............point, order basis functions hierarchically
       Deallocate ( BASIS, DBASIS )
       enddo
 C***********************************************************************
+
+C.....2019-11-07 Younghun added
+      CALL ALLOC_1D_GAUSS()
+      DO P = 1,ph
+         SZ2 = P+1
+         ALLOCATE (BASIS(SZ2),DBASIS1(SZ2))
+         M = 1
+         DO J = 0, P
+            M1D_INV(M,P) = (2.D0*J + 1.D0)/(2.D0*J + 2.D0)
+            M = M + 1
+         ENDDO
+         
+         DO Q = 1, NEGP(P)
+            PT(1) = XEGP(Q,P)
+            CALL orthogonal_basis_1d(PT(1),P,BASIS,DBASIS1)
+            PHI1D(:,Q,P) = BASIS
+            DXDPHI1D(:,Q,P) = DBASIS1
+         ENDDO
+         
+         PT(1) = -1.D0
+         CALL orthogonal_basis_1d(PT(1),P,BASIS,DBASIS1)
+         PHI1D_Plus(:,P) = BASIS
+
+         PT(1) = 1.D0
+         CALL orthogonal_basis_1d(PT(1),P,BASIS,DBASIS1)
+         PHI1D_Minus(:,P) = BASIS
+
+         Deallocate (BASIS,DBASIS1)
+      ENDDO
+      
+C.....2021-04-14 Younghun: Added prep for solving KWE
+      IF (NCEDS.GT.0) THEN
+         ALLOCATE (ManningKWE1(NCEDS))
+         DO J = 1, NCEDS
+             N1 = NCEDNO(1,J)
+             N2 = NCEDNO(2,J)
+             ManningKWE1(J) = 1.d0/2.d0*
+     &                           (ManningNEdge(N1) + ManningNEdge(N2))
+         ENDDO
+      ENDIF
+      
+      ALLOCATE (KS(MNE), HF(MNE), MD(MNE), IntDp(MNE), TotInf(MNE))
+      ALLOCATE (ManningKWE2(MNE))
+      
+      IF (DGSAKE.EQ.1) THEN
+      DO J = 1,NE
+         N1 = NM(J,1)
+         N2 = NM(J,2)
+         N3 = NM(J,3)
+         KS(J)     = 1.d0/3.d0 *(HydraulicCond(N1) 
+     &                       + HydraulicCond(N2) + HydraulicCond(N3))
+         HF(J)     = 1.d0/3.d0 *(CapillaryP(N1)
+     &                       + CapillaryP(N2)    + CapillaryP(N3))
+         MD(J)     = 1.d0/3.d0 *(MoistDecific(N1)
+     &                       + MoistDecific(N2)  + MoistDecific(N3))
+         IntDp(J)  = 1.d0/3.d0 *(IntDepth(N1)
+     &                       + IntDepth(N2)      + IntDepth(N3))
+         TotInf(J) = 1.d0/3.d0 *(ManningNEdge(N1)
+     &                       + ManningNEdge(N2)  + ManningNEdge(N3))
+         ManningKWE2(J) =  1.D0/3.D0*(ManningsN(N1)
+     &                       + ManningsN(N2) + ManningsN(N3))
+      ENDDO
+      ENDIF
 
 C.....Do the L2-projection of the initial conditions
 
@@ -1502,6 +1576,9 @@ C.....Compute basis functions at stations
          DO I = 1,NSTAE
             CALL STA_BASIS( ELEM, DIM, XEL(I), YEL(I),  NNE(I),
      &         PHI_STAE(:,I) )
+            IF (NCEDS.GT.0) THEN
+               CALL STA_BASIS1D(XEL(I), YEL(I), NNE1(I), PHI_STAE1(:,I))
+            ENDIF
          ENDDO
       ENDIF
       
@@ -1510,6 +1587,9 @@ C.....Compute basis functions at stations
          DO I = 1,NSTAV
             CALL STA_BASIS( ELEM, DIM, XEV(I), YEV(I),  NNV(I),
      &         PHI_STAV(:,I) )
+            IF (NCEDS.GT.0) THEN
+               CALL STA_BASIS1D(XEV(I), YEV(I), NNV1(I), PHI_STAV1(:,I))
+            ENDIF
          ENDDO
       ENDIF
 

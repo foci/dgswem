@@ -13,7 +13,7 @@ C***********************************************************************
 C.....Use appropriate modules
       
       USE SIZES, ONLY : SZ,layers
-      USE GLOBAL, ONLY : SEDFLAG
+      USE GLOBAL, ONLY : SEDFLAG, dgsake
 
 #ifdef CMPI
       USE MESSENGER_ELEM
@@ -27,7 +27,11 @@ C.....Declare local variables
       
 C.....Hydrodynamics
 
-      CALL DG_HYDRO_TIMESTEP(IT)
+      IF (dgsake .EQ. 0) CALL DG_HYDRO_TIMESTEP(IT)
+
+C.....Runoff model
+
+      IF (dgsake .EQ. 1) CALL DG_RUNOFF_TIMESTEP(IT)
 
 C.....Write out results
 

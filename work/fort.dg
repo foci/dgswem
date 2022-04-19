@@ -52,5 +52,9 @@ s0 = 0.0
 uniform_dif = 2.5e-6
 tune_by_hand = 0
 
+! dgsake options
+dgsake = 0   ! if dgsake = 1, dg-swem routine is turned off at this moment
+rainfall = 3 ! 0 = no rainfall, 1 = simple rainfall (no infiltration), 2 = rainfall with Green-Ampt model
+
 
 
