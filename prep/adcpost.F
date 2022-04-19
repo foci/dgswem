@@ -239,7 +239,26 @@ C
           print *, "Post-Processing hot start files"
           CALL POST67_68()
           ENDIF
-
+          
+      ! 2021-04-24 Younghun:
+      ! IF (DGSAKE.EQ.1) THEN ! fort.dg is not read..
+         IF (NOUTE.NE.0) THEN
+           print *, "Post-Processing Unit 91"
+           CALL POST91()
+         ENDIF
+         IF (NOUTV.NE.0) THEN
+           print *, "Post-Processing Unit 92"
+           CALL POST92()
+         ENDIF
+         IF (NOUTE.NE.0) THEN
+           print *, "Post-Processing Unit 95"
+           CALL POST95()
+         ENDIF
+         IF (NOUTV.NE.0) THEN
+           print *, "Post-Processing Unit 96"
+           CALL POST96()
+         ENDIF
+      ! ENDIF
 C
         GO TO 99
 C

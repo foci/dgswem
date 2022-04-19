@@ -61,6 +61,29 @@ C
       INTEGER, PRIVATE, ALLOCATABLE :: INDEX(:)
       REAL(SZ), PRIVATE,ALLOCATABLE :: SENDBUF(:,:), RECVBUF(:,:)
 C--
+C.....2021-05-13 Younghun: Declare variables for 1D KWE... should it be private?      
+      INTEGER, ALLOCATABLE :: IRECVBUF_CH(:),ISENDBUF_CH(:)
+      INTEGER :: NUM_PE_RECV_CH,NUM_PE_SEND_CH,NUM_PE_COMM_CH
+      INTEGER,ALLOCATABLE :: IPE_RECV_CH(:),IPE_SEND_CH(:)
+      INTEGER,ALLOCATABLE :: NUM_CH_RECV(:),NUM_CH_SEND(:)
+      INTEGER,ALLOCATABLE :: IRECVLOC_CH(:,:),ISENDLOC_CH(:,:)
+      
+      INTEGER, PRIVATE, ALLOCATABLE :: REQ_R1_CH(:), REQ_R2_CH(:)
+      INTEGER, PRIVATE, ALLOCATABLE :: STAT_R1_CH(:,:), STAT_R2_CH(:,:)
+      INTEGER, PRIVATE, ALLOCATABLE :: INDEX_CH(:)
+      REAL(SZ), PRIVATE,ALLOCATABLE :: SENDBUF_CH(:,:), RECVBUF_CH(:,:)
+C      
+C.....2021-05-27 Younghun: Declare variables for passing lateral inflow... should it be private?      
+      INTEGER, ALLOCATABLE :: IRECVBUF_LI(:),ISENDBUF_LI(:)
+      INTEGER :: NUM_PE_RECV_LI,NUM_PE_SEND_LI,NUM_PE_COMM_LI
+      INTEGER,ALLOCATABLE :: IPE_RECV_LI(:),IPE_SEND_LI(:)
+      INTEGER,ALLOCATABLE :: NUM_LI_RECV(:),NUM_LI_SEND(:)
+      INTEGER,ALLOCATABLE :: IRECVLOC_LI(:,:),ISENDLOC_LI(:,:)
+      
+      INTEGER, PRIVATE, ALLOCATABLE :: REQ_R1_LI(:), REQ_R2_LI(:)
+      INTEGER, PRIVATE, ALLOCATABLE :: STAT_R1_LI(:,:), STAT_R2_LI(:,:)
+      INTEGER, PRIVATE, ALLOCATABLE :: INDEX_LI(:)
+      REAL(SZ), PRIVATE,ALLOCATABLE :: SENDBUF_LI(:,:), RECVBUF_LI(:,:)
 C
 
 C---------------------end of data declarations--------------------------------C
@@ -1515,5 +1538,514 @@ c$$$C
 
       END SUBROUTINE para_min
 
+C.....2021-05-12 Younghun:
+      SUBROUTINE MSG_TABLE_CHANNEL()
+      USE DG
+      IMPLICIT NONE
+#ifndef HAVE_MPI_MOD
+      include 'mpif.h'
+#endif
+      INTEGER :: IDPROC,NLOCAL,I,J,JJ,NEIGH,K
+
+      INTEGER,ALLOCATABLE :: IRECV_CH(:,:,:),ISEND_CH(:,:,:),ISEG_SEND(:,:)
+      INTEGER,ALLOCATABLE :: IRECV_LI(:,:,:),ISEND_LI(:,:,:)
+      
+      ! INTEGER,ALLOCATABLE :: IPROC_RECV(:,:),IPROC_SEND(:,:,:)
+      
+      integer :: irecv,ged,isend
+      ! allocate (IRECV_CHANNEL(nedges),ISEND_CHANNEL(nedges))
+C
+      OPEN(182,FILE=DIRNAME(1:LNAME)//'/'//'DG.19')
+      READ(182,3010) NUM_PE_RECV_CH,NUM_PE_SEND_CH
+      
+      NUM_PE_COMM_CH = NUM_PE_RECV_CH + NUM_PE_SEND_CH
+      ALLOCATE (INDEX_CH(NUM_PE_COMM_CH))
+      
+      ALLOCATE (IPE_RECV_CH(NUM_PE_RECV_CH),IPE_SEND_CH(NUM_PE_SEND_CH))
+      ALLOCATE (NUM_CH_RECV(NUM_PE_RECV_CH),NUM_CH_SEND(NUM_PE_SEND_CH))
+      ALLOCATE (IRECVLOC_CH(NEDGES,NUM_PE_RECV_CH),ISENDLOC_CH(NEDGES,NUM_PE_SEND_CH))
+
+      ALLOCATE (IRECV_CH(NUM_PE_RECV_CH,NBOU,2))
+      ALLOCATE (ISEND_CH(NUM_PE_SEND_CH,NBOU,2),ISEG_SEND(NUM_PE_SEND_CH,NBOU))
+
+      DO K = 1,NUM_PE_RECV_CH
+         READ(182,3010) IPE_RECV_CH(K),NUM_CH_RECV(K)
+         READ(182,1130) (IRECV_CH(K,I,1),IRECV_CH(K,I,2),I=1,NUM_CH_RECV(K))
+      ENDDO
+      
+      DO K = 1,NUM_PE_SEND_CH
+         READ(182,3010) IPE_SEND_CH(K),NUM_CH_SEND(K)
+         READ(182,1130) (ISEND_CH(K,I,1),ISEND_CH(K,I,2),I=1,NUM_CH_SEND(K))
+      ENDDO
+      
+      DO K = 1,NUM_PE_RECV_CH
+         DO I = 1,NUM_CH_RECV(K)
+            DO J = 1, NCEDS
+               IF ((NCEDNO(1,J).EQ.IRECV_CH(K,I,1) .AND. NCEDNO(2,J).EQ.IRECV_CH(K,I,2))
+     &           .OR. (NCEDNO(2,J).EQ.IRECV_CH(K,I,1) .AND. NCEDNO(1,J).EQ.IRECV_CH(K,I,2))) THEN
+                  ged = ncedn(J)
+                  IRECVLOC_CH(I,K) = ged
+                  EXIT
+               ENDIF
+               IF (J.EQ.NCEDS) THEN
+                  print*,myproc,'recv ch null'
+                  stop
+               ENDIF
+            ENDDO
+         ENDDO
+      ENDDO
+      
+      DO K = 1,NUM_PE_SEND_CH
+         DO I = 1,NUM_CH_SEND(K)
+            DO J = 1, NCEDS
+               IF ((NCEDNO(1,J).EQ.ISEND_CH(K,I,1) .AND. NCEDNO(2,J).EQ.ISEND_CH(K,I,2))
+     &           .OR. (NCEDNO(2,J).EQ.ISEND_CH(K,I,1) .AND. NCEDNO(1,J).EQ.ISEND_CH(K,I,2))) THEN
+                  ged = ncedn(J)
+                  ISENDLOC_CH(I,K) = ged
+                  EXIT
+               ENDIF
+               IF (J.EQ.NCEDS) THEN
+                  print*,myproc,'send ch null'
+                  stop
+               ENDIF
+            ENDDO
+         ENDDO
+      ENDDO
+      
+      ! Do same thing for lateral inflow
+      READ(182,3010) NUM_PE_RECV_LI,NUM_PE_SEND_LI
+      
+      NUM_PE_COMM_LI = NUM_PE_RECV_LI + NUM_PE_SEND_LI
+      ALLOCATE (INDEX_LI(NUM_PE_COMM_LI))
+      
+      ALLOCATE (IPE_RECV_LI(NUM_PE_RECV_LI),IPE_SEND_LI(NUM_PE_SEND_LI))
+      ALLOCATE (NUM_LI_RECV(NUM_PE_RECV_LI),NUM_LI_SEND(NUM_PE_SEND_LI))
+      ALLOCATE (IRECVLOC_LI(NEDGES,NUM_PE_RECV_LI),ISENDLOC_LI(NEDGES,NUM_PE_SEND_LI))
+
+      ALLOCATE (IRECV_LI(NUM_PE_RECV_LI,NBOU,2),ISEND_LI(NUM_PE_SEND_LI,NBOU,2))
+
+      DO K = 1,NUM_PE_RECV_LI
+         READ(182,3010) IPE_RECV_LI(K),NUM_LI_RECV(K)
+         READ(182,1130) (IRECV_LI(K,I,1),IRECV_LI(K,I,2),I=1,NUM_LI_RECV(K))
+      ENDDO
+      
+      DO K = 1,NUM_PE_SEND_LI
+         READ(182,3010) IPE_SEND_LI(K),NUM_LI_SEND(K)
+         READ(182,1130) (ISEND_LI(K,I,1),ISEND_LI(K,I,2),I=1,NUM_LI_SEND(K))
+      ENDDO
+      
+      DO K = 1,NUM_PE_RECV_LI
+         DO I = 1,NUM_LI_RECV(K)
+            DO J = 1, NCEDS
+               IF ((NCEDNO(1,J).EQ.IRECV_LI(K,I,1) .AND. NCEDNO(2,J).EQ.IRECV_LI(K,I,2))
+     &           .OR. (NCEDNO(2,J).EQ.IRECV_LI(K,I,1) .AND. NCEDNO(1,J).EQ.IRECV_LI(K,I,2))) THEN
+                  ged = ncedn(J)
+                  IRECVLOC_LI(I,K) = J ! array QL in rhs_dg_runoff.F uses local channel numbering
+                  EXIT
+               ENDIF
+               IF (J.EQ.NCEDS) THEN
+                  print*,myproc,'RECV LI null'
+                  stop
+               ENDIF
+            ENDDO
+         ENDDO
+      ENDDO
+      
+      DO K = 1,NUM_PE_SEND_LI
+         DO I = 1,NUM_LI_SEND(K)
+            DO J = 1, NCEDS
+               IF ((NCEDNO(1,J).EQ.ISEND_LI(K,I,1) .AND. NCEDNO(2,J).EQ.ISEND_LI(K,I,2))
+     &           .OR. (NCEDNO(2,J).EQ.ISEND_LI(K,I,1) .AND. NCEDNO(1,J).EQ.ISEND_LI(K,I,2))) THEN
+                  ged = ncedn(J)
+                  ISENDLOC_LI(I,K) = J ! array QL in rhs_dg_runoff.F uses local channel numbering
+                  EXIT
+               ENDIF
+               IF (J.EQ.NCEDS) THEN
+                  print*,myproc,'send LI null'
+                  stop
+               ENDIF
+            ENDDO
+         ENDDO
+      ENDDO
+      
+      ! DO K = 1,NUM_PE_RECV_CH
+         ! WRITE(183,1130) (IRECVLOC_CH(I,K),I=1,NUM_CH_RECV(K))
+      ! ENDDO
+      ! DO K = 1,NUM_PE_SEND_CH
+         ! WRITE(184,1130) (ISENDLOC_CH(I,K),I=1,NUM_CH_SEND(K))
+      ! ENDDO
+      
+      ! DO K = 1,NUM_PE_SEND_CH
+         ! DO I = 1,NUM_CH_SEND(K)
+            ! iSEND = 0
+            ! DO J = 1,ISEND_CH(K,I)
+               ! if (segtype(J).eq.6) iSEND = iSEND + nvell(J)-1
+            ! END
+            ! isend = isend + ISEG_SEND(K,I)
+            ! ged = ncedn(iSEND)
+            ! ISENDLOC_CH(I,K) = ged
+         ! ENDDO
+      ! ENDDO      
+      
+      
+      
+      ! DO J = 1,NBOU
+         ! DO K = 1,NUM_PE_RECV_CH
+            ! DO I = 1, NUM_CH_RECV(K)
+               ! IF (IRECV_CH(K,I).EQ.J) THEN
+                  ! IPROC_RECV(J,1) = IPROC_RECV(J,1) + 1
+                  ! JJ = IPROC_RECV(J,1)+1
+                  ! IPROC_RECV(J,JJ) = IPE_RECV_CH(K)
+               ! ENDIF
+            ! ENDDO
+         ! ENDDO
+      ! ENDDO
+      
+      ! DO J = 1,NBOU
+         ! DO K = 1,NUM_PE_SEND_CH
+            ! DO I = 1, NUM_CH_SEND(K)
+               ! IF (ISEND_CH(K,I).EQ.J) THEN
+                  ! IPROC_SEND(J,1,1) = IPROC_SEND(J,1,1) + 1
+                  ! JJ = IPROC_SEND(J,1,1)+1
+                  ! IPROC_SEND(J,JJ,1) = IPE_SEND_CH(K)
+                  ! IPROC_SEND(J,JJ,2) = ISEG_SEND(K,I)
+               ! ENDIF
+            ! ENDDO
+         ! ENDDO
+      ! ENDDO
+      
+      
+      ! OPEN(183,FILE=DIRNAME(1:LNAME)//'/'//'fort.183')
+      ! OPEN(184,FILE=DIRNAME(1:LNAME)//'/'//'fort.184')
+      ! DO J = 1,NBOU
+         ! ! WRITE(183,3010) IPE_RECV_CH(K),NUM_CH_RECV(K)
+         ! WRITE(183,1130) IPROC_RECV(J,1),(IPROC_RECV(J,I+1),I=1,NUM_PE_RECV_CH)         
+         ! ! WRITE(183,3010) IPE_RECV_CH(K),NUM_CH_RECV(K)
+         ! WRITE(184,1130) IPROC_SEND(J,1,1),(IPROC_SEND(J,I+1,1),IPROC_SEND(J,I+1,2),I=1,NUM_PE_SEND_CH)
+      ! ENDDO
+      
+      ! irecv = 1
+      ! OPEN(185,FILE=DIRNAME(1:LNAME)//'/'//'fort.185')
+      ! DO K = 1,NBOU
+         ! if (iproc_recv(K,1).ne.0) then
+            ! ! WRITE(185,*) irecv
+            ! ged = ncedn(irecv)
+            ! IRECV_CHANNEL(ged) = iproc_recv(K,2)
+            ! ! WRITE(185,*) ged,IRECV_CHANNEL(ged)
+            ! WRITE(185,*)IRECV_CHANNEL(ged),NCEDNO(1,irecv),NCEDNO(2,irecv)
+         ! endif
+         ! if (segtype(k).eq.6) irecv = irecv + nvell(K)-1
+      ! enddo
+
+      ! isend = 0
+      ! OPEN(186,FILE=DIRNAME(1:LNAME)//'/'//'fort.186')
+      ! DO K = 1,NBOU
+         ! if (iproc_send(K,1,1).ne.0) then
+            ! DO I = 1,iproc_send(K,1,1)
+               ! J = isend + IPROC_SEND(K,I+1,2)
+               ! ged = ncedn(J)
+               ! ISEND_CHANNEL(ged) = iproc_send(K,I+1,1)
+               ! ! WRITE(186,*) J
+               ! ! WRITE(186,*) ged,ISEND_CHANNEL(ged)
+               ! WRITE(186,*)ISEND_CHANNEL(ged),NCEDNO(1,J),NCEDNO(2,J)
+            ! ENDDO
+         ! endif
+         ! if (segtype(k).eq.6) isend = isend + nvell(K)-1
+      ! enddo
+      
+1130  FORMAT(8X,9I8)
+3010  FORMAT(8X,2I8)
+
+      END SUBROUTINE MSG_TABLE_CHANNEL
+      
+C.....2021-05-13 Younghun
+      SUBROUTINE MESSAGE_START_CHANNEL()
+      IMPLICIT NONE
+#ifndef HAVE_MPI_MOD
+      include 'mpif.h'
+#endif
+      INTEGER :: J,NCOMM_CH_S,NCOMM_CH_R
+      INTEGER :: NCOMM_LI_S,NCOMM_LI_R
+C
+      NCOMM_CH_R = 0
+      NCOMM_CH_S = 0
+      DO J=1,NUM_PE_RECV_CH
+        NCOMM_CH_R = NCOMM_CH_R + NUM_CH_RECV(J)
+      ENDDO
+      DO J=1,NUM_PE_SEND_CH
+        NCOMM_CH_S = NCOMM_CH_S + NUM_CH_SEND(J)
+      ENDDO
+C
+      ALLOCATE ( SENDBUF_CH(NCOMM_CH_S*DOFH*4,NUM_PE_SEND_CH) )
+      ALLOCATE ( RECVBUF_CH(NCOMM_CH_R*DOFH*4,NUM_PE_RECV_CH) )
+C
+      ALLOCATE ( REQ_R1_CH(NUM_PE_COMM_CH),REQ_R2_CH(NUM_PE_COMM_CH))
+C
+      ALLOCATE ( STAT_R1_CH(MPI_STATUS_SIZE,NUM_PE_COMM_CH),       
+     &           STAT_R2_CH(MPI_STATUS_SIZE,NUM_PE_COMM_CH))
+C
+            !  Setup persistent structures for real arrays
+C
+      DO J=1,NUM_PE_RECV_CH
+         ! print*,'recv',NUM_CH_RECV(J),IPE_RECV_CH(J)
+         CALL MPI_RECV_INIT ( RECVBUF_CH(1,J), DOFH*NUM_CH_RECV(J), 
+     &     REALTYPE,IPE_RECV_CH(J), TAG, MPI_COMM_WORLD,
+     &     REQ_R1_CH(J),IERR)
+      ENDDO
+      DO J=1,NUM_PE_SEND_CH
+         ! print*,'send',NUM_CH_SEND(J),IPE_SEND_CH(J)
+         CALL MPI_SEND_INIT ( SENDBUF_CH(1,J), DOFH*NUM_CH_SEND(J), 
+     &     REALTYPE,IPE_SEND_CH(J), TAG, MPI_COMM_WORLD,
+     &     REQ_R1_CH(J+NUM_PE_RECV_CH),IERR)
+      ENDDO
+C      
+C.....Lateral inflow
+      NCOMM_LI_R = 0
+      NCOMM_LI_S = 0
+      DO J=1,NUM_PE_RECV_LI
+        NCOMM_LI_R = NCOMM_LI_R + NUM_LI_RECV(J)
+      ENDDO
+      DO J=1,NUM_PE_SEND_LI
+        NCOMM_LI_S = NCOMM_LI_S + NUM_LI_SEND(J)
+      ENDDO
+C
+      ALLOCATE ( SENDBUF_LI(NCOMM_LI_S*DOFH*4,NUM_PE_SEND_LI) )
+      ALLOCATE ( RECVBUF_LI(NCOMM_LI_R*DOFH*4,NUM_PE_RECV_LI) )
+C
+      ALLOCATE ( REQ_R1_LI(NUM_PE_COMM_LI),REQ_R2_LI(NUM_PE_COMM_LI))
+C
+      ALLOCATE ( STAT_R1_LI(MPI_STATUS_SIZE,NUM_PE_COMM_LI),       
+     &           STAT_R2_LI(MPI_STATUS_SIZE,NUM_PE_COMM_LI))
+C
+            !  Setup persistent structures for real arrays
+C
+      DO J=1,NUM_PE_RECV_LI
+         ! print*,'recv',NUM_LI_RECV(J),IPE_RECV_LI(J)
+         CALL MPI_RECV_INIT ( RECVBUF_LI(1,J), DOFH*NUM_LI_RECV(J), 
+     &     REALTYPE,IPE_RECV_LI(J), TAG, MPI_COMM_WORLD,
+     &     REQ_R1_LI(J),IERR)
+      ENDDO
+      DO J=1,NUM_PE_SEND_LI
+         ! print*,'send',NUM_LI_SEND(J),IPE_SEND_LI(J)
+         CALL MPI_SEND_INIT ( SENDBUF_LI(1,J), DOFH*NUM_LI_SEND(J), 
+     &     REALTYPE,IPE_SEND_LI(J), TAG, MPI_COMM_WORLD,
+     &     REQ_R1_LI(J+NUM_PE_RECV_LI),IERR)
+      ENDDO
+
+      RETURN
+      END SUBROUTINE
+      
+      SUBROUTINE UPDATER_CHANNEL( VEC1, VEC2, IRK, NMSG )
+      IMPLICIT NONE
+#ifndef HAVE_MPI_MOD
+      include 'mpif.h'
+#endif
+C
+      INTEGER,  INTENT(IN) ::  IRK, NMSG
+      REAL(SZ), INTENT(INOUT) ::  VEC1(:,:,:),VEC2(:,:,:)
+      INTEGER :: N,I,J,JJ,K,NCOUNT,NFINI,TOT
+C
+                             !..Pack 1, 2, or 3 Messages
+      DO J=1,NUM_PE_SEND_CH
+         NCOUNT = 0
+         DO I=1,NUM_CH_SEND(J)
+            DO K=1,DOFH
+              NCOUNT = NCOUNT+1
+              SENDBUF_CH(NCOUNT,J)=VEC1(K,ISENDLOC_CH(I,J),IRK)
+            ENDDO
+         ENDDO
+         IF (NMSG.GT.1) THEN
+           DO I=1,NUM_CH_SEND(J)
+             DO K=1,DOFH
+               NCOUNT = NCOUNT+1
+               SENDBUF_CH(NCOUNT,J)=VEC2(K,ISENDLOC_CH(I,J),IRK)
+             ENDDO
+           ENDDO
+         ENDIF
+
+         ! Start sending a message
+         IF (NMSG.EQ.1) THEN
+            CALL MPI_START ( REQ_R1_CH(J+NUM_PE_RECV_CH), IERR )
+         ELSE
+            CALL MPI_START ( REQ_R2_CH(J+NUM_PE_RECV_CH), IERR )
+         ENDIF
+      ENDDO
+C                    
+              ! Send/receive messages to/from all neighbors
+C
+      IF (NMSG.EQ.1) THEN
+        CALL MPI_STARTALL ( NUM_PE_COMM_CH-NUM_PE_SEND_CH, REQ_R1_CH, IERR )
+      ELSE
+        CALL MPI_STARTALL ( NUM_PE_COMM_CH-NUM_PE_SEND_CH, REQ_R2_CH, IERR )
+      ENDIF
+C
+              !..Unpack Received messages as they arrive     
+C
+      IF (NMSG.EQ.1) THEN   
+        TOT = 0
+        DO WHILE (TOT.LT.NUM_PE_COMM_CH)
+           DO N=1, NUM_PE_COMM_CH
+              INDEX_CH(N) = 0
+           ENDDO
+           CALL MPI_WAITSOME( NUM_PE_COMM_CH,REQ_R1_CH,NFINI,INDEX_CH,STAT_R1_CH,IERR )
+           TOT = TOT + NFINI
+           DO N=1, NFINI
+              IF (INDEX_CH(N).GT.0.AND.INDEX_CH(N).LE.NUM_PE_COMM_CH)  THEN
+                IF (INDEX_CH(N).LE.NUM_PE_RECV_CH) THEN
+                  J = INDEX_CH(N)
+                  NCOUNT = 0
+                  DO I=1,NUM_CH_RECV(J)
+                    DO K=1,DOFH
+                      NCOUNT = NCOUNT+1
+                      VEC1(K,IRECVLOC_CH(I,J),IRK) = RECVBUF_CH(NCOUNT,J)
+                    ENDDO
+                  ENDDO
+                ENDIF
+              ENDIF
+           ENDDO
+        ENDDO
+        GOTO 999
+      ELSEIF (NMSG.EQ.2) THEN
+        TOT = 0
+        DO WHILE (TOT.LT.NUM_PE_COMM_CH)
+           DO N=1, NUM_PE_COMM_CH
+              INDEX_CH(N) = 0
+           ENDDO
+           CALL MPI_WAITSOME( NUM_PE_COMM_CH,REQ_R2_CH,NFINI,INDEX_CH,STAT_R2_CH,IERR )
+           TOT = TOT + NFINI
+           DO N=1, NFINI
+              IF (INDEX_CH(N).GT.0.AND.INDEX_CH(N).LE.NUM_PE_COMM_CH)  THEN
+                IF (INDEX_CH(N).LE.NUM_PE_RECV_CH) THEN
+                  J = INDEX_CH(N)
+                  NCOUNT = 0
+                  DO I=1,NUM_CH_RECV(J)
+                    DO K=1,DOFH
+                      NCOUNT = NCOUNT+1
+                      VEC1(K,IRECVLOC_CH(I,J),IRK) = RECVBUF_CH(NCOUNT,J)
+                    ENDDO
+                  ENDDO
+                  DO I=1,NUM_CH_RECV(J)
+                    DO K=1,DOFH
+                      NCOUNT = NCOUNT+1
+                      VEC2(K,IRECVLOC_CH(I,J),IRK) = RECVBUF_CH(NCOUNT,J)
+                    ENDDO
+                  ENDDO
+                ENDIF
+              ENDIF
+           ENDDO
+        ENDDO
+        GOTO 999
+      ENDIF
+C 
+ 999  continue
+      RETURN
+      END SUBROUTINE
+      
+      SUBROUTINE UPDATER_LATERALINFLOW( VEC1, VEC2, IRK, NMSG )
+      IMPLICIT NONE
+#ifndef HAVE_MPI_MOD
+      include 'mpif.h'
+#endif
+C
+      INTEGER,  INTENT(IN) ::  IRK, NMSG
+      REAL(SZ), INTENT(INOUT) ::  VEC1(:,:),VEC2(:,:,:)
+      INTEGER :: N,I,J,JJ,K,NCOUNT,NFINI,TOT
+C
+                             !..Pack 1, 2, or 3 Messages
+      DO J=1,NUM_PE_SEND_LI
+         NCOUNT = 0
+         DO I=1,NUM_LI_SEND(J)
+            DO K=1,DOFH
+              NCOUNT = NCOUNT+1
+              SENDBUF_LI(NCOUNT,J)=VEC1(K,ISENDLOC_LI(I,J))
+            ENDDO
+         ENDDO
+         IF (NMSG.GT.1) THEN
+           DO I=1,NUM_LI_SEND(J)
+             DO K=1,DOFH
+               NCOUNT = NCOUNT+1
+               SENDBUF_LI(NCOUNT,J)=VEC2(K,ISENDLOC_LI(I,J),IRK)
+             ENDDO
+           ENDDO
+         ENDIF
+
+         ! Start sending a message
+         IF (NMSG.EQ.1) THEN
+            CALL MPI_START ( REQ_R1_LI(J+NUM_PE_RECV_LI), IERR )
+         ELSE
+            CALL MPI_START ( REQ_R2_LI(J+NUM_PE_RECV_LI), IERR )
+         ENDIF
+      ENDDO
+C                    
+              ! Send/receive messages to/from all neighbors
+C
+      IF (NMSG.EQ.1) THEN
+        CALL MPI_STARTALL ( NUM_PE_COMM_LI-NUM_PE_SEND_LI, REQ_R1_LI, IERR )
+      ELSE
+        CALL MPI_STARTALL ( NUM_PE_COMM_LI-NUM_PE_SEND_LI, REQ_R2_LI, IERR )
+      ENDIF
+C
+              !..Unpack Received messages as they arrive     
+C
+      IF (NMSG.EQ.1) THEN   
+        TOT = 0
+        DO WHILE (TOT.LT.NUM_PE_COMM_LI)
+           DO N=1, NUM_PE_COMM_LI
+              INDEX_LI(N) = 0
+           ENDDO
+           CALL MPI_WAITSOME( NUM_PE_COMM_LI,REQ_R1_LI,NFINI,INDEX_LI,STAT_R1_LI,IERR )
+           TOT = TOT + NFINI
+           DO N=1, NFINI
+              IF (INDEX_LI(N).GT.0.AND.INDEX_LI(N).LE.NUM_PE_COMM_LI)  THEN
+                IF (INDEX_LI(N).LE.NUM_PE_RECV_LI) THEN
+                  J = INDEX_LI(N)
+                  NCOUNT = 0
+                  DO I=1,NUM_LI_RECV(J)
+                    DO K=1,DOFH
+                      NCOUNT = NCOUNT+1
+                      VEC1(K,IRECVLOC_LI(I,J)) = RECVBUF_LI(NCOUNT,J)
+                    ENDDO
+                  ENDDO
+                ENDIF
+              ENDIF
+           ENDDO
+        ENDDO
+        GOTO 999
+      ELSEIF (NMSG.EQ.2) THEN
+        TOT = 0
+        DO WHILE (TOT.LT.NUM_PE_COMM_LI)
+           DO N=1, NUM_PE_COMM_LI
+              INDEX_LI(N) = 0
+           ENDDO
+           CALL MPI_WAITSOME( NUM_PE_COMM_LI,REQ_R2_LI,NFINI,INDEX_LI,STAT_R2_LI,IERR )
+           TOT = TOT + NFINI
+           DO N=1, NFINI
+              IF (INDEX_LI(N).GT.0.AND.INDEX_LI(N).LE.NUM_PE_COMM_LI)  THEN
+                IF (INDEX_LI(N).LE.NUM_PE_RECV_LI) THEN
+                  J = INDEX_LI(N)
+                  NCOUNT = 0
+                  DO I=1,NUM_LI_RECV(J)
+                    DO K=1,DOFH
+                      NCOUNT = NCOUNT+1
+                      VEC1(K,IRECVLOC_LI(I,J)) = RECVBUF_LI(NCOUNT,J)
+                    ENDDO
+                  ENDDO
+                  DO I=1,NUM_LI_RECV(J)
+                    DO K=1,DOFH
+                      NCOUNT = NCOUNT+1
+                      VEC2(K,IRECVLOC_LI(I,J),IRK) = RECVBUF_LI(NCOUNT,J)
+                    ENDDO
+                  ENDDO
+                ENDIF
+              ENDIF
+           ENDDO
+        ENDDO
+        GOTO 999
+      ENDIF
+C 
+ 999  continue
+      RETURN
+      END SUBROUTINE
+      
       END MODULE MESSENGER_ELEM
        

@@ -258,6 +258,12 @@ C--2021-04-21 Younghun: Precipitation section
 C
       REAL(SZ), ALLOCATABLE :: Precipitation(:,:),ITPREC(:),PREC2(:)
       INTEGER NTPREC
+      
+C....2021-05-10 Younghun: Channel decomposition
+      INTEGER,ALLOCATABLE :: RECV_CH(:,:,:),SEND_CH(:,:,:)
+      INTEGER,ALLOCATABLE :: RECV_LI(:,:,:),SEND_LI(:,:,:)
+      INTEGER, ALLOCATABLE :: NUM_RECV_CH(:), NUM_SEND_CH(:)
+      INTEGER, ALLOCATABLE :: NUM_RECV_LI(:), NUM_SEND_LI(:)
 
 C-------------------end of data declarations------------------------C
 

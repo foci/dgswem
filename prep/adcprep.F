@@ -367,6 +367,17 @@ C
         endif
 C--
 C
+C---------------------------------------------------------------------------C
+C...2021-04-21 Younghun
+C---------------------------------------------------------------------------C
+        ! if (dgsake.eq.1) then
+           ! CALL READPREC()
+           CALL PREPPREC()
+           CALL DecompChannel()
+           ! CALL CREATE_EDGE_DATA()
+        ! endif
+        
+        
         print *, ""
         print *, "Finished pre-processing input files"
 C

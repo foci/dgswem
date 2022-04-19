@@ -332,6 +332,9 @@ C.....Compute lateral inflow for 1D KWE
       ! endif
       ! print*,QL
       
+#ifdef CMPI
+      CALL UPDATER_LATERALINFLOW(QL,HWD,IRK+1,1)
+#endif
 
 C.....Compute RHS for 1D KWE
 

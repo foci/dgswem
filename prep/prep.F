@@ -394,13 +394,30 @@ C
 cjjw - added 1 line
 cjjw      IMPLICIT NONE
       INTEGER I,I1,J,K,L,ETYPE,ITEMP,ITEMP2,ILNODE,ILNODE2,ILNODE3
-      INTEGER JD,JG,JP,IPROC,IPROC2,IPROC3,DISC,BBN,IBP
-      INTEGER INDEX,INDEX2,ITOT,ITYPE,NUMS(10)
+      INTEGER JD,JG,JP,IPROC,IPROC2,IPROC3,DISC,BBN,IBP,NCE
+      INTEGER INDEX,INDEX2,ITOT,ITYPE,NUMS(10),INDEX3
       CHARACTER LOCFN*14,PE*6
       CHARACTER*80 OUTMSG
 C
+C....2021-05-10 Younghun
+      ! INTEGER,ALLOCATABLE :: ChannelInfo(:,:,:)
+      ALLOCATE (RECV_CH(NPROC,NBOU,3),SEND_CH(NPROC,NBOU,3))
+      ALLOCATE (RECV_LI(NPROC,NBOU,3),SEND_LI(NPROC,NBOU,3))
+      RECV_CH = 0
+      SEND_CH = 0
+      RECV_LI = 0
+      SEND_LI = 0
+      ALLOCATE (NUM_RECV_CH(NPROC), NUM_SEND_CH(NPROC))
+      ALLOCATE (NUM_RECV_LI(NPROC),NUM_SEND_LI(NPROC))
+      ! 2021-05-26 Younghun:
+      NUM_RECV_CH = 0
+      NUM_SEND_CH = 0
+      NUM_RECV_LI = 0
+      NUM_SEND_LI = 0
+      
       ETYPE = 3   ! The only Element-Type supported by ADCIRC is 3.
 C
+
 C--------------------------------------------------------------------------
 C--MAIN LOOP:   Write a Local Grid File ( fort.14 ) for each PE
 C--------------------------------------------------------------------------
@@ -519,6 +536,113 @@ C
 C
          ENDDO
 C
+
+c........2021-06-09 Younghun: handle ghost edge with ibtype=6
+         DO K = 1, NBOU
+            IF (IBTYPE(K).NE.6 .OR. NVELLP(K).LT.2) CYCLE
+            ITEMP = 0
+            DO J = 1, NVELLP(K)-1
+               INDEX = NBVVP(K,J)
+               INDEX2 = NBVVP(K,J+1)
+               
+               ITEMP2 = 0
+               DO I = 1,NELP(IPROC)
+                  N1 = NNEP(1,I,IPROC)
+                  N2 = NNEP(2,I,IPROC)
+                  N3 = NNEP(3,I,IPROC)
+                  
+                  IF ((N1.EQ.INDEX .AND. N2.EQ.INDEX2) .OR.
+     &               (N2.EQ.INDEX .AND. N3.EQ.INDEX2) .OR.
+     &               (N3.EQ.INDEX .AND. N1.EQ.INDEX2) .OR.
+     &               (N1.EQ.INDEX2 .AND. N2.EQ.INDEX) .OR.
+     &               (N2.EQ.INDEX2 .AND. N3.EQ.INDEX) .OR.
+     &               (N3.EQ.INDEX2 .AND. N1.EQ.INDEX)) THEN
+                     ITEMP2 = 1
+                     EXIT   
+                  ENDIF
+               ENDDO
+               
+               IF (ITEMP2.EQ.0) THEN
+                  ITEMP = J
+               ENDIF
+            ENDDO
+            
+            IF (ITEMP.GT.0) THEN
+               NVELLP(K) = NVELLP(K) - ITEMP
+               DO J = 1, NVELLP(K)
+                  NBVVP(K,J) = NBVVP(K,J+ITEMP)
+                  LBINDEX_LG(K,J) = LBINDEX_LG(K,J+ITEMP)
+               ENDDO
+            ENDIF
+         ENDDO
+      
+C........2021-05-07 Younghun:
+         DO K = 1, NBOU
+            IF (IBTYPE(K).EQ.6 .AND. NVELLP(K).GT.1) THEN
+               INDEX = NBVVP(K,1)
+               INDEX2 = NBVVP(K,2)
+               INDEX = IMAP_NOD_LG(INDEX,IPROC)
+               INDEX2 = IMAP_NOD_LG(INDEX2,IPROC)
+               
+               IF (ITOTPROC(INDEX).GT.1 .AND. ITOTPROC(INDEX2).GT.1) THEN
+                  ITEMP = 0
+                  ITEMP2 = 0
+                  DO I = 1, NBOU
+                     DO J = 1, NVELL(I)-1
+                        IF (NBVV(I,J+1).EQ.INDEX) ITEMP = ITEMP + 1
+                     ENDDO
+                     
+                     DO J = 1, NVELLP(I)-1
+                        INDEX3 = NBVVP(I,J+1)
+                        INDEX3 = IMAP_NOD_LG(INDEX3,IPROC)
+                        IF (INDEX3.EQ.INDEX) ITEMP2 = ITEMP2 + 1
+                     ENDDO
+                  ENDDO
+                  IF (ITEMP.EQ.ITEMP2) THEN
+                     GOTO 600
+                  ENDIF
+                  
+                  NUM_RECV_CH(IPROC) = NUM_RECV_CH(IPROC) + 1
+                  RECV_CH(IPROC,NUM_RECV_CH(IPROC),1) = INDEX
+                  RECV_CH(IPROC,NUM_RECV_CH(IPROC),2) = INDEX2
+               ENDIF
+            ENDIF
+            
+            ! Check receive lateral inflow
+600         IF (IBTYPE(K).EQ.6 .AND. NVELLP(K).GT.1) THEN
+              DO I = 1, NVELLP(K)-1
+                 INDEX = NBVVP(K,I)
+                 INDEX2 = NBVVP(K,I+1)
+                 INDEX = IMAP_NOD_LG(INDEX,IPROC)
+                 INDEX2 = IMAP_NOD_LG(INDEX2,IPROC)
+                 IF (ITOTPROC(INDEX).GT.1 .AND. ITOTPROC(INDEX2).GT.1) THEN
+                    ! Count elements sharing the edge
+                    ITEMP = 0
+                    DO J = 1,NELP(IPROC)
+                       IELG = IMAP_EL_LG(J,IPROC)
+                       IF ((NNEG(1,IELG).EQ.INDEX .AND. NNEG(2,IELG).EQ.INDEX2) .OR.
+     &                     (NNEG(2,IELG).EQ.INDEX .AND. NNEG(3,IELG).EQ.INDEX2) .OR.
+     &                     (NNEG(3,IELG).EQ.INDEX .AND. NNEG(1,IELG).EQ.INDEX2)) THEN
+                          ITEMP = ITEMP + 1
+                       ELSEIF ((NNEG(1,IELG).EQ.INDEX2 .AND. NNEG(2,IELG).EQ.INDEX) .OR.
+     &                         (NNEG(2,IELG).EQ.INDEX2 .AND. NNEG(3,IELG).EQ.INDEX) .OR.
+     &                         (NNEG(3,IELG).EQ.INDEX2 .AND. NNEG(1,IELG).EQ.INDEX)) THEN
+                          ITEMP = ITEMP + 1
+                       ENDIF
+                    ENDDO
+                    
+                    IF (ITEMP.EQ.1) THEN
+                       NUM_RECV_LI(IPROC) = NUM_RECV_LI(IPROC) + 1
+                       RECV_LI(IPROC,NUM_RECV_LI(IPROC),1) = INDEX
+                       RECV_LI(IPROC,NUM_RECV_LI(IPROC),2) = INDEX2
+                    ENDIF
+                 ENDIF
+              ENDDO
+           ENDIF
+         ENDDO
+
+
+
 Cmod 05/18/2004 rl -- I don't think this next part is the correct
 c  way to handle islands.  Rather, if an island is split by a domain, it 
 c  should remain an island.  This will ensure that the boundary is 
@@ -718,7 +842,7 @@ C             boundary segment.
 C
                 IF ((ITYPE.NE.3).AND.(ITYPE.NE.13).AND.
      &             (ITYPE.NE.23).AND.(ITYPE.NE.4).AND.
-     &             (ITYPE.NE.24)) THEN
+     &             (ITYPE.NE.24).AND.(ITYPE.NE.6)) THEN
                   DO I = 1,NVELLP(K)
                      WRITE(14,'(I8)') NBVVP(K,I)
                   ENDDO
@@ -733,6 +857,13 @@ C
                   DO I = 1,NVELLP(K)
                      INDEX = LBINDEX_LG(K,I)
                      WRITE(14,82) NBVVP(K,I),IBCONNRP(K,I),
+     &                        BAR1(K,INDEX),BAR2(K,INDEX),BAR3(K,INDEX)
+                  ENDDO
+                ! 2021-05-12 Younghun:
+                ELSEIF ((ITYPE.EQ.6)) THEN
+                  DO I = 1,NVELLP(K)
+                     INDEX = LBINDEX_LG(K,I)
+                     WRITE(14,83) NBVVP(K,I),
      &                        BAR1(K,INDEX),BAR2(K,INDEX),BAR3(K,INDEX)
                   ENDDO
                 ENDIF
@@ -784,6 +915,7 @@ C
   80  FORMAT(A80)
   81  FORMAT(I8,E13.6,2X,E13.6)
   82  FORMAT(I8,2X,I8,2X,E13.6,2X,E13.6,2X,E13.6)
+  83  FORMAT(I8,2X,E13.6,2X,E13.6,2X,E13.6)
   90  FORMAT(1X,A6,5I8)
 C
       RETURN
@@ -2942,6 +3074,309 @@ C
 c----------------------------------------------------------------------------
       END SUBROUTINE prepUnSWAN
 c----------------------------------------------------------------------------
+
+C----------------------------------------------------------------------------
+C...2021-04-21 Younghun
+C----------------------------------------------------------------------------
+      SUBROUTINE PrepPrec
+      USE PRE_GLOBAL
+      CHARACTER LOCFN*16
+      LOGICAL FOUND,SUCCESS
+      
+      INQUIRE(FILE=DIRNAME//'/../'//'fort.21',EXIST=FOUND)
+      IF (.not.FOUND) THEN
+         RETURN
+      ENDIF
+      
+      CALL OpenPrepFiles(21, 'Nodal rainfall rate         ',
+     &     nproc, sdu, success)
+      
+      IF (.not.success) THEN
+         WRITE(*,*) 'WARNING: Unit 21 files not preprocessed.'
+         RETURN ! note early return
+      ENDIF
+      
+      ! Read global fort.21 file
+      !OPEN(21,FILE=DIRNAME//'/../'//'fort.21',POSITION="rewind")
+      
+      READ(21,*) NTPREC, I
+      IF (I.ne.NNODG) THEN
+         print *, '*********** Execution terminated ***********'
+         print *, 'The number of nodes in precipitation file does not match with mesh'
+         stop
+      ENDIF
+      
+      ALLOCATE (Precipitation(NNODG,NTPREC), ITPREC(NTPREC))
+      
+      DO I = 1,NTPREC
+         READ(21,*) ITPREC(I)
+         DO J = 1,NNODG
+            READ(21,*) Precipitation(J,I)
+         ENDDO
+      ENDDO
+      
+      ! Write local fort.21 files
+      DO IPROC=1, NPROC
+         LOCFN(1:16) = 'PE0000/fort.21'
+         CALL IWRITE(LOCFN,3,6,IPROC-1)
+         OPEN (21,FILE=LOCFN)
+         
+         WRITE(21,*) NTPREC,NNODP(IPROC)
+         DO K = 1, NTPREC
+            WRITE(21,*) ITPREC(K)
+            DO J = 1,NNODP(IPROC)
+               INDEX = IMAP_NOD_LG(J,IPROC)
+               ! WRITE(21,*) J,Precipitation(INDEX,K)
+               WRITE(21,*) Precipitation(INDEX,K)
+            ENDDO
+         ENDDO
+         
+      ENDDO
+      END SUBROUTINE PrepPrec
+
+C.....2021-05-12 Younghun:
+      SUBROUTINE DecompChannel
+      USE PRE_GLOBAL
+      CHARACTER LOCFN*16
+      INTEGER INDEX,INDEX2,JPROC
+      INTEGER NUM_RECV_PE1, NUM_SEND_PE1
+      INTEGER FLAG1,FLAG2
+      INTEGER I1,I2
+      INTEGER,ALLOCATABLE :: NUM_RECV_PE_CH(:),NUM_SEND_PE_CH(:)
+      INTEGER,ALLOCATABLE :: NUM_RECV_PE_LI(:),NUM_SEND_PE_LI(:)
+      INTEGER,ALLOCATABLE :: RECV_PE_CH(:,:,:),SEND_PE_CH(:,:,:)
+      INTEGER,ALLOCATABLE :: RECV_PE_LI(:,:,:),SEND_PE_LI(:,:,:)
+      
+      ALLOCATE (NUM_RECV_PE_CH(NPROC),NUM_SEND_PE_CH(NPROC))
+      ALLOCATE (NUM_RECV_PE_LI(NPROC),NUM_SEND_PE_LI(NPROC))
+      ALLOCATE (RECV_PE_CH(NPROC,NCHANNEL,2),SEND_PE_CH(NPROC,NCHANNEL,2))
+      ALLOCATE (RECV_PE_LI(NPROC,NCHANNEL,2),SEND_PE_LI(NPROC,NCHANNEL,2))
+
+      SEND_CH = 0
+      NUM_SEND_CH = 0
+      NUM_SEND_LI = 0
+      DO IPROC = 1, NPROC         
+         DO JPROC = 1,NPROC
+            IF (IPROC.EQ.JPROC) CYCLE
+            
+            DO J = 1, NUM_RECV_CH(JPROC)
+               INDEX = RECV_CH(JPROC,J,1)
+               INDEX2 = RECV_CH(JPROC,J,2)
+               
+               IF (RECV_CH(JPROC,J,3).NE.0) CYCLE
+               
+               I1 = 0
+               I2 = 0
+               DO K = 1, NUM_RECV_CH(IPROC)
+                  IF (RECV_CH(IPROC,K,1).EQ.INDEX .AND. RECV_CH(IPROC,K,2).EQ.INDEX2) I1 = 1
+               ENDDO
+               IF (I1.EQ.1) CYCLE
+               
+               DO K = 1,ITOTPROC(INDEX)
+                  IF (IMAP_NOD_GL2(2*(K-1)+1,INDEX).EQ.IPROC) I1 = 1
+               ENDDO
+               
+               DO K = 1, ITOTPROC(INDEX2)
+                  IF (IMAP_NOD_GL2(2*(K-1)+1,INDEX2).EQ.IPROC) I2 = 1
+               ENDDO
+               
+               IF (I1.EQ.1 .AND. I2.EQ.1) THEN
+                  NUM_SEND_CH(IPROC) = NUM_SEND_CH(IPROC) + 1
+                  SEND_CH(IPROC,NUM_SEND_CH(IPROC),1) = INDEX
+                  SEND_CH(IPROC,NUM_SEND_CH(IPROC),2) = INDEX2
+                  SEND_CH(IPROC,NUM_SEND_CH(IPROC),3) = JPROC
+                  RECV_CH(JPROC,J,3) = IPROC
+               ENDIF                  
+            ENDDO
+                      
+            DO J = 1, NUM_RECV_LI(JPROC)          
+               INDEX = RECV_LI(JPROC,J,1)
+               INDEX2 = RECV_LI(JPROC,J,2)
+               
+               IF (RECV_LI(JPROC,J,3).NE.0) CYCLE
+               
+               I1 = 0
+               I2 = 0
+               DO K = 1, NUM_RECV_LI(IPROC)
+                  IF (RECV_LI(IPROC,K,1).EQ.INDEX .AND. RECV_LI(IPROC,K,2).EQ.INDEX2) I1 = 1
+               ENDDO
+               IF (I1.EQ.1) CYCLE
+               
+               DO K = 1,ITOTPROC(INDEX)
+                  IF (IMAP_NOD_GL2(2*(K-1)+1,INDEX).EQ.IPROC) I1 = 1
+               ENDDO
+               
+               DO K = 1, ITOTPROC(INDEX2)
+                  IF (IMAP_NOD_GL2(2*(K-1)+1,INDEX2).EQ.IPROC) I2 = 1
+               ENDDO
+               
+               IF (I1.EQ.1 .AND. I2.EQ.1) THEN
+                  NUM_SEND_LI(IPROC) = NUM_SEND_LI(IPROC) + 1
+                  SEND_LI(IPROC,NUM_SEND_LI(IPROC),1) = INDEX
+                  SEND_LI(IPROC,NUM_SEND_LI(IPROC),2) = INDEX2
+                  SEND_LI(IPROC,NUM_SEND_LI(IPROC),3) = JPROC
+                  RECV_LI(JPROC,J,3) = IPROC
+               ENDIF                  
+            ENDDO            
+         ENDDO
+      ENDDO
+
+      DO IPROC = 1, NPROC
+         NUM_RECV_PE_CH = 0
+         NUM_SEND_PE_CH = 0
+         NUM_RECV_PE_LI = 0
+         NUM_SEND_PE_LI = 0
+         RECV_PE_CH = 0
+         SEND_PE_CH = 0
+         RECV_PE_LI = 0
+         SEND_PE_LI = 0
+         NUM_SEND_PE1 = 0
+         NUM_RECV_PE1 = 0
+         
+         DO JPROC = 1, NPROC
+            IF (IPROC.EQ.JPROC) CYCLE
+            
+            DO I = 1, NUM_RECV_CH(IPROC)
+               IF (RECV_CH(IPROC,I,3).EQ.JPROC) THEN
+                  INDEX = RECV_CH(IPROC,I,1)
+                  INDEX2 = RECV_CH(IPROC,I,2)
+                  
+                  I1 = 0
+                  I2 = 0
+                  DO K = 1,ITOTPROC(INDEX)
+                     IF (IMAP_NOD_GL2(2*(K-1)+1,INDEX).EQ.IPROC) I1 = 2*K
+                  ENDDO
+                  
+                  DO K = 1,ITOTPROC(INDEX2)
+                     IF (IMAP_NOD_GL2(2*(K-1)+1,INDEX2).EQ.IPROC) I2 = 2*K
+                  ENDDO
+
+                  NUM_RECV_PE_CH(JPROC) = NUM_RECV_PE_CH(JPROC) + 1
+                  RECV_PE_CH(JPROC,NUM_RECV_PE_CH(JPROC),1) = IMAP_NOD_GL2(I1,INDEX) ! Convert to local index
+                  RECV_PE_CH(JPROC,NUM_RECV_PE_CH(JPROC),2) = IMAP_NOD_GL2(I2,INDEX2)
+               ENDIF
+            ENDDO
+            
+            DO I = 1, NUM_SEND_CH(IPROC)
+               IF (SEND_CH(IPROC,I,3).EQ.JPROC) THEN
+                  INDEX = SEND_CH(IPROC,I,1)
+                  INDEX2 = SEND_CH(IPROC,I,2)
+                  
+                  I1 = 0
+                  I2 = 0
+                  DO K = 1,ITOTPROC(INDEX)
+                     IF (IMAP_NOD_GL2(2*(K-1)+1,INDEX).EQ.IPROC) I1 = 2*K
+                  ENDDO
+                  
+                  DO K = 1,ITOTPROC(INDEX2)
+                     IF (IMAP_NOD_GL2(2*(K-1)+1,INDEX2).EQ.IPROC) I2 = 2*K
+                  ENDDO
+
+                  NUM_SEND_PE_CH(JPROC) = NUM_SEND_PE_CH(JPROC) + 1
+                  SEND_PE_CH(JPROC,NUM_SEND_PE_CH(JPROC),1) = IMAP_NOD_GL2(I1,INDEX) ! Convert to local index
+                  SEND_PE_CH(JPROC,NUM_SEND_PE_CH(JPROC),2) = IMAP_NOD_GL2(I2,INDEX2)
+               ENDIF
+            ENDDO
+         
+            DO I = 1, NUM_RECV_LI(IPROC)
+               IF (RECV_LI(IPROC,I,3).EQ.JPROC) THEN
+                  INDEX = RECV_LI(IPROC,I,1)
+                  INDEX2 = RECV_LI(IPROC,I,2)
+                  
+                  I1 = 0
+                  I2 = 0
+                  DO K = 1,ITOTPROC(INDEX)
+                     IF (IMAP_NOD_GL2(2*(K-1)+1,INDEX).EQ.IPROC) I1 = 2*K
+                  ENDDO
+                  
+                  DO K = 1,ITOTPROC(INDEX2)
+                     IF (IMAP_NOD_GL2(2*(K-1)+1,INDEX2).EQ.IPROC) I2 = 2*K
+                  ENDDO
+
+                  NUM_RECV_PE_LI(JPROC) = NUM_RECV_PE_LI(JPROC) + 1
+                  RECV_PE_LI(JPROC,NUM_RECV_PE_LI(JPROC),1) = IMAP_NOD_GL2(I1,INDEX) ! Convert to local index
+                  RECV_PE_LI(JPROC,NUM_RECV_PE_LI(JPROC),2) = IMAP_NOD_GL2(I2,INDEX2)
+               ENDIF
+            ENDDO
+            
+            DO I = 1, NUM_SEND_LI(IPROC)
+               IF (SEND_LI(IPROC,I,3).EQ.JPROC) THEN
+                  INDEX = SEND_LI(IPROC,I,1)
+                  INDEX2 = SEND_LI(IPROC,I,2)
+                  
+                  I1 = 0
+                  I2 = 0
+                  DO K = 1,ITOTPROC(INDEX)
+                     IF (IMAP_NOD_GL2(2*(K-1)+1,INDEX).EQ.IPROC) I1 = 2*K
+                  ENDDO
+                  
+                  DO K = 1,ITOTPROC(INDEX2)
+                     IF (IMAP_NOD_GL2(2*(K-1)+1,INDEX2).EQ.IPROC) I2 = 2*K
+                  ENDDO
+                  
+                  NUM_SEND_PE_LI(JPROC) = NUM_SEND_PE_LI(JPROC) + 1
+                  SEND_PE_LI(JPROC,NUM_SEND_PE_LI(JPROC),1) = IMAP_NOD_GL2(I1,INDEX) ! Convert to local index
+                  SEND_PE_LI(JPROC,NUM_SEND_PE_LI(JPROC),2) = IMAP_NOD_GL2(I2,INDEX2)
+               ENDIF
+            ENDDO
+         ENDDO
+         
+
+         LOCFN(1:14) = 'PE0000/DG.19'
+         CALL IWRITE(LOCFN,3,6,IPROC-1)
+         OPEN (182,FILE=LOCFN)
+         
+         DO JPROC = 1, NPROC
+            IF (NUM_RECV_PE_CH(JPROC).GT.0) NUM_RECV_PE1 = NUM_RECV_PE1 + 1
+            IF (NUM_SEND_PE_CH(JPROC).GT.0) NUM_SEND_PE1 = NUM_SEND_PE1 + 1
+         ENDDO
+         WRITE(182,3020) NUM_RECV_PE1,NUM_SEND_PE1
+         
+         DO JPROC = 1, NPROC
+            IF (NUM_RECV_PE_CH(JPROC).GT.0) THEN
+               WRITE(182,3030) JPROC-1,NUM_RECV_PE_CH(JPROC)
+               WRITE(182,1130) (RECV_PE_CH(JPROC,I,1),RECV_PE_CH(JPROC,I,2),I=1,NUM_RECV_PE_CH(JPROC))
+            ENDIF
+         ENDDO
+         DO JPROC = 1, NPROC
+            IF (NUM_SEND_PE_CH(JPROC).GT.0) THEN
+               WRITE(182,3040) JPROC-1,NUM_SEND_PE_CH(JPROC)
+               WRITE(182,1130) (SEND_PE_CH(JPROC,I,1),SEND_PE_CH(JPROC,I,2),I=1,NUM_SEND_PE_CH(JPROC))
+            ENDIF
+         ENDDO
+         
+         NUM_SEND_PE1 = 0
+         NUM_RECV_PE1 = 0
+         DO JPROC = 1, NPROC
+            IF (NUM_RECV_PE_LI(JPROC).GT.0) NUM_RECV_PE1 = NUM_RECV_PE1 + 1
+            IF (NUM_SEND_PE_LI(JPROC).GT.0) NUM_SEND_PE1 = NUM_SEND_PE1 + 1
+         ENDDO
+         WRITE(182,3020) NUM_RECV_PE1,NUM_SEND_PE1
+         
+         DO JPROC = 1, NPROC
+            IF (NUM_RECV_PE_LI(JPROC).GT.0) THEN
+               WRITE(182,3030) JPROC-1,NUM_RECV_PE_LI(JPROC)
+               WRITE(182,1130) (RECV_PE_LI(JPROC,I,1),RECV_PE_LI(JPROC,I,2),I=1,NUM_RECV_PE_LI(JPROC))
+            ENDIF
+         ENDDO
+         DO JPROC = 1, NPROC
+            IF (NUM_SEND_PE_LI(JPROC).GT.0) THEN
+               WRITE(182,3040) JPROC-1,NUM_SEND_PE_LI(JPROC)
+               WRITE(182,1130) (SEND_PE_LI(JPROC,I,1),SEND_PE_LI(JPROC,I,2),I=1,NUM_SEND_PE_LI(JPROC))
+            ENDIF
+         ENDDO
+      ENDDO
+       
+3020  FORMAT('COMM PE ',2I8)
+3030  FORMAT('RECV PE ',2I8)
+3040  FORMAT('SEND PE ',2I8)
+1130  FORMAT(8X,9I8)
+
+      END SUBROUTINE DecompChannel
+
+
+
+
 
 
 

@@ -125,6 +125,10 @@ C.......SSP Runge-Kutta Time Scheme
          ENDDO
 #endif
 
+#ifdef CMPI
+         CALL UPDATER_ELEM_MOD(HWD,QX,QY,IRK+1,1)
+         CALL UPDATER_CHANNEL(AWD,HWD,IRK+1,1)
+#endif
       ENDDO
 C.....Update variables for next time step     
 
