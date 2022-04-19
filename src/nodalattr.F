@@ -195,6 +195,51 @@ C     The following attribute contains BK(I),BALPHA(I),BDELX(I), and POAN(I)
       REAL(SZ), ALLOCATABLE :: EVM(:)
       REAL(SZ), ALLOCATABLE :: EVC(:)
 C
+C     ! 2021-04-14 Younghun: Added attributes for Green-Ampt infiltration model and edge manning n
+      REAL(SZ), ALLOCATABLE :: HydraulicCond(:), CapillaryP(:), MoistDecific(:), IntDepth(:)
+      REAL(SZ), ALLOCATABLE :: ManningNEdge(:) !, manningKWE2(:)
+      REAL(SZ), ALLOCATABLE :: Precipitation(:,:)
+      
+      LOGICAL LoadHydraulicCond
+      LOGICAL LoadCapillaryP
+      LOGICAL LoadMoistDecific
+      LOGICAL LoadIntDepth
+      LOGICAL LoadManningNEdge
+      LOGICAL LoadPrecipitation
+      ! LOGICAL LoadManningKWE2 ! do we want to put manning's n for land?
+
+      LOGICAL FoundHydraulicCond
+      LOGICAL FoundCapillaryP
+      LOGICAL FoundMoistDecific
+      LOGICAL FoundIntDepth
+      LOGICAL FoundManningNEdge
+      LOGICAL FoundPrecipitation
+      ! LOGICAL FoundManningKWE2
+      
+      CHARACTER(len=80) HydraulicCondUnits
+      CHARACTER(len=80) CapillaryPUnits
+      CHARACTER(len=80) MoistDecificUnits
+      CHARACTER(len=80) IntDepthUnits
+      CHARACTER(len=80) ManningNEdgeUnits
+      CHARACTER(len=80) PrecipitationUnits
+      ! CHARACTER(len=80) ManningKWE2Units
+      
+      INTEGER HydraulicCondNoOfVals
+      INTEGER CapillaryPNoOfVals
+      INTEGER MoistDecificNoOfVals
+      INTEGER IntDepthNoOfVals
+      INTEGER ManningNEdgeNoOfVals
+      INTEGER PrecipitationNoOfVals
+      ! INTEGER ManningKWE2NoOfVals
+      
+      REAL(SZ) HydraulicCondDefVal
+      REAL(SZ) CapillaryPDefVal
+      REAL(SZ) MoistDecificDefVal
+      REAL(SZ) IntDepthDefVal
+      REAL(SZ) ManningNEdgeDefVal
+      REAL(SZ),ALLOCATABLE :: PrecipitationDefVal(:)
+      ! REAL(SZ) ManningKWE2DefVal
+
       INTEGER i        ! node loop counter
       INTEGER j        ! attribute values loop counter
       INTEGER k        ! attribute loop counter
@@ -279,6 +324,35 @@ C
       ESLM=0.0
       ESLC=0.0
 C
+C     ! 2021-04-14 Younghun: Added Green-Ampt model parameters and manning n on edges
+      LoadHydraulicCond  = .False.
+      LoadCapillaryP     = .False.
+      LoadMoistDecific   = .False.
+      LoadIntDepth       = .False.
+      LoadManningNEdge   = .False.
+      LoadPrecipitation  = .False.
+      
+      FoundHydraulicCond = .False.
+      FoundCapillaryP    = .False.
+      FoundMoistDecific  = .False.
+      FoundIntDepth      = .False.
+      FoundManningNEdge  = .False.
+      FoundPrecipitation = .False.
+
+      HydraulicCondNoOfVals = 1
+      CapillaryPNoOfVals    = 1
+      MoistDecificNoOfVals  = 1
+      IntDepthNoOfVals      = 1
+      ManningNEdgeNoOfVals  = 1
+      ! PrecipitationNoOfVals = ! It will be read from fort.13
+      
+      HydraulicCondDefVal = 0.d0
+      CapillaryPDefVal    = 0.d0
+      MoistDecificDefVal  = 0.d0
+      IntDepthDefVal      = 0.d0
+      ManningNEdgeDefVal  = 0.d0
+      ! PrecipitationDefVal = ! It will be read from fort.13
+
       RETURN
 C     ----------------------------------------------------------------
       END SUBROUTINE InitNAModule
@@ -393,6 +467,21 @@ C     loaded from nodal attributes file.
 Casey 101118: Allow SWAN to handle wave refraction as a nodal attribute.
          CASE("wave_refraction_in_swan")
             LoadSwanWaveRefrac = .TRUE.
+C     ! 2021-04-14 Younghun: Added Green-Ampt parameters
+         CASE("hydraulic_conductivity")
+            LoadHydraulicCond = .True.
+         CASE("capillary_pressure")
+            LoadCapillaryP = .True.
+         CASE("moisture_decific")
+            LoadMoistDecific = .True.
+         CASE("intercept_depth")
+            LoadIntDepth = .True.
+         CASE("mannings_n_edge")
+            LoadManningNEdge = .True.
+         CASE("precipitation")
+            LoadPrecipitation = .True.
+         ! CASE("mannings_n_at_element")
+            ! LoadManningKWE2 = .True.
          CASE DEFAULT     
             WRITE(16,1000)          ! unit 15 Model Parameter file
             WRITE(16,1021) AttrName ! contains invalid name
@@ -496,6 +585,44 @@ Casey 101118: Allow SWAN to handle wave refraction as a nodal attribute.
             READ(13,'(A80)') SwanWaveRefracUnits
             READ(13,*) SwanWaveRefracNoOfVals
             READ(13,*) SwanWaveRefracDefVal
+      ! 2021-04-14 Younghun
+         CASE("hydraulic_conductivity")
+            FoundHydraulicCond = .True.
+            READ(13,'(A80)') HydraulicCondUnits
+            READ(13,*) HydraulicCondNoOfVals
+            READ(13,*) HydraulicCondDefVal
+         CASE("capillary_pressure")
+            FoundCapillaryP = .True.
+            READ(13,'(A80)') CapillaryPUnits
+            READ(13,*) CapillaryPNoOfVals
+            READ(13,*) CapillaryPDefVal
+         CASE("moisture_decific")
+            FoundMoistDecific = .True.
+            READ(13,'(A80)') MoistDecificUnits
+            READ(13,*) MoistDecificNoOfVals
+            READ(13,*) MoistDecificDefVal
+         CASE("intercept_depth")
+            FoundIntDepth = .True.
+            READ(13,'(A80)') IntDepthUnits
+            READ(13,*) IntDepthNoOfVals
+            READ(13,*) IntDepthDefVal
+         CASE("mannings_n_edge")
+            FoundManningNEdge = .True.
+            READ(13,'(A80)') ManningNEdgeUnits
+            READ(13,*) ManningNEdgeNoOfVals
+            READ(13,*) ManningNEdgeDefVal
+         CASE("precipitation")
+            FoundPrecipitation = .True.
+            READ(13,'(A80)') PrecipitationUnits  
+            READ(13,*) PrecipitationNoOfVals
+            ALLOCATE (PrecipitationDefVal(PrecipitationNoOfVals))
+            READ(13,*) (PrecipitationDefVal(j),j=1,PrecipitationNoOfVals)
+            
+         ! CASE("mannings_n_at_element")
+            ! FoundManningKWE2 = .True.
+            ! READ(13,'(A80)') ManningKWE2Units
+            ! READ(13,*) ManningKWE2NoOfVals
+            ! READ(13,*) ManningKWE2DefVal
          CASE DEFAULT     
             WRITE(16,1001)          ! Nodal Attributes file
             WRITE(16,1021) AttrName ! contains invalid name
@@ -528,7 +655,14 @@ C     that are not in the nodal attributes file.
      &   ((LoadEVM).and.(.not.FoundEVM)).or.
 Casey 101118: Allow SWAN to handle wave refraction as a nodal attribute.
      &   ((LoadSwanWaveRefrac).and.(.not.FoundSwanWaveRefrac)).or.
-     &   ((LoadEVC).and.(.not.FoundEVC)) ) THEN
+     &   ((LoadEVC).and.(.not.FoundEVC)).or.
+      ! 2021-04-14 Younghun:
+     &   ((LoadHydraulicCond).and.(.not.FoundHydraulicCond)).or.
+     &   ((LoadCapillaryP).and.(.not.FoundCapillaryP)).or.
+     &   ((LoadMoistDecific).and.(.not.FoundMoistDecific)).or.
+     &   ((LoadIntDepth).and.(.not.FoundIntDepth)).or.
+     &   ((LoadManningNEdge).and.(.not.FoundManningNEdge)).or.
+     &   ((LoadPrecipitation).and.(.not.FoundPrecipitation))) THEN
          WRITE(16,1111)
  1111    FORMAT('ERROR: Nodal Attributes file (unit 13) does '
      &        'not contain all the attributes listed in the '
@@ -555,6 +689,13 @@ C     Allocate memory to hold our data.
       ALLOCATE(EVC(NumOfNodes))
 Casey 101118: Allow SWAN to handle wave refraction as a nodal attribute.
       ALLOCATE(SwanWaveRefrac(NumOfNodes))
+      ! 2021-04-14 Younghun:
+      ALLOCATE(HydraulicCond(NumOfNodes))
+      ALLOCATE(CapillaryP(NumOfNodes))
+      ALLOCATE(MoistDecific(NumOfNodes))
+      ALLOCATE(IntDepth(NumOfNodes))
+      ALLOCATE(ManningNEdge(NumOfNodes))
+      ALLOCATE(Precipitation(NumOfNodes,PrecipitationNoOfVals))
 C
 C     Now read each of the attributes required by the model parameter
 C     (unit 15) file and skip past the others.
@@ -653,6 +794,50 @@ Casey 101118: Allow SWAN to handle wave refraction as a nodal attribute.
             IF (LoadSwanWaveRefrac) THEN
                CALL LoadAttrVec(SwanWaveRefrac, SwanWaveRefracDefVal,
      &              NumNodesNotDefault, NScreen, MyProc, NAbOut)
+            ELSE
+               SkipDataSet = .TRUE.
+            ENDIF
+      ! 2021-04-14 Younghun:
+         CASE("hydraulic_conductivity")
+            IF (LoadHydraulicCond) THEN
+               CALL LoadAttrVec(HydraulicCond, HydraulicCondDefVal, NumNodesNotDefault, 
+     &                                  NScreen, MyProc, NAbOut)
+            ELSE
+               SkipDataSet = .TRUE.
+            ENDIF
+         CASE("capillary_pressure")
+            IF (LoadCapillaryP) THEN
+               CALL LoadAttrVec(CapillaryP, CapillaryPDefVal, NumNodesNotDefault, 
+     &                                  NScreen, MyProc, NAbOut)
+            ELSE
+               SkipDataSet = .TRUE.
+            ENDIF
+         CASE("moisture_decific")
+            IF (LoadMoistDecific) THEN
+               CALL LoadAttrVec(MoistDecific, MoistDecificDefVal, NumNodesNotDefault, 
+     &                                  NScreen, MyProc, NAbOut)
+            ELSE
+               SkipDataSet = .TRUE.
+            ENDIF
+         CASE("intercept_depth")
+            IF (LoadIntDepth) THEN
+               CALL LoadAttrVec(IntDepth, IntDepthDefVal, NumNodesNotDefault, 
+     &                                  NScreen, MyProc, NAbOut)
+            ELSE
+               SkipDataSet = .TRUE.
+            ENDIF
+         CASE("mannings_n_edge")
+            IF (LoadManningNEdge) THEN
+               CALL LoadAttrVec(ManningNEdge, ManningNEdgeDefVal, NumNodesNotDefault,
+     &                                  NScreen, MyProc, NAbOut)
+            ELSE
+               SkipDataSet = .TRUE.
+            ENDIF
+         CASE("precipitation")
+            IF (LoadPrecipitation) THEN
+               CALL LoadAttrMat(Precipitation, PrecipitationNoOfVals,
+     &                           PrecipitationDefVal, NumNodesNotDefault,
+     &                                  NScreen, MyProc, NAbOut)
             ELSE
                SkipDataSet = .TRUE.
             ENDIF
