@@ -1536,10 +1536,10 @@ C.....and nodal coordinates and bathymetry
                  ENDIF
               ELSE
                  WRITE(16,9225)
- 9225           FORMAT(/,1X,'   NODE ',2X,'LAMBDA(DEG)',5X,'FEA(DEG)',11X,
+ 9225         FORMAT(/,1X,'   NODE ',2X,'LAMBDA(DEG)',5X,'FEA(DEG)',11X,
      &                'XCP',14X,'YCP',11X,'DP',/)
                  DO I = 1,NP
-                    WRITE (16,9228) I,SLAM(I)*RAD2DEG,SFEA(I)*RAD2DEG,
+                    WRITE(16,9228) I,SLAM(I)*RAD2DEG,SFEA(I)*RAD2DEG,
      &                   X(I),Y(I),DP(I)
  9228               FORMAT(1X,I6,2(1X,F14.8),2(1X,F15.1),1X,F10.2)
                  ENDDO
@@ -1563,7 +1563,7 @@ C.....and nodal coordinates and bathymetry
                           WRITE (16,3529) I,X(I),Y(I),DP(I),STARTDRY(I)
  3529                     FORMAT(5X,I6,2(2X,F20.2),2X,F12.2,2X,F12.0)
                        ELSE
-                          WRITE (16,2008) I,X(I),Y(I),DP(I)
+                          WRITE(16,2008) I,X(I),Y(I),DP(I)
                        ENDIF
                     ENDDO
                  ELSE
@@ -1575,7 +1575,7 @@ C.....and nodal coordinates and bathymetry
                        IF (STARTDRY(I).EQ.-88888.D0) THEN
                           WRITE (16,3531) I,X(I),Y(I),SLAM(I)*RAD2DEG,
      &                         SFEA(I)*RAD2DEG,DP(I),STARTDRY(I)
- 3531                     FORMAT(1X,I6,2(1X,F14.1),1X,2(1X,E15.7),1X,F8.2,
+ 3531                   FORMAT(1X,I6,2(1X,F14.1),1X,2(1X,E15.7),1X,F8.2,
      &                         1X,F10.0)
                        ELSE
                           WRITE (16,9197) I,X(I),Y(I),SLAM(I)*RAD2DEG,
@@ -1585,16 +1585,16 @@ C.....and nodal coordinates and bathymetry
                  ENDIF
               ELSE
                  WRITE(16,3535)
- 3535           FORMAT(/,1X,'   NODE ',2X,'LAMBDA(DEG)',5X,'FEA(DEG)',11X,
+ 3535         FORMAT(/,1X,'   NODE ',2X,'LAMBDA(DEG)',5X,'FEA(DEG)',11X,
      &                'XCP',14X,'YCP',11X,'DP',
      &                5X,'STARTDRY',/)
                  DO I = 1,NP
                     IF (STARTDRY(I).EQ.-88888.D0) THEN
-                       WRITE (16,3537) I,SLAM(I)*RAD2DEG,SFEA(I)*RAD2DEG,
+                      WRITE (16,3537) I,SLAM(I)*RAD2DEG,SFEA(I)*RAD2DEG,
      &                      X(I),Y(I),DP(I),STARTDRY(I)
- 3537              FORMAT(1X,I6,2(1X,F14.8),2(1X,F15.1),1X,F10.2,2X,F10.0)
+ 3537            FORMAT(1X,I6,2(1X,F14.8),2(1X,F15.1),1X,F10.2,2X,F10.0)
                     ELSE
-                       WRITE (16,9228) I,SLAM(I)*RAD2DEG,SFEA(I)*RAD2DEG,
+                       WRITE(16,9228) I,SLAM(I)*RAD2DEG,SFEA(I)*RAD2DEG,
      &                      X(I),Y(I),DP(I)
                     ENDIF
                  ENDDO

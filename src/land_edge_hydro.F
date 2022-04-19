@@ -147,10 +147,10 @@ C.....(modified for wetting and drying)
                HZ_X_IN = HZ_X_IN + HZ(K,1,1,EL_IN)*PHI_EDGE(K,I,LED,pa)
                HZ_Y_IN = HZ_Y_IN + HZ(K,2,2,EL_IN)*PHI_EDGE(K,I,LED,pa)
 #endif
-               LZ_XX_IN = LZ_XX_IN + LZ(K,1,1,EL_IN)*PHI_EDGE(K,I,LED,pa)
-               LZ_XY_IN = LZ_XY_IN + LZ(K,1,2,EL_IN)*PHI_EDGE(K,I,LED,pa)
-               LZ_YX_IN = LZ_YX_IN + LZ(K,2,1,EL_IN)*PHI_EDGE(K,I,LED,pa)
-               LZ_YY_IN = LZ_YY_IN + LZ(K,2,2,EL_IN)*PHI_EDGE(K,I,LED,pa)
+               LZ_XX_IN = LZ_XX_IN+LZ(K,1,1,EL_IN)*PHI_EDGE(K,I,LED,pa)
+               LZ_XY_IN = LZ_XY_IN+LZ(K,1,2,EL_IN)*PHI_EDGE(K,I,LED,pa)
+               LZ_YX_IN = LZ_YX_IN+LZ(K,2,1,EL_IN)*PHI_EDGE(K,I,LED,pa)
+               LZ_YY_IN = LZ_YY_IN+LZ(K,2,2,EL_IN)*PHI_EDGE(K,I,LED,pa)
 
 #ifdef TRACE
 
@@ -162,16 +162,16 @@ C.....(modified for wetting and drying)
                                 !LDG terms for sediment diffusion
 
 #ifdef TRACE
-               iota_IN = iota_IN + iota(K,EL_IN,IRK)*PHI_EDGE(K,I,LED,pa)
+               iota_IN = iota_IN+ iota(K,EL_IN,IRK)*PHI_EDGE(K,I,LED,pa)
 #endif
 
 #ifdef CHEM
-               iota_IN = iota_IN + iota(K,EL_IN,IRK)*PHI_EDGE(K,I,LED,pa)
-               iota2_IN = iota2_IN + iota2(K,EL_IN,IRK)*PHI_EDGE(K,I,LED,pa)
+               iota_IN = iota_IN+ iota(K,EL_IN,IRK)*PHI_EDGE(K,I,LED,pa)
+               iota2_IN=iota2_IN+iota2(K,EL_IN,IRK)*PHI_EDGE(K,I,LED,pa)
 #endif
 
 #ifdef DYNP
-               dynP_IN = dynP_IN + dynP(K,EL_IN,IRK)*PHI_EDGE(K,I,LED,pa)
+               dynP_IN = dynP_IN+dynP(K,EL_IN,IRK)*PHI_EDGE(K,I,LED,pa)
 #endif
 
 #ifdef SED_LAY
@@ -269,16 +269,16 @@ C.....Compute the edge integral
                RHS_QY(K,EL_IN,IRK) = RHS_QY(K,EL_IN,IRK) - W_IN*H_HAT
 
 #ifdef TRACE
-               RHS_iota(K,EL_IN,IRK) = RHS_iota(K,EL_IN,IRK) - W_IN*I_HAT
+               RHS_iota(K,EL_IN,IRK) = RHS_iota(K,EL_IN,IRK)-W_IN*I_HAT
 #endif
 
 #ifdef CHEM
-               RHS_iota(K,EL_IN,IRK) = RHS_iota(K,EL_IN,IRK) - W_IN*I_HAT
-               RHS_iota2(K,EL_IN,IRK) = RHS_iota2(K,EL_IN,IRK) - W_IN*J_HAT
+               RHS_iota(K,EL_IN,IRK) = RHS_iota(K,EL_IN,IRK)-W_IN*I_HAT
+               RHS_iota2(K,EL_IN,IRK) =RHS_iota2(K,EL_IN,IRK)-W_IN*J_HAT
 #endif
 
 #ifdef DYNP
-               RHS_dynP(K,EL_IN,IRK) = RHS_dynP(K,EL_IN,IRK) - W_IN*K_HAT
+               RHS_dynP(K,EL_IN,IRK) =RHS_dynP(K,EL_IN,IRK) - W_IN*K_HAT
 #endif
 
 #ifdef SED_LAY

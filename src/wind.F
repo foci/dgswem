@@ -145,7 +145,8 @@ C.. Compute the storm's direction.  We use the convention of northward
 C.. being zero degrees, and then cycling clockwise.
             Dir1 = ATAN2(EyeLatR(2)-EyeLatR(1),EyeLonR(2)-EyeLonR(1))
             Dir2 = ATAN2(EyeLatR(3)-EyeLatR(2),EyeLonR(3)-EyeLonR(2))
-            StormDirection = ATAN2(SIN(Dir1)+SIN(Dir2),COS(Dir1)+COS(Dir2))
+            StormDirection = ATAN2(SIN(Dir1)+SIN(Dir2),COS(Dir1)
+     & +COS(Dir2))
             StormDirection = StormDirection/DEG2RAD
             StormDirection = 90.D0 - StormDirection
             IF(StormDirection.LT.0.D0)THEN
@@ -189,13 +190,16 @@ C..   260-  0 : Left (3).
                   Dir2 = MOD(StormDirection+  0.D0,360.D0)
                ENDIF
                IF(Dir1.GT.Dir2)THEN
-                  IF((Dir1.LE.NodeDirection).AND.(NodeDirection.LE.360.D0))THEN
+                  IF((Dir1.LE.NodeDirection).AND.
+     &             (NodeDirection.LE.360.D0))THEN
                      Dir2 = Dir2 + 360.D0
-                  ELSEIF((0.D0.LE.NodeDirection).AND.(NodeDirection.LE.Dir2))THEN
+                  ELSEIF((0.D0.LE.NodeDirection).AND.
+     &             (NodeDirection.LE.Dir2))THEN
                      Dir1 = Dir1 - 360.D0
                   ENDIF
                ENDIF
-               IF((Dir1.LE.NodeDirection).AND.(NodeDirection.LE.Dir2))THEN
+               IF((Dir1.LE.NodeDirection).AND.(NodeDirection.LE.Dir2))
+     &          THEN
                   IF(MOD(IS,2).EQ.0)THEN
                      FoundSector = .TRUE.
                      Weight = 0.D0
@@ -213,8 +217,10 @@ C..   260-  0 : Left (3).
                         IW1 = 2
                         IW2 = 3
                      ENDIF
-                     Weight(IW1) = 1.D0 + (0.D0-1.D0)/(Dir2-Dir1)*(NodeDirection-Dir1)
-                     Weight(IW2) = 0.D0 + (1.D0-0.D0)/(Dir2-Dir1)*(NodeDirection-Dir1)
+                     Weight(IW1) = 1.D0 + (0.D0-1.D0)/(Dir2-Dir1)*
+     &                (NodeDirection-Dir1)
+                     Weight(IW2) = 0.D0 + (1.D0-0.D0)/(Dir2-Dir1)*
+     &                (NodeDirection-Dir1)
                   ENDIF
                ENDIF
             ENDDO
@@ -230,7 +236,8 @@ C.. Determine the wind drag for sector 1 (right).
                      Drag(1) = 0.0020
                   ENDIF
                ELSEIF(WindSpeed.LE.45.0)THEN
-                  Drag(1) = 0.0020 + (0.0030-0.0020)/(45.0-35.0)*(WindSpeed-35.0)
+                  Drag(1) = 0.0020 + (0.0030-0.0020)/(45.0-35.0)*
+     &             (WindSpeed-35.0)
                ELSE
                   Drag(1) = 0.0030
                ENDIF
@@ -241,7 +248,8 @@ C.. Determine the wind drag for sector 2 (rear).
                      Drag(2) = 0.0020
                   ENDIF
                ELSEIF(WindSpeed.LE.45.0)THEN
-                  Drag(2) = 0.0020 + (0.0010-0.0020)/(45.0-35.0)*(WindSpeed-35.0)
+                  Drag(2) = 0.0020 + (0.0010-0.0020)/(45.0-35.0)*
+     &             (WindSpeed-35.0)
                ELSE
                   Drag(2) = 0.0010
                ENDIF
@@ -251,15 +259,18 @@ C.. Determine the wind drag for sector 3 (left).
                   IF(WindSpeed.LE.25.0)THEN
                      Drag(3) = 0.0018
                   ELSEIF(WindSpeed.LE.30.0)THEN
-                     Drag(3) = 0.0018 + (0.0045-0.0018)/(30.0-25.0)*(WindSpeed-25.0)
+                     Drag(3) = 0.0018 + (0.0045-0.0018)/(30.0-25.0)*
+     &                (WindSpeed-25.0)
                   ELSEIF(WindSpeed.LE.45.0)THEN
-                     Drag(3) = 0.0045 + (0.0010-0.0045)/(45.0-30.0)*(WindSpeed-30.0)
+                     Drag(3) = 0.0045 + (0.0010-0.0045)/(45.0-30.0)*
+     &                (WindSpeed-30.0)
                   ELSE
                      Drag(3) = 0.0010
                   ENDIF
                ENDIF
 C.. Apply a weighted average.
-               WindDrag = Weight(1)*Drag(1) + Weight(2)*Drag(2) + Weight(3)*Drag(3)
+               WindDrag = Weight(1)*Drag(1) + Weight(2)*Drag(2)
+     &          + Weight(3)*Drag(3)
             ENDIF
          ENDIF
 
@@ -1414,7 +1425,7 @@ c     compute the coordinates of the closest Eta29 grid node
       im2=nwlon*2
       call e29calc(i,j,lamda,phi,n)
 
-c     compute the coordinates of neighbor node "a" (located SW of closest node)
+C     compute the coordinates of neighbor node "a" (located SW of closest node)
 
       if ((i.eq.1).and.(mod(j,2).eq.0)) then
          ia=i
@@ -1431,7 +1442,7 @@ c                                 this neighbor lies outside of Eta29 grid
          call e29calc(ia,ja,lamdaa,phia,na)
       endif
 
-c     compute the coordinates of neighbor node "b" (located W of closest node)
+C     compute the coordinates of neighbor node "b" (located W of closest node)
 
       ib=i-1
       jb=j
@@ -1441,7 +1452,7 @@ c     compute the coordinates of neighbor node "b" (located W of closest node)
          call e29calc(ib,jb,lamdab,phib,nb)
       endif
 
-c     compute the coordinates of neighbor node "c" (located NW of closest node)
+C     compute the coordinates of neighbor node "c" (located NW of closest node)
 
       if ((i.eq.1).and.(mod(j,2).eq.0)) then
          ic=i
@@ -1450,14 +1461,14 @@ c     compute the coordinates of neighbor node "c" (located NW of closest node)
          ic=ia
          jc=j+1
       endif
-c                                    this neighbor lies outside of Eta29 grid
+C                                    this neighbor lies outside of Eta29 grid
       if ((ic.lt.1).or.(jc.gt.nwlat)) then  
          nc=0
       else
          call e29calc(ic,jc,lamdac,phic,nc)
       endif
 
-c     compute the coordinates of neighbor node "d" (located NE of closest node)
+C     compute the coordinates of neighbor node "d" (located NE of closest node)
 
       if ((i.eq.181).and.(mod(j,2).ne.0)) then
          id=i
@@ -1466,14 +1477,14 @@ c     compute the coordinates of neighbor node "d" (located NE of closest node)
          id=ic+1
          jd=j+1
       endif
-c                                    this neighbor lies outside of Eta29 grid
+C                                    this neighbor lies outside of Eta29 grid
       if ((id.gt.nwlon).or.(jd.gt.nwlat)) then  
          nd=0
       else
          call e29calc(id,jd,lamdad,phid,nd)
       endif
 
-c     compute the coordinates of neighbor node "e" (located E of closest node)
+C     compute the coordinates of neighbor node "e" (located E of closest node)
 
       ie=i+1
       je=j
@@ -1483,7 +1494,7 @@ c     compute the coordinates of neighbor node "e" (located E of closest node)
          call e29calc(ie,je,lamdae,phie,ne)
       endif
       
-c     compute the coordinates of neighbor node "g" (located SE of closest node)
+C     compute the coordinates of neighbor node "g" (located SE of closest node)
 
       if ((i.eq.181).and.(mod(j,2).ne.0)) then
          ig=i
@@ -1499,21 +1510,21 @@ c                                    this neighbor lies outside of Eta29 grid
          call e29calc(ig,jg,lamdag,phig,ng)
       endif
 
-c     if (myproc == 0) then
-c      write(screenunit,*) 'closest E29 node i,j = ',n,i,j,lamda,phi
-c      if(na.eq.0) write(screenunit,*) 'point a falls outside of Eta29 grid'
-c      if(na.ne.0) write(screenunit,*) 'point a   = ',na,ia,ja,lamdaa,phia
-c      if(nb.eq.0) write(screenunit,*) 'point b falls outside of Eta29 grid'
-c      if(nb.ne.0) write(screenunit,*) 'point b   = ',nb,ib,jb,lamdab,phib
-c      if(nc.eq.0) write(screenunit,*) 'point c falls outside of Eta29 grid'
-c      if(nc.ne.0) write(screenunit,*) "point c   = ",nc,ic,jc,lamdac,phic
-c      if(nd.eq.0) write(screenunit,*) 'point d falls outside of Eta29 grid'
-c      if(nd.ne.0) write(screenunit,*) "point d   = ",nd,id,jd,lamdad,phid
-c      if(ne.eq.0) write(screenunit,*) 'point e falls outside of Eta29 grid'
-c      if(ne.ne.0) write(screenunit,*) "point e   = ",ne,ie,je,lamdae,phie
-c      if(ng.eq.0) write(screenunit,*) 'point g falls outside of Eta29 grid'
-c      if(ng.ne.0) write(screenunit,*) "point g   = ",ng,ig,jg,lamdag,phig
-c     endif
+C     if (myproc == 0) then
+C      write(screenunit,*) 'closest E29 node i,j = ',n,i,j,lamda,phi
+C      if(na.eq.0) write(screenunit,*) 'point a falls outside of Eta29 grid'
+C      if(na.ne.0) write(screenunit,*) 'point a   = ',na,ia,ja,lamdaa,phia
+C      if(nb.eq.0) write(screenunit,*) 'point b falls outside of Eta29 grid'
+C      if(nb.ne.0) write(screenunit,*) 'point b   = ',nb,ib,jb,lamdab,phib
+C      if(nc.eq.0) write(screenunit,*) 'point c falls outside of Eta29 grid'
+C      if(nc.ne.0) write(screenunit,*) "point c   = ",nc,ic,jc,lamdac,phic
+C      if(nd.eq.0) write(screenunit,*) 'point d falls outside of Eta29 grid'
+C      if(nd.ne.0) write(screenunit,*) "point d   = ",nd,id,jd,lamdad,phid
+C      if(ne.eq.0) write(screenunit,*) 'point e falls outside of Eta29 grid'
+C      if(ne.ne.0) write(screenunit,*) "point e   = ",ne,ie,je,lamdae,phie
+C      if(ng.eq.0) write(screenunit,*) 'point g falls outside of Eta29 grid'
+C      if(ng.ne.0) write(screenunit,*) "point g   = ",ng,ig,jg,lamdag,phig
+C     endif
 
       NN1=1
       NN2=1
@@ -1541,7 +1552,7 @@ c     test if the point is in triangle ij - b - a
          A3=(Y4-Y1)*(X2-X1)-(X4-X1)*(Y2-Y1)
          AA=ABS(A1)+ABS(A2)+ABS(A3)
          AE=ABS(AA-AREAS)/AREAS
-c     write(333,*) "AE = ",AE
+C     write(333,*) "AE = ",AE
          IF((AE.LT.1.0d-5).AND.(AE.LT.AEMIN)) THEN
             AEMIN=AE
             NN1=n
@@ -1552,11 +1563,11 @@ c     write(333,*) "AE = ",AE
             DD3=(-(X4-X1)*(Y2-Y1)+(Y4-Y1)*(X2-X1))/AREAS
             call betaucalc(i,j,DD1,ib,jb,DD2,ia,ja,DD3,betau)
             ifflag=ifflag+1
-c     write(333,*) 'position found in triangle ij - b - a'
+C     write(333,*) 'position found in triangle ij - b - a'
          ENDIF
       endif
 
-c     if along the west boundary, test if the point is in triangle ij - c - a
+C     if along the west boundary, test if the point is in triangle ij - c - a
 
       if((i.eq.1).and.(mod(j,2).ne.0)) then
          if((na.ne.0).and.(nc.ne.0)) then
@@ -1580,12 +1591,12 @@ c     write(333,*) "AE = ",AE
                DD3=(-(X4-X1)*(Y2-Y1)+(Y4-Y1)*(X2-X1))/AREAS
                call betaucalc(i,j,DD1,ic,jc,DD2,ia,ja,DD3,betau)
                ifflag=ifflag+1
-c     write(333,*) 'position found in triangle ij - c - a'
+C     write(333,*) 'position found in triangle ij - c - a'
             ENDIF
          endif
       endif
 
-c     test if the point is in triangle ij - c - b
+C     test if the point is in triangle ij - c - b
 
       if((nb.ne.0).and.(nc.ne.0)) then
          X2=lamdac
@@ -1598,7 +1609,7 @@ c     test if the point is in triangle ij - c - b
          A3=(Y4-Y1)*(X2-X1)-(X4-X1)*(Y2-Y1)
          AA=ABS(A1)+ABS(A2)+ABS(A3)
          AE=ABS(AA-AREAS)/AREAS
-c     write(333,*) "AE = ",AE
+C     write(333,*) "AE = ",AE
          IF((AE.LT.1.0d-5).AND.(AE.LT.AEMIN)) THEN
             NN1=n
             NN2=nc
@@ -1608,11 +1619,11 @@ c     write(333,*) "AE = ",AE
             DD3=(-(X4-X1)*(Y2-Y1)+(Y4-Y1)*(X2-X1))/AREAS
             call betaucalc(i,j,DD1,ic,jc,DD2,ib,jb,DD3,betau)
             ifflag=ifflag+1
-c     write(333,*) 'position found in triangle ij - c - b'
+C     write(333,*) 'position found in triangle ij - c - b'
          ENDIF
       endif
 
-c     test if the point is in triangle ij - d - c
+C     test if the point is in triangle ij - d - c
 
       if((nc.ne.0).and.(nd.ne.0)) then
          X2=lamdad
@@ -1635,11 +1646,11 @@ c     write(333,*) "AE = ",AE
             DD3=(-(X4-X1)*(Y2-Y1)+(Y4-Y1)*(X2-X1))/AREAS
             call betaucalc(i,j,DD1,id,jd,DD2,ic,jc,DD3,betau)
             ifflag=ifflag+1
-c     write(333,*) 'position found in triangle ij - d - c'
+C     write(333,*) 'position found in triangle ij - d - c'
          ENDIF
       endif
 
-c     if along the east boundary, test if the point is in triangle ij - g - d
+C     if along the east boundary, test if the point is in triangle ij - g - d
 
       if((i.eq.181).and.(mod(j,2).eq.0)) then
          if((nd.ne.0).and.(ng.ne.0)) then
@@ -1653,7 +1664,7 @@ c     if along the east boundary, test if the point is in triangle ij - g - d
             A3=(Y4-Y1)*(X2-X1)-(X4-X1)*(Y2-Y1)
             AA=ABS(A1)+ABS(A2)+ABS(A3)
             AE=ABS(AA-AREAS)/AREAS
-c     write(333,*) "AE = ",AE
+C     write(333,*) "AE = ",AE
             IF((AE.LT.1.0d-5).AND.(AE.LT.AEMIN)) THEN
                NN1=n
                NN2=ng
@@ -1663,12 +1674,12 @@ c     write(333,*) "AE = ",AE
                DD3=(-(X4-X1)*(Y2-Y1)+(Y4-Y1)*(X2-X1))/AREAS
                call betaucalc(i,j,DD1,ig,jg,DD2,id,jd,DD3,betau)
                ifflag=ifflag+1
-c     write(333,*) 'position found in triangle ij - g - d'
+C     write(333,*) 'position found in triangle ij - g - d'
             ENDIF
          endif
       endif
 
-c     test if the point is in triangle ij - e - d
+C     test if the point is in triangle ij - e - d
 
       if((nd.ne.0).and.(ne.ne.0)) then
          X2=lamdae
@@ -1691,11 +1702,11 @@ c     write(333,*) "AE = ",AE
             DD3=(-(X4-X1)*(Y2-Y1)+(Y4-Y1)*(X2-X1))/AREAS
             call betaucalc(i,j,DD1,ie,je,DD2,id,jd,DD3,betau)
             ifflag=ifflag+1
-c     write(333,*) 'position found in triangle ij - e - d'
+C     write(333,*) 'position found in triangle ij - e - d'
          ENDIF
       endif
 
-c     test if the point is in triangle ij - g - e
+C     test if the point is in triangle ij - g - e
 
       if((ne.ne.0).and.(ng.ne.0)) then
          X2=lamdag
@@ -1708,7 +1719,7 @@ c     test if the point is in triangle ij - g - e
          A3=(Y4-Y1)*(X2-X1)-(X4-X1)*(Y2-Y1)
          AA=ABS(A1)+ABS(A2)+ABS(A3)
          AE=ABS(AA-AREAS)/AREAS
-c     write(333,*) "AE = ",AE
+C     write(333,*) "AE = ",AE
          IF((AE.LT.1.0d-5).AND.(AE.LT.AEMIN)) THEN
             NN1=n
             NN2=ng
@@ -1718,11 +1729,11 @@ c     write(333,*) "AE = ",AE
             DD3=(-(X4-X1)*(Y2-Y1)+(Y4-Y1)*(X2-X1))/AREAS
             call betaucalc(i,j,DD1,ig,jg,DD2,ie,je,DD3,betau)
             ifflag=ifflag+1
-c     write(333,*) 'position found in triangle ij - g - e'
+C     write(333,*) 'position found in triangle ij - g - e'
          ENDIF
       endif
 
-c     test if the point is in triangle ij - a - g
+C     test if the point is in triangle ij - a - g
 
       if((na.ne.0).and.(ng.ne.0)) then
          X2=lamdaa
@@ -1735,7 +1746,7 @@ c     test if the point is in triangle ij - a - g
          A3=(Y4-Y1)*(X2-X1)-(X4-X1)*(Y2-Y1)
          AA=ABS(A1)+ABS(A2)+ABS(A3)
          AE=ABS(AA-AREAS)/AREAS
-c     write(333,*) "AE = ",AE
+C     write(333,*) "AE = ",AE
          IF((AE.LT.1.0d-5).AND.(AE.LT.AEMIN)) THEN
             NN1=n
             NN2=na
@@ -1745,23 +1756,23 @@ c     write(333,*) "AE = ",AE
             DD3=(-(X4-X1)*(Y2-Y1)+(Y4-Y1)*(X2-X1))/AREAS
             call betaucalc(i,j,DD1,ia,ja,DD2,ig,jg,DD3,betau)
             ifflag=ifflag+1
-c     write(333,*) 'position found in triangle ij - a - g'
+C     write(333,*) 'position found in triangle ij - a - g'
          ENDIF
       endif
 
-c      if(ifflag.eq.0) then
-c         write(333,*) 'position not found'
-c        if (myproc == 0) then
-c         write(screenunit,*) 'position not found in subroutine E29SEARCH'
-c        endif
-c        icode=3
-c      else
-c        if (myproc == 0) then
-c         write(screenunit,*) 'i,j,NN1,NN2,NN3,DD1,DD2,DD3'
-c        endif
-c         write(333,999) i,j,NN1,NN2,NN3,DD1,DD2,DD3,betau/dgtora
-c 999     format(5I8,1x,3E13.6)
-c      endif
+C      if(ifflag.eq.0) then
+C         write(333,*) 'position not found'
+C        if (myproc == 0) then
+C         write(screenunit,*) 'position not found in subroutine E29SEARCH'
+C        endif
+C        icode=3
+C      else
+C        if (myproc == 0) then
+C         write(screenunit,*) 'i,j,NN1,NN2,NN3,DD1,DD2,DD3'
+C        endif
+C         write(333,999) i,j,NN1,NN2,NN3,DD1,DD2,DD3,betau/dgtora
+C 999     format(5I8,1x,3E13.6)
+C      endif
 
       return
       end subroutine
@@ -3017,7 +3028,8 @@ C     &      "The simulation has run out of meteorological data.")
       ! scale (Vmax - Vt) and Vr up to the top of the surface,
       ! where the cylcostrophic wind balance is valid.
       !-------------------------------------------------------
-      stormMotion = 1.5d0*(SQRT(uTransNow**2.d0+vTransNow**2.d0))**0.63d0
+      stormMotion = 1.5d0*(SQRT(uTransNow**2.d0+vTransNow**2.d0))
+     & **0.63d0
       VmaxBL = (Vmax-stormMotion)/windReduction
       call newVortex(Pn,Pc,cLat,cLon,VmaxBL)
       call setRmaxes(crmaxw)

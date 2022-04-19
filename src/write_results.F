@@ -82,9 +82,9 @@ C.....to single nodal values
 #endif
             
                 DO KK = 2,DOFH
-                  ZE_DG(J) = ZE_DG(J)+PHI_CORNER(KK,K,ph)*ZE(KK,NBOR_EL,1)
-                  QX_DG(J) = QX_DG(J)+PHI_CORNER(KK,K,ph)*QX(KK,NBOR_EL,1)
-                  QY_DG(J) = QY_DG(J)+PHI_CORNER(KK,K,ph)*QY(KK,NBOR_EL,1)
+                ZE_DG(J) = ZE_DG(J)+PHI_CORNER(KK,K,ph)*ZE(KK,NBOR_EL,1)
+                QX_DG(J) = QX_DG(J)+PHI_CORNER(KK,K,ph)*QX(KK,NBOR_EL,1)
+                QY_DG(J) = QY_DG(J)+PHI_CORNER(KK,K,ph)*QY(KK,NBOR_EL,1)
               
 #ifdef TRACE
                   iota_DG(J) = iota_DG(J) 
@@ -108,7 +108,7 @@ C.....to single nodal values
 #ifdef SED_LAY
                   do l=1,layers
                      bed_DG(J,l) = bed_DG(J,l) 
-     &                           + PHI_CORNER(KK,K,ph)*bed(KK,NBOR_EL,1,l)
+     &                         + PHI_CORNER(KK,K,ph)*bed(KK,NBOR_EL,1,l)
                      HB_DG(J) = HB_DG(J) 
      &                        + PHI_CORNER(KK,K,ph)*bed(KK,NBOR_EL,1,l)
                      iotaa_DG(J) = iotaa(1,NBOR_EL,1)
@@ -278,7 +278,8 @@ C.....to single nodal values
             
             do k = 1,dofs(j)
                
-               iota_error = iota_error + (iota(k,j,1)- iotaa(k,j,1)) * PHI_AREA(k,I,pa) 
+               iota_error = iota_error + (iota(k,j,1)- iotaa(k,j,1)) * 
+     &          PHI_AREA(k,I,pa) 
                
             ENDDO
             
@@ -675,13 +676,13 @@ C.....time step falls within the specified window
 #ifdef TRACE                   
                   IF (ABS(tracer(I)).LE.(10.0**(-30))) tracer(I) = 0.D0
                   WRITE(88,2453) I,tracer(I)
-                  IF (ABS(tracer2(I)).LE.(10.0**(-30))) tracer2(I) = 0.D0
+                 IF (ABS(tracer2(I)).LE.(10.0**(-30))) tracer2(I) = 0.D0
                   WRITE(89,2453) I,tracer2(I)
 #endif
 #ifdef CHEM                   
                   IF (ABS(tracer(I)).LE.(10.0**(-30))) tracer(I) = 0.D0
                   WRITE(88,2453) I,tracer(I)
-                  IF (ABS(tracer2(I)).LE.(10.0**(-30))) tracer2(I) = 0.D0
+                 IF (ABS(tracer2(I)).LE.(10.0**(-30))) tracer2(I) = 0.D0
                   WRITE(89,2453) I,tracer2(I)
 #endif
                   IF (ABS(dpe(I)).LE.(10.0**(-30))) dpe(I) = 0.D0
@@ -702,7 +703,7 @@ C.....time step falls within the specified window
      $            ' ELEMENTS=', ne, 
      $            ' DATAPACKING=BLOCK ',
      $            'SOLUTIONTIME=',time_a,
-     $            'VARLOCATION=([3,4,5,6,7,8,10,11,12,13,14]=CELLCENTERED)'
+     $         'VARLOCATION=([3,4,5,6,7,8,10,11,12,13,14]=CELLCENTERED)'
                   do i=1,np
                      write(777,7777)  x(i)
                   enddo
@@ -1050,7 +1051,7 @@ C...
                     DP1     = DP(NM(NNV(I),1))
                     DP2     = DP(NM(NNV(I),2))
                     DP3     = DP(NM(NNV(I),3))
-                    DP00    = DP1*STAIV1(I) + DP2*STAIV2(I) +DP3*STAIV3(I)
+                    DP00  = DP1*STAIV1(I) + DP2*STAIV2(I) +DP3*STAIV3(I)
                     DEPTH   = ZE00 + DP00
                   else
                     DP1     = DPE(nnv(i))
@@ -1343,7 +1344,7 @@ C
          ENDIF
 #else
          IF(ELMAX.LT.200.d0.and.(MOD(IT,NSCREEN_INC).EQ.0) ) THEN
-           WRITE(6,1992) IT,TIME_A/86400.d0,ETA2(KEMAX),KEMAX,VELMAX,KVMAX
+         WRITE(6,1992) IT,TIME_A/86400.d0,ETA2(KEMAX),KEMAX,VELMAX,KVMAX
  1992      FORMAT(1X,'TIME STEP =',I8,5X,'TIME =',F12.6,
      &           /,2X,'ELMAX = ', E11.4,' AT NODE',I7,
      &           2X,'SPEEDMAX = ',E11.4,' AT NODE',I7)
