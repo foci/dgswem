@@ -901,7 +901,7 @@ C...
                   DO I=1,NP
                      write(73,2453) i,pr2(i)
                      WRITE(74,2454) i,wvnxout(i),wvnyout(i)
-                     IF (RAINFALL.EQ.3) WRITE(99,2453) I,PREC3(I)
+                     IF (RAINFALL.EQ.3) WRITE(99,2453) I,PREC3(I)*DTDP
                   ENDDO
                   igpp = igpp+1+np
                   IGWP = IGWP+1+NP
