@@ -645,6 +645,7 @@
       REAL(sz) :: Tm
       REAL(sz) :: rm
       REAL(sz) :: re
+      REAL(sz) :: dist_km
       
       !------------------------------------------------------
       ! Calculate distance and angle between eye of hurricane
@@ -764,10 +765,12 @@
       re=a4+(b4*NMW) ! curve fit parameter; specifies end behavior of rainfall rate curves
       ! Compute TRR
    
-      IF (dist.LT.rm) THEN
-         TRR = T0+(Tm-T0)*(dist/rm); !TRR is rain rate in inches/day
-      ELSEIF (dist.GE.rm) THEN
-         TRR= Tm*exp(-((dist-rm)/re));
+      ! change dist to km
+      dist_km = dist * nm2m * 0.001
+      IF (dist_km.LT.rm) THEN
+         TRR = T0+(Tm-T0)*(dist_km/rm); !TRR is rain rate in inches/day
+      ELSEIF (dist_km.GE.rm) THEN
+         TRR= Tm*exp(-((dist_km-rm)/re));
       ENDIF
     
       !convert inches/day-> m/sec
