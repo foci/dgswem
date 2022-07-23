@@ -376,7 +376,8 @@ C     sb46.28sb01 added NWS=12: OWI format
      &       (NWS.NE.3).AND.(ABS(NWS).NE.4) .AND.(ABS(NWS).NE.5).AND.
      &       (ABS(NWS).NE.45).AND.(ABS(NWS).NE.6).AND.
      &       (ABS(NWS).NE.8).AND.(ABS(NWS).NE.9).AND.
-     &       (ABS(NWS).NE.12).AND.(ABS(NWS).NE.19))  THEN
+     &       (ABS(NWS).NE.12).AND.(ABS(NWS).NE.19).AND. 
+     &       (ABS(NWS).NE.20))  THEN
            print *, "Value for NWS not supported by parallel code"
            stop
         ENDIF

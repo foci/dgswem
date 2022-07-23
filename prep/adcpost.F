@@ -59,7 +59,7 @@ C
       REAL TOL,SCALE
       LOGICAL FOUND
       CHARACTER DIRCMD*72,CMD*6,PENUM*6,PHASE*9,ISET*6,DIR1*80,DIR2*80,
-     &    CONVDIR*6,HOTANS*1
+     &    CONVDIR*6,HOTANS*1,PHASE2*9
 C
 C--Initialize constants for case ICS = 2 inputs
 C
@@ -130,17 +130,29 @@ C
           CALL POST62()
         ENDIF
 C
-        IF (NOUTGE.NE.0) THEN
+        print *," ***********************************"
+        print *," ADCPOST version 1.1  (5/04/99)"
+        print *," Parallel ADCIRC Post-processor"
+        print *," ***********************************"
+19      print *, " "
+        print *," Do you want to process DG.* files?"
+        print *, " "
+        print *," yes/no  "
+
+C
+        read(*,'(A7)') PHASE2
+C
+        IF ((NOUTGE.NE.0).and.(PHASE(1:4).EQ.'yes')) THEN
           print *, "Post-Processing DG.63"
           CALL POSTDG63()
         ENDIF
 C
-c        IF (NOUTGE.NE.0) THEN
+c        IF ((NOUTGE.NE.0).and.(PHASE(1:4).EQ.'yes')) THEN
 c          print *, "Post-Processing DG.65"
 c          CALL POSTDG65()
 c        ENDIF
 C
-        IF (NOUTGV.NE.0) THEN
+        IF ((NOUTGV.NE.0).and.(PHASE(1:4).EQ.'yes')) THEN
           print *, "Post-Processing DG.64"
           CALL POSTDG64()
         ENDIF

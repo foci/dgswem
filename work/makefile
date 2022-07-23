@@ -36,7 +36,7 @@ endif
 ifeq ($(BUILDTYPE),dgswem_serial)
   CF:= $(PPFC)
   O_DIR:=odir4/
-  FFLAGS:= $(FFLAGS3) $(DA) $(IMODS)$(O_DIR)
+  FFLAGS:= $(FFLAGS3) $(DA) $(IMODS)$(O_DIR) 
   VPATH:=  ../src 
   MSG_MOBJ:=
 endif

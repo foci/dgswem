@@ -831,5 +831,38 @@ Casey 121019: Added multiplication factor to be used before sending winds to cou
          END DO
       ENDIF
 
+      IF(NWS.EQ.20) THEN
+         CALL NWS20GET(SLAM,SFEA,WVNX2,WVNY2,PRN2,NP,AsymmetricTime,ICS)
+         DO II=1,NP
+            WindX = WVNX2(II)
+            WindY = WVNY2(II)
+            WindMag = SQRT(WindX*WindX+WindY*WindY)
+            WDragCo = WindDrag(WindMag, I)
+            IF (LoadDirEffRLen) THEN
+               CALL ApplyDirectionalWindReduction(II, WDragCo,
+     &              WindMag, DP(II), ETA2(II), H0, G, WindX, WindY)
+               WindMag = SQRT(WindX*WindX+WindY*WindY)
+               WDragCo = WindDrag(WindMag, I)
+            ENDIF
+
+            WSX2(II) = RampMete*0.001293d0*WDragCo*WindX*WindMag
+            WSY2(II) = RampMete*0.001293d0*WDragCo*WindY*WindMag
+!            PR2(II)=RampMete*PRN2(II)
+            PRBCKGRND_MH2O = 100.0D0*PRBCKGRND/(RHOWAT0*G)
+            PRDIFF = RampMete*(PRN2(II)-PRBCKGRND_MH2O)
+            PR2(II) = PRBCKGRND_MH2O + PRDIFF
+            WVNXOUT(II)=RampMete*WindX
+            WVNYOUT(II)=RampMete*WindY
+#ifdef CSWAN
+Casey 090302: Added these lines for coupling winds to SWAN.
+Casey 121019: Added multiplication factor to be used before sending winds to coupled wave models.
+            IF(COUPWIND)THEN
+               SWAN_WX2(II,2) = WindX/WindMultiplier
+               SWAN_WY2(II,2) = WindY/WindMultiplier
+            ENDIF
+#endif
+         END DO
+      ENDIF
+
       RETURN
       END SUBROUTINE MET_FORCING

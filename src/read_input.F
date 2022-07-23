@@ -663,7 +663,7 @@ C.....Read and process NWS - wind and pressure forcing & wave rad stress
       IF ( (NWS.NE.0)  .AND.(NWS.NE.1)       .AND.(ABS(NWS).NE.2)  .AND.
      &     (NWS.NE.3)  .AND.(ABS(NWS).NE.4)  .AND.(ABS(NWS).NE.5)  .AND.
      &     (NWS.NE.6)  .AND.(NWS.NE.10)      .AND.(NWS.NE.11)      .AND.
-     &     (ABS(NWS).NE.12 ).AND.(NWS.NE.19)                       .AND.
+     &     (ABS(NWS).NE.12 ).AND.(NWS.NE.19).AND.(NWS.NE.20)       .AND.
      &     (NWS.NE.100).AND.(NWS.NE.101)     .AND.(ABS(NWS).NE.102).AND.
      &     (NWS.NE.103).AND.(ABS(NWS).NE.104).AND.(ABS(NWS).NE.105).AND.
      &     (NWS.NE.106).AND.(NWS.NE.110)     .AND.(NWS.NE.111)     .AND.
@@ -914,6 +914,19 @@ C     rjw added nws = 19: asymmetric hurricane winds v2.0
      &    /,9X,'INTERPOLATION IN TIME IS DONE TO SYNC THE STORM DATA ',
      &    /,9X,'WITH THE MODEL TIME STEP.')
       ENDIF
+C     EV added nws = 20: asymmetric hurricane winds v2.0
+      IF(NWS.EQ.20) THEN
+         WRITE(16,2400) NWS
+ 2402    FORMAT(/,5X,'NWS = ',I3,
+     &    /,9X,'HURRICANE PARAMETERS AND THE ASYMMETRIC WIND MODEL',
+     &    /,9X,'  ARE USED TO FORCE THE COMPUTATION',
+     &    /,9X,'VALUES ARE READ IN FOR THE STORM FROM UNIT 22',
+     &    /,9X,
+     &    'WHICH IS CREATED FROM TEH ATCF FILE USING THE ASWIP PROGRAM',
+     &    /,9X,'THE UNIT 22 FILE BEGINS AT TIME=STATIM.',
+     &    /,9X,'INTERPOLATION IN TIME IS DONE TO SYNC THE STORM DATA ',
+     &    /,9X,'WITH THE MODEL TIME STEP.')
+      ENDIF
       IF (NRS.EQ.1) THEN
          WRITE(16,2391) NRS
  2391    FORMAT(/,5X,'NRS = ',I2,
@@ -1113,6 +1126,17 @@ C     rjw added nws = 19: asymmetric hurricane winds
          ELSEIF (NRS.GE.1) THEN
             READ(15,*) IREFYR,IREFMO,IREFDAY,IREFHR,StormNumber,BLAdj,
      &           RSTIMINC
+         ENDIF
+      ENDIF
+
+C     EV added nws = 20: asymmetric hurricane winds
+      IF(ABS(NWS).EQ.20) THEN
+         IF (NRS.EQ.0) THEN
+            READ(15,*) IREFYR,IREFMO,IREFDAY,IREFHR,StormNumber,BLAdj,
+     &          GEOFACTOR
+         ELSEIF (NRS.GE.1) THEN
+            READ(15,*) IREFYR,IREFMO,IREFDAY,IREFHR,StormNumber,BLAdj,
+     &           GEOFACTOR, RSTIMINC
          ENDIF
       ENDIF
 
@@ -4575,6 +4599,8 @@ C.....Write table of parameter sizes (vjp 11/28/99)
       IF (NWS.EQ.11) WRITE(16,4017)
       IF(NWS.EQ.19) WRITE(16,4018)      !rjw added nws = 19
       IF(NWS.EQ.19) WRITE(16,4019)      !rjw added nws = 19
+      IF(NWS.EQ.20) WRITE(16,4028)      !EV added nws = 20
+      IF(NWS.EQ.20) WRITE(16,4029)      !EV added nws = 20
       IF ((NFREQ.EQ.0).OR.(FMV.EQ.0.)) WRITE(16,4021)
       IF ((NFREQ.GE.1).AND.(FMV.NE.0.)) WRITE(16,4022)
       IF (ILUMP.EQ.0) WRITE(16,4031)
@@ -4613,6 +4639,8 @@ C.....Write table of parameter sizes (vjp 11/28/99)
  4016 FORMAT(' *   Also, AVN wind & pressure forcing will be used, *')
  4018 FORMAT(' *   Asymmetric hurricane wind and pressure forcing  *')
  4019 FORMAT(' *              will be used,                        *')
+ 4028 FORMAT(' *   Asymmetric Generalized hurricane wind and       *')
+ 4029 FORMAT(' *           pressure forcing will be used,          *')
  4017 FORMAT(' *   Also, ETA wind & pressure forcing will be used, *')
  4021 FORMAT(' *   means and variance calculation will NOT be made,*')
  4022 FORMAT(' *   means and variance calculation will be made,    *')
