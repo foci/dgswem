@@ -3181,6 +3181,7 @@ C***********************************************************************
      &    Rearth, pi, deg2rad, rad2deg, e, PRBCKGRND, g, rhoWat0,
      &    sphericalDistance, rhoAir, one2ten, windReduction,
      &    kt2ms, nm2m,deg2rad,omega, Rearth, m2nm, mb2pa, rnday
+      USE DG, ONLY : PREC2, PREC3
       IMPLICIT NONE
 
       INTEGER  :: np, ics
@@ -3750,13 +3751,18 @@ c      endif
       DO i=1,np
          CALL uvpr(dist(i),aziangle(i),crmaxw(i),crmaxwTrue(i),
      &        cHollBs(i),cVmwBL(i),cPhiFactor(i),stormMotionU,
-     &        stormMotionV,geofactor,wvnx(i),wvny(i),press(i))
+     &        stormMotionV,geofactor,wvnx(i),wvny(i),press(i),PREC2(i))
          !-------------------------------------------
          ! Convert atmospheric pressure (Pascals) to
          ! atmospheric pressure-induced water surface
          ! elevation (meters).
          !-------------------------------------------
          press(i) = press(i) / RhoWatG
+         
+         !-------------------------------------------
+         ! Compute accumulated rainfall rate
+         !-------------------------------------------
+         PREC3(i) = PREC3(i) + PREC2(i)
       END DO
       !-----------------------------------
       ! NHC advisory best-track i/o format

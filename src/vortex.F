@@ -810,7 +810,9 @@
       !=================================================================
       
       SUBROUTINE uvpr(idist,iangle,irmx,irmx_true,iB,iVm,iPhi,
-     &                uTrans,vTrans,geof, u,v,p)
+     &                uTrans,vTrans,geof, u,v,p,TRR)
+      USE GLOBAL, ONLY : RAINFALL
+      
       REAL(sz), INTENT(IN)  :: idist
       REAL(sz), INTENT(IN)  :: iangle
       REAL(sz), INTENT(IN)  :: irmx
@@ -825,6 +827,7 @@
       REAL(sz), INTENT(OUT) :: u
       REAL(sz), INTENT(OUT) :: v
       REAL(sz), INTENT(OUT) :: p
+      REAL(sz), INTENT(OUT), OPTIONAL :: TRR
 
       REAL(sz) :: TransSpdX  !NWS8-style translation speed
       REAL(sz) :: TransSpdY  !NWS8-style translation speed
@@ -836,6 +839,22 @@
       REAL(sz) :: damp
       REAL(sz) :: percentCoriolis
       INTEGER :: i
+      
+      !...Constants for parametric rainfall model
+      REAL(sz) :: a1
+      REAL(sz) :: a2
+      REAL(sz) :: a3
+      REAL(sz) :: a4
+      REAL(sz) :: b1
+      REAL(sz) :: b2
+      REAL(sz) :: b3
+      REAL(sz) :: b4
+      REAL(sz) :: NMW
+      REAL(sz) :: T0
+      REAL(sz) :: Tm
+      REAL(sz) :: rm
+      REAL(sz) :: re
+      REAL(sz) :: dist_km
       
       rmx=irmx
       B=iB
@@ -922,6 +941,39 @@
       !   p = mb2pa * Pn
       !endif
 
+      !...Compute parametric rainfall model
+      IF (RAINFALL.EQ.3) THEN
+      a1 = -1.10d0 !inches/day
+      a2 = -1.6d0 !inches/day
+      a3 =  64.5d0 !kilometers
+      a4 =  150.d0 !kilometers
+      b1 =  3.96d0 !inches/day
+      b2 =  4.80d0 !inches/day
+      b3 = -13.0d0 !kilometers
+      b4 = -16.0d0 !kilometers
+      
+      ! Equations 
+      NMW=(1.d0 + ((Vmax-35.d0)/33.d0)); !normalized maximum wind
+      T0=a1+(b1*NMW) ! rain rate at TC center r=0
+      Tm=a2+(b2*NMW) !maximum rain rate
+      rm=a3+(b3*NMW) !radius from the center at which maximum rain rate occurs
+      re=a4+(b4*NMW) ! curve fit parameter; specifies end behavior of rainfall rate curves
+      ! Compute TRR
+   
+      ! change dist to km
+      dist_km = idist * nm2m * 0.001
+      IF (dist_km.LT.rm) THEN
+         TRR = T0+(Tm-T0)*(dist_km/rm); !TRR is rain rate in inches/day
+      ELSEIF (dist_km.GE.rm) THEN
+         TRR= Tm*exp(-((dist_km-rm)/re));
+      ENDIF
+    
+      !convert inches/day-> m/sec
+      TRR=TRR/3401568.d0
+      
+      ! PRINT*,TRR
+      ENDIF
+      
       END SUBROUTINE uvpr
       
       !=================================================================
