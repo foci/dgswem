@@ -665,7 +665,13 @@ C...
           WRITE(72,3220) RUNDES,RUNID,AGRID
           WRITE(72,3645) NTRSPM,NSTAM,DTDP*NSPOOLM,NSPOOLM,2
           IWSTP=2
+          
+          IF (RAINFALL.EQ.3) THEN
+             OPEN(98,FILE=DIRNAME//'/'//'fort.98')
+             WRITE(98,3220) RUNDES,RUNID,AGRID
+             WRITE(98,3645) NTRSPM,NSTAM,DTDP*NSPOOLM,NSPOOLM,1
           ENDIF
+        ENDIF
 
         IF(ABS(NOUTM).EQ.2) THEN
           OPEN(71,FILE=DIRNAME//'/'//'fort.71',

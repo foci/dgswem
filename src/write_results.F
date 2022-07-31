@@ -602,13 +602,21 @@ C...
                 RMU00(I)=U11*STAIM1(I)+U22*STAIM2(I)+U33*STAIM3(I)
                 RMV00(I)=V11*STAIM1(I)+V22*STAIM2(I)+V33*STAIM3(I)
                 RMP00(I)=P11*STAIM1(I)+P22*STAIM2(I)+P33*STAIM3(I)
+                
+                R11=PREC3(NM1)
+                R22=PREC3(NM2)
+                R33=PREC3(NM3)
+                RMR00(I)=R11*STAIM1(I)+R22*STAIM2(I)+R33*STAIM3(I)
+                RMR00(I)=RMR00(I)*DTDP
                 END DO
               IF(ABS(NOUTM).EQ.1) THEN
                 WRITE(71,2120) time_A,IT
                 WRITE(72,2120) time_A,IT
+                IF (RAINFALL.EQ.3) WRITE(98,2120) time_A,IT
                 DO I=1,NSTAM
                   WRITE(71,2453) I,RMP00(I)
                   WRITE(72,2454) I,RMU00(I),RMV00(I)
+                  IF (RAINFALL.EQ.3) WRITE(98,2453) I,RMR00(I)
                   END DO
                 IPSTP=IPSTP+1+NSTAM
                 IWSTP=IWSTP+1+NSTAM

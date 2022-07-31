@@ -84,6 +84,15 @@ C
          ENDDO
       ENDDO
 C
+      READ(80,*) NOUTM,TOUTSM,TOUTFM,NSPOOLM
+C
+      DO I = 1,NPROC
+         READ(80,*) J,NSTAMP(I)
+         DO K = 1,NSTAMP(I)
+            READ(80,*) IMAP_STAM_LG(K,I)
+         ENDDO
+      ENDDO
+C
       READ(80,*) NOUTGE, TOUTSGE,TOUTFGE,NSPOOLGE
       READ(80,*) NOUTGV, TOUTSGV,TOUTFGV,NSPOOLGV
       READ(80,*) NOUTGC, TOUTSGC,TOUTFGC,NSPOOLGC
@@ -5627,3 +5636,245 @@ C
 C
       RETURN
       END
+      
+C---------------------------------------------------------------------------C
+C Globalize accumulated rainfall at specified meteorological recording stations
+C---------------------------------------------------------------------------C
+      SUBROUTINE POST98()
+      
+      USE POST_GLOBAL
+      INTEGER I,J,K,L,IPROC,IDUM
+      INTEGER NTRSPM,NSTEMP,ITSM,ITEMPM,NUMSTNS
+      INTEGER OREC
+      REAL DTM,TIMEOUTSM
+      CHARACTER*80  OUTMSG
+      CHARACTER*85  INLINE
+      CHARACTER*4 RDES4(8),RID4(6),AID4(6)
+      CHARACTER*8 RDES8(8),RID8(6),AID8(6)
+      LOGICAL FOUND
+
+
+      INTEGER,ALLOCATABLE :: LOC(:),IREC(:)
+      REAL,ALLOCATABLE ::   ETBIN(:),ETBINP(:)
+      CHARACTER*80,ALLOCATABLE ::  ETASC(:),ETASCP(:)
+      CHARACTER*16,ALLOCATABLE ::  LOCNAME(:)
+
+      ALLOCATE ( LOC(MNPROC),IREC(MNPROC) )
+      ALLOCATE ( ETBIN(MNSTAM),ETBINP(MNSTAM))
+      ALLOCATE ( ETASC(MNSTAM),ETASCP(MNSTAM))
+      ALLOCATE ( LOCNAME(MNPROC))
+
+C
+C--Determine whether Unit 98 is Sequential Formatted or Direct Access Binary
+C
+      IF (ABS(NOUTM).EQ.1) THEN
+        GO TO 1000
+      ELSE
+        GO TO 2000
+      ENDIF
+C
+1000  CONTINUE
+C
+C--Open All Local Sequential Formatted fort.98 file
+C
+      DO IPROC = 1,NPROC
+         LOCNAME(IPROC) = 'PE0000/fort.98'
+         WRITE(LOCNAME(IPROC)(3:6),'(I4.4)') (IPROC-1)
+         LOC(IPROC) = 105 + (IPROC-1)
+         INQUIRE(FILE=LOCNAME(IPROC),EXIST=FOUND)
+         IF (FOUND) THEN
+           OPEN(LOC(IPROC),FILE=LOCNAME(IPROC))
+         ELSE
+           print *, "No Local fort.98 files found"
+           RETURN
+         ENDIF
+         READ(LOC(IPROC),'(A85)')  INLINE
+         READ(LOC(IPROC),3645) NTRSPM,NUMSTNS,DTM,NSTEMP,ITEMPM
+         IF (NUMSTNS.NE.NSTAMP(IPROC)) THEN
+            STOP 'Inconsistency in Number of Elevation Stations'
+         ENDIF
+      ENDDO
+C
+C--Open Global Sequential Formatted fort.98 file
+C
+      OPEN(UNIT=98,FILE='fort.98')
+C
+      WRITE(98,'(A85)') INLINE
+      WRITE(98,3645) NTRSPM,NSTAM,DTM,NSPOOLE,ITEMPM
+C
+      DO J=1,NTRSPM
+C
+         DO IPROC=1,NPROC
+            READ(LOC(IPROC),2120,END=9999) TIMEOUTSM,ITSM
+            IF (NSTAMP(IPROC).GT.0) THEN
+              READ(LOC(IPROC),80,END=9999) (ETASCP(K),K=1,NSTAMP(IPROC))
+              DO K=1,NSTAMP(IPROC)
+                 ETASC(abs(IMAP_STAE_LG(K,IPROC))) = ETASCP(K)
+              ENDDO
+            ENDIF
+         ENDDO            
+C
+         WRITE(98,2120) TIMEOUTSM,ITSM
+         DO I=1, NSTAM
+            CALL NEWINDEX(ETASC(I),OUTMSG,I)
+            WRITE(98,80) OUTMSG
+         ENDDO
+C
+      ENDDO                 
+      GO TO 9999
+C 
+2000  CONTINUE
+C
+C--Open All Local and the Global Direct Access Binary fort.98 file
+C
+      DO IPROC = 1,NPROC
+         LOCNAME(IPROC) = 'PE0000/fort.98'
+         WRITE(LOCNAME(IPROC)(3:6),'(I4.4)') (IPROC-1)
+         LOC(IPROC) = 105 + (IPROC-1)
+         INQUIRE(FILE=LOCNAME(IPROC),EXIST=FOUND)
+         IF (FOUND) THEN
+           OPEN(LOC(IPROC),FILE=LOCNAME(IPROC),ACCESS='DIRECT',
+     &       RECL=NBYTE)
+         ELSE
+           print *, "No Local fort.98 files found"
+           RETURN
+         ENDIF
+      ENDDO
+      OPEN(98,FILE='fort.98',ACCESS='DIRECT',RECL=NBYTE)
+C
+C
+C--Read RUNDES RUNID and AGRID from each Local file
+C
+      DO IPROC = 1,NPROC
+         IREC(IPROC) = 0
+         IF (NBYTE.EQ.4) THEN
+           DO I=1,8
+              READ(LOC(IPROC),REC=IREC(IPROC)+I) RDES4(I)
+           ENDDO
+           IREC(IPROC)=IREC(IPROC)+8
+           DO I=1,6
+              READ(LOC(IPROC),REC=IREC(IPROC)+I) RID4(I)
+           ENDDO
+           IREC(IPROC)=IREC(IPROC)+6
+           DO I=1,6
+              READ(LOC(IPROC),REC=IREC(IPROC)+I) AID4(I)
+           ENDDO
+           IREC(IPROC)=IREC(IPROC)+6
+         ENDIF
+         IF (NBYTE.EQ.8) THEN
+           DO I=1,4
+              READ(LOC(IPROC),REC=IREC(IPROC)+I) RDES8(I)
+           ENDDO
+           IREC(IPROC)=IREC(IPROC)+4
+           DO I=1,3
+              READ(LOC(IPROC),REC=IREC(IPROC)+I) RID8(I)
+           ENDDO
+           IREC(IPROC)=IREC(IPROC)+3
+           DO I=1,3
+              READ(LOC(IPROC),REC=IREC(IPROC)+I) AID8(I)
+           ENDDO
+           IREC(IPROC)=IREC(IPROC)+3
+         ENDIF
+      ENDDO
+C
+C--Write RUNDES RUNID and AGRID to Global File
+C
+      OREC = 0
+      IF (NBYTE.EQ.4) THEN
+        DO I=1,8
+           WRITE(98,REC=OREC+I) RDES4(I)
+        ENDDO
+        OREC=OREC+8
+        DO I=1,6
+           WRITE(98,REC=OREC+I) RID4(I)
+        ENDDO
+        OREC=OREC+6
+        DO I=1,6
+           WRITE(98,REC=OREC+I) AID4(I)
+        ENDDO
+        OREC=OREC+6
+      ENDIF
+      IF (NBYTE.EQ.8) THEN
+        DO I=1,4
+           WRITE(98,REC=OREC+I) RDES8(I)
+        ENDDO
+        OREC=OREC+4
+        DO I=1,3
+           WRITE(98,REC=OREC+I) RID8(I)
+        ENDDO
+        OREC=OREC+3
+        DO I=1,3
+           WRITE(98,REC=OREC+I) AID8(I)
+        ENDDO
+        OREC=OREC+3
+      ENDIF
+C
+C--Read NTRSPM, NSTAM, DT*NSPOOLE from each Local file
+C  and then close files to flush file buffers
+C
+      DO IPROC = 1,NPROC
+         READ(LOC(IPROC),REC=IREC(IPROC)+1) NTRSPM
+         READ(LOC(IPROC),REC=IREC(IPROC)+2) NUMSTNS        
+         READ(LOC(IPROC),REC=IREC(IPROC)+3) DTM
+         READ(LOC(IPROC),REC=IREC(IPROC)+4) NSTEMP 
+         READ(LOC(IPROC),REC=IREC(IPROC)+5) ITEMPM
+         IREC(IPROC) = IREC(IPROC)+5
+         CLOSE(LOC(IPROC))    ! Flush the Write Buffer
+         IF (NUMSTNS.NE.NSTAMP(IPROC)) THEN
+            STOP 'Inconsistency in Number of Elevation Stations'
+         ENDIF
+         OPEN(LOC(IPROC),FILE=LOCNAME(IPROC),ACCESS='DIRECT',RECL=NBYTE)
+      ENDDO
+C
+C--Write same info to Global file and close it to flush buffer also
+C
+      WRITE(98,REC=OREC+1) NTRSPM
+      WRITE(98,REC=OREC+2) NSTAM
+      WRITE(98,REC=OREC+3) DTM
+      WRITE(98,REC=OREC+4) NSPOOLE
+      WRITE(98,REC=OREC+5) ITEMPM
+      OREC = OREC+5
+      CLOSE(98)         ! Flush the Write Buffer
+      OPEN(98,FILE='fort.98',ACCESS='DIRECT',RECL=NBYTE)
+C
+      DO J=1,NTRSPM
+C
+         DO IPROC=1,NPROC
+            READ(LOC(IPROC),REC=IREC(IPROC)+1) TIMEOUTSM
+            READ(LOC(IPROC),REC=IREC(IPROC)+2) ITSM
+            IREC(IPROC) = IREC(IPROC) + 2
+            IF (NSTAMP(IPROC).GT.0) THEN
+              DO K=1, NSTAMP(IPROC)
+                 READ(LOC(IPROC),REC=IREC(IPROC)+K) ETBINP(K)
+              ENDDO
+              DO K=1,NSTAMP(IPROC)
+                 ETBIN(IMAP_STAE_LG(K,IPROC)) = ETBINP(K)
+              ENDDO
+              IREC(IPROC) = IREC(IPROC) + NSTAMP(IPROC)
+            ENDIF
+         ENDDO            
+C
+         WRITE(98,REC=OREC+1) TIMEOUTSM
+         WRITE(98,REC=OREC+2) ITSM
+         OREC = OREC + 2
+         DO K=1, NSTAM
+            WRITE(98,REC=OREC+K) ETBIN(K)
+         ENDDO
+         OREC = OREC + NSTAM
+C
+      ENDDO                 
+C
+C--Close the Global and Local fort.98 Files
+C
+9999  CONTINUE
+      CLOSE(98)
+      DO IPROC = 1,NPROC
+         CLOSE(LOC(IPROC))
+      ENDDO
+C
+   80 FORMAT(A40)
+ 2120 FORMAT(2X,E20.10,5X,I10)
+ 3645 FORMAT(1X,I10,1X,I10,1X,E15.7,1X,I5,1X,I5)
+C
+      RETURN
+      END SUBROUTINE POST98

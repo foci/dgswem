@@ -272,6 +272,10 @@ C
            print *, "Post-Processing Unit 96"
            CALL POST96()
          ENDIF
+         IF (NOUTM.NE.0) THEN
+           print *, "Post-Processing Unit 98"
+           CALL POST98()
+         ENDIF
       ! ENDIF
 C
         GO TO 99
