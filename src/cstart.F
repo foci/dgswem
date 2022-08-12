@@ -757,6 +757,11 @@ C...
             WRITE(63,3645) NDSETSE,NE,DTDP*NSPOOLGE,NSPOOLGE,1
           endif
           IGEP=2
+          IF (DGSAKE.EQ.1) THEN
+             OPEN(911,FILE=DIRNAME//'/'//'fort.911')
+             WRITE(911,3220) RUNDES,RUNID,AGRID
+             WRITE(911,3645) NDSETSE,NP,DTDP*NSPOOLGE,NSPOOLGE,1
+             ENDIF
           ENDIF
 
         IF(ABS(NOUTGE).EQ.1) THEN
@@ -849,6 +854,11 @@ C...
             WRITE(64,3645) NDSETSV,NE,DTDP*NSPOOLGV,NSPOOLGV,2
           endif
           IGVP=2
+          IF (DGSAKE.EQ.1) THEN
+             OPEN(921,FILE=DIRNAME//'/'//'fort.921')
+             WRITE(921,3220) RUNDES,RUNID,AGRID
+             WRITE(921,3645) NDSETSV,NP,DTDP*NSPOOLGV,NSPOOLGV,2
+          ENDIF
           ENDIF
 
         IF(ABS(NOUTGV).EQ.2) THEN

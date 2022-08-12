@@ -51,8 +51,26 @@ C.....to single nodal values
           CEN_SUM = 0
           DO 333 J = 1,NO_NBORS
             NBOR_EL = ELETAB(I,1+J)
-        
-            IF(WDFLG(NBOR_EL).EQ.0) CYCLE  ! DON'T COUNT DRY ELEMENTS  sb 02/26/07
+
+            IF (DGSAKE.EQ.1) THEN
+               DO K = 1, 3
+                  N1 = NM(NBOR_EL,K)
+                  IF (N1.EQ.I) THEN
+                     HWD_DG(J) = HWD(1,NBOR_EL,1)
+                     AWD_DG(J) = AWD(1,NBOR_EL,1)
+
+                     DO KK = 2,DOFH
+                        HWD_DG(J) = HWD_DG(J)+PHI_CORNER(KK,K,ph)*HWD(KK,NBOR_EL,1)
+                        AWD_DG(J) = AWD_DG(J)+PHI_CORNER(KK,K,ph)*AWD(KK,NBOR_EL,1)
+                     ENDDO
+                     AREA = 0.5*AREAS(NBOR_EL)
+                     AREA_SUM = AREA_SUM + AREA
+                     GOTO 334
+                  ENDIF
+               ENDDO
+            ENDIF
+                
+334         IF(WDFLG(NBOR_EL).EQ.0) CYCLE  ! DON'T COUNT DRY ELEMENTS  sb 02/26/07
         
             DO K = 1,3
               N1 = NM(NBOR_EL,K)
@@ -132,12 +150,15 @@ C.....to single nodal values
          
           UU2(I)  = 0.D0
           VV2(I)  = 0.D0
+          
+          HWD2(I) = 0.D0
          
           IF(SEDFLAG.GE.2) DP(I) = 0.D0
 
           DO J = 1,NO_NBORS
             NBOR_EL = ELETAB(I,1+J)
          
+            IF (DGSAKE.EQ.1) HWD2(I) = HWD2(I) + AREA*HWD_DG(J)
             IF(WDFLG(NBOR_EL).EQ.0) CYCLE  ! DON'T COUNT DRY ELEMENTS  sb 02/26/07
          
             AREA = 0.5d0*AREAS(NBOR_EL)/AREA_SUM
@@ -658,6 +679,7 @@ C.....time step falls within the specified window
               WRITE(89,2120) TIME_A, IT
               WRITE(4441,2120) TIME_A, IT
               WRITE(631,2120) TIME_A, IT
+              IF (DGSAKE.EQ.1) WRITE(911,2120) TIME_A, IT
 2120          FORMAT(2X,E20.10,5X,I10)
               if (ModetoNode.eq.1) then
                 DO I=1,NP
@@ -669,6 +691,7 @@ C.....time step falls within the specified window
                   ELSE
                     WRITE(63,2453) I,ETA2(I)
                   ENDIF
+                  IF (DGSAKE.EQ.1) WRITE(911,2453) I,HWD2(I)
 2453              FORMAT(2X,I8,2X,E16.8E3)
                 ENDDO
                 IF(SEDFLAG.GE.1) THEN
@@ -851,6 +874,9 @@ C...
             IF(ABS(NOUTGV).EQ.1) THEN
               WRITE(64,2120) TIME_A,IT
               WRITE(641,2120) TIME_A,IT
+              IF (DGSAKE.EQ.1) THEN
+                 WRITE(921,2120) TIME_A,IT
+              ENDIF
               if (ModetoNode.eq.1) then
                 DO I = 1,NP
 C.....Had trouble writing out numbers with less than E-99 (EJK)

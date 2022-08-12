@@ -278,6 +278,8 @@ C.....Younghun added:
       INTEGER, TARGET :: RAINFALL
       REAL(SZ),ALLOCATABLE :: HWD00(:), HQX00(:), HQY00(:)
       REAL(SZ),ALLOCATABLE :: AWD00(:), AQ00(:)
+      REAL(SZ),ALLOCATABLE :: HWD_DG(:), AWD_DG(:)
+      REAL(SZ),ALLOCATABLE :: HWD2(:)
 C...
 C...DECLARE COMMON BLOCKS
 C...
@@ -516,6 +518,8 @@ C      ALLOCATE ( TAU0VAR(MNP))
 Csb-added by sb 10/11/2005
       ALLOCATE( NNDEL(MNP) )
       ALLOCATE( EDFLG(3,MNE) )
+C.....Younghun added for DG-SAKE
+      ALLOCATE ( HWD2(max(MNP,MNE)) )
 
 C--
 
@@ -771,6 +775,7 @@ C
       ALLOCATE ( ZE_DG(MAXEL), QX_DG(MAXEL), QY_DG(MAXEL), HB_DG(MAXEL))
       Allocate ( iota2_DG(MAXEL), iota_DG(MAXEL), iotaa_DG(MAXEL) )
       Allocate(bed_DG(MAXEL,layers),bed_N_int(layers),bed_N_ext(layers))
+      ALLOCATE ( HWD_DG(MAXEL), AWD_DG(MAXEL) )
       RETURN
       END SUBROUTINE
 
