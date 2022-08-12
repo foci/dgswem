@@ -28,7 +28,7 @@ C***********************************************************************
       DMIN = 1.0E+25
       DO J = 1,NCEDS
          IF (CBWIDTH(1,J).eq.0.D0 .or. CBWIDTH(2,J).eq.0.D0) THEN ! skip if routing edge
-            ! CYCLE
+            CYCLE
          ENDIF
          X1 = X(NCEDNO(1,J))
          X2 = X(NCEDNO(2,J))
