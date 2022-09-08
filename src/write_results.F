@@ -633,11 +633,11 @@ C...
               IF(ABS(NOUTM).EQ.1) THEN
                 WRITE(71,2120) time_A,IT
                 WRITE(72,2120) time_A,IT
-                IF (RAINFALL.EQ.3) WRITE(98,2120) time_A,IT
+                IF (RAINFALL.NE.0) WRITE(98,2120) time_A,IT
                 DO I=1,NSTAM
                   WRITE(71,2453) I,RMP00(I)
                   WRITE(72,2454) I,RMU00(I),RMV00(I)
-                  IF (RAINFALL.EQ.3) WRITE(98,2453) I,RMR00(I)
+                  IF (RAINFALL.NE.0) WRITE(98,2453) I,RMR00(I)
                   END DO
                 IPSTP=IPSTP+1+NSTAM
                 IWSTP=IWSTP+1+NSTAM
@@ -931,11 +931,11 @@ C...
                IF(ABS(NOUTGW).EQ.1) THEN
                   write(73,2120) time_A,it
                   WRITE(74,2120) time_A,IT
-                  IF (RAINFALL.EQ.3) WRITE(99,2120) TIME_A,IT
+                  IF (RAINFALL.NE.0) WRITE(99,2120) TIME_A,IT
                   DO I=1,NP
                      write(73,2453) i,pr2(i)
                      WRITE(74,2454) i,wvnxout(i),wvnyout(i)
-                     IF (RAINFALL.EQ.3) WRITE(99,2453) I,PREC3(I)*DTDP
+                     IF (RAINFALL.NE.0) WRITE(99,2453) I,PREC3(I)*DTDP
                   ENDDO
                   igpp = igpp+1+np
                   IGWP = IGWP+1+NP

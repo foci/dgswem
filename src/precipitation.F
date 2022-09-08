@@ -27,24 +27,22 @@ C.....Declare local variables
       REAL(SZ), INTENT(OUT) :: SOURCE_R1
       REAL(SZ) :: DT1, I1, I2, infilt
       
-      IF (RAINFALL.EQ.3) THEN
+      ! Linearly interpolate fort.21 file
+      IF (RAINFALL.EQ.1 .OR. RAINFALL.EQ.2) THEN
+         DO I = 1, NTPREC-1
+            IF (ITDT.ge.ITPREC(I) .AND. ITDT.le.ITPREC(I+1)) THEN
+               SOURCE_R1 = (PREC(II,I+1) - PREC(II,I))/
+     &          (ITPREC(I+1) - ITPREC(I))
+     &                        *(ITDT - ITPREC(I)) + PREC(II,I)
+               EXIT
+            ENDIF
+         ENDDO
+      ELSE ! Compute element-averaged rainfall for parametric models
          N1 = NM(II,1)
          N2 = NM(II,2)
          N3 = NM(II,3)
          SOURCE_R1 =  1.D0/3.D0*(PREC2(N1)
      &                       + PREC2(N2) + PREC2(N3))
-      ENDIF
-      
-      ! Linearly interpolate fort.prec file
-      IF (RAINFALL.EQ.1 .OR. RAINFALL.EQ.2) THEN
-      DO I = 1, NTPREC-1
-         IF (ITDT.ge.ITPREC(I) .AND. ITDT.le.ITPREC(I+1)) THEN
-            SOURCE_R1 = (PREC(II,I+1) - PREC(II,I))/
-     &       (ITPREC(I+1) - ITPREC(I))
-     &                     *(ITDT - ITPREC(I)) + PREC(II,I)
-            EXIT
-         ENDIF
-      ENDDO
       ENDIF
       
       if (RAINFALL .EQ. 1) then ! no infiltration

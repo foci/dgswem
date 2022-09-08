@@ -4493,10 +4493,11 @@ C--
      &                             + PREC1(N2,I) + PREC1(N3,I))
             ENDDO
          ENDDO
-         ELSEIF ( RAINFALL.EQ.3) THEN
-            ALLOCATE (PREC2(NP), PREC3(NP))
-            PREC3 = 0.d0
          ENDIF
+         
+         ALLOCATE (PREC2(NP), PREC3(NP))
+         PREC3 = 0.d0
+         
          ! CALL ReadKWEAttr()
       ENDIF
 

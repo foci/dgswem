@@ -666,7 +666,7 @@ C...
           WRITE(72,3645) NTRSPM,NSTAM,DTDP*NSPOOLM,NSPOOLM,2
           IWSTP=2
           
-          IF (RAINFALL.EQ.3) THEN
+          IF (RAINFALL.NE.0) THEN
              OPEN(98,FILE=DIRNAME//'/'//'fort.98')
              WRITE(98,3220) RUNDES,RUNID,AGRID
              WRITE(98,3645) NTRSPM,NSTAM,DTDP*NSPOOLM,NSPOOLM,1
@@ -930,7 +930,7 @@ C...
           ENDIF
           
           !...Younghun:
-          IF (RAINFALL.EQ.3) THEN
+          IF (RAINFALL.NE.0) THEN
             OPEN(99,FILE=DIRNAME//'/'//'fort.99')
             WRITE(99,3220) RUNDES,RUNID,AGRID
             WRITE(99,3645) NDSETSW,NP,DTDP*NSPOOLGW,NSPOOLGW,1
