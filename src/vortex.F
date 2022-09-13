@@ -748,43 +748,43 @@
       
       !...Compute parametric rainfall model
       IF (RAINFALL.EQ.3) THEN
-      a1 = -1.10d0 !inches/day
-      a2 = -1.6d0 !inches/day
-      a3 =  64.5d0 !kilometers
-      a4 =  150.d0 !kilometers
-      b1 =  3.96d0 !inches/day
-      b2 =  4.80d0 !inches/day
-      b3 = -13.0d0 !kilometers
-      b4 = -16.0d0 !kilometers
+         a1 = -1.10d0 !inches/day
+         a2 = -1.6d0 !inches/day
+         a3 =  64.5d0 !kilometers
+         a4 =  150.d0 !kilometers
+         b1 =  3.96d0 !inches/day
+         b2 =  4.80d0 !inches/day
+         b3 = -13.0d0 !kilometers
+         b4 = -16.0d0 !kilometers
+         
+         ! Equations 
+         NMW=(1.d0 + ((Vmax-35.d0)/33.d0)); !normalized maximum wind
+         T0=a1+(b1*NMW) ! rain rate at TC center r=0
+         Tm=a2+(b2*NMW) !maximum rain rate
+         rm=a3+(b3*NMW) !radius from the center at which maximum rain rate occurs
+         re=a4+(b4*NMW) ! curve fit parameter; specifies end behavior of rainfall rate curves
+         ! Compute TRR
       
-      ! Equations 
-      NMW=(1.d0 + ((Vmax-35.d0)/33.d0)); !normalized maximum wind
-      T0=a1+(b1*NMW) ! rain rate at TC center r=0
-      Tm=a2+(b2*NMW) !maximum rain rate
-      rm=a3+(b3*NMW) !radius from the center at which maximum rain rate occurs
-      re=a4+(b4*NMW) ! curve fit parameter; specifies end behavior of rainfall rate curves
-      ! Compute TRR
-   
-      ! change dist to km
-      dist_km = dist * nm2m * 0.001
-      IF (dist_km.LT.rm) THEN
-         TRR = T0+(Tm-T0)*(dist_km/rm); !TRR is rain rate in inches/day
-      ELSEIF (dist_km.GE.rm) THEN
-         TRR= Tm*exp(-((dist_km-rm)/re));
-      ENDIF
-    
-      !convert inches/day-> m/sec
-      TRR=TRR/3401568.d0
+         ! change dist to km
+         dist_km = dist * nm2m * 0.001
+         IF (dist_km.LT.rm) THEN
+            TRR = T0+(Tm-T0)*(dist_km/rm); !TRR is rain rate in inches/day
+         ELSEIF (dist_km.GE.rm) THEN
+            TRR= Tm*exp(-((dist_km-rm)/re));
+         ENDIF
+       
+         !convert inches/day-> m/sec
+         TRR=TRR/3401568.d0
       
       ELSEIF (RAINFALL.EQ.4) THEN
-      IF (dist.LE.LatestRmax) THEN
-         TRR=1.14+.12*(Pn-Pc)
-      ELSEIF (dist.GT.LatestRmax) THEN
-         TRR=(1.14+.12*(Pn-Pc))*exp(-0.3*((dist-LatestRmax)/LatestRmax))
-      ENDIF
-      
-      ! Convert mm/hr to m/s
-      TRR=TRR*1e-3/3600.d0
+         IF (dist.LE.LatestRmax) THEN
+            TRR=1.14+.12*(Pn-Pc)
+         ELSEIF (dist.GT.LatestRmax) THEN
+            TRR=(1.14+.12*(Pn-Pc))*exp(-0.3*((dist-LatestRmax)/LatestRmax))
+         ENDIF
+         
+         ! Convert mm/hr to m/s
+         TRR=TRR*1e-3/3600.d0
          
       ENDIF
       END SUBROUTINE uvp
@@ -952,44 +952,44 @@
 
       !...Compute parametric rainfall model
       IF (RAINFALL.EQ.3) THEN
-      a1 = -1.10d0 !inches/day
-      a2 = -1.6d0 !inches/day
-      a3 =  64.5d0 !kilometers
-      a4 =  150.d0 !kilometers
-      b1 =  3.96d0 !inches/day
-      b2 =  4.80d0 !inches/day
-      b3 = -13.0d0 !kilometers
-      b4 = -16.0d0 !kilometers
+         a1 = -1.10d0 !inches/day
+         a2 = -1.6d0 !inches/day
+         a3 =  64.5d0 !kilometers
+         a4 =  150.d0 !kilometers
+         b1 =  3.96d0 !inches/day
+         b2 =  4.80d0 !inches/day
+         b3 = -13.0d0 !kilometers
+         b4 = -16.0d0 !kilometers
+         
+         ! Equations 
+         NMW=(1.d0 + ((Vmax-35.d0)/33.d0)); !normalized maximum wind
+         T0=a1+(b1*NMW) ! rain rate at TC center r=0
+         Tm=a2+(b2*NMW) !maximum rain rate
+         rm=a3+(b3*NMW) !radius from the center at which maximum rain rate occurs
+         re=a4+(b4*NMW) ! curve fit parameter; specifies end behavior of rainfall rate curves
+         ! Compute TRR
       
-      ! Equations 
-      NMW=(1.d0 + ((Vmax-35.d0)/33.d0)); !normalized maximum wind
-      T0=a1+(b1*NMW) ! rain rate at TC center r=0
-      Tm=a2+(b2*NMW) !maximum rain rate
-      rm=a3+(b3*NMW) !radius from the center at which maximum rain rate occurs
-      re=a4+(b4*NMW) ! curve fit parameter; specifies end behavior of rainfall rate curves
-      ! Compute TRR
-   
-      ! change dist to km
-      dist_km = idist * nm2m * 0.001
-      IF (dist_km.LT.rm) THEN
-         TRR = T0+(Tm-T0)*(dist_km/rm); !TRR is rain rate in inches/day
-      ELSEIF (dist_km.GE.rm) THEN
-         TRR= Tm*exp(-((dist_km-rm)/re));
-      ENDIF
-    
-      !convert inches/day-> m/sec
-      TRR=TRR/3401568.d0
+         ! change dist to km
+         dist_km = idist * nm2m * 0.001
+         IF (dist_km.LT.rm) THEN
+            TRR = T0+(Tm-T0)*(dist_km/rm); !TRR is rain rate in inches/day
+         ELSEIF (dist_km.GE.rm) THEN
+            TRR= Tm*exp(-((dist_km-rm)/re));
+         ENDIF
+       
+         !convert inches/day-> m/sec
+         TRR=TRR/3401568.d0
       
       ELSEIF (RAINFALL.EQ.4) THEN
-      IF (idist.LE.rmx) THEN
-         TRR=1.14+.12*(Pn-Pc)
-      ELSEIF (idist.GT.rmx) THEN
-         TRR=(1.14+.12*(Pn-Pc))*exp(-0.3*((idist-rmx)/rmx))
-      ENDIF
-      
-      ! Convert mm/hr to m/s
-      TRR=TRR*1e-3/3600.d0
-      
+         IF (idist.LE.rmx) THEN
+            TRR=1.14+.12*(Pn-Pc)
+         ELSEIF (idist.GT.rmx) THEN
+            TRR=(1.14+.12*(Pn-Pc))*exp(-0.3*((idist-rmx)/rmx))
+         ENDIF
+         
+         ! Convert mm/hr to m/s
+         TRR=TRR*1e-3/3600.d0
+         
       ENDIF
       
       END SUBROUTINE uvpr
