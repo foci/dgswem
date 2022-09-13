@@ -776,7 +776,16 @@
       !convert inches/day-> m/sec
       TRR=TRR/3401568.d0
       
-      ! PRINT*,TRR
+      ELSEIF (RAINFALL.EQ.4) THEN
+      IF (dist.LE.LatestRmax) THEN
+         TRR=1.14+.12*(Pn-Pc)
+      ELSEIF (dist.GT.LatestRmax) THEN
+         TRR=(1.14+.12*(Pn-Pc))*exp(-0.3*((dist-LatestRmax)/LatestRmax))
+      ENDIF
+      
+      ! Convert mm/hr to m/s
+      TRR=TRR*1e-3/3600.d0
+         
       ENDIF
       END SUBROUTINE uvp
 
@@ -971,7 +980,16 @@
       !convert inches/day-> m/sec
       TRR=TRR/3401568.d0
       
-      ! PRINT*,TRR
+      ELSEIF (RAINFALL.EQ.4) THEN
+      IF (idist.LE.rmx) THEN
+         TRR=1.14+.12*(Pn-Pc)
+      ELSEIF (idist.GT.rmx) THEN
+         TRR=(1.14+.12*(Pn-Pc))*exp(-0.3*((idist-rmx)/rmx))
+      ENDIF
+      
+      ! Convert mm/hr to m/s
+      TRR=TRR*1e-3/3600.d0
+      
       ENDIF
       
       END SUBROUTINE uvpr
