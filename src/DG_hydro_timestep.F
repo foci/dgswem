@@ -72,12 +72,7 @@ C.....Begin Runge-Kutta time stepper
          
 C.......Compute the DG time and DG ramp
 
-#ifdef RKSSP
-         IF (METONLY.AND. NWS.NE.0) THEN
-            CALL MET_FORCING(IT)
-            CYCLE
-         ENDIF
-         
+#ifdef RKSSP        
          TIMEDG = TIME_A - DTDP + DTVD(IRK)*DTDP
          RAMPDG = 1.D0
          RAMPExtFlux = 1.0d0
@@ -100,6 +95,12 @@ C.......Compute the DG time and DG ramp
             ENDIF
          ENDIF
          RAMP = RAMPDG
+         
+C........Compute meteorological forcing without solving SWEs if only meteorological output is requested
+         IF (METONLY.AND. NWS.NE.0) THEN
+            CALL MET_FORCING(IT)
+            CYCLE
+         ENDIF
          
 C.......Obtain the meteorological forcing
 
@@ -293,12 +294,7 @@ C.......Compute the dynamic pressure if flagged
 
 #endif
 
-#ifdef RKC
-         IF (METONLY.AND. NWS.NE.0) THEN
-            CALL MET_FORCING(IT)
-            CYCLE
-         ENDIF
-         
+#ifdef RKC        
          TIMEDG = TIME_A - DTDP + RKC_c(IRK)*DTDP
          RAMPDG = 1.D0
          RAMPExtFlux = 1.0d0
@@ -323,6 +319,12 @@ C.......Compute the dynamic pressure if flagged
             ENDIF
          ENDIF
          RAMP = RAMPDG
+         
+C........Compute meteorological forcing without solving SWEs if only meteorological output is requested
+         IF (METONLY.AND. NWS.NE.0) THEN
+            CALL MET_FORCING(IT)
+            CYCLE
+         ENDIF
          
 C.......Obtain the meteorological forcing
 
