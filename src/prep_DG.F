@@ -937,8 +937,6 @@ C.....2021-04-14 Younghun: Added prep for solving KWE
      &                       + MoistDecific(N2)  + MoistDecific(N3))
          IntDp(J)  = 1.d0/3.d0 *(IntDepth(N1)
      &                       + IntDepth(N2)      + IntDepth(N3))
-         TotInf(J) = 1.d0/3.d0 *(ManningNEdge(N1)
-     &                       + ManningNEdge(N2)  + ManningNEdge(N3))
          ManningKWE2(J) =  1.D0/3.D0*(ManningsN(N1)
      &                       + ManningsN(N2) + ManningsN(N3))
       ENDDO
