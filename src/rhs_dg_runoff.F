@@ -51,6 +51,7 @@ C.....Declare local variables
       REAL(SZ) WCED, CB, CSS
       REAL(SZ) mx,my
       
+      INTEGER DOFS1
       ! INTEGER N1,N2
       
       Allocate ( XBCbt(MNE),YBCbt(MNE) )
@@ -356,12 +357,18 @@ C.....Compute RHS for 1D KWE
          
          pa = PDG_EL(EL)
          
+         IF (DOFS(EL).EQ.1) THEN
+            DOFS1 = 1
+         ELSE
+            DOFS1 = pa+1
+         ENDIF
+
          N2 = NCEDNO(2,I)
          
          DO J = 1,NEGP(pa)
             GP_IN = J
             AWD_IN = AWD(1,GED,IRK)
-            DO K = 2,pa+1
+            DO K = 2,DOFS1
                AWD_IN = AWD_IN + AWD(K,GED,IRK)*PHI1D(K,GP_IN,pa)
             ENDDO
             
@@ -392,7 +399,7 @@ C.....Compute RHS for 1D KWE
                AQ_IN = (1.D0/manningKWE1(I))*sqrt(CEDSLOPE(I))*((AWD_IN/P_MINUS)**(2.D0/3.D0)) * AWD_IN
             endif
             
-            DO K = 1,ph+1
+            DO K = 1,DOFS1
                RHS_AWD(K,GED,IRK) = RHS_AWD(K,GED,IRK) + (2/XLEN(GED))*M1D_INV(K,pa)
      &                             *DXDPHI1D(K,GP_IN,pa)*WEGP(GP_IN,pa)*AQ_IN
      &                             + M1D_INV(K,pa)*PHI1D(K,GP_IN,pa)*WEGP(GP_IN,pa)*QL(GP_IN,I)
@@ -405,7 +412,7 @@ C.....Compute Numerical Flux for 1D KWE
          AWD_MINUS = AWD(1,GED,IRK)
          ! AWD_PLUS = AWD(1,II,IRK)
          
-         DO K = 2,ph+1
+         DO K = 2,DOFS1
             AWD_MINUS = AWD_MINUS + AWD(K,GED,IRK)*PHI1D_MINUS(K,pa)
             ! AWD_PLUS = AWD_PLUS + AWD(K,II,IRK)*PHI1D_PLUS(K,pa)
          ENDDO
@@ -449,7 +456,7 @@ C         ! manning = 0.15, alpha = 1/n, beta = 2/3
 C         AQ_PLUS = (1.D0/manningKWE1(II))*sqrt(CEDSLOPE(II))
 C     &                      *((AWD_PLUS/P_PLUS)**(2.D0/3.D0)) * AWD_PLUS
          ! WRITE(*,*) AQ_MINUS
-         DO K = 1,ph+1
+         DO K = 1,DOFS1
             RHS_AWD(K,GED,IRK) = RHS_AWD(K,GED,IRK) - (2/XLEN(GED))*M1D_INV(K,pa)*PHI1D_MINUS(K,pa)*AQ_MINUS
             ! WRITE(*,*) K,RHS_AWD(K,GED,IRK)
          ENDDO
@@ -459,7 +466,7 @@ C     &                      *((AWD_PLUS/P_PLUS)**(2.D0/3.D0)) * AWD_PLUS
          if (NCEDEX(1,I).gt.0) then
             do J = 1,NCEDEX(1,I)
                GED_EX = NCEDEX(J+1,I)
-               DO K = 1,ph+1
+               DO K = 1,DOFS1
                   RHS_AWD(K,GED_EX,IRK) = RHS_AWD(K,GED_EX,IRK) + (2/XLEN(GED_EX))*M1D_INV(K,pa)*PHI1D_PLUS(K,pa)*AQ_MINUS
                ENDDO
             enddo
