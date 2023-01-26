@@ -888,7 +888,7 @@ C.....2019-11-07 Younghun added
          ALLOCATE (BASIS(SZ2),DBASIS1(SZ2))
          M = 1
          DO J = 0, P
-            M1D_INV(M,P) = (2.D0*J + 1.D0)/(2.D0*J + 2.D0)
+            M1D_INV(M,P) = (2.D0*J + 1.D0)/(2.D0)
             M = M + 1
          ENDDO
          
