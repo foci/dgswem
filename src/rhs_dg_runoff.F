@@ -390,7 +390,12 @@ C.....Compute RHS for 1D KWE
             endif
             
             ! Compute wetted perimeter
-            P_MINUS = CB + 2.D0*AWD_H_IN*sqrt(1.D0+1.D0/(CSS**2.D0))            
+            if (abs(CSSLOPE(2,I)).ge.1e8) then
+            P_MINUS = CB + 2.D0*AWD_H_IN
+            else
+            P_MINUS = CB + 2.D0*AWD_H_IN*sqrt(1.D0+1.D0/(CSS**2.D0))
+            endif
+            
                
             if (AWD_IN.eq.0.D0) then
                AQ_IN = 0.D0
@@ -400,7 +405,7 @@ C.....Compute RHS for 1D KWE
             endif
             
             DO K = 1,DOFS1
-               RHS_AWD(K,GED,IRK) = RHS_AWD(K,GED,IRK) + (2/XLEN(GED))*M1D_INV(K,pa)
+               RHS_AWD(K,GED,IRK) = RHS_AWD(K,GED,IRK) + (2.d0/XLEN(GED))*M1D_INV(K,pa)
      &                             *DXDPHI1D(K,GP_IN,pa)*WEGP(GP_IN,pa)*AQ_IN
      &                             + M1D_INV(K,pa)*PHI1D(K,GP_IN,pa)*WEGP(GP_IN,pa)*QL(GP_IN,I)
             ENDDO
@@ -431,8 +436,12 @@ C.....Compute Numerical Flux for 1D KWE
             AWD_H_IN = CSSLOPE(2,I)/2.D0*(-CBWIDTH(2,I)
      &               - sqrt(CBWIDTH(2,I)**2.D0 + 4.D0/CSSLOPE(2,I)*AWD_MINUS))
          endif
-     
+         
+         if (abs(CSSLOPE(2,I)).ge.1e8) then
+         P_MINUS = CBWIDTH(2,I) + 2.D0*AWD_H_IN
+         else
          P_MINUS = CBWIDTH(2,I) + 2.D0*AWD_H_IN*sqrt(1.D0+1.D0/(CSSLOPE(2,I)**2.D0))
+         endif
          
          ! manning = 0.15, alpha = 1/n, beta = 2/3
          if (AWD_H_IN.eq.0.D0) then
@@ -457,7 +466,7 @@ C         AQ_PLUS = (1.D0/manningKWE1(II))*sqrt(CEDSLOPE(II))
 C     &                      *((AWD_PLUS/P_PLUS)**(2.D0/3.D0)) * AWD_PLUS
          ! WRITE(*,*) AQ_MINUS
          DO K = 1,DOFS1
-            RHS_AWD(K,GED,IRK) = RHS_AWD(K,GED,IRK) - (2/XLEN(GED))*M1D_INV(K,pa)*PHI1D_MINUS(K,pa)*AQ_MINUS
+            RHS_AWD(K,GED,IRK) = RHS_AWD(K,GED,IRK) - (2.d0/XLEN(GED))*M1D_INV(K,pa)*PHI1D_MINUS(K,pa)*AQ_MINUS
             ! WRITE(*,*) K,RHS_AWD(K,GED,IRK)
          ENDDO
          
@@ -467,7 +476,7 @@ C     &                      *((AWD_PLUS/P_PLUS)**(2.D0/3.D0)) * AWD_PLUS
             do J = 1,NCEDEX(1,I)
                GED_EX = NCEDEX(J+1,I)
                DO K = 1,DOFS1
-                  RHS_AWD(K,GED_EX,IRK) = RHS_AWD(K,GED_EX,IRK) + (2/XLEN(GED_EX))*M1D_INV(K,pa)*PHI1D_PLUS(K,pa)*AQ_MINUS
+                  RHS_AWD(K,GED_EX,IRK) = RHS_AWD(K,GED_EX,IRK) + (2.d0/XLEN(GED_EX))*M1D_INV(K,pa)*PHI1D_PLUS(K,pa)*AQ_MINUS
                ENDDO
             enddo
          endif
