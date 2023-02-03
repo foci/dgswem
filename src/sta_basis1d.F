@@ -25,7 +25,7 @@ C***********************************************************************
       INTEGER :: i, JMIN
       
       EDSTA = 0
-      DMIN = 1.0E+25
+      DMIN = 1.0d+25
       DO J = 1,NCEDS
          IF (CBWIDTH(1,J).eq.0.D0 .or. CBWIDTH(2,J).eq.0.D0) THEN ! skip if routing edge
             CYCLE
@@ -36,11 +36,11 @@ C***********************************************************************
          Y1 = Y(NCEDNO(1,J))
          Y2 = Y(NCEDNO(2,J))
          
-         D1 = sqrt((XSTA-X1)**2 + (YSTA-Y1)**2)
-         D2 = sqrt((XSTA-X2)**2 + (YSTA-Y2)**2)
-         D3 = sqrt((X1-X2)**2 + (Y1-Y2)**2)
+         D1 = sqrt((XSTA-X1)**2.d0 + (YSTA-Y1)**2.d0)
+         D2 = sqrt((XSTA-X2)**2.d0 + (YSTA-Y2)**2.d0)
+         D3 = sqrt((X1-X2)**2.d0 + (Y1-Y2)**2.d0)
          
-         if (abs(D1+D2-D3)/D3.lt.1e-6) then
+         if (abs(D1+D2-D3)/D3.lt.1.d-6) then
             ! EDSTA = NCEDN(J)
             EDSTA = J
             DMIN = abs(D1+D2-D3)/D3
@@ -70,9 +70,9 @@ C***********************************************************************
       Y1 = Y(NCEDNO(1,EDSTA))
       Y2 = Y(NCEDNO(2,EDSTA))
       
-      D1 = sqrt((XSTA-X1)**2 + (YSTA-Y1)**2)
-      D2 = sqrt((XSTA-X2)**2 + (YSTA-Y2)**2)
-      D3 = sqrt((X1-X2)**2 + (Y1-Y2)**2)
+      D1 = sqrt((XSTA-X1)**2.d0 + (YSTA-Y1)**2.d0)
+      D2 = sqrt((XSTA-X2)**2.d0 + (YSTA-Y2)**2.d0)
+      D3 = sqrt((X1-X2)**2.d0 + (Y1-Y2)**2.d0)
       
       
       ! if (NCEDNO(3,EDSTA).eq.0) then
@@ -81,7 +81,7 @@ C***********************************************************************
          ! PT = 1 - D1/D3*2.D0
       ! endif
       
-      PT = D1/(D1+D2)*2.D0 - 1
+      PT = D1/(D1+D2)*2.D0 - 1.d0
       ! if (I.eq.3) print*,D1,D2,D3,PT, NCEDNO(1,EDSTA), NCEDNO(2,EDSTA),XEL(I) ,YEL(I)
                                      
       ALLOCATE (BASIS(ph+1),DBASIS1(ph+1))

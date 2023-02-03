@@ -58,7 +58,7 @@ C.....Compute the slope
         S0X(I) = (Z31*Y21 - Z21*Y31)/(X21*Y31 - X31*Y21)
         S0Y(I) = (Z21*X31 - Z31*X21)/(X21*Y31 - X31*Y21)
         
-        S0mag(I) = sqrt(S0X(I)**2 + S0Y(I)**2)
+        S0mag(I) = sqrt(S0X(I)**2.d0 + S0Y(I)**2.d0)
         
       ENDDO
         

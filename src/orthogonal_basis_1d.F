@@ -49,17 +49,8 @@ C.....Declare subroutine input and output
       
 C.....Explicitly declare remaining variables
       
-      INTEGER :: P, Q, R
-      REAL(8) :: AQ, BQ, CQ, X, Y, Z
-      REAL(8), DIMENSION(0:D) :: LEGENDRE
-      REAL(8), DIMENSION(0:D) :: LEGENDRE_X, LEGENDRE_Y, LEGENDRE_Z
-      REAL(8), DIMENSION(0:D) :: DLEGENDRE
-      REAL(8), DIMENSION(0:D) :: DLEGENDRE_X, DLEGENDRE_Y, DLEGENDRE_Z
-      REAL(8), DIMENSION(0:D,0:D) :: PHI
-      REAL(8), DIMENSION(0:D,0:D,2) :: DPHI
-      REAL(8), DIMENSION((D+2)*(D+1)/2) :: PHI_2D
-      REAL(8), DIMENSION((D+2)*(D+1)/2,2) :: DPHI_2D
-      
+      INTEGER :: P
+      REAL(8) :: X
       REAL(8), DIMENSION(0:D) :: P00, P11, DP00
 
 C.....Check to make sure input is correct
@@ -104,7 +95,7 @@ C-----------------------------------------------------------------------
       P00(0) = 1.D0
       P00(1) = X
       P11(0) = 1.D0
-      P11(1) = 2*X
+      P11(1) = 2.d0*X
       DP00(0) = 0.D0
       DP00(1) = 1.d0
       

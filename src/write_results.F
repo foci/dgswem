@@ -35,7 +35,7 @@ C.....Declare local variables
 C.....Younghun added
       INTEGER :: L, GED, EL1, EL2, NEL1ED, NEL2ED
       REAL(SZ) :: HWD_IN, HWD_EX, Q1X, Q1Y, Q2X, Q2Y, discharge
-      REAL(SZ) :: AWD_H_IN, P_MINUS, AQ_IN
+      REAL(SZ) :: AWD_IN, AWD_H_IN, P_MINUS, AQ_IN
       REAL(SZ) :: WCED, CB, CSS
 
 C.....Transform from modal coordinates to nodal coordinates and average
@@ -513,7 +513,7 @@ C...
      &                         + sqrt(CB**2.D0 + 4.D0/CSS*AWD_IN))
                    endif
                    
-                   P_MINUS = CB + 2.D0*AWD_H_IN*sqrt(1+1.D0/(CSS**2.D0))
+                   P_MINUS = CB + 2.D0*AWD_H_IN*sqrt(1.d0 + 1.D0/(CSS**2.D0))
                    
                    if (AWD_IN.eq.0.D0) then
                       AQ00(I) = 0.D0
@@ -524,7 +524,7 @@ C...
 
                    
                    
-                     WRITE(96,2454) I,AQ00(I)!/CBWIDTH(2,NNV1(I))
+                     WRITE(96,2453) I,AQ00(I)!/CBWIDTH(2,NNV1(I))
                    ENDIF
 
                 enddo
