@@ -80,6 +80,7 @@ C.....Declare local variables
       ENDIF
       
       if (RAINFALL .EQ. 1) then ! no infiltration
+         SOURCE_R1 = SOURCE_R11 + (SOURCE_R22 - SOURCE_R11)*(TIMEDG - ITDT)/DTDP
          
       elseif (RAINFALL .EQ. 2) then ! apply Green-Ampt model
          ! I = I + 1
