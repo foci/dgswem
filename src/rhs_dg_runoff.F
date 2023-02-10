@@ -390,7 +390,7 @@ C.....Compute RHS for 1D KWE
             endif
             
             ! Compute wetted perimeter
-            if (abs(CSSLOPE(2,I)).ge.1e8) then
+            if (abs(CSS).ge.1e8) then
             P_MINUS = CB + 2.D0*AWD_H_IN
             else
             P_MINUS = CB + 2.D0*AWD_H_IN*sqrt(1.D0+1.D0/(CSS**2.D0))

@@ -927,7 +927,6 @@ C...
           WRITE(74,3220) RUNDES,RUNID,AGRID
           WRITE(74,3645) NDSETSW,NP,DTDP*NSPOOLGW,NSPOOLGW,2
           IGWP=2
-          ENDIF
           
           !...Younghun:
           IF (RAINFALL.NE.0) THEN
@@ -935,6 +934,9 @@ C...
             WRITE(99,3220) RUNDES,RUNID,AGRID
             WRITE(99,3645) NDSETSW,NP,DTDP*NSPOOLGW,NSPOOLGW,1
           ENDIF
+          
+       ENDIF
+          
           
         IF(ABS(NOUTGW).EQ.2) THEN
           open(73,file=dirname//'/'//'fort.73',

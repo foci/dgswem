@@ -456,6 +456,10 @@ C...
                    HWD_IN = HWD_IN + HWD(K,NNV(I),1)*PHI_STAV(K,I)
                 ENDDO
                 
+                IF (HWD_IN .lt. 0.d0) THEN
+                   HWD_IN = 0.d0
+                ENDIF
+                
                 HQX00(I) = S0X(NNV(I))*(HWD_IN**(5.D0/3.D0)) /
      &                         (manningKWE2(NNV(I))*sqrt(S0mag(NNV(I))))
                 HQY00(I) = S0Y(NNV(I))*(HWD_IN**(5.D0/3.D0)) /
@@ -492,7 +496,7 @@ C...
                 GED = NCEDN(NNV1(I))
                 if (GED.gt.0) then
                    AWD_IN = AWD(1,GED,1)
-                   DO K = 2,pa+1
+                   DO K = 2,ph+1
                       AWD_IN = AWD_IN + AWD(K,GED,1)*PHI_STAV1(K,I)
                    ENDDO
                    ! print*,awd_in
