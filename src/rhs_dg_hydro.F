@@ -65,6 +65,14 @@ C.......Adjust the p values for constants
 #endif
          IF (RAINFALL.GT.0) THEN
             CALL PRECIPITATION(IT*DTDP,L,SOURCE_R)
+            IF (SOURCE_R.GT.0.d0) THEN
+               DO I = 1,NAGP(pa)
+                  DO K = 1,DOFS(L)
+                     RHS_ZE(K,L,IRK) = RHS_ZE(K,L,IRK)
+     &                           + SRFAC(K,I,L,pa)*SOURCE_R
+                  ENDDO
+               ENDDO
+            ENDIF
          ENDIF
                      
 C.......If element is dry then skip calculations
@@ -390,13 +398,11 @@ C.........Build the rhs
 
             RHS_QX(1,L,IRK) = RHS_QX(1,L,IRK) + SRFAC(1,I,L,pa)*SOURCE_X
             RHS_QY(1,L,IRK) = RHS_QY(1,L,IRK) + SRFAC(1,I,L,pa)*SOURCE_Y
-            ! namo - add rain here
-            RHS_ZE(1,L,IRK) = RHS_ZE(1,L,IRK) + SRFAC(1,I,L,pa)*SOURCE_R
             
             DO K = 2,DOFS(L)
 
                RHS_ZE(K,L,IRK) = RHS_ZE(K,L,IRK) + XFAC(K,I,L,pa)*FX_IN
-     &              + YFAC(K,I,L,pa)*FY_IN + SRFAC(K,I,L,pa)*SOURCE_R
+     &              + YFAC(K,I,L,pa)*FY_IN 
                RHS_QX(K,L,IRK) = RHS_QX(K,L,IRK) + XFAC(K,I,L,pa)*GX_IN
      &              + YFAC(K,I,L,pa)*GY_IN + SRFAC(K,I,L,pa)*SOURCE_X
                RHS_QY(K,L,IRK) = RHS_QY(K,L,IRK) + XFAC(K,I,L,pa)*HX_IN
