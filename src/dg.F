@@ -461,7 +461,7 @@ C.....These (below) are defined in slopelimiter.F (slopelimiter4)
 
 #ifdef SLOPEALL
       Allocate ( ZEtaylor(MNE,dofh,1),QXtaylor(MNE,dofh,1) )
-      Allocate ( iotataylor(MNE,dofh,1),iota2taylor(MNE,dofh,1) 
+      Allocate ( iotataylor(MNE,dofh,1),iota2taylor(MNE,dofh,1) )
       Allocate ( ZEtaylorvert(MNE,dofh,3),QXtaylorvert(MNE,dofh,3) )
       Allocate ( QYtaylorvert(MNE,dofh,3),iotataylorvert(MNE,dofh,3) )
       Allocate ( iota2taylorvert(MNE,dofh,3), QYtaylor(MNE,dofh,1) )

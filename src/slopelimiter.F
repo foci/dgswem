@@ -38,6 +38,8 @@ C***********************************************************************
         CALL SLOPELIMITER9()
       ELSE IF (SLOPEFLAG.EQ.10) THEN
         CALL SLOPELIMITER10()
+      ELSE IF (SLOPEFLAG.EQ.11) THEN
+        CALL SLOPELIMITER11()
       ENDIF
 #endif
 
@@ -10418,5 +10420,162 @@ C.....cem
       enddo
 
       end subroutine Inv2
+
+C***********************************************************************
+C     
+C     SUBROUTINE SLOPELIMITER11()
+C     
+C     Written by Younghun Kang - 11 Jan 2023
+C     
+C     This subroutine applies minmod slope limiter for DG-SAKE model.
+C     
+C***********************************************************************
+
+      SUBROUTINE SLOPELIMITER11()
+      
+      USE GLOBAL
+      USE DG
+      
+      IMPLICIT NONE
+      
+      REAL(SZ), ALLOCATABLE :: AWD_minmod(:,:)
+      REAL(SZ), ALLOCATABLE :: Aavg(:), Aminus(:), Aplus(:), Aminus0(:), Aplus0(:), Aavg0(:)
+      REAL(SZ) :: mm1, mm2, mm3, mmmax, mmval
+      REAL(SZ) :: tol, Aminus1, Aplus1
+      
+      REAL(SZ) :: mj, AWD1, theta2
+      
+      INTEGER :: I,J,K,GED,AAA
+      
+      LOGICAL FLAGPOS, FLAGSLOPE
+      
+      
+      ALLOCATE (AWD_minmod(2,NCEDS))
+      ALLOCATE (Aavg(NCEDS), Aminus(NCEDS), Aplus(NCEDS), Aminus0(NCEDS), Aplus0(NCEDS), Aavg0(NCEDS))
+      
+      AWD_minmod = 0.d0
+      Aavg = 0.d0
+      Aminus = 0.d0
+      Aplus = 0.d0
+      Aminus0 = 0.d0
+      Aplus0 = 0.d0
+      Aavg0 = 0.d0
+      
+      IF (slope_weight < 0) THEN
+         FLAGPOS = .true.
+         FLAGSLOPE = .false.
+      ELSEIF (slope_weight < 100) THEN
+         FLAGPOS = .false.
+         FLAGSLOPE = .true.
+         
+         mmmax = slope_weight*1.d0
+      ELSE
+         FLAGPOS = .true.
+         FLAGSLOPE = .true.
+         
+         mmmax = slope_weight - 100.d0
+      ENDIF
+      
+      
+      IF (FLAGSLOPE) THEN
+      
+      tol = 1e-8
+      
+      DO J = 1, NCEDS
+         GED = NCEDN(J)
+         
+         Aavg0(J) = AWD(1,GED,IRK+1)
+         DO K = 1, ph+1, 2
+            Aavg(J) = Aavg(J) + AWD(K,GED,IRK+1)/(K*1.d0)
+         ENDDO
+                  
+         DO K = 1, ph+1
+            Aminus(J) = Aminus(J) + PHI1D_MINUS(K,ph)*AWD(K,GED,IRK+1)
+            Aplus(J) = Aplus(J) + PHI1D_PLUS(K,ph)*AWD(K,GED,IRK+1)
+            IF (K.lt.3) THEN
+               Aminus0(J) = Aminus0(J) + PHI1D_MINUS(K,ph)*AWD(K,GED,IRK+1)
+               Aplus0(J) = Aplus0(J) + PHI1D_PLUS(K,ph)*AWD(K,GED,IRK+1)
+            ENDIF
+         ENDDO
+      ENDDO
+      
+      DO J = 1, NCEDS
+         GED = NCEDN(J)
+
+         IF (J.gt.1) THEN
+            mm2 = Aavg(J) - Aavg(J-1)
+         ENDIF
+
+         IF (J.lt.NCEDS) THEN
+            mm3 = Aavg(J+1) - Aavg(J)
+         ENDIF
+         
+         IF (J.eq.1) THEN
+            mm2 = Aavg(J) ! Aavg(0) = 0
+         ENDIF
+         
+         IF (J.eq.NCEDS) THEN
+            mm3 = 0.d0 ! radiation BC (Aavg(NCEDS+1) = Aavg(NCEDS))
+         ENDIF
+         
+         mm1 = Aminus(J) - Aavg(J)
+         IF (abs(mm1).lt.mmmax) THEN
+            mmval = mm1
+         ELSE
+            IF (sign(1.d0,mm1).eq.sign(1.d0,mm2) .and. sign(1.d0,mm1).eq.sign(1.d0,mm3)) THEN
+               mmval = sign(1.d0,mm1)*min(abs(mm1),abs(mm2),abs(mm3))
+            ELSE
+               mmval = 0.d0
+            ENDIF
+         ENDIF
+         Aminus1 = Aavg(J) + mmval
+         
+         mm1 = Aavg(J) - Aplus(J)         
+         IF (abs(mm1).lt.mmmax) THEN
+            mmval = mm1
+         ELSE
+            IF (sign(1.d0,mm1).eq.sign(1.d0,mm2) .and. sign(1.d0,mm1).eq.sign(1.d0,mm3)) THEN
+               mmval = sign(1.d0,mm1)*min(abs(mm1),abs(mm2),abs(mm3))
+            ELSE
+               mmval = 0.d0
+            ENDIF
+         ENDIF
+         Aplus1 = Aavg(J) - mmval
+            
+         IF (abs(Aminus1 - Aminus(J)).gt.tol .OR. abs(Aplus1 - Aplus(J)).gt.tol) THEN
+            AWD(2,GED,IRK+1) = (Aminus0(J) - Aplus0(J))/2
+
+            DO K = 3, ph+1
+               AWD(K,GED,IRK+1) = 0.d0
+            ENDDO
+         ENDIF
+      ENDDO
+      ENDIF
+      
+      IF (FLAGPOS) THEN
+         IF (Aavg(I) .lt. 0.d0) continue
+         DO I = 1, NCEDS
+            GED = NCEDN(I)
+            
+            mj = 99999.d0
+            DO J = 1,NEGP(pa)
+               AWD1 = 0.d0
+               DO K = 1, ph+1
+                  AWD1 = AWD1 + AWD(K,GED,IRK+1)*PHI1D(K,J,ph)
+               ENDDO
+               mj = min(mj,AWD1)
+            ENDDO
+            
+            theta2 = min(1.d0, Aavg(I)/(Aavg(I) - mj))
+            
+            if ((Aavg(I) - mj).gt.tol) then ! check if valid
+            DO K = 1, ph+1
+               AWD(K,GED,IRK+1) = AWD(K,GED,IRK+1)*theta2
+            ENDDO
+            AWD(1,GED,IRK+1) = AWD(1,GED,IRK+1) + (1.d0 - theta2)*AWD(1,GED,IRK+1)
+            endif
+         ENDDO
+      ENDIF
+      END SUBROUTINE SLOPELIMITER11
 
 #endif

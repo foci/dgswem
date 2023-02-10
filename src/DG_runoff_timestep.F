@@ -129,7 +129,13 @@ C.......SSP Runge-Kutta Time Scheme
          CALL UPDATER_ELEM_MOD(HWD,QX,QY,IRK+1,1)
          CALL UPDATER_CHANNEL(AWD,HWD,IRK+1,1)
 #endif
+     
+#ifdef SLOPEALL
+         CALL SLOPELIMITER()
+#endif
       ENDDO
+      
+
 C.....Update variables for next time step     
 
       DO J = 1,MNE
