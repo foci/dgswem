@@ -83,6 +83,7 @@ C.....Declare local variables
          SOURCE_R1 = SOURCE_R11 + (SOURCE_R22 - SOURCE_R11)*(TIMEDG - ITDT)/DTDP
          
       elseif (RAINFALL .EQ. 2) then ! apply Green-Ampt model
+         SOURCE_R1 = SOURCE_R11 + (SOURCE_R22 - SOURCE_R11)*(TIMEDG - ITDT)/DTDP
          ! I = I + 1
          DT1 = DTVD(IRK)*DTDP
          ! IF (IRK.EQ.1) THEN
