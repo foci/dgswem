@@ -158,7 +158,11 @@ C.....to single nodal values
           DO J = 1,NO_NBORS
             NBOR_EL = ELETAB(I,1+J)
          
-            IF (DGSAKE.EQ.1) HWD2(I) = HWD2(I) + AREA*HWD_DG(J)
+            IF (DGSAKE.EQ.1) THEN
+               AREA = 0.5d0*AREAS(NBOR_EL)/AREA_SUM
+               HWD2(I) = HWD2(I) + AREA*HWD_DG(J)
+            ENDIF
+            
             IF(WDFLG(NBOR_EL).EQ.0) CYCLE  ! DON'T COUNT DRY ELEMENTS  sb 02/26/07
          
             AREA = 0.5d0*AREAS(NBOR_EL)/AREA_SUM
