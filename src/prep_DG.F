@@ -924,11 +924,12 @@ C.....2021-04-14 Younghun: Added prep for solving KWE
       ALLOCATE (KS(MNE), HF(MNE), MD(MNE), IntDp(MNE), TotInf(MNE))
       ALLOCATE (ManningKWE2(MNE))
       
-      IF (DGSAKE.EQ.1) THEN
+      
       DO J = 1,NE
          N1 = NM(J,1)
          N2 = NM(J,2)
          N3 = NM(J,3)
+         IF (RAINFALL.EQ.2) THEN
          KS(J)     = 1.d0/3.d0 *(HydraulicCond(N1) 
      &                       + HydraulicCond(N2) + HydraulicCond(N3))
          HF(J)     = 1.d0/3.d0 *(CapillaryP(N1)
@@ -937,10 +938,11 @@ C.....2021-04-14 Younghun: Added prep for solving KWE
      &                       + MoistDecific(N2)  + MoistDecific(N3))
          IntDp(J)  = 1.d0/3.d0 *(IntDepth(N1)
      &                       + IntDepth(N2)      + IntDepth(N3))
+         ENDIF
          ManningKWE2(J) =  1.D0/3.D0*(ManningsN(N1)
      &                       + ManningsN(N2) + ManningsN(N3))
       ENDDO
-      ENDIF
+      
 
 C.....Do the L2-projection of the initial conditions
 
