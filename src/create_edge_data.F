@@ -53,7 +53,7 @@ C--
       INTEGER IERROR
       
       REAL(SZ) mX, mY, diff
-      LOGICAL INFLAG1, INFLAG2, ONFLAG1, ONFLAG2
+      INTEGER FLAG1, FLAG2
 
 C.....Compute maximum number of edges
 
@@ -730,81 +730,42 @@ C.....Younghun: Assign Edge type to identify open channel edges
         IEL2 = NEDEL(2,I)
         
         IF (IEL1 * IEL2.EQ.0) THEN
-            CALL pointInTri(mX + S0X(IEL1), mY + S0Y(IEL1),IEL1,
-     &       INFLAG1,ONFLAG1)     
-            IF (INFLAG1.OR.ONFLAG1) THEN
-                ET(I) = 0
-            ELSE
+            CALL pointInTri(mX + S0X(IEL1), mY + S0Y(IEL1),IEL1,FLAG1)
+            IF (FLAG1.EQ.-1) THEN
                 ET(I) = 1
+            ELSE
+                ET(I) = 0
             ENDIF 
                
         ELSE
-            CALL pointInTri(mX + S0X(IEL1), mY + S0Y(IEL1),IEL1,INFLAG1,
-     &       ONFLAG1)
-            CALL pointInTri(mX + S0X(IEL2), mY + S0Y(IEL2),IEL2,INFLAG2,
-     &       ONFLAG2)
+            CALL pointInTri(mX + S0X(IEL1), mY + S0Y(IEL1),IEL1,FLAG1)
+            CALL pointInTri(mX + S0X(IEL2), mY + S0Y(IEL2),IEL2,FLAG2)
             
-            IF (INFLAG1.eq.0 .AND. ONFLAG1.eq.0 .AND. INFLAG2.eq.0 .AND.
-     &       ONFLAG2.eq.0) THEN
-                diff = max(abs(abs(mX+S0X(IEL1)) - abs(mX+S0X(IEL2))),
-     &           abs(abs(mY+S0Y(IEL1)) - abs(mY+S0Y(IEL2))))
-                
-                IF (diff .lt. 0) THEN ! Do we need this?
-                    ET(I) = -1
-                ELSE
-                    ET(I) = -2
-                    ! flipNEDEL(I) = 1 ! test
-
-                    ! DG-SAKE in MALTAB handles "flowMap" variable here
-                ENDIF
-            ELSEIF (ONFLAG1 .AND. INFLAG2.eq.0 .AND. ONFLAG2.eq.0) THEN
-                ET(I) = -2
-                flipNEDEL(I) = 1
-
-                ! DG-SAKE in MALTAB handles "flowMap" variable here
-                
-            ELSEIF (INFLAG1.eq.0 .AND. ONFLAG1.eq.0 .AND. ONFLAG2) THEN
-                ET(I) = -2
-
-                ! DG-SAKE in MALTAB handles "flowMap" variable here
-                
-            ELSEIF (INFLAG1 .AND. INFLAG2) THEN
-                ET(I) = 0
-                
-            ELSEIF (INFLAG1 .AND. INFLAG2.eq.0) THEN
-                flipNEDEL(I) = 1     
-                
-                ! DG-SAKE in MALTAB handles "flowMap" variable here
-            ! ELSEIF (ONFLAG1 .AND. ONFLAG2) THEN
-               ! ET(I) = 0    
-                ! DG-SAKE in MALTAB handles "flowMap" variable here
+C......Younghun's classification
+            
+            IF (FLAG1.EQ.-1) THEN
+               if (FLAG2.EQ.-1) then
+                  ET(I) = -2
+               else
+                  ET(I) = -1
+               endif
+               
+            ELSEIF (FLAG1.EQ.0) then
+               if (FLAG2.EQ.-1) then
+                  ET(I) = -1
+                  flipNEDEL(I) = 1
+               else
+                  ET(I) = -1
+               endif
+               
+            ELSEIF (FLAG1.EQ.1) then
+               if (FLAG2.EQ.1) then
+                  ET(I) = 0
+               else
+                  ET(I) = -1
+                  flipNEDEL(I) = 1
+               endif
             ENDIF
-            
-CC......Younghun's classification
-C            
-C            IF (INFLAG1.eq.0 .AND. ONFLAG1.eq.0) THEN
-C               if (INFLAG2.eq.0 .AND. ONFLAG2.eq.0) then
-C                  ET(I) = -2
-C               else
-C                  ET(I) = -1
-C               endif
-C               
-C            ELSEIF (INFLAG1.eq.0 .AND. ONFLAG1.eq.1) then
-C               if (INFLAG2.eq.0 .AND. ONFLAG2.eq.0) then
-C                  ET(I) = -1
-C                  flipNEDEL(I) = 1
-C               else
-C                  ET(I) = -1
-C               endif
-C               
-C            ELSEIF (INFLAG1.eq.1 .AND. ONFLAG1.eq.0) then
-C               if (INFLAG2.eq.1 .AND. ONFLAG2.eq.0) then
-C                  ET(I) = 0
-C               else
-C                  ET(I) = -1
-C                  flipNEDEL(I) = 1
-C               endif
-C            ENDIF
                 
         ENDIF
         

@@ -3,12 +3,17 @@ C
 C     SUBROUTINE pointInTri( )
 C
 C     This subroutine determines whether point (p1,p2) is inside a I's element
+C     
+C     The output FLAG indicates three cases:
+C        FLAG = 1  if the given point is inside of element
+C        FLAG = 0  if the given point is on the edge of element
+C        FLAG = -1 if the given point is outside of element
 C
 C     Written by Dustin West in MATLAB and copied by Younghun Kang
 C
 C***********************************************************************
 
-      SUBROUTINE pointInTri(p1,p2,I,INFLAG,ONFLAG)
+      SUBROUTINE pointInTri(p1,p2,I,FLAG)
 
 C.....Use appropriate modules
 
@@ -19,7 +24,7 @@ C.....Use appropriate modules
 C.....Declare local variables
       REAL(SZ), INTENT(IN) :: p1, p2
       INTEGER, INTENT(IN) :: I
-      LOGICAL, INTENT(OUT) :: INFLAG, ONFLAG
+      INTEGER, INTENT(OUT) :: FLAG
       
       INTEGER II
       REAL(SZ) D, W(3), q1, q2
@@ -56,14 +61,12 @@ C.....Cap to zero
       ENDDO
 
 C.....Set default flags = 1
-      INFLAG = 1
-      ONFLAG = 0
+      FLAG = 1
       
 C.....Check if the point is out of element
       DO II = 1, 3
          IF (W(II).lt.0.D0 .OR. W(II).gt.1.D0) THEN
-            INFLAG = 0
-            ONFLAG = 0
+            FLAG = -1
             EXIT
          ENDIF
       ENDDO
@@ -71,8 +74,7 @@ C.....Check if the point is out of element
 C.....Check if the point is on the edge of element
       DO II = 1, 3
          IF (W(II).EQ.0.D0) THEN
-            INFLAG = 0
-            ONFLAG = 1
+            FLAG = 0
             EXIT
          ENDIF
       ENDDO
