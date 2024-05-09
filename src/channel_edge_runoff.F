@@ -147,11 +147,6 @@ C                  W_EX = 2.0d0*XLEN(GED)/AREAS(EL_EX)*M_INV(K,pa)*
 C     &                     PHI_EDGE(K,GP_EX,LED_EX,pa)*WEGP(GP_EX,pa)
      
                   IF (ET(GED).eq.-1) THEN
-                     W_IN = 2.0d0*XLEN(GED)/AREAS(EL_IN)*M_INV(K,pa)*
-     &                        PHI_EDGE(K,GP_IN,LED_IN,pa)*WEGP(GP_IN,pa)
-                     W_EX = 2.0d0*XLEN(GED)/AREAS(EL_IN)*M_INV(K,pa)*
-     &                        PHI_EDGE(K,GP_EX,LED_EX,pa)*WEGP(GP_EX,pa)
-                  
                      RHS_HWD(K,EL_IN,IRK) = RHS_HWD(K,EL_IN,IRK) - W_IN*HQ_HAT_IN
                      ! RHS_HWD(K,EL_EX,IRK) = RHS_HWD(K,EL_EX,IRK) + W_EX*HQ_HAT_IN
                      IF (NEDCEDN(GED) .gt. 0) THEN
@@ -174,11 +169,8 @@ C     &                     PHI_EDGE(K,GP_EX,LED_EX,pa)*WEGP(GP_EX,pa)
                ! IF (NEDCEDN(GED).eq.0) THEN
                   ! QL1 = 0.D0
                ! ENDIF
-               IF (ET(GED).eq.-1) THEN
-                  ! QL1 = (HQX_IN*NX + HQY_IN*NY)
-                  QL1 = 0.D0
-               ELSEIF (ET(GED).eq.-2) THEN
-                  QL1 = (HQX_IN*NX + HQY_IN*NY) - (HQX_EX*NX + HQY_EX*NY)
+               IF (ET(GED).eq.-2) THEN
+                  QL1 = HQ_HAT_IN - HQ_HAT_EX
                ELSE
                   QL1 = 0.D0
                ENDIF
@@ -278,11 +270,6 @@ C                  W_EX = 2.0d0*XLEN(GED)/AREAS(EL_EX)*M_INV(K,pa)*
 C     &                     PHI_EDGE(K,GP_EX,LED_EX,pa)*WEGP(GP_EX,pa)
      
                   IF (ET(GED).eq.-1) THEN
-                     W_IN = 2.0d0*XLEN(GED)/AREAS(EL_IN)*M_INV(K,pa)*
-     &                        PHI_EDGE(K,GP_IN,LED_IN,pa)*WEGP(GP_IN,pa)
-                     W_EX = 2.0d0*XLEN(GED)/AREAS(EL_IN)*M_INV(K,pa)*
-     &                        PHI_EDGE(K,GP_EX,LED_EX,pa)*WEGP(GP_EX,pa)
-                  
                      RHS_HWD(K,EL_IN,IRK) = RHS_HWD(K,EL_IN,IRK) - W_IN*HQ_HAT_IN
                      ! RHS_HWD(K,EL_EX,IRK) = RHS_HWD(K,EL_EX,IRK) + W_EX*HQ_HAT_IN
                      IF (NEDCEDN(GED) .gt. 0) THEN
@@ -302,16 +289,12 @@ C     &                     PHI_EDGE(K,GP_EX,LED_EX,pa)*WEGP(GP_EX,pa)
 
                ENDDO
                
-               IF (ET(GED).eq.-1) THEN
-                  ! QL1 = (HQX_IN*NX + HQY_IN*NY)
-                  QL1 = 0.D0
-               ELSEIF (ET(GED).eq.-2) THEN
-                  QL1 = (HQX_IN*NX + HQY_IN*NY) - (HQX_EX*NX + HQY_EX*NY)
+               IF (ET(GED).eq.-2) THEN
+                  QL1 = HQ_HAT_IN - HQ_HAT_EX
                ELSE
                   QL1 = 0.D0
                ENDIF
                
-               ! QL1 = (HQX_IN*NX + HQY_IN*NY) - (HQX_EX*NX + HQY_EX*NY)
                QL(J,I) = QL1
                
             ENDDO
@@ -341,21 +324,6 @@ C     &                     PHI_EDGE(K,GP_EX,LED_EX,pa)*WEGP(GP_EX,pa)
          ! ! enddo
       ! endif
       ! print*,QL
-      
-      IF (IT.eq.1) THEN
-       WRITE(9999,3220) RUNDES,RUNID,AGRID
-       WRITE(9999,3645) NTRSPE,NSTAE,DTDP*NSPOOLE,NSPOOLE,1
-      ENDIF
-      
- 3220   FORMAT(1X,A32,2X,A24,2X,A24)
- 3645   FORMAT(1X,I10,1X,I10,1X,E15.7,1X,I5,1X,I5)
- 
-      IF (NSCOUE+1 .EQ. NSPOOLE) THEN
-      write(9999,*) IT*DTDP
-      DO I = 1,NCEDS
-      write(9999,*) I,sum(QL(:,I))/NEGP(pa)
-      ENDDO
-      ENDIF
       
 #ifdef CMPI
       CALL UPDATER_LATERALINFLOW(QL,HWD,IRK+1,1)
