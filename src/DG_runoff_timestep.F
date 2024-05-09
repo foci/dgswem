@@ -93,6 +93,10 @@ C.......Compute radiation edges
 
          IF (NREDS.GT.0)  CALL RADIATION_EDGE_RUNOFF(IT)
          
+C.......Compute open channel edges
+         
+         IF (NCEDS.GT.0) CALL CHANNEL_EDGE_RUNOFF(IT)
+         
 C.......Compute internal edges
 
          CALL INTERNAL_EDGE_RUNOFF(IT)

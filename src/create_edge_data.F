@@ -517,6 +517,22 @@ C.....Younghun added
          ! print*,NCEDIN(1,I), NCEDEX(1,I)
          
       ENDDO
+      
+C.....Find the interior edges (exclude channel-edges)
+      NIEDS = 0
+      NIEDN = 0
+      DO I = 1,NEDGES
+        IEL1 = NEDEL(1,I)
+        IEL2 = NEDEL(2,I)
+        DO J = 1, NCEDS
+           IF (NCEDN(J).EQ.I) GOTO 40
+        ENDDO
+        IF((IEL1.NE.0).AND.(IEL2.NE.0))THEN
+          NIEDS = NIEDS + 1
+          NIEDN(NIEDS) = I
+          NCOUNT(I) = 0
+        ENDIF
+ 40   ENDDO
 
 C.....Check the order of the nodes assigned to an edge - important in
 C.....the calculation of the unit normal
@@ -546,7 +562,7 @@ C.....Check for missing edges
 
 Csb-PDG1 modified
       NERR = NEDGES - (NIEDS + NLEDS + NEEDS + NFEDS + NIBEDS + NEBEDS +
-     &                 NREDS)
+     &                 NREDS + NCEDS)
 
       IF(MYPROC.EQ.0) THEN
          WRITE(6,*) '  '
@@ -559,6 +575,7 @@ Csb-PDG1 modified
          WRITE(6,*) 'NO. OF EXTERNAL BARRIER EDGES = ', NEBEDS
          WRITE(6,*) 'NO. OF INTERNAL BARRIER EDGES = ', NIBEDS
          WRITE(6,*) 'NO. OF RADIATION EDGES = ', NREDS
+         WRITE(6,*) 'NO. OF OPEN CHANNEL EDGES = ', NCEDS
          WRITE(6,*) 
      &        '-----------------------------------------------------'
          WRITE(6,*) 'NO. OF MISSING EDGES = ',NERR
@@ -574,6 +591,7 @@ Csb-PDG1 modified
       WRITE(16,*) 'NO. OF EXTERNAL BARRIER EDGES = ', NEBEDS
       WRITE(16,*) 'NO. OF INTERNAL BARRIER EDGES = ', NIBEDS
       WRITE(16,*) 'NO. OF RADIATION EDGES = ', NREDS
+      WRITE(16,*) 'NO. OF OPEN CHANNEL EDGES = ', NCEDS
       WRITE(16,*) 
      &        '-----------------------------------------------------'
       WRITE(16,*) 'NO. OF MISSING EDGES = ',NERR

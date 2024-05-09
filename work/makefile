@@ -116,7 +116,8 @@ ADC_SRC    =  dgswem.F owiwind.F read_input.F cstart.F hstart.F radiation_edge_h
 	wetdry.F LDG_hydro.F met_forcing.F sta_basis.F modal2nodal.F write_output.F \
     calc_trislope.F pointInTri.F \
     precipitation.F DG_runoff_timestep.F internal_edge_runoff.F rhs_dg_runoff.F \
-    land_edge_runoff.F orthogonal_basis_1d.F sta_basis1d.F radiation_edge_runoff.F
+    land_edge_runoff.F orthogonal_basis_1d.F sta_basis1d.F radiation_edge_runoff.F \
+    channel_edge_runoff.F
 #Casey 121126: Added modal2nodal.F and write_output.F to the previous line.
 #Younghun 191024: Added calc_trislope.F pointInTri.F 
 #Younghun 191107: Added precipitation.F DG_runoff_timestep.F internal_edge_runoff.F
@@ -366,6 +367,7 @@ $(O_DIR)orthogonal_basis_1d.O   : orthogonal_basis_1d.F $(ADC_MOBJ)
 $(O_DIR)sta_basis1d.O           : sta_basis1d.F $(ADC_MOBJ)
 $(O_DIR)KWEAttr.O            : KWEAttr.F $(ADC_MOBJ)
 $(O_DIR)radiation_edge_runoff.O : radiation_edge_runoff.F $(ADC_MOBJ)
+$(O_DIR)channel_edge_runoff.O   : channel_edge_runoff.F $(ADC_MOBJ)
 
 debug:
 	@echo $(ADC_MSRC) 
