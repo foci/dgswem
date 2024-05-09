@@ -41,6 +41,7 @@ C.......Retrieve the global and local edge number
          GED = NIEDN(L)
 
 C.......Retrieve the elements which share the edge
+         ! Check direction of edge to make sure water flows from EL_IN to EL_EX
          IF (flipNEDEL(GED).eq.0) THEN
             LED_IN = NEDSD(1,GED)
             LED_EX = NEDSD(2,GED)
@@ -90,35 +91,27 @@ C.....Compute H (water depth), Q in 2D KWE at each edge Gauss quadrature point
                   
                ENDDO
                
+               ! Check if water depth is below 0
                IF (HWD_IN .lt. 0.D0) THEN
                   HWD_IN = 0.D0
-                  ! DO K = 1,DOFS(EL_IN)
-                     ! HWD(K,EL_IN,IRK) = 0.D0
-                  ! ENDDO
                ENDIF
                
                IF (HWD_EX .lt. 0.D0) THEN
                   HWD_EX = 0.D0
-                  ! DO K = 1,DOFS(EL_IN)
-                     ! HWD(K,EL_IN,IRK) = 0.D0
-                  ! ENDDO
                ENDIF
                
-               ! Manning_n = 0.015
+               ! Compute flux
                HQX_IN = S0X(EL_IN)*(HWD_IN**(5.D0/3.D0)) / (manningKWE2(EL_IN)*sqrt(S0mag(EL_IN)))
                HQY_IN = S0Y(EL_IN)*(HWD_IN**(5.D0/3.D0)) / (manningKWE2(EL_IN)*sqrt(S0mag(EL_IN)))
 
                HQX_EX = S0X(EL_EX)*(HWD_EX**(5.D0/3.D0)) / (manningKWE2(EL_EX)*sqrt(S0mag(EL_EX)))
                HQY_EX = S0Y(EL_EX)*(HWD_EX**(5.D0/3.D0)) / (manningKWE2(EL_EX)*sqrt(S0mag(EL_EX)))
-               
-               ! print*,S0X(EL_EX) / (manningKWE2(EL_EX)*sqrt(S0mag(EL_EX)))
 
 C.....Compute the numerical flux (upwind scheme)
                             
                HQ_HAT_IN = HQX_IN*NX + HQY_IN*NY
                HQ_HAT_EX = HQX_EX*NX + HQY_EX*NY
                
-               ! WRITE(*,*) HQ_HAT_IN,IT*DTDP
 C.....Compute the edge integral
                
                DO K = 1,DOFS(EL)
@@ -126,25 +119,14 @@ C.....Compute the edge integral
                   W_IN = EDFAC_IN*EDGEQ(K,GP_IN,LED_IN,pa)
                   W_EX = EDFAC_EX*EDGEQ(K,GP_EX,LED_EX,pa)
                   
-C                  W_IN = 2.0d0*XLEN(GED)/AREAS(EL_IN)*M_INV(K,pa)*
-C     &                     PHI_EDGE(K,GP_IN,LED_IN,pa)*WEGP(GP_IN,pa)
-C                  W_EX = 2.0d0*XLEN(GED)/AREAS(EL_EX)*M_INV(K,pa)*
-C     &                     PHI_EDGE(K,GP_EX,LED_EX,pa)*WEGP(GP_EX,pa)
-     
-                  IF (ET(GED).eq.-1) THEN
+                  ! Check edge type
+                  IF (ET(GED).eq.-1) THEN ! flowing edge (from EL_IN to EL_EX)
                      RHS_HWD(K,EL_IN,IRK) = RHS_HWD(K,EL_IN,IRK) - W_IN*HQ_HAT_IN
-                     ! RHS_HWD(K,EL_EX,IRK) = RHS_HWD(K,EL_EX,IRK) + W_EX*HQ_HAT_IN
-                     IF (NEDCEDN(GED) .gt. 0) THEN
-                        W_EX = EDFAC_EX*EDGEQ(K,GP_EX,LED_EX,pa)
-                        ! RHS_HWD(K,EL_EX,IRK) = RHS_HWD(K,EL_EX,IRK) + W_EX*HQ_HAT_EX
-                        ! stop
-                     else
-                        RHS_HWD(K,EL_EX,IRK) = RHS_HWD(K,EL_EX,IRK) + W_EX*HQ_HAT_IN
-                     ENDIF
+                     RHS_HWD(K,EL_EX,IRK) = RHS_HWD(K,EL_EX,IRK) + W_EX*HQ_HAT_IN
                      
-                  ELSEIF (ET(GED).eq.0) THEN
+                  ELSEIF (ET(GED).eq.0) THEN ! diverging edge
                      ! No flow
-                  ELSEIF (ET(GED).eq.-2) THEN
+                  ELSEIF (ET(GED).eq.-2) THEN ! converging edge (it should not happen after introducing channel_edge_runoff subroutine)
                      RHS_HWD(K,EL_IN,IRK) = RHS_HWD(K,EL_IN,IRK) - W_IN*HQ_HAT_IN
                      RHS_HWD(K,EL_EX,IRK) = RHS_HWD(K,EL_EX,IRK) + W_EX*HQ_HAT_EX
                   ENDIF
@@ -174,10 +156,6 @@ C     &                     PHI_EDGE(K,GP_EX,LED_EX,pa)*WEGP(GP_EX,pa)
             endif
 #endif
 
-C.......If both elements on either side of edge are dry then skip
-
-         ! IF((WDFLG(EL_IN).EQ.0).AND.(WDFLG(EL_EX).EQ.0)) GOTO 1000
-
 C.....Retrieve the components of the normal vector to the edge
         
             NX = -COSNX(GED)
@@ -206,28 +184,21 @@ C.....Compute H (water depth), Q in 2D KWE at each edge Gauss quadrature point
                   
                ENDDO
                
+               ! Check if water depth is below 0
                IF (HWD_IN .lt. 0.D0) THEN
                   HWD_IN = 0.D0
-                  ! DO K = 1,DOFS(EL_IN)
-                     ! HWD(K,EL_IN,IRK) = 0.D0
-                  ! ENDDO
                ENDIF
                
                IF (HWD_EX .lt. 0.D0) THEN
                   HWD_EX = 0.D0
-                  ! DO K = 1,DOFS(EL_IN)
-                     ! HWD(K,EL_IN,IRK) = 0.D0
-                  ! ENDDO
                ENDIF
                
-               
-               ! Manning_n = 0.015
+               ! Compute flux
                HQX_IN = S0X(EL_IN)*(HWD_IN**(5.D0/3.D0)) / (manningKWE2(EL_IN)*sqrt(S0mag(EL_IN)))
                HQY_IN = S0Y(EL_IN)*(HWD_IN**(5.D0/3.D0)) / (manningKWE2(EL_IN)*sqrt(S0mag(EL_IN)))
                                                   
                HQX_EX = S0X(EL_EX)*(HWD_EX**(5.D0/3.D0)) / (manningKWE2(EL_EX)*sqrt(S0mag(EL_EX)))
                HQY_EX = S0Y(EL_EX)*(HWD_EX**(5.D0/3.D0)) / (manningKWE2(EL_EX)*sqrt(S0mag(EL_EX)))
-
 
 C.....Compute the numerical flux (upwind scheme)
                             
@@ -244,16 +215,10 @@ C.....Compute the edge integral
                   IF (ET(GED).eq.-1) THEN
      
                      RHS_HWD(K,EL_IN,IRK) = RHS_HWD(K,EL_IN,IRK) - W_IN*HQ_HAT_IN
-                     IF (NEDCEDN(GED) .gt. 0) THEN
-                        W_EX = EDFAC_EX*EDGEQ(K,GP_EX,LED_EX,pa)
-                        ! RHS_HWD(K,EL_EX,IRK) = RHS_HWD(K,EL_EX,IRK) + W_EX*HQ_HAT_EX
-                        ! stop
-                     else
-                        RHS_HWD(K,EL_EX,IRK) = RHS_HWD(K,EL_EX,IRK) + W_EX*HQ_HAT_IN
-                     ENDIF
-                  ELSEIF (ET(GED).eq.0) THEN
+                     RHS_HWD(K,EL_EX,IRK) = RHS_HWD(K,EL_EX,IRK) + W_EX*HQ_HAT_IN
+                  ELSEIF (ET(GED).eq.0) THEN ! diverging edge
                      ! No flow
-                  ELSEIF (ET(GED).eq.-2) THEN
+                  ELSEIF (ET(GED).eq.-2) THEN ! converging edge (it should not happen after introducing channel_edge_runoff subroutine)
                      RHS_HWD(K,EL_IN,IRK) = RHS_HWD(K,EL_IN,IRK) - W_IN*HQ_HAT_IN
                      RHS_HWD(K,EL_EX,IRK) = RHS_HWD(K,EL_EX,IRK) + W_EX*HQ_HAT_EX
                   ENDIF
