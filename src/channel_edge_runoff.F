@@ -500,7 +500,8 @@ C     &                      *((AWD_PLUS/P_PLUS)**(2.D0/3.D0)) * AWD_PLUS
             do J = 1,NCEDEX(1,I)
                GED_EX = NCEDEX(J+1,I)
                DO K = 1,DOFS1
-                  RHS_AWD(K,GED_EX,IRK) = RHS_AWD(K,GED_EX,IRK) + (2.d0/XLEN(GED_EX))*M1D_INV(K,pa)*PHI1D_PLUS(K,pa)*AQ_MINUS
+                  RHS_AWD(K,GED_EX,IRK) = RHS_AWD(K,GED_EX,IRK)
+     &             + (2.d0/XLEN(GED_EX))*M1D_INV(K,pa)*PHI1D_PLUS(K,pa)*AQ_MINUS/NCEDEX(1,I)
                ENDDO
             enddo
          endif
