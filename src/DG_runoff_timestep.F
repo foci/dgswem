@@ -131,7 +131,7 @@ C.......SSP Runge-Kutta Time Scheme
 
 #ifdef CMPI
          CALL UPDATER_ELEM_MOD(HWD,QX,QY,IRK+1,1)
-         CALL UPDATER_CHANNEL(AWD,HWD,IRK+1,1)
+         CALL UPDATER_CHANNEL(AWD,IRK+1)
 #endif
      
 #ifdef SLOPEALL

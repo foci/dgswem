@@ -393,9 +393,10 @@ C---------------------------------------------------------------------------C
 C
 cjjw - added 1 line
 cjjw      IMPLICIT NONE
-      INTEGER I,I1,J,K,L,ETYPE,ITEMP,ITEMP2,ILNODE,ILNODE2,ILNODE3
+      INTEGER I,I1,J,K,L,ETYPE,ITEMP,ITEMP2,ITEMP3,ILNODE,ILNODE2,ILNODE3
       INTEGER JD,JG,JP,IPROC,IPROC2,IPROC3,DISC,BBN,IBP,NCE
       INTEGER INDEX,INDEX2,ITOT,ITYPE,NUMS(10),INDEX3
+      INTEGER, ALLOCATABLE :: NUMS2(:), BOUP_REMAP(:,:)
       CHARACTER LOCFN*14,PE*6
       CHARACTER*80 OUTMSG
 C
@@ -414,6 +415,9 @@ C....2021-05-10 Younghun
       NUM_SEND_CH = 0
       NUM_RECV_LI = 0
       NUM_SEND_LI = 0
+      
+      ALLOCATE (NUMS2(maxval(NVELL)),BOUP_REMAP(NPROC,NBOU))
+      BOUP_REMAP = 0
       
       ETYPE = 3   ! The only Element-Type supported by ADCIRC is 3.
 C
@@ -536,112 +540,7 @@ C
 C
          ENDDO
 C
-
-c........2021-06-09 Younghun: handle ghost edge with ibtype=6
-         DO K = 1, NBOU
-            IF (IBTYPE(K).NE.6 .OR. NVELLP(K).LT.2) CYCLE
-            ITEMP = 0
-            DO J = 1, NVELLP(K)-1
-               INDEX = NBVVP(K,J)
-               INDEX2 = NBVVP(K,J+1)
-               
-               ITEMP2 = 0
-               DO I = 1,NELP(IPROC)
-                  N1 = NNEP(1,I,IPROC)
-                  N2 = NNEP(2,I,IPROC)
-                  N3 = NNEP(3,I,IPROC)
-                  
-                  IF ((N1.EQ.INDEX .AND. N2.EQ.INDEX2) .OR.
-     &               (N2.EQ.INDEX .AND. N3.EQ.INDEX2) .OR.
-     &               (N3.EQ.INDEX .AND. N1.EQ.INDEX2) .OR.
-     &               (N1.EQ.INDEX2 .AND. N2.EQ.INDEX) .OR.
-     &               (N2.EQ.INDEX2 .AND. N3.EQ.INDEX) .OR.
-     &               (N3.EQ.INDEX2 .AND. N1.EQ.INDEX)) THEN
-                     ITEMP2 = 1
-                     EXIT   
-                  ENDIF
-               ENDDO
-               
-               IF (ITEMP2.EQ.0) THEN
-                  ITEMP = J
-               ENDIF
-            ENDDO
-            
-            IF (ITEMP.GT.0) THEN
-               NVELLP(K) = NVELLP(K) - ITEMP
-               DO J = 1, NVELLP(K)
-                  NBVVP(K,J) = NBVVP(K,J+ITEMP)
-                  LBINDEX_LG(K,J) = LBINDEX_LG(K,J+ITEMP)
-               ENDDO
-            ENDIF
-         ENDDO
       
-C........2021-05-07 Younghun:
-         DO K = 1, NBOU
-            IF (IBTYPE(K).EQ.6 .AND. NVELLP(K).GT.1) THEN
-               INDEX = NBVVP(K,1)
-               INDEX2 = NBVVP(K,2)
-               INDEX = IMAP_NOD_LG(INDEX,IPROC)
-               INDEX2 = IMAP_NOD_LG(INDEX2,IPROC)
-               
-               IF (ITOTPROC(INDEX).GT.1 .AND. ITOTPROC(INDEX2).GT.1) THEN
-                  ITEMP = 0
-                  ITEMP2 = 0
-                  DO I = 1, NBOU
-                     DO J = 1, NVELL(I)-1
-                        IF (NBVV(I,J+1).EQ.INDEX) ITEMP = ITEMP + 1
-                     ENDDO
-                     
-                     DO J = 1, NVELLP(I)-1
-                        INDEX3 = NBVVP(I,J+1)
-                        INDEX3 = IMAP_NOD_LG(INDEX3,IPROC)
-                        IF (INDEX3.EQ.INDEX) ITEMP2 = ITEMP2 + 1
-                     ENDDO
-                  ENDDO
-                  IF (ITEMP.EQ.ITEMP2) THEN
-                     GOTO 600
-                  ENDIF
-                  
-                  NUM_RECV_CH(IPROC) = NUM_RECV_CH(IPROC) + 1
-                  RECV_CH(IPROC,NUM_RECV_CH(IPROC),1) = INDEX
-                  RECV_CH(IPROC,NUM_RECV_CH(IPROC),2) = INDEX2
-               ENDIF
-            ENDIF
-            
-            ! Check receive lateral inflow
-600         IF (IBTYPE(K).EQ.6 .AND. NVELLP(K).GT.1) THEN
-              DO I = 1, NVELLP(K)-1
-                 INDEX = NBVVP(K,I)
-                 INDEX2 = NBVVP(K,I+1)
-                 INDEX = IMAP_NOD_LG(INDEX,IPROC)
-                 INDEX2 = IMAP_NOD_LG(INDEX2,IPROC)
-                 IF (ITOTPROC(INDEX).GT.1 .AND. ITOTPROC(INDEX2).GT.1) THEN
-                    ! Count elements sharing the edge
-                    ITEMP = 0
-                    DO J = 1,NELP(IPROC)
-                       IELG = IMAP_EL_LG(J,IPROC)
-                       IF ((NNEG(1,IELG).EQ.INDEX .AND. NNEG(2,IELG).EQ.INDEX2) .OR.
-     &                     (NNEG(2,IELG).EQ.INDEX .AND. NNEG(3,IELG).EQ.INDEX2) .OR.
-     &                     (NNEG(3,IELG).EQ.INDEX .AND. NNEG(1,IELG).EQ.INDEX2)) THEN
-                          ITEMP = ITEMP + 1
-                       ELSEIF ((NNEG(1,IELG).EQ.INDEX2 .AND. NNEG(2,IELG).EQ.INDEX) .OR.
-     &                         (NNEG(2,IELG).EQ.INDEX2 .AND. NNEG(3,IELG).EQ.INDEX) .OR.
-     &                         (NNEG(3,IELG).EQ.INDEX2 .AND. NNEG(1,IELG).EQ.INDEX)) THEN
-                          ITEMP = ITEMP + 1
-                       ENDIF
-                    ENDDO
-                    
-                    IF (ITEMP.EQ.1) THEN
-                       NUM_RECV_LI(IPROC) = NUM_RECV_LI(IPROC) + 1
-                       RECV_LI(IPROC,NUM_RECV_LI(IPROC),1) = INDEX
-                       RECV_LI(IPROC,NUM_RECV_LI(IPROC),2) = INDEX2
-                    ENDIF
-                 ENDIF
-              ENDDO
-           ENDIF
-         ENDDO
-
-
 
 Cmod 05/18/2004 rl -- I don't think this next part is the correct
 c  way to handle islands.  Rather, if an island is split by a domain, it 
@@ -759,6 +658,210 @@ C
               ENDIF
             ENDIF
          ENDDO
+         
+C     2023-06-08 Younghun: handle ghost edge with ibtype=6. Ghost edge
+C     occurs when two nodes are included in a subdomain but the edge is
+C     not a part of the subdomain. It is problematic with 1D KWE solver,
+C     as ghost edges create artificial 1D element. This part splits the 
+C     boundary segment and splitted segments are stored it into i-th
+C     boundary segment where NVELLP(i) = 0.
+         DO K = 1, NBOU         
+            ! Check if open-channel edge
+            IF (IBTYPE(K).NE.6 .OR. NVELLP(K).LT.2) CYCLE
+            ITEMP = 0 ! ITEMP=1 if (J-1)th edge is in global fort.14 file, otherwise 0
+            ITEMP3 = 0 ! The number of open-channels partitions (after splitted at ghost edges)
+            NUMS2 = 0 
+            DO J = 1, NVELLP(K)-1
+               INDEX = NBVVP(K,J)
+               INDEX2 = NBVVP(K,J+1)
+               
+               ! Check if J-th edge is a ghost edge
+               ITEMP2 = 0 ! ITEMP2=1 if J-th edge is in global fort.14 file, otherwise 0
+               L = BOUP_REMAP(IPROC,K)
+               IF (L.EQ.0) L = K
+                  DO I = 1, NVELL(L)-1
+                     N1 = NBVV(L,I)
+                     N2 = NBVV(L,I+1)
+                     IF (N1.EQ.IMAP_NOD_LG(INDEX,IPROC) .AND. N2.EQ.IMAP_NOD_LG(INDEX2,IPROC)) THEN
+                        ITEMP2 = 1
+                        EXIT
+                     ENDIF
+                  ENDDO
+               
+               ! Store node local id to be used for splitting
+               IF (ITEMP.EQ.0 .AND. ITEMP2.EQ.1) THEN
+                  ITEMP3 = ITEMP3 + 1
+                  NUMS2(2*ITEMP3-1) = J ! Store local node number starting this partition
+                  ITEMP = 1
+               ELSEIF (ITEMP.EQ.1 .AND. ITEMP2.EQ.0) THEN
+                  NUMS2(2*ITEMP3) = J ! Store local node number ending this partition
+                  ITEMP = 0
+               ENDIF
+            ENDDO
+            
+            ! Check if the last edge is in fort.14 file
+            IF (ITEMP.EQ.1) THEN
+               NUMS2(2*ITEMP3) = J
+               ITEMP = 0
+            ENDIF
+
+            ! Update NVELP
+            NVELP(IPROC) = NVELP(IPROC) - NVELLP(K)
+            
+            ! Check if all edges are ghost edges
+            IF (ITEMP3.EQ.0) THEN
+               NBOUP(IPROC) = NBOUP(IPROC) - 1
+               NVELLP(K) = 0
+               CYCLE
+            ENDIF
+            
+            ! Split edge segments
+            DO I = 1, ITEMP3-1
+               INDEX = NUMS2(2*I-1)
+               INDEX2 = NUMS2(2*I)
+               
+               ! Find where NVELLP is empty
+               ITEMP = 0
+               DO J = 1, NBOU
+                  IF (NVELLP(J).EQ.0) THEN
+                     ITEMP = J
+                     EXIT
+                  ENDIF
+               ENDDO
+               
+               ! If all NVELLP > 0, splitted segments cannot be stored
+               ! This is unlikely happen, but if it happens, splitted 
+               ! segments should be stored in another way.
+               IF (ITEMP.EQ.0) THEN
+                  PRINT*, 'open-channel cannot be splitted.'
+                  stop
+               ENDIF
+               
+               ! Update NBOUP and NVELP
+               NBOUP(IPROC) = NBOUP(IPROC) + 1
+               NVELP(IPROC) = NVELP(IPROC) + INDEX2 - INDEX + 1
+               
+               ! Store splitted segments
+               NVELLP(ITEMP) = INDEX2 - INDEX + 1
+               DO J = 1, NVELLP(ITEMP)
+                  NBVVP(ITEMP,J) = NBVVP(K,INDEX+J-1)
+                  LBINDEX_LG(ITEMP,J) = LBINDEX_LG(K,INDEX+J-1)
+               ENDDO
+               IBTYPEP(ITEMP,IPROC) = IBTYPEP(K,IPROC)
+               BOUP_REMAP(IPROC,ITEMP) = K               
+            ENDDO
+            
+            ! The last one is stored in K-th element
+            I = ITEMP3
+            INDEX = NUMS2(2*I-1)
+            INDEX2 = NUMS2(2*I)
+            NVELP(IPROC) = NVELP(IPROC) + INDEX2 - INDEX + 1
+            NVELLP(K) = INDEX2 - INDEX + 1
+            DO J = 1, NVELLP(K)
+               NBVVP(K,J) = NBVVP(K,INDEX+J-1)
+               LBINDEX_LG(K,J) = LBINDEX_LG(K,INDEX+J-1)
+            ENDDO
+         ENDDO
+         
+C........2021-05-07 Younghun: check open-channel edges require data from another subdomain
+         DO K = 1, NBOU
+            ! Check if it needs to receive incoming flux
+            IF (IBTYPE(K).EQ.6 .AND. NVELLP(K).GT.1) THEN
+               DO L = 1, NVELLP(K)-1
+                  INDEX = NBVVP(K,L)
+                  INDEX2 = NBVVP(K,L+1)
+                  
+                  ! Check if the edge is in only one subdomain
+                  INDEX = IMAP_NOD_LG(INDEX,IPROC)
+                  INDEX2 = IMAP_NOD_LG(INDEX2,IPROC)
+                  
+                  IF (ITOTPROC(INDEX).EQ.1 .OR. ITOTPROC(INDEX2).EQ.1) CYCLE
+                  
+                  ! Count open-channel edges in global fort.14 starting with INDEX
+                  ITEMP = 0  ! The number of open-channel edges in global fort.14 starting with INDEX
+                  ITEMP2 = 0 ! The number of open-channel edges in local fort.14 starting with INDEX
+                  DO I = 1, NBOU
+                     DO J = 1, NVELL(I)-1
+                        IF (NBVV(I,J+1).EQ.INDEX) ITEMP = ITEMP + 1
+                     ENDDO
+
+                     DO J = 1, NVELLP(I)-1
+                        INDEX3 = NBVVP(I,J+1)
+                        INDEX3 = IMAP_NOD_LG(INDEX3,IPROC)
+                        IF (INDEX3.EQ.INDEX) ITEMP2 = ITEMP2 + 1
+                     ENDDO
+                  ENDDO
+                  
+                  ! Add to receiving list if ITEMP2 < ITEMP
+                  IF (ITEMP2.LT.ITEMP) THEN
+                     NUM_RECV_CH(IPROC) = NUM_RECV_CH(IPROC) + 1
+                     RECV_CH(IPROC,NUM_RECV_CH(IPROC),1) = INDEX
+                     RECV_CH(IPROC,NUM_RECV_CH(IPROC),2) = INDEX2
+                  ELSEIF (ITEMP2.GT.ITEMP) THEN
+                     PRINT*,'!!! Something is wrong with partition of open-channel edges !!!'
+                     stop
+                  ENDIF
+               ENDDO
+            ENDIF
+            
+            ! Check if it needs to receive lateral inflow
+            IF (IBTYPE(K).EQ.6 .AND. NVELLP(K).GT.1) THEN
+              DO I = 1, NVELLP(K)-1
+                 INDEX = NBVVP(K,I)
+                 INDEX2 = NBVVP(K,I+1)
+                 
+                 ! check if this edge is in local fort.14 file
+                 ITEMP = 0 
+                 DO J = 1,NELP(IPROC)
+                    N1 = NNEP(1,J,IPROC)
+                    N2 = NNEP(2,J,IPROC)
+                    N3 = NNEP(3,J,IPROC)
+                    
+                    IF ((N1.EQ.INDEX .AND. N2.EQ.INDEX2) .OR.
+     &                  (N2.EQ.INDEX .AND. N3.EQ.INDEX2) .OR.
+     &                  (N3.EQ.INDEX .AND. N1.EQ.INDEX2) .OR.
+     &                  (N1.EQ.INDEX2 .AND. N2.EQ.INDEX) .OR.
+     &                  (N2.EQ.INDEX2 .AND. N3.EQ.INDEX) .OR.
+     &                  (N3.EQ.INDEX2 .AND. N1.EQ.INDEX)) THEN
+                       ITEMP = 1
+                       EXIT   
+                    ENDIF
+                 ENDDO
+                 
+                 IF (ITEMP.EQ.0) CYCLE
+                 
+                 INDEX = IMAP_NOD_LG(INDEX,IPROC)
+                 INDEX2 = IMAP_NOD_LG(INDEX2,IPROC)
+                 IF (ITOTPROC(INDEX).GT.1 .AND. ITOTPROC(INDEX2).GT.1) THEN
+                    ! Count elements sharing the edge
+                    ITEMP = 0
+                    DO J = 1,NELP(IPROC)
+                       IELG = IMAP_EL_LG(J,IPROC)
+                       IF ((NNEG(1,IELG).EQ.INDEX .AND. NNEG(2,IELG).EQ.INDEX2) .OR.
+     &                     (NNEG(2,IELG).EQ.INDEX .AND. NNEG(3,IELG).EQ.INDEX2) .OR.
+     &                     (NNEG(3,IELG).EQ.INDEX .AND. NNEG(1,IELG).EQ.INDEX2)) THEN
+                          ITEMP = ITEMP + 1
+                       ELSEIF ((NNEG(1,IELG).EQ.INDEX2 .AND. NNEG(2,IELG).EQ.INDEX) .OR.
+     &                         (NNEG(2,IELG).EQ.INDEX2 .AND. NNEG(3,IELG).EQ.INDEX) .OR.
+     &                         (NNEG(3,IELG).EQ.INDEX2 .AND. NNEG(1,IELG).EQ.INDEX)) THEN
+                          ITEMP = ITEMP + 1
+                       ENDIF
+                    ENDDO
+                    
+                    ! Add to receiving list if only one neighboring element exist
+                    IF (ITEMP.EQ.1) THEN
+                       NUM_RECV_LI(IPROC) = NUM_RECV_LI(IPROC) + 1
+                       IF (NUM_RECV_LI(IPROC).GT.NBOU) THEN
+                          print*,IPROC,I,INDEX,INDEX2,NUM_RECV_LI(IPROC)
+                          stop
+                       ENDIF
+                       RECV_LI(IPROC,NUM_RECV_LI(IPROC),1) = INDEX
+                       RECV_LI(IPROC,NUM_RECV_LI(IPROC),2) = INDEX2
+                    ENDIF
+                 ENDIF
+              ENDDO
+           ENDIF
+         ENDDO
 C
 C--------------------------------------------------------------------------
 C--BEGIN WRITING LOCAL GRID ( fort.14 ) FILE HERE        
@@ -863,8 +966,10 @@ C
                 ELSEIF ((ITYPE.EQ.6)) THEN
                   DO I = 1,NVELLP(K)
                      INDEX = LBINDEX_LG(K,I)
+                     L = BOUP_REMAP(IPROC,K)
+                     IF (L.EQ.0) L = K
                      WRITE(14,83) NBVVP(K,I),
-     &                        BAR1(K,INDEX),BAR2(K,INDEX),BAR3(K,INDEX)
+     &                        BAR1(L,INDEX),BAR2(L,INDEX),BAR3(L,INDEX)
                   ENDDO
                 ENDIF
              ENDIF

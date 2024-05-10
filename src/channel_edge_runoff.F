@@ -326,7 +326,7 @@ C     &                     PHI_EDGE(K,GP_EX,LED_EX,pa)*WEGP(GP_EX,pa)
       ! print*,QL
       
 #ifdef CMPI
-      CALL UPDATER_LATERALINFLOW(QL,HWD,IRK+1,1)
+      CALL UPDATER_LATERALINFLOW(QL,IRK+1)
 #endif
 
 C.....Compute RHS for 1D KWE
