@@ -399,11 +399,8 @@ C...
                 ! print*,I,NCEDNO(1,NNE1(I)), NCEDNO(2,NNE1(I))
                 IF (GED.gt.0) then
                    AWD00(I) = AWD(1,GED,1)
-                   ! write(*,*) 'nne1'
-                   ! write(*,*) NNE1(I)
                    DO K = 2, ph+1
                       AWD00(I) = AWD00(I) + AWD(K,GED,1)*PHI_STAE1(K,I)
-                      ! if (I.eq.3) write(*,*) I,PHI_STAE1(K,I)
                    ENDDO
                 ENDIF
                 
@@ -474,11 +471,9 @@ C...
               IF(ABS(NOUTV).EQ.1) THEN
                 WRITE(62,2120) time_A,IT
                 IF (DGSAKE.EQ.1) WRITE(92,2120) time_A,IT
-                ! WRITE(96,2120) time_A,IT
                 DO I=1,NSTAV
                   WRITE(62,2454) I,UU00(I),VV00(I)
                   IF (DGSAKE.EQ.1) WRITE(92,2454) I,HQX00(I),HQY00(I)
-                  ! WRITE(96,2454) I,AQ00(I)!/CBWIDTH(2,NNV1(I))
                   END DO
                 IVSTP = IVSTP+1+NSTAV
                 ENDIF
@@ -503,7 +498,7 @@ C...
                    DO K = 2,ph+1
                       AWD_IN = AWD_IN + AWD(K,GED,1)*PHI_STAV1(K,I)
                    ENDDO
-                   ! print*,awd_in
+                   
                    if (AWD_IN .lt. 1e-16) then
                       AWD_IN = 0.D0
                    endif
@@ -513,7 +508,7 @@ C...
                    CSS = (1.D0 - WCED)*CSSLOPE(1,NNV1(I)) + WCED*CSSLOPE(2,NNV1(I))
                    
                    N2 = NCEDNO(2,NNV1(I))
-                   ! write(*,*) X(NEDNO(1,NNV1(I))), Y(NEDNO(1,NNV1(I)))
+                   
                    if (CSS.ge.1e8) then
                       AWD_H_IN = AWD_IN/CB
                    else
@@ -526,7 +521,6 @@ C...
                    if (AWD_IN.eq.0.D0) then
                       AQ00(I) = 0.D0
                    else
-                      ! manning = 0.15, alpha = 1/n, beta = 2/3
                       AQ00(I) = (1.D0/manningKWE1(NNV1(I)))*sqrt(CEDSLOPE(NNV1(I)))*((AWD_IN/P_MINUS)**(2.D0/3.D0)) * AWD_IN 
                    endif
 
@@ -536,8 +530,6 @@ C...
                    ENDIF
 
                 enddo
-                ! print*,NNV1(I),CBWIDTH(NNV1(I))
-                
                 
               ENDIF
               

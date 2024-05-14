@@ -112,10 +112,8 @@ C.......SSP Runge-Kutta Time Scheme
             BRK = BTVD(IRK,I)*DT
             DO J = 1,NE
                DO K = 1,DOFS(J)
-
                   HWD(K,J,IRK+1) = HWD(K,J,irk+1) + ARK*HWD(K,J,I)
      &                 + BRK*RHS_HWD(K,J,I) 
-     
                ENDDO
             ENDDO
             
@@ -145,28 +143,15 @@ C.....Update variables for next time step
       DO J = 1,MNE
          
          DO K = 1,DOFS(J)
-            ! ZE(K,J,1) = ZE(K,J,NRK+1)
-            ! QX(K,J,1) = QX(K,J,NRK+1)
-            ! QY(K,J,1) = QY(K,J,NRK+1)
-            
             HWD(K,J,1) = HWD(K,J,NRK+1)
-
          ENDDO
       ENDDO
 
       DO KK = 2,NRK+1
          DO J = 1,MNE
             DO K = 1,DOFH
-               ! ZE(K,J,KK) = 0.D0
-               ! QX(K,J,KK) = 0.D0
-               ! QY(K,J,KK) = 0.D0
-               ! RHS_ZE(K,J,KK-1) = 0.D0
-               ! RHS_QX(K,J,KK-1) = 0.D0
-               ! RHS_QY(K,J,KK-1) = 0.D0
-               
                HWD(K,J,KK) = 0.D0
                RHS_HWD(K,J,KK-1) = 0.D0
-
             ENDDO
          ENDDO
       ENDDO

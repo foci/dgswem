@@ -117,12 +117,8 @@ C.......Compute ZE, QX, QY, and HB at each area Gauss quadrature point
             
             IF (HWD_IN .lt. 0.D0) THEN
                HWD_IN = 0.D0
-               ! DO K = 1,DOFS(L)
-                  ! HWD(K,L,IRK) = 0.D0
-               ! ENDDO
             ENDIF
 
-            ! manning_n = 0.015
             HQX_IN = S0X(L)*(HWD_IN**(5.D0/3.D0)) / (manningKWE2(L)*sqrt(S0mag(L)))
             HQY_IN = S0Y(L)*(HWD_IN**(5.D0/3.D0)) / (manningKWE2(L)*sqrt(S0mag(L)))
 

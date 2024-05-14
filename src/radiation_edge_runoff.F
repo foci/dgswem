@@ -55,10 +55,6 @@ C.....Retrieve the elements which share the edge
          mX = (X(N1) + X(N2))/2
          mY = (Y(N1) + Y(N2))/2
          
-         ! CALL pointInTri(mX + S0X(EL_IN), mY + S0Y(EL_IN),EL_IN,INFLAG,ONFLAG)
-         ! IF (INFLAG.eq.0 .AND. ONFLAG.eq.0) THEN
-         ! IF (ET(GED).eq.1) THEN
-
 C.....Retrieve the components of the normal vector to the edge
          
             NX = COSNX(GED)
@@ -82,9 +78,6 @@ C.....Compute ZE, QX, QY, and HB at each Gauss point
                
                IF (HWD_IN .lt. 0.D0) THEN
                   HWD_IN = 0.D0
-                  ! DO K = 1,DOFS(EL_IN)
-                     ! HWD(K,EL_IN,IRK) = 0.D0
-                  ! ENDDO
                ENDIF
                   
                
@@ -96,26 +89,14 @@ C.....Compute the numerical flux (upwind scheme)
                             
                HQ_HAT = HQX_IN*NX + HQY_IN*NY
                
-C                CS = abs(NX*S0X(EL_IN)*(5.0d0/3.0d0)*(HWD_IN**(2.0d0/3.0d0)) / (manningKWE2(EL_IN)*sqrt(S0mag(EL_IN)))
-C      &             + NY*S0Y(EL_IN)*(5.0d0/3.0d0)*(HWD_IN**(2.0d0/3.0d0)) / (manningKWE2(EL_IN)*sqrt(S0mag(EL_IN))))
-C                CS = (5.D0/3.D0)*HQ_HAT/(HWD_IN)
-C                IF (HWD_IN.GT.0.D0) THEN
-C                   HQ_HAT = HQ_HAT + CS*HWD_IN
-C                ENDIF
-               
 C.....Compute the edge integral
                DO K = 1,DOFS(EL_IN)
-            
                   W_IN = 2.0*M_INV(K,pa)/AREAS(EL_IN)*XLEN(GED)*
      &                 PHI_EDGE(K,I,LED,pa)*WEGP(I,pa)
-            
-                  ! if (ET(GED).eq.1) then               
                      RHS_HWD(K,EL_IN,IRK) = RHS_HWD(K,EL_IN,IRK) - W_IN*HQ_HAT
-                  ! endif
                ENDDO
             
             ENDDO
-         ! ENDIF
       ENDDO
       RETURN
       END SUBROUTINE
