@@ -148,13 +148,13 @@ C     &                     PHI_EDGE(K,GP_EX,LED_EX,pa)*WEGP(GP_EX,pa)
      
                   IF (ET(GED).eq.-1) THEN
                      RHS_HWD(K,EL_IN,IRK) = RHS_HWD(K,EL_IN,IRK) - W_IN*HQ_HAT_IN
-                     ! RHS_HWD(K,EL_EX,IRK) = RHS_HWD(K,EL_EX,IRK) + W_EX*HQ_HAT_IN
+                     RHS_HWD(K,EL_EX,IRK) = RHS_HWD(K,EL_EX,IRK) + W_EX*HQ_HAT_IN
                      IF (NEDCEDN(GED) .gt. 0) THEN
                         W_EX = EDFAC_EX*EDGEQ(K,GP_EX,LED_EX,pa)
                         ! RHS_HWD(K,EL_EX,IRK) = RHS_HWD(K,EL_EX,IRK) + W_EX*HQ_HAT_EX
                         ! stop
                      else
-                        RHS_HWD(K,EL_EX,IRK) = RHS_HWD(K,EL_EX,IRK) + W_EX*HQ_HAT_IN
+                        ! RHS_HWD(K,EL_EX,IRK) = RHS_HWD(K,EL_EX,IRK) + W_EX*HQ_HAT_IN
                      ENDIF
                      
                   ELSEIF (ET(GED).eq.0) THEN
@@ -271,13 +271,13 @@ C     &                     PHI_EDGE(K,GP_EX,LED_EX,pa)*WEGP(GP_EX,pa)
      
                   IF (ET(GED).eq.-1) THEN
                      RHS_HWD(K,EL_IN,IRK) = RHS_HWD(K,EL_IN,IRK) - W_IN*HQ_HAT_IN
-                     ! RHS_HWD(K,EL_EX,IRK) = RHS_HWD(K,EL_EX,IRK) + W_EX*HQ_HAT_IN
+                     RHS_HWD(K,EL_EX,IRK) = RHS_HWD(K,EL_EX,IRK) + W_EX*HQ_HAT_IN
                      IF (NEDCEDN(GED) .gt. 0) THEN
                         W_EX = EDFAC_EX*EDGEQ(K,GP_EX,LED_EX,pa)
                         ! RHS_HWD(K,EL_EX,IRK) = RHS_HWD(K,EL_EX,IRK) + W_EX*HQ_HAT_EX
                         ! stop
                      else
-                        RHS_HWD(K,EL_EX,IRK) = RHS_HWD(K,EL_EX,IRK) + W_EX*HQ_HAT_IN
+                        ! RHS_HWD(K,EL_EX,IRK) = RHS_HWD(K,EL_EX,IRK) + W_EX*HQ_HAT_IN
                      ENDIF
                      
                   ELSEIF (ET(GED).eq.0) THEN
