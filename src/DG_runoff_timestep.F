@@ -113,7 +113,7 @@ C.......SSP Runge-Kutta Time Scheme
             DO J = 1,NE
                DO K = 1,DOFS(J)
                   HWD(K,J,IRK+1) = HWD(K,J,irk+1) + ARK*HWD(K,J,I)
-     &                 + BRK*RHS_HWD(K,J,I) 
+     &                 + BRK*RHS_KW2(K,J,I) 
                ENDDO
             ENDDO
             
@@ -121,7 +121,7 @@ C.......SSP Runge-Kutta Time Scheme
                GED = NCEDN(J)
                DO K = 1,ph+1
                   AWD(K,GED,IRK+1) = AWD(K,GED,irk+1) + ARK*AWD(K,GED,I)
-     &                 + BRK*RHS_AWD(K,GED,I)
+     &                 + BRK*RHS_KW1(K,GED,I)
                ENDDO
             ENDDO
          ENDDO
@@ -151,7 +151,7 @@ C.....Update variables for next time step
          DO J = 1,MNE
             DO K = 1,DOFH
                HWD(K,J,KK) = 0.D0
-               RHS_HWD(K,J,KK-1) = 0.D0
+               RHS_KW2(K,J,KK-1) = 0.D0
             ENDDO
          ENDDO
       ENDDO
@@ -171,7 +171,7 @@ C.....Update variables for next time step
             GED = NCEDN(J)
             DO K = 1,ph+1
                AWD(K,GED,KK) = 0.D0
-               RHS_AWD(K,GED,KK-1) = 0.D0
+               RHS_KW1(K,GED,KK-1) = 0.D0
             ENDDO
          ENDDO
       ENDDO

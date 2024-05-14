@@ -93,7 +93,7 @@ C.....Compute the edge integral
                DO K = 1,DOFS(EL_IN)
                   W_IN = 2.0*M_INV(K,pa)/AREAS(EL_IN)*XLEN(GED)*
      &                 PHI_EDGE(K,I,LED,pa)*WEGP(I,pa)
-                     RHS_HWD(K,EL_IN,IRK) = RHS_HWD(K,EL_IN,IRK) - W_IN*HQ_HAT
+                     RHS_KW2(K,EL_IN,IRK) = RHS_KW2(K,EL_IN,IRK) - W_IN*HQ_HAT
                ENDDO
             
             ENDDO

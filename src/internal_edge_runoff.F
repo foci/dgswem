@@ -121,14 +121,14 @@ C.....Compute the edge integral
                   
                   ! Check edge type
                   IF (ET(GED).eq.-1) THEN ! flowing edge (from EL_IN to EL_EX)
-                     RHS_HWD(K,EL_IN,IRK) = RHS_HWD(K,EL_IN,IRK) - W_IN*HQ_HAT_IN
-                     RHS_HWD(K,EL_EX,IRK) = RHS_HWD(K,EL_EX,IRK) + W_EX*HQ_HAT_IN
+                     RHS_KW2(K,EL_IN,IRK) = RHS_KW2(K,EL_IN,IRK) - W_IN*HQ_HAT_IN
+                     RHS_KW2(K,EL_EX,IRK) = RHS_KW2(K,EL_EX,IRK) + W_EX*HQ_HAT_IN
                      
                   ELSEIF (ET(GED).eq.0) THEN ! diverging edge
                      ! No flow
                   ELSEIF (ET(GED).eq.-2) THEN ! converging edge (it should not happen after introducing channel_edge_runoff subroutine)
-                     RHS_HWD(K,EL_IN,IRK) = RHS_HWD(K,EL_IN,IRK) - W_IN*HQ_HAT_IN
-                     RHS_HWD(K,EL_EX,IRK) = RHS_HWD(K,EL_EX,IRK) + W_EX*HQ_HAT_EX
+                     RHS_KW2(K,EL_IN,IRK) = RHS_KW2(K,EL_IN,IRK) - W_IN*HQ_HAT_IN
+                     RHS_KW2(K,EL_EX,IRK) = RHS_KW2(K,EL_EX,IRK) + W_EX*HQ_HAT_EX
                   ENDIF
 
                ENDDO
@@ -214,13 +214,13 @@ C.....Compute the edge integral
                   
                   IF (ET(GED).eq.-1) THEN
      
-                     RHS_HWD(K,EL_IN,IRK) = RHS_HWD(K,EL_IN,IRK) - W_IN*HQ_HAT_IN
-                     RHS_HWD(K,EL_EX,IRK) = RHS_HWD(K,EL_EX,IRK) + W_EX*HQ_HAT_IN
+                     RHS_KW2(K,EL_IN,IRK) = RHS_KW2(K,EL_IN,IRK) - W_IN*HQ_HAT_IN
+                     RHS_KW2(K,EL_EX,IRK) = RHS_KW2(K,EL_EX,IRK) + W_EX*HQ_HAT_IN
                   ELSEIF (ET(GED).eq.0) THEN ! diverging edge
                      ! No flow
                   ELSEIF (ET(GED).eq.-2) THEN ! converging edge (it should not happen after introducing channel_edge_runoff subroutine)
-                     RHS_HWD(K,EL_IN,IRK) = RHS_HWD(K,EL_IN,IRK) - W_IN*HQ_HAT_IN
-                     RHS_HWD(K,EL_EX,IRK) = RHS_HWD(K,EL_EX,IRK) + W_EX*HQ_HAT_EX
+                     RHS_KW2(K,EL_IN,IRK) = RHS_KW2(K,EL_IN,IRK) - W_IN*HQ_HAT_IN
+                     RHS_KW2(K,EL_EX,IRK) = RHS_KW2(K,EL_EX,IRK) + W_EX*HQ_HAT_EX
                   ENDIF
                   
                ENDDO

@@ -142,13 +142,13 @@ C.....Compute the numerical flux (upwind scheme)
                   W_EX = EDFAC_EX*EDGEQ(K,GP_EX,LED_EX,pa)
      
                   IF (ET(GED).eq.-1) THEN
-                     RHS_HWD(K,EL_IN,IRK) = RHS_HWD(K,EL_IN,IRK) - W_IN*HQ_HAT_IN
-                     RHS_HWD(K,EL_EX,IRK) = RHS_HWD(K,EL_EX,IRK) + W_EX*HQ_HAT_IN
+                     RHS_KW2(K,EL_IN,IRK) = RHS_KW2(K,EL_IN,IRK) - W_IN*HQ_HAT_IN
+                     RHS_KW2(K,EL_EX,IRK) = RHS_KW2(K,EL_EX,IRK) + W_EX*HQ_HAT_IN
                   ELSEIF (ET(GED).eq.0) THEN
                      ! No flow
                   ELSEIF (ET(GED).eq.-2) THEN
-                     RHS_HWD(K,EL_IN,IRK) = RHS_HWD(K,EL_IN,IRK) - W_IN*HQ_HAT_IN
-                     RHS_HWD(K,EL_EX,IRK) = RHS_HWD(K,EL_EX,IRK) + W_EX*HQ_HAT_EX
+                     RHS_KW2(K,EL_IN,IRK) = RHS_KW2(K,EL_IN,IRK) - W_IN*HQ_HAT_IN
+                     RHS_KW2(K,EL_EX,IRK) = RHS_KW2(K,EL_EX,IRK) + W_EX*HQ_HAT_EX
                   ENDIF
 
                ENDDO
@@ -237,13 +237,13 @@ C.....Compute the numerical flux (upwind scheme)
                   W_EX = EDFAC_EX*EDGEQ(K,GP_EX,LED_EX,pa)
 
                   IF (ET(GED).eq.-1) THEN
-                     RHS_HWD(K,EL_IN,IRK) = RHS_HWD(K,EL_IN,IRK) - W_IN*HQ_HAT_IN
-                     RHS_HWD(K,EL_EX,IRK) = RHS_HWD(K,EL_EX,IRK) + W_EX*HQ_HAT_IN
+                     RHS_KW2(K,EL_IN,IRK) = RHS_KW2(K,EL_IN,IRK) - W_IN*HQ_HAT_IN
+                     RHS_KW2(K,EL_EX,IRK) = RHS_KW2(K,EL_EX,IRK) + W_EX*HQ_HAT_IN
                   ELSEIF (ET(GED).eq.0) THEN
                      ! No flow
                   ELSEIF (ET(GED).eq.-2) THEN
-                     RHS_HWD(K,EL_IN,IRK) = RHS_HWD(K,EL_IN,IRK) - W_IN*HQ_HAT_IN
-                     RHS_HWD(K,EL_EX,IRK) = RHS_HWD(K,EL_EX,IRK) + W_EX*HQ_HAT_EX
+                     RHS_KW2(K,EL_IN,IRK) = RHS_KW2(K,EL_IN,IRK) - W_IN*HQ_HAT_IN
+                     RHS_KW2(K,EL_EX,IRK) = RHS_KW2(K,EL_EX,IRK) + W_EX*HQ_HAT_EX
                   ENDIF
 
                ENDDO
@@ -323,7 +323,7 @@ C.....Compute RHS for 1D KWE
             endif
             
             DO K = 1,DOFS1
-               RHS_AWD(K,GED,IRK) = RHS_AWD(K,GED,IRK) + (2.d0/XLEN(GED))*M1D_INV(K,pa)
+               RHS_KW1(K,GED,IRK) = RHS_KW1(K,GED,IRK) + (2.d0/XLEN(GED))*M1D_INV(K,pa)
      &                             *DXDPHI1D(K,GP_IN,pa)*WEGP(GP_IN,pa)*AQ_IN
      &                             + M1D_INV(K,pa)*PHI1D(K,GP_IN,pa)*WEGP(GP_IN,pa)*QL(GP_IN,I)
             ENDDO
@@ -366,14 +366,14 @@ C.....Compute Numerical Flux for 1D KWE
          endif
          
          DO K = 1,DOFS1
-            RHS_AWD(K,GED,IRK) = RHS_AWD(K,GED,IRK) - (2.d0/XLEN(GED))*M1D_INV(K,pa)*PHI1D_MINUS(K,pa)*AQ_MINUS
+            RHS_KW1(K,GED,IRK) = RHS_KW1(K,GED,IRK) - (2.d0/XLEN(GED))*M1D_INV(K,pa)*PHI1D_MINUS(K,pa)*AQ_MINUS
          ENDDO
          
          if (NCEDEX(1,I).gt.0) then
             do J = 1,NCEDEX(1,I)
                GED_EX = NCEDEX(J+1,I)
                DO K = 1,DOFS1
-                  RHS_AWD(K,GED_EX,IRK) = RHS_AWD(K,GED_EX,IRK)
+                  RHS_KW1(K,GED_EX,IRK) = RHS_KW1(K,GED_EX,IRK)
      &             + (2.d0/XLEN(GED_EX))*M1D_INV(K,pa)*PHI1D_PLUS(K,pa)*AQ_MINUS/NCEDEX(1,I)
                ENDDO
             enddo

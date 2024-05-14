@@ -371,10 +371,10 @@ C.....Initialize the DG arrays
       
       ! Younghun added
       HWD = 0.D0
-      RHS_HWD = 0.D0
+      RHS_KW2 = 0.D0
       
       AWD = 0.D0
-      RHS_AWD = 0.D0
+      RHS_KW1 = 0.D0
       TotInf = 0.D0
 C.....If using modal initial conditions transform the bathymetry from
 C.....nodal coordinates to modal dof
