@@ -228,9 +228,9 @@ C.....These (below) are defined in prep_slopelim.F
       Real(SZ),Allocatable :: deltx(:),delty(:),pmatrix(:,:,:)
 
 C.....Younghun: Declare arrays for runoff model
-      REAL(SZ), ALLOCATABLE :: HWD(:,:,:), RHS_KW2(:,:,:)
+      REAL(SZ), ALLOCATABLE :: H(:,:,:), RHS_KW2(:,:,:)
       REAL(SZ) :: SOURCE_R
-      REAL(SZ), ALLOCATABLE :: AWD(:,:,:), RHS_KW1(:,:,:), QL(:,:)
+      REAL(SZ), ALLOCATABLE :: A(:,:,:), RHS_KW1(:,:,:), QL(:,:)
       
 C.....These (below) are defined in slopelimiter.F 
 
@@ -292,7 +292,7 @@ C.....Set edge array sizes
       ! ALLOCATE ( PREC(MNP) )! Younghun added
       ALLOCATE ( NCEDN(MNED), NCEDNO(3,MNED), NCEDED(2,MNED),
      &    CEDSLOPE(MNED), HYDR_INFO(2,MNP), NEDCEDN(MNED))
-      ALLOCATE ( AWD(DOFH,MNED,NRK+2), RHS_KW1(DOFH,MNED,NRK))
+      ALLOCATE ( A(DOFH,MNED,NRK+2), RHS_KW1(DOFH,MNED,NRK))
       ALLOCATE ( QL(NEGP(ph)+1,MNED))
       RETURN
       END SUBROUTINE
@@ -356,7 +356,7 @@ C--
       ALLOCATE ( PDG(MNP) )
       
 C.....Younghun 191107: Added
-      ALLOCATE ( HWD(DOFH,MNE,NRK+2), RHS_KW2(DOFH,MNE,NRK) )
+      ALLOCATE ( H(DOFH,MNE,NRK+2), RHS_KW2(DOFH,MNE,NRK) )
       
       RETURN
       END SUBROUTINE

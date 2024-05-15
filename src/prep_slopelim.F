@@ -16,7 +16,7 @@ C***********************************************************************
 C.....Use appropriate modules
 
       USE GLOBAL
-      USE DG
+      USE DG, AA => A ! A(:,:,:) is added in DG.F for 1D KWE
 
       IMPLICIT NONE
       

@@ -370,10 +370,10 @@ C.....Initialize the DG arrays
       WSY2(:) = 0.d0
       
       ! Younghun added
-      HWD = 0.D0
+      H = 0.D0
       RHS_KW2 = 0.D0
       
-      AWD = 0.D0
+      A = 0.D0
       RHS_KW1 = 0.D0
       TotInf = 0.D0
 C.....If using modal initial conditions transform the bathymetry from

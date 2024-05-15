@@ -26,7 +26,7 @@ C.....Declare local variables
       REAL(SZ) LZ_XX_IN, LZ_XY_IN, LZ_YX_IN, LZ_YY_IN,W_IN
       Real(SZ) MZ_X_IN(layers),MZ_Y_IN(layers),TZ_X_IN,TZ_Y_IN
       
-      REAL(SZ) HWD_IN, HQX_IN, HQY_IN, HQ_HAT
+      REAL(SZ) H_IN, HQX_IN, HQY_IN, HQ_HAT
       REAL(SZ) mX,mY,INFLAG,ONFLAG
 
       test_el = 0
@@ -69,30 +69,31 @@ C.....Set the components for the tangential vector to the edge
 C.....Compute ZE, QX, QY, and HB at each Gauss point
 
             DO I = 1,NEGP(pa)
-               HWD_IN = HWD(1,EL_IN,IRK)
+               H_IN = H(1,EL_IN,IRK)
            
                DO K = 2,DOFS(EL_IN)
                   
-                  HWD_IN = HWD_IN + HWD(K,EL_IN,IRK)*PHI_EDGE(K,I,LED,pa)
+                  H_IN = H_IN + H(K,EL_IN,IRK)*PHI_EDGE(K,I,LED,pa)
                
                ENDDO
                
-               IF (HWD_IN .lt. 0.D0) THEN
-                  HWD_IN = 0.D0
+               IF (H_IN .lt. 0.D0) THEN
+                  H_IN = 0.D0
                ENDIF
                
-               HQX_IN = S0X(EL_IN)*(HWD_IN**(5.0d0/3.0d0)) / (manningKWE2(EL_IN)*sqrt(S0mag(EL_IN)))
-               HQY_IN = S0Y(EL_IN)*(HWD_IN**(5.0d0/3.0d0)) / (manningKWE2(EL_IN)*sqrt(S0mag(EL_IN)))
+               HQX_IN = S0X(EL_IN)*(H_IN**(5.0d0/3.0d0)) / (manningKWE2(EL_IN)*sqrt(S0mag(EL_IN)))
+               HQY_IN = S0Y(EL_IN)*(H_IN**(5.0d0/3.0d0)) / (manningKWE2(EL_IN)*sqrt(S0mag(EL_IN)))
 
 C.....Compute the numerical flux (upwind scheme)
                             
                HQ_HAT = HQX_IN*NX + HQY_IN*NY
 
 C.....Compute the edge integral
+
                DO K = 1,DOFS(EL_IN)
                   W_IN = 2.0*M_INV(K,pa)/AREAS(EL_IN)*XLEN(GED)*
      &                 PHI_EDGE(K,I,LED,pa)*WEGP(I,pa)
-                     RHS_KW2(K,EL_IN,IRK) = RHS_KW2(K,EL_IN,IRK) - W_IN*HQ_HAT
+                  RHS_KW2(K,EL_IN,IRK) = RHS_KW2(K,EL_IN,IRK) - W_IN*HQ_HAT
                ENDDO
             
             ENDDO

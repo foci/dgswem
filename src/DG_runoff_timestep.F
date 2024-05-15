@@ -112,7 +112,7 @@ C.......SSP Runge-Kutta Time Scheme
             BRK = BTVD(IRK,I)*DT
             DO J = 1,NE
                DO K = 1,DOFS(J)
-                  HWD(K,J,IRK+1) = HWD(K,J,irk+1) + ARK*HWD(K,J,I)
+                  H(K,J,IRK+1) = H(K,J,irk+1) + ARK*H(K,J,I)
      &                 + BRK*RHS_KW2(K,J,I) 
                ENDDO
             ENDDO
@@ -120,7 +120,7 @@ C.......SSP Runge-Kutta Time Scheme
             DO J = 1,NCEDS
                GED = NCEDN(J)
                DO K = 1,ph+1
-                  AWD(K,GED,IRK+1) = AWD(K,GED,irk+1) + ARK*AWD(K,GED,I)
+                  A(K,GED,IRK+1) = A(K,GED,irk+1) + ARK*A(K,GED,I)
      &                 + BRK*RHS_KW1(K,GED,I)
                ENDDO
             ENDDO
@@ -128,8 +128,8 @@ C.......SSP Runge-Kutta Time Scheme
 #endif
 
 #ifdef CMPI
-         CALL UPDATER_ELEM_MOD(HWD,QX,QY,IRK+1,1)
-         CALL UPDATER_CHANNEL(AWD,IRK+1)
+         CALL UPDATER_ELEM_MOD(H,QX,QY,IRK+1,1)
+         CALL UPDATER_CHANNEL(A,IRK+1)
 #endif
      
 #ifdef SLOPEALL
@@ -143,14 +143,14 @@ C.....Update variables for next time step
       DO J = 1,MNE
          
          DO K = 1,DOFS(J)
-            HWD(K,J,1) = HWD(K,J,NRK+1)
+            H(K,J,1) = H(K,J,NRK+1)
          ENDDO
       ENDDO
 
       DO KK = 2,NRK+1
          DO J = 1,MNE
             DO K = 1,DOFH
-               HWD(K,J,KK) = 0.D0
+               H(K,J,KK) = 0.D0
                RHS_KW2(K,J,KK-1) = 0.D0
             ENDDO
          ENDDO
@@ -162,7 +162,7 @@ C.....Update variables for next time step
       DO J = 1,NCEDS
          GED = NCEDN(J)
          DO K = 1,ph+1
-            AWD(K,GED,1) = AWD(K,GED,NRK+1)
+            A(K,GED,1) = A(K,GED,NRK+1)
          ENDDO
       ENDDO
 
@@ -170,7 +170,7 @@ C.....Update variables for next time step
          DO J = 1,NCEDS
             GED = NCEDN(J)
             DO K = 1,ph+1
-               AWD(K,GED,KK) = 0.D0
+               A(K,GED,KK) = 0.D0
                RHS_KW1(K,GED,KK-1) = 0.D0
             ENDDO
          ENDDO

@@ -39,9 +39,9 @@ C.....Declare local variables
       REAL(SZ) EDFAC_IN, EDFAC_EX
 
       INTEGER  GED_EX
-      REAL(SZ) HWD_IN, HWD_EX, HQX_IN, HQY_IN, HQX_EX, HQY_EX, HQ_HAT_IN, HQ_HAT_EX
-      REAL(SZ) AWD_IN, AWD_PLUS, AWD_MINUS, AQ_IN, AQ_MINUS, AQ_PLUS
-      REAL(SZ) AWD_H_IN, AWD_H_EX, P_PLUS, P_MINUS
+      REAL(SZ) H_IN, H_EX, HQX_IN, HQY_IN, HQX_EX, HQY_EX, HQ_HAT_IN, HQ_HAT_EX
+      REAL(SZ) A_IN, A_PLUS, A_MINUS, AQ_IN, AQ_MINUS, AQ_PLUS
+      REAL(SZ) A_H_IN, A_H_EX, P_PLUS, P_MINUS
       REAL(SZ) ZE_1D_IN, ZE_1D_PLUS, ZE_1D_MINUS
       REAL(SZ) ZE_1D_H_IN, ZE_1D_H_EX
       REAL(SZ) QX_1D_IN, QX_1D_PLUS, QX_1D_MINUS
@@ -105,26 +105,26 @@ C.....Set the components for the tangential vector to the edge
                   GP_EX = J
                endif
                   
-               HWD_IN = HWD(1,EL_IN,IRK)
-               HWD_EX = HWD(1,EL_EX,IRK)
+               H_IN = H(1,EL_IN,IRK)
+               H_EX = H(1,EL_EX,IRK)
                
                DO K = 2,DOFS(EL_IN)
-                  HWD_IN = HWD_IN + HWD(K,EL_IN,IRK)*PHI_EDGE(K,GP_IN,LED_IN,pa)
-                  HWD_EX = HWD_EX + HWD(K,EL_EX,IRK)*PHI_EDGE(K,GP_EX,LED_EX,pa)
+                  H_IN = H_IN + H(K,EL_IN,IRK)*PHI_EDGE(K,GP_IN,LED_IN,pa)
+                  H_EX = H_EX + H(K,EL_EX,IRK)*PHI_EDGE(K,GP_EX,LED_EX,pa)
                ENDDO
                
-               IF (HWD_IN.lt.0.D0) THEN
-                  HWD_IN = 0.D0
+               IF (H_IN.lt.0.D0) THEN
+                  H_IN = 0.D0
                ENDIF
                
-               IF (HWD_EX.lt.0.D0) THEN
-                  HWD_EX = 0.D0
+               IF (H_EX.lt.0.D0) THEN
+                  H_EX = 0.D0
                ENDIF
                
-               HQX_IN = S0X(EL_IN)*(HWD_IN**(5.D0/3.D0)) / (manningKWE2(EL_IN)*sqrt(S0mag(EL_IN)))
-               HQY_IN = S0Y(EL_IN)*(HWD_IN**(5.D0/3.D0)) / (manningKWE2(EL_IN)*sqrt(S0mag(EL_IN)))
-               HQX_EX = S0X(EL_EX)*(HWD_EX**(5.D0/3.D0)) / (manningKWE2(EL_EX)*sqrt(S0mag(EL_EX)))
-               HQY_EX = S0Y(EL_EX)*(HWD_EX**(5.D0/3.D0)) / (manningKWE2(EL_EX)*sqrt(S0mag(EL_EX)))
+               HQX_IN = S0X(EL_IN)*(H_IN**(5.D0/3.D0)) / (manningKWE2(EL_IN)*sqrt(S0mag(EL_IN)))
+               HQY_IN = S0Y(EL_IN)*(H_IN**(5.D0/3.D0)) / (manningKWE2(EL_IN)*sqrt(S0mag(EL_IN)))
+               HQX_EX = S0X(EL_EX)*(H_EX**(5.D0/3.D0)) / (manningKWE2(EL_EX)*sqrt(S0mag(EL_EX)))
+               HQY_EX = S0Y(EL_EX)*(H_EX**(5.D0/3.D0)) / (manningKWE2(EL_EX)*sqrt(S0mag(EL_EX)))
                
                IF (EL_EX.EQ.EL_IN .AND. LED_EX.EQ.LED_IN) THEN
                   HQX_EX = 0.d0
@@ -200,26 +200,26 @@ C.....Set the components for the tangential vector to the edge
                   GP_EX = J
                endif
                   
-               HWD_IN = HWD(1,EL_IN,IRK)
-               HWD_EX = HWD(1,EL_EX,IRK)
+               H_IN = H(1,EL_IN,IRK)
+               H_EX = H(1,EL_EX,IRK)
                
                DO K = 2,DOFS(EL_IN)
-                  HWD_IN = HWD_IN + HWD(K,EL_IN,IRK)*PHI_EDGE(K,GP_IN,LED_IN,pa)
-                  HWD_EX = HWD_EX + HWD(K,EL_EX,IRK)*PHI_EDGE(K,GP_EX,LED_EX,pa)
+                  H_IN = H_IN + H(K,EL_IN,IRK)*PHI_EDGE(K,GP_IN,LED_IN,pa)
+                  H_EX = H_EX + H(K,EL_EX,IRK)*PHI_EDGE(K,GP_EX,LED_EX,pa)
                ENDDO
                
-               IF (HWD_IN.lt.0.D0) THEN
-                  HWD_IN = 0.D0
+               IF (H_IN.lt.0.D0) THEN
+                  H_IN = 0.D0
                ENDIF
                
-               IF (HWD_EX.lt.0.D0) THEN
-                  HWD_EX = 0.D0
+               IF (H_EX.lt.0.D0) THEN
+                  H_EX = 0.D0
                ENDIF
                
-               HQX_IN = S0X(EL_IN)*(HWD_IN**(5.D0/3.D0)) / (manningKWE2(EL_IN)*sqrt(S0mag(EL_IN)))
-               HQY_IN = S0Y(EL_IN)*(HWD_IN**(5.D0/3.D0)) / (manningKWE2(EL_IN)*sqrt(S0mag(EL_IN)))
-               HQX_EX = S0X(EL_EX)*(HWD_EX**(5.D0/3.D0)) / (manningKWE2(EL_EX)*sqrt(S0mag(EL_EX)))
-               HQY_EX = S0Y(EL_EX)*(HWD_EX**(5.D0/3.D0)) / (manningKWE2(EL_EX)*sqrt(S0mag(EL_EX)))
+               HQX_IN = S0X(EL_IN)*(H_IN**(5.D0/3.D0)) / (manningKWE2(EL_IN)*sqrt(S0mag(EL_IN)))
+               HQY_IN = S0Y(EL_IN)*(H_IN**(5.D0/3.D0)) / (manningKWE2(EL_IN)*sqrt(S0mag(EL_IN)))
+               HQX_EX = S0X(EL_EX)*(H_EX**(5.D0/3.D0)) / (manningKWE2(EL_EX)*sqrt(S0mag(EL_EX)))
+               HQY_EX = S0Y(EL_EX)*(H_EX**(5.D0/3.D0)) / (manningKWE2(EL_EX)*sqrt(S0mag(EL_EX)))
 
                IF (EL_EX.EQ.EL_IN .AND. LED_EX.EQ.LED_IN) THEN
                   HQX_EX = 0.d0
@@ -288,13 +288,13 @@ C.....Compute RHS for 1D KWE
          
          DO J = 1,NEGP(pa)
             GP_IN = J
-            AWD_IN = AWD(1,GED,IRK)
+            A_IN = A(1,GED,IRK)
             DO K = 2,DOFS1
-               AWD_IN = AWD_IN + AWD(K,GED,IRK)*PHI1D(K,GP_IN,pa)
+               A_IN = A_IN + A(K,GED,IRK)*PHI1D(K,GP_IN,pa)
             ENDDO
             
-            if (AWD_IN .lt. 1e-16) then
-               AWD_IN = 0.D0
+            if (A_IN .lt. 1e-16) then
+               A_IN = 0.D0
             endif
             
             WCED = (XEGP(J,pa) + 1.D0)/2.D0
@@ -302,24 +302,24 @@ C.....Compute RHS for 1D KWE
             CSS = (1.D0 - WCED)*CSSLOPE(1,I) + WCED*CSSLOPE(2,I)
             
             if (abs(CSS).ge.1e8) then
-               AWD_H_IN = AWD_IN/CB
+               A_H_IN = A_IN/CB
             elseif (CSS.gt.0) then
-               AWD_H_IN = CSS/2.D0*(-CB + sqrt(CB**2.D0 + 4.D0/CSS*AWD_IN))
+               A_H_IN = CSS/2.D0*(-CB + sqrt(CB**2.D0 + 4.D0/CSS*A_IN))
             else
-               AWD_H_IN = CSS/2.D0*(-CB - sqrt(CB**2.D0 + 4.D0/CSS*AWD_IN))
+               A_H_IN = CSS/2.D0*(-CB - sqrt(CB**2.D0 + 4.D0/CSS*A_IN))
             endif
             
             ! Compute wetted perimeter
             if (abs(CSS).ge.1e8) then
-            P_MINUS = CB + 2.D0*AWD_H_IN
+            P_MINUS = CB + 2.D0*A_H_IN
             else
-            P_MINUS = CB + 2.D0*AWD_H_IN*sqrt(1.D0+1.D0/(CSS**2.D0))
+            P_MINUS = CB + 2.D0*A_H_IN*sqrt(1.D0+1.D0/(CSS**2.D0))
             endif
                
-            if (AWD_IN.eq.0.D0) then
+            if (A_IN.eq.0.D0) then
                AQ_IN = 0.D0
             else
-               AQ_IN = (1.D0/manningKWE1(I))*sqrt(CEDSLOPE(I))*((AWD_IN/P_MINUS)**(2.D0/3.D0)) * AWD_IN
+               AQ_IN = (1.D0/manningKWE1(I))*sqrt(CEDSLOPE(I))*((A_IN/P_MINUS)**(2.D0/3.D0)) * A_IN
             endif
             
             DO K = 1,DOFS1
@@ -332,37 +332,37 @@ C.....Compute RHS for 1D KWE
          
 C.....Compute Numerical Flux for 1D KWE
          
-         AWD_MINUS = AWD(1,GED,IRK)
+         A_MINUS = A(1,GED,IRK)
          
          DO K = 2,DOFS1
-            AWD_MINUS = AWD_MINUS + AWD(K,GED,IRK)*PHI1D_MINUS(K,pa)
+            A_MINUS = A_MINUS + A(K,GED,IRK)*PHI1D_MINUS(K,pa)
          ENDDO
          
-         if (AWD_MINUS .lt. 1e-16) then
-            AWD_MINUS = 0.D0
+         if (A_MINUS .lt. 1e-16) then
+            A_MINUS = 0.D0
          endif
          
          if (abs(CSSLOPE(2,I)).ge.1e8) then
-            AWD_H_IN = AWD_MINUS/CBWIDTH(2,I)
+            A_H_IN = A_MINUS/CBWIDTH(2,I)
          elseif (CSSLOPE(2,I).gt.0) then
-            AWD_H_IN = CSSLOPE(2,I)/2.D0*(-CBWIDTH(2,I)
-     &               + sqrt(CBWIDTH(2,I)**2.D0 + 4.D0/CSSLOPE(2,I)*AWD_MINUS))
+            A_H_IN = CSSLOPE(2,I)/2.D0*(-CBWIDTH(2,I)
+     &               + sqrt(CBWIDTH(2,I)**2.D0 + 4.D0/CSSLOPE(2,I)*A_MINUS))
          else
-            AWD_H_IN = CSSLOPE(2,I)/2.D0*(-CBWIDTH(2,I)
-     &               - sqrt(CBWIDTH(2,I)**2.D0 + 4.D0/CSSLOPE(2,I)*AWD_MINUS))
+            A_H_IN = CSSLOPE(2,I)/2.D0*(-CBWIDTH(2,I)
+     &               - sqrt(CBWIDTH(2,I)**2.D0 + 4.D0/CSSLOPE(2,I)*A_MINUS))
          endif
          
          if (abs(CSSLOPE(2,I)).ge.1e8) then
-         P_MINUS = CBWIDTH(2,I) + 2.D0*AWD_H_IN
+         P_MINUS = CBWIDTH(2,I) + 2.D0*A_H_IN
          else
-         P_MINUS = CBWIDTH(2,I) + 2.D0*AWD_H_IN*sqrt(1.D0+1.D0/(CSSLOPE(2,I)**2.D0))
+         P_MINUS = CBWIDTH(2,I) + 2.D0*A_H_IN*sqrt(1.D0+1.D0/(CSSLOPE(2,I)**2.D0))
          endif
          
-         if (AWD_H_IN.eq.0.D0) then
+         if (A_H_IN.eq.0.D0) then
             AQ_MINUS = 0.D0
          else
             AQ_MINUS = (1.D0/manningKWE1(I))*sqrt(CEDSLOPE(I))
-     &                         *((AWD_MINUS/P_MINUS)**(2.D0/3.D0)) * AWD_MINUS
+     &                         *((A_MINUS/P_MINUS)**(2.D0/3.D0)) * A_MINUS
          endif
          
          DO K = 1,DOFS1

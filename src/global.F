@@ -276,10 +276,10 @@ C.....for bridge pilings
 C.....Younghun added:
       INTEGER, TARGET :: DGSAKE
       INTEGER, TARGET :: RAINFALL
-      REAL(SZ),ALLOCATABLE :: HWD00(:), HQX00(:), HQY00(:)
-      REAL(SZ),ALLOCATABLE :: AWD00(:), AQ00(:)
-      REAL(SZ),ALLOCATABLE :: HWD_DG(:), AWD_DG(:)
-      REAL(SZ),ALLOCATABLE :: HWD2(:)
+      REAL(SZ),ALLOCATABLE :: H00(:), HQX00(:), HQY00(:)
+      REAL(SZ),ALLOCATABLE :: AA00(:), AQ00(:) ! AA00 is for station records for 1D KWE
+      REAL(SZ),ALLOCATABLE :: H_DG(:), A_DG(:)
+      REAL(SZ),ALLOCATABLE :: H2(:)
 C...
 C...DECLARE COMMON BLOCKS
 C...
@@ -519,7 +519,7 @@ Csb-added by sb 10/11/2005
       ALLOCATE( NNDEL(MNP) )
       ALLOCATE( EDFLG(3,MNE) )
 C.....Younghun added for DG-SAKE
-      ALLOCATE ( HWD2(max(MNP,MNE)) )
+      ALLOCATE ( H2(max(MNP,MNE)) )
 
 C--
 
@@ -651,8 +651,8 @@ C
       ALLOCATE ( NNE(MNSTAE),ET00(MNSTAE),BT00(MNSTAE))
       ALLOCATE ( STAIE1(MNSTAE),STAIE2(MNSTAE),STAIE3(MNSTAE))
       ALLOCATE ( XEL(MNSTAE),YEL(MNSTAE),SLEL(MNSTAE),SFEL(MNSTAE))
-      ALLOCATE ( HWD00(MNSTAE))  ! Younghun added
-      ALLOCATE ( AWD00(MNSTAE))
+      ALLOCATE ( H00(MNSTAE))  ! Younghun added
+      ALLOCATE ( AA00(MNSTAE))
       RETURN
       END SUBROUTINE
 
@@ -775,7 +775,7 @@ C
       ALLOCATE ( ZE_DG(MAXEL), QX_DG(MAXEL), QY_DG(MAXEL), HB_DG(MAXEL))
       Allocate ( iota2_DG(MAXEL), iota_DG(MAXEL), iotaa_DG(MAXEL) )
       Allocate(bed_DG(MAXEL,layers),bed_N_int(layers),bed_N_ext(layers))
-      ALLOCATE ( HWD_DG(MAXEL), AWD_DG(MAXEL) )
+      ALLOCATE ( H_DG(MAXEL), A_DG(MAXEL) )
       RETURN
       END SUBROUTINE
 

@@ -29,7 +29,7 @@ C.....Declare local variables
 
       REAL(SZ) ARK, BRK
       REAL(SZ) MAX_BOA          ! Maximum of beta_il/alpha_il for all l
-      REAL(SZ) HWD_IN, HWD_EX, HQX_IN, HQY_IN, HQX_EX, HQY_EX, HQ_HAT_IN, HQ_HAT_EX
+      REAL(SZ) H_IN, H_EX, HQX_IN, HQY_IN, HQX_EX, HQY_EX, HQ_HAT_IN, HQ_HAT_EX
 c     
 
       test_el = 0
@@ -81,31 +81,31 @@ C.....Compute H (water depth), Q in 2D KWE at each edge Gauss quadrature point
                GP_IN = I
                GP_EX = NEGP(pa) - I + 1
 
-               HWD_IN = HWD(1,EL_IN,IRK)
-               HWD_EX = HWD(1,EL_EX,IRK)
+               H_IN = H(1,EL_IN,IRK)
+               H_EX = H(1,EL_EX,IRK)
                
                DO K = 2,DOFS(EL_IN)
                
-                  HWD_IN = HWD_IN + HWD(K,EL_IN,IRK)*PHI_EDGE(K,GP_IN,LED_IN,pa)
-                  HWD_EX = HWD_EX + HWD(K,EL_EX,IRK)*PHI_EDGE(K,GP_EX,LED_EX,pa)
+                  H_IN = H_IN + H(K,EL_IN,IRK)*PHI_EDGE(K,GP_IN,LED_IN,pa)
+                  H_EX = H_EX + H(K,EL_EX,IRK)*PHI_EDGE(K,GP_EX,LED_EX,pa)
                   
                ENDDO
                
                ! Check if water depth is below 0
-               IF (HWD_IN .lt. 0.D0) THEN
-                  HWD_IN = 0.D0
+               IF (H_IN .lt. 0.D0) THEN
+                  H_IN = 0.D0
                ENDIF
                
-               IF (HWD_EX .lt. 0.D0) THEN
-                  HWD_EX = 0.D0
+               IF (H_EX .lt. 0.D0) THEN
+                  H_EX = 0.D0
                ENDIF
                
                ! Compute flux
-               HQX_IN = S0X(EL_IN)*(HWD_IN**(5.D0/3.D0)) / (manningKWE2(EL_IN)*sqrt(S0mag(EL_IN)))
-               HQY_IN = S0Y(EL_IN)*(HWD_IN**(5.D0/3.D0)) / (manningKWE2(EL_IN)*sqrt(S0mag(EL_IN)))
+               HQX_IN = S0X(EL_IN)*(H_IN**(5.D0/3.D0)) / (manningKWE2(EL_IN)*sqrt(S0mag(EL_IN)))
+               HQY_IN = S0Y(EL_IN)*(H_IN**(5.D0/3.D0)) / (manningKWE2(EL_IN)*sqrt(S0mag(EL_IN)))
 
-               HQX_EX = S0X(EL_EX)*(HWD_EX**(5.D0/3.D0)) / (manningKWE2(EL_EX)*sqrt(S0mag(EL_EX)))
-               HQY_EX = S0Y(EL_EX)*(HWD_EX**(5.D0/3.D0)) / (manningKWE2(EL_EX)*sqrt(S0mag(EL_EX)))
+               HQX_EX = S0X(EL_EX)*(H_EX**(5.D0/3.D0)) / (manningKWE2(EL_EX)*sqrt(S0mag(EL_EX)))
+               HQY_EX = S0Y(EL_EX)*(H_EX**(5.D0/3.D0)) / (manningKWE2(EL_EX)*sqrt(S0mag(EL_EX)))
 
 C.....Compute the numerical flux (upwind scheme)
                             
@@ -174,31 +174,31 @@ C.....Compute H (water depth), Q in 2D KWE at each edge Gauss quadrature point
                GP_IN = NEGP(pa) - I + 1
                GP_EX = I
                
-               HWD_IN = HWD(1,EL_IN,IRK)
-               HWD_EX = HWD(1,EL_EX,IRK)
+               H_IN = H(1,EL_IN,IRK)
+               H_EX = H(1,EL_EX,IRK)
                
                DO K = 2,DOFS(EL_IN)
                
-                  HWD_IN = HWD_IN + HWD(K,EL_IN,IRK)*PHI_EDGE(K,GP_IN,LED_IN,pa)
-                  HWD_EX = HWD_EX + HWD(K,EL_EX,IRK)*PHI_EDGE(K,GP_EX,LED_EX,pa)
+                  H_IN = H_IN + H(K,EL_IN,IRK)*PHI_EDGE(K,GP_IN,LED_IN,pa)
+                  H_EX = H_EX + H(K,EL_EX,IRK)*PHI_EDGE(K,GP_EX,LED_EX,pa)
                   
                ENDDO
                
                ! Check if water depth is below 0
-               IF (HWD_IN .lt. 0.D0) THEN
-                  HWD_IN = 0.D0
+               IF (H_IN .lt. 0.D0) THEN
+                  H_IN = 0.D0
                ENDIF
                
-               IF (HWD_EX .lt. 0.D0) THEN
-                  HWD_EX = 0.D0
+               IF (H_EX .lt. 0.D0) THEN
+                  H_EX = 0.D0
                ENDIF
                
                ! Compute flux
-               HQX_IN = S0X(EL_IN)*(HWD_IN**(5.D0/3.D0)) / (manningKWE2(EL_IN)*sqrt(S0mag(EL_IN)))
-               HQY_IN = S0Y(EL_IN)*(HWD_IN**(5.D0/3.D0)) / (manningKWE2(EL_IN)*sqrt(S0mag(EL_IN)))
+               HQX_IN = S0X(EL_IN)*(H_IN**(5.D0/3.D0)) / (manningKWE2(EL_IN)*sqrt(S0mag(EL_IN)))
+               HQY_IN = S0Y(EL_IN)*(H_IN**(5.D0/3.D0)) / (manningKWE2(EL_IN)*sqrt(S0mag(EL_IN)))
                                                   
-               HQX_EX = S0X(EL_EX)*(HWD_EX**(5.D0/3.D0)) / (manningKWE2(EL_EX)*sqrt(S0mag(EL_EX)))
-               HQY_EX = S0Y(EL_EX)*(HWD_EX**(5.D0/3.D0)) / (manningKWE2(EL_EX)*sqrt(S0mag(EL_EX)))
+               HQX_EX = S0X(EL_EX)*(H_EX**(5.D0/3.D0)) / (manningKWE2(EL_EX)*sqrt(S0mag(EL_EX)))
+               HQY_EX = S0Y(EL_EX)*(H_EX**(5.D0/3.D0)) / (manningKWE2(EL_EX)*sqrt(S0mag(EL_EX)))
 
 C.....Compute the numerical flux (upwind scheme)
                             

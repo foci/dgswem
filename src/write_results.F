@@ -34,8 +34,8 @@ C.....Declare local variables
 
 C.....Younghun added
       INTEGER :: L, GED, EL1, EL2, NEL1ED, NEL2ED
-      REAL(SZ) :: HWD_IN, HWD_EX, Q1X, Q1Y, Q2X, Q2Y, discharge
-      REAL(SZ) :: AWD_IN, AWD_H_IN, P_MINUS, AQ_IN
+      REAL(SZ) :: H_IN, H_EX, Q1X, Q1Y, Q2X, Q2Y, discharge
+      REAL(SZ) :: A_IN, A_H_IN, P_MINUS, AQ_IN
       REAL(SZ) :: WCED, CB, CSS
 
 C.....Transform from modal coordinates to nodal coordinates and average
@@ -56,12 +56,12 @@ C.....to single nodal values
                DO K = 1, 3
                   N1 = NM(NBOR_EL,K)
                   IF (N1.EQ.I) THEN
-                     HWD_DG(J) = HWD(1,NBOR_EL,1)
-                     AWD_DG(J) = AWD(1,NBOR_EL,1)
+                     H_DG(J) = H(1,NBOR_EL,1)
+                     A_DG(J) = A(1,NBOR_EL,1)
 
                      DO KK = 2,DOFH
-                        HWD_DG(J) = HWD_DG(J)+PHI_CORNER(KK,K,ph)*HWD(KK,NBOR_EL,1)
-                        AWD_DG(J) = AWD_DG(J)+PHI_CORNER(KK,K,ph)*AWD(KK,NBOR_EL,1)
+                        H_DG(J) = H_DG(J)+PHI_CORNER(KK,K,ph)*H(KK,NBOR_EL,1)
+                        A_DG(J) = A_DG(J)+PHI_CORNER(KK,K,ph)*A(KK,NBOR_EL,1)
                      ENDDO
                      AREA = 0.5*AREAS(NBOR_EL)
                      AREA_SUM = AREA_SUM + AREA
@@ -151,7 +151,7 @@ C.....to single nodal values
           UU2(I)  = 0.D0
           VV2(I)  = 0.D0
           
-          HWD2(I) = 0.D0
+          H2(I) = 0.D0
          
           IF(SEDFLAG.GE.2) DP(I) = 0.D0
 
@@ -160,7 +160,7 @@ C.....to single nodal values
          
             IF (DGSAKE.EQ.1) THEN
                AREA = 0.5d0*AREAS(NBOR_EL)/AREA_SUM
-               HWD2(I) = HWD2(I) + AREA*HWD_DG(J)
+               H2(I) = H2(I) + AREA*H_DG(J)
             ENDIF
             
             IF(WDFLG(NBOR_EL).EQ.0) CYCLE  ! DON'T COUNT DRY ELEMENTS  sb 02/26/07
@@ -360,9 +360,9 @@ C...
                 endif
                 IF(NCELE.EQ.0) BT00(I)=-99999.
                 
-                HWD00(I) = HWD(1,NNE(I),1)
+                H00(I) = H(1,NNE(I),1)
                 DO K = 2, DOF
-                   HWD00(I) = HWD00(I) + HWD(K,NNE(I),1)*PHI_STAE(K,I)
+                   H00(I) = H00(I) + H(K,NNE(I),1)*PHI_STAE(K,I)
                 ENDDO
                 
 
@@ -374,7 +374,7 @@ C...
                 DO I=1,NSTAE
                   WRITE(61,2453) I,ET00(I)
                   WRITE(82,2453) I,BT00(I)
-                  IF (DGSAKE.EQ.1) WRITE(91,2453) I,HWD00(I)
+                  IF (DGSAKE.EQ.1) WRITE(91,2453) I,H00(I)
                   END DO
                 IESTP = IESTP+1+NSTAE
                 ENDIF
@@ -398,14 +398,14 @@ C...
                 GED = NCEDN(NNE1(I))
                 ! print*,I,NCEDNO(1,NNE1(I)), NCEDNO(2,NNE1(I))
                 IF (GED.gt.0) then
-                   AWD00(I) = AWD(1,GED,1)
+                   AA00(I) = A(1,GED,1)
                    DO K = 2, ph+1
-                      AWD00(I) = AWD00(I) + AWD(K,GED,1)*PHI_STAE1(K,I)
+                      AA00(I) = AA00(I) + A(K,GED,1)*PHI_STAE1(K,I)
                    ENDDO
                 ENDIF
                 
                 
-                  WRITE(95,2453) I,AWD00(I)
+                  WRITE(95,2453) I,AA00(I)
                 ENDDO
               ENDIF
               
@@ -452,18 +452,18 @@ C...
                 endif  
 
                 
-                HWD_IN = HWD(1,NNV(I),1)
+                H_IN = H(1,NNV(I),1)
                 DO K = 2, DOF
-                   HWD_IN = HWD_IN + HWD(K,NNV(I),1)*PHI_STAV(K,I)
+                   H_IN = H_IN + H(K,NNV(I),1)*PHI_STAV(K,I)
                 ENDDO
                 
-                IF (HWD_IN .lt. 0.d0) THEN
-                   HWD_IN = 0.d0
+                IF (H_IN .lt. 0.d0) THEN
+                   H_IN = 0.d0
                 ENDIF
                 
-                HQX00(I) = S0X(NNV(I))*(HWD_IN**(5.D0/3.D0)) /
+                HQX00(I) = S0X(NNV(I))*(H_IN**(5.D0/3.D0)) /
      &                         (manningKWE2(NNV(I))*sqrt(S0mag(NNV(I))))
-                HQY00(I) = S0Y(NNV(I))*(HWD_IN**(5.D0/3.D0)) /
+                HQY00(I) = S0Y(NNV(I))*(H_IN**(5.D0/3.D0)) /
      &                         (manningKWE2(NNV(I))*sqrt(S0mag(NNV(I))))
                 
               END DO
@@ -494,13 +494,13 @@ C...
                 DO I=1,NSTAV
                 GED = NCEDN(NNV1(I))
                 if (GED.gt.0) then
-                   AWD_IN = AWD(1,GED,1)
+                   A_IN = A(1,GED,1)
                    DO K = 2,ph+1
-                      AWD_IN = AWD_IN + AWD(K,GED,1)*PHI_STAV1(K,I)
+                      A_IN = A_IN + A(K,GED,1)*PHI_STAV1(K,I)
                    ENDDO
                    
-                   if (AWD_IN .lt. 1e-16) then
-                      AWD_IN = 0.D0
+                   if (A_IN .lt. 1e-16) then
+                      A_IN = 0.D0
                    endif
                    
                    WCED = 1.D0/2.D0
@@ -510,23 +510,22 @@ C...
                    N2 = NCEDNO(2,NNV1(I))
                    
                    if (CSS.ge.1e8) then
-                      AWD_H_IN = AWD_IN/CB
+                      A_H_IN = A_IN/CB
                    else
-                      AWD_H_IN = CSS/2.D0*(-CB
-     &                         + sqrt(CB**2.D0 + 4.D0/CSS*AWD_IN))
+                      A_H_IN = CSS/2.D0*(-CB
+     &                         + sqrt(CB**2.D0 + 4.D0/CSS*A_IN))
                    endif
                    
-                   P_MINUS = CB + 2.D0*AWD_H_IN*sqrt(1.d0 + 1.D0/(CSS**2.D0))
+                   P_MINUS = CB + 2.D0*A_H_IN*sqrt(1.d0 + 1.D0/(CSS**2.D0))
                    
-                   if (AWD_IN.eq.0.D0) then
+                   if (A_IN.eq.0.D0) then
                       AQ00(I) = 0.D0
                    else
-                      AQ00(I) = (1.D0/manningKWE1(NNV1(I)))*sqrt(CEDSLOPE(NNV1(I)))*((AWD_IN/P_MINUS)**(2.D0/3.D0)) * AWD_IN 
+                      AQ00(I) = (1.D0/manningKWE1(NNV1(I)))*sqrt(CEDSLOPE(NNV1(I)))*((A_IN/P_MINUS)**(2.D0/3.D0)) * A_IN 
                    endif
-
                    
+                   WRITE(96,2453) I,AQ00(I)
                    
-                     WRITE(96,2453) I,AQ00(I)!/CBWIDTH(2,NNV1(I))
                    ENDIF
 
                 enddo
@@ -691,7 +690,7 @@ C.....time step falls within the specified window
                   ELSE
                     WRITE(63,2453) I,ETA2(I)
                   ENDIF
-                  IF (DGSAKE.EQ.1) WRITE(911,2453) I,HWD2(I)
+                  IF (DGSAKE.EQ.1) WRITE(911,2453) I,H2(I)
 2453              FORMAT(2X,I8,2X,E16.8E3)
                 ENDDO
                 IF(SEDFLAG.GE.1) THEN
