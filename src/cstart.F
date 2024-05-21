@@ -393,26 +393,25 @@ C...
  3220   FORMAT(1X,A32,2X,A24,2X,A24)
  3645   FORMAT(1X,I10,1X,I10,1X,E15.7,1X,I5,1X,I5)
 
-        IF(ABS(NOUTE).EQ.1) THEN
+        IF(ABS(NOUTE).EQ.1 .AND. DGSAKE.EQ.0) THEN
           OPEN(61,FILE=DIRNAME//'/'//'fort.61')
           WRITE(61,3220) RUNDES,RUNID,AGRID
           WRITE(61,3645) NTRSPE,NSTAE,DTDP*NSPOOLE,NSPOOLE,1
-          
-          !...Younghun: open output files for DG-SAKE
-          IF (DGSAKE.EQ.1) THEN
-             OPEN(91,FILE=DIRNAME//'/'//'fort.91')
-             WRITE(91,3220) RUNDES,RUNID,AGRID
-             WRITE(91,3645) NTRSPE,NSTAE,DTDP*NSPOOLE,NSPOOLE,1
-             
-             ! IF(NCEDS.GT.0) THEN
-                OPEN(95,FILE=DIRNAME//'/'//'fort.95')
-                WRITE(95,3220) RUNDES,RUNID,AGRID
-                WRITE(95,3645) NTRSPE,NSTAE,DTDP*NSPOOLE,NSPOOLE,1
-             ! ENDIF
-          ENDIF
-          
           IESTP=2
           ENDIF
+          
+        !...Younghun: open output files for DG-SAKE
+        IF (ABS(NOUTE).EQ.1 .AND. DGSAKE.EQ.1) THEN
+           OPEN(612,FILE=DIRNAME//'/'//'KWE.612')
+           WRITE(612,3220) RUNDES,RUNID,AGRID
+           WRITE(612,3645) NTRSPE,NSTAE,DTDP*NSPOOLE,NSPOOLE,1
+           
+           ! IF(NCEDS.GT.0) THEN
+              OPEN(611,FILE=DIRNAME//'/'//'KWE.611')
+              WRITE(611,3220) RUNDES,RUNID,AGRID
+              WRITE(611,3645) NTRSPE,NSTAE,DTDP*NSPOOLE,NSPOOLE,1
+           ! ENDIF
+        ENDIF
 
         IF(ABS(NOUTE).EQ.2) THEN
           OPEN(61,FILE=DIRNAME//'/'//'fort.61',
@@ -465,27 +464,26 @@ C...
         NSCOUV=0
         IVSTP=0
 
-        IF(ABS(NOUTV).EQ.1) THEN
+        IF(ABS(NOUTV).EQ.1 .AND. DGSAKE.EQ.0) THEN
           OPEN(62,FILE=DIRNAME//'/'//'fort.62')
           WRITE(62,3220) RUNDES,RUNID,AGRID
           WRITE(62,3645) NTRSPV,NSTAV,DTDP*NSPOOLV,NSPOOLV,2
-          
-          !...Younghun: open output files for DG-SAKE
-          IF (DGSAKE.EQ.1) THEN
-             OPEN(92,FILE=DIRNAME//'/'//'fort.92')
-             WRITE(92,3220) RUNDES,RUNID,AGRID
-             WRITE(92,3645) NTRSPV,NSTAV,DTDP*NSPOOLV,NSPOOLV,2
-             
-             ! IF(NCEDS.GT.0) THEN
-                OPEN(96,FILE=DIRNAME//'/'//'fort.96')
-                WRITE(96,3220) RUNDES,RUNID,AGRID
-                WRITE(96,3645) NTRSPV,NSTAV,DTDP*NSPOOLV,NSPOOLV,2
-             ! ENDIF
-          ENDIF
-          
           IVSTP=2
           ENDIF
-
+          
+        !...Younghun: open output files for DG-SAKE
+        IF (ABS(NOUTV).EQ.1 .AND. DGSAKE.EQ.1) THEN
+           OPEN(622,FILE=DIRNAME//'/'//'KWE.622')
+           WRITE(622,3220) RUNDES,RUNID,AGRID
+           WRITE(622,3645) NTRSPV,NSTAV,DTDP*NSPOOLV,NSPOOLV,2
+           
+           ! IF(NCEDS.GT.0) THEN
+              OPEN(621,FILE=DIRNAME//'/'//'KWE.621')
+              WRITE(621,3220) RUNDES,RUNID,AGRID
+              WRITE(621,3645) NTRSPV,NSTAV,DTDP*NSPOOLV,NSPOOLV,2
+           ! ENDIF
+        ENDIF
+          
         IF(ABS(NOUTV).EQ.2) THEN
           OPEN(62,FILE=DIRNAME//'/'//'fort.62',
      &          ACCESS='DIRECT',RECL=NBYTE)
@@ -596,7 +594,7 @@ C...
         NSCOUE=0
         IESTP=0
 
-        IF(ABS(NOUTE).EQ.1) THEN
+        IF(ABS(NOUTE).EQ.1 .AND. DGSAKE.EQ.0) THEN
           OPEN(82,FILE=DIRNAME//'/'//'fort.82')
           WRITE(82,3220) RUNDES,RUNID,AGRID
           WRITE(82,3645) NTRSPE,NSTAE,DTDP*NSPOOLE,NSPOOLE,1
@@ -748,7 +746,7 @@ C...
         NSCOUGE=0
         IGEP=0
 
-        IF(ABS(NOUTGE).EQ.1) THEN
+        IF(ABS(NOUTGE).EQ.1 .AND. DGSAKE.EQ.0) THEN
           OPEN(63,FILE=DIRNAME//'/'//'fort.63')
           WRITE(63,3220) RUNDES,RUNID,AGRID
           if (ModetoNode .eq. 1) then
@@ -757,28 +755,29 @@ C...
             WRITE(63,3645) NDSETSE,NE,DTDP*NSPOOLGE,NSPOOLGE,1
           endif
           IGEP=2
-          IF (DGSAKE.EQ.1) THEN
-             OPEN(911,FILE=DIRNAME//'/'//'fort.911')
-             WRITE(911,3220) RUNDES,RUNID,AGRID
-             WRITE(911,3645) NDSETSE,NP,DTDP*NSPOOLGE,NSPOOLGE,1
-             ENDIF
           ENDIF
-
-        IF(ABS(NOUTGE).EQ.1) THEN
+          
+        IF (ABS(NOUTGE).EQ.1 .AND. DGSAKE.EQ.1) THEN
+           OPEN(633,FILE=DIRNAME//'/'//'KWE.63')
+           WRITE(633,3220) RUNDES,RUNID,AGRID
+           WRITE(633,3645) NDSETSE,NP,DTDP*NSPOOLGE,NSPOOLGE,1
+           ENDIF
+             
+        IF(ABS(NOUTGE).EQ.1 .AND. DGSAKE.EQ.0) THEN
           OPEN(88,FILE=DIRNAME//'/'//'fort.88')
           WRITE(88,3220) RUNDES,RUNID,AGRID
           WRITE(88,3645) NDSETSE,NE,DTDP*NSPOOLGE,NSPOOLGE,1
           IGEP=2
           ENDIF
 
-        IF(ABS(NOUTGE).EQ.1) THEN
+        IF(ABS(NOUTGE).EQ.1 .AND. DGSAKE.EQ.0) THEN
           OPEN(89,FILE=DIRNAME//'/'//'fort.89')
           WRITE(89,3220) RUNDES,RUNID,AGRID
           WRITE(89,3645) NDSETSE,NE,DTDP*NSPOOLGE,NSPOOLGE,1
           IGEP=2
           ENDIF
 
-        IF(ABS(NOUTGE).EQ.1) THEN
+        IF(ABS(NOUTGE).EQ.1 .AND. DGSAKE.EQ.0) THEN
           OPEN(4441,FILE=DIRNAME//'/'//'fort.4l')
           WRITE(4441,3220) RUNDES,RUNID,AGRID
           if (ModetoNode .eq. 1) then
@@ -845,7 +844,7 @@ C...
         NSCOUGV=0
         IGVP=0
 
-        IF(ABS(NOUTGV).EQ.1) THEN
+        IF(ABS(NOUTGV).EQ.1 .AND. DGSAKE.EQ.0) THEN
           OPEN(64,FILE=DIRNAME//'/'//'fort.64')
           WRITE(64,3220) RUNDES,RUNID,AGRID
           if (ModetoNode .eq. 1) then
@@ -854,13 +853,14 @@ C...
             WRITE(64,3645) NDSETSV,NE,DTDP*NSPOOLGV,NSPOOLGV,2
           endif
           IGVP=2
-          IF (DGSAKE.EQ.1) THEN
-             OPEN(921,FILE=DIRNAME//'/'//'fort.921')
-             WRITE(921,3220) RUNDES,RUNID,AGRID
-             WRITE(921,3645) NDSETSV,NP,DTDP*NSPOOLGV,NSPOOLGV,2
           ENDIF
-          ENDIF
-
+          
+        IF (ABS(NOUTGV).EQ.1 .AND. DGSAKE.EQ.1) THEN
+           OPEN(643,FILE=DIRNAME//'/'//'KWE.64')
+           WRITE(643,3220) RUNDES,RUNID,AGRID
+           WRITE(643,3645) NDSETSV,NP,DTDP*NSPOOLGV,NSPOOLGV,2
+        ENDIF
+          
         IF(ABS(NOUTGV).EQ.2) THEN
           OPEN(64,FILE=DIRNAME//'/'//'fort.64',
      &          ACCESS='DIRECT',RECL=NBYTE)

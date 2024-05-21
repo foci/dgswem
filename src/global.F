@@ -279,7 +279,7 @@ C.....Younghun added:
       REAL(SZ),ALLOCATABLE :: H00(:), HQX00(:), HQY00(:)
       REAL(SZ),ALLOCATABLE :: AA00(:), AQ00(:) ! AA00 is for station records for 1D KWE
       REAL(SZ),ALLOCATABLE :: H_DG(:), A_DG(:)
-      REAL(SZ),ALLOCATABLE :: H2(:)
+      REAL(SZ),ALLOCATABLE :: H2(:), HQX2(:), HQY2(:)
 C...
 C...DECLARE COMMON BLOCKS
 C...
@@ -519,7 +519,7 @@ Csb-added by sb 10/11/2005
       ALLOCATE( NNDEL(MNP) )
       ALLOCATE( EDFLG(3,MNE) )
 C.....Younghun added for DG-SAKE
-      ALLOCATE ( H2(max(MNP,MNE)) )
+      ALLOCATE ( H2(max(MNP,MNE)), HQX2(max(MNP,MNE)), HQY2(max(MNP,MNE)) )
 
 C--
 

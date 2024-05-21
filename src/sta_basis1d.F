@@ -41,7 +41,6 @@ C***********************************************************************
          D3 = sqrt((X1-X2)**2.d0 + (Y1-Y2)**2.d0)
          
          if (abs(D1+D2-D3)/D3.lt.1.d-6) then
-            ! EDSTA = NCEDN(J)
             EDSTA = J
             DMIN = abs(D1+D2-D3)/D3
          endif 
@@ -54,15 +53,10 @@ C***********************************************************************
       ENDDO
       
       if (EDSTA.eq.0) then
-         ! EDSTA = NCEDN(JMIN)
          EDSTA = JMIN
          print *, 'PROGRAM ESTIMATED NEAREST EDGE',NCEDN(JMIN)
          print *, 'PROXIMITY INDEX FOR THIS EDGE EQUALS',DMIN
       endif
-      
-      ! if (DMIN.lt.1e-6) then
-         ! EDSTA = JMIN
-      ! endif
       
       X1 = X(NCEDNO(1,EDSTA))
       X2 = X(NCEDNO(2,EDSTA))
@@ -74,15 +68,7 @@ C***********************************************************************
       D2 = sqrt((XSTA-X2)**2.d0 + (YSTA-Y2)**2.d0)
       D3 = sqrt((X1-X2)**2.d0 + (Y1-Y2)**2.d0)
       
-      
-      ! if (NCEDNO(3,EDSTA).eq.0) then
-         ! PT = D1/D3*2.D0 - 1
-      ! elseif (NCEDNO(3,EDSTA).eq.1) then
-         ! PT = 1 - D1/D3*2.D0
-      ! endif
-      
       PT = D1/(D1+D2)*2.D0 - 1.d0
-      ! if (I.eq.3) print*,D1,D2,D3,PT, NCEDNO(1,EDSTA), NCEDNO(2,EDSTA),XEL(I) ,YEL(I)
                                      
       ALLOCATE (BASIS(ph+1),DBASIS1(ph+1))
       CALL ORTHOGONAL_BASIS_1D(PT,ph,BASIS,DBASIS1)

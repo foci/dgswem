@@ -152,7 +152,8 @@ C.....to single nodal values
           VV2(I)  = 0.D0
           
           H2(I) = 0.D0
-         
+          HQX2(I) = 0.D0
+          HQY2(I) = 0.D0
           IF(SEDFLAG.GE.2) DP(I) = 0.D0
 
           DO J = 1,NO_NBORS
@@ -160,7 +161,11 @@ C.....to single nodal values
          
             IF (DGSAKE.EQ.1) THEN
                AREA = 0.5d0*AREAS(NBOR_EL)/AREA_SUM
-               H2(I) = H2(I) + AREA*H_DG(J)
+               IF (H_DG(J).GT.0.D0) THEN
+                 H2(I) = H2(I) + AREA*H_DG(J)
+                 HQX2(I) = HQX2(I) + AREA*S0X(NBOR_EL)*(H_DG(J)**(5.D0/3.D0)) / (manningKWE2(NBOR_EL)*sqrt(S0mag(NBOR_EL)))
+                 HQY2(I) = HQY2(I) + AREA*S0Y(NBOR_EL)*(H_DG(J)**(5.D0/3.D0)) / (manningKWE2(NBOR_EL)*sqrt(S0mag(NBOR_EL)))
+               ENDIF
             ENDIF
             
             IF(WDFLG(NBOR_EL).EQ.0) CYCLE  ! DON'T COUNT DRY ELEMENTS  sb 02/26/07
@@ -367,15 +372,13 @@ C...
                 
 
               END DO
-              IF(ABS(NOUTE).EQ.1) THEN
+              IF(ABS(NOUTE).EQ.1 .AND. DGSAKE.EQ.0) THEN
                 WRITE(61,2120) time_A,IT
                 WRITE(82,2120) time_A,IT
-                IF (DGSAKE.EQ.1) WRITE(91,2120) time_A,IT
                 DO I=1,NSTAE
                   WRITE(61,2453) I,ET00(I)
                   WRITE(82,2453) I,BT00(I)
-                  IF (DGSAKE.EQ.1) WRITE(91,2453) I,H00(I)
-                  END DO
+                END DO
                 IESTP = IESTP+1+NSTAE
                 ENDIF
               IF(ABS(NOUTE).EQ.2) THEN
@@ -392,20 +395,27 @@ C...
                 ENDIF
               NSCOUE=0
               
-              IF(NCEDS.GT.0 .AND. ABS(NOUTE).EQ.1 .AND. DGSAKE.EQ.1)THEN
-                WRITE(95,2120) time_A,IT
+C.............Write 2D KWE output
+              IF(ABS(NOUTE).EQ.1 .AND. DGSAKE.EQ.1) THEN
+                WRITE(612,2120) time_A,IT
+                DO I=1,NSTAE
+                  WRITE(612,2453) I,H00(I)
+                END DO
+                IESTP = IESTP+1+NSTAE
+                ENDIF
+                
+C.............Write 1D KWE output
+              IF(ABS(NOUTE).EQ.1 .AND. DGSAKE.EQ.1 .AND. NCEDS.GT.0)THEN
+                WRITE(611,2120) time_A,IT
                 DO I=1,NSTAE
                 GED = NCEDN(NNE1(I))
-                ! print*,I,NCEDNO(1,NNE1(I)), NCEDNO(2,NNE1(I))
                 IF (GED.gt.0) then
                    AA00(I) = A(1,GED,1)
                    DO K = 2, ph+1
                       AA00(I) = AA00(I) + A(K,GED,1)*PHI_STAE1(K,I)
                    ENDDO
                 ENDIF
-                
-                
-                  WRITE(95,2453) I,AA00(I)
+                WRITE(611,2453) I,AA00(I)
                 ENDDO
               ENDIF
               
@@ -413,8 +423,8 @@ C...
             ENDIF
           IF(IT.EQ.NTCYFE) CLOSE(61)
           IF(IT.EQ.NTCYFE) CLOSE(82)
-          IF(IT.EQ.NTCYFE) CLOSE(91)
-          IF(IT.EQ.NTCYFE) CLOSE(95)
+          IF(IT.EQ.NTCYFE) CLOSE(611)
+          IF(IT.EQ.NTCYFE) CLOSE(612)
           ENDIF
 
 C...
@@ -468,12 +478,10 @@ C...
                 
               END DO
               
-              IF(ABS(NOUTV).EQ.1) THEN
+              IF(ABS(NOUTV).EQ.1 .AND. DGSAKE.EQ.0) THEN
                 WRITE(62,2120) time_A,IT
-                IF (DGSAKE.EQ.1) WRITE(92,2120) time_A,IT
                 DO I=1,NSTAV
                   WRITE(62,2454) I,UU00(I),VV00(I)
-                  IF (DGSAKE.EQ.1) WRITE(92,2454) I,HQX00(I),HQY00(I)
                   END DO
                 IVSTP = IVSTP+1+NSTAV
                 ENDIF
@@ -489,8 +497,18 @@ C...
                 ENDIF
               NSCOUV=0
               
-              IF(NCEDS.GT.0 .AND. ABS(NOUTV).EQ.1 .AND. (DGSAKE.EQ.1)) THEN
-                WRITE(96,2120) time_A,IT
+C.............Write 2D KWE output
+              IF(ABS(NOUTV).EQ.1 .AND. DGSAKE.EQ.1) THEN
+                WRITE(622,2120) time_A,IT
+                DO I=1,NSTAV
+                  WRITE(622,2454) I,HQX00(I),HQY00(I)
+                END DO
+                IVSTP = IVSTP+1+NSTAV
+                ENDIF
+                
+C.............Write 1D KWE output
+              IF(ABS(NOUTV).EQ.1 .AND. (DGSAKE.EQ.1) .AND. NCEDS.GT.0) THEN
+                WRITE(621,2120) time_A,IT
                 DO I=1,NSTAV
                 GED = NCEDN(NNV1(I))
                 if (GED.gt.0) then
@@ -524,7 +542,7 @@ C...
                       AQ00(I) = (1.D0/manningKWE1(NNV1(I)))*sqrt(CEDSLOPE(NNV1(I)))*((A_IN/P_MINUS)**(2.D0/3.D0)) * A_IN 
                    endif
                    
-                   WRITE(96,2453) I,AQ00(I)
+                   WRITE(621,2453) I,AQ00(I)
                    
                    ENDIF
 
@@ -535,8 +553,8 @@ C...
               ENDIF
             ENDIF
           IF(IT.EQ.NTCYFV) CLOSE(62)
-          IF(IT.EQ.NTCYFV) CLOSE(92)
-          IF(IT.EQ.NTCYFV) CLOSE(96)
+          IF(IT.EQ.NTCYFV) CLOSE(621)
+          IF(IT.EQ.NTCYFV) CLOSE(622)
           ENDIF
 
 C...
@@ -672,17 +690,15 @@ C.....time step falls within the specified window
         IF ((IT.GT.NTCYSGE).AND.(IT.LE.NTCYFGE).OR.FORCE_WRITE) THEN
           NSCOUGE = NSCOUGE + 1
           IF (NSCOUGE.EQ.NSPOOLGE.OR.FORCE_WRITE) THEN
-            IF (ABS(NOUTGE).EQ.1) THEN
+            IF (ABS(NOUTGE).EQ.1 .AND. DGSAKE.EQ.0) THEN
               WRITE(63,2120) TIME_A, IT
               WRITE(88,2120) TIME_A, IT
               WRITE(89,2120) TIME_A, IT
               WRITE(4441,2120) TIME_A, IT
               WRITE(631,2120) TIME_A, IT
-              IF (DGSAKE.EQ.1) WRITE(911,2120) TIME_A, IT
 2120          FORMAT(2X,E20.10,5X,I10)
               if (ModetoNode.eq.1) then
                 DO I=1,NP
-                
                   IF (ABS(ETA2(I)).LE.(10.0**(-30))) ETA2(I) = 0.D0
                   IF (NOLIFA .EQ. 2) THEN
                     IF (NODECODE(I).EQ.1) WRITE(63,2453) I,ETA2(I)
@@ -690,7 +706,6 @@ C.....time step falls within the specified window
                   ELSE
                     WRITE(63,2453) I,ETA2(I)
                   ENDIF
-                  IF (DGSAKE.EQ.1) WRITE(911,2453) I,H2(I)
 2453              FORMAT(2X,I8,2X,E16.8E3)
                 ENDDO
                 IF(SEDFLAG.GE.1) THEN
@@ -853,11 +868,22 @@ C.....Write DG.65 results, elemental statuses (wet/dry)
               ENDIF
               IGEP = IGEP + NP
             ENDIF
+            
+C...........Write KWE.63 file
+            IF (ABS(NOUTGE).EQ.1 .AND. DGSAKE.EQ.1) THEN
+              WRITE(633,2120) TIME_A, IT
+              IF (ModetoNode.eq.1) THEN
+                DO I=1,NP
+                  WRITE(633,2453) I,H2(I)
+                ENDDO
+              ENDIF
+            ENDIF
             NSCOUGE = 0
           ENDIF
         ENDIF
         IF (IT.EQ.NTCYFGE) CLOSE(63)
         IF (IT.EQ.NTCYFGE) CLOSE(631)
+        IF (IT.EQ.NTCYFGE) CLOSE(633)
         IF (IT.EQ.NTCYFGE.AND.NOLIFA.GE.2) CLOSE(651)
         IF (IT.EQ.NTCYFGE.AND.SEDFLAG.GE.1) CLOSE(84)
       ENDIF
@@ -870,12 +896,9 @@ C...
         IF ((IT.GT.NTCYSGV).AND.(IT.LE.NTCYFGV).OR.FORCE_WRITE) THEN
           NSCOUGV=NSCOUGV+1
           IF (NSCOUGV.EQ.NSPOOLGV.OR.FORCE_WRITE) THEN
-            IF(ABS(NOUTGV).EQ.1) THEN
+            IF(ABS(NOUTGV).EQ.1 .AND. DGSAKE.EQ.0) THEN
               WRITE(64,2120) TIME_A,IT
               WRITE(641,2120) TIME_A,IT
-              IF (DGSAKE.EQ.1) THEN
-                 WRITE(921,2120) TIME_A,IT
-              ENDIF
               if (ModetoNode.eq.1) then
                 DO I = 1,NP
 C.....Had trouble writing out numbers with less than E-99 (EJK)
@@ -912,11 +935,22 @@ C.....Write DG.64 results
               ENDDO
               IGVP = IGVP + 2*NP
             ENDIF
+            
+C...........Write KWE.64 file
+            IF(ABS(NOUTGV).EQ.1 .AND. DGSAKE.EQ.1) THEN
+              WRITE(643,2120) TIME_A,IT
+              if (ModetoNode.eq.1) then
+                DO I = 1,NP
+                  WRITE(643,2454) I,HQX2(I),HQY2(I)
+                ENDDO
+              endif
+            ENDIF
             NSCOUGV=0
           ENDIF
         ENDIF
         IF(IT.EQ.NTCYFGV) CLOSE(64)
         IF(IT.EQ.NTCYFGV) CLOSE(641)
+        IF(IT.EQ.NTCYFGV) CLOSE(643)
       ENDIF
 
 C...
