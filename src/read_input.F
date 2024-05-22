@@ -2448,7 +2448,7 @@ C...Younghun added follow lines
       IF(IBTYPE.EQ.6) THEN
          ! NCEDS = NCEDS + NVELL(K)-1
          DO I=1,NVELL(K)
-            READ(14,*) NBVV(K,I),CDEPTHR(K,I),CTWIDTHR(K,I),CBWIDTHR(K,I)
+            READ(14,*)NBVV(K,I),CDEPTHR(K,I),CTWIDTHR(K,I),CBWIDTHR(K,I)
          END DO
          
 C         DO I=1, NVELL(K)-1

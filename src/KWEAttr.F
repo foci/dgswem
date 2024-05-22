@@ -72,7 +72,7 @@ C***********************************************************************
          CASE("hydraulic_conductivity")
             FoundHydraulicCond = .True.
             READ(131,'(A80)') HydraulicCondUnits
-            READ(131,*) HydraulicCondNoOfVals, HydraulicCondNoOfAttrNodes
+            READ(131,*)HydraulicCondNoOfVals, HydraulicCondNoOfAttrNodes
             ALLOCATE (KS(HydraulicCondNoOfAttrNodes))
             READ(131,*) HydraulicCondDefVal
          CASE("capillary_pressure")
@@ -129,23 +129,27 @@ C            CALL LoadAttrVecKWE(Prec, PrecDefVal, NumNodesNotDefault,
 C     &                   PrecNoOfAttrNodes,NScreen, MyProc, NAbOut)
          CASE("hydraulic_conductivity")
             PRINT *,  HydraulicCondNoOfAttrNodes
-            CALL LoadAttrVecKWE(KS, HydraulicCondDefVal, NumNodesNotDefault, 
-     &                   HydraulicCondNoOfAttrNodes,NScreen, MyProc, NAbOut)
+            CALL LoadAttrVecKWE(KS, HydraulicCondDefVal,
+     &       NumNodesNotDefault,
+     &               HydraulicCondNoOfAttrNodes,NScreen, MyProc, NAbOut)
          CASE("capillary_pressure")
-            CALL LoadAttrVecKWE(HF, CapillaryPDefVal, NumNodesNotDefault, 
-     &                   CapillaryPNoOfAttrNodes,NScreen, MyProc, NAbOut)
+            CALL LoadAttrVecKWE(HF, CapillaryPDefVal,NumNodesNotDefault,
+     &                  CapillaryPNoOfAttrNodes,NScreen, MyProc, NAbOut)
          CASE("moisture_decific")
-            CALL LoadAttrVecKWE(MD, MoistDecificDefVal, NumNodesNotDefault, 
-     &                   MoistDecificNoOfAttrNodes,NScreen, MyProc, NAbOut)
+            CALL LoadAttrVecKWE(MD, MoistDecificDefVal,
+     &            NumNodesNotDefault,
+     &                MoistDecificNoOfAttrNodes,NScreen, MyProc, NAbOut)
          CASE("intercept_depth")
-            CALL LoadAttrVecKWE(IntDp, IntDepthDefVal, NumNodesNotDefault, 
+            CALL LoadAttrVecKWE(IntDp,IntDepthDefVal,NumNodesNotDefault,
      &                   IntDepthNoOfAttrNodes,NScreen, MyProc, NAbOut)
          CASE("mannings_n_at_element")
-            CALL LoadAttrVecKWE(manningKWE2, ManningKWE2DefVal, NumNodesNotDefault, 
-     &                   ManningKWE2NoOfAttrNodes,NScreen, MyProc, NAbOut)
+            CALL LoadAttrVecKWE(manningKWE2, ManningKWE2DefVal,
+     &            NumNodesNotDefault,
+     &                 ManningKWE2NoOfAttrNodes,NScreen, MyProc, NAbOut)
          CASE("mannings_n_at_open_channel")
-            CALL LoadAttrVecKWE(manningKWE1, ManningKWE1DefVal, NumNodesNotDefault,
-     &                   ManningKWE1NoOfAttrNodes,NScreen, MyProc, NAbOut)
+            CALL LoadAttrVecKWE(manningKWE1, ManningKWE1DefVal,
+     &       NumNodesNotDefault,
+     &                 ManningKWE1NoOfAttrNodes,NScreen, MyProc, NAbOut)
          CASE DEFAULT
             ! SkipDataSet = .True.
             ! WRITE(16,1001)      ! Nodal Attributes file

@@ -196,7 +196,8 @@ C     The following attribute contains BK(I),BALPHA(I),BDELX(I), and POAN(I)
       REAL(SZ), ALLOCATABLE :: EVC(:)
 C
 C     ! 2021-04-14 Younghun: Added attributes for Green-Ampt infiltration model and edge manning n
-      REAL(SZ), ALLOCATABLE :: HydraulicCond(:), CapillaryP(:), MoistDecific(:), IntDepth(:)
+      REAL(SZ), ALLOCATABLE :: HydraulicCond(:), CapillaryP(:),
+     & MoistDecific(:), IntDepth(:)
       REAL(SZ), ALLOCATABLE :: ManningNEdge(:) !, manningKWE2(:)
       REAL(SZ), ALLOCATABLE :: Precipitation(:,:)
       
@@ -616,7 +617,7 @@ Casey 101118: Allow SWAN to handle wave refraction as a nodal attribute.
             READ(13,'(A80)') PrecipitationUnits  
             READ(13,*) PrecipitationNoOfVals
             ALLOCATE (PrecipitationDefVal(PrecipitationNoOfVals))
-            READ(13,*) (PrecipitationDefVal(j),j=1,PrecipitationNoOfVals)
+            READ(13,*)(PrecipitationDefVal(j),j=1,PrecipitationNoOfVals)
             
          ! CASE("mannings_n_at_element")
             ! FoundManningKWE2 = .True.
@@ -800,35 +801,40 @@ Casey 101118: Allow SWAN to handle wave refraction as a nodal attribute.
       ! 2021-04-14 Younghun:
          CASE("hydraulic_conductivity")
             IF (LoadHydraulicCond) THEN
-               CALL LoadAttrVec(HydraulicCond, HydraulicCondDefVal, NumNodesNotDefault, 
+               CALL LoadAttrVec(HydraulicCond, HydraulicCondDefVal,
+     &          NumNodesNotDefault,
      &                                  NScreen, MyProc, NAbOut)
             ELSE
                SkipDataSet = .TRUE.
             ENDIF
          CASE("capillary_pressure")
             IF (LoadCapillaryP) THEN
-               CALL LoadAttrVec(CapillaryP, CapillaryPDefVal, NumNodesNotDefault, 
+               CALL LoadAttrVec(CapillaryP, CapillaryPDefVal,
+     &          NumNodesNotDefault,
      &                                  NScreen, MyProc, NAbOut)
             ELSE
                SkipDataSet = .TRUE.
             ENDIF
          CASE("moisture_decific")
             IF (LoadMoistDecific) THEN
-               CALL LoadAttrVec(MoistDecific, MoistDecificDefVal, NumNodesNotDefault, 
+               CALL LoadAttrVec(MoistDecific, MoistDecificDefVal,
+     &               NumNodesNotDefault,
      &                                  NScreen, MyProc, NAbOut)
             ELSE
                SkipDataSet = .TRUE.
             ENDIF
          CASE("intercept_depth")
             IF (LoadIntDepth) THEN
-               CALL LoadAttrVec(IntDepth, IntDepthDefVal, NumNodesNotDefault, 
+               CALL LoadAttrVec(IntDepth, IntDepthDefVal,
+     &          NumNodesNotDefault,
      &                                  NScreen, MyProc, NAbOut)
             ELSE
                SkipDataSet = .TRUE.
             ENDIF
          CASE("mannings_n_edge")
             IF (LoadManningNEdge) THEN
-               CALL LoadAttrVec(ManningNEdge, ManningNEdgeDefVal, NumNodesNotDefault,
+               CALL LoadAttrVec(ManningNEdge, ManningNEdgeDefVal,
+     &          NumNodesNotDefault,
      &                                  NScreen, MyProc, NAbOut)
             ELSE
                SkipDataSet = .TRUE.
@@ -836,7 +842,7 @@ Casey 101118: Allow SWAN to handle wave refraction as a nodal attribute.
          CASE("precipitation")
             IF (LoadPrecipitation) THEN
                CALL LoadAttrMat(Precipitation, PrecipitationNoOfVals,
-     &                           PrecipitationDefVal, NumNodesNotDefault,
+     &                          PrecipitationDefVal, NumNodesNotDefault,
      &                                  NScreen, MyProc, NAbOut)
             ELSE
                SkipDataSet = .TRUE.
@@ -1352,29 +1358,29 @@ C     define land roughness from usace values
 C
 C     reset z0l depending on situation                       
       if(z0l.le.0.006) then    
-c     coe set their value to a marine value -> reset to correct marine value
+C     coe set their value to a marine value -> reset to correct marine value
          z0l=z0m    
       else 
-c     coe set their value to a land value -> proceed with checking this value
+C     coe set their value to a land value -> proceed with checking this value
          TotalDepth = BathymetricDepth + Elevation
          if( (TotalDepth.gt.2*CutOffDepth).and.
      &        (BathymetricDepth.lt.20)) then
-c     compute adjusted z0l to account for overland flooding - do this only 
-c     in the case where the water column is greater than twice h0 and 
-c     you are not in a river (I assume that rivers are deeper than 20m 
-c     and have z0l>0.006) 
+C     compute adjusted z0l to account for overland flooding - do this only
+C     in the case where the water column is greater than twice h0 and
+C     you are not in a river (I assume that rivers are deeper than 20m
+C     and have z0l>0.006)
             z0l=z0l-TotalDepth/30. ! correction for overland flooding
          endif 
       endif  
 C
-c     compute land wind reduction factor
+C     compute land wind reduction factor
       if(z0l.gt.0.0001) then
          fr=(z0m/z0l)**0.0706d0
       else
          fr=1.000d0
       endif
       if(fr.gt.1.0000d0) fr=1.0000d0
-c     adjust time interpolated wind field
+C     adjust time interpolated wind field
       WindX = vcanopy(NodeNumber)*fr*WindX 
       WindY = vcanopy(NodeNumber)*fr*WindY 
 C

@@ -119,11 +119,13 @@ C.......Compute ZE, QX, QY, and HB at each area Gauss quadrature point
                H_IN = 0.D0
             ENDIF
 
-            HQX_IN = S0X(L)*(H_IN**(5.D0/3.D0)) / (manningKWE2(L)*sqrt(S0mag(L)))
-            HQY_IN = S0Y(L)*(H_IN**(5.D0/3.D0)) / (manningKWE2(L)*sqrt(S0mag(L)))
+            HQX_IN = S0X(L)*(H_IN**(5.D0/3.D0)) /
+     &       (manningKWE2(L)*sqrt(S0mag(L)))
+            HQY_IN = S0Y(L)*(H_IN**(5.D0/3.D0)) /
+     &       (manningKWE2(L)*sqrt(S0mag(L)))
 
             DO K = 1,DOFS(L)
-               RHS_KW2(K,L,IRK) = RHS_KW2(K,L,IRK) + XFAC(K,I,L,pa)*HQX_IN
+               RHS_KW2(K,L,IRK) = RHS_KW2(K,L,IRK)+XFAC(K,I,L,pa)*HQX_IN
      &              + YFAC(K,I,L,pa)*HQY_IN  + SRFAC(K,I,L,pa)*SOURCE_R
             ENDDO
          ENDDO  

@@ -29,7 +29,8 @@ C.....Declare local variables
 
       REAL(SZ) ARK, BRK
       REAL(SZ) MAX_BOA          ! Maximum of beta_il/alpha_il for all l
-      REAL(SZ) H_IN, H_EX, HQX_IN, HQY_IN, HQX_EX, HQY_EX, HQ_HAT_IN, HQ_HAT_EX
+      REAL(SZ) H_IN, H_EX, HQX_IN, HQY_IN, HQX_EX, HQY_EX, HQ_HAT_IN,
+     & HQ_HAT_EX
 c     
 
       test_el = 0
@@ -86,8 +87,8 @@ C.....Compute H (water depth), Q in 2D KWE at each edge Gauss quadrature point
                
                DO K = 2,DOFS(EL_IN)
                
-                  H_IN = H_IN + H(K,EL_IN,IRK)*PHI_EDGE(K,GP_IN,LED_IN,pa)
-                  H_EX = H_EX + H(K,EL_EX,IRK)*PHI_EDGE(K,GP_EX,LED_EX,pa)
+                H_IN = H_IN + H(K,EL_IN,IRK)*PHI_EDGE(K,GP_IN,LED_IN,pa)
+                H_EX = H_EX + H(K,EL_EX,IRK)*PHI_EDGE(K,GP_EX,LED_EX,pa)
                   
                ENDDO
                
@@ -101,11 +102,15 @@ C.....Compute H (water depth), Q in 2D KWE at each edge Gauss quadrature point
                ENDIF
                
                ! Compute flux
-               HQX_IN = S0X(EL_IN)*(H_IN**(5.D0/3.D0)) / (manningKWE2(EL_IN)*sqrt(S0mag(EL_IN)))
-               HQY_IN = S0Y(EL_IN)*(H_IN**(5.D0/3.D0)) / (manningKWE2(EL_IN)*sqrt(S0mag(EL_IN)))
+               HQX_IN = S0X(EL_IN)*(H_IN**(5.D0/3.D0)) /
+     &          (manningKWE2(EL_IN)*sqrt(S0mag(EL_IN)))
+               HQY_IN = S0Y(EL_IN)*(H_IN**(5.D0/3.D0)) /
+     &          (manningKWE2(EL_IN)*sqrt(S0mag(EL_IN)))
 
-               HQX_EX = S0X(EL_EX)*(H_EX**(5.D0/3.D0)) / (manningKWE2(EL_EX)*sqrt(S0mag(EL_EX)))
-               HQY_EX = S0Y(EL_EX)*(H_EX**(5.D0/3.D0)) / (manningKWE2(EL_EX)*sqrt(S0mag(EL_EX)))
+               HQX_EX = S0X(EL_EX)*(H_EX**(5.D0/3.D0)) /
+     &          (manningKWE2(EL_EX)*sqrt(S0mag(EL_EX)))
+               HQY_EX = S0Y(EL_EX)*(H_EX**(5.D0/3.D0)) /
+     &          (manningKWE2(EL_EX)*sqrt(S0mag(EL_EX)))
 
 C.....Compute the numerical flux (upwind scheme)
                             
@@ -121,14 +126,18 @@ C.....Compute the edge integral
                   
                   ! Check edge type
                   IF (ET(GED).eq.-1) THEN ! flowing edge (from EL_IN to EL_EX)
-                     RHS_KW2(K,EL_IN,IRK) = RHS_KW2(K,EL_IN,IRK) - W_IN*HQ_HAT_IN
-                     RHS_KW2(K,EL_EX,IRK) = RHS_KW2(K,EL_EX,IRK) + W_EX*HQ_HAT_IN
+                     RHS_KW2(K,EL_IN,IRK) = RHS_KW2(K,EL_IN,IRK) -
+     &                 W_IN*HQ_HAT_IN
+                     RHS_KW2(K,EL_EX,IRK) = RHS_KW2(K,EL_EX,IRK) +
+     &                W_EX*HQ_HAT_IN
                      
                   ELSEIF (ET(GED).eq.0) THEN ! diverging edge
                      ! No flow
                   ELSEIF (ET(GED).eq.-2) THEN ! converging edge (it should not happen after introducing channel_edge_runoff subroutine)
-                     RHS_KW2(K,EL_IN,IRK) = RHS_KW2(K,EL_IN,IRK) - W_IN*HQ_HAT_IN
-                     RHS_KW2(K,EL_EX,IRK) = RHS_KW2(K,EL_EX,IRK) + W_EX*HQ_HAT_EX
+                     RHS_KW2(K,EL_IN,IRK) = RHS_KW2(K,EL_IN,IRK) -
+     &                W_IN*HQ_HAT_IN
+                     RHS_KW2(K,EL_EX,IRK) = RHS_KW2(K,EL_EX,IRK) +
+     &                W_EX*HQ_HAT_EX
                   ENDIF
 
                ENDDO
@@ -179,8 +188,8 @@ C.....Compute H (water depth), Q in 2D KWE at each edge Gauss quadrature point
                
                DO K = 2,DOFS(EL_IN)
                
-                  H_IN = H_IN + H(K,EL_IN,IRK)*PHI_EDGE(K,GP_IN,LED_IN,pa)
-                  H_EX = H_EX + H(K,EL_EX,IRK)*PHI_EDGE(K,GP_EX,LED_EX,pa)
+                  H_IN = H_IN+H(K,EL_IN,IRK)*PHI_EDGE(K,GP_IN,LED_IN,pa)
+                  H_EX = H_EX+H(K,EL_EX,IRK)*PHI_EDGE(K,GP_EX,LED_EX,pa)
                   
                ENDDO
                
@@ -194,11 +203,15 @@ C.....Compute H (water depth), Q in 2D KWE at each edge Gauss quadrature point
                ENDIF
                
                ! Compute flux
-               HQX_IN = S0X(EL_IN)*(H_IN**(5.D0/3.D0)) / (manningKWE2(EL_IN)*sqrt(S0mag(EL_IN)))
-               HQY_IN = S0Y(EL_IN)*(H_IN**(5.D0/3.D0)) / (manningKWE2(EL_IN)*sqrt(S0mag(EL_IN)))
+               HQX_IN = S0X(EL_IN)*(H_IN**(5.D0/3.D0)) /
+     &          (manningKWE2(EL_IN)*sqrt(S0mag(EL_IN)))
+               HQY_IN = S0Y(EL_IN)*(H_IN**(5.D0/3.D0)) /
+     &          (manningKWE2(EL_IN)*sqrt(S0mag(EL_IN)))
                                                   
-               HQX_EX = S0X(EL_EX)*(H_EX**(5.D0/3.D0)) / (manningKWE2(EL_EX)*sqrt(S0mag(EL_EX)))
-               HQY_EX = S0Y(EL_EX)*(H_EX**(5.D0/3.D0)) / (manningKWE2(EL_EX)*sqrt(S0mag(EL_EX)))
+               HQX_EX = S0X(EL_EX)*(H_EX**(5.D0/3.D0)) /
+     &          (manningKWE2(EL_EX)*sqrt(S0mag(EL_EX)))
+               HQY_EX = S0Y(EL_EX)*(H_EX**(5.D0/3.D0)) /
+     &          (manningKWE2(EL_EX)*sqrt(S0mag(EL_EX)))
 
 C.....Compute the numerical flux (upwind scheme)
                             
@@ -214,13 +227,17 @@ C.....Compute the edge integral
                   
                   IF (ET(GED).eq.-1) THEN
      
-                     RHS_KW2(K,EL_IN,IRK) = RHS_KW2(K,EL_IN,IRK) - W_IN*HQ_HAT_IN
-                     RHS_KW2(K,EL_EX,IRK) = RHS_KW2(K,EL_EX,IRK) + W_EX*HQ_HAT_IN
+                     RHS_KW2(K,EL_IN,IRK) = RHS_KW2(K,EL_IN,IRK) -
+     &                W_IN*HQ_HAT_IN
+                     RHS_KW2(K,EL_EX,IRK) = RHS_KW2(K,EL_EX,IRK) +
+     &                W_EX*HQ_HAT_IN
                   ELSEIF (ET(GED).eq.0) THEN ! diverging edge
                      ! No flow
                   ELSEIF (ET(GED).eq.-2) THEN ! converging edge (it should not happen after introducing channel_edge_runoff subroutine)
-                     RHS_KW2(K,EL_IN,IRK) = RHS_KW2(K,EL_IN,IRK) - W_IN*HQ_HAT_IN
-                     RHS_KW2(K,EL_EX,IRK) = RHS_KW2(K,EL_EX,IRK) + W_EX*HQ_HAT_EX
+                     RHS_KW2(K,EL_IN,IRK) = RHS_KW2(K,EL_IN,IRK) -
+     &                W_IN*HQ_HAT_IN
+                     RHS_KW2(K,EL_EX,IRK) = RHS_KW2(K,EL_EX,IRK) +
+     &                W_EX*HQ_HAT_EX
                   ENDIF
                   
                ENDDO

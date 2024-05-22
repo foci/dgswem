@@ -25,8 +25,8 @@ C.....Use appropriate modules
       Use SIZES, only: layers
 c     
       USE NodalAttributes, ONLY: GeoidOffset, LoadGeoidOffset
-      use fparser
-      use fparser2
+C      use fparser
+C      use fparser2
 
       IMPLICIT NONE
 

@@ -72,14 +72,14 @@
 
       SUBROUTINE READ_FIXED_FORT_DG()
       
-      USE global, ONLY: dgswe,dg_to_cg,sedflag,reaction_rate,sed_equationX,sed_equationY, &
-                        rhowat0,vertexslope
+      USE global, ONLY: dgswe,dg_to_cg,sedflag,reaction_rate,
+     & sed_equationX,sed_equationY, rhowat0,vertexslope
       USE sizes, ONLY: myproc,layers,dirname
-      USE dg, ONLY: padapt,pflag,gflag,diorism,pl,ph,px,slimit,plimit, &
-                    pflag2con1,pflag2con2,lebesgueP,fluxtype,rk_stage,rk_order, &
-                    modal_ic,dghot,dghotspool,slopeflag,slope_weight,porosity, &
-                    sevdm,mnes,artdif,kappa,s0,uniform_dif,tune_by_hand, &
-                    sl2_m,sl2_nyu,sl3_md
+      USE dg, ONLY: padapt,pflag,gflag,diorism,pl,ph,px,slimit,plimit,
+     &      pflag2con1,pflag2con2,lebesgueP,fluxtype,rk_stage,rk_order,
+     &      modal_ic,dghot,dghotspool,slopeflag,slope_weight,porosity,
+     &      sevdm,mnes,artdif,kappa,s0,uniform_dif,tune_by_hand,
+     &      sl2_m,sl2_nyu,sl3_md
             
       
       IMPLICIT NONE
@@ -152,10 +152,11 @@
       READ(25,'(a)') sed_equationX
       READ(25,'(a)') sed_equationY
       
-      IF(FLUXTYPE.NE.1.AND.FLUXTYPE.NE.2.AND.FLUXTYPE.NE.3.AND.FLUXTYPE.NE.4) THEN
+      IF(FLUXTYPE.NE.1.AND.FLUXTYPE.NE.2.AND.FLUXTYPE.NE.3.AND.
+     & FLUXTYPE.NE.4) THEN
          IF (myproc == 0) THEN 
-           PRINT *, 'SPECIFIED FLUXTYPE (=', FLUXTYPE,') IS NOT ALLOWED.'
-           PRINT *, 'EXECUTION WILL BE TERMINATED.'
+           PRINT *,'SPECIFIED FLUXTYPE (=', FLUXTYPE,') IS NOT ALLOWED.'
+           PRINT *,'EXECUTION WILL BE TERMINATED.'
          ENDIF 
          
          STOP 
@@ -251,7 +252,7 @@
           
           ! Look for a match for the keyword
           found = 0
-    test: DO opt = 1,nopt
+       test: DO opt = 1,nopt
     
             i = fortdg_ind(opt)    
     
@@ -261,13 +262,16 @@
               SELECT CASE (fortdg(i)%vartype) 
                 CASE(1)
                   READ(test_val,*) fortdg(i)%iptr
-                  IF (myproc == 0) PRINT("(A,A,I8)"), test_opt," = ",fortdg(i)%iptr
+                  IF (myproc == 0) PRINT("(A,A,I8)"),
+     &              test_opt," = ",fortdg(i)%iptr
                 CASE(2)
                   READ(test_val,*) fortdg(i)%rptr
-                  IF (myproc == 0) PRINT("(A,A,E21.8)"), test_opt," = ",fortdg(i)%rptr                  
+                  IF (myproc == 0) PRINT("(A,A,E21.8)"),
+     &             test_opt," = ",fortdg(i)%rptr
                 CASE(3)
                   fortdg(i)%cptr = TRIM(test_val)
-                  IF (myproc == 0) PRINT("(A,A,A)"), test_opt," = ",fortdg(i)%cptr                  
+                  IF (myproc == 0) PRINT("(A,A,A)"),
+     &             test_opt," = ",fortdg(i)%cptr
               END SELECT
 
               found = 1          ! flag match
@@ -282,10 +286,11 @@
           IF (myproc == 0 ) THEN     
             IF (found == 0 .and. eqind > 0) THEN
               ! unmatched lines with an equal sign are either incorrect or no longer supported
-              PRINT("(3A)"),"*** WARNING: ",test_opt, " is an incorrect or depreciated value ***"            
+              PRINT("(3A)"),"*** WARNING: ",test_opt,
+     &         " is an incorrect or depreciated value ***"
             ELSE IF (found == 0) THEN
               ! unmatched lines without an equal sign are ignored
-              PRINT("(A)"), "*** WARNING: non-comment line does not contain a keyword assignment***"           
+              PRINT("(A)"),"*** WARNING ***"
             ENDIF
           ENDIF 
            
@@ -304,17 +309,17 @@
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-     SUBROUTINE CHECK_ERRORS(opt_read)
+      SUBROUTINE CHECK_ERRORS(opt_read)
      
       USE sizes, ONLY: myproc     
      
-     IMPLICIT NONE
+      IMPLICIT NONE
      
-     INTEGER :: i,j,opt
-     INTEGER :: opt_read
-     INTEGER :: quit
+      INTEGER :: i,j,opt
+      INTEGER :: opt_read
+      INTEGER :: quit
      
-     IF(opt_read /= nopt) THEN
+      IF(opt_read /= nopt) THEN
 
        ! check for required options that are unspecifed 
        quit = 0
@@ -328,18 +333,20 @@
        IF (quit == 1) THEN
         
           IF (myproc == 0) THEN
-            PRINT("(A)"), "*** ERROR: There are missing required options in the fort.dg file ***"  
-            PRINT("(A)"), "           The following options must be specified: "      
+            PRINT("(A)"), "*** ERROR ***"
+            PRINT("(A)"), "the following options must be specified: "
             j = 0        
             DO opt = 1,nopt
               i = fortdg_ind(opt)
-              IF ((fortdg(i)%flag == 0) .and. (fortdg(i)%required == 1)) THEN
+              IF ((fortdg(i)%flag == 0) .and. (fortdg(i)%required == 1))
+     &         THEN
                 j = j+1
                 PRINT "(A,I3,2A)", "              ",j,") ",fortdg(i)%key
               ENDIF
             ENDDO          
           
-            PRINT("(A)"), "!!!!!! EXECUTION WILL NOW BE TERMINATED !!!!!!"
+            PRINT("(A)"),
+     &            "!!!!!! EXECUTION WILL NOW BE TERMINATED !!!!!!"
           ENDIF
           
           STOP
@@ -372,11 +379,11 @@
           
        ENDIF       
                   
-     ENDIF        
+      ENDIF
      
      
-     RETURN
-     END SUBROUTINE CHECK_ERRORS
+      RETURN
+      END SUBROUTINE CHECK_ERRORS
       
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!           
@@ -414,12 +421,13 @@
       !     versions of the code because the new options will be ignored
       
       
-      USE global, ONLY: dgswe,dg_to_cg,sedflag,reaction_rate,sed_equationX,sed_equationY,dgsake,rainfall
+      USE global, ONLY: dgswe,dg_to_cg,sedflag,reaction_rate,
+     & sed_equationX,sed_equationY,dgsake,rainfall
       USE sizes, ONLY: myproc,layers
-      USE dg, ONLY: padapt,pflag,gflag,diorism,pl,ph,px,slimit,plimit, &
-                    pflag2con1,pflag2con2,lebesgueP,fluxtype,rk_stage,rk_order, &
-                    modal_ic,dghot,dghotspool,slopeflag,slope_weight,porosity, &
-                    sevdm,mnes,artdif,kappa,s0,uniform_dif,tune_by_hand
+      USE dg, ONLY: padapt,pflag,gflag,diorism,pl,ph,px,slimit,plimit,
+     &     pflag2con1,pflag2con2,lebesgueP,fluxtype,rk_stage,rk_order,
+     &     modal_ic,dghot,dghotspool,slopeflag,slope_weight,porosity,
+     &     sevdm,mnes,artdif,kappa,s0,uniform_dif,tune_by_hand
       
       IMPLICIT NONE        
       

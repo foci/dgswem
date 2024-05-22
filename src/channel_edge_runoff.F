@@ -39,7 +39,8 @@ C.....Declare local variables
       REAL(SZ) EDFAC_IN, EDFAC_EX
 
       INTEGER  GED_EX
-      REAL(SZ) H_IN, H_EX, HQX_IN, HQY_IN, HQX_EX, HQY_EX, HQ_HAT_IN, HQ_HAT_EX
+      REAL(SZ) H_IN, H_EX, HQX_IN, HQY_IN, HQX_EX, HQY_EX, HQ_HAT_IN,
+     & HQ_HAT_EX
       REAL(SZ) A_IN, A_PLUS, A_MINUS, AQ_IN, AQ_MINUS, AQ_PLUS
       REAL(SZ) A_H_IN, A_H_EX, P_PLUS, P_MINUS
       REAL(SZ) ZE_1D_IN, ZE_1D_PLUS, ZE_1D_MINUS
@@ -109,8 +110,8 @@ C.....Set the components for the tangential vector to the edge
                H_EX = H(1,EL_EX,IRK)
                
                DO K = 2,DOFS(EL_IN)
-                  H_IN = H_IN + H(K,EL_IN,IRK)*PHI_EDGE(K,GP_IN,LED_IN,pa)
-                  H_EX = H_EX + H(K,EL_EX,IRK)*PHI_EDGE(K,GP_EX,LED_EX,pa)
+                H_IN = H_IN + H(K,EL_IN,IRK)*PHI_EDGE(K,GP_IN,LED_IN,pa)
+                H_EX = H_EX + H(K,EL_EX,IRK)*PHI_EDGE(K,GP_EX,LED_EX,pa)
                ENDDO
                
                IF (H_IN.lt.0.D0) THEN
@@ -121,10 +122,14 @@ C.....Set the components for the tangential vector to the edge
                   H_EX = 0.D0
                ENDIF
                
-               HQX_IN = S0X(EL_IN)*(H_IN**(5.D0/3.D0)) / (manningKWE2(EL_IN)*sqrt(S0mag(EL_IN)))
-               HQY_IN = S0Y(EL_IN)*(H_IN**(5.D0/3.D0)) / (manningKWE2(EL_IN)*sqrt(S0mag(EL_IN)))
-               HQX_EX = S0X(EL_EX)*(H_EX**(5.D0/3.D0)) / (manningKWE2(EL_EX)*sqrt(S0mag(EL_EX)))
-               HQY_EX = S0Y(EL_EX)*(H_EX**(5.D0/3.D0)) / (manningKWE2(EL_EX)*sqrt(S0mag(EL_EX)))
+               HQX_IN = S0X(EL_IN)*(H_IN**(5.D0/3.D0)) /
+     &          (manningKWE2(EL_IN)*sqrt(S0mag(EL_IN)))
+               HQY_IN = S0Y(EL_IN)*(H_IN**(5.D0/3.D0)) /
+     &          (manningKWE2(EL_IN)*sqrt(S0mag(EL_IN)))
+               HQX_EX = S0X(EL_EX)*(H_EX**(5.D0/3.D0)) /
+     &          (manningKWE2(EL_EX)*sqrt(S0mag(EL_EX)))
+               HQY_EX = S0Y(EL_EX)*(H_EX**(5.D0/3.D0)) /
+     &          (manningKWE2(EL_EX)*sqrt(S0mag(EL_EX)))
                
                IF (EL_EX.EQ.EL_IN .AND. LED_EX.EQ.LED_IN) THEN
                   HQX_EX = 0.d0
@@ -142,13 +147,17 @@ C.....Compute the numerical flux (upwind scheme)
                   W_EX = EDFAC_EX*EDGEQ(K,GP_EX,LED_EX,pa)
      
                   IF (ET(GED).eq.-1) THEN
-                     RHS_KW2(K,EL_IN,IRK) = RHS_KW2(K,EL_IN,IRK) - W_IN*HQ_HAT_IN
-                     RHS_KW2(K,EL_EX,IRK) = RHS_KW2(K,EL_EX,IRK) + W_EX*HQ_HAT_IN
+                     RHS_KW2(K,EL_IN,IRK) = RHS_KW2(K,EL_IN,IRK) -
+     &                W_IN*HQ_HAT_IN
+                     RHS_KW2(K,EL_EX,IRK) = RHS_KW2(K,EL_EX,IRK) +
+     &                W_EX*HQ_HAT_IN
                   ELSEIF (ET(GED).eq.0) THEN
                      ! No flow
                   ELSEIF (ET(GED).eq.-2) THEN
-                     RHS_KW2(K,EL_IN,IRK) = RHS_KW2(K,EL_IN,IRK) - W_IN*HQ_HAT_IN
-                     RHS_KW2(K,EL_EX,IRK) = RHS_KW2(K,EL_EX,IRK) + W_EX*HQ_HAT_EX
+                     RHS_KW2(K,EL_IN,IRK) = RHS_KW2(K,EL_IN,IRK) -
+     &                W_IN*HQ_HAT_IN
+                     RHS_KW2(K,EL_EX,IRK) = RHS_KW2(K,EL_EX,IRK) +
+     &                W_EX*HQ_HAT_EX
                   ENDIF
 
                ENDDO
@@ -204,8 +213,8 @@ C.....Set the components for the tangential vector to the edge
                H_EX = H(1,EL_EX,IRK)
                
                DO K = 2,DOFS(EL_IN)
-                  H_IN = H_IN + H(K,EL_IN,IRK)*PHI_EDGE(K,GP_IN,LED_IN,pa)
-                  H_EX = H_EX + H(K,EL_EX,IRK)*PHI_EDGE(K,GP_EX,LED_EX,pa)
+                H_IN = H_IN + H(K,EL_IN,IRK)*PHI_EDGE(K,GP_IN,LED_IN,pa)
+                H_EX = H_EX + H(K,EL_EX,IRK)*PHI_EDGE(K,GP_EX,LED_EX,pa)
                ENDDO
                
                IF (H_IN.lt.0.D0) THEN
@@ -216,10 +225,14 @@ C.....Set the components for the tangential vector to the edge
                   H_EX = 0.D0
                ENDIF
                
-               HQX_IN = S0X(EL_IN)*(H_IN**(5.D0/3.D0)) / (manningKWE2(EL_IN)*sqrt(S0mag(EL_IN)))
-               HQY_IN = S0Y(EL_IN)*(H_IN**(5.D0/3.D0)) / (manningKWE2(EL_IN)*sqrt(S0mag(EL_IN)))
-               HQX_EX = S0X(EL_EX)*(H_EX**(5.D0/3.D0)) / (manningKWE2(EL_EX)*sqrt(S0mag(EL_EX)))
-               HQY_EX = S0Y(EL_EX)*(H_EX**(5.D0/3.D0)) / (manningKWE2(EL_EX)*sqrt(S0mag(EL_EX)))
+               HQX_IN = S0X(EL_IN)*(H_IN**(5.D0/3.D0)) /
+     &               (manningKWE2(EL_IN)*sqrt(S0mag(EL_IN)))
+               HQY_IN = S0Y(EL_IN)*(H_IN**(5.D0/3.D0)) /
+     &          (manningKWE2(EL_IN)*sqrt(S0mag(EL_IN)))
+               HQX_EX = S0X(EL_EX)*(H_EX**(5.D0/3.D0)) /
+     &          (manningKWE2(EL_EX)*sqrt(S0mag(EL_EX)))
+               HQY_EX = S0Y(EL_EX)*(H_EX**(5.D0/3.D0)) /
+     &          (manningKWE2(EL_EX)*sqrt(S0mag(EL_EX)))
 
                IF (EL_EX.EQ.EL_IN .AND. LED_EX.EQ.LED_IN) THEN
                   HQX_EX = 0.d0
@@ -237,13 +250,17 @@ C.....Compute the numerical flux (upwind scheme)
                   W_EX = EDFAC_EX*EDGEQ(K,GP_EX,LED_EX,pa)
 
                   IF (ET(GED).eq.-1) THEN
-                     RHS_KW2(K,EL_IN,IRK) = RHS_KW2(K,EL_IN,IRK) - W_IN*HQ_HAT_IN
-                     RHS_KW2(K,EL_EX,IRK) = RHS_KW2(K,EL_EX,IRK) + W_EX*HQ_HAT_IN
+                     RHS_KW2(K,EL_IN,IRK) = RHS_KW2(K,EL_IN,IRK) -
+     &                W_IN*HQ_HAT_IN
+                     RHS_KW2(K,EL_EX,IRK) = RHS_KW2(K,EL_EX,IRK) +
+     &                W_EX*HQ_HAT_IN
                   ELSEIF (ET(GED).eq.0) THEN
                      ! No flow
                   ELSEIF (ET(GED).eq.-2) THEN
-                     RHS_KW2(K,EL_IN,IRK) = RHS_KW2(K,EL_IN,IRK) - W_IN*HQ_HAT_IN
-                     RHS_KW2(K,EL_EX,IRK) = RHS_KW2(K,EL_EX,IRK) + W_EX*HQ_HAT_EX
+                     RHS_KW2(K,EL_IN,IRK) = RHS_KW2(K,EL_IN,IRK) -
+     &                W_IN*HQ_HAT_IN
+                     RHS_KW2(K,EL_EX,IRK) = RHS_KW2(K,EL_EX,IRK) +
+     &                W_EX*HQ_HAT_EX
                   ENDIF
 
                ENDDO
@@ -319,13 +336,15 @@ C.....Compute RHS for 1D KWE
             if (A_IN.eq.0.D0) then
                AQ_IN = 0.D0
             else
-               AQ_IN = (1.D0/manningKWE1(I))*sqrt(CEDSLOPE(I))*((A_IN/P_MINUS)**(2.D0/3.D0)) * A_IN
+               AQ_IN = (1.D0/manningKWE1(I))*sqrt(CEDSLOPE(I))*
+     &          ((A_IN/P_MINUS)**(2.D0/3.D0)) * A_IN
             endif
             
             DO K = 1,DOFS1
-               RHS_KW1(K,GED,IRK) = RHS_KW1(K,GED,IRK) + (2.d0/XLEN(GED))*M1D_INV(K,pa)
-     &                             *DXDPHI1D(K,GP_IN,pa)*WEGP(GP_IN,pa)*AQ_IN
-     &                             + M1D_INV(K,pa)*PHI1D(K,GP_IN,pa)*WEGP(GP_IN,pa)*QL(GP_IN,I)
+               RHS_KW1(K,GED,IRK) = RHS_KW1(K,GED,IRK) +
+     &          (2.d0/XLEN(GED))*M1D_INV(K,pa)
+     &            *DXDPHI1D(K,GP_IN,pa)*WEGP(GP_IN,pa)*AQ_IN
+     &      + M1D_INV(K,pa)*PHI1D(K,GP_IN,pa)*WEGP(GP_IN,pa)*QL(GP_IN,I)
             ENDDO
             
          ENDDO
@@ -346,27 +365,31 @@ C.....Compute Numerical Flux for 1D KWE
             A_H_IN = A_MINUS/CBWIDTH(2,I)
          elseif (CSSLOPE(2,I).gt.0) then
             A_H_IN = CSSLOPE(2,I)/2.D0*(-CBWIDTH(2,I)
-     &               + sqrt(CBWIDTH(2,I)**2.D0 + 4.D0/CSSLOPE(2,I)*A_MINUS))
+     &               + sqrt(CBWIDTH(2,I)**2.D0 + 4.D0/
+     &                 CSSLOPE(2,I)*A_MINUS))
          else
             A_H_IN = CSSLOPE(2,I)/2.D0*(-CBWIDTH(2,I)
-     &               - sqrt(CBWIDTH(2,I)**2.D0 + 4.D0/CSSLOPE(2,I)*A_MINUS))
+     &               - sqrt(CBWIDTH(2,I)**2.D0 + 4.D0/
+     &                 CSSLOPE(2,I)*A_MINUS))
          endif
          
          if (abs(CSSLOPE(2,I)).ge.1e8) then
          P_MINUS = CBWIDTH(2,I) + 2.D0*A_H_IN
          else
-         P_MINUS = CBWIDTH(2,I) + 2.D0*A_H_IN*sqrt(1.D0+1.D0/(CSSLOPE(2,I)**2.D0))
+         P_MINUS = CBWIDTH(2,I) + 2.D0*A_H_IN*sqrt(1.D0+1.D0/
+     &    (CSSLOPE(2,I)**2.D0))
          endif
          
          if (A_H_IN.eq.0.D0) then
             AQ_MINUS = 0.D0
          else
             AQ_MINUS = (1.D0/manningKWE1(I))*sqrt(CEDSLOPE(I))
-     &                         *((A_MINUS/P_MINUS)**(2.D0/3.D0)) * A_MINUS
+     &                     *((A_MINUS/P_MINUS)**(2.D0/3.D0)) * A_MINUS
          endif
          
          DO K = 1,DOFS1
-            RHS_KW1(K,GED,IRK) = RHS_KW1(K,GED,IRK) - (2.d0/XLEN(GED))*M1D_INV(K,pa)*PHI1D_MINUS(K,pa)*AQ_MINUS
+            RHS_KW1(K,GED,IRK) = RHS_KW1(K,GED,IRK) -
+     &      (2.d0/XLEN(GED))*M1D_INV(K,pa)*PHI1D_MINUS(K,pa)*AQ_MINUS
          ENDDO
          
          if (NCEDEX(1,I).gt.0) then
@@ -374,7 +397,8 @@ C.....Compute Numerical Flux for 1D KWE
                GED_EX = NCEDEX(J+1,I)
                DO K = 1,DOFS1
                   RHS_KW1(K,GED_EX,IRK) = RHS_KW1(K,GED_EX,IRK)
-     &             + (2.d0/XLEN(GED_EX))*M1D_INV(K,pa)*PHI1D_PLUS(K,pa)*AQ_MINUS/NCEDEX(1,I)
+     &             + (2.d0/XLEN(GED_EX))*M1D_INV(K,pa)*PHI1D_PLUS(K,pa)
+     &              *AQ_MINUS/NCEDEX(1,I)
                ENDDO
             enddo
          endif

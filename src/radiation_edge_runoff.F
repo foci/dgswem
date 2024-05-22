@@ -81,8 +81,10 @@ C.....Compute ZE, QX, QY, and HB at each Gauss point
                ENDIF
                
                ! Manning_n = 0.015
-               HQX_IN = S0X(EL_IN)*(H_IN**(5.0d0/3.0d0)) / (manningKWE2(EL_IN)*sqrt(S0mag(EL_IN)))
-               HQY_IN = S0Y(EL_IN)*(H_IN**(5.0d0/3.0d0)) / (manningKWE2(EL_IN)*sqrt(S0mag(EL_IN)))
+               HQX_IN = S0X(EL_IN)*(H_IN**(5.0d0/3.0d0)) /
+     &          (manningKWE2(EL_IN)*sqrt(S0mag(EL_IN)))
+               HQY_IN = S0Y(EL_IN)*(H_IN**(5.0d0/3.0d0)) /
+     &          (manningKWE2(EL_IN)*sqrt(S0mag(EL_IN)))
 
 C.....Compute the numerical flux (upwind scheme)
                             
@@ -92,7 +94,8 @@ C.....Compute the edge integral
                DO K = 1,DOFS(EL_IN)
                   W_IN = 2.0*M_INV(K,pa)/AREAS(EL_IN)*XLEN(GED)*
      &                 PHI_EDGE(K,I,LED,pa)*WEGP(I,pa)
-                  RHS_KW2(K,EL_IN,IRK) = RHS_KW2(K,EL_IN,IRK) - W_IN*HQ_HAT
+                  RHS_KW2(K,EL_IN,IRK) = RHS_KW2(K,EL_IN,IRK) -
+     &             W_IN*HQ_HAT
                ENDDO
             
             ENDDO

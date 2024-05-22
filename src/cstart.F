@@ -259,7 +259,7 @@ C     RJW Merged:
         IF(NWS.EQ.20) THEN
            AsymmetricTime = STATIM*86400.D0
            OPEN(22,FILE=TRIM(GBLINPUTDIR)//'/'//'fort.22',STATUS='OLD')
-          CALL NWS20GET(SLAM,SFEA,WVNX2,WVNY2,PRN2,NP,AsymmetricTime,ICS)
+         CALL NWS20GET(SLAM,SFEA,WVNX2,WVNY2,PRN2,NP,AsymmetricTime,ICS)
         ENDIF
 
       ! jgf52.14: Implementing Casey's fix for uninitialized

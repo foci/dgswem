@@ -780,7 +780,8 @@
          IF (dist.LE.LatestRmax) THEN
             TRR=1.14+.12*(Pn-Pc)
          ELSEIF (dist.GT.LatestRmax) THEN
-            TRR=(1.14+.12*(Pn-Pc))*exp(-0.3*((dist-LatestRmax)/LatestRmax))
+            TRR=(1.14+.12*(Pn-Pc))*exp(-0.3*((dist-LatestRmax)/
+     &       LatestRmax))
          ENDIF
          
          ! Convert mm/hr to m/s

@@ -60,8 +60,8 @@ C.....to single nodal values
                      A_DG(J) = A(1,NBOR_EL,1)
 
                      DO KK = 2,DOFH
-                        H_DG(J) = H_DG(J)+PHI_CORNER(KK,K,ph)*H(KK,NBOR_EL,1)
-                        A_DG(J) = A_DG(J)+PHI_CORNER(KK,K,ph)*A(KK,NBOR_EL,1)
+                   H_DG(J) = H_DG(J)+PHI_CORNER(KK,K,ph)*H(KK,NBOR_EL,1)
+                   A_DG(J) = A_DG(J)+PHI_CORNER(KK,K,ph)*A(KK,NBOR_EL,1)
                      ENDDO
                      AREA = 0.5*AREAS(NBOR_EL)
                      AREA_SUM = AREA_SUM + AREA
@@ -163,8 +163,12 @@ C.....to single nodal values
                AREA = 0.5d0*AREAS(NBOR_EL)/AREA_SUM
                IF (H_DG(J).GT.0.D0) THEN
                  H2(I) = H2(I) + AREA*H_DG(J)
-                 HQX2(I) = HQX2(I) + AREA*S0X(NBOR_EL)*(H_DG(J)**(5.D0/3.D0)) / (manningKWE2(NBOR_EL)*sqrt(S0mag(NBOR_EL)))
-                 HQY2(I) = HQY2(I) + AREA*S0Y(NBOR_EL)*(H_DG(J)**(5.D0/3.D0)) / (manningKWE2(NBOR_EL)*sqrt(S0mag(NBOR_EL)))
+                 HQX2(I) = HQX2(I)
+     &            + AREA*S0X(NBOR_EL)*(H_DG(J)**(5.D0/3.D0)) /
+     &              (manningKWE2(NBOR_EL)*sqrt(S0mag(NBOR_EL)))
+                 HQY2(I) = HQY2(I)
+     &            + AREA*S0Y(NBOR_EL)*(H_DG(J)**(5.D0/3.D0)) /
+     &               (manningKWE2(NBOR_EL)*sqrt(S0mag(NBOR_EL)))
                ENDIF
             ENDIF
             
@@ -507,7 +511,8 @@ C.............Write 2D KWE output
                 ENDIF
                 
 C.............Write 1D KWE output
-              IF(ABS(NOUTV).EQ.1 .AND. (DGSAKE.EQ.1) .AND. NCEDS.GT.0) THEN
+              IF(ABS(NOUTV).EQ.1 .AND. (DGSAKE.EQ.1) .AND. NCEDS.GT.0)
+     &         THEN
                 WRITE(621,2120) time_A,IT
                 DO I=1,NSTAV
                 GED = NCEDN(NNV1(I))
@@ -522,8 +527,10 @@ C.............Write 1D KWE output
                    endif
                    
                    WCED = 1.D0/2.D0
-                   CB = (1.D0 - WCED)*CBWIDTH(1,NNV1(I)) + WCED*CBWIDTH(2,NNV1(I))
-                   CSS = (1.D0 - WCED)*CSSLOPE(1,NNV1(I)) + WCED*CSSLOPE(2,NNV1(I))
+                   CB = (1.D0 - WCED)*CBWIDTH(1,NNV1(I)) +
+     &              WCED*CBWIDTH(2,NNV1(I))
+                   CSS = (1.D0 - WCED)*CSSLOPE(1,NNV1(I)) +
+     &              WCED*CSSLOPE(2,NNV1(I))
                    
                    N2 = NCEDNO(2,NNV1(I))
                    
@@ -534,12 +541,13 @@ C.............Write 1D KWE output
      &                         + sqrt(CB**2.D0 + 4.D0/CSS*A_IN))
                    endif
                    
-                   P_MINUS = CB + 2.D0*A_H_IN*sqrt(1.d0 + 1.D0/(CSS**2.D0))
+                   P_MINUS = CB+2.D0*A_H_IN*sqrt(1.d0+1.D0/(CSS**2.D0))
                    
                    if (A_IN.eq.0.D0) then
                       AQ00(I) = 0.D0
                    else
-                      AQ00(I) = (1.D0/manningKWE1(NNV1(I)))*sqrt(CEDSLOPE(NNV1(I)))*((A_IN/P_MINUS)**(2.D0/3.D0)) * A_IN 
+                      AQ00(I) = (1.D0/manningKWE1(NNV1(I)))*
+     &      sqrt(CEDSLOPE(NNV1(I)))*((A_IN/P_MINUS)**(2.D0/3.D0)) * A_IN
                    endif
                    
                    WRITE(621,2453) I,AQ00(I)

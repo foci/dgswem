@@ -1444,7 +1444,7 @@ C     compute the coordinates of neighbor node "a" (located SW of closest node)
          if(mod(j,2).eq.0) ia=i-1
          ja=j-1
       endif
-c                                 this neighbor lies outside of Eta29 grid
+C                                 this neighbor lies outside of Eta29 grid
       if ((ia.lt.1).or.(ja.lt.1)) then
          na=0
       else
@@ -1512,7 +1512,7 @@ C     compute the coordinates of neighbor node "g" (located SE of closest node)
          ig=id
          jg=j-1
       endif
-c                                    this neighbor lies outside of Eta29 grid
+C                                    this neighbor lies outside of Eta29 grid
       if ((ig.gt.nwlon).or.(jg.lt.1)) then  
          ng=0
       else
@@ -3388,7 +3388,8 @@ C      call allMessage(DEBUG,"Enter.")
      &        (ir1(ient,i),i=1,4), ipn1(ient), atcfRMW1(ient),
      &        dir1(ient),speed1(ient), name1(ient),
      &        cycle_num1(ient),isotachs_per_cycle1(ient),
-     &        (quadflag1(ient,i),i=1,4),(rmaxw1(ient,i),i=1,4),HollB1(ient),
+     &        (quadflag1(ient,i),i=1,4),(rmaxw1(ient,i),i=1,4),
+     &        HollB1(ient),
      &        (HollBs1(ient,i),i=1,4),(VmaxesBL1(ient,i),i=1,4)
 
 
@@ -3550,7 +3551,7 @@ C     &      "The simulation has run out of meteorological data.")
          ENDIF
       ENDIF
 ! @jasonfleming: Add handling of "CALM"
-c      if ((trim(type(icyc)).eq.'CALM').or.trim(type(icyc-1)).eq.'CALM') then
+c      if ((trim(type(icyc)).eq.'CALM').or.trim(type(icyc-1)).eq.'CALM')then
 c         wvnx(:)=0.d0
 c         wvny(:)=0.d0
 c         press(:)=PRBCKGRND*mb2pa/(rhowat0*g)
@@ -3726,7 +3727,7 @@ c      endif
          end do
       enddo
       newVortexRMW = newVortexRMW / numRmaxes
-      vortexRMW = oldVortexRMW + wtratio * ( newVortexRMW - oldVortexRMW )
+      vortexRMW = oldVortexRMW + wtratio * ( newVortexRMW-oldVortexRMW )
       !-------------------------------
       ! Create a new asymmetric hurricane vortex.
       !
@@ -3742,7 +3743,8 @@ c      endif
       ! a 1-minute (max sustained) to a 10-minute average prior to
       ! adding the translational velocity in subroutine uvp.
       !-------------------------------------------------------------
-      stormMotion = 1.5d0*(SQRT(uTransNow**2.d0+vTransNow**2.d0))**0.63d0
+      stormMotion =
+     & 1.5d0*(SQRT(uTransNow**2.d0+vTransNow**2.d0))**0.63d0
       dirNow = rad2deg * ATAN2(uTransNow, vTransNow)
       if (dirNow .lt. 0.d0) dirNow = dirNow + 360.d0
       stormMotionU = sin(dirNow/rad2deg)*stormMotion
