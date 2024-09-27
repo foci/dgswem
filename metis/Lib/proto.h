@@ -8,7 +8,7 @@
  * Started 10/19/95
  * George
  *
- * $Id: proto.h,v 1.1 1998/11/27 17:59:28 karypis Exp $
+ * $Id: proto.h,v 1.1.1.1 2003/01/23 17:21:06 estrade Exp $
  *
  */
 
@@ -432,7 +432,7 @@ int *ismalloc(int, int, char *);
 idxtype *idxsmalloc(int, idxtype, char *);
 void *GKmalloc(int, char *);
 #endif
-/*void GKfree(void **,...); */
+void GKfree(void **,...);
 int *iset(int n, int val, int *x);
 idxtype *idxset(int n, idxtype val, idxtype *x);
 float *sset(int n, float val, float *x);

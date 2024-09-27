@@ -201,7 +201,7 @@ C.......For non-periodic flux bcs
 
 C.......Compute LDG auxiliary equations
          
-         IF (EVMSUM.NE.0.D0.or.artdif.eq.1) CALL LDG_HYDRO(IT)
+         IF (artdif.eq.1) CALL LDG_HYDRO(IT)
          
 C.......Compute elevation specified edges
 

@@ -1,7 +1,7 @@
 SHELL:=/bin/sh
 #
 #  Makefile to Build DGSWEM and its pre/post-processor
-export MPICH_FC=ifort
+#export MPICH_FC=ifort
 
 ########################################################################
 #  Get Canonical Machine NAME from config.guess
@@ -11,6 +11,9 @@ LIST     := $(subst -, ,$(NAME))
 MACHINE  := $(word 1, $(LIST))
 VENDOR   := $(word 2, $(LIST))
 OS       := $(subst  $(MACHINE)-$(VENDOR)-,,$(strip $(NAME)))
+
+$(info MACHINE is $(MACHINE))
+$(info OS is $(OS))
 
 include cmplrflags.mk
 #Casey 121126: Include variables/flags from SWAN.
@@ -37,7 +40,7 @@ endif
 ifeq ($(BUILDTYPE),dgswem_serial)
   CF:= $(PPFC)
   O_DIR:=odir4/
-  FFLAGS:= $(FFLAGS3) $(DA) $(IMODS)$(O_DIR) -g -p -traceback -fpe0
+  FFLAGS:= $(FFLAGS3) $(DA) $(IMODS)$(O_DIR)
   VPATH:=  ../src
   MSG_MOBJ:=
 endif
@@ -54,7 +57,7 @@ endif
 ifeq ($(BUILDTYPE),dgswem)
   CF:= $(PFC)
   O_DIR:=odir5/
-  FFLAGS:= $(FFLAGS4) $(DP) $(IMODS)$(O_DIR) -traceback -fpe0
+  FFLAGS:= $(FFLAGS4) $(DP) $(IMODS)$(O_DIR)
   VPATH :=  ../src
   MSG_MOBJ:= $(O_DIR)messenger_elem.o $(O_DIR)messenger.o
   MSG_OBJ:=

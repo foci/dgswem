@@ -14,14 +14,14 @@ C***********************************************************************
 
 C.....Use appropriate modules
 
-      USE GLOBAL
-      USE DG
+      USE GLOBAL, only : x, y, sfac
+      USE DG, only : xlen, cosnx, sinnx, nedges, nedno,  sav
       
       IMPLICIT NONE
       
 C.....Declare local variables
 
-      INTEGER IEL, IED,i
+      INTEGER IEL, IED,i, n1, n2
 
 C.....Loop over the edges
 

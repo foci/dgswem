@@ -286,12 +286,13 @@ endif
 ########################################################################
 # Compiler flags for Linux operating system on 64bit x86 CPU
 #
-ifneq (,$(findstring x86_64-linux-gnu,$(MACHINE)-$(OS)))
+ifneq (,$(findstring linux-gnu,$(OS)))
 #
 # ***NOTE*** User must select between various Linux setups
 #            by commenting/uncommenting the appropriate compiler
 #
 compiler=intel-lonestar
+#compiler=nvhpc
 #compiler=cray_xt3
 #compiler=kraken
 #
@@ -323,7 +324,7 @@ ifeq ($(compiler),intel-lonestar)
   PPFC          :=  ifort	
   FC            :=  ifort
   PFC           :=  mpif90
-  CC            :=  icc
+  CC            :=  icx
   FFLAGS1       :=  $(INCDIRS) -O2 -msse3 -132  #-traceback -check all #-prof-gen -prof-dir /bevo2/michoski/v21/work -pg -prof-use
   FFLAGS2       :=  $(FFLAGS1)
   FFLAGS3       :=  $(FFLAGS1)
@@ -332,10 +333,29 @@ ifeq ($(compiler),intel-lonestar)
   DP            :=  -DREAL8 -DLINUX -DCSCA -DCMPI -DRKSSP -DSLOPE5 #-DDGOUT #-DOUT_TEC #-DARTDIF #-DWETDR  # -DSED_LAY -DRKC -DTRACE -DSED_LAY -DCHEM -DP0 -DP_AD -DSLOPEALL
   DPRE          :=  -DREAL8 -DLINUX -DRKSSP -DSLOPE5 #-DOUT_TEC #-DSWAN #-DARTDIF  # -DWETDR #-DSED_LAY -DSWAN #-DOUT_TEC #-DSWAN -DRKC -DTRACE -DSED_LAY -DCHEM -DP0 -DP_AD -DSLOPEALL
   DPRE2         :=  -DREAL8 -DLINUX -DCMPI 
-  CFLAGS        :=  -O3 -xSSSE3 -I.
+  CFLAGS        :=  -O3 -xSSSE3 -I. -Wno-implicit-function-declaration
   IMODS         :=  -I
   LIBS          :=  -L ../metis -lmetis
   MSGLIBS       :=
 endif
 
+ifeq ($(compiler),nvhpc)   # NVIDIA
+  PPFC	        :=  nvfortran
+  FC	        :=  nvfortran
+  PFC	        :=  mpif90
+  FFLAGS1	:=  -Mextend -traceback -g -O3
+  FFLAGS2	:=  $(FFLAGS1)
+  FFLAGS3	:=  $(FFLAGS1)
+  FFLAGS4	:=  $(FFLAGS1)
+  DA  	        :=  -DREAL8 -DLINUX -DCSCA -DRKSSP -DSLOPE5
+  DP  	        :=  -DREAL8 -DLINUX -DCSCA -DCMPI -DRKSSP -DSLOPE5
+  DPRE	        :=  -DREAL8 -DLINUX -DRKSSP -DSLOPE5
+  DPRE2         :=  -DREAL8 -DLINUX -DCMPI
+  IMODS 	:=  -I
+  CC            :=  nvc
+  CFLAGS        :=  -O3 -I. -fastsse -DLINUX
+  CLIBS         :=
+  LIBS  	:=  -L ../metis  -lmetis
+  MSGLIBS	:=
+endif
 endif

@@ -9,11 +9,13 @@
  * Started 7/23/97
  * George
  *
- * $Id: minitpart.c,v 1.2 1998/11/30 15:08:37 karypis Exp $
+ * $Id: minitpart.c,v 1.1.1.1 2003/01/23 17:21:06 estrade Exp $
  *
  */
 
-#include <metis.h>
+#include "metis.h"
+
+int SelectQueueOneWay(int ncon, float *npwgts, float *tpwgts, int from, PQueueType queues[MAXNCON][2]);
 
 /*************************************************************************
 * This function computes the initial bisection of the coarsest graph
