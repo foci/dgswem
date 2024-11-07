@@ -134,52 +134,52 @@ C.....Retrieve the barycenter coordinates of the element
 C.....Compute the x and y derivatives of the P1 part of ZE
 
             DZEDR = ZE(3,L,NRK+2)
-            DZEDS = 3.D0/2.D0*ZE(2,L,NRK+2) + 1.D0/2.D0*ZE(3,L,NRK+2)
+            DZEDS = 3.0/2.0*ZE(2,L,NRK+2) + 1.0/2.0*ZE(3,L,NRK+2)
 
             DZEDX(4) = DZEDR*DRDX(L) + DZEDS*DSDX(L)
             DZEDY(4) = DZEDR*DRDY(L) + DZEDS*DSDY(L)
             
-            GRADZE(4) = SQRT(DZEDX(4)**2.D0 + DZEDY(4)**2.D0)
+            GRADZE(4) = SQRT(DZEDX(4)**2.0 + DZEDY(4)**2.0)
             
 C.....Compute the x and y derivatives of the P1 part of QX
             
             DQXDR = QX(3,L,NRK+2)
-            DQXDS = 3.D0/2.D0*QX(2,L,NRK+2) + 1.D0/2.D0*QX(3,L,NRK+2)
+            DQXDS = 3.0/2.0*QX(2,L,NRK+2) + 1.0/2.0*QX(3,L,NRK+2)
 
             DQXDX(4) = DQXDR*DRDX(L) + DQXDS*DSDX(L)
             DQXDY(4) = DQXDR*DRDY(L) + DQXDS*DSDY(L)
             
-            GRADQX(4) = SQRT(DQXDX(4)**2.D0 + DQXDY(4)**2.D0)
+            GRADQX(4) = SQRT(DQXDX(4)**2.0 + DQXDY(4)**2.0)
             
 C.....Compute the x and y derivatives of the P1 part of QY
             
             DQYDR = QY(3,L,NRK+2)
-            DQYDS = 3.D0/2.D0*QY(2,L,NRK+2) + 1.D0/2.D0*QY(3,L,NRK+2)
+            DQYDS = 3.0/2.0*QY(2,L,NRK+2) + 1.0/2.0*QY(3,L,NRK+2)
 
             DQYDX(4) = DQYDR*DRDX(L) + DQYDS*DSDX(L)
             DQYDY(4) = DQYDR*DRDY(L) + DQYDS*DSDY(L)
             
-            GRADQY(4) = SQRT(DQYDX(4)**2.D0 + DQYDY(4)**2.D0)
+            GRADQY(4) = SQRT(DQYDX(4)**2.0 + DQYDY(4)**2.0)
 
 
 C.....Compute the x and y derivatives of the P1 part of iota & iota2
 
 #ifdef TRACE     
             DiotaDR = iota(3,L,NRK+2)
-            DiotaDS =3.D0/2.D0*iota(2,L,NRK+2)+1.D0/2.D0*iota(3,L,NRK+2)
+            DiotaDS =3.0/2.0*iota(2,L,NRK+2)+1.0/2.0*iota(3,L,NRK+2)
 
             DiotaDX(4) = DiotaDR*DRDX(L) + DiotaDS*DSDX(L)
             DiotaDY(4) = DiotaDR*DRDY(L) + DiotaDS*DSDY(L)
             
-            GRADiota(4) = SQRT(DiotaDX(4)**2.D0 + DiotaDY(4)**2.D0)
+            GRADiota(4) = SQRT(DiotaDX(4)**2.0 + DiotaDY(4)**2.0)
 #endif
 
 #ifdef CHEM
             DiotaDR = iota(3,L,NRK+2)
-            DiotaDS =3.D0/2.D0*iota(2,L,NRK+2)+1.D0/2.D0*iota(3,L,NRK+2)
+            DiotaDS =3.0/2.0*iota(2,L,NRK+2)+1.0/2.0*iota(3,L,NRK+2)
 
             Diota2DR = iota2(3,L,NRK+2)
-            Diota2DS = 3.D0/2.D0*iota2(2,L,NRK+2) + 1.D0/2.D0*
+            Diota2DS = 3.0/2.0*iota2(2,L,NRK+2) + 1.0/2.0*
      &         iota2(3,L,NRK+2)
 
             DiotaDX(4) = DiotaDR*DRDX(L) + DiotaDS*DSDX(L)
@@ -188,8 +188,8 @@ C.....Compute the x and y derivatives of the P1 part of iota & iota2
             Diota2DX(4) = Diota2DR*DRDX(L) + Diota2DS*DSDX(L)
             Diota2DY(4) = Diota2DR*DRDY(L) + Diota2DS*DSDY(L)
             
-            GRADiota(4) = SQRT(DiotaDX(4)**2.D0 + DiotaDY(4)**2.D0)
-            GRADiota2(4) = SQRT(Diota2DX(4)**2.D0 + Diota2DY(4)**2.D0)
+            GRADiota(4) = SQRT(DiotaDX(4)**2.0 + DiotaDY(4)**2.0)
+            GRADiota2(4) = SQRT(Diota2DX(4)**2.0 + Diota2DY(4)**2.0)
 #endif
             
             DO I = 1,3
@@ -198,7 +198,7 @@ C.....Compute the x and y derivatives of the P1 part of iota & iota2
                EL3 = EL_NBORS(I+1,L)
 
 C.......Special treatment for elements that do not have three neighboring elements
-               IF((EL2.EQ.0).OR.(EL3.EQ.0).OR.(SL3(I,L).LE.0.D0)) THEN
+               IF((EL2.EQ.0).OR.(EL3.EQ.0).OR.(SL3(I,L).LE.0.0)) THEN
                   GRADZE(I) = 1.D10
                   GRADQX(I) = 1.D10
                   GRADQY(I) = 1.D10
@@ -233,7 +233,7 @@ C.....Compute limiting slopes for the surface elevation
                
                DZEDY(I) = -SL2/SL3(I,L)
                
-               GRADZE(I) = SQRT(DZEDX(I)**2.D0 + DZEDY(I)**2.D0)
+               GRADZE(I) = SQRT(DZEDX(I)**2.0 + DZEDY(I)**2.0)
                
 C.....Compute limiting slopes for the X flow
 
@@ -247,7 +247,7 @@ C.....Compute limiting slopes for the X flow
 
                DQXDY(I) = -SL2/SL3(I,L)
                
-               GRADQX(I) = SQRT(DQXDX(I)**2.D0 + DQXDY(I)**2.D0)
+               GRADQX(I) = SQRT(DQXDX(I)**2.0 + DQXDY(I)**2.0)
                
 C.....Compute limiting slopes for the Y flow
 
@@ -261,7 +261,7 @@ C.....Compute limiting slopes for the Y flow
 
                DQYDY(I) = -SL2/SL3(I,L)
                
-               GRADQY(I) = SQRT(DQYDX(I)**2.D0 + DQYDY(I)**2.D0)
+               GRADQY(I) = SQRT(DQYDX(I)**2.0 + DQYDY(I)**2.0)
                
 
 C.....Compute limiting slopes for the concentrations
@@ -277,7 +277,7 @@ C.....Compute limiting slopes for the concentrations
                
                DiotaDY(I) = -SL2/SL3(I,L)
                
-               GRADiota(I) = SQRT(DiotaDX(I)**2.D0 + DiotaDY(I)**2.D0)
+               GRADiota(I) = SQRT(DiotaDX(I)**2.0 + DiotaDY(I)**2.0)
 #endif
 
 #ifdef CHEM
@@ -291,7 +291,7 @@ C.....Compute limiting slopes for the concentrations
                
                DiotaDY(I) = -SL2/SL3(I,L)
                
-               GRADiota(I) = SQRT(DiotaDX(I)**2.D0 + DiotaDY(I)**2.D0)
+               GRADiota(I) = SQRT(DiotaDX(I)**2.0 + DiotaDY(I)**2.0)
 
                SL1=iota2(1,L,NRK+2)*(Y3 - Y2)+iota2(1,EL2,NRK+2)*(Y1-Y3)
      &              + iota2(1,EL3,NRK+2)*(Y2 - Y1)
@@ -303,7 +303,7 @@ C.....Compute limiting slopes for the concentrations
                
                Diota2DY(I) = -SL2/SL3(I,L)
                
-               GRADiota2(I) = SQRT(Diota2DX(I)**2.D0+Diota2DY(I)**2.D0)
+               GRADiota2(I) = SQRT(Diota2DX(I)**2.0+Diota2DY(I)**2.0)
 #endif
 
             ENDDO
@@ -365,31 +365,31 @@ C.....Compute the (possibly) limited gradient
 
             DEN = DRDX(L)*DSDY(L) - DRDY(L)*DSDX(L)
 
-            ZE(2,L,IRK+1) = 1.D0/3.D0*(2.D0*ZELIMY*DRDX(L)
-     &           -2.D0*DRDY(L)*ZELIMX-ZELIMX*DSDY(L)+DSDX(L)*ZELIMY)/DEN
-            QX(2,L,IRK+1) = 1.D0/3.D0*(2.D0*QXLIMY*DRDX(L)
-     &           -2.D0*DRDY(L)*QXLIMX-QXLIMX*DSDY(L)+DSDX(L)*QXLIMY)/DEN
-            QY(2,L,IRK+1) = 1.D0/3.D0*(2.D0*QYLIMY*DRDX(L)
-     &           -2.D0*DRDY(L)*QYLIMX-QYLIMX*DSDY(L)+DSDX(L)*QYLIMY)/DEN
+            ZE(2,L,IRK+1) = 1.0/3.0*(2.0*ZELIMY*DRDX(L)
+     &           -2.0*DRDY(L)*ZELIMX-ZELIMX*DSDY(L)+DSDX(L)*ZELIMY)/DEN
+            QX(2,L,IRK+1) = 1.0/3.0*(2.0*QXLIMY*DRDX(L)
+     &           -2.0*DRDY(L)*QXLIMX-QXLIMX*DSDY(L)+DSDX(L)*QXLIMY)/DEN
+            QY(2,L,IRK+1) = 1.0/3.0*(2.0*QYLIMY*DRDX(L)
+     &           -2.0*DRDY(L)*QYLIMX-QYLIMX*DSDY(L)+DSDX(L)*QYLIMY)/DEN
 
             ZE(3,L,IRK+1) = (ZELIMX*DSDY(L) - DSDX(L)*ZELIMY)/DEN
             QX(3,L,IRK+1) = (QXLIMX*DSDY(L) - DSDX(L)*QXLIMY)/DEN
             QY(3,L,IRK+1) = (QYLIMX*DSDY(L) - DSDX(L)*QYLIMY)/DEN
 
 #ifdef TRACE
-            iota(2,L,IRK+1) = 1.D0/3.D0*(2.D0*iotaLIMY*DRDX(L)
-     &           - 2.D0*DRDY(L)*iotaLIMX - iotaLIMX*DSDY(L) + DSDX(L)*
+            iota(2,L,IRK+1) = 1.0/3.0*(2.0*iotaLIMY*DRDX(L)
+     &           - 2.0*DRDY(L)*iotaLIMX - iotaLIMX*DSDY(L) + DSDX(L)*
      &           iotaLIMY)/DEN
 
             iota(3,L,IRK+1) = (iotaLIMX*DSDY(L) - DSDX(L)*iotaLIMY)/DEN
 #endif
 
 #ifdef CHEM
-            iota(2,L,IRK+1) = 1.D0/3.D0*(2.D0*iotaLIMY*DRDX(L)
-     &           - 2.D0*DRDY(L)*iotaLIMX - iotaLIMX*DSDY(L) + DSDX(L)*
+            iota(2,L,IRK+1) = 1.0/3.0*(2.0*iotaLIMY*DRDX(L)
+     &           - 2.0*DRDY(L)*iotaLIMX - iotaLIMX*DSDY(L) + DSDX(L)*
      &           iotaLIMY)/DEN
-            iota2(2,L,IRK+1) = 1.D0/3.D0*(2.D0*iota2LIMY*DRDX(L)
-     &           - 2.D0*DRDY(L)*iota2LIMX - iota2LIMX*DSDY(L) + DSDX(L)*
+            iota2(2,L,IRK+1) = 1.0/3.0*(2.0*iota2LIMY*DRDX(L)
+     &           - 2.0*DRDY(L)*iota2LIMX - iota2LIMX*DSDY(L) + DSDX(L)*
      &           iota2LIMY)/DEN
 
             iota(3,L,IRK+1) = (iotaLIMX*DSDY(L) - DSDX(L)*iotaLIMY)/DEN
@@ -531,8 +531,8 @@ C.......Barycenters
 C     If there is no neighboring element on this side (e.g. domain boundary),
 C     locate a barycenter at the mirroring point and use the values at the 
 C     baricenter of this element.
-               XB(I) = 2.D0*XM(I) - XB(0)
-               YB(I) = 2.D0*YM(I) - YB(0)
+               XB(I) = 2.0*XM(I) - XB(0)
+               YB(I) = 2.0*YM(I) - YB(0)
                ZB(I) = ZB(0)
                DB(I) = DB(0)
                QXB(I) = QXB(0)
@@ -634,13 +634,13 @@ C.......Apply the TVB modified minmod function
                IF(ABS(W_TILDA(K)) < SL2_M*R_SQ) THEN
                   DELTA_C(K,I) = W_TILDA(K)
                ELSE
-                  IF((W_TILDA(K)*DELTA_W(K) >= 0.D0)
+                  IF((W_TILDA(K)*DELTA_W(K) >= 0.0)
      &                 .AND.(ABS(W_TILDA(K)) > ZERO)) THEN
                      S = W_TILDA(K)/ABS(W_TILDA(K))
                      DELTA_C(K,I) = S*MIN(
      &                    ABS(W_TILDA(K)),ABS(SL2_NYU*DELTA_W(K)))
                   ELSE
-                     DELTA_C(K,I) = 0.D0
+                     DELTA_C(K,I) = 0.0
                   ENDIF
                ENDIF
             ENDDO
@@ -664,29 +664,29 @@ C     whether the variables should be limited.
 C     Find the possibly limited DELTA and variable vectors at the corner nodes
          DO I = 1,3             ! Loop for variable components
 C     Find the possibly limited DELTA
-            POS = 0.D0
-            NEG = 0.D0
+            POS = 0.0
+            NEG = 0.0
             DO J = 1,3          ! Loop for edges
-               POS = POS + MAX(0.D0, DELTA_O(I,J))
-               NEG = NEG + MAX(0.D0,-DELTA_O(I,J))
+               POS = POS + MAX(0.0, DELTA_O(I,J))
+               NEG = NEG + MAX(0.0,-DELTA_O(I,J))
             ENDDO
             IF((POS < ZERO).OR.(NEG < ZERO)) THEN 
-               DELTA_HAT(I,1) = 0.D0
-               DELTA_HAT(I,2) = 0.D0
-               DELTA_HAT(I,3) = 0.D0
+               DELTA_HAT(I,1) = 0.0
+               DELTA_HAT(I,2) = 0.0
+               DELTA_HAT(I,3) = 0.0
             ELSE
-               THETA_P = MIN(1.D0,NEG/POS)
-               THETA_N = MIN(1.D0,POS/NEG)
+               THETA_P = MIN(1.0,NEG/POS)
+               THETA_N = MIN(1.0,POS/NEG)
                
                DELTA_HAT(I,1)
-     &              = THETA_P*MAX(0.D0, DELTA_O(I,1))
-     &              - THETA_N*MAX(0.D0,-DELTA_O(I,1))
+     &              = THETA_P*MAX(0.0, DELTA_O(I,1))
+     &              - THETA_N*MAX(0.0,-DELTA_O(I,1))
                DELTA_HAT(I,2)
-     &              = THETA_P*MAX(0.D0, DELTA_O(I,2))
-     &              - THETA_N*MAX(0.D0,-DELTA_O(I,2))
+     &              = THETA_P*MAX(0.0, DELTA_O(I,2))
+     &              - THETA_N*MAX(0.0,-DELTA_O(I,2))
                DELTA_HAT(I,3)
-     &              = THETA_P*MAX(0.D0, DELTA_O(I,3))
-     &              - THETA_N*MAX(0.D0,-DELTA_O(I,3))
+     &              = THETA_P*MAX(0.0, DELTA_O(I,3))
+     &              - THETA_N*MAX(0.0,-DELTA_O(I,3))
             ENDIF
 
 C     Compute the possibly limited variable vectors at the corner nodes
@@ -717,18 +717,18 @@ C     Computing limited variables at the corner nodes
          ENDDO
 
          IF(LIMITIT(1)) THEN
-            ZE(2,L,IRK+1) = -1.D0/6.D0*(WC_O(1,1) + WC_O(1,2))
-     &           + 1.D0/3.D0*WC_O(1,3)
+            ZE(2,L,IRK+1) = -1.0/6.0*(WC_O(1,1) + WC_O(1,2))
+     &           + 1.0/3.0*WC_O(1,3)
             ZE(3,L,IRK+1) = -0.5D0*WC_O(1,1) + 0.5D0*WC_O(1,2)
          ENDIF
          IF(LIMITIT(2)) THEN
-            QX(2,L,IRK+1) = -1.D0/6.D0*(WC_O(2,1) + WC_O(2,2))
-     &           + 1.D0/3.D0*WC_O(2,3)
+            QX(2,L,IRK+1) = -1.0/6.0*(WC_O(2,1) + WC_O(2,2))
+     &           + 1.0/3.0*WC_O(2,3)
             QX(3,L,IRK+1) = -0.5D0*WC_O(2,1) + 0.5D0*WC_O(2,2)
          ENDIF
          IF(LIMITIT(3)) THEN
-            QY(2,L,IRK+1) = -1.D0/6.D0*(WC_O(3,1) + WC_O(3,2))
-     &           + 1.D0/3.D0*WC_O(3,3)
+            QY(2,L,IRK+1) = -1.0/6.0*(WC_O(3,1) + WC_O(3,2))
+     &           + 1.0/3.0*WC_O(3,3)
             QY(3,L,IRK+1) = -0.5D0*WC_O(3,1) + 0.5D0*WC_O(3,2)
          ENDIF
 
@@ -884,11 +884,11 @@ C.....Retrieve the nodal info
          ENDDO
       ENDDO
 
-      HMIN = MAX(0.D0,MIN(ZC(1)+DC(1),ZC(2)+DC(2),ZC(3)+DC(3)))
+      HMIN = MAX(0.0,MIN(ZC(1)+DC(1),ZC(2)+DC(2),ZC(3)+DC(3)))
       HMAX = MAX(ZC(1)+DC(1),ZC(2)+DC(2),ZC(3)+DC(3))
       HAVG = ZE(1,L,IRK+1) + HB(1,L,1)
-      HLIMIT = MIN(1.D0,(HMIN*HMIN)/(SL3_MD*SL3_MD))
-      HLIMIT = 1.D0
+      HLIMIT = MIN(1.0,(HMIN*HMIN)/(SL3_MD*SL3_MD))
+      HLIMIT = 1.0
       IF(nolifa.eq.2.and.HMIN.LE.H0) RETURN
 c     IF(HMIN.LE.0.01D0) RETURN
 
@@ -914,12 +914,12 @@ C     IF(EL_N == 0) THEN
 C     If there is no neighboring element on this side (e.g. domain boundary),
 C     locate a barycenter at the mirroring point and use extrapolated values.
 C     but all elements in this subroutine will have 3 neighbors
-C     XB(I) = 2.D0*XM(I) - XB(0)
-C     YB(I) = 2.D0*YM(I) - YB(0)
-C     ZB(I) = 2.D0*ZM(I) - ZB(0)
-C     DB(I) = 2.D0*DM(I) - DB(0)
-C     QXB(I) = 2.D0*QXM(I) - QXB(0)
-C     QYB(I) = 2.D0*QYM(I) - QYB(0)
+C     XB(I) = 2.0*XM(I) - XB(0)
+C     YB(I) = 2.0*YM(I) - YB(0)
+C     ZB(I) = 2.0*ZM(I) - ZB(0)
+C     DB(I) = 2.0*DM(I) - DB(0)
+C     QXB(I) = 2.0*QXM(I) - QXB(0)
+C     QYB(I) = 2.0*QYM(I) - QYB(0)
 C     ELSE
          XB(I) = XBC(EL_N)
          YB(I) = YBC(EL_N)
@@ -962,16 +962,16 @@ C.......is negative that element must be set to p = 0.
 
          ALPHA1(I) = ( A(2,2)*B(1) - A(1,2)*B(2))/DTM
          IF (ALPHA1(I).LT.0) THEN
-            ZE(2:DOF,L,IRK+1) = 0.D0
-            QX(2:DOF,L,IRK+1) = 0.D0
-            QY(2:DOF,L,IRK+1) = 0.D0
+            ZE(2:DOF,L,IRK+1) = 0.0
+            QX(2:DOF,L,IRK+1) = 0.0
+            QY(2:DOF,L,IRK+1) = 0.0
             RETURN
          ENDIF
          ALPHA2(I) = (-A(2,1)*B(1) + A(1,1)*B(2))/DTM
          IF (ALPHA2(I).LT.0) THEN
-            ZE(2:DOF,L,IRK+1) = 0.D0
-            QX(2:DOF,L,IRK+1) = 0.D0
-            QY(2:DOF,L,IRK+1) = 0.D0
+            ZE(2:DOF,L,IRK+1) = 0.0
+            QX(2:DOF,L,IRK+1) = 0.0
+            QY(2:DOF,L,IRK+1) = 0.0
             RETURN
          ENDIF
       ENDDO
@@ -1052,7 +1052,7 @@ c     endif
 C     IF(ABS(W_TILDA(K)) < SL2_M*HLIMIT*R_SQ) THEN
 C     DELTA_C(K,I) = W_TILDA(K)
 C     ELSE
-            IF((W_TILDA(K)*DELTA_W(K) >= 0.D0)
+            IF((W_TILDA(K)*DELTA_W(K) >= 0.0)
      &           .AND.(ABS(W_TILDA(K)) > ZERO)) THEN
                S = W_TILDA(K)/ABS(W_TILDA(K))
 C.......Hard-wired SL2_NYU = 1.5 as taken in Cockburn and Shu reference
@@ -1061,7 +1061,7 @@ C.......Hard-wired SL2_NYU = 1.5 as taken in Cockburn and Shu reference
                IF (DELTA_C(K,I).EQ.(S*ABS(W_TILDA(K))))
      &              NOT_LIMITED(K) = NOT_LIMITED(K) + 1
             ELSE
-               DELTA_C(K,I) = 0.D0
+               DELTA_C(K,I) = 0.0
             ENDIF
 C     ENDIF
          ENDDO
@@ -1077,25 +1077,25 @@ C.....Else perform limiting on characteristic variables
 
       ELSE
          DO I = 1,3             ! Loop for variable components
-            POS = 0.D0
-            NEG = 0.D0
+            POS = 0.0
+            NEG = 0.0
             DO J = 1,3          ! Loop for edges
-               POS = POS + MAX(0.D0, DELTA_C(I,J))
-               NEG = NEG + MAX(0.D0,-DELTA_C(I,J))
+               POS = POS + MAX(0.0, DELTA_C(I,J))
+               NEG = NEG + MAX(0.0,-DELTA_C(I,J))
             ENDDO
             IF((POS < ZERO).OR.(NEG < ZERO)) THEN
-               DELTA_HAT(I,1) = 0.D0
-               DELTA_HAT(I,2) = 0.D0
-               DELTA_HAT(I,3) = 0.D0
+               DELTA_HAT(I,1) = 0.0
+               DELTA_HAT(I,2) = 0.0
+               DELTA_HAT(I,3) = 0.0
             ELSE
-               THETA_P = MIN(1.D0,NEG/POS)
-               THETA_N = MIN(1.D0,POS/NEG)
-               DELTA_HAT(I,1) = THETA_P*MAX(0.D0, DELTA_C(I,1))
-     &              - THETA_N*MAX(0.D0,-DELTA_C(I,1))
-               DELTA_HAT(I,2) = THETA_P*MAX(0.D0, DELTA_C(I,2))
-     &              - THETA_N*MAX(0.D0,-DELTA_C(I,2))
-               DELTA_HAT(I,3) = THETA_P*MAX(0.D0, DELTA_C(I,3))
-     &              - THETA_N*MAX(0.D0,-DELTA_C(I,3))
+               THETA_P = MIN(1.0,NEG/POS)
+               THETA_N = MIN(1.0,POS/NEG)
+               DELTA_HAT(I,1) = THETA_P*MAX(0.0, DELTA_C(I,1))
+     &              - THETA_N*MAX(0.0,-DELTA_C(I,1))
+               DELTA_HAT(I,2) = THETA_P*MAX(0.0, DELTA_C(I,2))
+     &              - THETA_N*MAX(0.0,-DELTA_C(I,2))
+               DELTA_HAT(I,3) = THETA_P*MAX(0.0, DELTA_C(I,3))
+     &              - THETA_N*MAX(0.0,-DELTA_C(I,3))
             ENDIF
 
 C.........Computed limited characteristic variables at the corner nodes
@@ -1124,19 +1124,19 @@ c     endif
          
 C.......If the limited water depth < 0, don't apply this slope limiting
 
-         IF((WC_O(1,1)+DC(1)).LE.0.D0.OR.(WC_O(1,2)+DC(2)).LE.0.D0.OR.
-     &        (WC_O(1,2)+DC(2)).LE.0.D0) RETURN
+         IF((WC_O(1,1)+DC(1)).LE.0.0.OR.(WC_O(1,2)+DC(2)).LE.0.0.OR.
+     &        (WC_O(1,2)+DC(2)).LE.0.0) RETURN
          
 C.......Else compute new modal dofs
 
-         ZE(2,L,IRK+1) = -1.D0/6.D0*(WC_O(1,1) + WC_O(1,2))
-     &        +  1.D0/3.D0*WC_O(1,3)
+         ZE(2,L,IRK+1) = -1.0/6.0*(WC_O(1,1) + WC_O(1,2))
+     &        +  1.0/3.0*WC_O(1,3)
          ZE(3,L,IRK+1) = -0.5D0*WC_O(1,1) + 0.5D0*WC_O(1,2)
-         QX(2,L,IRK+1) = -1.D0/6.D0*(WC_O(2,1) + WC_O(2,2))
-     &        +  1.D0/3.D0*WC_O(2,3)
+         QX(2,L,IRK+1) = -1.0/6.0*(WC_O(2,1) + WC_O(2,2))
+     &        +  1.0/3.0*WC_O(2,3)
          QX(3,L,IRK+1) = -0.5D0*WC_O(2,1) + 0.5D0*WC_O(2,2)
-         QY(2,L,IRK+1) = -1.D0/6.D0*(WC_O(3,1) + WC_O(3,2))
-     &        +  1.D0/3.D0*WC_O(3,3)
+         QY(2,L,IRK+1) = -1.0/6.0*(WC_O(3,1) + WC_O(3,2))
+     &        +  1.0/3.0*WC_O(3,3)
          QY(3,L,IRK+1) = -0.5D0*WC_O(3,1) + 0.5D0*WC_O(3,2)
 
       ENDIF
@@ -1243,11 +1243,11 @@ C.....Retrieve the nodal info
          ENDDO
       ENDDO
 
-      HMIN = MAX(0.D0,MIN(ZC(1)+DC(1),ZC(2)+DC(2),ZC(3)+DC(3)))
+      HMIN = MAX(0.0,MIN(ZC(1)+DC(1),ZC(2)+DC(2),ZC(3)+DC(3)))
       HMAX = MAX(ZC(1)+DC(1),ZC(2)+DC(2),ZC(3)+DC(3))
       HAVG = ZE(1,L,IRK+1) + HB(1,L,1)
-      HLIMIT = MIN(1.D0,(HMIN*HMIN)/(SL3_MD*SL3_MD))
-      HLIMIT = 1.D0
+      HLIMIT = MIN(1.0,(HMIN*HMIN)/(SL3_MD*SL3_MD))
+      HLIMIT = 1.0
       IF(nolifa.eq.2.and.HMIN.LE.H0) RETURN
 c     IF(HMIN.LE.0.01D0) RETURN
 
@@ -1300,16 +1300,16 @@ C.....Compute alpha1 and alpha2
          DTM = A(1,1)*A(2,2) - A(1,2)*A(2,1) ! Compute the determinant
          ALPHA1(I) = ( A(2,2)*B(1) - A(1,2)*B(2))/DTM
          IF (ALPHA1(I).LT.0) THEN
-            ZE(2:DOF,L,IRK+1) = 0.D0
-            QX(2:DOF,L,IRK+1) = 0.D0
-            QY(2:DOF,L,IRK+1) = 0.D0
+            ZE(2:DOF,L,IRK+1) = 0.0
+            QX(2:DOF,L,IRK+1) = 0.0
+            QY(2:DOF,L,IRK+1) = 0.0
             RETURN
          ENDIF
          ALPHA2(I) = (-A(2,1)*B(1) + A(1,1)*B(2))/DTM
          IF (ALPHA2(I).LT.0) THEN
-            ZE(2:DOF,L,IRK+1) = 0.D0
-            QX(2:DOF,L,IRK+1) = 0.D0
-            QY(2:DOF,L,IRK+1) = 0.D0
+            ZE(2:DOF,L,IRK+1) = 0.0
+            QX(2:DOF,L,IRK+1) = 0.0
+            QY(2:DOF,L,IRK+1) = 0.0
             RETURN
          ENDIF
       ENDDO
@@ -1381,7 +1381,7 @@ c     &       + (YM(I) - YB(0))*(YM(I) - YB(0))
 c     IF(ABS(W_TILDA(K)) < SL2_M*HLIMIT*R_SQ) THEN
 c     DELTA_C(K,I) = W_TILDA(K)
 c     ELSE
-            IF((W_TILDA(K)*DELTA_W(K) >= 0.D0)
+            IF((W_TILDA(K)*DELTA_W(K) >= 0.0)
      &           .AND.(ABS(W_TILDA(K)) > ZERO)) THEN
                S = W_TILDA(K)/ABS(W_TILDA(K))
                DELTA_C(K,I) = S*MIN(
@@ -1389,7 +1389,7 @@ c     ELSE
                IF (DELTA_C(K,I).EQ.(S*ABS(W_TILDA(K))))
      &              NOT_LIMITED(K) = NOT_LIMITED(K) + 1
             ELSE
-               DELTA_C(K,I) = 0.D0
+               DELTA_C(K,I) = 0.0
             ENDIF
 c     ENDIF
          ENDDO
@@ -1404,25 +1404,25 @@ C.....Else perform limiting on characteristic variables
 
       ELSE
          DO I = 1,3             ! Loop for variable components
-            POS = 0.D0
-            NEG = 0.D0
+            POS = 0.0
+            NEG = 0.0
             DO J = 1,3          ! Loop for edges
-               POS = POS + MAX(0.D0, DELTA_C(I,J))
-               NEG = NEG + MAX(0.D0,-DELTA_C(I,J))
+               POS = POS + MAX(0.0, DELTA_C(I,J))
+               NEG = NEG + MAX(0.0,-DELTA_C(I,J))
             ENDDO
             IF((POS < ZERO).OR.(NEG < ZERO)) THEN
-               DELTA_HAT(I,1) = 0.D0
-               DELTA_HAT(I,2) = 0.D0
-               DELTA_HAT(I,3) = 0.D0
+               DELTA_HAT(I,1) = 0.0
+               DELTA_HAT(I,2) = 0.0
+               DELTA_HAT(I,3) = 0.0
             ELSE
-               THETA_P = MIN(1.D0,NEG/POS)
-               THETA_N = MIN(1.D0,POS/NEG)
-               DELTA_HAT(I,1) = THETA_P*MAX(0.D0, DELTA_C(I,1))
-     &              - THETA_N*MAX(0.D0,-DELTA_C(I,1))
-               DELTA_HAT(I,2) = THETA_P*MAX(0.D0, DELTA_C(I,2))
-     &              - THETA_N*MAX(0.D0,-DELTA_C(I,2))
-               DELTA_HAT(I,3) = THETA_P*MAX(0.D0, DELTA_C(I,3))
-     &              - THETA_N*MAX(0.D0,-DELTA_C(I,3))
+               THETA_P = MIN(1.0,NEG/POS)
+               THETA_N = MIN(1.0,POS/NEG)
+               DELTA_HAT(I,1) = THETA_P*MAX(0.0, DELTA_C(I,1))
+     &              - THETA_N*MAX(0.0,-DELTA_C(I,1))
+               DELTA_HAT(I,2) = THETA_P*MAX(0.0, DELTA_C(I,2))
+     &              - THETA_N*MAX(0.0,-DELTA_C(I,2))
+               DELTA_HAT(I,3) = THETA_P*MAX(0.0, DELTA_C(I,3))
+     &              - THETA_N*MAX(0.0,-DELTA_C(I,3))
             ENDIF
 
 C.........Computed limited characteristic variables at the corner nodes
@@ -1448,19 +1448,19 @@ C.........Transform back to the original space
          
 C.......If the limited water depth < 0, don't apply this slope limiting
 
-         IF((WC_O(1,1)+DC(1)).LE.0.D0.OR.(WC_O(1,2)+DC(2)).LE.0.D0.OR.
-     &        (WC_O(1,2)+DC(2)).LE.0.D0) RETURN
+         IF((WC_O(1,1)+DC(1)).LE.0.0.OR.(WC_O(1,2)+DC(2)).LE.0.0.OR.
+     &        (WC_O(1,2)+DC(2)).LE.0.0) RETURN
          
 C.......Else compute new modal dofs
 
-         ZE(2,L,IRK+1) = -1.D0/6.D0*(WC_O(1,1) + WC_O(1,2))
-     &        +  1.D0/3.D0*WC_O(1,3)
+         ZE(2,L,IRK+1) = -1.0/6.0*(WC_O(1,1) + WC_O(1,2))
+     &        +  1.0/3.0*WC_O(1,3)
          ZE(3,L,IRK+1) = -0.5D0*WC_O(1,1) + 0.5D0*WC_O(1,2)
-         QX(2,L,IRK+1) = -1.D0/6.D0*(WC_O(2,1) + WC_O(2,2))
-     &        +  1.D0/3.D0*WC_O(2,3)
+         QX(2,L,IRK+1) = -1.0/6.0*(WC_O(2,1) + WC_O(2,2))
+     &        +  1.0/3.0*WC_O(2,3)
          QX(3,L,IRK+1) = -0.5D0*WC_O(2,1) + 0.5D0*WC_O(2,2)
-         QY(2,L,IRK+1) = -1.D0/6.D0*(WC_O(3,1) + WC_O(3,2))
-     &        +  1.D0/3.D0*WC_O(3,3)
+         QY(2,L,IRK+1) = -1.0/6.0*(WC_O(3,1) + WC_O(3,2))
+     &        +  1.0/3.0*WC_O(3,3)
          QY(3,L,IRK+1) = -0.5D0*WC_O(3,1) + 0.5D0*WC_O(3,2)
 
       ENDIF
@@ -1567,11 +1567,11 @@ C.....Retrieve the nodal info
          ENDDO
       ENDDO
 
-      HMIN = MAX(0.D0,MIN(ZC(1)+DC(1),ZC(2)+DC(2),ZC(3)+DC(3)))
+      HMIN = MAX(0.0,MIN(ZC(1)+DC(1),ZC(2)+DC(2),ZC(3)+DC(3)))
       HMAX = MAX(ZC(1)+DC(1),ZC(2)+DC(2),ZC(3)+DC(3))
       HAVG = ZE(1,L,IRK+1) + HB(1,L,1)
-      HLIMIT = MIN(1.D0,(HMIN*HMIN)/(SL3_MD*SL3_MD))
-      HLIMIT = 1.D0
+      HLIMIT = MIN(1.0,(HMIN*HMIN)/(SL3_MD*SL3_MD))
+      HLIMIT = 1.0
       IF(NOLIFA.eq.2.and.HMIN.LE.H0) RETURN
 
 C.....Retrieve info at barycenters and edge midpoints
@@ -1595,12 +1595,12 @@ C.......Barycenters
          IF(EL_N == 0) THEN
 C     If there is no neighboring element on this side (e.g. domain boundary),
 C     locate a barycenter at the mirroring point and use extrapolated values.
-            XB(I) = 2.D0*XM(I) - XB(0)
-            YB(I) = 2.D0*YM(I) - YB(0)
-            ZB(I) = 2.D0*ZM(I) - ZB(0)
-            DB(I) = 2.D0*DM(I) - DB(0)
-            QXB(I) = 2.D0*QXM(I) - QXB(0)
-            QYB(I) = 2.D0*QYM(I) - QYB(0)
+            XB(I) = 2.0*XM(I) - XB(0)
+            YB(I) = 2.0*YM(I) - YB(0)
+            ZB(I) = 2.0*ZM(I) - ZB(0)
+            DB(I) = 2.0*DM(I) - DB(0)
+            QXB(I) = 2.0*QXM(I) - QXB(0)
+            QYB(I) = 2.0*QYM(I) - QYB(0)
          ELSE
             XB(I) = XBC(EL_N)
             YB(I) = YBC(EL_N)
@@ -1698,13 +1698,13 @@ C.......Apply the TVB modified minmod function
             IF(ABS(W_TILDA(K)) < SL2_M*HLIMIT*R_SQ) THEN
                DELTA_C(K,I) = W_TILDA(K)
             ELSE
-               IF((W_TILDA(K)*DELTA_W(K) >= 0.D0)
+               IF((W_TILDA(K)*DELTA_W(K) >= 0.0)
      &              .AND.(ABS(W_TILDA(K)) > ZERO)) THEN
                   S = W_TILDA(K)/ABS(W_TILDA(K))
                   DELTA_C(K,I) = S*MIN(
      &                 ABS(W_TILDA(K)),ABS(SL2_NYU*DELTA_W(K)))
                ELSE
-                  DELTA_C(K,I) = 0.D0
+                  DELTA_C(K,I) = 0.0
                ENDIF
             ENDIF
          ENDDO
@@ -1735,29 +1735,29 @@ C     whether the variables should be limited.
 C     Find the possibly limited DELTA and variable vectors at the corner nodes
       DO I = 1,3                ! Loop for variable components
 C     Find the possibly limited DELTA
-         POS = 0.D0
-         NEG = 0.D0
+         POS = 0.0
+         NEG = 0.0
          DO J = 1,3             ! Loop for edges
-            POS = POS + MAX(0.D0, DELTA_O(I,J))
-            NEG = NEG + MAX(0.D0,-DELTA_O(I,J))
+            POS = POS + MAX(0.0, DELTA_O(I,J))
+            NEG = NEG + MAX(0.0,-DELTA_O(I,J))
          ENDDO
          IF((POS < ZERO).OR.(NEG < ZERO)) THEN 
-            DELTA_HAT(I,1) = 0.D0
-            DELTA_HAT(I,2) = 0.D0
-            DELTA_HAT(I,3) = 0.D0
+            DELTA_HAT(I,1) = 0.0
+            DELTA_HAT(I,2) = 0.0
+            DELTA_HAT(I,3) = 0.0
          ELSE
-            THETA_P = MIN(1.D0,NEG/POS)
-            THETA_N = MIN(1.D0,POS/NEG)
+            THETA_P = MIN(1.0,NEG/POS)
+            THETA_N = MIN(1.0,POS/NEG)
             
             DELTA_HAT(I,1)
-     &           = THETA_P*MAX(0.D0, DELTA_O(I,1))
-     &           - THETA_N*MAX(0.D0,-DELTA_O(I,1))
+     &           = THETA_P*MAX(0.0, DELTA_O(I,1))
+     &           - THETA_N*MAX(0.0,-DELTA_O(I,1))
             DELTA_HAT(I,2)
-     &           = THETA_P*MAX(0.D0, DELTA_O(I,2))
-     &           - THETA_N*MAX(0.D0,-DELTA_O(I,2))
+     &           = THETA_P*MAX(0.0, DELTA_O(I,2))
+     &           - THETA_N*MAX(0.0,-DELTA_O(I,2))
             DELTA_HAT(I,3)
-     &           = THETA_P*MAX(0.D0, DELTA_O(I,3))
-     &           - THETA_N*MAX(0.D0,-DELTA_O(I,3))
+     &           = THETA_P*MAX(0.0, DELTA_O(I,3))
+     &           - THETA_N*MAX(0.0,-DELTA_O(I,3))
          ENDIF
 
 C     Compute the possibly limited variable vectors at the corner nodes
@@ -1788,25 +1788,25 @@ C     Computing limited variables at the corner nodes
       ENDDO
 
 C     If the limited water depth is less 0, don't apply this slope limiting.
-      IF((WC_O(1,1)+DC(1)).LE.0.D0.OR.
-     &     (WC_O(1,2)+DC(2)).LE.0.D0.OR.
-     &     (WC_O(1,2)+DC(2)).LE.0.D0) THEN
+      IF((WC_O(1,1)+DC(1)).LE.0.0.OR.
+     &     (WC_O(1,2)+DC(2)).LE.0.0.OR.
+     &     (WC_O(1,2)+DC(2)).LE.0.0) THEN
          GOTO 10000
       ENDIF
 
       IF(LIMITIT(1)) THEN
-         ZE(2,L,IRK+1) = -1.D0/6.D0*(WC_O(1,1) + WC_O(1,2))
-     &        + 1.D0/3.D0*WC_O(1,3)
+         ZE(2,L,IRK+1) = -1.0/6.0*(WC_O(1,1) + WC_O(1,2))
+     &        + 1.0/3.0*WC_O(1,3)
          ZE(3,L,IRK+1) = -0.5D0*WC_O(1,1) + 0.5D0*WC_O(1,2)
       ENDIF
       IF(LIMITIT(2)) THEN
-         QX(2,L,IRK+1) = -1.D0/6.D0*(WC_O(2,1) + WC_O(2,2))
-     &        + 1.D0/3.D0*WC_O(2,3)
+         QX(2,L,IRK+1) = -1.0/6.0*(WC_O(2,1) + WC_O(2,2))
+     &        + 1.0/3.0*WC_O(2,3)
          QX(3,L,IRK+1) = -0.5D0*WC_O(2,1) + 0.5D0*WC_O(2,2)
       ENDIF
       IF(LIMITIT(3)) THEN
-         QY(2,L,IRK+1) = -1.D0/6.D0*(WC_O(3,1) + WC_O(3,2))
-     &        + 1.D0/3.D0*WC_O(3,3)
+         QY(2,L,IRK+1) = -1.0/6.0*(WC_O(3,1) + WC_O(3,2))
+     &        + 1.0/3.0*WC_O(3,3)
          QY(3,L,IRK+1) = -0.5D0*WC_O(3,1) + 0.5D0*WC_O(3,2)
       ENDIF
 
@@ -1923,11 +1923,11 @@ c$$$               QYC(K) = QYC(K) + PHI_CORNER(KK,K,pa)*QY(KK,L,IRK+1)
 c$$$            ENDDO
 c$$$         ENDDO
 c$$$
-c$$$         HMIN = MAX(0.D0,MIN(ZC(1)+DC(1),ZC(2)+DC(2),ZC(3)+DC(3)))
+c$$$         HMIN = MAX(0.0,MIN(ZC(1)+DC(1),ZC(2)+DC(2),ZC(3)+DC(3)))
 c$$$         HMAX = MAX(ZC(1)+DC(1),ZC(2)+DC(2),ZC(3)+DC(3))
 c$$$         HAVG = ZE(1,L,IRK+1) + HB(1,L,1)
-c$$$         HLIMIT = MIN(1.D0,(HMIN*HMIN)/(SL3_MD*SL3_MD))
-c$$$         HLIMIT = 1.D0
+c$$$         HLIMIT = MIN(1.0,(HMIN*HMIN)/(SL3_MD*SL3_MD))
+c$$$         HLIMIT = 1.0
 c$$$         IF(HMIN.LE.H0) RETURN
 c$$$
 c$$$C.....Retrieve info at barycenters and edge midpoints
@@ -1951,12 +1951,12 @@ c$$$C.......Barycenters
 c$$$            IF(EL_N == 0) THEN
 c$$$C     If there is no neighboring element on this side (e.g. domain boundary),
 c$$$C     locate a barycenter at the mirroring point and use extrapolated values.
-c$$$               XB(I) = 2.D0*XM(I) - XB(0)
-c$$$               YB(I) = 2.D0*YM(I) - YB(0)
-c$$$               ZB(I) = 2.D0*ZM(I) - ZB(0)
-c$$$               DB(I) = 2.D0*DM(I) - DB(0)
-c$$$               QXB(I) = 2.D0*QXM(I) - QXB(0)
-c$$$               QYB(I) = 2.D0*QYM(I) - QYB(0)
+c$$$               XB(I) = 2.0*XM(I) - XB(0)
+c$$$               YB(I) = 2.0*YM(I) - YB(0)
+c$$$               ZB(I) = 2.0*ZM(I) - ZB(0)
+c$$$               DB(I) = 2.0*DM(I) - DB(0)
+c$$$               QXB(I) = 2.0*QXM(I) - QXB(0)
+c$$$               QYB(I) = 2.0*QYM(I) - QYB(0)
 c$$$            ELSE
 c$$$               XB(I) = XBC(EL_N)
 c$$$               YB(I) = YBC(EL_N)
@@ -2054,13 +2054,13 @@ c$$$            DO K = 1,3          ! Loop for components of variable vectors
 c$$$               IF(ABS(W_TILDA(K)) < SL2_M*HLIMIT*R_SQ) THEN
 c$$$                  DELTA_C(K,I) = W_TILDA(K)
 c$$$               ELSE
-c$$$                  IF((W_TILDA(K)*DELTA_W(K) >= 0.D0)
+c$$$                  IF((W_TILDA(K)*DELTA_W(K) >= 0.0)
 c$$$     &                 .AND.(ABS(W_TILDA(K)) > ZERO)) THEN
 c$$$                     S = W_TILDA(K)/ABS(W_TILDA(K))
 c$$$                     DELTA_C(K,I) = S*MIN(
 c$$$     &                    ABS(W_TILDA(K)),ABS(SL2_NYU*DELTA_W(K)))
 c$$$                  ELSE
-c$$$                     DELTA_C(K,I) = 0.D0
+c$$$                     DELTA_C(K,I) = 0.0
 c$$$                  ENDIF
 c$$$               ENDIF
 c$$$            ENDDO
@@ -2091,29 +2091,29 @@ c$$$
 c$$$C     Find the possibly limited DELTA and variable vectors at the corner nodes
 c$$$         DO I = 1,3             ! Loop for variable components
 c$$$C     Find the possibly limited DELTA
-c$$$            POS = 0.D0
-c$$$            NEG = 0.D0
+c$$$            POS = 0.0
+c$$$            NEG = 0.0
 c$$$            DO J = 1,3          ! Loop for edges
-c$$$               POS = POS + MAX(0.D0, DELTA_O(I,J))
-c$$$               NEG = NEG + MAX(0.D0,-DELTA_O(I,J))
+c$$$               POS = POS + MAX(0.0, DELTA_O(I,J))
+c$$$               NEG = NEG + MAX(0.0,-DELTA_O(I,J))
 c$$$            ENDDO
 c$$$            IF((POS < ZERO).OR.(NEG < ZERO)) THEN 
-c$$$               DELTA_HAT(I,1) = 0.D0
-c$$$               DELTA_HAT(I,2) = 0.D0
-c$$$               DELTA_HAT(I,3) = 0.D0
+c$$$               DELTA_HAT(I,1) = 0.0
+c$$$               DELTA_HAT(I,2) = 0.0
+c$$$               DELTA_HAT(I,3) = 0.0
 c$$$            ELSE
-c$$$               THETA_P = MIN(1.D0,NEG/POS)
-c$$$               THETA_N = MIN(1.D0,POS/NEG)
+c$$$               THETA_P = MIN(1.0,NEG/POS)
+c$$$               THETA_N = MIN(1.0,POS/NEG)
 c$$$               
 c$$$               DELTA_HAT(I,1)
-c$$$     &              = THETA_P*MAX(0.D0, DELTA_O(I,1))
-c$$$     &              - THETA_N*MAX(0.D0,-DELTA_O(I,1))
+c$$$     &              = THETA_P*MAX(0.0, DELTA_O(I,1))
+c$$$     &              - THETA_N*MAX(0.0,-DELTA_O(I,1))
 c$$$               DELTA_HAT(I,2)
-c$$$     &              = THETA_P*MAX(0.D0, DELTA_O(I,2))
-c$$$     &              - THETA_N*MAX(0.D0,-DELTA_O(I,2))
+c$$$     &              = THETA_P*MAX(0.0, DELTA_O(I,2))
+c$$$     &              - THETA_N*MAX(0.0,-DELTA_O(I,2))
 c$$$               DELTA_HAT(I,3)
-c$$$     &              = THETA_P*MAX(0.D0, DELTA_O(I,3))
-c$$$     &              - THETA_N*MAX(0.D0,-DELTA_O(I,3))
+c$$$     &              = THETA_P*MAX(0.0, DELTA_O(I,3))
+c$$$     &              - THETA_N*MAX(0.0,-DELTA_O(I,3))
 c$$$            ENDIF
 c$$$
 c$$$C     Compute the possibly limited variable vectors at the corner nodes
@@ -2144,18 +2144,18 @@ c$$$            ENDIF
 c$$$         ENDDO
 c$$$
 c$$$         IF(LIMITIT(1)) THEN
-c$$$            ZE(2,L,IRK+1) = -1.D0/6.D0*(WC_O(1,1) + WC_O(1,2))
-c$$$     &           + 1.D0/3.D0*WC_O(1,3)
+c$$$            ZE(2,L,IRK+1) = -1.0/6.0*(WC_O(1,1) + WC_O(1,2))
+c$$$     &           + 1.0/3.0*WC_O(1,3)
 c$$$            ZE(3,L,IRK+1) = -0.5D0*WC_O(1,1) + 0.5D0*WC_O(1,2)
 c$$$         ENDIF
 c$$$         IF(LIMITIT(2)) THEN
-c$$$            QX(2,L,IRK+1) = -1.D0/6.D0*(WC_O(2,1) + WC_O(2,2))
-c$$$     &           + 1.D0/3.D0*WC_O(2,3)
+c$$$            QX(2,L,IRK+1) = -1.0/6.0*(WC_O(2,1) + WC_O(2,2))
+c$$$     &           + 1.0/3.0*WC_O(2,3)
 c$$$            QX(3,L,IRK+1) = -0.5D0*WC_O(2,1) + 0.5D0*WC_O(2,2)
 c$$$         ENDIF
 c$$$         IF(LIMITIT(3)) THEN
-c$$$            QY(2,L,IRK+1) = -1.D0/6.D0*(WC_O(3,1) + WC_O(3,2))
-c$$$     &           + 1.D0/3.D0*WC_O(3,3)
+c$$$            QY(2,L,IRK+1) = -1.0/6.0*(WC_O(3,1) + WC_O(3,2))
+c$$$     &           + 1.0/3.0*WC_O(3,3)
 c$$$            QY(3,L,IRK+1) = -0.5D0*WC_O(3,1) + 0.5D0*WC_O(3,2)
 c$$$         ENDIF
 c$$$
@@ -2195,22 +2195,22 @@ C.....Evaluate the eigenvalues at the Roe averaged variables
       
 C.....Evaluate right eigenvectors at Roe averaged variables
 
-      RI(1,1) = 1.D0
+      RI(1,1) = 1.0
       RI(2,1) = U*IFNLCT + (IFNLCT*C + (1-IFNLCT)*G/C)*NX
       RI(3,1) = V*IFNLCT + (IFNLCT*C + (1-IFNLCT)*G/C)*NY
 
-      RI(1,2) = 0.D0
+      RI(1,2) = 0.0
       RI(2,2) = -NY
       RI(3,2) =  NX
 
-      RI(1,3) = 1.D0
+      RI(1,3) = 1.0
       RI(2,3) = U*IFNLCT - (IFNLCT*C + (1-IFNLCT)*G/C)*NX
       RI(3,3) = V*IFNLCT - (IFNLCT*C + (1-IFNLCT)*G/C)*NY
 
 C.....Evaluate left eigenvectors at Roe averaged variables
 
 C.....Determinant
-      DTM = 1.0d0/(RI(2,2)*RI(3,3)-RI(2,3)*RI(3,2)+RI(2,1)*RI(3,2)
+      DTM = 1.0/(RI(2,2)*RI(3,3)-RI(2,3)*RI(3,2)+RI(2,1)*RI(3,2)
      &     -RI(3,1)*RI(2,2))
 
       LE(1,1) =  DTM*( RI(2,2)*RI(3,3)-RI(2,3)*RI(3,2) )
@@ -2244,7 +2244,7 @@ c$$$  &     a(1,1)*(a(2,2)*a(3,3)-a(2,3)*a(3,2)) +
 c$$$  &     a(1,2)*(a(2,3)*a(3,1)-a(2,1)*a(3,3)) +
 c$$$  &     a(1,3)*(a(2,1)*a(3,2)-a(2,2)*a(3,1))
 c$$$  
-c$$$  if(det.eq.0.D0) then
+c$$$  if(det.eq.0.0) then
 c$$$  succeed = .false.
 c$$$  return
 c$$$  endif
@@ -2399,22 +2399,22 @@ C.....Set initial values
 
       ENDDO   
 
-      marea = 2.D0              !master elements area
+      marea = 2.0              !master elements area
 
 C.....Convert initial values to the Taylor basis (multiply by Nmatrix) on base element
 
 
-      ZEtaylor = 0.D0 
-      QXtaylor = 0.D0
-      QYtaylor = 0.D0
+      ZEtaylor = 0.0 
+      QXtaylor = 0.0
+      QYtaylor = 0.0
 
 #ifdef TRACE
-      iotataylor = 0.D0
+      iotataylor = 0.0
 #endif
 
 #ifdef CHEM
-      iotataylor = 0.D0
-      iota2taylor = 0.D0
+      iotataylor = 0.0
+      iota2taylor = 0.0
 #endif
 
       do k=1,mne
@@ -2459,23 +2459,23 @@ C.....Convert initial values to the Taylor basis (multiply by Nmatrix) on base e
 C.....Find values at vertices of base elements and neighbors
 
 
-      ZEmax = -100.D0
-      QXmax = -100.D0
-      QYmax = -100.D0
-      ZEmin = 100.D0
-      QXmin = 100.D0
-      QYmin = 100.D0
+      ZEmax = -100.0
+      QXmax = -100.0
+      QYmax = -100.0
+      ZEmin = 100.0
+      QXmin = 100.0
+      QYmin = 100.0
 
 #ifdef TRACE
-      iotamax = -100.D0
-      iotamin = 100.D0
+      iotamax = -100.0
+      iotamin = 100.0
 #endif
 
 #ifdef CHEM
-      iotamax = -100.D0
-      iota2max = -100.D0
-      iotamin = 100.D0
-      iota2min = 100.D0
+      iotamax = -100.0
+      iota2max = -100.0
+      iotamin = 100.0
+      iota2min = 100.0
 #endif
 
 
@@ -2581,17 +2581,17 @@ C.....Find max and min values over polynomial coefficients
 
 C.....Must generate linear recostructions at vertices
 
-      ZEtaylorvert = 0.D0
-      QXtaylorvert = 0.D0
-      Qytaylorvert = 0.D0
+      ZEtaylorvert = 0.0
+      QXtaylorvert = 0.0
+      Qytaylorvert = 0.0
 
 #ifdef TRACE
-      iotataylorvert = 0.D0
+      iotataylorvert = 0.0
 #endif
 
 #ifdef CHEM
-      iotataylorvert = 0.D0
-      iota2taylorvert = 0.D0
+      iotataylorvert = 0.0
+      iota2taylorvert = 0.0
 #endif
 
       do k=1,mne
@@ -2672,17 +2672,17 @@ C.....Must generate linear recostructions at vertices
 C.....Compute alphas for each variable in each order derivitive
 
 
-      alphaZE0 = 0.D0
-      alphaQX0 = 0.D0
-      alphaQY0 = 0.D0
+      alphaZE0 = 0.0
+      alphaQX0 = 0.0
+      alphaQY0 = 0.0
 
 #ifdef TRACE
-      alphaiota0 = 0.D0
+      alphaiota0 = 0.0
 #endif
 
 #ifdef CHEM
-      alphaiota0 = 0.D0
-      alphaiota20 = 0.D0
+      alphaiota0 = 0.0
+      alphaiota20 = 0.0
 #endif
 
       do k=1,mne
@@ -2699,26 +2699,26 @@ C.....Compute alphas for each variable in each order derivitive
      &                    ( abs(ZEtaylorvert(k,ll,lll)-ZEtaylor(k,ll,1)).gt.1.0E-15 ).and.
      &                    ( ZEmax(nm(k,lll),ll).ne.ZEtaylor(k,ll,1) ) ) then  
 
-                        alphaZE0(k,ll,lll) = min(1.D0,  ( ZEmax(nm(k,lll),ll)
+                        alphaZE0(k,ll,lll) = min(1.0,  ( ZEmax(nm(k,lll),ll)
      &                       - ZEtaylor(k,ll,1) )/ (ZEtaylorvert(k,ll,lll) - ZEtaylor(k,ll,1)))
 
                      elseif ( (ZEtaylorvert(k,ll,lll).lt.ZEtaylor(k,ll,1) )
      &                       .and.( abs(ZEtaylorvert(k,ll,lll)-ZEtaylor(k,ll,1)).gt.1.0E-15 ).and.
      &                       ( ZEmin(nm(k,lll),ll).ne.ZEtaylor(k,ll,1) ) ) then 
 
-                        alphaZE0(k,ll,lll) = min( 1.D0,( ZEmin(nm(k,lll),ll)
+                        alphaZE0(k,ll,lll) = min( 1.0,( ZEmin(nm(k,lll),ll)
      &                       - ZEtaylor(k,ll,1) )/( ZEtaylorvert(k,ll,lll)-ZEtaylor(k,ll,1)))
                         
                      elseif ( ( ZEtaylorvert(k,ll,lll).eq.ZEtaylor(k,ll,1) ).or.
      &                       ( abs(ZEtaylorvert(k,ll,lll)-ZEtaylor(k,ll,1)).le.1.0E-15 ) ) then
 
-                        alphaZE0(k,ll,lll) = 1.D0
+                        alphaZE0(k,ll,lll) = 1.0
 
                      endif
 
                   else
 
-                     alphaZE0(k,ll,lll) = 1.D0
+                     alphaZE0(k,ll,lll) = 1.0
 
                   endif
 
@@ -2729,26 +2729,26 @@ C.....Compute alphas for each variable in each order derivitive
      &                    ( abs(iotataylorvert(k,ll,lll)-iotataylor(k,ll,1)).gt.1.0E-15 ).and.
      &                    ( iotamax(nm(k,lll),ll).ne.iotataylor(k,ll,1) ) ) then  
 
-                        alphaiota0(k,ll,lll) = min(1.D0,  ( iotamax(nm(k,lll),ll)
+                        alphaiota0(k,ll,lll) = min(1.0,  ( iotamax(nm(k,lll),ll)
      &                       - iotataylor(k,ll,1) )/ (iotataylorvert(k,ll,lll) - iotataylor(k,ll,1))) 
                         
                      elseif ( (iotataylorvert(k,ll,lll).lt.iotataylor(k,ll,1) )
      &                       .and.( abs(iotataylorvert(k,ll,lll)-iotataylor(k,ll,1)).gt.1.0E-15 ).and.
      &                       ( iotamin(nm(k,lll),ll).ne.iotataylor(k,ll,1) ) ) then 
 
-                        alphaiota0(k,ll,lll) = min( 1.D0,( iotamin(nm(k,lll),ll)
+                        alphaiota0(k,ll,lll) = min( 1.0,( iotamin(nm(k,lll),ll)
      &                       - iotataylor(k,ll,1) )/( iotataylorvert(k,ll,lll)-iotataylor(k,ll,1)))
 
                      elseif ( ( iotataylorvert(k,ll,lll).eq.iotataylor(k,ll,1) ).or.
      &                       ( abs(iotataylorvert(k,ll,lll)-iotataylor(k,ll,1)).le.1.0E-15 ) ) then
 
-                        alphaiota0(k,ll,lll) = 1.D0
+                        alphaiota0(k,ll,lll) = 1.0
 
                      endif
 
                   else
 
-                     alphaiota0(k,ll,lll) = 1.D0
+                     alphaiota0(k,ll,lll) = 1.0
 
                   endif
 #endif
@@ -2760,26 +2760,26 @@ C.....Compute alphas for each variable in each order derivitive
      &                    ( abs(iotataylorvert(k,ll,lll)-iotataylor(k,ll,1)).gt.1.0E-15 ).and.
      &                    ( iotamax(nm(k,lll),ll).ne.iotataylor(k,ll,1) ) ) then  
 
-                        alphaiota0(k,ll,lll) = min(1.D0,  ( iotamax(nm(k,lll),ll)
+                        alphaiota0(k,ll,lll) = min(1.0,  ( iotamax(nm(k,lll),ll)
      &                       - iotataylor(k,ll,1) )/ (iotataylorvert(k,ll,lll) - iotataylor(k,ll,1)))
 
                      elseif ( (iotataylorvert(k,ll,lll).lt.iotataylor(k,ll,1) )
      &                       .and.( abs(iotataylorvert(k,ll,lll)-iotataylor(k,ll,1)).gt.1.0E-15 ).and.
      &                       ( iotamin(nm(k,lll),ll).ne.iotataylor(k,ll,1) ) ) then 
 
-                        alphaiota0(k,ll,lll) = min( 1.D0,( iotamin(nm(k,lll),ll)
+                        alphaiota0(k,ll,lll) = min( 1.0,( iotamin(nm(k,lll),ll)
      &                       - iotataylor(k,ll,1) )/( iotataylorvert(k,ll,lll)-iotataylor(k,ll,1)))
                         
                      elseif ( ( iotataylorvert(k,ll,lll).eq.iotataylor(k,ll,1) ).or.
      &                       ( abs(iotataylorvert(k,ll,lll)-iotataylor(k,ll,1)).le.1.0E-15 ) ) then
 
-                        alphaiota0(k,ll,lll) = 1.D0
+                        alphaiota0(k,ll,lll) = 1.0
 
                      endif
 
                   else
 
-                     alphaiota0(k,ll,lll) = 1.D0
+                     alphaiota0(k,ll,lll) = 1.0
 
                   endif
 
@@ -2789,26 +2789,26 @@ C.....Compute alphas for each variable in each order derivitive
      &                    ( abs(iota2taylorvert(k,ll,lll)-iota2taylor(k,ll,1)).gt.1.0E-15 ).and.
      &                    ( iota2max(nm(k,lll),ll).ne.iota2taylor(k,ll,1) ) ) then  
 
-                        alphaiota20(k,ll,lll) = min(1.D0,  ( iota2max(nm(k,lll),ll)
+                        alphaiota20(k,ll,lll) = min(1.0,  ( iota2max(nm(k,lll),ll)
      &                       - iota2taylor(k,ll,1) )/ (iota2taylorvert(k,ll,lll) - iota2taylor(k,ll,1)))
 
                      elseif ( (iota2taylorvert(k,ll,lll).lt.iota2taylor(k,ll,1) )
      &                       .and.( abs(iota2taylorvert(k,ll,lll)-iota2taylor(k,ll,1)).gt.1.0E-15 ).and.
      &                       ( iota2min(nm(k,lll),ll).ne.iota2taylor(k,ll,1) ) ) then 
 
-                        alphaiota20(k,ll,lll) = min( 1.D0,( iota2min(nm(k,lll),ll)
+                        alphaiota20(k,ll,lll) = min( 1.0,( iota2min(nm(k,lll),ll)
      &                       - iota2taylor(k,ll,1) )/( iota2taylorvert(k,ll,lll)-iota2taylor(k,ll,1)))
                         
                      elseif ( ( iota2taylorvert(k,ll,lll).eq.iota2taylor(k,ll,1) ).or.
      &                       ( abs(iota2taylorvert(k,ll,lll)-iota2taylor(k,ll,1)).le.1.0E-15 ) ) then
 
-                        alphaiota20(k,ll,lll) = 1.D0
+                        alphaiota20(k,ll,lll) = 1.0
 
                      endif
 
                   else
 
-                     alphaiota20(k,ll,lll) = 1.D0
+                     alphaiota20(k,ll,lll) = 1.0
 
                   endif
 #endif                 
@@ -2819,26 +2819,26 @@ C.....Compute alphas for each variable in each order derivitive
      &                    ( abs(QXtaylorvert(k,ll,lll)-QXtaylor(k,ll,1)).gt.1.0E-15 ).and.
      &                    ( QXmax(nm(k,lll),ll).ne.QXtaylor(k,ll,1) ) ) then  
 
-                        alphaQX0(k,ll,lll) = min(1.D0,  ( QXmax(nm(k,lll),ll)
+                        alphaQX0(k,ll,lll) = min(1.0,  ( QXmax(nm(k,lll),ll)
      &                       - QXtaylor(k,ll,1) )/ (QXtaylorvert(k,ll,lll) - QXtaylor(k,ll,1)))
 
                      elseif ( (QXtaylorvert(k,ll,lll).lt.QXtaylor(k,ll,1) )
      &                       .and.( abs(QXtaylorvert(k,ll,lll)-QXtaylor(k,ll,1)).gt.1.0E-15 ).and.
      &                       ( QXmin(nm(k,lll),ll).ne.QXtaylor(k,ll,1) ) ) then 
 
-                        alphaQX0(k,ll,lll) = min( 1.D0,( QXmin(nm(k,lll),ll)
+                        alphaQX0(k,ll,lll) = min( 1.0,( QXmin(nm(k,lll),ll)
      &                       - QXtaylor(k,ll,1) )/( QXtaylorvert(k,ll,lll)-QXtaylor(k,ll,1)))
                         
                      elseif ( ( QXtaylorvert(k,ll,lll).eq.QXtaylor(k,ll,1) ).or.
      &                       ( abs(QXtaylorvert(k,ll,lll)-QXtaylor(k,ll,1)).le.1.0E-15 ) ) then
 
-                        alphaQX0(k,ll,lll) = 1.D0
+                        alphaQX0(k,ll,lll) = 1.0
 
                      endif
 
                   else
 
-                     alphaQX0(k,ll,lll) = 1.D0
+                     alphaQX0(k,ll,lll) = 1.0
 
                   endif
 
@@ -2849,26 +2849,26 @@ C.....Compute alphas for each variable in each order derivitive
      &                    ( abs(QYtaylorvert(k,ll,lll)-QYtaylor(k,ll,1)).gt.1.0E-15 ).and.
      &                    ( QYmax(nm(k,lll),ll).ne.QYtaylor(k,ll,1) ) ) then  
 
-                        alphaQY0(k,ll,lll) = min(1.D0,  ( QYmax(nm(k,lll),ll)
+                        alphaQY0(k,ll,lll) = min(1.0,  ( QYmax(nm(k,lll),ll)
      &                       - QYtaylor(k,ll,1) )/ (QYtaylorvert(k,ll,lll) - QYtaylor(k,ll,1)))
 
                      elseif ( (QYtaylorvert(k,ll,lll).lt.QYtaylor(k,ll,1) )
      &                       .and.( abs(QYtaylorvert(k,ll,lll)-QYtaylor(k,ll,1)).gt.1.0E-15 ).and.
      &                       ( QYmin(nm(k,lll),ll).ne.QYtaylor(k,ll,1) ) ) then 
 
-                        alphaQY0(k,ll,lll) = min( 1.D0,( QYmin(nm(k,lll),ll)
+                        alphaQY0(k,ll,lll) = min( 1.0,( QYmin(nm(k,lll),ll)
      &                       - QYtaylor(k,ll,1) )/( QYtaylorvert(k,ll,lll)-QYtaylor(k,ll,1)))                        
                         
                      elseif ( ( QYtaylorvert(k,ll,lll).eq.QYtaylor(k,ll,1) ).or.
      &                       ( abs(QYtaylorvert(k,ll,lll)-QYtaylor(k,ll,1)).le.1.0E-15 ) ) then
 
-                        alphaQY0(k,ll,lll) = 1.D0
+                        alphaQY0(k,ll,lll) = 1.0
 
                      endif
 
                   else
 
-                     alphaQY0(k,ll,lll) = 1.D0
+                     alphaQY0(k,ll,lll) = 1.0
 
                   endif
 
@@ -2886,17 +2886,17 @@ C.....Compute alphas for each variable in each order derivitive
 
 C.....Find the prescribed higher limiters by finding smallest local value
 
-      alphaZE = 0.D0
-      alphaQX = 0.D0
-      alphaQY = 0.D0
+      alphaZE = 0.0
+      alphaQX = 0.0
+      alphaQY = 0.0
 
 #ifdef TRACE
-      alphaiota = 0.D0
+      alphaiota = 0.0
 #endif
 
 #ifdef CHEM
-      alphaiota = 0.D0
-      alphaiota2 = 0.D0
+      alphaiota = 0.0
+      alphaiota2 = 0.0
 #endif
 
       do k=1,mne
@@ -2930,17 +2930,17 @@ C.....Find the prescribed higher limiters by finding smallest local value
 
 C.... Choose smallest (minimum) alpha for derivative in x or y
 
-      alphaZEm = 0.D0
-      alphaQXm = 0.D0
-      alphaQYm = 0.D0
+      alphaZEm = 0.0
+      alphaQXm = 0.0
+      alphaQYm = 0.0
 
 #ifdef TRACE
-      alphaiotam = 0.D0
+      alphaiotam = 0.0
 #endif
 
 #ifdef CHEM
-      alphaiotam = 0.D0
-      alphaiota2m = 0.D0
+      alphaiotam = 0.0
+      alphaiota2m = 0.0
 #endif
 
       do k=1,mne
@@ -2984,17 +2984,17 @@ C.... Choose smallest (minimum) alpha for derivative in x or y
 
 C.....Use max higher derivative values for final limiter value
 
-      alphaZE_max = 0.D0
-      alphaQX_max = 0.D0
-      alphaQY_max = 0.D0
+      alphaZE_max = 0.0
+      alphaQX_max = 0.0
+      alphaQY_max = 0.0
 
 #ifdef TRACE
-      alphaiota_max = 0.D0
+      alphaiota_max = 0.0
 #endif
 
 #ifdef CHEM
-      alphaiota_max = 0.D0
-      alphaiota2_max = 0.D0
+      alphaiota_max = 0.0
+      alphaiota2_max = 0.0
 #endif
 
       do k=1,mne
@@ -3040,19 +3040,19 @@ C.....Limit on the Master element in the Taylor basis, via reconstruction
 C.....of unconstrained solutions with alpha constraints
 
 
-      limitZE = 0.D0
-      limitQX = 0.D0
-      limitQY = 0.D0
+      limitZE = 0.0
+      limitQX = 0.0
+      limitQY = 0.0
 
       lim_count_roll = 0
 
 #ifdef TRACE
-      limitiota = 0.D0
+      limitiota = 0.0
 #endif
 
 #ifdef CHEM
-      limitiota = 0.D0
-      limitiota2 = 0.D0
+      limitiota = 0.0
+      limitiota2 = 0.0
 #endif
 
       do k=1,mne
@@ -3082,8 +3082,8 @@ C.....of unconstrained solutions with alpha constraints
                   
                   do bb=1,pdg_el(k)
 
-                     if ( ll.le.( ( (bb+1)*(bb+2)) / 2.D0 ).and.(ll.gt.
-     &                    (bb*(bb+1)/2.D0) ) ) then
+                     if ( ll.le.( ( (bb+1)*(bb+2)) / 2.0 ).and.(ll.gt.
+     &                    (bb*(bb+1)/2.0) ) ) then
 
                         limitZE(k,ll) = alphaZE_max(k,(bb*(bb+1))/2 + 1) 
      &                       * ZEtaylor(k,ll,1)
@@ -3108,26 +3108,26 @@ C.....of unconstrained solutions with alpha constraints
 
 c$$$  ! Make a counter to track limiting
 c$$$  
-c$$$  if ( ( alphaZE_max(k,(bb*(bb+1))/2 + 1).lt.1.D0.or.
-c$$$  &                       alphaQX_max(k,(bb*(bb+1))/2 + 1).lt.1.D0.or.
-c$$$  &                       alphaQY_max(k,(bb*(bb+1))/2 + 1).lt.1.D0 ).and.
+c$$$  if ( ( alphaZE_max(k,(bb*(bb+1))/2 + 1).lt.1.0.or.
+c$$$  &                       alphaQX_max(k,(bb*(bb+1))/2 + 1).lt.1.0.or.
+c$$$  &                       alphaQY_max(k,(bb*(bb+1))/2 + 1).lt.1.0 ).and.
 c$$$  &                       chem_flag.ne.1.and.tracer_flag.ne.1 ) then
 c$$$  
 c$$$  lim_count = 1  
 c$$$  
-c$$$  elseif ( (alphaZE_max(k,(bb*(bb+1))/2 + 1).lt.1.D0.or.
-c$$$  &                          alphaQX_max(k,(bb*(bb+1))/2 + 1).lt.1.D0.or.
-c$$$  &                          alphaQY_max(k,(bb*(bb+1))/2 + 1).lt.1.D0.or.
-c$$$  &                          alphaiota_max(k,(bb*(bb+1))/2 + 1).lt.1.D0 ).and.
+c$$$  elseif ( (alphaZE_max(k,(bb*(bb+1))/2 + 1).lt.1.0.or.
+c$$$  &                          alphaQX_max(k,(bb*(bb+1))/2 + 1).lt.1.0.or.
+c$$$  &                          alphaQY_max(k,(bb*(bb+1))/2 + 1).lt.1.0.or.
+c$$$  &                          alphaiota_max(k,(bb*(bb+1))/2 + 1).lt.1.0 ).and.
 c$$$  &                          chem_flag.ne.1.and.tracer_flag.eq.1 ) then
 c$$$  
 c$$$  lim_count = 1   
 c$$$  
-c$$$  elseif ( (alphaZE_max(k,(bb*(bb+1))/2 + 1).lt.1.D0.or.
-c$$$  &                          alphaQX_max(k,(bb*(bb+1))/2 + 1).lt.1.D0.or.
-c$$$  &                          alphaQY_max(k,(bb*(bb+1))/2 + 1).lt.1.D0.or.
-c$$$  &                          alphaiota_max(k,(bb*(bb+1))/2 + 1).lt.1.D0.or.
-c$$$  &                          alphaiota2_max(k,(bb*(bb+1))/2 + 1).lt.1.D0 ).and.
+c$$$  elseif ( (alphaZE_max(k,(bb*(bb+1))/2 + 1).lt.1.0.or.
+c$$$  &                          alphaQX_max(k,(bb*(bb+1))/2 + 1).lt.1.0.or.
+c$$$  &                          alphaQY_max(k,(bb*(bb+1))/2 + 1).lt.1.0.or.
+c$$$  &                          alphaiota_max(k,(bb*(bb+1))/2 + 1).lt.1.0.or.
+c$$$  &                          alphaiota2_max(k,(bb*(bb+1))/2 + 1).lt.1.0 ).and.
 c$$$  &                          chem_flag.eq.1 ) then
 c$$$  
 c$$$  lim_count = 1 
@@ -3154,17 +3154,17 @@ c$$$  endif
 
 C.....Transform back to the Dubiner basis (multiply by NmatrixInv),
 
-      ZEconst =  0.D0
-      QXconst =  0.D0
-      QYconst =  0.D0
+      ZEconst =  0.0
+      QXconst =  0.0
+      QYconst =  0.0
 
 #ifdef TRACE
-      iotaconst =  0.D0
+      iotaconst =  0.0
 #endif
 
 #ifdef CHEM
-      iotaconst =  0.D0
-      iota2const =  0.D0
+      iotaconst =  0.0
+      iota2const =  0.0
 #endif
 
       do k=1,mne
@@ -3295,7 +3295,7 @@ C.....Declare local variables
 C     FIND THE MAXIMUM AND MINIMUM OF EACH VARIABLE OVER ALL ELEMENTS 
 C     SHARING A NODE
 
-      bound = 0.0D0
+      bound = 0.0
 
       DO I = 1,NP
          ZE_MIN1(I)=99999.
@@ -3575,9 +3575,9 @@ C     COMPUTE THE VERTEX VALUES
 C     RESET THE VERTEX VALUE TO BE LESS THAN OR EQUAL TO THE MAX AND
 C     GREATER THAN OR EQUAL TO THE MIN AT THAT VERTEX
 C     
-            ZEVERTEX(1)=DMAX1(DMIN1(ZEVERTEX(1),ZEMAX1(1)),ZEMIN1(1))
-            ZEVERTEX(2)=DMAX1(DMIN1(ZEVERTEX(2),ZEMAX1(2)),ZEMIN1(2))
-            ZEVERTEX(3)=DMAX1(DMIN1(ZEVERTEX(3),ZEMAX1(3)),ZEMIN1(3))
+            ZEVERTEX(1)=MAX(MIN(ZEVERTEX(1),ZEMAX1(1)),ZEMIN1(1))
+            ZEVERTEX(2)=MAX(MIN(ZEVERTEX(2),ZEMAX1(2)),ZEMIN1(2))
+            ZEVERTEX(3)=MAX(MIN(ZEVERTEX(3),ZEMAX1(3)),ZEMIN1(3))
 
             tmp1 = ZEVERTEX(1)
             tmp2 = ZEVERTEX(2)
@@ -3590,9 +3590,9 @@ C     VERTEX THEN SUBTRACT OFF THE DIFFERENCE AND ADD IT TO THE OTHER
 C     VERTICES
 C     
             DO LL=1,3
-               SUMLOC=(ZEVERTEX(1)+ZEVERTEX(2)+ZEVERTEX(3))/3.0D0
-               SUMDIF=(SUMLOC-ZEC(1))*3.0D0
-               SIGNDIF=DSIGN(1.D0,SUMDIF)
+               SUMLOC=(ZEVERTEX(1)+ZEVERTEX(2)+ZEVERTEX(3))/3.0
+               SUMDIF=(SUMLOC-ZEC(1))*3.0
+               SIGNDIF=SIGN(1.0,SUMDIF)
                DIF(1)=(ZEVERTEX(1)-ZEC(1))*SIGNDIF
                DIF(2)=(ZEVERTEX(2)-ZEC(1))*SIGNDIF
                DIF(3)=(ZEVERTEX(3)-ZEC(1))*SIGNDIF
@@ -3605,7 +3605,7 @@ C
                KDP=INC1+INC2+INC3
 C     
                DO K=1,3
-                  DIV=DMAX1(1.D0,DFLOAT(KDP))
+                  DIV=MAX(1.0,DFLOAT(KDP))
                   IF (DIF(K).GT.0) THEN
                      REDFAC=SUMDIF*SIGNDIF/DIV
                      KDP=KDP-1
@@ -3617,7 +3617,7 @@ C
                   ELSE
                      REDMAX=ZEMAX1(K)-ZEVERTEX(K)
                   ENDIF
-                  REDFAC=DMIN1(REDFAC,REDMAX)
+                  REDFAC=MIN(REDFAC,REDMAX)
                   SUMDIF=SUMDIF-REDFAC*SIGNDIF
                   ZEVERTEX(K)=ZEVERTEX(K)-REDFAC*SIGNDIF
                ENDDO
@@ -3629,7 +3629,7 @@ c$$$     &              (abs(tmp2-ZEVERTEX(2)).ge.bound).or.
 c$$$     &              (abs(tmp3-ZEVERTEX(3)).ge.bound).and.
 c$$$     &              (slopeflag.eq.5) ) then
 c$$$
-c$$$                  ZE(4:dofs(i),i,irk+1)=0.D0
+c$$$                  ZE(4:dofs(i),i,irk+1)=0.0
 c$$$
 c$$$                  if (padapt.eq.1) then
 c$$$                     pdg_el(i) = 1
@@ -3637,8 +3637,8 @@ c$$$                  endif
 c$$$
 c$$$               endif
 
-               ZE(2,I,IRK+1)=-1.d0/6.d0*(ZEVERTEX(1)+ZEVERTEX(2))
-     $              +1.d0/3.d0*ZEVERTEX(3)
+               ZE(2,I,IRK+1)=-1.0/6.0*(ZEVERTEX(1)+ZEVERTEX(2))
+     $              +1.0/3.0*ZEVERTEX(3)
                ZE(3,I,IRK+1)=-.5d0*ZEVERTEX(1)+.5d0*ZEVERTEX(2)
             ENDIF
             IF (IVAR.EQ.2) THEN
@@ -3649,7 +3649,7 @@ c$$$     &              (abs(tmp3-ZEVERTEX(3)).ge.bound).and.
 c$$$     &              (slopeflag.eq.5) ) then
 c$$$
 c$$$
-c$$$                  QX(4:dofs(i),i,irk+1)=0.D0
+c$$$                  QX(4:dofs(i),i,irk+1)=0.0
 c$$$
 c$$$                  if (padapt.eq.1) then
 c$$$                     pdg_el(i) = 1
@@ -3657,8 +3657,8 @@ c$$$                  endif
 c$$$
 c$$$               endif
 
-               QX(2,I,IRK+1)=-1.d0/6.d0*(ZEVERTEX(1)+ZEVERTEX(2))
-     $              +1.d0/3.d0*ZEVERTEX(3)
+               QX(2,I,IRK+1)=-1.0/6.0*(ZEVERTEX(1)+ZEVERTEX(2))
+     $              +1.0/3.0*ZEVERTEX(3)
                QX(3,I,IRK+1)=-.5d0*ZEVERTEX(1)+.5d0*ZEVERTEX(2)
             ENDIF
             IF (IVAR.EQ.3) THEN
@@ -3668,7 +3668,7 @@ c$$$     &              (abs(tmp2-ZEVERTEX(2)).ge.bound).or.
 c$$$     &              (abs(tmp3-ZEVERTEX(3)).ge.bound).and.
 c$$$     &              (slopeflag.eq.5) ) then
 c$$$
-c$$$                  QY(4:dofs(i),i,irk+1)=0.D0
+c$$$                  QY(4:dofs(i),i,irk+1)=0.0
 c$$$
 c$$$                  if (padapt.eq.1) then
 c$$$                     pdg_el(i) = 1
@@ -3676,8 +3676,8 @@ c$$$                  endif
 c$$$
 c$$$               endif
 
-               QY(2,I,IRK+1)=-1.d0/6.d0*(ZEVERTEX(1)+ZEVERTEX(2))
-     $              +1.d0/3.d0*ZEVERTEX(3)
+               QY(2,I,IRK+1)=-1.0/6.0*(ZEVERTEX(1)+ZEVERTEX(2))
+     $              +1.0/3.0*ZEVERTEX(3)
                QY(3,I,IRK+1)=-.5d0*ZEVERTEX(1)+.5d0*ZEVERTEX(2)
             ENDIF
 
@@ -3690,7 +3690,7 @@ c$$$     &              (abs(tmp3-ZEVERTEX(3)).ge.bound).and.
 c$$$     &              (slopeflag.eq.5) ) then
 c$$$
 c$$$
-c$$$                  iota(4:dofs(i),i,irk+1)=0.D0
+c$$$                  iota(4:dofs(i),i,irk+1)=0.0
 c$$$
 c$$$                  if (padapt.eq.1) then
 c$$$                     pdg_el(i) = 1
@@ -3698,8 +3698,8 @@ c$$$                  endif
 c$$$
 c$$$               endif
                
-               iota(2,I,IRK+1)=-1.d0/6.d0*(ZEVERTEX(1)+ZEVERTEX(2))
-     $              +1.d0/3.d0*ZEVERTEX(3)
+               iota(2,I,IRK+1)=-1.0/6.0*(ZEVERTEX(1)+ZEVERTEX(2))
+     $              +1.0/3.0*ZEVERTEX(3)
                iota(3,I,IRK+1)=-.5d0*ZEVERTEX(1)+.5d0*ZEVERTEX(2)
 
             ENDIF
@@ -3714,7 +3714,7 @@ c$$$     &              (abs(tmp3-ZEVERTEX(3)).ge.bound).and.
 c$$$     &              (slopeflag.eq.5) ) then
 c$$$
 c$$$
-c$$$                  iota(4:dofs(i),i,irk+1)=0.D0
+c$$$                  iota(4:dofs(i),i,irk+1)=0.0
 c$$$
 c$$$                  if (padapt.eq.1) then
 c$$$                     pdg_el(i) = 1
@@ -3722,8 +3722,8 @@ c$$$                  endif
 c$$$
 c$$$               endif
                
-               iota(2,I,IRK+1)=-1.d0/6.d0*(ZEVERTEX(1)+ZEVERTEX(2))
-     $              +1.d0/3.d0*ZEVERTEX(3)
+               iota(2,I,IRK+1)=-1.0/6.0*(ZEVERTEX(1)+ZEVERTEX(2))
+     $              +1.0/3.0*ZEVERTEX(3)
                iota(3,I,IRK+1)=-.5d0*ZEVERTEX(1)+.5d0*ZEVERTEX(2)
 
             ENDIF
@@ -3735,7 +3735,7 @@ c$$$     &              (abs(tmp3-ZEVERTEX(3)).ge.bound).and.
 c$$$     &              (slopeflag.eq.5) ) then
 c$$$
 c$$$
-c$$$                  iota2(4:dofs(i),i,irk+1)=0.D0
+c$$$                  iota2(4:dofs(i),i,irk+1)=0.0
 c$$$
 c$$$                  if (padapt.eq.1) then
 c$$$                     pdg_el(i) = 1
@@ -3743,8 +3743,8 @@ c$$$                  endif
 c$$$
 c$$$               endif
 
-               iota2(2,I,IRK+1)=-1.d0/6.d0*(ZEVERTEX(1)+ZEVERTEX(2))
-     $              +1.d0/3.d0*ZEVERTEX(3)
+               iota2(2,I,IRK+1)=-1.0/6.0*(ZEVERTEX(1)+ZEVERTEX(2))
+     $              +1.0/3.0*ZEVERTEX(3)
                iota2(3,I,IRK+1)=-.5d0*ZEVERTEX(1)+.5d0*ZEVERTEX(2)
             ENDIF
 #endif
@@ -3761,7 +3761,7 @@ c$$$     &              (abs(tmp3-ZEVERTEX(3)).ge.bound).and.
 c$$$     &              (slopeflag.eq.5) ) then
 c$$$
 c$$$
-c$$$                  bed(4:dofs(i),i,irk+1,l)=0.D0
+c$$$                  bed(4:dofs(i),i,irk+1,l)=0.0
 c$$$
 c$$$                  if (padapt.eq.1) then
 c$$$                     pdg_el(i) = 1
@@ -3769,8 +3769,8 @@ c$$$                  endif
 c$$$
 c$$$               endif
                
-               bed(2,I,IRK+1,l)=-1.d0/6.d0*(ZEVERTEX(1)+ZEVERTEX(2))
-     $              +1.d0/3.d0*ZEVERTEX(3)
+               bed(2,I,IRK+1,l)=-1.0/6.0*(ZEVERTEX(1)+ZEVERTEX(2))
+     $              +1.0/3.0*ZEVERTEX(3)
                bed(3,I,IRK+1,l)=-.5d0*ZEVERTEX(1)+.5d0*ZEVERTEX(2)
             
             
@@ -3838,7 +3838,7 @@ C.....Declare local variables
 C     FIND THE MAXIMUM AND MINIMUM OF EACH VARIABLE OVER ALL ELEMENTS 
 C     SHARING A NODE
 
-      bound = 0.0D0
+      bound = 0.0
 
       DO I = 1,NP
          ZE_MIN1(I)=99999.
@@ -4118,9 +4118,9 @@ C     COMPUTE THE VERTEX VALUES
 C     RESET THE VERTEX VALUE TO BE LESS THAN OR EQUAL TO THE MAX AND
 C     GREATER THAN OR EQUAL TO THE MIN AT THAT VERTEX
 C     
-            ZEVERTEX(1)=DMAX1(DMIN1(ZEVERTEX(1),ZEMAX1(1)),ZEMIN1(1))
-            ZEVERTEX(2)=DMAX1(DMIN1(ZEVERTEX(2),ZEMAX1(2)),ZEMIN1(2))
-            ZEVERTEX(3)=DMAX1(DMIN1(ZEVERTEX(3),ZEMAX1(3)),ZEMIN1(3))
+            ZEVERTEX(1)=MAX(MIN(ZEVERTEX(1),ZEMAX1(1)),ZEMIN1(1))
+            ZEVERTEX(2)=MAX(MIN(ZEVERTEX(2),ZEMAX1(2)),ZEMIN1(2))
+            ZEVERTEX(3)=MAX(MIN(ZEVERTEX(3),ZEMAX1(3)),ZEMIN1(3))
 
             tmp1 = ZEVERTEX(1)
             tmp2 = ZEVERTEX(2)
@@ -4133,9 +4133,9 @@ C     VERTEX THEN SUBTRACT OFF THE DIFFERENCE AND ADD IT TO THE OTHER
 C     VERTICES
 C     
             DO LL=1,3
-               SUMLOC=(ZEVERTEX(1)+ZEVERTEX(2)+ZEVERTEX(3))/3.0D0
-               SUMDIF=(SUMLOC-ZEC(1))*3.0D0
-               SIGNDIF=DSIGN(1.D0,SUMDIF)
+               SUMLOC=(ZEVERTEX(1)+ZEVERTEX(2)+ZEVERTEX(3))/3.0
+               SUMDIF=(SUMLOC-ZEC(1))*3.0
+               SIGNDIF=SIGN(1.0,SUMDIF)
                DIF(1)=(ZEVERTEX(1)-ZEC(1))*SIGNDIF
                DIF(2)=(ZEVERTEX(2)-ZEC(1))*SIGNDIF
                DIF(3)=(ZEVERTEX(3)-ZEC(1))*SIGNDIF
@@ -4148,7 +4148,7 @@ C
                KDP=INC1+INC2+INC3
 C     
                DO K=1,3
-                  DIV=DMAX1(1.D0,DFLOAT(KDP))
+                  DIV=MAX(1.0,DFLOAT(KDP))
                   IF (DIF(K).GT.0) THEN
                      REDFAC=SUMDIF*SIGNDIF/DIV
                      KDP=KDP-1
@@ -4160,7 +4160,7 @@ C
                   ELSE
                      REDMAX=ZEMAX1(K)-ZEVERTEX(K)
                   ENDIF
-                  REDFAC=DMIN1(REDFAC,REDMAX)
+                  REDFAC=MIN(REDFAC,REDMAX)
                   SUMDIF=SUMDIF-REDFAC*SIGNDIF
                   ZEVERTEX(K)=ZEVERTEX(K)-REDFAC*SIGNDIF
                ENDDO
@@ -4172,7 +4172,7 @@ c$$$     &              (abs(tmp2-ZEVERTEX(2)).ge.bound).or.
 c$$$     &              (abs(tmp3-ZEVERTEX(3)).ge.bound).and.
 c$$$     &              (slopeflag.eq.5) ) then
 c$$$
-c$$$                  ZE(4:dofs(i),i,irk+1)=0.D0
+c$$$                  ZE(4:dofs(i),i,irk+1)=0.0
 c$$$
 c$$$                  if (padapt.eq.1) then
 c$$$                     pdg_el(i) = 1
@@ -4180,8 +4180,8 @@ c$$$                  endif
 c$$$
 c$$$               endif
 
-               ZE(2,I,IRK+1)=-1.d0/6.d0*(ZEVERTEX(1)+ZEVERTEX(2))
-     $              +1.d0/3.d0*ZEVERTEX(3)
+               ZE(2,I,IRK+1)=-1.0/6.0*(ZEVERTEX(1)+ZEVERTEX(2))
+     $              +1.0/3.0*ZEVERTEX(3)
                ZE(3,I,IRK+1)=-.5d0*ZEVERTEX(1)+.5d0*ZEVERTEX(2)
             ENDIF
             IF (IVAR.EQ.2) THEN
@@ -4192,7 +4192,7 @@ c$$$     &              (abs(tmp3-ZEVERTEX(3)).ge.bound).and.
 c$$$     &              (slopeflag.eq.5) ) then
 c$$$
 c$$$
-c$$$                  QX(4:dofs(i),i,irk+1)=0.D0
+c$$$                  QX(4:dofs(i),i,irk+1)=0.0
 c$$$
 c$$$                  if (padapt.eq.1) then
 c$$$                     pdg_el(i) = 1
@@ -4200,8 +4200,8 @@ c$$$                  endif
 c$$$
 c$$$               endif
 
-               QX(2,I,IRK+1)=-1.d0/6.d0*(ZEVERTEX(1)+ZEVERTEX(2))
-     $              +1.d0/3.d0*ZEVERTEX(3)
+               QX(2,I,IRK+1)=-1.0/6.0*(ZEVERTEX(1)+ZEVERTEX(2))
+     $              +1.0/3.0*ZEVERTEX(3)
                QX(3,I,IRK+1)=-.5d0*ZEVERTEX(1)+.5d0*ZEVERTEX(2)
             ENDIF
             IF (IVAR.EQ.3) THEN
@@ -4211,7 +4211,7 @@ c$$$     &              (abs(tmp2-ZEVERTEX(2)).ge.bound).or.
 c$$$     &              (abs(tmp3-ZEVERTEX(3)).ge.bound).and.
 c$$$     &              (slopeflag.eq.5) ) then
 c$$$
-c$$$                  QY(4:dofs(i),i,irk+1)=0.D0
+c$$$                  QY(4:dofs(i),i,irk+1)=0.0
 c$$$
 c$$$                  if (padapt.eq.1) then
 c$$$                     pdg_el(i) = 1
@@ -4219,8 +4219,8 @@ c$$$                  endif
 c$$$
 c$$$               endif
 
-               QY(2,I,IRK+1)=-1.d0/6.d0*(ZEVERTEX(1)+ZEVERTEX(2))
-     $              +1.d0/3.d0*ZEVERTEX(3)
+               QY(2,I,IRK+1)=-1.0/6.0*(ZEVERTEX(1)+ZEVERTEX(2))
+     $              +1.0/3.0*ZEVERTEX(3)
                QY(3,I,IRK+1)=-.5d0*ZEVERTEX(1)+.5d0*ZEVERTEX(2)
             ENDIF
 
@@ -4233,7 +4233,7 @@ c$$$     &              (abs(tmp3-ZEVERTEX(3)).ge.bound).and.
 c$$$     &              (slopeflag.eq.5) ) then
 c$$$
 c$$$
-c$$$                  iota(4:dofs(i),i,irk+1)=0.D0
+c$$$                  iota(4:dofs(i),i,irk+1)=0.0
 c$$$
 c$$$                  if (padapt.eq.1) then
 c$$$                     pdg_el(i) = 1
@@ -4241,8 +4241,8 @@ c$$$                  endif
 c$$$
 c$$$               endif
                
-               iota(2,I,IRK+1)=-1.d0/6.d0*(ZEVERTEX(1)+ZEVERTEX(2))
-     $              +1.d0/3.d0*ZEVERTEX(3)
+               iota(2,I,IRK+1)=-1.0/6.0*(ZEVERTEX(1)+ZEVERTEX(2))
+     $              +1.0/3.0*ZEVERTEX(3)
                iota(3,I,IRK+1)=-.5d0*ZEVERTEX(1)+.5d0*ZEVERTEX(2)
 
             ENDIF
@@ -4257,7 +4257,7 @@ c$$$     &              (abs(tmp3-ZEVERTEX(3)).ge.bound).and.
 c$$$     &              (slopeflag.eq.5) ) then
 c$$$
 c$$$
-c$$$                  iota(4:dofs(i),i,irk+1)=0.D0
+c$$$                  iota(4:dofs(i),i,irk+1)=0.0
 c$$$
 c$$$                  if (padapt.eq.1) then
 c$$$                     pdg_el(i) = 1
@@ -4265,8 +4265,8 @@ c$$$                  endif
 c$$$
 c$$$               endif
                
-               iota(2,I,IRK+1)=-1.d0/6.d0*(ZEVERTEX(1)+ZEVERTEX(2))
-     $              +1.d0/3.d0*ZEVERTEX(3)
+               iota(2,I,IRK+1)=-1.0/6.0*(ZEVERTEX(1)+ZEVERTEX(2))
+     $              +1.0/3.0*ZEVERTEX(3)
                iota(3,I,IRK+1)=-.5d0*ZEVERTEX(1)+.5d0*ZEVERTEX(2)
 
             ENDIF
@@ -4278,7 +4278,7 @@ c$$$     &              (abs(tmp3-ZEVERTEX(3)).ge.bound).and.
 c$$$     &              (slopeflag.eq.5) ) then
 c$$$
 c$$$
-c$$$                  iota2(4:dofs(i),i,irk+1)=0.D0
+c$$$                  iota2(4:dofs(i),i,irk+1)=0.0
 c$$$
 c$$$                  if (padapt.eq.1) then
 c$$$                     pdg_el(i) = 1
@@ -4286,8 +4286,8 @@ c$$$                  endif
 c$$$
 c$$$               endif
 
-               iota2(2,I,IRK+1)=-1.d0/6.d0*(ZEVERTEX(1)+ZEVERTEX(2))
-     $              +1.d0/3.d0*ZEVERTEX(3)
+               iota2(2,I,IRK+1)=-1.0/6.0*(ZEVERTEX(1)+ZEVERTEX(2))
+     $              +1.0/3.0*ZEVERTEX(3)
                iota2(3,I,IRK+1)=-.5d0*ZEVERTEX(1)+.5d0*ZEVERTEX(2)
             ENDIF
 #endif
@@ -4304,7 +4304,7 @@ c$$$     &              (abs(tmp3-ZEVERTEX(3)).ge.bound).and.
 c$$$     &              (slopeflag.eq.5) ) then
 c$$$
 c$$$
-c$$$                  bed(4:dofs(i),i,irk+1,l)=0.D0
+c$$$                  bed(4:dofs(i),i,irk+1,l)=0.0
 c$$$
 c$$$                  if (padapt.eq.1) then
 c$$$                     pdg_el(i) = 1
@@ -4312,8 +4312,8 @@ c$$$                  endif
 c$$$
 c$$$               endif
                
-               bed(2,I,IRK+1,l)=-1.d0/6.d0*(ZEVERTEX(1)+ZEVERTEX(2))
-     $              +1.d0/3.d0*ZEVERTEX(3)
+               bed(2,I,IRK+1,l)=-1.0/6.0*(ZEVERTEX(1)+ZEVERTEX(2))
+     $              +1.0/3.0*ZEVERTEX(3)
                bed(3,I,IRK+1,l)=-.5d0*ZEVERTEX(1)+.5d0*ZEVERTEX(2)
             
             
@@ -4665,9 +4665,9 @@ C     COMPUTE THE VERTEX VALUES
 C     RESET THE VERTEX VALUE TO BE LESS THAN OR EQUAL TO THE MAX AND
 C     GREATER THAN OR EQUAL TO THE MIN AT THAT VERTEX
 C     
-            ZEVERTEX(1)=DMAX1(DMIN1(ZEVERTEX(1),ZEMAX1(1)),ZEMIN1(1))
-            ZEVERTEX(2)=DMAX1(DMIN1(ZEVERTEX(2),ZEMAX1(2)),ZEMIN1(2))
-            ZEVERTEX(3)=DMAX1(DMIN1(ZEVERTEX(3),ZEMAX1(3)),ZEMIN1(3))
+            ZEVERTEX(1)=MAX(MIN(ZEVERTEX(1),ZEMAX1(1)),ZEMIN1(1))
+            ZEVERTEX(2)=MAX(MIN(ZEVERTEX(2),ZEMAX1(2)),ZEMIN1(2))
+            ZEVERTEX(3)=MAX(MIN(ZEVERTEX(3),ZEMAX1(3)),ZEMIN1(3))
 
             tmp1 = ZEVERTEX(1)
             tmp2 = ZEVERTEX(2)
@@ -4680,9 +4680,9 @@ C     VERTEX THEN SUBTRACT OFF THE DIFFERENCE AND ADD IT TO THE OTHER
 C     VERTICES
 C     
             DO LL=1,3
-               SUMLOC=(ZEVERTEX(1)+ZEVERTEX(2)+ZEVERTEX(3))/3.0D0
-               SUMDIF=(SUMLOC-ZEC(1))*3.0D0
-               SIGNDIF=DSIGN(1.D0,SUMDIF)
+               SUMLOC=(ZEVERTEX(1)+ZEVERTEX(2)+ZEVERTEX(3))/3.0
+               SUMDIF=(SUMLOC-ZEC(1))*3.0
+               SIGNDIF=SIGN(1.0,SUMDIF)
                DIF(1)=(ZEVERTEX(1)-ZEC(1))*SIGNDIF
                DIF(2)=(ZEVERTEX(2)-ZEC(1))*SIGNDIF
                DIF(3)=(ZEVERTEX(3)-ZEC(1))*SIGNDIF
@@ -4695,7 +4695,7 @@ C
                KDP=INC1+INC2+INC3
 C     
                DO K=1,3
-                  DIV=DMAX1(1.D0,DFLOAT(KDP))
+                  DIV=MAX(1.0,DFLOAT(KDP))
                   IF (DIF(K).GT.0) THEN
                      REDFAC=SUMDIF*SIGNDIF/DIV
                      KDP=KDP-1
@@ -4707,7 +4707,7 @@ C
                   ELSE
                      REDMAX=ZEMAX1(K)-ZEVERTEX(K)
                   ENDIF
-                  REDFAC=DMIN1(REDFAC,REDMAX)
+                  REDFAC=MIN(REDFAC,REDMAX)
                   SUMDIF=SUMDIF-REDFAC*SIGNDIF
                   ZEVERTEX(K)=ZEVERTEX(K)-REDFAC*SIGNDIF
                ENDDO
@@ -4719,7 +4719,7 @@ c$$$     &              (abs(tmp2-ZEVERTEX(2)).gt.bound).or.
 c$$$     &              (abs(tmp3-ZEVERTEX(3)).gt.bound).and.
 c$$$     &              (slopeflag.eq.5) ) then
 c$$$
-c$$$                  ZE(4:dofs(i),i,irk+1)=0.D0
+c$$$                  ZE(4:dofs(i),i,irk+1)=0.0
 c$$$
 c$$$                  if (padapt.eq.1) then
 c$$$                     pdg_el(i) = 1
@@ -4727,8 +4727,8 @@ c$$$                  endif
 c$$$
 c$$$               endif
 
-               ZE(2,I,IRK+1)=-1.d0/6.d0*(ZEVERTEX(1)+ZEVERTEX(2))
-     $              +1.d0/3.d0*ZEVERTEX(3)
+               ZE(2,I,IRK+1)=-1.0/6.0*(ZEVERTEX(1)+ZEVERTEX(2))
+     $              +1.0/3.0*ZEVERTEX(3)
                ZE(3,I,IRK+1)=-.5d0*ZEVERTEX(1)+.5d0*ZEVERTEX(2)
             ENDIF
             IF (IVAR.EQ.2) THEN
@@ -4739,7 +4739,7 @@ c$$$     &              (abs(tmp3-ZEVERTEX(3)).gt.bound).and.
 c$$$     &              (slopeflag.eq.5) ) then
 c$$$
 c$$$
-c$$$                  QX(4:dofs(i),i,irk+1)=0.D0
+c$$$                  QX(4:dofs(i),i,irk+1)=0.0
 c$$$
 c$$$                  if (padapt.eq.1) then
 c$$$                     pdg_el(i) = 1
@@ -4747,8 +4747,8 @@ c$$$                  endif
 c$$$
 c$$$               endif
 
-               QX(2,I,IRK+1)=-1.d0/6.d0*(ZEVERTEX(1)+ZEVERTEX(2))
-     $              +1.d0/3.d0*ZEVERTEX(3)
+               QX(2,I,IRK+1)=-1.0/6.0*(ZEVERTEX(1)+ZEVERTEX(2))
+     $              +1.0/3.0*ZEVERTEX(3)
                QX(3,I,IRK+1)=-.5d0*ZEVERTEX(1)+.5d0*ZEVERTEX(2)
             ENDIF
             IF (IVAR.EQ.3) THEN
@@ -4758,7 +4758,7 @@ c$$$     &              (abs(tmp2-ZEVERTEX(2)).gt.bound).or.
 c$$$     &              (abs(tmp3-ZEVERTEX(3)).gt.bound).and.
 c$$$     &              (slopeflag.eq.5) ) then
 c$$$
-c$$$                  QY(4:dofs(i),i,irk+1)=0.D0
+c$$$                  QY(4:dofs(i),i,irk+1)=0.0
 c$$$
 c$$$                  if (padapt.eq.1) then
 c$$$                     pdg_el(i) = 1
@@ -4766,8 +4766,8 @@ c$$$                  endif
 c$$$
 c$$$               endif
 
-               QY(2,I,IRK+1)=-1.d0/6.d0*(ZEVERTEX(1)+ZEVERTEX(2))
-     $              +1.d0/3.d0*ZEVERTEX(3)
+               QY(2,I,IRK+1)=-1.0/6.0*(ZEVERTEX(1)+ZEVERTEX(2))
+     $              +1.0/3.0*ZEVERTEX(3)
                QY(3,I,IRK+1)=-.5d0*ZEVERTEX(1)+.5d0*ZEVERTEX(2)
             ENDIF
 
@@ -4780,7 +4780,7 @@ c$$$     &              (abs(tmp3-ZEVERTEX(3)).gt.bound).and.
 c$$$     &              (slopeflag.eq.5) ) then
 c$$$
 c$$$
-c$$$                  iota(4:dofs(i),i,irk+1)=0.D0
+c$$$                  iota(4:dofs(i),i,irk+1)=0.0
 c$$$
 c$$$                  if (padapt.eq.1) then
 c$$$                     pdg_el(i) = 1
@@ -4788,8 +4788,8 @@ c$$$                  endif
 c$$$
 c$$$               endif
                
-               iota(2,I,IRK+1)=-1.d0/6.d0*(ZEVERTEX(1)+ZEVERTEX(2))
-     $              +1.d0/3.d0*ZEVERTEX(3)
+               iota(2,I,IRK+1)=-1.0/6.0*(ZEVERTEX(1)+ZEVERTEX(2))
+     $              +1.0/3.0*ZEVERTEX(3)
                iota(3,I,IRK+1)=-.5d0*ZEVERTEX(1)+.5d0*ZEVERTEX(2)
 
             ENDIF
@@ -4804,7 +4804,7 @@ c$$$     &              (abs(tmp3-ZEVERTEX(3)).gt.bound).and.
 c$$$     &              (slopeflag.eq.5) ) then
 c$$$
 c$$$
-c$$$                  iota(4:dofs(i),i,irk+1)=0.D0
+c$$$                  iota(4:dofs(i),i,irk+1)=0.0
 c$$$
 c$$$                  if (padapt.eq.1) then
 c$$$                     pdg_el(i) = 1
@@ -4812,8 +4812,8 @@ c$$$                  endif
 c$$$
 c$$$               endif
                
-               iota(2,I,IRK+1)=-1.d0/6.d0*(ZEVERTEX(1)+ZEVERTEX(2))
-     $              +1.d0/3.d0*ZEVERTEX(3)
+               iota(2,I,IRK+1)=-1.0/6.0*(ZEVERTEX(1)+ZEVERTEX(2))
+     $              +1.0/3.0*ZEVERTEX(3)
                iota(3,I,IRK+1)=-.5d0*ZEVERTEX(1)+.5d0*ZEVERTEX(2)
 
             ENDIF
@@ -4825,7 +4825,7 @@ c$$$     &              (abs(tmp3-ZEVERTEX(3)).gt.bound).and.
 c$$$     &              (slopeflag.eq.5) ) then
 c$$$
 c$$$
-c$$$                  iota2(4:dofs(i),i,irk+1)=0.D0
+c$$$                  iota2(4:dofs(i),i,irk+1)=0.0
 c$$$
 c$$$                  if (padapt.eq.1) then
 c$$$                     pdg_el(i) = 1
@@ -4833,8 +4833,8 @@ c$$$                  endif
 c$$$
 c$$$               endif
 
-               iota2(2,I,IRK+1)=-1.d0/6.d0*(ZEVERTEX(1)+ZEVERTEX(2))
-     $              +1.d0/3.d0*ZEVERTEX(3)
+               iota2(2,I,IRK+1)=-1.0/6.0*(ZEVERTEX(1)+ZEVERTEX(2))
+     $              +1.0/3.0*ZEVERTEX(3)
                iota2(3,I,IRK+1)=-.5d0*ZEVERTEX(1)+.5d0*ZEVERTEX(2)
             ENDIF
 #endif
@@ -4851,7 +4851,7 @@ c$$$     &              (abs(tmp3-ZEVERTEX(3)).gt.bound).and.
 c$$$     &              (slopeflag.eq.5) ) then
 c$$$
 c$$$
-c$$$                  bed(4:dofs(i),i,irk+1,l)=0.D0
+c$$$                  bed(4:dofs(i),i,irk+1,l)=0.0
 c$$$
 c$$$                  if (padapt.eq.1) then
 c$$$                     pdg_el(i) = 1
@@ -4859,8 +4859,8 @@ c$$$                  endif
 c$$$
 c$$$               endif
                
-               bed(2,I,IRK+1,l)=-1.d0/6.d0*(ZEVERTEX(1)+ZEVERTEX(2))
-     $              +1.d0/3.d0*ZEVERTEX(3)
+               bed(2,I,IRK+1,l)=-1.0/6.0*(ZEVERTEX(1)+ZEVERTEX(2))
+     $              +1.0/3.0*ZEVERTEX(3)
                bed(3,I,IRK+1,l)=-.5d0*ZEVERTEX(1)+.5d0*ZEVERTEX(2)
             
             
@@ -4952,22 +4952,22 @@ C.....Set initial values
 
       ENDDO   
 
-      marea = 2.D0              !master elements area
+      marea = 2.0              !master elements area
 
 C.....Convert initial values to the Taylor basis (multiply by Nmatrix) on base element
 
 
-      ZEtaylor = 0.D0 
-      QXtaylor = 0.D0
-      QYtaylor = 0.D0
+      ZEtaylor = 0.0 
+      QXtaylor = 0.0
+      QYtaylor = 0.0
 
 #ifdef TRACE
-      iotataylor = 0.D0
+      iotataylor = 0.0
 #endif
 
 #ifdef CHEM
-      iotataylor = 0.D0
-      iota2taylor = 0.D0
+      iotataylor = 0.0
+      iota2taylor = 0.0
 #endif
 
       do k=1,ne
@@ -5006,23 +5006,23 @@ C.....Convert initial values to the Taylor basis (multiply by Nmatrix) on base e
 C.....Find values at vertices of base elements and neighbors
 
 
-      ZEmaxel = -100.D0
-      QXmaxel = -100.D0
-      QYmaxel = -100.D0
-      ZEminel = 100.D0
-      QXminel = 100.D0
-      QYminel = 100.D0
+      ZEmaxel = -100.0
+      QXmaxel = -100.0
+      QYmaxel = -100.0
+      ZEminel = 100.0
+      QXminel = 100.0
+      QYminel = 100.0
 
 #ifdef TRACE
-      iotamaxel = -100.D0
-      iotaminel = 100.D0
+      iotamaxel = -100.0
+      iotaminel = 100.0
 #endif
 
 #ifdef CHEM
-      iotamaxel = -100.D0
-      iota2maxel = -100.D0
-      iotaminel = 100.D0
-      iota2minel = 100.D0
+      iotamaxel = -100.0
+      iota2maxel = -100.0
+      iotaminel = 100.0
+      iota2minel = 100.0
 #endif
 
 #ifdef CMPI
@@ -5083,17 +5083,17 @@ C.....Find max and min values over polynomial coefficients
 
 C.....Must generate linear recostructions at vertices
 
-      ZEtaylorvert = 0.D0
-      QXtaylorvert = 0.D0
-      Qytaylorvert = 0.D0
+      ZEtaylorvert = 0.0
+      QXtaylorvert = 0.0
+      Qytaylorvert = 0.0
 
 #ifdef TRACE
-      iotataylorvert = 0.D0
+      iotataylorvert = 0.0
 #endif
 
 #ifdef CHEM
-      iotataylorvert = 0.D0
-      iota2taylorvert = 0.D0
+      iotataylorvert = 0.0
+      iota2taylorvert = 0.0
 #endif
 
       do k=1,ne
@@ -5173,17 +5173,17 @@ C.....Must generate linear recostructions at vertices
 
 C.....Compute alphas for each variable in each order derivitive
 
-      alphaZE0 = 0.D0
-      alphaQX0 = 0.D0
-      alphaQY0 = 0.D0
+      alphaZE0 = 0.0
+      alphaQX0 = 0.0
+      alphaQY0 = 0.0
 
 #ifdef TRACE
-      alphaiota0 = 0.D0
+      alphaiota0 = 0.0
 #endif
 
 #ifdef CHEM
-      alphaiota0 = 0.D0
-      alphaiota20 = 0.D0
+      alphaiota0 = 0.0
+      alphaiota20 = 0.0
 #endif
 
       do k = 1,ne
@@ -5197,18 +5197,18 @@ C.....Compute alphas for each variable in each order derivitive
                   if ( ZEtaylorvert(k,ll,lll).gt.ZEtaylor(k,ll,1).and.
      &                 abs((ZEtaylorvert(k,ll,lll)-ZEtaylor(k,ll,1))).gt.1.0E-15 ) then 
 
-                     alphaZE0(k,ll,lll) = min( 1.D0, ( ZEmaxel(k,ll) - 
+                     alphaZE0(k,ll,lll) = min( 1.0, ( ZEmaxel(k,ll) - 
      &                    ZEtaylor(k,ll,1) ) / (  ZEtaylorvert(k,ll,lll) - ZEtaylor(k,ll,1) ) )
                      
                   elseif ( ZEtaylorvert(k,ll,lll).eq.ZEtaylor(k,ll,1).or.
      &                    abs((ZEtaylorvert(k,ll,lll)-ZEtaylor(k,ll,1))).le.1.0E-15 ) then
 
-                     alphaZE0(k,ll,lll) = 1.D0
+                     alphaZE0(k,ll,lll) = 1.0
 
                   elseif (  ZEtaylorvert(k,ll,lll).lt.ZEtaylor(k,ll,1).and.
      &                    abs((ZEtaylorvert(k,ll,lll)-ZEtaylor(k,ll,1))).gt.1.0E-15 ) then
 
-                     alphaZE0(k,ll,lll) = min( 1.D0, ( ZEminel(k,ll)
+                     alphaZE0(k,ll,lll) = min( 1.0, ( ZEminel(k,ll)
      &                    - ZEtaylor(k,ll,1) ) / ( ZEtaylorvert(k,ll,lll) - ZEtaylor(k,ll,1) ) )
                      
                   endif
@@ -5217,18 +5217,18 @@ C.....Compute alphas for each variable in each order derivitive
                   if ( iotataylorvert(k,ll,lll).gt.iotataylor(k,ll,1).and.
      &                 abs((iotataylorvert(k,ll,lll)-iotataylor(k,ll,1))).gt.1.0E-15 ) then 
 
-                     alphaiota0(k,ll,lll) = min(1.D0,( iotamaxel(k,ll)
+                     alphaiota0(k,ll,lll) = min(1.0,( iotamaxel(k,ll)
      &                    -iotataylor(k,ll,1) )/ (iotataylorvert(k,ll,lll) - iotataylor(k,ll,1)))
                      
                   elseif (iotataylorvert(k,ll,lll).eq.iotataylor(k,ll,1).or.
      &                    abs((iotataylorvert(k,ll,lll)-iotataylor(k,ll,1))).le.1.0E-15 ) then
 
-                     alphaiota0(k,ll,lll) = 1.D0
+                     alphaiota0(k,ll,lll) = 1.0
 
                   elseif (iotataylorvert(k,ll,lll).lt.iotataylor(k,ll,1).
      &                    and.abs((iotataylorvert(k,ll,lll)-iotataylor(k,ll,1))).gt.1.0E-15) then
 
-                     alphaiota0(k,ll,lll) = min( 1.D0,( iotaminel(k,ll)
+                     alphaiota0(k,ll,lll) = min( 1.0,( iotaminel(k,ll)
      &                    -iotataylor(k,ll,1) )/( iotataylorvert(k,ll,lll)-iotataylor(k,ll,1)))
                      
                   endif
@@ -5238,18 +5238,18 @@ C.....Compute alphas for each variable in each order derivitive
                   if ( iotataylorvert(k,ll,lll).gt.iotataylor(k,ll,1).and.
      &                 abs((iotataylorvert(k,ll,lll)-iotataylor(k,ll,1))).gt.1.0E-15 ) then 
 
-                     alphaiota0(k,ll,lll) = min(1.D0,( iotamaxel(k,ll)-
+                     alphaiota0(k,ll,lll) = min(1.0,( iotamaxel(k,ll)-
      &                    iotataylor(k,ll,1) )/ (iotataylorvert(k,ll,lll) - iotataylor(k,ll,1)))
                      
                   elseif (iotataylorvert(k,ll,lll).eq.iotataylor(k,ll,1).or.
      &                    abs((iotataylorvert(k,ll,lll)-iotataylor(k,ll,1))).le.1.0E-15 ) then
 
-                     alphaiota0(k,ll,lll) = 1.D0
+                     alphaiota0(k,ll,lll) = 1.0
 
                   elseif (iotataylorvert(k,ll,lll).lt.iotataylor(k,ll,1).and.
      &                    abs((iotataylorvert(k,ll,lll)-iotataylor(k,ll,1))).gt.1.0E-15) then
 
-                     alphaiota0(k,ll,lll) = min( 1.D0,( iotaminel(k,ll)
+                     alphaiota0(k,ll,lll) = min( 1.0,( iotaminel(k,ll)
      &                    -iotataylor(k,ll,1) )/( iotataylorvert(k,ll,lll)-iotataylor(k,ll,1)))
                      
                   endif
@@ -5257,18 +5257,18 @@ C.....Compute alphas for each variable in each order derivitive
                   if ( iota2taylorvert(k,ll,lll).gt.iota2taylor(k,ll,1).and.
      &                 abs((iota2taylorvert(k,ll,lll)-iota2taylor(k,ll,1))).gt.1.0E-15 ) then 
 
-                     alphaiota20(k,ll,lll) = min(1.D0,( iota2maxel(k,ll)
+                     alphaiota20(k,ll,lll) = min(1.0,( iota2maxel(k,ll)
      &                    -iota2taylor(k,ll,1) )/ (iota2taylorvert(k,ll,lll) - iota2taylor(k,ll,1)))
                      
                   elseif (iota2taylorvert(k,ll,lll).eq.iota2taylor(k,ll,1).or.
      &                    abs((iota2taylorvert(k,ll,lll)-iota2taylor(k,ll,1))).le.1.0E-15 ) then
 
-                     alphaiota20(k,ll,lll) = 1.D0
+                     alphaiota20(k,ll,lll) = 1.0
 
                   elseif (iota2taylorvert(k,ll,lll).lt.iota2taylor(k,ll,1).and.
      &                    abs((iota2taylorvert(k,ll,lll)-iota2taylor(k,ll,1))).gt.1.0E-15) then
 
-                     alphaiota20(k,ll,lll) = min( 1.D0,( iota2minel(k,ll)
+                     alphaiota20(k,ll,lll) = min( 1.0,( iota2minel(k,ll)
      &                    -iota2taylor(k,ll,1) )/( iota2taylorvert(k,ll,lll)-iota2taylor(k,ll,1)))
                      
                   endif
@@ -5277,18 +5277,18 @@ C.....Compute alphas for each variable in each order derivitive
                   if ( QXtaylorvert(k,ll,lll).gt.QXtaylor(k,ll,1).and.
      &                 (QXtaylorvert(k,ll,lll)-QXtaylor(k,ll,1)).gt.1.0E-15 ) then !in xi1
 
-                     alphaQX0(k,ll,lll) = min( 1.D0, ( QXmaxel(k,ll) 
+                     alphaQX0(k,ll,lll) = min( 1.0, ( QXmaxel(k,ll) 
      &                    - QXtaylor(k,ll,1) ) / ( QXtaylorvert(k,ll,lll) - QXtaylor(k,ll,1) ) )
                      
                   elseif ( QXtaylorvert(k,ll,lll).eq.QXtaylor(k,ll,1).or.
      &                    (QXtaylorvert(k,ll,lll)-QXtaylor(k,ll,1)).le.1.0E-15  ) then
 
-                     alphaQX0(k,ll,lll) = 1.D0
+                     alphaQX0(k,ll,lll) = 1.0
 
                   elseif ( QXtaylorvert(k,ll,lll).lt.QXtaylor(k,ll,1).and.
      &                    (QXtaylorvert(k,ll,lll)-QXtaylor(k,ll,1)).gt.1.0E-15 ) then
 
-                     alphaQX0(k,ll,lll) = min( 1.D0, ( QXminel(k,ll)
+                     alphaQX0(k,ll,lll) = min( 1.0, ( QXminel(k,ll)
      &                    - QXtaylor(k,ll,1) ) / ( QXtaylorvert(k,ll,lll) - QXtaylor(k,ll,1) ) )
 
                   endif
@@ -5296,18 +5296,18 @@ C.....Compute alphas for each variable in each order derivitive
                   if ( QYtaylorvert(k,ll,lll).gt.QYtaylor(k,ll,1).and.
      &                 (QYtaylorvert(k,ll,lll)-QYtaylor(k,ll,1)).gt.1.0E-15 ) then !in xi1
 
-                     alphaQY0(k,ll,lll) = min( 1.D0, ( QYmaxel(k,ll) 
+                     alphaQY0(k,ll,lll) = min( 1.0, ( QYmaxel(k,ll) 
      &                    - QYtaylor(k,ll,1) ) / ( QYtaylorvert(k,ll,lll) - QYtaylor(k,ll,1) ) )
                      
                   elseif ( QYtaylorvert(k,ll,lll).eq.QYtaylor(k,ll,1).or.
      &                    (QYtaylorvert(k,ll,lll)-QYtaylor(k,ll,1)).le.1.0E-15  ) then
 
-                     alphaQY0(k,ll,lll) = 1.D0
+                     alphaQY0(k,ll,lll) = 1.0
 
                   elseif ( QYtaylorvert(k,ll,lll).lt.QYtaylor(k,ll,1).and.
      &                    (QYtaylorvert(k,ll,lll)-QYtaylor(k,ll,1)).gt.1.0E-15 ) then
 
-                     alphaQY0(k,ll,lll) = min( 1.D0, ( QYminel(k,ll) 
+                     alphaQY0(k,ll,lll) = min( 1.0, ( QYminel(k,ll) 
      &                    - QYtaylor(k,ll,1) ) / ( QYtaylorvert(k,ll,lll)  - QYtaylor(k,ll,1) ) )
 
                   endif
@@ -5326,17 +5326,17 @@ C.....Compute alphas for each variable in each order derivitive
 
 C.....Find the prescribed higher limiters by finding smallest local value
 
-      alphaZE = 0.D0
-      alphaQX = 0.D0
-      alphaQY = 0.D0
+      alphaZE = 0.0
+      alphaQX = 0.0
+      alphaQY = 0.0
 
 #ifdef TRACE
-      alphaiota = 0.D0
+      alphaiota = 0.0
 #endif
 
 #ifdef CHEM
-      alphaiota = 0.D0
-      alphaiota2 = 0.D0
+      alphaiota = 0.0
+      alphaiota2 = 0.0
 #endif
 
       do k=1,ne
@@ -5370,17 +5370,17 @@ C.....Find the prescribed higher limiters by finding smallest local value
 
 C.... Choose smallest (minimum) alpha for derivative in x or y
 
-      alphaZEm = 0.D0
-      alphaQXm = 0.D0
-      alphaQYm = 0.D0
+      alphaZEm = 0.0
+      alphaQXm = 0.0
+      alphaQYm = 0.0
 
 #ifdef TRACE
-      alphaiotam = 0.D0
+      alphaiotam = 0.0
 #endif
 
 #ifdef CHEM
-      alphaiotam = 0.D0
-      alphaiota2m = 0.D0
+      alphaiotam = 0.0
+      alphaiota2m = 0.0
 #endif
 
       do k=1,ne
@@ -5424,17 +5424,17 @@ C.... Choose smallest (minimum) alpha for derivative in x or y
 
 C.....Use max higher derivative values for final limiter value
 
-      alphaZE_max = 0.D0
-      alphaQX_max = 0.D0
-      alphaQY_max = 0.D0
+      alphaZE_max = 0.0
+      alphaQX_max = 0.0
+      alphaQY_max = 0.0
 
 #ifdef TRACE
-      alphaiota_max = 0.D0
+      alphaiota_max = 0.0
 #endif
 
 #ifdef CHEM
-      alphaiota_max = 0.D0
-      alphaiota2_max = 0.D0
+      alphaiota_max = 0.0
+      alphaiota2_max = 0.0
 #endif
 
       do k=1,ne
@@ -5479,19 +5479,19 @@ C.....Use max higher derivative values for final limiter value
 C.....Limit on the Master element in the Taylor basis, via reconstruction 
 C.....of unconstrained solutions with alpha constraints
 
-      limitZE = 0.D0
-      limitQX = 0.D0
-      limitQY = 0.D0
+      limitZE = 0.0
+      limitQX = 0.0
+      limitQY = 0.0
 
       lim_count_roll = 0
 
 #ifdef TRACE
-      limitiota = 0.D0
+      limitiota = 0.0
 #endif
 
 #ifdef CHEM
-      limitiota = 0.D0
-      limitiota2 = 0.D0
+      limitiota = 0.0
+      limitiota2 = 0.0
 #endif
 
       do k=1,ne
@@ -5521,8 +5521,8 @@ C.....of unconstrained solutions with alpha constraints
                   
                   do bb=1,pdg_el(k)
 
-                     if ( ll.le.( ( (bb+1)*(bb+2)) / 2.D0 ).and.(ll.gt.
-     &                    (bb*(bb+1)/2.D0) ) ) then
+                     if ( ll.le.( ( (bb+1)*(bb+2)) / 2.0 ).and.(ll.gt.
+     &                    (bb*(bb+1)/2.0) ) ) then
 
                         limitZE(k,ll) = alphaZE_max(k,(bb*(bb+1))/2 + 1) 
      &                       * ZEtaylor(k,ll,1)
@@ -5546,26 +5546,26 @@ C.....of unconstrained solutions with alpha constraints
 
 c$$$  ! Make a counter to track limiting
 c$$$  
-c$$$  if ( ( alphaZE_max(k,(bb*(bb+1))/2 + 1).lt.1.D0.or.
-c$$$  &                       alphaQX_max(k,(bb*(bb+1))/2 + 1).lt.1.D0.or.
-c$$$  &                       alphaQY_max(k,(bb*(bb+1))/2 + 1).lt.1.D0 ).and.
+c$$$  if ( ( alphaZE_max(k,(bb*(bb+1))/2 + 1).lt.1.0.or.
+c$$$  &                       alphaQX_max(k,(bb*(bb+1))/2 + 1).lt.1.0.or.
+c$$$  &                       alphaQY_max(k,(bb*(bb+1))/2 + 1).lt.1.0 ).and.
 c$$$  &                       chem_flag.ne.1.and.tracer_flag.ne.1 ) then
 c$$$  
 c$$$  lim_count = 1  
 c$$$  
-c$$$  elseif ( (alphaZE_max(k,(bb*(bb+1))/2 + 1).lt.1.D0.or.
-c$$$  &                          alphaQX_max(k,(bb*(bb+1))/2 + 1).lt.1.D0.or.
-c$$$  &                          alphaQY_max(k,(bb*(bb+1))/2 + 1).lt.1.D0.or.
-c$$$  &                          alphaiota_max(k,(bb*(bb+1))/2 + 1).lt.1.D0 ).and.
+c$$$  elseif ( (alphaZE_max(k,(bb*(bb+1))/2 + 1).lt.1.0.or.
+c$$$  &                          alphaQX_max(k,(bb*(bb+1))/2 + 1).lt.1.0.or.
+c$$$  &                          alphaQY_max(k,(bb*(bb+1))/2 + 1).lt.1.0.or.
+c$$$  &                          alphaiota_max(k,(bb*(bb+1))/2 + 1).lt.1.0 ).and.
 c$$$  &                          chem_flag.ne.1.and.tracer_flag.eq.1 ) then
 c$$$  
 c$$$  lim_count = 1   
 c$$$  
-c$$$  elseif ( (alphaZE_max(k,(bb*(bb+1))/2 + 1).lt.1.D0.or.
-c$$$  &                          alphaQX_max(k,(bb*(bb+1))/2 + 1).lt.1.D0.or.
-c$$$  &                          alphaQY_max(k,(bb*(bb+1))/2 + 1).lt.1.D0.or.
-c$$$  &                          alphaiota_max(k,(bb*(bb+1))/2 + 1).lt.1.D0.or.
-c$$$  &                          alphaiota2_max(k,(bb*(bb+1))/2 + 1).lt.1.D0 ).and.
+c$$$  elseif ( (alphaZE_max(k,(bb*(bb+1))/2 + 1).lt.1.0.or.
+c$$$  &                          alphaQX_max(k,(bb*(bb+1))/2 + 1).lt.1.0.or.
+c$$$  &                          alphaQY_max(k,(bb*(bb+1))/2 + 1).lt.1.0.or.
+c$$$  &                          alphaiota_max(k,(bb*(bb+1))/2 + 1).lt.1.0.or.
+c$$$  &                          alphaiota2_max(k,(bb*(bb+1))/2 + 1).lt.1.0 ).and.
 c$$$  &                          chem_flag.eq.1 ) then
 c$$$  
 c$$$  lim_count = 1 
@@ -5592,17 +5592,17 @@ c$$$  endif
 
 C.....Transform back to the Dubiner basis (multiply by NmatrixInv),
 
-      ZEconst =  0.D0
-      QXconst =  0.D0
-      QYconst =  0.D0
+      ZEconst =  0.0
+      QXconst =  0.0
+      QYconst =  0.0
 
 #ifdef TRACE
-      iotaconst =  0.D0
+      iotaconst =  0.0
 #endif
 
 #ifdef CHEM
-      iotaconst =  0.D0
-      iota2const =  0.D0
+      iotaconst =  0.0
+      iota2const =  0.0
 #endif
 
       do k=1,ne
@@ -5748,22 +5748,22 @@ C.....Set initial values
 
       ENDDO   
 
-      marea = 2.D0              !master elements area
+      marea = 2.0              !master elements area
 
 C.....Convert initial values to the Taylor basis (multiply by Nmatrix) on base element
 
 
-      ZEtaylor = 0.D0 
-      QXtaylor = 0.D0
-      QYtaylor = 0.D0
+      ZEtaylor = 0.0 
+      QXtaylor = 0.0
+      QYtaylor = 0.0
 
 #ifdef TRACE
-      iotataylor = 0.D0
+      iotataylor = 0.0
 #endif
 
 #ifdef CHEM
-      iotataylor = 0.D0
-      iota2taylor = 0.D0
+      iotataylor = 0.0
+      iota2taylor = 0.0
 #endif
 
       do k=1,mne
@@ -5802,23 +5802,23 @@ C.....Convert initial values to the Taylor basis (multiply by Nmatrix) on base e
 C.....Find values at vertices of base elements and neighbors
 
 
-      ZEmax = -100.D0
-      QXmax = -100.D0
-      QYmax = -100.D0
-      ZEmin = 100.D0
-      QXmin = 100.D0
-      QYmin = 100.D0
+      ZEmax = -100.0
+      QXmax = -100.0
+      QYmax = -100.0
+      ZEmin = 100.0
+      QXmin = 100.0
+      QYmin = 100.0
 
 #ifdef TRACE
-      iotamax = -100.D0
-      iotamin = 100.D0
+      iotamax = -100.0
+      iotamin = 100.0
 #endif
 
 #ifdef CHEM
-      iotamax = -100.D0
-      iota2max = -100.D0
-      iotamin = 100.D0
-      iota2min = 100.D0
+      iotamax = -100.0
+      iota2max = -100.0
+      iotamin = 100.0
+      iota2min = 100.0
 #endif
 
 
@@ -5923,17 +5923,17 @@ C.....Find max and min values over polynomial coefficients
 
 C.....Must generate linear recostructions at vertices
 
-      ZEtaylorvert = 0.D0
-      QXtaylorvert = 0.D0
-      Qytaylorvert = 0.D0
+      ZEtaylorvert = 0.0
+      QXtaylorvert = 0.0
+      Qytaylorvert = 0.0
 
 #ifdef TRACE
-      iotataylorvert = 0.D0
+      iotataylorvert = 0.0
 #endif
 
 #ifdef CHEM
-      iotataylorvert = 0.D0
-      iota2taylorvert = 0.D0
+      iotataylorvert = 0.0
+      iota2taylorvert = 0.0
 #endif
 
       do k=1,mne
@@ -6014,17 +6014,17 @@ C.....Must generate linear recostructions at vertices
 C.....Compute alphas for each variable in each order derivitive
 
 
-      alphaZE0 = 0.D0
-      alphaQX0 = 0.D0
-      alphaQY0 = 0.D0
+      alphaZE0 = 0.0
+      alphaQX0 = 0.0
+      alphaQY0 = 0.0
 
 #ifdef TRACE
-      alphaiota0 = 0.D0
+      alphaiota0 = 0.0
 #endif
 
 #ifdef CHEM
-      alphaiota0 = 0.D0
-      alphaiota20 = 0.D0
+      alphaiota0 = 0.0
+      alphaiota20 = 0.0
 #endif
 
       do k=1,mne
@@ -6041,7 +6041,7 @@ C.....Compute alphas for each variable in each order derivitive
      &                    ( abs(ZEtaylorvert(k,ll,lll)-ZEtaylor(k,ll,1)).gt.1.0E-15 ).and.
      &                    ( ZEmax(nm(k,lll),ll).ne.ZEtaylor(k,ll,1) ) ) then  
 
-                        alphaZE0(k,ll,lll) = min(1.D0,  ( ZEmax(nm(k,lll),ll)
+                        alphaZE0(k,ll,lll) = min(1.0,  ( ZEmax(nm(k,lll),ll)
      &                       - ZEtaylor(k,ll,1) )/ (ZEtaylorvert(k,ll,lll) - ZEtaylor(k,ll,1)))
 
                                 !adapted part
@@ -6058,7 +6058,7 @@ C.....Compute alphas for each variable in each order derivitive
      &                       .and.( abs(ZEtaylorvert(k,ll,lll)-ZEtaylor(k,ll,1)).gt.1.0E-15 ).and.
      &                       ( ZEmin(nm(k,lll),ll).ne.ZEtaylor(k,ll,1) ) ) then 
 
-                        alphaZE0(k,ll,lll) = min( 1.D0,( ZEmin(nm(k,lll),ll)
+                        alphaZE0(k,ll,lll) = min( 1.0,( ZEmin(nm(k,lll),ll)
      &                       - ZEtaylor(k,ll,1) )/( ZEtaylorvert(k,ll,lll)-ZEtaylor(k,ll,1)))
 
                                 !adapted part
@@ -6074,13 +6074,13 @@ C.....Compute alphas for each variable in each order derivitive
                      elseif ( ( ZEtaylorvert(k,ll,lll).eq.ZEtaylor(k,ll,1) ).or.
      &                       ( abs(ZEtaylorvert(k,ll,lll)-ZEtaylor(k,ll,1)).le.1.0E-15 ) ) then
 
-                        alphaZE0(k,ll,lll) = 1.D0
+                        alphaZE0(k,ll,lll) = 1.0
 
                      endif
 
                   else
 
-                     alphaZE0(k,ll,lll) = 1.D0
+                     alphaZE0(k,ll,lll) = 1.0
 
                   endif
 #ifdef TRACE
@@ -6090,7 +6090,7 @@ C.....Compute alphas for each variable in each order derivitive
      &                    ( abs(iotataylorvert(k,ll,lll)-iotataylor(k,ll,1)).gt.1.0E-15 ).and.
      &                    ( iotamax(nm(k,lll),ll).ne.iotataylor(k,ll,1) ) ) then  
 
-                        alphaiota0(k,ll,lll) = min(1.D0,  ( iotamax(nm(k,lll),ll)
+                        alphaiota0(k,ll,lll) = min(1.0,  ( iotamax(nm(k,lll),ll)
      &                       - iotataylor(k,ll,1) )/ (iotataylorvert(k,ll,lll) - iotataylor(k,ll,1)))
 
                                 !adapted part
@@ -6107,7 +6107,7 @@ C.....Compute alphas for each variable in each order derivitive
      &                       .and.( abs(iotataylorvert(k,ll,lll)-iotataylor(k,ll,1)).gt.1.0E-15 ).and.
      &                       ( iotamin(nm(k,lll),ll).ne.iotataylor(k,ll,1) ) ) then 
 
-                        alphaiota0(k,ll,lll) = min( 1.D0,( iotamin(nm(k,lll),ll)
+                        alphaiota0(k,ll,lll) = min( 1.0,( iotamin(nm(k,lll),ll)
      &                       - iotataylor(k,ll,1) )/( iotataylorvert(k,ll,lll)-iotataylor(k,ll,1)))
 
                                 !adapted part
@@ -6123,13 +6123,13 @@ C.....Compute alphas for each variable in each order derivitive
                      elseif ( ( iotataylorvert(k,ll,lll).eq.iotataylor(k,ll,1) ).or.
      &                       ( abs(iotataylorvert(k,ll,lll)-iotataylor(k,ll,1)).le.1.0E-15 ) ) then
 
-                        alphaiota0(k,ll,lll) = 1.D0
+                        alphaiota0(k,ll,lll) = 1.0
 
                      endif
 
                   else
 
-                     alphaiota0(k,ll,lll) = 1.D0
+                     alphaiota0(k,ll,lll) = 1.0
 
                   endif
 #endif
@@ -6141,7 +6141,7 @@ C.....Compute alphas for each variable in each order derivitive
      &                    ( abs(iotataylorvert(k,ll,lll)-iotataylor(k,ll,1)).gt.1.0E-15 ).and.
      &                    ( iotamax(nm(k,lll),ll).ne.iotataylor(k,ll,1) ) ) then  
 
-                        alphaiota0(k,ll,lll) = min(1.D0,  ( iotamax(nm(k,lll),ll)
+                        alphaiota0(k,ll,lll) = min(1.0,  ( iotamax(nm(k,lll),ll)
      &                       - iotataylor(k,ll,1) )/ (iotataylorvert(k,ll,lll) - iotataylor(k,ll,1)))
 
                                 !adapted part
@@ -6158,7 +6158,7 @@ C.....Compute alphas for each variable in each order derivitive
      &                       .and.( abs(iotataylorvert(k,ll,lll)-iotataylor(k,ll,1)).gt.1.0E-15 ).and.
      &                       ( iotamin(nm(k,lll),ll).ne.iotataylor(k,ll,1) ) ) then 
 
-                        alphaiota0(k,ll,lll) = min( 1.D0,( iotamin(nm(k,lll),ll)
+                        alphaiota0(k,ll,lll) = min( 1.0,( iotamin(nm(k,lll),ll)
      &                       - iotataylor(k,ll,1) )/( iotataylorvert(k,ll,lll)-iotataylor(k,ll,1)))
 
                                 !adapted part
@@ -6174,13 +6174,13 @@ C.....Compute alphas for each variable in each order derivitive
                      elseif ( ( iotataylorvert(k,ll,lll).eq.iotataylor(k,ll,1) ).or.
      &                       ( abs(iotataylorvert(k,ll,lll)-iotataylor(k,ll,1)).le.1.0E-15 ) ) then
 
-                        alphaiota0(k,ll,lll) = 1.D0
+                        alphaiota0(k,ll,lll) = 1.0
 
                      endif
 
                   else
 
-                     alphaiota0(k,ll,lll) = 1.D0
+                     alphaiota0(k,ll,lll) = 1.0
 
                   endif
 
@@ -6190,7 +6190,7 @@ C.....Compute alphas for each variable in each order derivitive
      &                    ( abs(iota2taylorvert(k,ll,lll)-iota2taylor(k,ll,1)).gt.1.0E-15 ).and.
      &                    ( iota2max(nm(k,lll),ll).ne.iota2taylor(k,ll,1) ) ) then  
 
-                        alphaiota20(k,ll,lll) = min(1.D0,  ( iota2max(nm(k,lll),ll)
+                        alphaiota20(k,ll,lll) = min(1.0,  ( iota2max(nm(k,lll),ll)
      &                       - iota2taylor(k,ll,1) )/ (iota2taylorvert(k,ll,lll) - iota2taylor(k,ll,1)))
 
                                 !adapted part
@@ -6207,7 +6207,7 @@ C.....Compute alphas for each variable in each order derivitive
      &                       .and.( abs(iota2taylorvert(k,ll,lll)-iota2taylor(k,ll,1)).gt.1.0E-15 ).and.
      &                       ( iota2min(nm(k,lll),ll).ne.iota2taylor(k,ll,1) ) ) then 
 
-                        alphaiota20(k,ll,lll) = min( 1.D0,( iota2min(nm(k,lll),ll)
+                        alphaiota20(k,ll,lll) = min( 1.0,( iota2min(nm(k,lll),ll)
      &                       - iota2taylor(k,ll,1) )/( iota2taylorvert(k,ll,lll)-iota2taylor(k,ll,1)))
 
                                 !adapted part
@@ -6223,13 +6223,13 @@ C.....Compute alphas for each variable in each order derivitive
                      elseif ( ( iota2taylorvert(k,ll,lll).eq.iota2taylor(k,ll,1) ).or.
      &                       ( abs(iota2taylorvert(k,ll,lll)-iota2taylor(k,ll,1)).le.1.0E-15 ) ) then
 
-                        alphaiota20(k,ll,lll) = 1.D0
+                        alphaiota20(k,ll,lll) = 1.0
 
                      endif
 
                   else
 
-                     alphaiota20(k,ll,lll) = 1.D0
+                     alphaiota20(k,ll,lll) = 1.0
 
                   endif
 #endif
@@ -6240,7 +6240,7 @@ C.....Compute alphas for each variable in each order derivitive
      &                    ( abs(QXtaylorvert(k,ll,lll)-QXtaylor(k,ll,1)).gt.1.0E-15 ).and.
      &                    ( QXmax(nm(k,lll),ll).ne.QXtaylor(k,ll,1) ) ) then  
 
-                        alphaQX0(k,ll,lll) = min(1.D0,  ( QXmax(nm(k,lll),ll)
+                        alphaQX0(k,ll,lll) = min(1.0,  ( QXmax(nm(k,lll),ll)
      &                       - QXtaylor(k,ll,1) )/ (QXtaylorvert(k,ll,lll) - QXtaylor(k,ll,1)))
 
                                 !adapted part
@@ -6257,7 +6257,7 @@ C.....Compute alphas for each variable in each order derivitive
      &                       .and.( abs(QXtaylorvert(k,ll,lll)-QXtaylor(k,ll,1)).gt.1.0E-15 ).and.
      &                       ( QXmin(nm(k,lll),ll).ne.QXtaylor(k,ll,1) ) ) then 
 
-                        alphaQX0(k,ll,lll) = min( 1.D0,( QXmin(nm(k,lll),ll)
+                        alphaQX0(k,ll,lll) = min( 1.0,( QXmin(nm(k,lll),ll)
      &                       - QXtaylor(k,ll,1) )/( QXtaylorvert(k,ll,lll)-QXtaylor(k,ll,1)))
 
                                 !adapted part
@@ -6273,13 +6273,13 @@ C.....Compute alphas for each variable in each order derivitive
                      elseif ( ( QXtaylorvert(k,ll,lll).eq.QXtaylor(k,ll,1) ).or.
      &                       ( abs(QXtaylorvert(k,ll,lll)-QXtaylor(k,ll,1)).le.1.0E-15 ) ) then
 
-                        alphaQX0(k,ll,lll) = 1.D0
+                        alphaQX0(k,ll,lll) = 1.0
 
                      endif
 
                   else
 
-                     alphaQX0(k,ll,lll) = 1.D0
+                     alphaQX0(k,ll,lll) = 1.0
 
                   endif
 
@@ -6290,7 +6290,7 @@ C.....Compute alphas for each variable in each order derivitive
      &                    ( abs(QYtaylorvert(k,ll,lll)-QYtaylor(k,ll,1)).gt.1.0E-15 ).and.
      &                    ( QYmax(nm(k,lll),ll).ne.QYtaylor(k,ll,1) ) ) then  
 
-                        alphaQY0(k,ll,lll) = min(1.D0,  ( QYmax(nm(k,lll),ll)
+                        alphaQY0(k,ll,lll) = min(1.0,  ( QYmax(nm(k,lll),ll)
      &                       - QYtaylor(k,ll,1) )/ (QYtaylorvert(k,ll,lll) - QYtaylor(k,ll,1)))
 
                                 !adapted part
@@ -6307,7 +6307,7 @@ C.....Compute alphas for each variable in each order derivitive
      &                       .and.( abs(QYtaylorvert(k,ll,lll)-QYtaylor(k,ll,1)).gt.1.0E-15 ).and.
      &                       ( QYmin(nm(k,lll),ll).ne.QYtaylor(k,ll,1) ) ) then 
 
-                        alphaQY0(k,ll,lll) = min( 1.D0,( QYmin(nm(k,lll),ll)
+                        alphaQY0(k,ll,lll) = min( 1.0,( QYmin(nm(k,lll),ll)
      &                       - QYtaylor(k,ll,1) )/( QYtaylorvert(k,ll,lll)-QYtaylor(k,ll,1)))
 
                                 !adapted part
@@ -6323,13 +6323,13 @@ C.....Compute alphas for each variable in each order derivitive
                      elseif ( ( QYtaylorvert(k,ll,lll).eq.QYtaylor(k,ll,1) ).or.
      &                       ( abs(QYtaylorvert(k,ll,lll)-QYtaylor(k,ll,1)).le.1.0E-15 ) ) then
 
-                        alphaQY0(k,ll,lll) = 1.D0
+                        alphaQY0(k,ll,lll) = 1.0
 
                      endif
 
                   else
 
-                     alphaQY0(k,ll,lll) = 1.D0
+                     alphaQY0(k,ll,lll) = 1.0
 
                   endif
 
@@ -6347,17 +6347,17 @@ C.....Compute alphas for each variable in each order derivitive
 
 C.....Find the prescribed higher limiters by finding smallest local value
 
-      alphaZE = 0.D0
-      alphaQX = 0.D0
-      alphaQY = 0.D0
+      alphaZE = 0.0
+      alphaQX = 0.0
+      alphaQY = 0.0
 
 #ifdef TRACE
-      alphaiota = 0.D0
+      alphaiota = 0.0
 #endif
 
 #ifdef CHEM
-      alphaiota = 0.D0
-      alphaiota2 = 0.D0
+      alphaiota = 0.0
+      alphaiota2 = 0.0
 #endif
 
       do k=1,mne
@@ -6391,17 +6391,17 @@ C.....Find the prescribed higher limiters by finding smallest local value
 
 C.... Choose smallest (minimum) alpha for derivative in x or y
 
-      alphaZEm = 0.D0
-      alphaQXm = 0.D0
-      alphaQYm = 0.D0
+      alphaZEm = 0.0
+      alphaQXm = 0.0
+      alphaQYm = 0.0
 
 #ifdef TRACE
-      alphaiotam = 0.D0
+      alphaiotam = 0.0
 #endif
 
 #ifdef CHEM
-      alphaiotam = 0.D0
-      alphaiota2m = 0.D0
+      alphaiotam = 0.0
+      alphaiota2m = 0.0
 #endif
 
       do k=1,mne
@@ -6445,17 +6445,17 @@ C.... Choose smallest (minimum) alpha for derivative in x or y
 
 C.....Use max higher derivative values for final limiter value
 
-      alphaZE_max = 0.D0
-      alphaQX_max = 0.D0
-      alphaQY_max = 0.D0
+      alphaZE_max = 0.0
+      alphaQX_max = 0.0
+      alphaQY_max = 0.0
 
 #ifdef TRACE
-      alphaiota_max = 0.D0
+      alphaiota_max = 0.0
 #endif
 
 #ifdef CHEM
-      alphaiota_max = 0.D0
-      alphaiota2_max = 0.D0
+      alphaiota_max = 0.0
+      alphaiota2_max = 0.0
 #endif
 
       do k=1,mne
@@ -6501,19 +6501,19 @@ C.....Limit on the Master element in the Taylor basis, via reconstruction
 C.....of unconstrained solutions with alpha constraints
 
 
-      limitZE = 0.D0
-      limitQX = 0.D0
-      limitQY = 0.D0
+      limitZE = 0.0
+      limitQX = 0.0
+      limitQY = 0.0
 
       lim_count_roll = 0
 
 #ifdef TRACE
-      limitiota = 0.D0
+      limitiota = 0.0
 #endif
 
 #ifdef CHEM
-      limitiota = 0.D0
-      limitiota2 = 0.D0
+      limitiota = 0.0
+      limitiota2 = 0.0
 #endif
 
       do k=1,mne
@@ -6543,8 +6543,8 @@ C.....of unconstrained solutions with alpha constraints
                   
                   do bb=1,pdg_el(k)
 
-                     if ( ll.le.( ( (bb+1)*(bb+2)) / 2.D0 ).and.(ll.gt.
-     &                    (bb*(bb+1)/2.D0) ) ) then
+                     if ( ll.le.( ( (bb+1)*(bb+2)) / 2.0 ).and.(ll.gt.
+     &                    (bb*(bb+1)/2.0) ) ) then
 
                         limitZE(k,ll) = alphaZE_max(k,(bb*(bb+1))/2 + 1) 
      &                       * ZEtaylor(k,ll,1)
@@ -6569,26 +6569,26 @@ C.....of unconstrained solutions with alpha constraints
 
 c$$$  ! Make a counter to track limiting
 c$$$  
-c$$$  if ( ( alphaZE_max(k,(bb*(bb+1))/2 + 1).lt.1.D0.or.
-c$$$  &                       alphaQX_max(k,(bb*(bb+1))/2 + 1).lt.1.D0.or.
-c$$$  &                       alphaQY_max(k,(bb*(bb+1))/2 + 1).lt.1.D0 ).and.
+c$$$  if ( ( alphaZE_max(k,(bb*(bb+1))/2 + 1).lt.1.0.or.
+c$$$  &                       alphaQX_max(k,(bb*(bb+1))/2 + 1).lt.1.0.or.
+c$$$  &                       alphaQY_max(k,(bb*(bb+1))/2 + 1).lt.1.0 ).and.
 c$$$  &                       chem_flag.ne.1.and.tracer_flag.ne.1 ) then
 c$$$  
 c$$$  lim_count = 1  
 c$$$  
-c$$$  elseif ( (alphaZE_max(k,(bb*(bb+1))/2 + 1).lt.1.D0.or.
-c$$$  &                          alphaQX_max(k,(bb*(bb+1))/2 + 1).lt.1.D0.or.
-c$$$  &                          alphaQY_max(k,(bb*(bb+1))/2 + 1).lt.1.D0.or.
-c$$$  &                          alphaiota_max(k,(bb*(bb+1))/2 + 1).lt.1.D0 ).and.
+c$$$  elseif ( (alphaZE_max(k,(bb*(bb+1))/2 + 1).lt.1.0.or.
+c$$$  &                          alphaQX_max(k,(bb*(bb+1))/2 + 1).lt.1.0.or.
+c$$$  &                          alphaQY_max(k,(bb*(bb+1))/2 + 1).lt.1.0.or.
+c$$$  &                          alphaiota_max(k,(bb*(bb+1))/2 + 1).lt.1.0 ).and.
 c$$$  &                          chem_flag.ne.1.and.tracer_flag.eq.1 ) then
 c$$$  
 c$$$  lim_count = 1   
 c$$$  
-c$$$  elseif ( (alphaZE_max(k,(bb*(bb+1))/2 + 1).lt.1.D0.or.
-c$$$  &                          alphaQX_max(k,(bb*(bb+1))/2 + 1).lt.1.D0.or.
-c$$$  &                          alphaQY_max(k,(bb*(bb+1))/2 + 1).lt.1.D0.or.
-c$$$  &                          alphaiota_max(k,(bb*(bb+1))/2 + 1).lt.1.D0.or.
-c$$$  &                          alphaiota2_max(k,(bb*(bb+1))/2 + 1).lt.1.D0 ).and.
+c$$$  elseif ( (alphaZE_max(k,(bb*(bb+1))/2 + 1).lt.1.0.or.
+c$$$  &                          alphaQX_max(k,(bb*(bb+1))/2 + 1).lt.1.0.or.
+c$$$  &                          alphaQY_max(k,(bb*(bb+1))/2 + 1).lt.1.0.or.
+c$$$  &                          alphaiota_max(k,(bb*(bb+1))/2 + 1).lt.1.0.or.
+c$$$  &                          alphaiota2_max(k,(bb*(bb+1))/2 + 1).lt.1.0 ).and.
 c$$$  &                          chem_flag.eq.1 ) then
 c$$$  
 c$$$  lim_count = 1 
@@ -6615,17 +6615,17 @@ c$$$  endif
 
 C.....Transform back to the Dubiner basis (multiply by NmatrixInv),
 
-      ZEconst =  0.D0
-      QXconst =  0.D0
-      QYconst =  0.D0
+      ZEconst =  0.0
+      QXconst =  0.0
+      QYconst =  0.0
 
 #ifdef TRACE
-      iotaconst =  0.D0
+      iotaconst =  0.0
 #endif
 
 #ifdef CHEM
-      iotaconst =  0.D0
-      iota2const =  0.D0
+      iotaconst =  0.0
+      iota2const =  0.0
 #endif
 
       do k=1,mne
@@ -6779,22 +6779,22 @@ C.....Set initial values
 
       ENDDO   
 
-      marea = 2.D0              !master elements area
+      marea = 2.0              !master elements area
 
 C.....Convert initial values to the Taylor basis (multiply by Nmatrix) on base element
 
 
-      ZEtaylor = 0.D0 
-      QXtaylor = 0.D0
-      QYtaylor = 0.D0
+      ZEtaylor = 0.0 
+      QXtaylor = 0.0
+      QYtaylor = 0.0
 
 #ifdef TRACE
-      iotataylor = 0.D0
+      iotataylor = 0.0
 #endif
 
 #ifdef CHEM
-      iotataylor = 0.D0
-      iota2taylor = 0.D0
+      iotataylor = 0.0
+      iota2taylor = 0.0
 #endif
 
       do k=1,ne
@@ -6833,23 +6833,23 @@ C.....Convert initial values to the Taylor basis (multiply by Nmatrix) on base e
 C.....Find values at vertices of base elements and neighbors
 
 
-      ZEmaxel = -100.D0
-      QXmaxel = -100.D0
-      QYmaxel = -100.D0
-      ZEminel = 100.D0
-      QXminel = 100.D0
-      QYminel = 100.D0
+      ZEmaxel = -100.0
+      QXmaxel = -100.0
+      QYmaxel = -100.0
+      ZEminel = 100.0
+      QXminel = 100.0
+      QYminel = 100.0
 
 #ifdef TRACE
-      iotamaxel = -100.D0
-      iotaminel = 100.D0
+      iotamaxel = -100.0
+      iotaminel = 100.0
 #endif
 
 #ifdef CHEM
-      iotamaxel = -100.D0
-      iota2maxel = -100.D0
-      iotaminel = 100.D0
-      iota2minel = 100.D0
+      iotamaxel = -100.0
+      iota2maxel = -100.0
+      iotaminel = 100.0
+      iota2minel = 100.0
 #endif
 
 #ifdef CMPI
@@ -6912,17 +6912,17 @@ C.....Must generate linear recostructions at vertices
 
 
 
-      ZEtaylorvert = 0.D0
-      QXtaylorvert = 0.D0
-      Qytaylorvert = 0.D0
+      ZEtaylorvert = 0.0
+      QXtaylorvert = 0.0
+      Qytaylorvert = 0.0
 
 #ifdef TRACE
-      iotataylorvert = 0.D0
+      iotataylorvert = 0.0
 #endif
 
 #ifdef CHEM
-      iotataylorvert = 0.D0
-      iota2taylorvert = 0.D0
+      iotataylorvert = 0.0
+      iota2taylorvert = 0.0
 #endif
 
       do k=1,ne
@@ -7003,17 +7003,17 @@ C.....Must generate linear recostructions at vertices
 C.....Compute alphas for each variable in each order derivitive
 
 
-      alphaZE0 = 0.D0
-      alphaQX0 = 0.D0
-      alphaQY0 = 0.D0
+      alphaZE0 = 0.0
+      alphaQX0 = 0.0
+      alphaQY0 = 0.0
 
 #ifdef TRACE
-      alphaiota0 = 0.D0
+      alphaiota0 = 0.0
 #endif
 
 #ifdef CHEM
-      alphaiota0 = 0.D0
-      alphaiota20 = 0.D0
+      alphaiota0 = 0.0
+      alphaiota20 = 0.0
 #endif
 
       do k = 1,ne
@@ -7027,18 +7027,18 @@ C.....Compute alphas for each variable in each order derivitive
                   if ( ZEtaylorvert(k,ll,lll).gt.ZEtaylor(k,ll,1).and.
      &                 abs((ZEtaylorvert(k,ll,lll)-ZEtaylor(k,ll,1))).gt.1.0E-15 ) then 
 
-                     alphaZE0(k,ll,lll) = min( 1.D0, ( ZEmaxel(k,ll) - 
+                     alphaZE0(k,ll,lll) = min( 1.0, ( ZEmaxel(k,ll) - 
      &                    ZEtaylor(k,ll,1) ) / (  ZEtaylorvert(k,ll,lll) - ZEtaylor(k,ll,1) ) )
                      
                   elseif ( ZEtaylorvert(k,ll,lll).eq.ZEtaylor(k,ll,1).or.
      &                    abs((ZEtaylorvert(k,ll,lll)-ZEtaylor(k,ll,1))).le.1.0E-15 ) then
 
-                     alphaZE0(k,ll,lll) = 1.D0
+                     alphaZE0(k,ll,lll) = 1.0
 
                   elseif (  ZEtaylorvert(k,ll,lll).lt.ZEtaylor(k,ll,1).and.
      &                    abs((ZEtaylorvert(k,ll,lll)-ZEtaylor(k,ll,1))).gt.1.0E-15 ) then
 
-                     alphaZE0(k,ll,lll) = min( 1.D0, ( ZEminel(k,ll)
+                     alphaZE0(k,ll,lll) = min( 1.0, ( ZEminel(k,ll)
      &                    - ZEtaylor(k,ll,1) ) / ( ZEtaylorvert(k,ll,lll) - ZEtaylor(k,ll,1) ) )
                      
                   endif
@@ -7049,7 +7049,7 @@ C.....Compute alphas for each variable in each order derivitive
                      if ( iotataylorvert(k,ll,lll).gt.iotataylor(k,ll,1).and.
      &                    abs((iotataylorvert(k,ll,lll)-iotataylor(k,ll,1))).gt.1.0E-15 ) then 
 
-                        alphaiota0(k,ll,lll) = min(1.D0,( iotamaxel(k,ll)
+                        alphaiota0(k,ll,lll) = min(1.0,( iotamaxel(k,ll)
      &                       -iotataylor(k,ll,1) )/ (iotataylorvert(k,ll,lll) - iotataylor(k,ll,1)))
 
                                 !adapted part
@@ -7073,19 +7073,19 @@ C.....Compute alphas for each variable in each order derivitive
                      elseif (iotataylorvert(k,ll,lll).eq.iotataylor(k,ll,1).or.
      &                       abs((iotataylorvert(k,ll,lll)-iotataylor(k,ll,1))).le.1.0E-15 ) then
 
-                        alphaiota0(k,ll,lll) = 1.D0
+                        alphaiota0(k,ll,lll) = 1.0
 
                      elseif (iotataylorvert(k,ll,lll).lt.iotataylor(k,ll,1).
      &                       and.abs((iotataylorvert(k,ll,lll)-iotataylor(k,ll,1))).gt.1.0E-15) then
 
-                        alphaiota0(k,ll,lll) = min( 1.D0,( iotaminel(k,ll)
+                        alphaiota0(k,ll,lll) = min( 1.0,( iotaminel(k,ll)
      &                       -iotataylor(k,ll,1) )/( iotataylorvert(k,ll,lll)-iotataylor(k,ll,1)))
                         
                      endif
 
                   else
                      
-                     alphaiota0(k,ll,lll) = 1.D0
+                     alphaiota0(k,ll,lll) = 1.0
 
                   endif
 #endif
@@ -7094,18 +7094,18 @@ C.....Compute alphas for each variable in each order derivitive
                   if ( iotataylorvert(k,ll,lll).gt.iotataylor(k,ll,1).and.
      &                 abs((iotataylorvert(k,ll,lll)-iotataylor(k,ll,1))).gt.1.0E-15 ) then 
 
-                     alphaiota0(k,ll,lll) = min(1.D0,( iotamaxel(k,ll)-
+                     alphaiota0(k,ll,lll) = min(1.0,( iotamaxel(k,ll)-
      &                    iotataylor(k,ll,1) )/ (iotataylorvert(k,ll,lll) - iotataylor(k,ll,1)))
                      
                   elseif (iotataylorvert(k,ll,lll).eq.iotataylor(k,ll,1).or.
      &                    abs((iotataylorvert(k,ll,lll)-iotataylor(k,ll,1))).le.1.0E-15 ) then
 
-                     alphaiota0(k,ll,lll) = 1.D0
+                     alphaiota0(k,ll,lll) = 1.0
 
                   elseif (iotataylorvert(k,ll,lll).lt.iotataylor(k,ll,1).and.
      &                    abs((iotataylorvert(k,ll,lll)-iotataylor(k,ll,1))).gt.1.0E-15) then
 
-                     alphaiota0(k,ll,lll) = min( 1.D0,( iotaminel(k,ll)
+                     alphaiota0(k,ll,lll) = min( 1.0,( iotaminel(k,ll)
      &                    -iotataylor(k,ll,1) )/( iotataylorvert(k,ll,lll)-iotataylor(k,ll,1)))
                      
                   endif
@@ -7113,18 +7113,18 @@ C.....Compute alphas for each variable in each order derivitive
                   if ( iota2taylorvert(k,ll,lll).gt.iota2taylor(k,ll,1).and.
      &                 abs((iota2taylorvert(k,ll,lll)-iota2taylor(k,ll,1))).gt.1.0E-15 ) then 
 
-                     alphaiota20(k,ll,lll) = min(1.D0,( iota2maxel(k,ll)
+                     alphaiota20(k,ll,lll) = min(1.0,( iota2maxel(k,ll)
      &                    -iota2taylor(k,ll,1) )/ (iota2taylorvert(k,ll,lll) - iota2taylor(k,ll,1)))
                      
                   elseif (iota2taylorvert(k,ll,lll).eq.iota2taylor(k,ll,1).or.
      &                    abs((iota2taylorvert(k,ll,lll)-iota2taylor(k,ll,1))).le.1.0E-15 ) then
 
-                     alphaiota20(k,ll,lll) = 1.D0
+                     alphaiota20(k,ll,lll) = 1.0
 
                   elseif (iota2taylorvert(k,ll,lll).lt.iota2taylor(k,ll,1).and.
      &                    abs((iota2taylorvert(k,ll,lll)-iota2taylor(k,ll,1))).gt.1.0E-15) then
 
-                     alphaiota20(k,ll,lll) = min( 1.D0,( iota2minel(k,ll)
+                     alphaiota20(k,ll,lll) = min( 1.0,( iota2minel(k,ll)
      &                    -iota2taylor(k,ll,1) )/( iota2taylorvert(k,ll,lll)-iota2taylor(k,ll,1)))
                      
                   endif
@@ -7133,18 +7133,18 @@ C.....Compute alphas for each variable in each order derivitive
                   if ( QXtaylorvert(k,ll,lll).gt.QXtaylor(k,ll,1).and.
      &                 (QXtaylorvert(k,ll,lll)-QXtaylor(k,ll,1)).gt.1.0E-15 ) then !in xi1
 
-                     alphaQX0(k,ll,lll) = min( 1.D0, ( QXmaxel(k,ll) 
+                     alphaQX0(k,ll,lll) = min( 1.0, ( QXmaxel(k,ll) 
      &                    - QXtaylor(k,ll,1) ) / ( QXtaylorvert(k,ll,lll) - QXtaylor(k,ll,1) ) )
                      
                   elseif ( QXtaylorvert(k,ll,lll).eq.QXtaylor(k,ll,1).or.
      &                    (QXtaylorvert(k,ll,lll)-QXtaylor(k,ll,1)).le.1.0E-15  ) then
 
-                     alphaQX0(k,ll,lll) = 1.D0
+                     alphaQX0(k,ll,lll) = 1.0
 
                   elseif ( QXtaylorvert(k,ll,lll).lt.QXtaylor(k,ll,1).and.
      &                    (QXtaylorvert(k,ll,lll)-QXtaylor(k,ll,1)).gt.1.0E-15 ) then
 
-                     alphaQX0(k,ll,lll) = min( 1.D0, ( QXminel(k,ll)
+                     alphaQX0(k,ll,lll) = min( 1.0, ( QXminel(k,ll)
      &                    - QXtaylor(k,ll,1) ) / ( QXtaylorvert(k,ll,lll) - QXtaylor(k,ll,1) ) )
 
                   endif
@@ -7152,18 +7152,18 @@ C.....Compute alphas for each variable in each order derivitive
                   if ( QYtaylorvert(k,ll,lll).gt.QYtaylor(k,ll,1).and.
      &                 (QYtaylorvert(k,ll,lll)-QYtaylor(k,ll,1)).gt.1.0E-15 ) then !in xi1
 
-                     alphaQY0(k,ll,lll) = min( 1.D0, ( QYmaxel(k,ll) 
+                     alphaQY0(k,ll,lll) = min( 1.0, ( QYmaxel(k,ll) 
      &                    - QYtaylor(k,ll,1) ) / ( QYtaylorvert(k,ll,lll) - QYtaylor(k,ll,1) ) )
                      
                   elseif ( QYtaylorvert(k,ll,lll).eq.QYtaylor(k,ll,1).or.
      &                    (QYtaylorvert(k,ll,lll)-QYtaylor(k,ll,1)).le.1.0E-15  ) then
 
-                     alphaQY0(k,ll,lll) = 1.D0
+                     alphaQY0(k,ll,lll) = 1.0
 
                   elseif ( QYtaylorvert(k,ll,lll).lt.QYtaylor(k,ll,1).and.
      &                    (QYtaylorvert(k,ll,lll)-QYtaylor(k,ll,1)).gt.1.0E-15 ) then
 
-                     alphaQY0(k,ll,lll) = min( 1.D0, ( QYminel(k,ll) 
+                     alphaQY0(k,ll,lll) = min( 1.0, ( QYminel(k,ll) 
      &                    - QYtaylor(k,ll,1) ) / ( QYtaylorvert(k,ll,lll)  - QYtaylor(k,ll,1) ) )
 
                   endif
@@ -7182,17 +7182,17 @@ C.....Compute alphas for each variable in each order derivitive
 
 C.....Find the prescribed higher limiters by finding smallest local value
 
-      alphaZE = 0.D0
-      alphaQX = 0.D0
-      alphaQY = 0.D0
+      alphaZE = 0.0
+      alphaQX = 0.0
+      alphaQY = 0.0
 
 #ifdef TRACE
-      alphaiota = 0.D0
+      alphaiota = 0.0
 #endif
 
 #ifdef CHEM
-      alphaiota = 0.D0
-      alphaiota2 = 0.D0
+      alphaiota = 0.0
+      alphaiota2 = 0.0
 #endif
 
       do k=1,ne
@@ -7226,17 +7226,17 @@ C.....Find the prescribed higher limiters by finding smallest local value
 
 C.... Choose smallest (minimum) alpha for derivative in x or y
 
-      alphaZEm = 0.D0
-      alphaQXm = 0.D0
-      alphaQYm = 0.D0
+      alphaZEm = 0.0
+      alphaQXm = 0.0
+      alphaQYm = 0.0
 
 #ifdef TRACE
-      alphaiotam = 0.D0
+      alphaiotam = 0.0
 #endif
 
 #ifdef CHEM
-      alphaiotam = 0.D0
-      alphaiota2m = 0.D0
+      alphaiotam = 0.0
+      alphaiota2m = 0.0
 #endif
 
       do k=1,ne
@@ -7280,17 +7280,17 @@ C.... Choose smallest (minimum) alpha for derivative in x or y
 
 C.....Use max higher derivative values for final limiter value
 
-      alphaZE_max = 0.D0
-      alphaQX_max = 0.D0
-      alphaQY_max = 0.D0
+      alphaZE_max = 0.0
+      alphaQX_max = 0.0
+      alphaQY_max = 0.0
 
 #ifdef TRACE
-      alphaiota_max = 0.D0
+      alphaiota_max = 0.0
 #endif
 
 #ifdef CHEM
-      alphaiota_max = 0.D0
-      alphaiota2_max = 0.D0
+      alphaiota_max = 0.0
+      alphaiota2_max = 0.0
 #endif
 
       do k=1,ne
@@ -7336,19 +7336,19 @@ C.....Limit on the Master element in the Taylor basis, via reconstruction
 C.....of unconstrained solutions with alpha constraints
 
 
-      limitZE = 0.D0
-      limitQX = 0.D0
-      limitQY = 0.D0
+      limitZE = 0.0
+      limitQX = 0.0
+      limitQY = 0.0
 
       lim_count_roll = 0
 
 #ifdef TRACE
-      limitiota = 0.D0
+      limitiota = 0.0
 #endif
 
 #ifdef CHEM
-      limitiota = 0.D0
-      limitiota2 = 0.D0
+      limitiota = 0.0
+      limitiota2 = 0.0
 #endif
 
       do k=1,ne
@@ -7378,8 +7378,8 @@ C.....of unconstrained solutions with alpha constraints
                   
                   do bb=1,pdg_el(k)
 
-                     if ( ll.le.( ( (bb+1)*(bb+2)) / 2.D0 ).and.(ll.gt.
-     &                    (bb*(bb+1)/2.D0) ) ) then
+                     if ( ll.le.( ( (bb+1)*(bb+2)) / 2.0 ).and.(ll.gt.
+     &                    (bb*(bb+1)/2.0) ) ) then
 
                         limitZE(k,ll) = alphaZE_max(k,(bb*(bb+1))/2 + 1) 
      &                       * ZEtaylor(k,ll,1)
@@ -7403,26 +7403,26 @@ C.....of unconstrained solutions with alpha constraints
 
 c$$$  ! Make a counter to track limiting
 c$$$  
-c$$$  if ( ( alphaZE_max(k,(bb*(bb+1))/2 + 1).lt.1.D0.or.
-c$$$  &                       alphaQX_max(k,(bb*(bb+1))/2 + 1).lt.1.D0.or.
-c$$$  &                       alphaQY_max(k,(bb*(bb+1))/2 + 1).lt.1.D0 ).and.
+c$$$  if ( ( alphaZE_max(k,(bb*(bb+1))/2 + 1).lt.1.0.or.
+c$$$  &                       alphaQX_max(k,(bb*(bb+1))/2 + 1).lt.1.0.or.
+c$$$  &                       alphaQY_max(k,(bb*(bb+1))/2 + 1).lt.1.0 ).and.
 c$$$  &                       chem_flag.ne.1.and.tracer_flag.ne.1 ) then
 c$$$  
 c$$$  lim_count = 1  
 c$$$  
-c$$$  elseif ( (alphaZE_max(k,(bb*(bb+1))/2 + 1).lt.1.D0.or.
-c$$$  &                          alphaQX_max(k,(bb*(bb+1))/2 + 1).lt.1.D0.or.
-c$$$  &                          alphaQY_max(k,(bb*(bb+1))/2 + 1).lt.1.D0.or.
-c$$$  &                          alphaiota_max(k,(bb*(bb+1))/2 + 1).lt.1.D0 ).and.
+c$$$  elseif ( (alphaZE_max(k,(bb*(bb+1))/2 + 1).lt.1.0.or.
+c$$$  &                          alphaQX_max(k,(bb*(bb+1))/2 + 1).lt.1.0.or.
+c$$$  &                          alphaQY_max(k,(bb*(bb+1))/2 + 1).lt.1.0.or.
+c$$$  &                          alphaiota_max(k,(bb*(bb+1))/2 + 1).lt.1.0 ).and.
 c$$$  &                          chem_flag.ne.1.and.tracer_flag.eq.1 ) then
 c$$$  
 c$$$  lim_count = 1   
 c$$$  
-c$$$  elseif ( (alphaZE_max(k,(bb*(bb+1))/2 + 1).lt.1.D0.or.
-c$$$  &                          alphaQX_max(k,(bb*(bb+1))/2 + 1).lt.1.D0.or.
-c$$$  &                          alphaQY_max(k,(bb*(bb+1))/2 + 1).lt.1.D0.or.
-c$$$  &                          alphaiota_max(k,(bb*(bb+1))/2 + 1).lt.1.D0.or.
-c$$$  &                          alphaiota2_max(k,(bb*(bb+1))/2 + 1).lt.1.D0 ).and.
+c$$$  elseif ( (alphaZE_max(k,(bb*(bb+1))/2 + 1).lt.1.0.or.
+c$$$  &                          alphaQX_max(k,(bb*(bb+1))/2 + 1).lt.1.0.or.
+c$$$  &                          alphaQY_max(k,(bb*(bb+1))/2 + 1).lt.1.0.or.
+c$$$  &                          alphaiota_max(k,(bb*(bb+1))/2 + 1).lt.1.0.or.
+c$$$  &                          alphaiota2_max(k,(bb*(bb+1))/2 + 1).lt.1.0 ).and.
 c$$$  &                          chem_flag.eq.1 ) then
 c$$$  
 c$$$  lim_count = 1 
@@ -7449,17 +7449,17 @@ c$$$  endif
 
 C.....Transform back to the Dubiner basis (multiply by NmatrixInv),
 
-      ZEconst =  0.D0
-      QXconst =  0.D0
-      QYconst =  0.D0
+      ZEconst =  0.0
+      QXconst =  0.0
+      QYconst =  0.0
 
 #ifdef TRACE
-      iotaconst =  0.D0
+      iotaconst =  0.0
 #endif
 
 #ifdef CHEM
-      iotaconst =  0.D0
-      iota2const =  0.D0
+      iotaconst =  0.0
+      iota2const =  0.0
 #endif
 
       do k=1,ne
@@ -7633,22 +7633,22 @@ C.....Set initial values
 
       ENDDO   
 
-      marea = 2.D0              !master elements area
+      marea = 2.0              !master elements area
 
 C.....Convert initial values to the Taylor basis (multiply by Nmatrix) on base element
 
 
-      ZEtaylor = 0.D0 
-      QXtaylor = 0.D0
-      QYtaylor = 0.D0
+      ZEtaylor = 0.0 
+      QXtaylor = 0.0
+      QYtaylor = 0.0
 
 #ifdef TRACE
-      iotataylor = 0.D0      
+      iotataylor = 0.0      
 #endif
 
 #ifdef CHEM
-      iotataylor = 0.D0
-      iota2taylor = 0.D0
+      iotataylor = 0.0
+      iota2taylor = 0.0
 #endif
 
       do k=1,ne
@@ -7687,20 +7687,20 @@ C.....Convert initial values to the Taylor basis (multiply by Nmatrix) on base e
 
 C.....Generate linear recostructions at vertices
 
-      ZEtaylor0 = 0.D0
-      QXtaylor0 = 0.D0
-      Qytaylor0 = 0.D0
+      ZEtaylor0 = 0.0
+      QXtaylor0 = 0.0
+      Qytaylor0 = 0.0
 
 #ifdef TRACE
-      iotataylor0 = 0.D0
-      iotataylor0slope = 0.D0
+      iotataylor0 = 0.0
+      iotataylor0slope = 0.0
 #endif
 
 #ifdef CHEM
-      iotataylor0 = 0.D0
-      iotataylor0slope = 0.D0
-      iota2taylor0 = 0.D0
-      iota2taylor0slope = 0.D0
+      iotataylor0 = 0.0
+      iotataylor0slope = 0.0
+      iota2taylor0 = 0.0
+      iota2taylor0slope = 0.0
 #endif
 
 #ifdef CMPI
@@ -7724,22 +7724,22 @@ C.....Generate linear recostructions at vertices
          do ll = dofs(k),3,-1
 
             ZEtaylor0(k,ll,1) = ZEtaylor(k,ll,1)
-            ZEtaylor0slope(k,ll,1) = 0.D0
+            ZEtaylor0slope(k,ll,1) = 0.0
             QXtaylor0(k,ll,1) = QXtaylor(k,ll,1)
-            QXtaylor0slope(k,ll,1) = 0.D0
+            QXtaylor0slope(k,ll,1) = 0.0
             QYtaylor0(k,ll,1) = QYtaylor(k,ll,1)
-            QYtaylor0slope(k,ll,1) = 0.D0
+            QYtaylor0slope(k,ll,1) = 0.0
             
 #ifdef TRACE
             iotataylor0(k,ll,1) = iotataylor(k,ll,1)
-            iotataylor0slope(k,ll,1) = 0.D0
+            iotataylor0slope(k,ll,1) = 0.0
 #endif
 
 #ifdef CHEM            
             iotataylor0(k,ll,1) = iotataylor(k,ll,1)
-            iotataylor0slope(k,ll,1) = 0.D0
+            iotataylor0slope(k,ll,1) = 0.0
             iota2taylor0(k,ll,1) = iota2taylor(k,ll,1)
-            iota2taylor0slope(k,ll,1) = 0.D0
+            iota2taylor0slope(k,ll,1) = 0.0
 #endif
 
             if (ll.gt.3) then
@@ -7762,54 +7762,54 @@ C.....Generate linear recostructions at vertices
                         do mm = 1,nagp(pdg_el(k))
 
                            ZEtaylor0(k,ll,1) =   ZEtaylor0(k,ll,1) + ZEtaylor(k,b_index,1) * 
-     &                          (1.D0/fact(i)*fact(j))* ( ( yagp(mm,pdg_el(k)) - xi2BCb(k) )**i
+     &                          (1.0/fact(i)*fact(j))* ( ( yagp(mm,pdg_el(k)) - xi2BCb(k) )**i
      &                          *( xagp(mm,pdg_el(k)) - xi1BCb(k) )**j  )  * wagp(mm,pdg_el(k))
 
                            ZEtaylor0slope(k,ll,1) =  ZEtaylor0slope(k,ll,1) + ZEtaylor(k,b_index,1) * 
-     &                          (1.D0/fact(i)*fact(j))* ( ( yagp(mm,pdg_el(k)) - xi2BCb(k) )**i
+     &                          (1.0/fact(i)*fact(j))* ( ( yagp(mm,pdg_el(k)) - xi2BCb(k) )**i
      &                          *( xagp(mm,pdg_el(k)) - xi1BCb(k) )**j  )  * wagp(mm,pdg_el(k))
 
                            QXtaylor0(k,ll,1) =   QXtaylor0(k,ll,1) + QXtaylor(k,b_index,1) * 
-     &                          (1.D0/fact(i)*fact(j))* ( ( yagp(mm,pdg_el(k)) - xi2BCb(k) )**i
+     &                          (1.0/fact(i)*fact(j))* ( ( yagp(mm,pdg_el(k)) - xi2BCb(k) )**i
      &                          *( xagp(mm,pdg_el(k)) - xi1BCb(k) )**j  )  * wagp(mm,pdg_el(k))
 
                            QXtaylor0slope(k,ll,1) =  QXtaylor0slope(k,ll,1) + QXtaylor(k,b_index,1) * 
-     &                          (1.D0/fact(i)*fact(j))* ( ( yagp(mm,pdg_el(k)) - xi2BCb(k) )**i
+     &                          (1.0/fact(i)*fact(j))* ( ( yagp(mm,pdg_el(k)) - xi2BCb(k) )**i
      &                          *( xagp(mm,pdg_el(k)) - xi1BCb(k) )**j  )  * wagp(mm,pdg_el(k))
 
                            QYtaylor0(k,ll,1) =   QYtaylor0(k,ll,1) + QYtaylor(k,b_index,1) * 
-     &                          (1.D0/fact(i)*fact(j))* ( ( yagp(mm,pdg_el(k)) - xi2BCb(k) )**i
+     &                          (1.0/fact(i)*fact(j))* ( ( yagp(mm,pdg_el(k)) - xi2BCb(k) )**i
      &                          *( xagp(mm,pdg_el(k)) - xi1BCb(k) )**j  )  * wagp(mm,pdg_el(k))
 
                            QYtaylor0slope(k,ll,1) =  QYtaylor0slope(k,ll,1) + QYtaylor(k,b_index,1) * 
-     &                          (1.D0/fact(i)*fact(j))* ( ( yagp(mm,pdg_el(k)) - xi2BCb(k) )**i
+     &                          (1.0/fact(i)*fact(j))* ( ( yagp(mm,pdg_el(k)) - xi2BCb(k) )**i
      &                          *( xagp(mm,pdg_el(k)) - xi1BCb(k) )**j  )  * wagp(mm,pdg_el(k))
 
 #ifdef TRACE
                            iotataylor0(k,ll,1) =   iotataylor0(k,ll,1) + iotataylor(k,b_index,1) * 
-     &                          (1.D0/fact(i)*fact(j))* ( ( yagp(mm,pdg_el(k)) - xi2BCb(k) )**i
+     &                          (1.0/fact(i)*fact(j))* ( ( yagp(mm,pdg_el(k)) - xi2BCb(k) )**i
      &                          *( xagp(mm,pdg_el(k)) - xi1BCb(k) )**j  )  * wagp(mm,pdg_el(k))
 
                            iotataylor0slope(k,ll,1) =  iotataylor0slope(k,ll,1) + iotataylor(k,b_index,1) * 
-     &                          (1.D0/fact(i)*fact(j))* ( ( yagp(mm,pdg_el(k)) - xi2BCb(k) )**i
+     &                          (1.0/fact(i)*fact(j))* ( ( yagp(mm,pdg_el(k)) - xi2BCb(k) )**i
      &                          *( xagp(mm,pdg_el(k)) - xi1BCb(k) )**j  )  * wagp(mm,pdg_el(k))
 #endif
 
 #ifdef CHEM
                            iotataylor0(k,ll,1) =   iotataylor0(k,ll,1) + iotataylor(k,b_index,1) * 
-     &                          (1.D0/fact(i)*fact(j))* ( ( yagp(mm,pdg_el(k)) - xi2BCb(k) )**i
+     &                          (1.0/fact(i)*fact(j))* ( ( yagp(mm,pdg_el(k)) - xi2BCb(k) )**i
      &                          *( xagp(mm,pdg_el(k)) - xi1BCb(k) )**j  )  * wagp(mm,pdg_el(k))
 
                            iotataylor0slope(k,ll,1) =  iotataylor0slope(k,ll,1) + iotataylor(k,b_index,1) * 
-     &                          (1.D0/fact(i)*fact(j))* ( ( yagp(mm,pdg_el(k)) - xi2BCb(k) )**i
+     &                          (1.0/fact(i)*fact(j))* ( ( yagp(mm,pdg_el(k)) - xi2BCb(k) )**i
      &                          *( xagp(mm,pdg_el(k)) - xi1BCb(k) )**j  )  * wagp(mm,pdg_el(k))
 
                            iota2taylor0(k,ll,1) =   iota2taylor0(k,ll,1) + iota2taylor(k,b_index,1) * 
-     &                          (1.D0/fact(i)*fact(j))* ( ( yagp(mm,pdg_el(k)) - xi2BCb(k) )**i
+     &                          (1.0/fact(i)*fact(j))* ( ( yagp(mm,pdg_el(k)) - xi2BCb(k) )**i
      &                          *( xagp(mm,pdg_el(k)) - xi1BCb(k) )**j  )  * wagp(mm,pdg_el(k))
 
                            iota2taylor0slope(k,ll,1) =  iota2taylor0slope(k,ll,1) + iota2taylor(k,b_index,1) * 
-     &                          (1.D0/fact(i)*fact(j))* ( ( yagp(mm,pdg_el(k)) - xi2BCb(k) )**i
+     &                          (1.0/fact(i)*fact(j))* ( ( yagp(mm,pdg_el(k)) - xi2BCb(k) )**i
      &                          *( xagp(mm,pdg_el(k)) - xi1BCb(k) )**j  )  * wagp(mm,pdg_el(k))
 #endif
 
@@ -7832,13 +7832,13 @@ C.....Generate linear recostructions at vertices
 
                                 !Find Candidates
 
-      ZE_cand = 0.D0
-      QX_cand = 0.D0
-      QY_cand = 0.D0
+      ZE_cand = 0.0
+      QX_cand = 0.0
+      QY_cand = 0.0
 
-      iota_cand = 0.D0
+      iota_cand = 0.0
 
-      iota2_cand = 0.D0
+      iota2_cand = 0.0
 
       do k=1,mne
 
@@ -7886,17 +7886,17 @@ C.....Generate linear recostructions at vertices
 
                                 !Find the minmod functions
 
-      ZE_minmod(k,ll,1) = 0.D0
-      QX_minmod(k,ll,1) = 0.D0
-      QY_minmod(k,ll,1) = 0.D0
+      ZE_minmod(k,ll,1) = 0.0
+      QX_minmod(k,ll,1) = 0.0
+      QY_minmod(k,ll,1) = 0.0
       
 #ifdef TRACE
-      iota_minmod(k,ll,1) = 0.D0
+      iota_minmod(k,ll,1) = 0.0
 #endif
 
 #ifdef CHEM
-      iota_minmod(k,ll,1) = 0.D0
-      iota2_minmod(k,ll,1) = 0.D0
+      iota_minmod(k,ll,1) = 0.0
+      iota2_minmod(k,ll,1) = 0.0
 #endif
 
 c$$$  #ifdef CMPI
@@ -7938,45 +7938,45 @@ c$$$  #endif
                   if (MUSCL.eq.1) then !construct MUSCL minmod
 
 
-                     if (minval(ZE_cand(focal_neigh(k,1:focal_up(k)),ll,1)).gt.0.D0 ) then
+                     if (minval(ZE_cand(focal_neigh(k,1:focal_up(k)),ll,1)).gt.0.0 ) then
 
                         ZE_minmod(k,ll,1) = minval(ZE_cand(focal_neigh(k,1:focal_up(k)),ll,1))
 
-                     elseif (maxval(ZE_cand(focal_neigh(k,1:focal_up(k)),ll,1)).lt.0.D0 ) then
+                     elseif (maxval(ZE_cand(focal_neigh(k,1:focal_up(k)),ll,1)).lt.0.0 ) then
 
                         ZE_minmod(k,ll,1) = maxval(ZE_cand(focal_neigh(k,1:focal_up(k)),ll,1))
 
                      else
 
-                        ZE_minmod(k,ll,1) = 0.D0
+                        ZE_minmod(k,ll,1) = 0.0
 
                      endif
 
-                     if (minval(QX_cand(focal_neigh(k,1:focal_up(k)),ll,1)).gt.0.D0 ) then
+                     if (minval(QX_cand(focal_neigh(k,1:focal_up(k)),ll,1)).gt.0.0 ) then
 
                         QX_minmod(k,ll,1) = minval(QX_cand(focal_neigh(k,1:focal_up(k)),ll,1))
 
-                     elseif (maxval(QX_cand(focal_neigh(k,1:focal_up(k)),ll,1)).lt.0.D0 ) then
+                     elseif (maxval(QX_cand(focal_neigh(k,1:focal_up(k)),ll,1)).lt.0.0 ) then
 
                         QX_minmod(k,ll,1) = maxval(QX_cand(focal_neigh(k,1:focal_up(k)),ll,1))
 
                      else
 
-                        QX_minmod(k,ll,1) = 0.D0
+                        QX_minmod(k,ll,1) = 0.0
 
                      endif
 
-                     if (minval(QY_cand(focal_neigh(k,1:focal_up(k)),ll,1)).gt.0.D0 ) then
+                     if (minval(QY_cand(focal_neigh(k,1:focal_up(k)),ll,1)).gt.0.0 ) then
 
                         QY_minmod(k,ll,1) = minval(QY_cand(focal_neigh(k,1:focal_up(k)),ll,1))
 
-                     elseif (maxval(QY_cand(focal_neigh(k,1:focal_up(k)),ll,1)).lt.0.D0 ) then
+                     elseif (maxval(QY_cand(focal_neigh(k,1:focal_up(k)),ll,1)).lt.0.0 ) then
 
                         QY_minmod(k,ll,1) = maxval(QY_cand(focal_neigh(k,1:focal_up(k)),ll,1))
 
                      else
 
-                        QY_minmod(k,ll,1) = 0.D0
+                        QY_minmod(k,ll,1) = 0.0
 
                      endif
                      
@@ -7997,17 +7997,17 @@ c$$$  #endif
                   if (MUSCL.eq.1) then !construct MUSCL minmod
 
 
-                     if (minval(iota_cand(focal_neigh(k,1:focal_up(k)),ll,1)).gt.0.D0 ) then
+                     if (minval(iota_cand(focal_neigh(k,1:focal_up(k)),ll,1)).gt.0.0 ) then
 
                         iota_minmod(k,ll,1) = minval(iota_cand(focal_neigh(k,1:focal_up(k)),ll,1))
 
-                     elseif (maxval(iota_cand(focal_neigh(k,1:focal_up(k)),ll,1)).lt.0.D0 ) then
+                     elseif (maxval(iota_cand(focal_neigh(k,1:focal_up(k)),ll,1)).lt.0.0 ) then
 
                         iota_minmod(k,ll,1) = maxval(iota_cand(focal_neigh(k,1:focal_up(k)),ll,1))
 
                      else
 
-                        iota_minmod(k,ll,1) = 0.D0
+                        iota_minmod(k,ll,1) = 0.0
 
                      endif
                      
@@ -8027,17 +8027,17 @@ c$$$  #endif
                   if (MUSCL.eq.1) then !construct MUSCL minmod
 
 
-                     if (minval(iota_cand(focal_neigh(k,1:focal_up(k)),ll,1)).gt.0.D0 ) then
+                     if (minval(iota_cand(focal_neigh(k,1:focal_up(k)),ll,1)).gt.0.0 ) then
 
                         iota_minmod(k,ll,1) = minval(iota_cand(focal_neigh(k,1:focal_up(k)),ll,1))
 
-                     elseif (maxval(iota_cand(focal_neigh(k,1:focal_up(k)),ll,1)).lt.0.D0 ) then
+                     elseif (maxval(iota_cand(focal_neigh(k,1:focal_up(k)),ll,1)).lt.0.0 ) then
 
                         iota_minmod(k,ll,1) = maxval(iota_cand(focal_neigh(k,1:focal_up(k)),ll,1))
 
                      else
 
-                        iota_minmod(k,ll,1) = 0.D0
+                        iota_minmod(k,ll,1) = 0.0
 
                      endif
                      
@@ -8055,17 +8055,17 @@ c$$$  #endif
                   if (MUSCL.eq.1) then !construct MUSCL minmod
 
 
-                     if (minval(iota2_cand(focal_neigh(k,1:focal_up(k)),ll,1)).gt.0.D0 ) then
+                     if (minval(iota2_cand(focal_neigh(k,1:focal_up(k)),ll,1)).gt.0.0 ) then
 
                         iota2_minmod(k,ll,1) = minval(iota2_cand(focal_neigh(k,1:focal_up(k)),ll,1))
 
-                     elseif (maxval(iota2_cand(focal_neigh(k,1:focal_up(k)),ll,1)).lt.0.D0 ) then
+                     elseif (maxval(iota2_cand(focal_neigh(k,1:focal_up(k)),ll,1)).lt.0.0 ) then
 
                         iota2_minmod(k,ll,1) = maxval(iota2_cand(focal_neigh(k,1:focal_up(k)),ll,1))
 
                      else
 
-                        iota2_minmod(k,ll,1) = 0.D0
+                        iota2_minmod(k,ll,1) = 0.0
 
                      endif
                      
@@ -8085,45 +8085,45 @@ c$$$  #endif
 
                   if (MUSCL.eq.1) then !construct MUSCL minmod
 
-                     if (ZE_cand(k,ll,1).gt.0.D0 ) then
+                     if (ZE_cand(k,ll,1).gt.0.0 ) then
 
                         ZE_minmod(k,ll,1) = minval(ZE_cand(El_nbors(:,k),ll,1))
 
-                     elseif (ZE_cand(k,ll,1).lt.0.D0 ) then
+                     elseif (ZE_cand(k,ll,1).lt.0.0 ) then
 
                         ZE_minmod(k,ll,1) = maxval(ZE_cand(El_nbors(:,k),ll,1))
 
                      else
 
-                        ZE_minmod(k,ll,1) = 0.D0
+                        ZE_minmod(k,ll,1) = 0.0
 
                      endif
 
-                     if (QX_cand(k,ll,1).gt.0.D0 ) then
+                     if (QX_cand(k,ll,1).gt.0.0 ) then
 
                         QX_minmod(k,ll,1) = minval(QX_cand(El_nbors(:,k),ll,1))
 
-                     elseif (QX_cand(k,ll,1).lt.0.D0 ) then
+                     elseif (QX_cand(k,ll,1).lt.0.0 ) then
 
                         QX_minmod(k,ll,1) = maxval(QX_cand(El_nbors(:,k),ll,1))
 
                      else
 
-                        QX_minmod(k,ll,1) = 0.D0
+                        QX_minmod(k,ll,1) = 0.0
 
                      endif
 
-                     if (QY_cand(k,ll,1).gt.0.D0 ) then
+                     if (QY_cand(k,ll,1).gt.0.0 ) then
 
                         QY_minmod(k,ll,1) = minval(QY_cand(El_nbors(:,k),ll,1))
 
-                     elseif (QY_cand(k,ll,1).lt.0.D0 ) then
+                     elseif (QY_cand(k,ll,1).lt.0.0 ) then
 
                         QY_minmod(k,ll,1) = maxval(QY_cand(El_nbors(:,k),ll,1))
 
                      else
 
-                        QY_minmod(k,ll,1) = 0.D0
+                        QY_minmod(k,ll,1) = 0.0
 
                      endif
 
@@ -8142,17 +8142,17 @@ c$$$  #endif
 #ifdef TRACE
                   if (MUSCL.eq.1) then !construct MUSCL minmod
 
-                     if (iota_cand(k,ll,1).gt.0.D0 ) then
+                     if (iota_cand(k,ll,1).gt.0.0 ) then
 
                         iota_minmod(k,ll,1) = minval(iota_cand(El_nbors(:,k),ll,1))
 
-                     elseif (iota_cand(k,ll,1).lt.0.D0 ) then
+                     elseif (iota_cand(k,ll,1).lt.0.0 ) then
 
                         iota_minmod(k,ll,1) = maxval(iota_cand(El_nbors(:,k),ll,1))
 
                      else
 
-                        iota_minmod(k,ll,1) = 0.D0
+                        iota_minmod(k,ll,1) = 0.0
 
                      endif
 
@@ -8170,17 +8170,17 @@ c$$$  #endif
 #ifdef CHEM
                   if (MUSCL.eq.1) then !construct MUSCL minmod
 
-                     if (iota_cand(k,ll,1).gt.0.D0 ) then
+                     if (iota_cand(k,ll,1).gt.0.0 ) then
 
                         iota_minmod(k,ll,1) = minval(iota_cand(El_nbors(:,k),ll,1))
 
-                     elseif (iota_cand(k,ll,1).lt.0.D0 ) then
+                     elseif (iota_cand(k,ll,1).lt.0.0 ) then
 
                         iota_minmod(k,ll,1) = maxval(iota_cand(El_nbors(:,k),ll,1))
 
                      else
 
-                        iota_minmod(k,ll,1) = 0.D0
+                        iota_minmod(k,ll,1) = 0.0
 
                      endif
 
@@ -8196,17 +8196,17 @@ c$$$  #endif
 
                   if (MUSCL.eq.1) then !construct MUSCL minmod
 
-                     if (iota2_cand(k,ll,1).gt.0.D0 ) then
+                     if (iota2_cand(k,ll,1).gt.0.0 ) then
 
                         iota2_minmod(k,ll,1) = minval(iota2_cand(El_nbors(:,k),ll,1))
 
-                     elseif (iota2_cand(k,ll,1).lt.0.D0 ) then
+                     elseif (iota2_cand(k,ll,1).lt.0.0 ) then
 
                         iota2_minmod(k,ll,1) = maxval(iota2_cand(El_nbors(:,k),ll,1))
 
                      else
 
-                        iota2_minmod(k,ll,1) = 0.D0
+                        iota2_minmod(k,ll,1) = 0.0
 
                      endif
 
@@ -8245,17 +8245,17 @@ c$$$  #endif
 
 C.....Transform back to the Dubiner basis (multiply by NmatrixInv),
 
-      ZEconst =  0.D0
-      QXconst =  0.D0
-      QYconst =  0.D0
+      ZEconst =  0.0
+      QXconst =  0.0
+      QYconst =  0.0
 
 #ifdef TRACE
-      iotaconst =  0.D0
+      iotaconst =  0.0
 #endif
 
 #ifdef CHEM
-      iotaconst =  0.D0
-      iota2const =  0.D0
+      iotaconst =  0.0
+      iota2const =  0.0
 #endif
 
       do k=1,ne
@@ -8416,17 +8416,17 @@ C     SHARING A NODE
 c.....convert initial values to the taylor basis (multiply by nmatrix) on base element
 
 
-      zetaylor = 0.d0 
-      qxtaylor = 0.d0
-      qytaylor = 0.d0
+      zetaylor = 0.0 
+      qxtaylor = 0.0
+      qytaylor = 0.0
 
 #ifdef TRACE
-      iotataylor = 0.d0
+      iotataylor = 0.0
 #endif
 
 #ifdef CHEM
-      iotataylor = 0.d0
-      iota2taylor = 0.d0
+      iotataylor = 0.0
+      iota2taylor = 0.0
 #endif
 
       do k=1,ne
@@ -8473,17 +8473,17 @@ c.....convert initial values to the taylor basis (multiply by nmatrix) on base e
 #endif
 
 
-      temparray1 = 0.D0
-      temparray2 = 0.D0
-      temparray3 = 0.D0
+      temparray1 = 0.0
+      temparray2 = 0.0
+      temparray3 = 0.0
 
 #ifdef TRACE
-      temparray4 = 0.D0
+      temparray4 = 0.0
 #endif
 
 #ifdef CHEM
-      temparray4 = 0.D0
-      temparray5 = 0.D0
+      temparray4 = 0.0
+      temparray5 = 0.0
 #endif
 
       do ll=dofh,1,-1
@@ -8524,126 +8524,126 @@ c.....convert initial values to the taylor basis (multiply by nmatrix) on base e
 
                do k = 1,ne
 
-                  if (ZEtaylor(k,ll+floor( 0.5D0 + sqrt(real(2*ll))+1 ),1 ).gt.0.D0.and.
-     &                 temparray1(k,ll+1+floor(  0.5D0 + sqrt(real(2*(ll+1)))),1).gt.0.D0 ) then
+                  if (ZEtaylor(k,ll+floor( 0.5D0 + sqrt(real(2*ll))+1 ),1 ).gt.0.0.and.
+     &                 temparray1(k,ll+1+floor(  0.5D0 + sqrt(real(2*(ll+1)))),1).gt.0.0 ) then
 
                      ZEtaylor(k,ll+floor( 0.5D0 + sqrt(real(2*ll))+1 ),1 ) = 
      &                    min(ZEtaylor(k,ll+floor(  0.5D0 + sqrt(real(2*ll)) + 1 ),1),
      &                    temparray1(k,ll+1+floor(  0.5D0 + sqrt(real(2*(ll+1)))),1))
 
-                  elseif (ZEtaylor(k,ll+floor( 0.5D0 + sqrt(real(2*ll)) +1 ),1 ).lt.0.D0.and.
-     &                    temparray1(k,ll+1+floor(  0.5D0 + sqrt(real(2*(ll+1)))),1).lt.0.D0 ) then
+                  elseif (ZEtaylor(k,ll+floor( 0.5D0 + sqrt(real(2*ll)) +1 ),1 ).lt.0.0.and.
+     &                    temparray1(k,ll+1+floor(  0.5D0 + sqrt(real(2*(ll+1)))),1).lt.0.0 ) then
                      
                      ZEtaylor(k,ll+floor( 0.5D0 + sqrt(real(2*ll))+1 ),1 ) =  
      &                    max(ZEtaylor(k,ll+floor(  0.5D0 + sqrt(real(2*ll)) + 1),1),
      &                    temparray1(k,ll+1+floor(  0.5D0 + sqrt(real(2*(ll+1)))),1))
 
-                  elseif (temparray1(k,ll+1+floor(  0.5D0 + sqrt(real(2*(ll+1)))),1).ne.0.D0) then
+                  elseif (temparray1(k,ll+1+floor(  0.5D0 + sqrt(real(2*(ll+1)))),1).ne.0.0) then
 
-                     ZEtaylor(k,ll+floor( 0.5D0 + sqrt(real(2*ll)) +1),1 ) = 0.D0
+                     ZEtaylor(k,ll+floor( 0.5D0 + sqrt(real(2*ll)) +1),1 ) = 0.0
 
                   endif
 
-                  if (QXtaylor(k,ll+floor( 0.5D0 + sqrt(real(2*ll))+1 ),1 ).gt.0.D0.and.
-     &                 temparray2(k,ll+1+floor(  0.5D0 + sqrt(real(2*(ll+1)))),1).gt.0.D0 ) then
+                  if (QXtaylor(k,ll+floor( 0.5D0 + sqrt(real(2*ll))+1 ),1 ).gt.0.0.and.
+     &                 temparray2(k,ll+1+floor(  0.5D0 + sqrt(real(2*(ll+1)))),1).gt.0.0 ) then
 
                      QXtaylor(k,ll+floor( 0.5D0 + sqrt(real(2*ll))+1 ),1 ) = 
      &                    min(QXtaylor(k,ll+floor(  0.5D0 + sqrt(real(2*ll)) + 1 ),1),
      &                    temparray2(k,ll+1+floor(  0.5D0 + sqrt(real(2*(ll+1)))),1))
 
-                  elseif (QXtaylor(k,ll+floor( 0.5D0 + sqrt(real(2*ll)) +1 ),1 ).lt.0.D0.and.
-     &                    temparray2(k,ll+1+floor(  0.5D0 + sqrt(real(2*(ll+1)))),1).lt.0.D0 ) then
+                  elseif (QXtaylor(k,ll+floor( 0.5D0 + sqrt(real(2*ll)) +1 ),1 ).lt.0.0.and.
+     &                    temparray2(k,ll+1+floor(  0.5D0 + sqrt(real(2*(ll+1)))),1).lt.0.0 ) then
                      
                      QXtaylor(k,ll+floor( 0.5D0 + sqrt(real(2*ll))+1 ),1 ) =  
      &                    max(QXtaylor(k,ll+floor(  0.5D0 + sqrt(real(2*ll)) + 1),1),
      &                    temparray2(k,ll+1+floor(  0.5D0 + sqrt(real(2*(ll+1)))),1))
 
-                  elseif (temparray2(k,ll+1+floor(  0.5D0 + sqrt(real(2*(ll+1)))),1).ne.0.D0) then
+                  elseif (temparray2(k,ll+1+floor(  0.5D0 + sqrt(real(2*(ll+1)))),1).ne.0.0) then
 
-                     QXtaylor(k,ll+floor( 0.5D0 + sqrt(real(2*ll)) +1),1 ) = 0.D0
+                     QXtaylor(k,ll+floor( 0.5D0 + sqrt(real(2*ll)) +1),1 ) = 0.0
 
                   endif
 
-                  if (QYtaylor(k,ll+floor( 0.5D0 + sqrt(real(2*ll))+1 ),1 ).gt.0.D0.and.
-     &                 temparray3(k,ll+1+floor(  0.5D0 + sqrt(real(2*(ll+1)))),1).gt.0.D0 ) then
+                  if (QYtaylor(k,ll+floor( 0.5D0 + sqrt(real(2*ll))+1 ),1 ).gt.0.0.and.
+     &                 temparray3(k,ll+1+floor(  0.5D0 + sqrt(real(2*(ll+1)))),1).gt.0.0 ) then
 
                      QYtaylor(k,ll+floor( 0.5D0 + sqrt(real(2*ll))+1 ),1 ) = 
      &                    min(QYtaylor(k,ll+floor(  0.5D0 + sqrt(real(2*ll)) + 1 ),1),
      &                    temparray3(k,ll+1+floor(  0.5D0 + sqrt(real(2*(ll+1)))),1))
 
-                  elseif (QYtaylor(k,ll+floor( 0.5D0 + sqrt(real(2*ll)) +1 ),1 ).lt.0.D0.and.
-     &                    temparray3(k,ll+1+floor(  0.5D0 + sqrt(real(2*(ll+1)))),1).lt.0.D0 ) then
+                  elseif (QYtaylor(k,ll+floor( 0.5D0 + sqrt(real(2*ll)) +1 ),1 ).lt.0.0.and.
+     &                    temparray3(k,ll+1+floor(  0.5D0 + sqrt(real(2*(ll+1)))),1).lt.0.0 ) then
                      
                      QYtaylor(k,ll+floor( 0.5D0 + sqrt(real(2*ll))+1 ),1 ) =  
      &                    max(QYtaylor(k,ll+floor(  0.5D0 + sqrt(real(2*ll)) + 1),1),
      &                    temparray3(k,ll+1+floor(  0.5D0 + sqrt(real(2*(ll+1)))),1))
 
-                  elseif (temparray3(k,ll+1+floor(  0.5D0 + sqrt(real(2*(ll+1)))),1).ne.0.D0) then
+                  elseif (temparray3(k,ll+1+floor(  0.5D0 + sqrt(real(2*(ll+1)))),1).ne.0.0) then
 
-                     QYtaylor(k,ll+floor( 0.5D0 + sqrt(real(2*ll)) +1),1 ) = 0.D0
+                     QYtaylor(k,ll+floor( 0.5D0 + sqrt(real(2*ll)) +1),1 ) = 0.0
 
                   endif
 
 #ifdef TRACE
-                  if (iotataylor(k,ll+floor( 0.5D0 + sqrt(real(2*ll))+1 ),1 ).gt.0.D0.and.
-     &                 temparray4(k,ll+1+floor(  0.5D0 + sqrt(real(2*(ll+1)))),1).gt.0.D0 ) then
+                  if (iotataylor(k,ll+floor( 0.5D0 + sqrt(real(2*ll))+1 ),1 ).gt.0.0.and.
+     &                 temparray4(k,ll+1+floor(  0.5D0 + sqrt(real(2*(ll+1)))),1).gt.0.0 ) then
 
                      iotataylor(k,ll+floor( 0.5D0 + sqrt(real(2*ll))+1 ),1 ) = 
      &                    min(iotataylor(k,ll+floor(  0.5D0 + sqrt(real(2*ll)) + 1 ),1),
      &                    temparray4(k,ll+1+floor(  0.5D0 + sqrt(real(2*(ll+1)))),1))
 
-                  elseif (iotataylor(k,ll+floor( 0.5D0 + sqrt(real(2*ll)) +1 ),1 ).lt.0.D0.and.
-     &                    temparray4(k,ll+1+floor(  0.5D0 + sqrt(real(2*(ll+1)))),1).lt.0.D0 ) then
+                  elseif (iotataylor(k,ll+floor( 0.5D0 + sqrt(real(2*ll)) +1 ),1 ).lt.0.0.and.
+     &                    temparray4(k,ll+1+floor(  0.5D0 + sqrt(real(2*(ll+1)))),1).lt.0.0 ) then
                      
                      iotataylor(k,ll+floor( 0.5D0 + sqrt(real(2*ll))+1 ),1 ) =  
      &                    max(iotataylor(k,ll+floor(  0.5D0 + sqrt(real(2*ll)) + 1),1),
      &                    temparray4(k,ll+1+floor(  0.5D0 + sqrt(real(2*(ll+1)))),1))
 
-                  elseif (temparray4(k,ll+1+floor(  0.5D0 + sqrt(real(2*(ll+1)))),1).ne.0.D0) then
+                  elseif (temparray4(k,ll+1+floor(  0.5D0 + sqrt(real(2*(ll+1)))),1).ne.0.0) then
 
-                     iotataylor(k,ll+floor( 0.5D0 + sqrt(real(2*ll)) +1),1 ) = 0.D0
+                     iotataylor(k,ll+floor( 0.5D0 + sqrt(real(2*ll)) +1),1 ) = 0.0
 
                   endif
 #endif
 
 #ifdef CHEM
-                  if (iotataylor(k,ll+floor( 0.5D0 + sqrt(real(2*ll))+1 ),1 ).gt.0.D0.and.
-     &                 temparray4(k,ll+1+floor(  0.5D0 + sqrt(real(2*(ll+1)))),1).gt.0.D0 ) then
+                  if (iotataylor(k,ll+floor( 0.5D0 + sqrt(real(2*ll))+1 ),1 ).gt.0.0.and.
+     &                 temparray4(k,ll+1+floor(  0.5D0 + sqrt(real(2*(ll+1)))),1).gt.0.0 ) then
 
                      iotataylor(k,ll+floor( 0.5D0 + sqrt(real(2*ll))+1 ),1 ) = 
      &                    min(iotataylor(k,ll+floor(  0.5D0 + sqrt(real(2*ll)) + 1 ),1),
      &                    temparray4(k,ll+1+floor(  0.5D0 + sqrt(real(2*(ll+1)))),1))
 
-                  elseif (iotataylor(k,ll+floor( 0.5D0 + sqrt(real(2*ll)) +1 ),1 ).lt.0.D0.and.
-     &                    temparray4(k,ll+1+floor(  0.5D0 + sqrt(real(2*(ll+1)))),1).lt.0.D0 ) then
+                  elseif (iotataylor(k,ll+floor( 0.5D0 + sqrt(real(2*ll)) +1 ),1 ).lt.0.0.and.
+     &                    temparray4(k,ll+1+floor(  0.5D0 + sqrt(real(2*(ll+1)))),1).lt.0.0 ) then
                      
                      iotataylor(k,ll+floor( 0.5D0 + sqrt(real(2*ll))+1 ),1 ) =  
      &                    max(iotataylor(k,ll+floor(  0.5D0 + sqrt(real(2*ll)) + 1),1),
      &                    temparray4(k,ll+1+floor(  0.5D0 + sqrt(real(2*(ll+1)))),1))
 
-                  elseif (temparray4(k,ll+1+floor(  0.5D0 + sqrt(real(2*(ll+1)))),1).ne.0.D0) then
+                  elseif (temparray4(k,ll+1+floor(  0.5D0 + sqrt(real(2*(ll+1)))),1).ne.0.0) then
 
-                     iotataylor(k,ll+floor( 0.5D0 + sqrt(real(2*ll)) +1),1 ) = 0.D0
+                     iotataylor(k,ll+floor( 0.5D0 + sqrt(real(2*ll)) +1),1 ) = 0.0
 
                   endif
 
-                  if (iota2taylor(k,ll+floor( 0.5D0 + sqrt(real(2*ll))+1 ),1 ).gt.0.D0.and.
-     &                 temparray5(k,ll+1+floor(  0.5D0 + sqrt(real(2*(ll+1)))),1).gt.0.D0 ) then
+                  if (iota2taylor(k,ll+floor( 0.5D0 + sqrt(real(2*ll))+1 ),1 ).gt.0.0.and.
+     &                 temparray5(k,ll+1+floor(  0.5D0 + sqrt(real(2*(ll+1)))),1).gt.0.0 ) then
 
                      iota2taylor(k,ll+floor( 0.5D0 + sqrt(real(2*ll))+1 ),1 ) = 
      &                    min(iota2taylor(k,ll+floor(  0.5D0 + sqrt(real(2*ll)) + 1 ),1),
      &                    temparray5(k,ll+1+floor(  0.5D0 + sqrt(real(2*(ll+1)))),1))
 
-                  elseif (iota2taylor(k,ll+floor( 0.5D0 + sqrt(real(2*ll)) +1 ),1 ).lt.0.D0.and.
-     &                    temparray5(k,ll+1+floor(  0.5D0 + sqrt(real(2*(ll+1)))),1).lt.0.D0 ) then
+                  elseif (iota2taylor(k,ll+floor( 0.5D0 + sqrt(real(2*ll)) +1 ),1 ).lt.0.0.and.
+     &                    temparray5(k,ll+1+floor(  0.5D0 + sqrt(real(2*(ll+1)))),1).lt.0.0 ) then
                      
                      iota2taylor(k,ll+floor( 0.5D0 + sqrt(real(2*ll))+1 ),1 ) =  
      &                    max(iota2taylor(k,ll+floor(  0.5D0 + sqrt(real(2*ll)) + 1),1),
      &                    temparray5(k,ll+1+floor(  0.5D0 + sqrt(real(2*(ll+1)))),1))
 
-                  elseif (temparray5(k,ll+1+floor(  0.5D0 + sqrt(real(2*(ll+1)))),1).ne.0.D0) then
+                  elseif (temparray5(k,ll+1+floor(  0.5D0 + sqrt(real(2*(ll+1)))),1).ne.0.0) then
 
-                     iota2taylor(k,ll+floor( 0.5D0 + sqrt(real(2*ll)) +1),1 ) = 0.D0
+                     iota2taylor(k,ll+floor( 0.5D0 + sqrt(real(2*ll)) +1),1 ) = 0.0
 
                   endif
 #endif
@@ -8672,17 +8672,17 @@ c.....convert initial values to the taylor basis (multiply by nmatrix) on base e
 
 C.....Transform back to the Dubiner basis (multiply by NmatrixInv),
 
-      ZEconst =  0.D0
-      QXconst =  0.D0
-      QYconst =  0.D0
+      ZEconst =  0.0
+      QXconst =  0.0
+      QYconst =  0.0
 
 #ifdef TRACE
-      iotaconst =  0.D0
+      iotaconst =  0.0
 #endif
 
 #ifdef CHEM
-      iotaconst =  0.D0
-      iota2const =  0.D0
+      iotaconst =  0.0
+      iota2const =  0.0
 #endif
 
       do k=1,ne
@@ -8925,9 +8925,9 @@ C
 C     LOOP OVER ELEMENTS TO CALCULATE NEW VERTEX VALUES
 C     
 
-      zek = 0.D0
-      zecc = 0.D0
-      zeve = 0.D0
+      zek = 0.0
+      zecc = 0.0
+      zeve = 0.0
 
       DO I=1,NE 
 
@@ -9010,11 +9010,11 @@ C
             ENDIF
 
 
-            ZEVERTEX = 0.D0
-            zevertex2 = 0.D0
+            ZEVERTEX = 0.0
+            zevertex2 = 0.0
 
-            Zhi = 0.D0
-            ZhiInv = 0.D0
+            Zhi = 0.0
+            ZhiInv = 0.0
 
             do lll = 1,3
 
@@ -9044,9 +9044,9 @@ C
 C     RESET THE VERTEX VALUE TO BE LESS THAN OR EQUAL TO THE MAX AND
 C     GREATER THAN OR EQUAL TO THE MIN AT THAT VERTEX
 C     
-            ZEVERTEX(1)=DMAX1(DMIN1(ZEVERTEX(1),ZEMAX1(1)),ZEMIN1(1))
-            ZEVERTEX(2)=DMAX1(DMIN1(ZEVERTEX(2),ZEMAX1(2)),ZEMIN1(2))
-            ZEVERTEX(3)=DMAX1(DMIN1(ZEVERTEX(3),ZEMAX1(3)),ZEMIN1(3))
+            ZEVERTEX(1)=MAX(MIN(ZEVERTEX(1),ZEMAX1(1)),ZEMIN1(1))
+            ZEVERTEX(2)=MAX(MIN(ZEVERTEX(2),ZEMAX1(2)),ZEMIN1(2))
+            ZEVERTEX(3)=MAX(MIN(ZEVERTEX(3),ZEMAX1(3)),ZEMIN1(3))
 
 C     LOOP OVER THE VERTICES 3 TIMES
 C     IF THE VALUE AT THE VERTEX IS ABOVE (BELOW) THE MAX (MIN) AT THAT
@@ -9054,9 +9054,9 @@ C     VERTEX THEN SUBTRACT OFF THE DIFFERENCE AND ADD IT TO THE OTHER
 C     VERTICES
 C     
             DO LL=1,3
-               SUMLOC=(ZEVERTEX(1)+ZEVERTEX(2)+ZEVERTEX(3))/3.0D0
-               SUMDIF=(SUMLOC-ZEC(1))*3.0D0
-               SIGNDIF=DSIGN(1.D0,SUMDIF)
+               SUMLOC=(ZEVERTEX(1)+ZEVERTEX(2)+ZEVERTEX(3))/3.0
+               SUMDIF=(SUMLOC-ZEC(1))*3.0
+               SIGNDIF=SIGN(1.0,SUMDIF)
                DIF(1)=(ZEVERTEX(1)-ZEC(1))*SIGNDIF
                DIF(2)=(ZEVERTEX(2)-ZEC(1))*SIGNDIF
                DIF(3)=(ZEVERTEX(3)-ZEC(1))*SIGNDIF
@@ -9069,7 +9069,7 @@ C
                KDP=INC1+INC2+INC3
 C     
                DO K=1,3
-                  DIV=DMAX1(1.D0,DFLOAT(KDP))
+                  DIV=MAX(1.0,DFLOAT(KDP))
                   IF (DIF(K).GT.0) THEN
                      REDFAC=SUMDIF*SIGNDIF/DIV
                      KDP=KDP-1
@@ -9081,7 +9081,7 @@ C
                   ELSE
                      REDMAX=ZEMAX1(K)-ZEVERTEX(K)
                   ENDIF
-                  REDFAC=DMIN1(REDFAC,REDMAX)
+                  REDFAC=MIN(REDFAC,REDMAX)
                   SUMDIF=SUMDIF-REDFAC*SIGNDIF
                   ZEVERTEX(K)=ZEVERTEX(K)-REDFAC*SIGNDIF
                ENDDO
@@ -9091,8 +9091,8 @@ C
 
             IF (IVAR.EQ.1) THEN
 
-               ZEder(i,l2,1)= 0.D0
-               ZEder(i,l3,1)= 0.D0
+               ZEder(i,l2,1)= 0.0
+               ZEder(i,l3,1)= 0.0
 
                do lll = 1,3
 
@@ -9111,8 +9111,8 @@ C
 
             IF (IVAR.EQ.2) THEN
 
-               QXder(i,l2,1)= 0.D0
-               QXder(i,l3,1)= 0.D0
+               QXder(i,l2,1)= 0.0
+               QXder(i,l3,1)= 0.0
 
                do lll = 1,3
 
@@ -9130,8 +9130,8 @@ C
 
             IF (IVAR.EQ.3) THEN
 
-               QYder(i,l2,1)= 0.D0
-               QYder(i,l3,1)= 0.D0
+               QYder(i,l2,1)= 0.0
+               QYder(i,l3,1)= 0.0
 
                do lll = 1,3
 
@@ -9151,8 +9151,8 @@ C
 
                                 !Call Inv2(Zhi, ZhiInv, 3) 
                
-               iotader(i,l2,1)= 0.D0
-               iotader(i,l3,1)= 0.D0
+               iotader(i,l2,1)= 0.0
+               iotader(i,l3,1)= 0.0
 
                do lll = 1,3
 
@@ -9170,8 +9170,8 @@ C
 
             IF (IVAR.EQ.5) THEN
                
-               iota2der(i,l2,1)= 0.D0
-               iota2der(i,l3,1)= 0.D0
+               iota2der(i,l2,1)= 0.0
+               iota2der(i,l3,1)= 0.0
                
                do lll = 1,3
                   
@@ -9265,19 +9265,19 @@ c$$$         endif
 c$$$
 c$$$      ENDDO   
 c$$$
-c$$$      marea = 2.D0              !master elements area
+c$$$      marea = 2.0              !master elements area
 c$$$
 c$$$C.....Convert initial values to the Taylor basis (multiply by Nmatrix) on base element
 c$$$
 c$$$
-c$$$      ZEtaylor = 0.D0 
-c$$$      QXtaylor = 0.D0
-c$$$      QYtaylor = 0.D0
+c$$$      ZEtaylor = 0.0 
+c$$$      QXtaylor = 0.0
+c$$$      QYtaylor = 0.0
 c$$$
 c$$$      if (tracer_flag.eq.1.or.chem_flag.eq.1) then
 c$$$
-c$$$         iotataylor = 0.D0
-c$$$         iota2taylor = 0.D0
+c$$$         iotataylor = 0.0
+c$$$         iota2taylor = 0.0
 c$$$
 c$$$      endif
 c$$$
@@ -9321,26 +9321,26 @@ c$$$
 c$$$C.....Find values at vertices of base elements and neighbors
 c$$$
 c$$$
-c$$$      ZEmax = -100.D0
-c$$$      QXmax = -100.D0
-c$$$      QYmax = -100.D0
-c$$$      ZEmin = 100.D0
-c$$$      QXmin = 100.D0
-c$$$      QYmin = 100.D0
+c$$$      ZEmax = -100.0
+c$$$      QXmax = -100.0
+c$$$      QYmax = -100.0
+c$$$      ZEmin = 100.0
+c$$$      QXmin = 100.0
+c$$$      QYmin = 100.0
 c$$$
 c$$$      if (tracer_flag.eq.1) then
 c$$$
-c$$$         iotamax = -100.D0
-c$$$         iotamin = 100.D0
+c$$$         iotamax = -100.0
+c$$$         iotamin = 100.0
 c$$$
 c$$$      endif
 c$$$
 c$$$      if (chem_flag.eq.1) then
 c$$$
-c$$$         iotamax = -100.D0
-c$$$         iota2max = -100.D0
-c$$$         iotamin = 100.D0
-c$$$         iota2min = 100.D0
+c$$$         iotamax = -100.0
+c$$$         iota2max = -100.0
+c$$$         iotamin = 100.0
+c$$$         iota2min = 100.0
 c$$$
 c$$$      endif
 c$$$
@@ -9465,20 +9465,20 @@ c$$$#endif
 c$$$
 c$$$C.....Must generate linear recostructions at vertices
 c$$$
-c$$$      ZEtaylorvert = 0.D0
-c$$$      QXtaylorvert = 0.D0
-c$$$      Qytaylorvert = 0.D0
+c$$$      ZEtaylorvert = 0.0
+c$$$      QXtaylorvert = 0.0
+c$$$      Qytaylorvert = 0.0
 c$$$
 c$$$      if (tracer_flag.eq.1) then
 c$$$
-c$$$         iotataylorvert = 0.D0
+c$$$         iotataylorvert = 0.0
 c$$$
 c$$$      endif
 c$$$
 c$$$      if (chem_flag.eq.1) then
 c$$$
-c$$$         iotataylorvert = 0.D0
-c$$$         iota2taylorvert = 0.D0
+c$$$         iotataylorvert = 0.0
+c$$$         iota2taylorvert = 0.0
 c$$$
 c$$$      endif
 c$$$
@@ -9570,20 +9570,20 @@ c$$$
 c$$$C.....Compute alphas for each variable in each order derivitive
 c$$$
 c$$$
-c$$$      alphaZE0 = 0.D0
-c$$$      alphaQX0 = 0.D0
-c$$$      alphaQY0 = 0.D0
+c$$$      alphaZE0 = 0.0
+c$$$      alphaQX0 = 0.0
+c$$$      alphaQY0 = 0.0
 c$$$
 c$$$      if (tracer_flag.eq.1) then
 c$$$
-c$$$         alphaiota0 = 0.D0
+c$$$         alphaiota0 = 0.0
 c$$$
 c$$$      endif
 c$$$
 c$$$      if (chem_flag.eq.1) then
 c$$$
-c$$$         alphaiota0 = 0.D0
-c$$$         alphaiota20 = 0.D0
+c$$$         alphaiota0 = 0.0
+c$$$         alphaiota20 = 0.0
 c$$$
 c$$$      endif
 c$$$
@@ -9601,7 +9601,7 @@ c$$$                     if ( ( ZEtaylorvert(k,ll,lll).gt.ZEtaylor(k,ll,1) ).and
 c$$$     &                    ( abs(ZEtaylorvert(k,ll,lll)-ZEtaylor(k,ll,1)).gt.1.0E-15 ).and.
 c$$$     &                    ( ZEmax(nm(k,lll),ll).ne.ZEtaylor(k,ll,1) ) ) then  
 c$$$
-c$$$                        alphaZE0(k,ll,lll) = min(1.D0,  ( ZEmax(nm(k,lll),ll)
+c$$$                        alphaZE0(k,ll,lll) = min(1.0,  ( ZEmax(nm(k,lll),ll)
 c$$$     &                       - ZEtaylor(k,ll,1) )/ (ZEtaylorvert(k,ll,lll) - ZEtaylor(k,ll,1)))
 c$$$
 c$$$                                !adapted part
@@ -9618,7 +9618,7 @@ c$$$                     elseif ( (ZEtaylorvert(k,ll,lll).lt.ZEtaylor(k,ll,1) )
 c$$$     &                       .and.( abs(ZEtaylorvert(k,ll,lll)-ZEtaylor(k,ll,1)).gt.1.0E-15 ).and.
 c$$$     &                       ( ZEmin(nm(k,lll),ll).ne.ZEtaylor(k,ll,1) ) ) then 
 c$$$
-c$$$                        alphaZE0(k,ll,lll) = min( 1.D0,( ZEmin(nm(k,lll),ll)
+c$$$                        alphaZE0(k,ll,lll) = min( 1.0,( ZEmin(nm(k,lll),ll)
 c$$$     &                       - ZEtaylor(k,ll,1) )/( ZEtaylorvert(k,ll,lll)-ZEtaylor(k,ll,1)))
 c$$$
 c$$$                                !adapted part
@@ -9634,13 +9634,13 @@ c$$$
 c$$$                     elseif ( ( ZEtaylorvert(k,ll,lll).eq.ZEtaylor(k,ll,1) ).or.
 c$$$     &                       ( abs(ZEtaylorvert(k,ll,lll)-ZEtaylor(k,ll,1)).le.1.0E-15 ) ) then
 c$$$
-c$$$                        alphaZE0(k,ll,lll) = 1.D0
+c$$$                        alphaZE0(k,ll,lll) = 1.0
 c$$$
 c$$$                     endif
 c$$$
 c$$$                  else
 c$$$
-c$$$                     alphaZE0(k,ll,lll) = 1.D0
+c$$$                     alphaZE0(k,ll,lll) = 1.0
 c$$$
 c$$$                  endif
 c$$$
@@ -9652,14 +9652,14 @@ c$$$                        if ( ( iotataylorvert(k,ll,lll).gt.iotataylor(k,ll,1
 c$$$     &                       ( abs(iotataylorvert(k,ll,lll)-iotataylor(k,ll,1)).gt.1.0E-15 ).and.
 c$$$     &                       ( iotamax(nm(k,lll),ll).ne.iotataylor(k,ll,1) ) ) then  
 c$$$
-c$$$                           alphaiota0(k,ll,lll) = min(1.D0,  ( iotamax(nm(k,lll),ll)
+c$$$                           alphaiota0(k,ll,lll) = min(1.0,  ( iotamax(nm(k,lll),ll)
 c$$$     &                          - iotataylor(k,ll,1) )/ (iotataylorvert(k,ll,lll) - iotataylor(k,ll,1)))
 c$$$  
 c$$$                        elseif ( ( iotataylorvert(k,ll,lll).lt.iotataylor(k,ll,1) ).and.
 c$$$     &                       ( abs(iotataylorvert(k,ll,lll)-iotataylor(k,ll,1)).gt.1.0E-15 ).and.
 c$$$     &                       ( iotamax(nm(k,lll),ll).ne.iotataylor(k,ll,1) ) ) then  
 c$$$
-c$$$                           alphaiota0(k,ll,lll) = min(1.D0,  ( iotamin(nm(k,lll),ll)
+c$$$                           alphaiota0(k,ll,lll) = min(1.0,  ( iotamin(nm(k,lll),ll)
 c$$$     &                          - iotataylor(k,ll,1) )/ (iotataylorvert(k,ll,lll) - iotataylor(k,ll,1)))
 c$$$
 c$$$                                !adapted part
@@ -9692,17 +9692,17 @@ c$$$                        elseif ( ( iotataylorvert(k,ll,lll).eq.iotataylor(k,
 c$$$     &                          ( abs(iotataylorvert(k,ll,lll)-iotataylor(k,ll,1)).le.1.0E-15 ).or.
 c$$$     &                           iotamin(nm(k,lll),ll).ne.iotamax(nm(k,lll),ll) ) then
 c$$$
-c$$$                           alphaiota0(k,ll,lll) = 1.D0
+c$$$                           alphaiota0(k,ll,lll) = 1.0
 c$$$
 c$$$                        endif
 c$$$
 c$$$                     else
 c$$$
-c$$$                        alphaiota0(k,ll,lll) = 1.D0
+c$$$                        alphaiota0(k,ll,lll) = 1.0
 c$$$
 c$$$                     endif
 c$$$
-c$$$                     if (alphaiota0(k,ll,lll).gt.1.d0.or.alphaiota0(k,ll,lll).lt.0.d0) then
+c$$$                     if (alphaiota0(k,ll,lll).gt.1.0.or.alphaiota0(k,ll,lll).lt.0.0) then
 c$$$
 c$$$                        print*,ll
 c$$$
@@ -9718,7 +9718,7 @@ c$$$                        if ( ( iotataylorvert(k,ll,lll).gt.iotataylor(k,ll,1
 c$$$     &                       ( abs(iotataylorvert(k,ll,lll)-iotataylor(k,ll,1)).gt.1.0E-15 ).and.
 c$$$     &                       ( iotamax(nm(k,lll),ll).ne.iotataylor(k,ll,1) ) ) then  
 c$$$
-c$$$                           alphaiota0(k,ll,lll) = min(1.D0,  ( iotamax(nm(k,lll),ll)
+c$$$                           alphaiota0(k,ll,lll) = min(1.0,  ( iotamax(nm(k,lll),ll)
 c$$$     &                          - iotataylor(k,ll,1) )/ (iotataylorvert(k,ll,lll) - iotataylor(k,ll,1)))
 c$$$
 c$$$                                !adapted part
@@ -9735,7 +9735,7 @@ c$$$                        elseif ( (iotataylorvert(k,ll,lll).lt.iotataylor(k,l
 c$$$     &                          .and.( abs(iotataylorvert(k,ll,lll)-iotataylor(k,ll,1)).gt.1.0E-15 ).and.
 c$$$     &                          ( iotamin(nm(k,lll),ll).ne.iotataylor(k,ll,1) ) ) then 
 c$$$
-c$$$                           alphaiota0(k,ll,lll) = min( 1.D0,( iotamin(nm(k,lll),ll)
+c$$$                           alphaiota0(k,ll,lll) = min( 1.0,( iotamin(nm(k,lll),ll)
 c$$$     &                          - iotataylor(k,ll,1) )/( iotataylorvert(k,ll,lll)-iotataylor(k,ll,1)))
 c$$$
 c$$$                                !adapted part
@@ -9751,13 +9751,13 @@ c$$$
 c$$$                        elseif ( ( iotataylorvert(k,ll,lll).eq.iotataylor(k,ll,1) ).or.
 c$$$     &                          ( abs(iotataylorvert(k,ll,lll)-iotataylor(k,ll,1)).le.1.0E-15 ) ) then
 c$$$
-c$$$                           alphaiota0(k,ll,lll) = 1.D0
+c$$$                           alphaiota0(k,ll,lll) = 1.0
 c$$$
 c$$$                        endif
 c$$$
 c$$$                     else
 c$$$
-c$$$                        alphaiota0(k,ll,lll) = 1.D0
+c$$$                        alphaiota0(k,ll,lll) = 1.0
 c$$$
 c$$$                     endif
 c$$$
@@ -9767,7 +9767,7 @@ c$$$                        if ( ( iota2taylorvert(k,ll,lll).gt.iota2taylor(k,ll
 c$$$     &                       ( abs(iota2taylorvert(k,ll,lll)-iota2taylor(k,ll,1)).gt.1.0E-15 ).and.
 c$$$     &                       ( iota2max(nm(k,lll),ll).ne.iota2taylor(k,ll,1) ) ) then  
 c$$$
-c$$$                           alphaiota20(k,ll,lll) = min(1.D0,  ( iota2max(nm(k,lll),ll)
+c$$$                           alphaiota20(k,ll,lll) = min(1.0,  ( iota2max(nm(k,lll),ll)
 c$$$     &                          - iota2taylor(k,ll,1) )/ (iota2taylorvert(k,ll,lll) - iota2taylor(k,ll,1)))
 c$$$
 c$$$                                !adapted part
@@ -9784,7 +9784,7 @@ c$$$                        elseif ( (iota2taylorvert(k,ll,lll).lt.iota2taylor(k
 c$$$     &                          .and.( abs(iota2taylorvert(k,ll,lll)-iota2taylor(k,ll,1)).gt.1.0E-15 ).and.
 c$$$     &                          ( iota2min(nm(k,lll),ll).ne.iota2taylor(k,ll,1) ) ) then 
 c$$$
-c$$$                           alphaiota20(k,ll,lll) = min( 1.D0,( iota2min(nm(k,lll),ll)
+c$$$                           alphaiota20(k,ll,lll) = min( 1.0,( iota2min(nm(k,lll),ll)
 c$$$     &                          - iota2taylor(k,ll,1) )/( iota2taylorvert(k,ll,lll)-iota2taylor(k,ll,1)))
 c$$$
 c$$$                                !adapted part
@@ -9800,13 +9800,13 @@ c$$$
 c$$$                        elseif ( ( iota2taylorvert(k,ll,lll).eq.iota2taylor(k,ll,1) ).or.
 c$$$     &                          ( abs(iota2taylorvert(k,ll,lll)-iota2taylor(k,ll,1)).le.1.0E-15 ) ) then
 c$$$
-c$$$                           alphaiota20(k,ll,lll) = 1.D0
+c$$$                           alphaiota20(k,ll,lll) = 1.0
 c$$$
 c$$$                        endif
 c$$$
 c$$$                     else
 c$$$
-c$$$                        alphaiota20(k,ll,lll) = 1.D0
+c$$$                        alphaiota20(k,ll,lll) = 1.0
 c$$$
 c$$$                     endif
 c$$$
@@ -9820,7 +9820,7 @@ c$$$                     if ( ( QXtaylorvert(k,ll,lll).gt.QXtaylor(k,ll,1) ).and
 c$$$     &                    ( abs(QXtaylorvert(k,ll,lll)-QXtaylor(k,ll,1)).gt.1.0E-15 ).and.
 c$$$     &                    ( QXmax(nm(k,lll),ll).ne.QXtaylor(k,ll,1) ) ) then  
 c$$$
-c$$$                        alphaQX0(k,ll,lll) = min(1.D0,  ( QXmax(nm(k,lll),ll)
+c$$$                        alphaQX0(k,ll,lll) = min(1.0,  ( QXmax(nm(k,lll),ll)
 c$$$     &                       - QXtaylor(k,ll,1) )/ (QXtaylorvert(k,ll,lll) - QXtaylor(k,ll,1)))
 c$$$
 c$$$                                !adapted part
@@ -9837,7 +9837,7 @@ c$$$                     elseif ( (QXtaylorvert(k,ll,lll).lt.QXtaylor(k,ll,1) )
 c$$$     &                       .and.( abs(QXtaylorvert(k,ll,lll)-QXtaylor(k,ll,1)).gt.1.0E-15 ).and.
 c$$$     &                       ( QXmin(nm(k,lll),ll).ne.QXtaylor(k,ll,1) ) ) then 
 c$$$
-c$$$                        alphaQX0(k,ll,lll) = min( 1.D0,( QXmin(nm(k,lll),ll)
+c$$$                        alphaQX0(k,ll,lll) = min( 1.0,( QXmin(nm(k,lll),ll)
 c$$$     &                       - QXtaylor(k,ll,1) )/( QXtaylorvert(k,ll,lll)-QXtaylor(k,ll,1)))
 c$$$
 c$$$                                !adapted part
@@ -9853,13 +9853,13 @@ c$$$
 c$$$                     elseif ( ( QXtaylorvert(k,ll,lll).eq.QXtaylor(k,ll,1) ).or.
 c$$$     &                       ( abs(QXtaylorvert(k,ll,lll)-QXtaylor(k,ll,1)).le.1.0E-15 ) ) then
 c$$$
-c$$$                        alphaQX0(k,ll,lll) = 1.D0
+c$$$                        alphaQX0(k,ll,lll) = 1.0
 c$$$
 c$$$                     endif
 c$$$
 c$$$                  else
 c$$$
-c$$$                     alphaQX0(k,ll,lll) = 1.D0
+c$$$                     alphaQX0(k,ll,lll) = 1.0
 c$$$
 c$$$                  endif
 c$$$
@@ -9870,7 +9870,7 @@ c$$$                     if ( ( QYtaylorvert(k,ll,lll).gt.QYtaylor(k,ll,1) ).and
 c$$$     &                    ( abs(QYtaylorvert(k,ll,lll)-QYtaylor(k,ll,1)).gt.1.0E-15 ).and.
 c$$$     &                    ( QYmax(nm(k,lll),ll).ne.QYtaylor(k,ll,1) ) ) then  
 c$$$
-c$$$                        alphaQY0(k,ll,lll) = min(1.D0,  ( QYmax(nm(k,lll),ll)
+c$$$                        alphaQY0(k,ll,lll) = min(1.0,  ( QYmax(nm(k,lll),ll)
 c$$$     &                       - QYtaylor(k,ll,1) )/ (QYtaylorvert(k,ll,lll) - QYtaylor(k,ll,1)))
 c$$$
 c$$$                                !adapted part
@@ -9887,7 +9887,7 @@ c$$$                     elseif ( (QYtaylorvert(k,ll,lll).lt.QYtaylor(k,ll,1) )
 c$$$     &                       .and.( abs(QYtaylorvert(k,ll,lll)-QYtaylor(k,ll,1)).gt.1.0E-15 ).and.
 c$$$     &                       ( QYmin(nm(k,lll),ll).ne.QYtaylor(k,ll,1) ) ) then 
 c$$$
-c$$$                        alphaQY0(k,ll,lll) = min( 1.D0,( QYmin(nm(k,lll),ll)
+c$$$                        alphaQY0(k,ll,lll) = min( 1.0,( QYmin(nm(k,lll),ll)
 c$$$     &                       - QYtaylor(k,ll,1) )/( QYtaylorvert(k,ll,lll)-QYtaylor(k,ll,1)))
 c$$$
 c$$$                                !adapted part
@@ -9903,13 +9903,13 @@ c$$$
 c$$$                     elseif ( ( QYtaylorvert(k,ll,lll).eq.QYtaylor(k,ll,1) ).or.
 c$$$     &                       ( abs(QYtaylorvert(k,ll,lll)-QYtaylor(k,ll,1)).le.1.0E-15 ) ) then
 c$$$
-c$$$                        alphaQY0(k,ll,lll) = 1.D0
+c$$$                        alphaQY0(k,ll,lll) = 1.0
 c$$$
 c$$$                     endif
 c$$$
 c$$$                  else
 c$$$
-c$$$                     alphaQY0(k,ll,lll) = 1.D0
+c$$$                     alphaQY0(k,ll,lll) = 1.0
 c$$$
 c$$$                  endif
 c$$$
@@ -9927,20 +9927,20 @@ c$$$      enddo
 c$$$
 c$$$C.... Choose smallest (minimum) alpha for derivative in x or y
 c$$$
-c$$$      alphaZEm = 0.D0
-c$$$      alphaQXm = 0.D0
-c$$$      alphaQYm = 0.D0
+c$$$      alphaZEm = 0.0
+c$$$      alphaQXm = 0.0
+c$$$      alphaQYm = 0.0
 c$$$
 c$$$      if (tracer_flag.eq.1) then
 c$$$
-c$$$         alphaiotam = 0.D0
+c$$$         alphaiotam = 0.0
 c$$$
 c$$$      endif
 c$$$
 c$$$      if (chem_flag.eq.1) then
 c$$$
-c$$$         alphaiotam = 0.D0
-c$$$         alphaiota2m = 0.D0
+c$$$         alphaiotam = 0.0
+c$$$         alphaiota2m = 0.0
 c$$$
 c$$$      endif
 c$$$
@@ -9989,20 +9989,20 @@ c$$$      enddo
 c$$$
 c$$$C.....Use max higher derivative values for final limiter value
 c$$$
-c$$$      alphaZE_max = 0.D0
-c$$$      alphaQX_max = 0.D0
-c$$$      alphaQY_max = 0.D0
+c$$$      alphaZE_max = 0.0
+c$$$      alphaQX_max = 0.0
+c$$$      alphaQY_max = 0.0
 c$$$
 c$$$      if (tracer_flag.eq.1) then
 c$$$
-c$$$         alphaiota_max = 0.D0
+c$$$         alphaiota_max = 0.0
 c$$$
 c$$$      endif
 c$$$
 c$$$      if (chem_flag.eq.1) then
 c$$$
-c$$$         alphaiota_max = 0.D0
-c$$$         alphaiota2_max = 0.D0
+c$$$         alphaiota_max = 0.0
+c$$$         alphaiota2_max = 0.0
 c$$$
 c$$$      endif
 c$$$
@@ -10053,22 +10053,22 @@ c$$$C.....Limit on the Master element in the Taylor basis, via reconstruction
 c$$$C.....of unconstrained solutions with alpha constraints
 c$$$
 c$$$
-c$$$      limitZE = 0.D0
-c$$$      limitQX = 0.D0
-c$$$      limitQY = 0.D0
+c$$$      limitZE = 0.0
+c$$$      limitQX = 0.0
+c$$$      limitQY = 0.0
 c$$$
-c$$$      lim_count_roll = 0.D0
+c$$$      lim_count_roll = 0.0
 c$$$
 c$$$      if (tracer_flag.eq.1) then
 c$$$
-c$$$         limitiota = 0.D0
+c$$$         limitiota = 0.0
 c$$$
 c$$$      endif
 c$$$
 c$$$      if (chem_flag.eq.1) then
 c$$$
-c$$$         limitiota = 0.D0
-c$$$         limitiota2 = 0.D0
+c$$$         limitiota = 0.0
+c$$$         limitiota2 = 0.0
 c$$$
 c$$$      endif
 c$$$
@@ -10103,8 +10103,8 @@ c$$$               elseif ( ll.ge.2 ) then
 c$$$                  
 c$$$                  do bb=1,pdg_el(k)
 c$$$
-c$$$                     if ( ll.le.( ( (bb+1)*(bb+2)) / 2.D0 ).and.(ll.gt.
-c$$$     &                    (bb*(bb+1)/2.D0) ) ) then
+c$$$                     if ( ll.le.( ( (bb+1)*(bb+2)) / 2.0 ).and.(ll.gt.
+c$$$     &                    (bb*(bb+1)/2.0) ) ) then
 c$$$
 c$$$                        limitZE(k,ll) = alphaZE_max(k,(bb*(bb+1))/2 + 1) 
 c$$$     &                       * ZEtaylor(k,ll,1)
@@ -10134,25 +10134,25 @@ c$$$
 c$$$
 c$$$                                ! Make a counter to track limiting
 c$$$
-c$$$                        if ( ( alphaZE_max(k,(bb*(bb+1))/2 + 1).lt.1.D0.or.
-c$$$     &                       alphaQX_max(k,(bb*(bb+1))/2 + 1).lt.1.D0.or.
-c$$$     &                       alphaQY_max(k,(bb*(bb+1))/2 + 1).lt.1.D0 ).and.
+c$$$                        if ( ( alphaZE_max(k,(bb*(bb+1))/2 + 1).lt.1.0.or.
+c$$$     &                       alphaQX_max(k,(bb*(bb+1))/2 + 1).lt.1.0.or.
+c$$$     &                       alphaQY_max(k,(bb*(bb+1))/2 + 1).lt.1.0 ).and.
 c$$$     &                       chem_flag.ne.1.and.tracer_flag.ne.1 ) then
 c$$$                           
 c$$$                           lim_count = 0  
 c$$$
-c$$$                        elseif ( ( alphaiota_max(k,(bb*(bb+1))/2 + 1).lt.1.D0 ).and.
+c$$$                        elseif ( ( alphaiota_max(k,(bb*(bb+1))/2 + 1).lt.1.0 ).and.
 c$$$     &                          tracer_flag.eq.1 ) then
 c$$$                           
 c$$$                           !print*,alphaiota_max(k,(bb*(bb+1))/2 + 1)
 c$$$
 c$$$                           lim_count = 1   
 c$$$                           
-c$$$                        elseif ( (alphaZE_max(k,(bb*(bb+1))/2 + 1).lt.1.D0.or.
-c$$$     &                          alphaQX_max(k,(bb*(bb+1))/2 + 1).lt.1.D0.or.
-c$$$     &                          alphaQY_max(k,(bb*(bb+1))/2 + 1).lt.1.D0.or.
-c$$$     &                          alphaiota_max(k,(bb*(bb+1))/2 + 1).lt.1.D0.or.
-c$$$     &                          alphaiota2_max(k,(bb*(bb+1))/2 + 1).lt.1.D0 ).and.
+c$$$                        elseif ( (alphaZE_max(k,(bb*(bb+1))/2 + 1).lt.1.0.or.
+c$$$     &                          alphaQX_max(k,(bb*(bb+1))/2 + 1).lt.1.0.or.
+c$$$     &                          alphaQY_max(k,(bb*(bb+1))/2 + 1).lt.1.0.or.
+c$$$     &                          alphaiota_max(k,(bb*(bb+1))/2 + 1).lt.1.0.or.
+c$$$     &                          alphaiota2_max(k,(bb*(bb+1))/2 + 1).lt.1.0 ).and.
 c$$$     &                          chem_flag.eq.1 ) then
 c$$$
 c$$$                           lim_count = 0 
@@ -10179,20 +10179,20 @@ c$$$      enddo
 c$$$
 c$$$C.....Transform back to the Dubiner basis (multiply by NmatrixInv),
 c$$$
-c$$$      ZEconst =  0.D0
-c$$$      QXconst =  0.D0
-c$$$      QYconst =  0.D0
+c$$$      ZEconst =  0.0
+c$$$      QXconst =  0.0
+c$$$      QYconst =  0.0
 c$$$
 c$$$      if (tracer_flag.eq.1) then
 c$$$
-c$$$         iotaconst =  0.D0
+c$$$         iotaconst =  0.0
 c$$$
 c$$$      endif
 c$$$
 c$$$      if (chem_flag.eq.1) then
 c$$$
-c$$$         iotaconst =  0.D0
-c$$$         iota2const =  0.D0
+c$$$         iotaconst =  0.0
+c$$$         iota2const =  0.0
 c$$$
 c$$$      endif
 c$$$

@@ -38,8 +38,8 @@ C.....Compute an average SFAC to adjust normal for CPP coordinates
         
 C.....Compute the length of the given egde
         
-        XLEN(I) = SQRT((Y(N2) - Y(N1))**2.D0
-     &                    + (X(N2) - X(N1))**2.D0)
+        XLEN(I) = SQRT((Y(N2) - Y(N1))**2.0
+     &                    + (X(N2) - X(N1))**2.0)
      
 C.....Compute the components of the normal vector
 

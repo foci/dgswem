@@ -43,19 +43,20 @@ C       wts: Array of quadrature weights of size n by 1.
 C
 C-----------------------------------------------------------------------
       subroutine quad_rules_general(n, lobatyn, alph, bet, pts, wts)
+      use sizes, only : sz
 
       implicit none
 
       integer n,np1,nm1,nin
       logical, intent(in) :: lobatyn
       integer j,m,quadtype,nn,p,ierr,i
-      real(8), intent(in) :: alph, bet
-      real(8), dimension(n), intent(out) :: pts, wts
-      real(8), dimension(n) :: aj, bj
-      real(8) :: Jac(n,n), augJ(n+1,n), eig(n), v(n)
-      real(8), dimension(0:n+1) :: polyo
-      real(8) eps, jrl, dum, ajp1, bjp1, x, prl,nv,lambda
-      real(8) summ, dpolyon, al, be, nrl,B0, gammaf
+      real(sz), intent(in) :: alph, bet
+      real(sz), dimension(n), intent(out) :: pts, wts
+      real(sz), dimension(n) :: aj, bj
+      real(sz) :: Jac(n,n), augJ(n+1,n), eig(n), v(n)
+      real(sz), dimension(0:n+1) :: polyo
+      real(sz) eps, jrl, dum, ajp1, bjp1, x, prl,nv,lambda
+      real(sz) summ, dpolyon, al, be, nrl,B0, gammaf
 
 c.....Determine whether Lobatto rules are needed. If so, 
 c.....prepare elements for modified Jacobi matrix, and
@@ -63,27 +64,27 @@ c.....places these elements in the necessary locations.
       if (lobatyn) then
          al = alph
          be = bet
-         if (.not.(alph.eq. 0.0d0 .and.bet.eq. 0.0d0)) then
+         if (.not.(alph.eq. 0.0 .and.bet.eq. 0.0)) then
             PRINT*,' ERROR ENCOUNTERED IN quad_rules_general.f! '
             PRINT*,' INVALID CHOICE(S) FOR ALPHA/BETA FOR QUADRATURE! '
             PRINT*,' IF LOBATTO RULES ARE NEEDED, CURRENTLY ONLY '
             PRINT*,' LEGENDRE WEIGHTS ARE SUPPORTED FOR THESE RULES '
             PRINT*,' NOW SETTING ALPHA = BETA = 0. '
-            al = 0.0d0 
-            be = 0.0d0
+            al = 0.0 
+            be = 0.0
             PRINT*,' CONTINUING EXECUTION. '
          endif
 
          n = n - 1
          nn = n - 1
          nrl = real(nn, kind=8)
-         Jac(:,:) = 0.0d0
-         ajp1 = (al - be)/(2.0d0*nrl + al + be + 2.0d0)
-         bjp1 = 4.0d0*(nrl + al + 1.0d0)*(nrl + be + 1.0d0)
-     &      *(nrl + al + be + 1.0d0)
-     &      /((2.0d0*nrl + al + be + 1.0d0)
-     &      *(2.0d0*nrl + al + be + 2.0d0)
-     &      *(2.0d0*nrl + al + be + 2.0d0))
+         Jac(:,:) = 0.0
+         ajp1 = (al - be)/(2.0*nrl + al + be + 2.0)
+         bjp1 = 4.0*(nrl + al + 1.0)*(nrl + be + 1.0)
+     &      *(nrl + al + be + 1.0)
+     &      /((2.0*nrl + al + be + 1.0)
+     &      *(2.0*nrl + al + be + 2.0)
+     &      *(2.0*nrl + al + be + 2.0))
             bjp1 = sqrt(bjp1)
          Jac(n+1,n+1) = ajp1
          Jac(n,n+1) = bjp1
@@ -93,32 +94,32 @@ c.....places these elements in the necessary locations.
       else
          al = alph
          be = bet
-         Jac(:,:) = 0.0d0
+         Jac(:,:) = 0.0
          nn = n
       endif
 
 c.....Determine whether Legendre or Jacobi weights are desired and
 c.....calculate entries of Jacobi matrix accordingly.
-      if (al .eq. 0.0d0 .and. be .eq. 0.0d0) then
+      if (al .eq. 0.0 .and. be .eq. 0.0) then
          quadtype = 1
-         aj(1:n) = 0.0d0
+         aj(1:n) = 0.0
          do j = 1, n-1
             jrl = real(j, kind=8)
-            bj(j) = jrl*jrl/(4.0d0*jrl*jrl - 1.0d0)
+            bj(j) = jrl*jrl/(4.0*jrl*jrl - 1.0)
          enddo
-      elseif (al .gt. -1.0d0 .and. be .gt. -1.0d0) then
+      elseif (al .gt. -1.0 .and. be .gt. -1.0) then
          quadtype = 2
          do j = 1, n
             jrl = real(j, kind=8)
-            dum = 2.0d0*jrl + al + be
-            aj(j) = (be - al) * (be + al) / (dum * (dum - 2.0d0))   
+            dum = 2.0*jrl + al + be
+            aj(j) = (be - al) * (be + al) / (dum * (dum - 2.0))   
          enddo
          do j = 1, n-1
             jrl = real(j, kind=8)
-            dum = 2.0d0*jrl + al + be
-            bj(j) = 4.0d0*jrl * (al + jrl) 
+            dum = 2.0*jrl + al + be
+            bj(j) = 4.0*jrl * (al + jrl) 
      &         * (be + jrl) * (al + be + jrl) 
-     &         / (dum*dum*(dum + 1.0d0)*(dum - 1.0d0))
+     &         / (dum*dum*(dum + 1.0)*(dum - 1.0))
          enddo
       else
          PRINT*,' ERROR ENCOUNTERED IN quad_rules_general.f! '
@@ -128,7 +129,7 @@ c.....calculate entries of Jacobi matrix accordingly.
      & quad_rules_general. '
          STOP
       endif
-      bj(n) = 0.0d0
+      bj(n) = 0.0
       bj(1:n) = sqrt(bj(1:n))
 
 C.....Construct Jacobi matrix
@@ -149,7 +150,7 @@ C.....Find eigenvalues of Jacobi matrix via QR iteration
 C.....If rule is symmetric, duplicate values across the symmetry.
       if (al .eq. be) then
          if (mod(nn,2) .eq. 1) then
-            m = ceiling(real(nn, kind=8)/2.d0)
+            m = ceiling(real(nn, kind=8)/2.0)
             pts(1:m) = eig(1:m)
             pts(m+1:nn) =  -pts(m-1:1:-1)
          else
@@ -163,13 +164,13 @@ C.....If rule is symmetric, duplicate values across the symmetry.
 
 C.....If a point is very close to 0, then set it equal to 0.
       do j = 1,nn
-         if (abs(pts(j)).LT. 1.0d-12) pts(j) = 0.0d0
+         if (abs(pts(j)).LT. 1.0d-12) pts(j) = 0.0
       enddo
 C.....If Lobatto endpoints are close to 1 in absolute value, then
 C.....set endpoints equal to 1.
       if (lobatyn) then
-         if (abs(pts(1) - (-1.0d0)).LT. 1.0d-12) pts(1) = -1.0d0
-         if (abs(pts(nn) - 1.0d0).LT. 1.0d-12) pts(nn) = 1.0d0
+         if (abs(pts(1) - (-1.0)).LT. 1.0d-12) pts(1) = -1.0
+         if (abs(pts(nn) - 1.0).LT. 1.0d-12) pts(nn) = 1.0
       endif
 
 C.....Find weights from algebraic formulas
@@ -177,18 +178,18 @@ C.....Find weights from algebraic formulas
          x = pts(m)
          if (quadtype .eq. 1 .and. .not. lobatyn) then
 C...........Legendre weights
-            polyo(0)  = 1.0d0
+            polyo(0)  = 1.0
             polyo(1)  = x
 C...........Compute values of Legendre polys. at current point from
 C...........recurrence relation.
             do p = 1,n
                prl = real(p, kind=8)
-               polyo(p+1) = ((2.0d0*prl+1.0d0)*x*polyo(p)-prl
-     &            *polyo(p-1))/(prl+1.0d0)
+               polyo(p+1) = ((2.0*prl+1.0)*x*polyo(p)-prl
+     &            *polyo(p-1))/(prl+1.0)
             enddo
 C...........Compute weights
             nrl = real(n, kind=8)
-            wts(m) = 2.0d0*(1.0d0 - x*x)/((nrl + 1.0d0)*(nrl + 1.0d0)
+            wts(m) = 2.0*(1.0 - x*x)/((nrl + 1.0)*(nrl + 1.0)
      &         *polyo(n+1)*polyo(n+1))
          elseif (quadtype .eq. 2 .and. .not. lobatyn) then
 C...........Jacobi weights, computed from eigenvectors, which are
@@ -200,14 +201,14 @@ C...........computed by Guassian elimination.
                   augJ(i,j) = Jac(i,j)
                enddo
                augJ(j,j) = augJ(j,j) - lambda
-               augJ(nn+1,j) = 0.0d0
+               augJ(nn+1,j) = 0.0
             enddo
 
             call Gauss_Elim(augJ,nn,ierr)
 
             v = augJ(nn+1,:)
 
-            summ = 0.0d0
+            summ = 0.0
             do j = 1,nn
                summ = summ + v(j)*v(j)
             enddo
@@ -216,9 +217,9 @@ C...........computed by Guassian elimination.
             if (abs(nv).LT. eps) nv = eps
             v = v/nv
 
-            B0 = 2.0d0**(alph + bet + 1.0d0) 
-     &         * gammaf(alph + 1.0d0) * gammaf(bet + 1.0d0) 
-     &         / gammaf(alph + bet + 2.0d0)
+            B0 = 2.0**(alph + bet + 1.0) 
+     &         * gammaf(alph + 1.0) * gammaf(bet + 1.0) 
+     &         / gammaf(alph + bet + 2.0)
             wts(m) = B0*v(1)*v(1)
 
          elseif (lobatyn) then
@@ -228,22 +229,22 @@ C..............Lobatto rule weights with Lengendre weight function.
                nrl = real( nin, kind = 8)
                if (m .eq. 1) then
 C..............Compute weights at endpoints.
-                  wts(m) = 2.0d0/((nrl+1.0d0)*(nrl+2.0d0))
+                  wts(m) = 2.0/((nrl+1.0)*(nrl+2.0))
                elseif (m .eq. nn) then
                   wts(m) = wts(1)
                else
 C..............Compute weights at interior quad points.
-                  polyo(0)  = 1.0d0
+                  polyo(0)  = 1.0
                   polyo(1)  = x
 C.................Compute values of Legendre polys. at current point 
 C.................from recurrence relation.
                   do p = 1,nin
                      prl = real(p, kind=8)
-                     polyo(p+1) = ((2.0d0*prl+1.0d0)*x*polyo(p)-prl
-     &                  *polyo(p-1))/(prl+1.0d0)
+                     polyo(p+1) = ((2.0*prl+1.0)*x*polyo(p)-prl
+     &                  *polyo(p-1))/(prl+1.0)
                   enddo
 C.................Compute weights
-                  wts(m) = 2.0d0/((nrl+1.0d0)*(nrl+2.d0)
+                  wts(m) = 2.0/((nrl+1.0)*(nrl+2.0)
      &               *polyo(nin+1)*polyo(nin+1))
                endif
             elseif (quadtype .eq. 2) then
@@ -261,31 +262,32 @@ C..............for these rules, so they are currently excluded.
       end subroutine
    
       subroutine QRdecomp(A,n,eps,eig)
+      use sizes, only : sz
 C.....QR decomposition with shifting
       implicit none
       integer, intent(in)::n
       integer i,k
-      real(8), dimension(n,n), intent(in):: A
-      real(8), dimension(n,n) :: A2,oldA2,Q,QT,R,EYE
-      real(8) res,sig,normA
-      real(8), intent(in):: eps
-      real(8), dimension(n) :: vec1,vec2
-      real(8), dimension(n), intent(out)::eig
+      real(sz), dimension(n,n), intent(in):: A
+      real(sz), dimension(n,n) :: A2,oldA2,Q,QT,R,EYE
+      real(sz) res,sig,normA
+      real(sz), intent(in):: eps
+      real(sz), dimension(n) :: vec1,vec2
+      real(sz), dimension(n), intent(out)::eig
       logical DoIterate
 
 
-      EYE(:,:) = 0.0d0
+      EYE(:,:) = 0.0
       do i = 1,n
-         EYE(i,i) = 1.0d0
+         EYE(i,i) = 1.0
       enddo   
 
-      oldA2(:,:) = 1.0d0
+      oldA2(:,:) = 1.0
       A2(:,:) = A(:,:)
 
       do while (DoIterate(A2,oldA2,eps,n))
-         sig = 0.0d0
+         sig = 0.0
          do i = 1,n
-            normA = 0.0d0
+            normA = 0.0
             do k = 1,n
                normA = normA + A2(i,k)*A2(i,k)
             enddo
@@ -319,15 +321,16 @@ C.....QR decomposition with shifting
       end subroutine
       
       function gammaf(n)
+      use sizes, only : sz
       ! Compute the gamma function for an input
       implicit none
-      real(8), intent(in) :: n
+      real(sz), intent(in) :: n
       integer :: i, m
-      real(8) :: ans, gammaf
+      real(sz) :: ans, gammaf
       
       ! Subtract 1 from input number (should be an integer as a real)
-      m = int(n - 1.0d0)
-      ans = 1.0d0
+      m = int(n - 1.0)
+      ans = 1.0
       ! Calculate the factorial of n-1
       do i = 1,m
          ans = ans * dble(i)
@@ -338,12 +341,13 @@ C.....QR decomposition with shifting
       end function
 
       subroutine dotprod(vec1,vec2,n,prod)
+      use sizes, only : sz
       ! Compute the dot product of two vector inputs
       implicit none
       integer::n,i
-      real(8), dimension(n)::vec1,vec2
-      real(8)::prod
-      prod=0.0d0
+      real(sz), dimension(n)::vec1,vec2
+      real(sz)::prod
+      prod=0.0
       do i=1,n
          prod=prod+vec1(i)*vec2(i)
       enddo
@@ -351,11 +355,12 @@ C.....QR decomposition with shifting
       end subroutine
 
       function DoIterate (A1,A2,eps,n)
+      use sizes, only : sz
       ! Evaluate whether or not to iterate QR decomp.
       implicit none
       integer::n,i,j
-      real(8), dimension(n,n)::A1,A2
-      real(8)::eps
+      real(sz), dimension(n,n)::A1,A2
+      real(sz)::eps
       logical::DoIterate
 
       DoIterate=.false.
@@ -372,12 +377,13 @@ C.....QR decomposition with shifting
       end function
 
       subroutine Gauss_Elim(M,n,ierr)
+      use sizes, only : sz
       ! Perform Gaussian elimination on an "augmented matrix"
       implicit none
       integer, intent(in)::n
       integer, intent(out)::ierr
-      real(8), dimension(n+1,n), intent(inout)::M
-      real(8)::tempM,val,eps
+      real(sz), dimension(n+1,n), intent(inout)::M
+      real(sz)::tempM,val,eps
       integer::i,j,k,c,a,b,temp
       logical::broken
 
@@ -424,11 +430,11 @@ C.....QR decomposition with shifting
                   ierr=a
                   return
                end if
-               M(a,b)=0.0d0
+               M(a,b)=0.0
             end do
          end do
          do b=i,n
-            M(b,b)=1.0d0
+            M(b,b)=1.0
             M(n+1,b)=real(n-b+1, kind=8)    
          end do
       end if

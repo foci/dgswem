@@ -95,27 +95,27 @@ C.....Comput the edge integral
       IMASS = M_INV(K,pah)/(0.5D0*AREA)
 
       RHS_ZE(K,EL_I,IRK) = RHS_ZE(K,EL_I,IRK)
-     &  - IMASS*XLEN(GED)/2.D0*FLUX1*PHI_EDGE(K,GP,LED,pah)*WEGP(GP,pah)
+     &  - IMASS*XLEN(GED)/2.0*FLUX1*PHI_EDGE(K,GP,LED,pah)*WEGP(GP,pah)
       RHS_QX(K,EL_I,IRK) = RHS_QX(K,EL_I,IRK)
-     &  - IMASS*XLEN(GED)/2.D0*FLUX2*PHI_EDGE(K,GP,LED,pah)*WEGP(GP,pah)
+     &  - IMASS*XLEN(GED)/2.0*FLUX2*PHI_EDGE(K,GP,LED,pah)*WEGP(GP,pah)
       RHS_QY(K,EL_I,IRK) = RHS_QY(K,EL_I,IRK)
-     &  - IMASS*XLEN(GED)/2.D0*FLUX3*PHI_EDGE(K,GP,LED,pah)*WEGP(GP,pah)
+     &  - IMASS*XLEN(GED)/2.0*FLUX3*PHI_EDGE(K,GP,LED,pah)*WEGP(GP,pah)
 
 #ifdef TRACE
       RHS_iota(k,EL_I,IRK) = RHS_iota(k,EL_I,IRK)
-     &  - IMASS*XLEN(GED)/2.D0*FLUX4*PHI_EDGE(k,GP,LED,pah)*WEGP(GP,pah)
+     &  - IMASS*XLEN(GED)/2.0*FLUX4*PHI_EDGE(k,GP,LED,pah)*WEGP(GP,pah)
 #endif
 
 #ifdef CHEM
       RHS_iota(k,EL_I,IRK) = RHS_iota(k,EL_I,IRK)
-     &  - IMASS*XLEN(GED)/2.D0*FLUX4*PHI_EDGE(k,GP,LED,pah)*WEGP(GP,pah)
+     &  - IMASS*XLEN(GED)/2.0*FLUX4*PHI_EDGE(k,GP,LED,pah)*WEGP(GP,pah)
       RHS_iota2(k,EL_I,IRK) = RHS_iota2(k,EL_I,IRK)
-     &  - IMASS*XLEN(GED)/2.D0*FLUX5*PHI_EDGE(k,GP,LED,pah)*WEGP(GP,pah)
+     &  - IMASS*XLEN(GED)/2.0*FLUX5*PHI_EDGE(k,GP,LED,pah)*WEGP(GP,pah)
 #endif
 
 #ifdef DYNP
       RHS_dynP(k,EL_I,IRK) = RHS_dynP(k,EL_I,IRK)
-     &  - IMASS*XLEN(GED)/2.D0*FLUX6*PHI_EDGE(k,GP,LED,pah)*WEGP(GP,pah)
+     &  - IMASS*XLEN(GED)/2.0*FLUX6*PHI_EDGE(k,GP,LED,pah)*WEGP(GP,pah)
 #endif
       
       RETURN

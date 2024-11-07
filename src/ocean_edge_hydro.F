@@ -87,34 +87,34 @@ C.....Compute ZE, QX, QY, and HB at each edge Gauss quadrature point
             QX_IN = QX(1,EL_IN,IRK)
             QY_IN = QY(1,EL_IN,IRK)
 
-            ZE_EX = 0.D0
-            QX_EX = 0.D0
-            QY_EX = 0.D0
-            U_EX  = 0.D0
-            V_EX  = 0.D0
+            ZE_EX = 0.0
+            QX_EX = 0.0
+            QY_EX = 0.0
+            U_EX  = 0.0
+            V_EX  = 0.0
 
 #ifdef TRACE
             iota_IN = iota(1,EL_IN,IRK)
-            iota_EX = 0.D0
+            iota_EX = 0.0
 #endif
 
 #ifdef CHEM
             iota_IN = iota(1,EL_IN,IRK)
             iota2_IN = iota2(1,EL_IN,IRK)
-            iota_EX = 0.D0
-            iota2_EX = 0.D0
+            iota_EX = 0.0
+            iota2_EX = 0.0
 #endif
 
 #ifdef DYNP
             dynP_IN = dynP(1,EL_IN,IRK)
-            dynP_EX = 0.D0
+            dynP_EX = 0.0
 #endif
             
             HB_IN = BATHED(I,LED,EL_IN,pa)
             SFAC_IN = SFACED(I,LED,EL_IN,pa)
             
 #ifdef SED_LAY                  !When layered, these change
-            HB(:,EL_IN,irk) = 0.D0
+            HB(:,EL_IN,irk) = 0.0
             do ll=1,layers
                HB(1,EL_IN,irk) = HB(1,EL_IN,irk) + bed(1,EL_IN,irk,ll)
 
@@ -143,8 +143,8 @@ C.....Compute the specified open ocean elevation
             
             DO JJ=1,NBFR
                
-               IF (PER(JJ).EQ.0.D0) THEN
-                  NCYC = 0.D0
+               IF (PER(JJ).EQ.0.0) THEN
+                  NCYC = 0.0
                ELSE
                   NCYC = INT(TIMEDG/PER(JJ))
                ENDIF
@@ -255,20 +255,20 @@ C.....Set the exterior value of the bathymetry equal to the interior
             !ZE_EX = ZE_IN !this was added
 
 #ifdef TRACE
-            iota_EX = 0.D0 !iota_IN !might need 0.D0
+            iota_EX = 0.0 !iota_IN !might need 0.0
 #endif
 
 #ifdef CHEM
-            iota_EX = 0.D0 !iota_IN
-            iota2_EX = 0.D0 !iota2_IN
+            iota_EX = 0.0 !iota_IN
+            iota2_EX = 0.0 !iota2_IN
 #endif
 
 #ifdef DYNP
-            dynP_EX = 0.D0 !What's the right setting here?
+            dynP_EX = 0.0 !What's the right setting here?
 #endif
 
 #ifdef SED_LAY                  !When layered, these change
-            bed_EX(:) = 10.D0 !bed_IN(:) 
+            bed_EX(:) = 10.0 !bed_IN(:) 
 #endif
 
 
@@ -304,7 +304,7 @@ C.....Add LDG terms for sediment
 C.....Compute the edge integral
             DO K = 1,DOFS(EL_IN)
 
-               W_IN = 2.0d0*M_INV(K,pa)/AREAS(EL_IN)*XLEN(GED)*
+               W_IN = 2.0*M_INV(K,pa)/AREAS(EL_IN)*XLEN(GED)*
      &              PHI_EDGE(K,I,LED,pa)*WEGP(I,pa)
 
                RHS_ZE(K,EL_IN,IRK) = RHS_ZE(K,EL_IN,IRK) - W_IN*F_HAT

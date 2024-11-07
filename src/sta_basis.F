@@ -21,8 +21,8 @@ C***********************************************************************
       REAL(SZ) PHI_STA(DOF)
       REAL(SZ) XSTA, YSTA, AREA
       REAL(SZ) Z1, Z2, TOL
-      REAL(8) PT(DIM)
-      REAL(8),Allocatable  :: BASIS(:), DBASIS(:,:)
+      real(sz) PT(DIM)
+      real(sz),Allocatable  :: BASIS(:), DBASIS(:,:)
       INTEGER :: i
 
 C.....Retrieve element coordinates and area
@@ -39,12 +39,12 @@ C.....Retrieve element coordinates and area
       
 C.....Transform to local Z element coordinates
 
-      Z1 = -1.D0/(2.D0*AREA)*( XSTA*(2.D0*Y1 - 2.D0*Y3) +
-     &                         YSTA*(2.D0*X3 - 2.D0*X1) +
+      Z1 = -1.0/(2.0*AREA)*( XSTA*(2.0*Y1 - 2.0*Y3) +
+     &                         YSTA*(2.0*X3 - 2.0*X1) +
      &                   X1*Y2 + X1*Y3 - X2*Y1 + X2*Y3 - X3*Y1 - X3*Y2 )
 
-      Z2 =  1.D0/(2.D0*AREA)*( XSTA*(2.D0*Y1 - 2.D0*Y2) +
-     &                         YSTA*(2.D0*X2 - 2.D0*X1) +
+      Z2 =  1.0/(2.0*AREA)*( XSTA*(2.0*Y1 - 2.0*Y2) +
+     &                         YSTA*(2.0*X2 - 2.0*X1) +
      &                   X1*Y2 + X1*Y3 - X2*Y1 - X2*Y3 - X3*Y1 + X3*Y2 )
 
 C.....Compute the basis functions at that point and store

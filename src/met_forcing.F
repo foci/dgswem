@@ -815,7 +815,7 @@ Casey 101118: Added these lines for coupling winds to SWAN.
             WSX2(II) = RampMete*0.001293d0*WDragCo*WindX*WindMag
             WSY2(II) = RampMete*0.001293d0*WDragCo*WindY*WindMag
 !            PR2(II)=RampMete*PRN2(II)
-            PRBCKGRND_MH2O = 100.0D0*PRBCKGRND/(RHOWAT0*G)
+            PRBCKGRND_MH2O = 100.0*PRBCKGRND/(RHOWAT0*G)
             PRDIFF = RampMete*(PRN2(II)-PRBCKGRND_MH2O)
             PR2(II) = PRBCKGRND_MH2O + PRDIFF
             WVNXOUT(II)=RampMete*WindX
@@ -848,7 +848,7 @@ Casey 121019: Added multiplication factor to be used before sending winds to cou
             WSX2(II) = RampMete*0.001293d0*WDragCo*WindX*WindMag
             WSY2(II) = RampMete*0.001293d0*WDragCo*WindY*WindMag
 !            PR2(II)=RampMete*PRN2(II)
-            PRBCKGRND_MH2O = 100.0D0*PRBCKGRND/(RHOWAT0*G)
+            PRBCKGRND_MH2O = 100.0*PRBCKGRND/(RHOWAT0*G)
             PRDIFF = RampMete*(PRN2(II)-PRBCKGRND_MH2O)
             PR2(II) = PRBCKGRND_MH2O + PRDIFF
             WVNXOUT(II)=RampMete*WindX

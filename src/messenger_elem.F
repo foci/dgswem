@@ -1459,7 +1459,7 @@ c$$$C
       Real(SZ) sum_of_this 
       Integer kount       
 
-      sum_of_this = 0.D0
+      sum_of_this = 0.0
 
       kount=1
 
@@ -1480,7 +1480,7 @@ c$$$C
       Real(SZ) max_of_this     
       Integer kount            
 
-      max_of_this = -100.D0
+      max_of_this = -100.0
 
       kount=1
 
@@ -1504,7 +1504,7 @@ c$$$C
       Real(SZ) min_of_this    
       Integer kount           
 
-      min_of_this = 100.D0
+      min_of_this = 100.0
 
       kount=1
 

@@ -23,9 +23,9 @@ C.....Declare local variables
       
 C.....Set the inflow integrals and length to zero
 
-      INFLOW_ZE = 0.D0
+      INFLOW_ZE = 0.0
       
-      INFLOW_LEN = 0.D0
+      INFLOW_LEN = 0.0
       
 C.....Loop over the three edges of the element
       
@@ -75,8 +75,8 @@ C.....Retrieve the components of the normal vector to the edge
 
 C.....Compute the solution at the midpoint of the edge
 
-        QX_IN = 0.D0
-        QY_IN = 0.D0
+        QX_IN = 0.0
+        QY_IN = 0.0
       
         DO K = 1,DOFS(L)
 
@@ -95,8 +95,8 @@ C.....Sum of the length of the outflow boundaries for the given element
 
           DO I = 1,NEGP(pa)
 
-            ZE_IN = 0.D0
-            ZE_EX = 0.D0
+            ZE_IN = 0.0
+            ZE_EX = 0.0
 
             DO K = 1,DOF
               ZE_IN = ZE_IN+ZE(K,L,IRK+1)*PHI_EDGE(K,GP_IN(I),LED_IN,pa)
@@ -111,8 +111,8 @@ C.....If the edge is an open ocean edge compute the specified elevation
             
               DO JJ=1,NBFR
 
-                IF (PER(JJ).EQ.0.D0) THEN
-                  NCYC = 0.D0
+                IF (PER(JJ).EQ.0.0) THEN
+                  NCYC = 0.0
                 ELSE
                   NCYC = INT(TIMEDG/PER(JJ))
                 ENDIF
@@ -144,7 +144,7 @@ C.....If the edge is a land edge compute the exterior value
 C.....Sum the edge integral
 
             INFLOW_ZE = INFLOW_ZE +
-     &                    XLEN(GED)/2.D0*(ZE_IN-ZE_EX)*WEGP(GP_IN(I),pa)
+     &                    XLEN(GED)/2.0*(ZE_IN-ZE_EX)*WEGP(GP_IN(I),pa)
             
 C.....Store the minimum edge length of the given element
 
@@ -160,11 +160,11 @@ C.....If the given element has inflow boundaries estimate the max norm
 
       IF (INFLOW_ZE.NE.0) THEN
       
-        ZE_NORM = 0.D0
+        ZE_NORM = 0.0
      
         DO I=1,NAGP(ph)
         
-          ZE_IN = 0.D0
+          ZE_IN = 0.0
 
           DO K = 1,DOFS(L)
 
@@ -180,11 +180,11 @@ C.....If the given element has inflow boundaries estimate the max norm
       
 C.....Compute the discontinuity detector
 
-      DEN = H_LEN**((pa+1)/2.D0)*INFLOW_LEN*ZE_NORM
+      DEN = H_LEN**((pa+1)/2.0)*INFLOW_LEN*ZE_NORM
       IF (DEN.NE.0) THEN
         ZE_DECT= ABS(INFLOW_ZE)/DEN
       ELSE
-        ZE_DECT = 0.D0
+        ZE_DECT = 0.0
       ENDIF
       
       IF (ZE_DECT.GT.1) THEN

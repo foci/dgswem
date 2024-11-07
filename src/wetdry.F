@@ -91,7 +91,7 @@ C.......and count number of dry nodes
             HT_NODE(I) = ZE_NODE(I,pa) + DP_NODE(I,J,pa)
                                 ! print*,DP_node(i,j,pa), i,j
 #ifdef SED_LAY   
-            HT_NODE(I) = 0.D0
+            HT_NODE(I) = 0.0
             do l=1,layers !notice we are summing over layers at nodes
                DP_NODE(I,J,pa) = bed(1,J,IRK+1,l)
                DO K = 2,DOFS(J)
@@ -118,12 +118,12 @@ C.......Set "average" bathymetry based on p
 
          
          !Notice that the average is the average over the sum of the layers
-         !DP_AVG = 1.D0/ncheck(pa) * (sum(DP_NODE(:,J,pa)))        
+         !DP_AVG = 1.0/ncheck(pa) * (sum(DP_NODE(:,J,pa)))        
       DP_AVG = C13*(DP_NODE(1,J,pa) + DP_NODE(2,J,pa) + DP_NODE(3,J,pa))
 
 #ifdef P0
          IF (pdg_el(J).EQ.0) THEN
-            DP_AVG = 0.D0
+            DP_AVG = 0.0
             DP_AVG = DPE_MIN(J)
          ENDIF
 #endif
@@ -175,7 +175,7 @@ C.........water depth at all points = average water depth
             ELSEIF (pa.EQ.1) THEN
                HT_AVG = ZE(1,J,IRK+1) + DP_AVG
             ELSE
-               ZE_VOL = 0.D0
+               ZE_VOL = 0.0
                DO K = 1,DOFS(J)
                   ZE_VOL = ZE_VOL + ZE(K,J,IRK+1)*PHI_INTEGRATED(K,pa)
                ENDDO
@@ -183,7 +183,7 @@ C.........water depth at all points = average water depth
                HT_AVG = HT_VOL/(0.5D0*AREAS(J))
             ENDIF
             
-            ZE(:,J,IRK+1) = 0.D0
+            ZE(:,J,IRK+1) = 0.0
             ZE(1,J,IRK+1) = HT_AVG - DP_AVG ! for pa = 0, i.e FVM
             IF ( pa > 0 ) THEN 
                ! Prevent water from becoming dangeously low by            !
@@ -194,8 +194,8 @@ C.........water depth at all points = average water depth
             ZE(3,J,IRK+1) = -HB(3,J,1)
 
 C.........Zero out the fluxes
-            QX(:,J,IRK+1) = 0.D0
-            QY(:,J,IRK+1) = 0.D0
+            QX(:,J,IRK+1) = 0.0
+            QY(:,J,IRK+1) = 0.0
             
 C.........Set flags to dry and skip element check
             WDFLG(J) = 0
@@ -205,14 +205,14 @@ C.........Set flags to dry and skip element check
 !            !zero out higher order stuff
 !            do i = 4,dofh
 !               
-!               ZE(i,J,IRK+1) = 0.D0
-!               QX(i,J,IRK+1) = 0.D0
-!               QY(i,J,IRK+1) = 0.D0
+!               ZE(i,J,IRK+1) = 0.0
+!               QX(i,J,IRK+1) = 0.0
+!               QY(i,J,IRK+1) = 0.0
 !
 c$$$#ifdef SED_LAY !is this more stable?
 c$$$               do l=1,layers 
 c$$$
-c$$$                  bed(i,J,IRK+1,l) = 0.D0
+c$$$                  bed(i,J,IRK+1,l) = 0.0
 c$$$
 c$$$               enddo
 c$$$#endif
@@ -223,14 +223,14 @@ c$$$#endif
             !transported quantities should still be stable
 c$$$            if (tracer_flag.eq.1) then
 c$$$               
-c$$$               iota(:,J,irk+1) = 0.D0
+c$$$               iota(:,J,irk+1) = 0.0
 c$$$               
 c$$$            endif
 c$$$            
 c$$$            if (chem_flag.eq.1) then
 c$$$               
-c$$$               iota(:,J,irk+1) = 0.D0
-c$$$               iota2(:,j,irk+1) = 0.D0
+c$$$               iota(:,J,irk+1) = 0.0
+c$$$               iota2(:,j,irk+1) = 0.0
 c$$$               
 c$$$            endif            
             
@@ -246,7 +246,7 @@ C.........Set averages based on p
             ELSEIF (pa.EQ.1) THEN
                HT_AVG = ZE(1,J,IRK+1) + DP_AVG
             ELSE
-               ZE_VOL = 0.D0
+               ZE_VOL = 0.0
                DO K = 1,DOFS(J)
                   ZE_VOL = ZE_VOL + ZE(K,J,IRK+1)*PHI_INTEGRATED(K,pa)
                ENDDO
@@ -263,7 +263,7 @@ C     --------------------------------------------------------------
 C...........Set surface elevation parallel to bathymetry such that total
 C...........water depth at all points = average water depth
 
-               ZE(:,J,IRK+1) = 0.D0
+               ZE(:,J,IRK+1) = 0.0
                ZE(1,J,IRK+1) = HT_AVG - DP_AVG 
                IF ( pa > 0 ) THEN
                   ! dw: just in case, it is not likely to happen 
@@ -275,8 +275,8 @@ C...........water depth at all points = average water depth
                ZE_HAT(:,pa) = ZE(1,J,IRK+1)
 
 C...........Zero out the fluxes
-               QX(:,J,IRK+1) = 0.D0
-               QY(:,J,IRK+1) = 0.D0
+               QX(:,J,IRK+1) = 0.0
+               QY(:,J,IRK+1) = 0.0
 
 C     --------------------------------------------------------------
 C.........Case 3B: Aaverage water depth > H0
@@ -296,7 +296,7 @@ C...........water depth and the same linear components
                   HT_MODE(1) = HT_AVG
                   HT_MODE(2) = -(ZE(2,J,1) + HB(2,J,1))
                   HT_MODE(3) = -(ZE(3,J,1) + HB(3,J,1))
-                  HT_NODE = 0.D0
+                  HT_NODE = 0.0
                   DO K = 1,3
                      HT_NODE(1)=HT_NODE(1)+PHI_CORNER(K,1,pa)*HT_MODE(K)
                      HT_NODE(2)=HT_NODE(2)+PHI_CORNER(K,2,pa)*HT_MODE(K)
@@ -359,25 +359,25 @@ C...........If all adjusted nodes/vertices are dry then zero out fluxes
 
                IF (NDRYNODE.EQ.3) THEN
                   
-                  QX(:,J,IRK+1) = 0.D0
-                  QY(:,J,IRK+1) = 0.D0
+                  QX(:,J,IRK+1) = 0.0
+                  QY(:,J,IRK+1) = 0.0
 
 c$$$  if (tracer_flag.eq.1) then
 c$$$  
-c$$$  iota(:,J,irk+1) = 0.D0
+c$$$  iota(:,J,irk+1) = 0.0
 c$$$  
 c$$$  endif
 c$$$
 c$$$  if (tracer_flag.eq.1) then
 c$$$  
-c$$$  iota(:,J,irk+1) = 0.D0
+c$$$  iota(:,J,irk+1) = 0.0
 c$$$  
 c$$$  endif
 c$$$  
 c$$$  if (chem_flag.eq.1) then
 c$$$  
-c$$$  iota(:,J,irk+1) = 0.D0
-c$$$  iota2(:,j,irk+1) = 0.D0
+c$$$  iota(:,J,irk+1) = 0.0
+c$$$  iota2(:,j,irk+1) = 0.0
 c$$$  
 c$$$  endif 
 
@@ -385,22 +385,22 @@ C...........Else re-distribute nodal/vertex fluxes
 
                ELSE
                   !
-                  QX_SUMs = QX_SUMs/(3.D0-REAL(NDRYNODE))
-                  QY_SUMs = QY_SUMs/(3.D0-REAL(NDRYNODE))
+                  QX_SUMs = QX_SUMs/(3.0-REAL(NDRYNODE))
+                  QY_SUMs = QY_SUMs/(3.0-REAL(NDRYNODE))
                   DO I = 1,3
                      IF(HT_HAT(I).LE.(H0+1.D-10)) THEN
-                        QX_HAT(I) = 0.D0
-                        QY_HAT(I) = 0.D0
+                        QX_HAT(I) = 0.0
+                        QY_HAT(I) = 0.0
                      ELSE
                         !c
                         !c... dw: seem to not agree with sb's paper (??)
                         !c       (momemtum could be increased)
-                        !IF(QX_SUMs*QX_NODE(I).LT.0.D0) THEN
+                        !IF(QX_SUMs*QX_NODE(I).LT.0.0) THEN
                         !   QX_HAT(I) = QX_NODE(I) + QX_SUMs
                         !ELSE
                         !   QX_HAT(I) = QX_NODE(I)
                         !ENDIF
-                        !IF(QY_SUMs*QY_NODE(I).LT.0.D0) THEN
+                        !IF(QY_SUMs*QY_NODE(I).LT.0.0) THEN
                         !   QY_HAT(I) = QY_NODE(I) + QY_SUMs
                         !ELSE
                         !   QY_HAT(I) = QY_NODE(I)
@@ -459,27 +459,27 @@ C.........If applicable zero out higher dofs
 
             do i = 4,dofh
                
-               ZE(i,J,IRK+1) = 0.D0
-               QX(i,J,IRK+1) = 0.D0
-               QY(i,J,IRK+1) = 0.D0
+               ZE(i,J,IRK+1) = 0.0
+               QX(i,J,IRK+1) = 0.0
+               QY(i,J,IRK+1) = 0.0
 
 #ifdef SED_LAY
                do l=1,layers
-                  bed(i,J,irk+1,l) = 0.D0
+                  bed(i,J,irk+1,l) = 0.0
                enddo
 #endif
                
 #ifdef TRACE
-               iota(i,J,irk+1) = 0.D0
+               iota(i,J,irk+1) = 0.0
 #endif
                
 #ifdef CHEM         
-               iota(i,J,irk+1) = 0.D0
-               iota2(i,j,irk+1) = 0.D0
+               iota(i,J,irk+1) = 0.0
+               iota2(i,j,irk+1) = 0.0
 #endif
 
 #ifdef DYNP
-               dynP(i,J,irk+1) = 0.D0
+               dynP(i,J,irk+1) = 0.0
 #endif
 
             enddo
@@ -532,8 +532,8 @@ C.........Make no adjustments and set element and node flags to wet
 
 C...........Make adjustments and set element node codes to dry
 
-               QX(:,J,IRK+1) = 0.D0
-               QY(:,J,IRK+1) = 0.D0
+               QX(:,J,IRK+1) = 0.0
+               QY(:,J,IRK+1) = 0.0
 
                WDFLG(J) = 0
 

@@ -41,11 +41,11 @@ C....IF BOTTOM IS INITIALLY BELOW THE GEIOD AND
 C....STARTDRY=-88888 -> DRY NODE
         HABSMIN=0.8d0*H0
         DO I=1,NP
-          UU1(I) =0.D0
-          VV1(I) =0.D0
-          UU2(I) =0.D0
-          VV2(I) =0.D0
-          ETA2(I)=0.D0
+          UU1(I) =0.0
+          VV1(I) =0.0
+          UU2(I) =0.0
+          VV2(I) =0.0
+          ETA2(I)=0.0
           NODEREP(I)=MAX0(NODEWETMIN,NODEDRYMIN)
           NNODECODE(I)=1
           IF(NOLIFA.EQ.2) THEN
@@ -61,8 +61,8 @@ C              ENDIF
             ENDIF
           ENDIF
           ETA1(I)=ETA2(I)
-          ETAS(I)=0.D0
-          CH1(I)=0.d0
+          ETAS(I)=0.0
+          CH1(I)=0.0
         END DO
 
          !...Younghun:
@@ -93,7 +93,7 @@ C...
           DO J=1,NETA
              READ(19,*) ESBIN2(J)
           END DO
-          ETIME1 = STATIM*86400.D0
+          ETIME1 = STATIM*86400.0
           ETIME2 = ETIME1 + ETIMINC
         ENDIF
 
@@ -108,18 +108,18 @@ C....INITIALIZE THE NORMAL FLOW BOUNDARY CONDITION
           OPEN(20,FILE=DIRNAME//'/'//'fort.20')
           READ(20,*) FTIMINC
           DO J=1,NVEL
-            QNIN1(J)=0.D0
+            QNIN1(J)=0.0
             IF((LBCODEI(J).EQ.2).OR.(LBCODEI(J).EQ.12)
      &                          .OR.(LBCODEI(J).EQ.22))
      &      READ(20,*) QNIN1(J)
           END DO
           DO J=1,NVEL
-            QNIN2(J)=0.D0
+            QNIN2(J)=0.0
             IF((LBCODEI(J).EQ.2).OR.(LBCODEI(J).EQ.12)
      &                          .OR.(LBCODEI(J).EQ.22))
      &      READ(20,*) QNIN2(J)
           END DO
-          QTIME1 = STATIM*86400.D0
+          QTIME1 = STATIM*86400.0
           QTIME2 = QTIME1 + FTIMINC
         ENDIF
 
@@ -131,12 +131,12 @@ C....TIME LEVEL 1 AND LEVEL 2 WIND FIELDS
 
         IF(NWS.NE.0) THEN
           DO I=1,NP
-            WSX1(I)=0.D0
-            WSY1(I)=0.D0
-            PR1(I) =0.D0
-            WSX2(I)=0.D0
-            WSY2(I)=0.D0
-            PR2(I) =0.D0
+            WSX1(I)=0.0
+            WSY1(I)=0.0
+            PR1(I) =0.0
+            WSX2(I)=0.0
+            WSY2(I)=0.0
+            PR2(I) =0.0
             ENDDO
 
           IF(NSCREEN.EQ.1 .AND.MYPROC.EQ.0) WRITE(6,1112)
@@ -154,7 +154,7 @@ C....TIME LEVEL 1 AND LEVEL 2 WIND FIELDS
           OPEN(22,FILE=DIRNAME//'/'//'fort.22')
           READ(22,*) (NHG,WVNX1(I),WVNY1(I),PRN1(I),I=1,NP)
           READ(22,*) (NHG,WVNX2(I),WVNY2(I),PRN2(I),I=1,NP)
-          WTIME1 = STATIM*86400.D0
+          WTIME1 = STATIM*86400.0
           WTIME2 = WTIME1 + WTIMINC
           ENDIF
 
@@ -191,7 +191,7 @@ C....TIME LEVEL 1 AND LEVEL 2 WIND FIELDS
 
         IF(ABS(NWS).EQ.4) THEN
           OPEN(22,FILE=DIRNAME//'/'//'fort.22')
-          WTIME1 = STATIM*86400.D0
+          WTIME1 = STATIM*86400.0
           WTIME2=WTIME1+WTIMINC
           CALL NWS4GET(WVNX1,WVNY1,PRN1,NP,RHOWAT0,G)
           CALL NWS4GET(WVNX2,WVNY2,PRN2,NP,RHOWAT0,G)
@@ -201,7 +201,7 @@ C....TIME LEVEL 1 AND LEVEL 2 WIND FIELDS
           OPEN(22,FILE=DIRNAME//'/'//'fort.22')
           READ(22,*) (NHG,WVNX1(I),WVNY1(I),PRN1(I),I=1,NP)
           READ(22,*) (NHG,WVNX2(I),WVNY2(I),PRN2(I),I=1,NP)
-          WTIME1 = STATIM*86400.D0
+          WTIME1 = STATIM*86400.0
           WTIME2 = WTIME1 + WTIMINC
           ENDIF
 
@@ -211,12 +211,12 @@ C....TIME LEVEL 1 AND LEVEL 2 WIND FIELDS
      &                 WLATMAX,WLONMIN,WLATINC,WLONINC,ICS,RHOWAT0,G)
           CALL NWS6GET(X,Y,SLAM,SFEA,WVNX2,WVNY2,PRN2,NP,NWLON,NWLAT,
      &                 WLATMAX,WLONMIN,WLATINC,WLONINC,ICS,RHOWAT0,G)
-          WTIME1 = STATIM*86400.D0
+          WTIME1 = STATIM*86400.0
           WTIME2 = WTIME1 + WTIMINC
           ENDIF
 
         IF(NWS.EQ.10) THEN
-          WTIME1=STATIM*86400.D0
+          WTIME1=STATIM*86400.0
           WTIME2=WTIME1+WTIMINC
           NWSGGWI=-1
           CALL NWS10GET(NWSGGWI,SLAM,SFEA,WVNX1,WVNY1,PRN1,NP,RHOWAT0,G,
@@ -227,7 +227,7 @@ C....TIME LEVEL 1 AND LEVEL 2 WIND FIELDS
           ENDIF
 
         IF(NWS.EQ.11) THEN
-          WTIME1=STATIM*86400.D0
+          WTIME1=STATIM*86400.0
           WTIME2=WTIME1+WTIMINC
           NWSEGWI=0
           IDSETFLG=0
@@ -252,19 +252,19 @@ Cek added nws = 12 for owi winds
           CALL NWS12INIT( WVNX1, WVNY1, PRN1, NP, RHOWAT0, G )
           CALL NWS12GET(  WVNX1, WVNY1, PRN1, NP, RHOWAT0, G )
           CALL NWS12GET(  WVNX2, WVNY2, PRN2, NP, RHOWAT0, G )
-          WTIME1 = STATIM*86400.D0
+          WTIME1 = STATIM*86400.0
           WTIME2 = WTIME1 + WTIMINC
         ENDIF
 
 C     RJW Merged:
 !    rjw added nws = 19: asymmetric hurricane winds v2.0
         IF(NWS.EQ.19) THEN
-           AsymmetricTime = STATIM*86400.D0
+           AsymmetricTime = STATIM*86400.0
            OPEN(22,FILE=TRIM(GBLINPUTDIR)//'/'//'fort.22',STATUS='OLD')
           CALL NWS19GET(SLAM,SFEA,WVNX2,WVNY2,PRN2,NP,AsymmetricTime,ICS)
         ENDIF
         IF(NWS.EQ.20) THEN
-           AsymmetricTime = STATIM*86400.D0
+           AsymmetricTime = STATIM*86400.0
            OPEN(22,FILE=TRIM(GBLINPUTDIR)//'/'//'fort.22',STATUS='OLD')
           CALL NWS20GET(SLAM,SFEA,WVNX2,WVNY2,PRN2,NP,AsymmetricTime,ICS)
         ENDIF
@@ -286,16 +286,16 @@ C....READ IN THE TIME LEVEL 1 AND LEVEL 2 FIELDS
         IF(NRS.EQ.1) THEN
           IF(NWS.EQ.0) THEN
             DO I=1,NP
-              WSX1(I)=0.D0
-              WSY1(I)=0.D0
-              WSX2(I)=0.D0
-              WSY2(I)=0.D0
-              PRN1(I)=0.D0    !need to be initialized
-              PRN2(I)=0.D0    !even if not used
+              WSX1(I)=0.0
+              WSY1(I)=0.0
+              WSX2(I)=0.0
+              WSY2(I)=0.0
+              PRN1(I)=0.0    !need to be initialized
+              PRN2(I)=0.0    !even if not used
               ENDDO
             ENDIF
           OPEN(23,FILE=DIRNAME//'/'//'fort.23')
-          RSTIME1 = STATIM*86400.D0
+          RSTIME1 = STATIM*86400.0
           RSTIME2 = RSTIME1+RSTIMINC
           IF (FRW.EQ.0) THEN
             CALL RSGET(RSNX1,RSNY1,NP)
@@ -316,10 +316,10 @@ Casey 101118: Added this call to initialize radiation stress gradients.
            IF(.NOT.ALLOCATED(RSNY1)) ALLOCATE(RSNY1(1:NP))
            IF(.NOT.ALLOCATED(RSNY2)) ALLOCATE(RSNY2(1:NP))
            DO I=1,NP
-             RSNX1(I) = 0.D0
-             RSNX2(I) = 0.D0
-             RSNY1(I) = 0.D0
-             RSNY2(I) = 0.D0
+             RSNX1(I) = 0.0
+             RSNX2(I) = 0.0
+             RSNY1(I) = 0.0
+             RSNY2(I) = 0.0
            ENDDO
          ENDIF
 #endif
@@ -1077,12 +1077,12 @@ C...
            IF(NHAGV.EQ.1) CALL HACOLDSVG(NP)
            IF ( CHARMV) THEN
              DO I=1,NP
-                ELAV(I)=0.D0
-                XVELAV(I)=0.D0
-                YVELAV(I)=0.D0
-                ELVA(I)=0.D0
-                XVELVA(I)=0.D0
-                YVELVA(I)=0.D0
+                ELAV(I)=0.0
+                XVELAV(I)=0.0
+                YVELAV(I)=0.0
+                ELVA(I)=0.0
+                XVELVA(I)=0.0
+                YVELVA(I)=0.0
              ENDDO
            ENDIF !  charmv
         ENDIF

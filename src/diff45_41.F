@@ -25,10 +25,10 @@ C.....for buoyancy forcing
       INTEGER,ALLOCATABLE ::    LBArray_Pointer(:)
 
 C.....nominal density of water RHOWAT0
-      REAL(SZ), PARAMETER ::  RHOWAT0=1000.D0
+      REAL(SZ), PARAMETER ::  RHOWAT0=1000.0
 
 C.....Sigma T value of reference density
-      REAL(SZ), PARAMETER ::  SigT0=RHOWAT0-1000.D0 
+      REAL(SZ), PARAMETER ::  SigT0=RHOWAT0-1000.0 
 
       LOGICAL CBaroclinic
 

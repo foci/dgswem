@@ -501,7 +501,7 @@ C         write(16,*) i, j !jgfdebug48.03
       integer lun
       character(*) :: filename
       type (OutputDataDescript_t) :: descript
-      real(8)  :: time
+      real(sz)  :: time
       integer  :: it
       ! the subroutine used to write the file
       external write_cmd
@@ -637,7 +637,7 @@ C! CMPI
       integer      :: nLWetNodes, nGWetNodes
       integer      :: iglobal
 #endif
-      real(8)      :: time
+      real(sz)      :: time
       character(*) :: filename
       type (OutputDataDescript_t) :: descript
 
@@ -684,7 +684,7 @@ C    !-----IF CMPI IS DEFINED -----
 
       if (myproc == 0) then
         open(lun, file=filename, access='SEQUENTIAL', position='APPEND')
-        write(lun, 1101) time, it, nGWetNodes, -99999.d0
+        write(lun, 1101) time, it, nGWetNodes, -99999.0
       endif
 
       bufsize = min(BUFSIZE_MAX, 
@@ -781,8 +781,8 @@ C! CMPI
       integer      :: nLNonDefValues, nGNonDefValues
       integer      :: iglobal
 #endif
-      real(8)      :: default
-      real(8)      :: time
+      real(sz)      :: default
+      real(sz)      :: time
       character(*) :: filename
       type (OutputDataDescript_t) :: descript
 
@@ -922,7 +922,7 @@ C! CMPI
       integer      :: lun
       integer      :: bufsize, ibucket
       integer      :: istart, iend, it, tag
-      real(8)      :: time
+      real(sz)      :: time
       type (OutputDataDescript_t) :: descript
 
       if (WRITE_LOCAL_HOT_START_FILES) then
@@ -1280,7 +1280,7 @@ C! CMPI
       integer :: lun, size_this
 
       write(lun, 1000) rundes, runid, agrid
-      write(lun, 1010) 1, size_this, 1.d0, 1, 1
+      write(lun, 1010) 1, size_this, 1.0, 1, 1
 
  1000 FORMAT(1X,A32,2X,A24,2X,A24)
  1010 FORMAT(1X,I10,1X,I10,1X,E15.7,1X,I5,1X,I5)
@@ -1478,7 +1478,7 @@ C     Open the file
           write(lun, 1010) ndsetse, nodes, dtdp*nspoolge,
      &                 nspoolge, 1
       case("ElevMax")
-          write(lun, 1010) 1, numNodes, 1.d0, 1, 1
+          write(lun, 1010) 1, numNodes, 1.0, 1, 1
       case("Vel2D")
           write(lun, 1010) ndsetsv, nodes, dtdp*nspoolgv,
      &                     nspoolgv, 2

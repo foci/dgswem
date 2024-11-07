@@ -340,17 +340,18 @@ ifeq ($(compiler),intel-lonestar)
 endif
 
 ifeq ($(compiler),nvhpc)   # NVIDIA
+  sz            := 8
   PPFC	        :=  nvfortran
   FC	        :=  nvfortran
   PFC	        :=  mpif90
-  FFLAGS1	:=  -Mextend -traceback -g -O3
+  FFLAGS1	:=  -r$(sz) -Mextend -traceback -g -O3
   FFLAGS2	:=  $(FFLAGS1)
   FFLAGS3	:=  $(FFLAGS1)
   FFLAGS4	:=  $(FFLAGS1)
-  DA  	        :=  -DREAL8 -DLINUX -DCSCA -DRKSSP -DSLOPE5
-  DP  	        :=  -DREAL8 -DLINUX -DCSCA -DCMPI -DRKSSP -DSLOPE5
-  DPRE	        :=  -DREAL8 -DLINUX -DRKSSP -DSLOPE5
-  DPRE2         :=  -DREAL8 -DLINUX -DCMPI
+  DA  	        :=  -DREAL$(sz) -DLINUX -DCSCA -DRKSSP -DSLOPE5
+  DP  	        :=  -DREAL$(sz) -DLINUX -DCSCA -DCMPI -DRKSSP -DSLOPE5
+  DPRE	        :=  -DREAL$(sz) -DLINUX -DRKSSP -DSLOPE5
+  DPRE2         :=  -DREAL$(sz) -DLINUX -DCMPI
   IMODS 	:=  -I
   CC            :=  nvc
   CXX    := nvc++

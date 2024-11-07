@@ -162,10 +162,10 @@
       cLon = lon
       Vmax = vm
       ! evaluate basic physical params
-      corio = 2.0d0 * omega * SIN(deg2rad*cLat)
-      B = (Vmax*kt2ms)**2 * RhoAir * EXP(1.d0)
+      corio = 2.0 * omega * SIN(deg2rad*cLat)
+      B = (Vmax*kt2ms)**2 * RhoAir * EXP(1.0)
      &             / ((Pn - Pc) * mb2pa)
-      B = MAX( MIN(B,2.5d0), 1.0d0) ! limit B to range 1.0->2.5
+      B = MAX( MIN(B,2.5d0), 1.0) ! limit B to range 1.0->2.5
       ! added for compatibility of calcRmaxes to use with simplified nws20
       Bs(1:6)=B
       VmBL(1:6)=Vmax
@@ -186,15 +186,15 @@
       cLon = lon
       Vmax = vm
       ! evaluate basic physical params
-      corio = 2.0d0 * omega * SIN(deg2rad*cLat)
-      B = (Vmax*kt2ms)**2 * RhoAir * EXP(1.d0)
+      corio = 2.0 * omega * SIN(deg2rad*cLat)
+      B = (Vmax*kt2ms)**2 * RhoAir * EXP(1.0)
      &             / ((Pn - Pc) * mb2pa)
-      Phi=1.d0
+      Phi=1.0
       Bs(1:6)=B
       Phis(1:6)=Phi
       VmBL(1:6)=Vmax
       ! Jie 2013.01 
-      ! B = MAX( MIN(B,2.5d0), 1.0d0) ! limit B to range 1.0->2.5
+      ! B = MAX( MIN(B,2.5d0), 1.0) ! limit B to range 1.0->2.5
 
       END SUBROUTINE newVortexFull
 
@@ -221,7 +221,7 @@
       cLat = lat
       cLon = lon
       ! evaluate basic physical params
-      corio = 2.0d0 * omega * SIN(deg2rad*cLat)
+      corio = 2.0 * omega * SIN(deg2rad*cLat)
       END SUBROUTINE setVortex
 
 
@@ -240,8 +240,8 @@
       SUBROUTINE calcRmaxes()
 !              REAL(sz), EXTERNAL  :: func
       REAL(sz)            :: root        ! Radius of maximum winds
-      REAL(sz), PARAMETER :: innerRadius = 1.d0
-      REAL(sz), PARAMETER :: outerRadius = 400.d0
+      REAL(sz), PARAMETER :: innerRadius = 1.0
+      REAL(sz), PARAMETER :: outerRadius = 400.0
       REAL(sz), PARAMETER :: accuracy    = 0.0001d0
       REAL(sz), PARAMETER :: zoom        = 0.01d0
       INTEGER , PARAMETER :: itmax = 3
@@ -260,10 +260,10 @@
          Vmax = VmBL(n+1)
 
          quad = n
-         root = -1.d0
+         root = -1.0
          r1 = innerRadius
          r2 = outerRadius
-         dr = 1.d0
+         dr = 1.0
          DO iter = 1, itmax
             root = findRoot(VhWithCori, r1,r2, dr, r3,r4)
             r1 = r3
@@ -276,10 +276,10 @@
          ! Rmax using the gradient wind balance that neglects
          ! coriolis (and is appropriate in the vicinity of Rmax)
          vicinity = abs(root-radius(quad))/root
-         if ( (root.lt.0.d0).or.(vicinity.le.0.1d0)) then
+         if ( (root.lt.0.0).or.(vicinity.le.0.1d0)) then
             r1 = innerRadius
             r2 = outerRadius
-            dr = 1.d0
+            dr = 1.0
             DO iter = 1, itmax
                root = findRoot(VhNoCori, r1,r2, dr, r3,r4)
                r1 = r3
@@ -309,8 +309,8 @@
       SUBROUTINE calcRmaxesFull()
 !              REAL(sz), EXTERNAL  :: func
       REAL(sz)            :: root        ! Radius of maximum winds
-      REAL(sz), PARAMETER :: innerRadius = 1.d0
-      REAL(sz), PARAMETER :: outerRadius = 500.d0
+      REAL(sz), PARAMETER :: innerRadius = 1.0
+      REAL(sz), PARAMETER :: outerRadius = 500.0
       REAL(sz), PARAMETER :: accuracy    = 0.0001d0
       REAL(sz), PARAMETER :: zoom        = 0.01d0
       INTEGER , PARAMETER :: itmax = 3
@@ -336,10 +336,10 @@
       DO icont = 1, cont ! logical expre. is at the end to exit the loop
          norootflg=0
          quad = n
-         root = -1.d0
+         root = -1.0
          r1 = innerRadius
          r2 = outerRadius
-         dr = 1.d0
+         dr = 1.0
          DO iter = 1, itmax
             root = findRoot(VhWithCoriFull, r1,r2, dr, r3,r4)
             r1 = r3
@@ -347,10 +347,10 @@
             dr = dr * zoom
          END DO
          ! avoid invalid B value when root is not found        
-         if (root.lt.0.d0) then
+         if (root.lt.0.0) then
          !   r1 = innerRadius
          !   r2 = outerRadius
-         !   dr = 1.d0
+         !   dr = 1.0
          !   DO iter = 1, itmax
          !      root = findRoot(VhNoCori, r1,r2, dr, r3,r4)
          !      r1 = r3
@@ -453,11 +453,11 @@
       endif
       ! Jie 2013.02
       Vh = ms2kt * ( SQRT(
-     &            ((Vmax*kt2ms)**2.d0+Vmax*kt2ms*testRmax*nm2m*corio) 
+     &            ((Vmax*kt2ms)**2.0+Vmax*kt2ms*testRmax*nm2m*corio) 
      &                   * (testRmax/radius(quad))**B
-     &                   * EXP(Phi*(1.0d0-(testRmax/radius(quad))**B))
-     &            + (nm2m*radius(quad)*corio/2.d0)**2.d0)
-     &            - nm2m*radius(quad)*corio/2.d0 )
+     &                   * EXP(Phi*(1.0-(testRmax/radius(quad))**B))
+     &            + (nm2m*radius(quad)*corio/2.0)**2.0)
+     &            - nm2m*radius(quad)*corio/2.0 )
       VhWithCoriFull = Vh - thisVr
       END FUNCTION VhWithCoriFull
       !===============================================================
@@ -492,10 +492,10 @@
          thisVr = Vr
       endif
       Vh = ms2kt * ( SQRT(
-     &            (Vmax*kt2ms)**2.d0 * (testRmax/radius(quad))**B
-     &                   * EXP(1.0d0-(testRmax/radius(quad))**B)
-     &            + (nm2m*radius(quad)*corio/2.d0)**2.d0)
-     &            - nm2m*radius(quad)*corio/2.d0 )
+     &            (Vmax*kt2ms)**2.0 * (testRmax/radius(quad))**B
+     &                   * EXP(1.0-(testRmax/radius(quad))**B)
+     &            + (nm2m*radius(quad)*corio/2.0)**2.0)
+     &            - nm2m*radius(quad)*corio/2.0 )
       VhWithCori = Vh - thisVr
       END FUNCTION VhWithCori
       !===============================================================
@@ -511,7 +511,7 @@
          thisVr = Vr
       endif
       VhNoCori = ABS(ms2kt *
-     &           SQRT( (Vmax*kt2ms)**2.0d0 * (testRmax/radius(quad))**B
+     &           SQRT( (Vmax*kt2ms)**2.0 * (testRmax/radius(quad))**B
      &           * EXP(1 - (testRmax/radius(quad))**B)))
      &           - thisVr
 
@@ -555,7 +555,7 @@
          b = x1 + iter * dx
          fb = func(b)
          ! Check progress
-         IF ((fa*fb < 0.0d0) .OR. (ABS(fb) > ABS(fa))) THEN
+         IF ((fa*fb < 0.0) .OR. (ABS(fb) > ABS(fa))) THEN
             ! Assign root
             IF (ABS(fb) > ABS(fa)) THEN
                findRoot = a
@@ -645,17 +645,17 @@
       !----------------------------------------
       ! in eye velocity is zero not translational velocity
       !----------------------------------------
-      IF (dist < 1.d0) THEN
-         u = 0.0d0
-         v = 0.0d0
+      IF (dist < 1.0) THEN
+         u = 0.0
+         v = 0.0
          p = Pc * mb2pa
          RETURN
       END IF
 
       dist = m2nm * dist
 
-      angle = 360.0d0 + rad2deg * ATAN2(dx,dy)
-      IF (angle > 360.d0) angle = angle - 360.d0
+      angle = 360.0 + rad2deg * ATAN2(dx,dy)
+      IF (angle > 360.0) angle = angle - 360.0
       latestAngle = angle
       rmx =  Rmw(angle)
       latestRmax = rmx
@@ -670,22 +670,22 @@
       ! averages to 10-minute averages for the storm surge
       ! model.
       !---------------------------------------------------
-      percentCoriolis=1.0d0
+      percentCoriolis=1.0
       speed = SQRT(
-     &           (Vmax*kt2ms)**2.d0 * (rmx/dist)**B
-     &                  * EXP(1.d0-(rmx/dist)**B)
+     &           (Vmax*kt2ms)**2.0 * (rmx/dist)**B
+     &                  * EXP(1.0-(rmx/dist)**B)
      &            + (nm2m*dist*percentCoriolis
-     &                           *corio/2.d0)**2.d0)
-     &            - nm2m*dist*percentCoriolis*corio/2.d0
+     &                           *corio/2.0)**2.0)
+     &            - nm2m*dist*percentCoriolis*corio/2.0
 
       ! calculate the wind speed (m/s) at Rmax, using
       ! equation that includes full coriolis
       speedAtRmax = SQRT(
-     &           (Vmax*kt2ms)**2.d0 *
-     &                  * EXP(0.d0)
+     &           (Vmax*kt2ms)**2.0 *
+     &                  * EXP(0.0)
      &             + (nm2m*dist*percentCoriolis
-     &                           *corio/2.d0)**2.d0)
-     &            - nm2m*dist*percentCoriolis*corio/2.d0
+     &                           *corio/2.0)**2.0)
+     &            - nm2m*dist*percentCoriolis*corio/2.0
 
       ! calculate a factor to place the velocity profile so that
       ! it hits vmax
@@ -724,9 +724,9 @@
       !
       ! TODO: 401nm should be replaced with something less
       ! arbitrary ... and find a better way to blend this
-      !if ( dist.gt.401.d0 ) then
-      !   u = 0.0d0
-      !   v = 0.0d0
+      !if ( dist.gt.401.0 ) then
+      !   u = 0.0
+      !   v = 0.0
       !   p = mb2pa * Pn
       !endif
       
@@ -798,9 +798,9 @@
       !----------------------------------------
       ! in eye velocity is zero not translational velocity
       !----------------------------------------
-      IF (idist < 1.d0) THEN
-         u = 0.0d0
-         v = 0.0d0
+      IF (idist < 1.0) THEN
+         u = 0.0
+         v = 0.0
          p = Pc * mb2pa
          RETURN
       END IF
@@ -815,24 +815,24 @@
       ! averages to 10-minute averages for the storm surge
       ! model.
       !---------------------------------------------------
-      percentCoriolis=1.0d0
+      percentCoriolis=1.0
       ! Jie 2014.07
       IF (geof == 1) THEN
          speed = SQRT(
-     &           ((Vmax*kt2ms)**2.d0+Vmax*kt2ms*rmx*nm2m
+     &           ((Vmax*kt2ms)**2.0+Vmax*kt2ms*rmx*nm2m
      &             *percentCoriolis*corio) 
      &                  * (rmx/idist)**B
-     &                  * EXP(Phi*(1.d0-(rmx/idist)**B))
+     &                  * EXP(Phi*(1.0-(rmx/idist)**B))
      &            + (nm2m*idist*percentCoriolis
-     &                           *corio/2.d0)**2.d0)
-     &            - nm2m*idist*percentCoriolis*corio/2.d0
+     &                           *corio/2.0)**2.0)
+     &            - nm2m*idist*percentCoriolis*corio/2.0
       ELSE 
          speed = SQRT(
-     &           (Vmax*kt2ms)**2.d0 * (rmx/idist)**B
-     &            * EXP(1.d0-(rmx/idist)**B)
+     &           (Vmax*kt2ms)**2.0 * (rmx/idist)**B
+     &            * EXP(1.0-(rmx/idist)**B)
      &            + (nm2m*idist*percentCoriolis
-     &            *corio/2.d0)**2.d0)
-     &            - nm2m*idist*percentCoriolis*corio/2.d0      
+     &            *corio/2.0)**2.0)
+     &            - nm2m*idist*percentCoriolis*corio/2.0      
       ENDIF
       ! jgf20111007: Calculate NWS8-like translation speed
       TransSpdX = (abs(speed/(Vmax*kt2ms)))*uTrans*kt2ms
@@ -868,9 +868,9 @@
       !
       ! TODO: 401nm should be replaced with something less
       ! arbitrary ... and find a better way to blend this
-      !if ( dist.gt.401.d0 ) then
-      !   u = 0.0d0
-      !   v = 0.0d0
+      !if ( dist.gt.401.0 ) then
+      !   u = 0.0
+      !   v = 0.0
       !   p = mb2pa * Pn
       !endif
 
@@ -910,35 +910,35 @@
          param = VmBL4    
       end if   
       
-      if (angle.le.45.0d0) then
+      if (angle.le.45.0) then
          iquad = 5
-         delta_angle = 45.d0 + angle
-      else if (angle.le.135.d0) then
+         delta_angle = 45.0 + angle
+      else if (angle.le.135.0) then
          iquad = 2
-         delta_angle = angle - 45.d0
-      else if (angle.le.225.d0) then
+         delta_angle = angle - 45.0
+      else if (angle.le.225.0) then
          iquad = 3
-         delta_angle = angle - 135.d0
-      else if (angle.le.315.d0) then
+         delta_angle = angle - 135.0
+      else if (angle.le.315.0) then
          iquad = 4
-         delta_angle = angle - 225.d0
-      else if (angle.gt.315.d0) then
+         delta_angle = angle - 225.0
+      else if (angle.gt.315.0) then
          iquad = 5
-         delta_angle = angle - 315.d0
+         delta_angle = angle - 315.0
       endif
 
       ! nearest neighbor weighted interpolation     
-         if ( delta_angle.lt.1.d0 ) then
+         if ( delta_angle.lt.1.0 ) then
              spInterp=interpR(param, iquad, dist)
-         else if (delta_angle.gt.89.d0) then
+         else if (delta_angle.gt.89.0) then
              spInterp=interpR(param, iquad+1, dist)
          else
              temp1= interpR(param, iquad, dist)
              temp2= interpR(param, iquad+1, dist)
-             spInterp = ( temp1/delta_angle**2.d0
-     &             + temp2/(90.0-delta_angle)**2.d0 )
-     &             / ( 1.d0/delta_angle**2.d0
-     &              + 1.d0/(90.d0-delta_angle)**2.d0 )
+             spInterp = ( temp1/delta_angle**2.0
+     &             + temp2/(90.0-delta_angle)**2.0 )
+     &             / ( 1.0/delta_angle**2.0
+     &              + 1.0/(90.0-delta_angle)**2.0 )
          end if
 
       END FUNCTION spInterp
@@ -1026,36 +1026,36 @@
       REAL(sz), INTENT(IN) :: angle
       INTEGER :: base_quadrant
       REAL(sz) :: delta_angle
-      if (angle.le.45.0d0) then
+      if (angle.le.45.0) then
          base_quadrant = 5
-         delta_angle = 45.d0 + angle
-      else if (angle.le.135.d0) then
+         delta_angle = 45.0 + angle
+      else if (angle.le.135.0) then
          base_quadrant = 2
-         delta_angle = angle - 45.d0
-      else if (angle.le.225.d0) then
+         delta_angle = angle - 45.0
+      else if (angle.le.225.0) then
          base_quadrant = 3
-         delta_angle = angle - 135.d0
-      else if (angle.le.315.d0) then
+         delta_angle = angle - 135.0
+      else if (angle.le.315.0) then
          base_quadrant = 4
-         delta_angle = angle - 225.d0
-      else if (angle.gt.315.d0) then
+         delta_angle = angle - 225.0
+      else if (angle.gt.315.0) then
          base_quadrant = 5
-         delta_angle = angle - 315.d0
+         delta_angle = angle - 315.0
       endif
       ! nearest neighbor weighted interpolation
-      if ( delta_angle.lt.1.d0 ) then
+      if ( delta_angle.lt.1.0 ) then
          Rmw = Rmaxes(base_quadrant)   ! avoid div by zero
-      else if ( delta_angle.gt.89.d0 ) then
+      else if ( delta_angle.gt.89.0 ) then
          Rmw = Rmaxes(base_quadrant+1) ! avoid div by zero
       else
-         Rmw = ( Rmaxes(base_quadrant)/delta_angle**2.d0
-     &             + Rmaxes(base_quadrant+1)/(90.0-delta_angle)**2.d0 )
-     &             / ( 1.d0/delta_angle**2.d0
-     &              + 1.d0/(90.d0-delta_angle)**2.d0 )
+         Rmw = ( Rmaxes(base_quadrant)/delta_angle**2.0
+     &             + Rmaxes(base_quadrant+1)/(90.0-delta_angle)**2.0 )
+     &             / ( 1.0/delta_angle**2.0
+     &              + 1.0/(90.0-delta_angle)**2.0 )
       endif
 
       ! linearly interpolate
-C            Rmw = (delta_angle/90.0d0)
+C            Rmw = (delta_angle/90.0)
 C     &             *(Rmaxes(base_quadrant+1)-Rmaxes(base_quadrant))
 C     &            + Rmaxes(base_quadrant)
 
@@ -1086,7 +1086,7 @@ C     &            + Rmaxes(base_quadrant)
 
       REAL(sz) :: A, cosA, sinA
 
-      A = SIGN(1.d0, whichWay) * deg2rad * angle
+      A = SIGN(1.0, whichWay) * deg2rad * angle
       cosA = COS(A)
       sinA = SIN(A)
 
@@ -1109,14 +1109,14 @@ C     &            + Rmaxes(base_quadrant)
       REAL(sz), INTENT(IN) :: r
       REAL(sz), INTENT(IN) :: rmx
 
-      IF (0.0d0 <= r .AND. r < rmx) THEN
-         fang = 10.0d0 * r/rmx
+      IF (0.0 <= r .AND. r < rmx) THEN
+         fang = 10.0 * r/rmx
       ELSE IF (rmx <= r .AND. r < 1.2d0*rmx) THEN
-         fang = 10.0d0 + 75.0d0 * (r/rmx - 1.d0)
+         fang = 10.0 + 75.0 * (r/rmx - 1.0)
       ELSE IF (r >= 1.2d0*rmx) THEN
-         fang = 25.0d0
+         fang = 25.0
       ELSE
-         fang = 0.0d0
+         fang = 0.0
       END IF
       END FUNCTION fang
 
@@ -1152,10 +1152,10 @@ C
       REAL(sz) :: dt
       REAL(sz) :: avgLat
 
-      avgLat = (latOld + latNew) / 2.d0
+      avgLat = (latOld + latNew) / 2.0
       dx = sphericalDistance( ((lonNew-lonOld)*deg2rad),
-     &         0.0d0, avgLat, avgLat)
-      dy = sphericalDistance(0.0d0,((latNew-latOld)*deg2rad),
+     &         0.00, avgLat, avgLat)
+      dy = sphericalDistance(0.00,((latNew-latOld)*deg2rad),
      &         latOld,latNew)
 
       dt = tNew - tOld

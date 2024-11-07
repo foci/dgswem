@@ -105,15 +105,15 @@ Casey 110111: Create new data structure with discontinuous information for SWAN.
             ENDIF
           ENDDO
 333     CONTINUE
-        ETA2(I) = 0.D0
-        UU2(I)  = 0.D0
-        VV2(I)  = 0.D0
+        ETA2(I) = 0.0
+        UU2(I)  = 0.0
+        VV2(I)  = 0.0
         DO J = 1,NO_NBORS
           NBOR_EL = ELETAB(I,1+J)
           IF(WDFLG(NBOR_EL).EQ.0) CYCLE
           AREA = 0.5*AREAS(NBOR_EL)/AREA_SUM
           DEPTH = ZE_DG(J) + HB_DG(J)
-          FH_NL = 1.D0/(NLEQ*DEPTH + LEQ)
+          FH_NL = 1.0/(NLEQ*DEPTH + LEQ)
           ETA2(I) = ETA2(I) + AREA*ZE_DG(J)
           UU2(I)  = UU2(I)  + AREA*QX_DG(J)*FH_NL
           VV2(I)  = VV2(I)  + AREA*QY_DG(J)*FH_NL

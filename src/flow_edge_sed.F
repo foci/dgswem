@@ -52,12 +52,12 @@ C.....Compute ZE, QX, QY, and HB at each edge Gauss quadrature point
 
       DO 111 I = 1,NEGP
 
-        ZE_IN = 0.D0
-        QX_IN = 0.D0
-        QY_IN = 0.D0
+        ZE_IN = 0.0
+        QX_IN = 0.0
+        QY_IN = 0.0
 
-        HB_IN = 0.D0
-        HB_EX = 0.D0
+        HB_IN = 0.0
+        HB_EX = 0.0
 
 C.....Compute the solution at the interior state
 
@@ -77,7 +77,7 @@ C.....height, and angle at the given interior gauss point
 
         IF (SEDFLAG.EQ.2) THEN
 
-          WAVE_RATIO = (XEGP(I) - (-1.D0))/2.D0
+          WAVE_RATIO = (XEGP(I) - (-1.0))/2.0
 
           T_WAVE = WAVE_T(N1) + WAVE_RATIO*(WAVE_T(N2) - WAVE_T(N1))
           A_WAVE = WAVE_A(N1) + WAVE_RATIO*(WAVE_A(N2) - WAVE_A(N1))
@@ -109,8 +109,8 @@ C.....Compute the velocities in the x and y directions
         
 C.....Compute the magnitudes of the velocities
 
-        UMAG_IN = SQRT(U_IN**(2.D0) + V_IN**(2.D0))
-        UMAG_EX = SQRT(U_EX**(2.D0) + V_EX**(2.D0))
+        UMAG_IN = SQRT(U_IN**(2.0) + V_IN**(2.0))
+        UMAG_EX = SQRT(U_EX**(2.0) + V_EX**(2.0))
 
 C.....Compute the Roe averaged velocities
 

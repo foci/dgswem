@@ -31,7 +31,7 @@ C.....Loop over the nodes
       
 C.....Initialize tidal potential terms
 
-        TIP2(I) = 0.D0
+        TIP2(I) = 0.0
 
 C.....Loop over the tidal potential constituents
 
@@ -51,7 +51,7 @@ C.....Semi-diurnal species
 
           IF (NA.EQ.1) THEN
 
-            ARGTP    = ARGT + 2.D0*SLAM(I)
+            ARGTP    = ARGT + 2.0*SLAM(I)
             ARGSALT  = ARGT - SALTPHA(J,I)
             CCSFEA   = COS(SFEA(I))
             CCSFEA   = CCSFEA*CCSFEA
@@ -66,7 +66,7 @@ C.....Diurnal species
 
             ARGTP    = ARGT + SLAM(I)
             ARGSALT  = ARGT - SALTPHA(J,I)
-            S2SFEA   = SIN(2.D0*SFEA(I))
+            S2SFEA   = SIN(2.0*SFEA(I))
             TIP2(I) = TIP2(I) + TPMUL*S2SFEA*COS(ARGTP)
      &                        + SALTMUL*SALTAMP(J,I)*COS(ARGSALT)
      

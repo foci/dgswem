@@ -61,29 +61,29 @@ Casey 121128: Added variables for the output of global files from SWAN.
       Logical vertexslope
 
 C.....Background Atmospheric Pressure in mb
-      REAL(SZ), PARAMETER :: PRBCKGRND = 1013.0d0   !tcm 20100617 v49.16 Added
-      REAL(8) :: rhoAir = 1.15d0         ! kg/m^3
-      REAL(8) :: windReduction = 0.9d0
-      REAL(8) :: one2ten = 0.8928d0
-      REAL(8) :: ten2one = 1.d0/0.8928d0
+      REAL(SZ), PARAMETER :: PRBCKGRND = 1013.0   !tcm 20100617 v49.16 Added
+      real(sz) :: rhoAir = 1.15d0         ! kg/m^3
+      real(sz) :: windReduction = 0.9d0
+      real(sz) :: one2ten = 0.8928d0
+      real(sz) :: ten2one = 1.0/0.8928d0
 Casey 121019: Added multiplication factor to be used before sending winds to coupled wave models.
-      REAL(SZ) :: WaveWindMultiplier = 1.D0
+      REAL(SZ) :: WaveWindMultiplier = 1.0
 C.....PI etc
-      REAL(8), PARAMETER ::  PI=3.141592653589793D0
-      REAL(8), PARAMETER ::  DEG2RAD = PI/180.D0  ! degrees to radians
-      REAL(8), PARAMETER ::  RAD2DEG = 180.D0/PI  ! radians to degrees
-      REAL(8), PARAMETER ::  e=2.718281828459045d0
+      real(sz), PARAMETER ::  PI=3.141592653589793D0
+      real(sz), PARAMETER ::  DEG2RAD = PI/180.0  ! degrees to radians
+      real(sz), PARAMETER ::  RAD2DEG = 180.0/PI  ! radians to degrees
+      real(sz), PARAMETER ::  e=2.718281828459045d0
 C.....Days to seconds conversion
-      REAL(8), PARAMETER :: day2sec=24.d0*3600.d0
-      REAL(8), PARAMETER :: sec2day=1.d0/day2sec
+      real(sz), PARAMETER :: day2sec=24.0*3600.0
+      real(sz), PARAMETER :: sec2day=1.0/day2sec
       ! jgf50.38.03: Additional useful constants
-      REAL(8), PARAMETER :: Rearth = 6378206.4d0 ! radius of earth (m)
-      REAL(8), PARAMETER :: nm2m = 1852.d0 ! nautical miles to meters
-      REAL(8), PARAMETER :: m2nm = 1.d0/nm2m ! meters to nautical miles
-      REAL(8), PARAMETER :: kt2ms = nm2m / 3600.0 ! knots to m/s
-      REAL(8), PARAMETER :: ms2kt = 1.d0 / kt2ms ! m/s to knots
-      REAL(8), PARAMETER :: omega = 2.0d0*pi / 86164.2d0
-      REAL(8), PARAMETER :: mb2pa = 100.d0
+      real(sz), PARAMETER :: Rearth = 6378206.4d0 ! radius of earth (m)
+      real(sz), PARAMETER :: nm2m = 1852.0 ! nautical miles to meters
+      real(sz), PARAMETER :: m2nm = 1.0/nm2m ! meters to nautical miles
+      real(sz), PARAMETER :: kt2ms = nm2m / 3600.0 ! knots to m/s
+      real(sz), PARAMETER :: ms2kt = 1.0 / kt2ms ! m/s to knots
+      real(sz), PARAMETER :: omega = 2.0*pi / 86164.2d0
+      real(sz), PARAMETER :: mb2pa = 100.0
 
 C.....parameters used in barrier overflow
       REAL(SZ), PARAMETER ::  BARMIN=0.01D0
@@ -181,13 +181,13 @@ C...
 C      REAL(SZ),ALLOCATABLE ::   TAU0VAR(:)
       REAL(SZ),ALLOCATABLE ::   ET00(:),BT00(:)
       REAL(SZ),ALLOCATABLE ::   STAIE1(:),STAIE2(:),STAIE3(:)
-      REAL(8),ALLOCATABLE ::    XEV(:),YEV(:),SLEV(:),SFEV(:)
+      real(sz),ALLOCATABLE ::    XEV(:),YEV(:),SLEV(:),SFEV(:)
       REAL(SZ),ALLOCATABLE ::   UU00(:),VV00(:)
       REAL(SZ),ALLOCATABLE ::   STAIV1(:),STAIV2(:),STAIV3(:)
-      REAL(8),ALLOCATABLE ::    XEC(:),YEC(:),SLEC(:),SFEC(:)
+      real(sz),ALLOCATABLE ::    XEC(:),YEC(:),SLEC(:),SFEC(:)
       REAL(SZ),ALLOCATABLE ::   CC00(:)
       REAL(SZ),ALLOCATABLE ::   STAIC1(:),STAIC2(:),STAIC3(:)
-      REAL(8),ALLOCATABLE ::    XEM(:),YEM(:),SLEM(:),SFEM(:)
+      real(sz),ALLOCATABLE ::    XEM(:),YEM(:),SLEM(:),SFEM(:)
       REAL(SZ),ALLOCATABLE ::   RMU00(:),RMV00(:),RMP00(:)
       REAL(SZ),ALLOCATABLE ::   STAIM1(:),STAIM2(:),STAIM3(:)
       REAL(SZ),ALLOCATABLE ::   CH1(:),QB(:),QA(:),SOURSIN(:)!,EVC(:)
@@ -213,7 +213,7 @@ C.....Allocate additional variables for wave friction
       REAL(SZ),ALLOCATABLE ::    AREAS(:),SFACDUB(:,:),YDUB(:,:,:)
 
       !temp
-      REAL(8) ,ALLOCATABLE ::   RTEMP2(:)
+      real(sz) ,ALLOCATABLE ::   RTEMP2(:)
 
 
       REAL(SZ),ALLOCATABLE ::   XVELAV(:),YVELAV(:),XVELVA(:),YVELVA(:)
@@ -278,7 +278,7 @@ C...DECLARE COMMON BLOCKS
 C...
       INTEGER NTSTEPS,ITMV
       REAL(SZ) DT,FMV
-      REAL(8) TIMEBEG
+      real(sz) TIMEBEG
       COMMON /MEANSQ/ TIMEBEG,DT,FMV,NTSTEPS,ITMV
 C
       INTEGER NHARFR
@@ -288,25 +288,25 @@ C
       COMMON /EXTMODE5/ NP,NOLICA,NOLIFA,NSCREEN,IHOT,ICS
 
 C...
-C...DECLARE REAL(8) AND CHAR VARIABLES, EQUIVALENCES
+C...DECLARE real(sz) AND CHAR VARIABLES, EQUIVALENCES
 C...
-      REAL(8) STATIM,REFTIM,TIME_A,DTDP,TIMEH,vdtdp,cfl_max
-      REAL(8) AVGXY,DIF1R,DIF2R,DIF3R
-      REAL(8) AEMIN,AE,AA,A1,A2,A3,X1,X2,X3,X4,Y1,Y2,Y3,Y4
-      REAL(8) FDX1,FDX2,FDX3,FDY1,FDY2,FDY3
-      REAL(8) FDX1OA,FDX2OA,FDX3OA,FDY1OA,FDY2OA,FDY3OA,AREAIE
-      REAL(8) DDX1,DDX2,DDX3,DDY1,DDY2,DDY3
-      REAL(8) DXX11,DXX12,DXX13,DXX21,DXX22,DXX23,DXX31,DXX32,DXX33
-      REAL(8) DYY11,DYY12,DYY13,DYY21,DYY22,DYY23,DYY31,DYY32,DYY33
-      REAL(8) DXY11,DXY12,DXY13,DXY21,DXY22,DXY23,DXY31,DXY32,DXY33
-      REAL(8) XL0,XL1,XL2,YL0,YL1,YL2,SLAM0,SFEA0
-      REAL(8) WREFTIM,WTIMED,WTIME2,WTIME1,WTIMINC,QTIME1,QTIME2
-      REAL(8) FTIMINC,ETIMINC,RSTIME1,RSTIME2,RSTIMINC
-      REAL(8) DELX,DELY,DIST,DELDIST,DELETA
-      REAL(8),ALLOCATABLE :: AMIG(:),AMIGT(:),FAMIG(:)
-      REAL(8),ALLOCATABLE :: PER(:),PERT(:),FPER(:)
-      REAL(8),ALLOCATABLE :: FREQ(:),FF(:),FACE(:)
-      REAL(8),ALLOCATABLE :: SLAM(:),SFEA(:),X(:),Y(:)
+      real(sz) STATIM,REFTIM,TIME_A,DTDP,TIMEH,vdtdp,cfl_max
+      real(sz) AVGXY,DIF1R,DIF2R,DIF3R
+      real(sz) AEMIN,AE,AA,A1,A2,A3,X1,X2,X3,X4,Y1,Y2,Y3,Y4
+      real(sz) FDX1,FDX2,FDX3,FDY1,FDY2,FDY3
+      real(sz) FDX1OA,FDX2OA,FDX3OA,FDY1OA,FDY2OA,FDY3OA,AREAIE
+      real(sz) DDX1,DDX2,DDX3,DDY1,DDY2,DDY3
+      real(sz) DXX11,DXX12,DXX13,DXX21,DXX22,DXX23,DXX31,DXX32,DXX33
+      real(sz) DYY11,DYY12,DYY13,DYY21,DYY22,DYY23,DYY31,DYY32,DYY33
+      real(sz) DXY11,DXY12,DXY13,DXY21,DXY22,DXY23,DXY31,DXY32,DXY33
+      real(sz) XL0,XL1,XL2,YL0,YL1,YL2,SLAM0,SFEA0
+      real(sz) WREFTIM,WTIMED,WTIME2,WTIME1,WTIMINC,QTIME1,QTIME2
+      real(sz) FTIMINC,ETIMINC,RSTIME1,RSTIME2,RSTIMINC
+      real(sz) DELX,DELY,DIST,DELDIST,DELETA
+      real(sz),ALLOCATABLE :: AMIG(:),AMIGT(:),FAMIG(:)
+      real(sz),ALLOCATABLE :: PER(:),PERT(:),FPER(:)
+      real(sz),ALLOCATABLE :: FREQ(:),FF(:),FACE(:)
+      real(sz),ALLOCATABLE :: SLAM(:),SFEA(:),X(:),Y(:)
 
 
       CHARACTER*32 RUNDES
@@ -428,8 +428,8 @@ C.....End (EK)
       REAL(SZ) VELMIN
 
 
-      REAL(8)  RNP_GLOBAL
-      REAL(8)  REFSEC   ! required to run in either 32-bit or 64-bit
+      real(sz)  RNP_GLOBAL
+      real(sz)  REFSEC   ! required to run in either 32-bit or 64-bit
 
       
 
@@ -455,9 +455,9 @@ C
 C     compute the distances based on haversine formula for
 C     distance along a sphere
       sphericalDistance = Rearth *
-     &  ( 2.0d0*ASIN(
-     &     sqrt(sin(DY/2.0d0)**2.0d0
-     &      + cos(y1*DEG2RAD)*cos(y2*DEG2RAD)*sin(DX/2.0d0)**2.0d0
+     &  ( 2.0*ASIN(
+     &     sqrt(sin(DY/2.0)**2.0
+     &      + cos(y1*DEG2RAD)*cos(y2*DEG2RAD)*sin(DX/2.0)**2.0
      &   )))
 
       RETURN

@@ -17,7 +17,7 @@ Casey 090302: Added the filename as the last argument.
       IMPLICIT NONE
 C     args
       INTEGER, intent(in) :: lun ! logical unit number of file to write to
-      REAL(8), intent(in) :: time ! seconds since cold start
+      real(sz), intent(in) :: time ! seconds since cold start
       INTEGER, intent(in) :: it   ! number of time steps since cold start
       type(OutputDataDescript_t), intent(in) :: descript !describes output data
       EXTERNAL :: pack_cmd   ! subroutine used to pack data on subdomain

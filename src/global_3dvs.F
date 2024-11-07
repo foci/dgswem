@@ -66,8 +66,8 @@ C   REAL CSII(MNVel),SIII(MNVel)     : cosine and sine of normal flux boundary n
 C   REAL ETA1(MNP),ETA2(MNP)         : water surf elev at time levels s, s+1
 C   REAL DP(MNP)                     : still water depth
 C   REAL BTP(MNP)                    : barotropic pressure (incl TP & wl) at time levels s+1/2
-C   REAL*8  X(MNP),Y(MNP)            : nodal coordinates
-C   REAL*8  AREAS(MNE)               : 2*Element Area
+C   real(sz)  X(MNP),Y(MNP)            : nodal coordinates
+C   real(sz)  AREAS(MNE)               : 2*Element Area
 
 C...
 C...DECLARE INTERNAL MODE GLOBAL ARRAYS

@@ -201,7 +201,7 @@ C.....Read in the fort.dg file
         CALL read_keyword_fort_dg() ! otherwise assume keyword format
       ENDIF     
       
-      RHOWAT0 = 1000.D0
+      RHOWAT0 = 1000.0
                   
       
 C.....Input from unit 15 and output to unit 16 rundescription and run ID
@@ -978,7 +978,7 @@ C.....Read and process NRAMP - whether a ramp function will be used
 C.....Read and process G - gravity
 C...  
       READ(15,*) G
-      G2ROOT = SQRT(G/2.0d0)
+      G2ROOT = SQRT(G/2.0)
       IF ((ICS.EQ.2).AND.(abs(G-9.81).gt.0.01)) THEN
          IF ((NSCREEN.EQ.1).AND.(MYPROC.EQ.0)) THEN
             WRITE(6,9972)
@@ -1089,7 +1089,7 @@ Casey 101118: Changed NRS.EQ.1 to NRS.GE.1 throughout this section.
  6111       FORMAT(5X,'WIND REFERENCE TIME FOR SIMULATION = ',
      &           I2,'/',I2,'/',I2,'  ',I2,'H',/)
          ENDIF
-         CALL TIMECONV(IREFYR,IREFMO,IREFDAY,IREFHR,0,0.0d0,
+         CALL TIMECONV(IREFYR,IREFMO,IREFDAY,IREFHR,0,0.0,
      &        WindRefTime, MyProc, NScreen, ScreenUnit)
       ENDIF
 
@@ -1153,7 +1153,7 @@ C.....Read and process RNDAY - simulation duration i days
 
 C.....Compute total number of time steps NT
 
-      NT = INT(RNDAY*(86400.D0/DTDP) + 0.5D0)
+      NT = INT(RNDAY*(86400.0/DTDP) + 0.5D0)
       WRITE(16,1920) NT
  1920 FORMAT(5X,'NUMBER OF TIME STEPS  =',I8,/)
 
@@ -1167,8 +1167,8 @@ C     jgf46.08 Add fine-grained ramp functions.
 C     jgf46.21 Add FluxSettlingTime for IBTYPE=52 to accomodate
 C     MS river during Katrina, split ramps for flux b.c.s into internal
 C     and external.
-      FluxSettlingTime = 0.0d0
-      DRamp = 1.0d0
+      FluxSettlingTime = 0.0
+      DRamp = 1.0
       SELECT CASE(NRamp)
 C     ---------
       CASE(0,1)          ! Either no ramp, or same ramp for all forcings
@@ -1244,7 +1244,7 @@ C     ------------
 
 C.....Compute the total number of timesteps the ramping function is used
  
-      IRAMPING = INT(DRAMP*(86400.D0/DTDP) + 0.5D0)
+      IRAMPING = INT(DRAMP*(86400.0/DTDP) + 0.5D0)
 
 C.....Read GWCE time weighting factors
 
@@ -1336,7 +1336,7 @@ C.....If ICS = 1 set the SFAC equal to unity
 
       IF(ICS.EQ.1) THEN
          DO I=1,NP
-            SFAC(I)=1.0d0
+            SFAC(I)=1.0
          ENDDO
       ENDIF
       
@@ -1385,7 +1385,7 @@ C.....been used for inputting the connectivity table
          Y1 = Y(NM(JKI,1))
          Y2 = Y(NM(JKI,2))
          Y3 = Y(NM(JKI,3))
-         AVGXY = (ABS(X1)+ABS(X2)+ABS(X3)+ABS(Y1)+ABS(Y2)+ABS(Y3))/6.D0
+         AVGXY = (ABS(X1)+ABS(X2)+ABS(X3)+ABS(Y1)+ABS(Y2)+ABS(Y3))/6.0
          DIF1R = AVGXY/(((X2-X1)**2+(Y2-Y1)**2)**0.5d0)
          DIF2R = AVGXY/(((X3-X2)**2+(Y3-Y2)**2)**0.5d0)
          DIF3R = AVGXY/(((X3-X1)**2+(Y3-Y1)**2)**0.5d0)
@@ -1506,9 +1506,9 @@ C.....Reset tau0var values based on input values of startdry and
 C.....automatic selection of tau0 on a processor
 
 C     DO I = 1,NP
-C     IF (TAU0.LT.0.D0) THEN
-C     IF (DP(I).LE.10.D0) TAU0VAR(I) = 0.02D0
-C     IF (DP(I).GT.10.D0) TAU0VAR(I) = 0.005D0
+C     IF (TAU0.LT.0.0) THEN
+C     IF (DP(I).LE.10.0) TAU0VAR(I) = 0.02D0
+C     IF (DP(I).GT.10.0) TAU0VAR(I) = 0.005D0
 C     IF (STARTDRY(I).EQ.-77777) TAU0VAR(I) = 0.02D0
 C     IF (STARTDRY(I).EQ.-88888) TAU0VAR(I) = 0.02D0
 C     WRITE(16,248) MYPROC,I,TAU0VAR(I)
@@ -1582,7 +1582,7 @@ C.....and nodal coordinates and bathymetry
  3527               FORMAT(/,10X,'NODE NO.',10X,'X',20X,'Y',15X,'DP',
      &                   5X,'STARTDRY',/)
                     DO I = 1,NP
-                       IF (STARTDRY(I).EQ.-88888.D0) THEN
+                       IF (STARTDRY(I).EQ.-88888.0) THEN
                           WRITE (16,3529) I,X(I),Y(I),DP(I),STARTDRY(I)
  3529                     FORMAT(5X,I6,2(2X,F20.2),2X,F12.2,2X,F12.0)
                        ELSE
@@ -1595,7 +1595,7 @@ C.....and nodal coordinates and bathymetry
      &                   'LAMBDA(DEG)',6X,'FEA(DEG)',9X,'DP',
      &                   5X,'STARTDRY',/)
                     DO I = 1,NP
-                       IF (STARTDRY(I).EQ.-88888.D0) THEN
+                       IF (STARTDRY(I).EQ.-88888.0) THEN
                           WRITE (16,3531) I,X(I),Y(I),SLAM(I)*RAD2DEG,
      &                         SFEA(I)*RAD2DEG,DP(I),STARTDRY(I)
  3531                     FORMAT(1X,I6,2(1X,F14.1),1X,2(1X,E15.7),1X,F8.2,
@@ -1612,7 +1612,7 @@ C.....and nodal coordinates and bathymetry
      &                'XCP',14X,'YCP',11X,'DP',
      &                5X,'STARTDRY',/)
                  DO I = 1,NP
-                    IF (STARTDRY(I).EQ.-88888.D0) THEN
+                    IF (STARTDRY(I).EQ.-88888.0) THEN
                        WRITE (16,3537) I,SLAM(I)*RAD2DEG,SFEA(I)*RAD2DEG,
      &                      X(I),Y(I),DP(I),STARTDRY(I)
  3537              FORMAT(1X,I6,2(1X,F14.8),2(1X,F15.1),1X,F10.2,2X,F10.0)
@@ -1739,16 +1739,16 @@ C     IF(NWP.EQ.2) THEN
 C     CALL ALLOC_MAIN13()   !allocate bridge piling arrays
 C     DO I=1,NP
 C     NBNNUM(I)=0
-C     BK(I)=0.d0
-C     BALPHA(I)=0.d0
-C     BDELX(I)=1.d0
+C     BK(I)=0.0
+C     BALPHA(I)=0.0
+C     BDELX(I)=1.0
 C     ENDDO
 C     OPEN(21,FILE=DIRNAME//'/'//'fort.21')
 C     READ(21,'(A20)') AFRIC
 C     READ(21,*) NBPNODES
 C     DO I=1,NBPNODES
 C     READ(21,*) NBNNUM(I),BK(I),BALPHA(I),BDELX(I),POAN
-C     BDELX(I)=4.d0*BDELX(I)/POAN
+C     BDELX(I)=4.0*BDELX(I)/POAN
 C     ENDDO
 C     WRITE(16,3602) AFRIC
 C     3602 FORMAT(/,5X,'BRIDGE PIER FRICTION FILE IDENTIFICATN :',A20,/)
@@ -1795,7 +1795,7 @@ C...
 
 
 C...  02/19/2007 s.b.
-      EVMSUM = 0.D0
+      EVMSUM = 0.0
       IF (NWP.EQ.0) THEN
          DO I=1,NP
             EVMSUM = EVMSUM + ABS(EVM(I))
@@ -1827,7 +1827,7 @@ C...
       ENDIF
       IF(NCOR.EQ.1) THEN
          DO I=1,NP
-            CORIF(I)=2.0d0*7.29212d-5*SIN(SFEA(I))
+            CORIF(I)=2.0*7.29212d-5*SIN(SFEA(I))
          END DO
       ENDIF
 
@@ -1870,7 +1870,7 @@ C....
          IF(AMIGT(I).EQ.0.) THEN
             PERT(I)=0.
          ELSE
-            PERT(I)=2.D0*PI/AMIGT(I)
+            PERT(I)=2.0*PI/AMIGT(I)
          ENDIF
       END DO
 
@@ -1890,8 +1890,8 @@ C...  LINES TO USE EARTH LOAD/SELF-ATTRACTION PART OF TIDAL POTENTIAL FORCING
       ELSE
          DO I=1,NTIF
             DO J=1,NP
-               SALTAMP(I,J)=0.d0
-               SALTPHA(I,J)=0.d0
+               SALTAMP(I,J)=0.0
+               SALTPHA(I,J)=0.0
             END DO
          END DO
          CLOSE(24)
@@ -2003,7 +2003,7 @@ C     - Allocate arrays dimensioned by MNBFR
          IF(AMIG(I).EQ.0.) THEN
             PER(I)=0.
          ELSE
-            PER(I)=2.D0*PI/AMIG(I)
+            PER(I)=2.0*PI/AMIG(I)
          ENDIF
       ENDDO
 C...  
@@ -2559,7 +2559,7 @@ C..........THE LAST BOUNDARY SEGMENT ON EACH BOUNDARY SHOULD BE ZERO
             NBVJ=NBVV(K,I+1)
             DELX=X(NBVJ)-X(NBVI)
             DELY=Y(NBVJ)-Y(NBVI)
-            BNDLEN2O3(JGW)=2.D0*(SQRT(DELX*DELX+DELY*DELY))/3.D0
+            BNDLEN2O3(JGW)=2.0*(SQRT(DELX*DELX+DELY*DELY))/3.0
 
 C...........COMPUTE THE INCLUDED ANGLE AND TEST TO DETERMINE WHETHER TO 
 C...........ZERO TANGENTIAL VELOCITIES
@@ -2589,11 +2589,11 @@ C...........CLOSED OR A TRUE VALUE IF THE BOUNDARY IS CLOSED
 
             THETA=0.
             IF((I.EQ.1).AND.(NBVV(K,I).EQ.NBVV(K,I-1))) THEN
-               THETA1=-9999999.d0
+               THETA1=-9999999.0
                THETA=THETA1
                COSTHETA1=COSTSET
                COSTHETA=COSTHETA1
-               CROSS1=0.d0
+               CROSS1=0.0
                CROSS=CROSS1
             ENDIF
             IF(I.EQ.NVELL(K)) THEN
@@ -2609,11 +2609,11 @@ C...........CLOSED OR A TRUE VALUE IF THE BOUNDARY IS CLOSED
                DOTVEC=VL1X*VL2X+VL1Y*VL2Y
                VECNORM=(SQRT(VL1X**2+VL1Y**2))*(SQRT(VL2X**2+VL2Y**2))
                COSTHETA=DOTVEC/VECNORM
-               IF(COSTHETA.GT.1.0d0) COSTHETA=1.0d0
-               IF(COSTHETA.LT.-1.0d0) COSTHETA=-1.0d0
+               IF(COSTHETA.GT.1.0) COSTHETA=1.0
+               IF(COSTHETA.LT.-1.0) COSTHETA=-1.0
                THETA=RAD2DEG*ACOS(COSTHETA)
                CROSS=-VL1X*VL2Y+VL2X*VL1Y
-               IF(CROSS.LT.0) THETA=360.d0-THETA
+               IF(CROSS.LT.0) THETA=360.0-THETA
                IF(I.EQ.1) THEN
                   THETA1=THETA
                   COSTHETA1=COSTHETA
@@ -3008,7 +3008,7 @@ C.....READ IN AND WRITE OUT INFO ON SPECIFIED NORMAL FLOW BOUNDARIES
                IF(FAMIG(I).EQ.0.) THEN
                   FPER(I)=0.
                ELSE
-                  FPER(I)=2.D0*PI/FAMIG(I)
+                  FPER(I)=2.0*PI/FAMIG(I)
                ENDIF
             END DO
 
@@ -3199,8 +3199,8 @@ C.... IF STATION ELEVATION OUTPUT WILL BE GENERATED
 
 C......COMPUTE NTCYSE, NTCYFE, WHICH = TOUTSE AND TOUTFE IN TIMESTEPS
 
-         NTCYSE=INT((TOUTSE-STATIM)*(86400.D0/DTDP)+0.5d0)
-         NTCYFE=INT((TOUTFE-STATIM)*(86400.D0/DTDP)+0.5d0)
+         NTCYSE=INT((TOUTSE-STATIM)*(86400.0/DTDP)+0.5d0)
+         NTCYFE=INT((TOUTFE-STATIM)*(86400.0/DTDP)+0.5d0)
 
          IF(NTCYFE.GT.NT) NTCYFE=NT
 
@@ -3388,8 +3388,8 @@ C.... IF STATION VELOCITY OUTPUT WILL BE GENERATED
 
 C......COMPUTE NTCYSV, NTCYFV, WHICH = TOUTSV AND TOUTFV IN TIME STEPS
 
-         NTCYSV=INT((TOUTSV-STATIM)*(86400.D0/DTDP) + 0.5d0)
-         NTCYFV=INT((TOUTFV-STATIM)*(86400.D0/DTDP) + 0.5d0)
+         NTCYSV=INT((TOUTSV-STATIM)*(86400.0/DTDP) + 0.5d0)
+         NTCYFV=INT((TOUTFV-STATIM)*(86400.0/DTDP) + 0.5d0)
          IF(NTCYFV.GT.NT) NTCYFV=NT
 
 C......CALCULATE NTRSPV = THE NO. OF DATA SETS TO BE SPOOLED TO UNIT 62
@@ -3566,8 +3566,8 @@ C.....IF STATION CONCENTRATION OUTPUT WILL BE GENERATED
 
 C.......COMPUTE NTCYSC, NTCYFC, WHICH = TOUTSC AND TOUTFC IN TIMESTEPS
 
-            NTCYSC=INT((TOUTSC-STATIM)*(86400.D0/DTDP) + 0.5d0)
-            NTCYFC=INT((TOUTFC-STATIM)*(86400.D0/DTDP) + 0.5d0)
+            NTCYSC=INT((TOUTSC-STATIM)*(86400.0/DTDP) + 0.5d0)
+            NTCYFC=INT((TOUTFC-STATIM)*(86400.0/DTDP) + 0.5d0)
             IF(NTCYFC.GT.NT) NTCYFC=NT
 
 C.......COMPUTE NTRSPC = THE NO. OF DATA SETS TO BE SPOOLED TO UNIT 81
@@ -3747,8 +3747,8 @@ C.....IF STATION MET OUTPUT WILL BE GENERATED
 
 C.......COMPUTE NTCYSM, NTCYFM, WHICH = TOUTSM AND TOUTFM IN TIMESTEPS
 
-            NTCYSM=INT((TOUTSM-STATIM)*(86400.D0/DTDP) + 0.5d0)
-            NTCYFM=INT((TOUTFM-STATIM)*(86400.D0/DTDP) + 0.5d0)
+            NTCYSM=INT((TOUTSM-STATIM)*(86400.0/DTDP) + 0.5d0)
+            NTCYFM=INT((TOUTFM-STATIM)*(86400.0/DTDP) + 0.5d0)
             IF(NTCYFM.GT.NT) NTCYFM=NT
 
 C.....COMPUTE NTRSPM = THE NO. OF DATA SETS TO BE SPOOLED TO UNITS 71&72
@@ -3921,8 +3921,8 @@ C.... IF GLOBAL ELEVATION OUTPUT WILL BE GENERATED
 
 C.....COMPUTE NTCYSGE, NTCYFGE, WHICH = TOUTSGE AND TOUTFGE IN TIMESTEPS
 
-         NTCYSGE=INT((TOUTSGE-STATIM)*(86400.D0/DTDP) + 0.5d0)
-         NTCYFGE=INT((TOUTFGE-STATIM)*(86400.D0/DTDP) + 0.5d0)
+         NTCYSGE=INT((TOUTSGE-STATIM)*(86400.0/DTDP) + 0.5d0)
+         NTCYFGE=INT((TOUTFGE-STATIM)*(86400.0/DTDP) + 0.5d0)
          IF(NTCYFGE.GT.NT) NTCYFGE=NT
 
 C......CALCULATE NDSETSE = THE # OF DATA SETS TO BE SPOOLED TO UNIT 63
@@ -3987,8 +3987,8 @@ C.... IF GLOBAL VELOCITY OUTPUT WILL BE GENERATED
 
 C.....COMPUTE NTCYSGV, NTCYFGV, WHICH = TOUTSGV AND TOUTFGV IN TIMESTEPS
 
-         NTCYSGV=INT((TOUTSGV-STATIM)*(86400.D0/DTDP) + 0.5d0)
-         NTCYFGV=INT((TOUTFGV-STATIM)*(86400.D0/DTDP) + 0.5d0)
+         NTCYSGV=INT((TOUTSGV-STATIM)*(86400.0/DTDP) + 0.5d0)
+         NTCYFGV=INT((TOUTFGV-STATIM)*(86400.0/DTDP) + 0.5d0)
          IF(NTCYFGV.GT.NT) NTCYFGV=NT
 
 C......CALCULATE NDSETSV = THE # OF DATA SETS TO BE SPOOLED TO UNIT 64
@@ -4058,8 +4058,8 @@ C.....IF GLOBAL CONCENTRATION OUTPUT WILL BE GENERATED
 
 C.....COMPUTE NTCYSGC, NTCYFGC, WHICH = TOUTSGC AND TOUTFGC IN TIMESTEPS
 
-            NTCYSGC=INT((TOUTSGC-STATIM)*(86400.D0/DTDP) + 0.5d0)
-            NTCYFGC=INT((TOUTFGC-STATIM)*(86400.D0/DTDP) + 0.5d0)
+            NTCYSGC=INT((TOUTSGC-STATIM)*(86400.0/DTDP) + 0.5d0)
+            NTCYFGC=INT((TOUTFGC-STATIM)*(86400.0/DTDP) + 0.5d0)
             IF(NTCYFGC.GT.NT) NTCYFGC=NT
 
 C.......CALCULATE NDSETSC = THE # OF DATA SETS TO BE SPOOLED TO UNIT 73
@@ -4127,8 +4127,8 @@ C........IF GLOBAL WIND STRESS OUTPUT WILL BE GENERATED
 
 C.....COMPUTE NTCYSGW, NTCYFGW, WHICH = TOUTSGW AND TOUTFGW IN TIMESTEPS
 
-            NTCYSGW=INT((TOUTSGW-STATIM)*(86400.D0/DTDP) + 0.5d0)
-            NTCYFGW=INT((TOUTFGW-STATIM)*(86400.D0/DTDP) + 0.5d0)
+            NTCYSGW=INT((TOUTSGW-STATIM)*(86400.0/DTDP) + 0.5d0)
+            NTCYFGW=INT((TOUTFGW-STATIM)*(86400.0/DTDP) + 0.5d0)
             IF(NTCYFGW.GT.NT) NTCYFGW=NT
 
 C........CALCULATE NDSETSW = THE # OF DATA SETS TO BE SPOOLED TO UNIT 74
@@ -4197,10 +4197,10 @@ C.... READ IN INTERVAL INFORMATION FOR HARMONIC ANALYSIS
 C.... COMPUTE THAS AND THAF IN TERMS OF THE NUMBER OF TIME STEPS
 
       READ(15,*) THAS,THAF,NHAINC,FMV
-      ITHAS=INT((THAS-STATIM)*(86400.D0/DTDP) + 0.5d0)
-      THAS=ITHAS*DTDP/86400.D0 + STATIM
-      ITHAF=INT((THAF-STATIM)*(86400.D0/DTDP) + 0.5d0)
-      THAF=ITHAF*DTDP/86400.D0 + STATIM
+      ITHAS=INT((THAS-STATIM)*(86400.0/DTDP) + 0.5d0)
+      THAS=ITHAS*DTDP/86400.0 + STATIM
+      ITHAF=INT((THAF-STATIM)*(86400.0/DTDP) + 0.5d0)
+      THAF=ITHAF*DTDP/86400.0 + STATIM
       ITMV = ITHAF - (ITHAF-ITHAS)*FMV
       IF(NFREQ.GT.0) THEN
          WRITE(16,34634) THAS,ITHAS,THAF,ITHAF,NHAINC
@@ -4431,11 +4431,11 @@ C--
 C.....INITIALIZE AVERAGING FOR INTERNAL BARRIER WATER LEVELS
 C......BARAVGWT=0.000 -> NO AVERAGING PERFORMED
 cjj   wm001 changed one line                
-      BARAVGWT=0.000D0
+      BARAVGWT=0.000
       IBSTART=0
       DO I=1,NVEL
-         RBARWL1AVG(I)=0.D0
-         RBARWL2AVG(I)=0.D0
+         RBARWL1AVG(I)=0.0
+         RBARWL2AVG(I)=0.0
       END DO
 C.....INITIALIZE NIBNODECODE(I)
       DO I=1,NP

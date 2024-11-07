@@ -599,7 +599,7 @@ C.....Print out radiation edges info.
       
 C.....Construct global edge to local edge (1,2, or 3) table
 
-      NEDSD(:,:) = 0.D0
+      NEDSD(:,:) = 0.0
       DO I = 1,MNED
         DO K = 1,2
           IF (NEDEL(K,I).NE.0) THEN

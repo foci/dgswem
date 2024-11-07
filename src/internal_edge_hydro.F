@@ -172,8 +172,8 @@ C.....Compute the total mass in the elements
 
 
 #ifdef SED_LAY                  !Must add up the layers as they shift
-         HB(1,EL_IN,irk) = 0.D0
-         HB(1,EL_EX,irk) = 0.D0
+         HB(1,EL_IN,irk) = 0.0
+         HB(1,EL_EX,irk) = 0.0
          do ll=1,layers
             HB(1,EL_IN,irk) = HB(1,EL_IN,irk) + bed(1,EL_IN,irk,ll)
             HB(1,EL_EX,irk) = HB(1,EL_EX,irk) + bed(1,EL_EX,irk,ll)
@@ -404,7 +404,7 @@ C.....Check if the flux is large enough to dry up the elements
 C.....1.01D0 is a safty factor.
 
           IF ( (1.01d0*F_HAT*XLEN_EL_IN*MAX_BOA_DT(IRK).GE.MASS_EL_IN)
-     &          .OR.(1.01d0*F_HAT*XLEN_EL_EX*MAX_BOA_DT(IRK)*(-1.D0).GE.
+     &          .OR.(1.01d0*F_HAT*XLEN_EL_EX*MAX_BOA_DT(IRK)*(-1.0).GE.
      &           MASS_EL_EX)) THEN
 
 C......namo 5/22 - modify for rain (source term no longer zero)
@@ -462,7 +462,7 @@ C........Check to make sure mass flux is not coming from a dry element
                      Q_T_EXT = QX_EX*TX + QY_EX*TY
                      Q_N_INT = -Q_N_EXT
                      Q_T_INT =  Q_T_EXT
-                     DEN = 1.D0/(NX*TY - NY*TX)
+                     DEN = 1.0/(NX*TY - NY*TX)
                      QX_IN = ( TY*Q_N_INT - NY*Q_T_INT)*DEN
                      QY_IN = (-TX*Q_N_INT + NX*Q_T_INT)*DEN
                      ZE_IN = ZE_EX
@@ -494,8 +494,8 @@ C........Check to make sure mass flux is not coming from a dry element
 
                      ! on the dry side (in): do nothing
 
-                     G_HAT_IN = 0.D0 
-                     H_HAT_IN = 0.D0 
+                     G_HAT_IN = 0.0 
+                     H_HAT_IN = 0.0 
 
 #ifdef TRACE
                      I_HAT_O  = I_HAT
@@ -519,9 +519,9 @@ C........Check to make sure mass flux is not coming from a dry element
                      ! Flux coming from wet side (ex)
                      ! Leave fluxes on ex side intact and use zero gravity flux for dry side      
                      NLEQG_TMP = NLEQG
-                     NLEQG = 0.D0
+                     NLEQG = 0.0
                      G_TMP = G
-                     G = 0.D0
+                     G = 0.0
                      CALL NUMERICAL_FLUX(IT,test_el)
                      NLEQG = NLEQG_TMP
                      G = G_TMP
@@ -542,7 +542,7 @@ C........Check to make sure mass flux is not coming from a dry element
                      Q_T_INT = QX_IN*TX + QY_IN*TY
                      Q_N_EXT = -Q_N_INT
                      Q_T_EXT =  Q_T_INT
-                     DEN = 1.D0/(NX*TY - NY*TX)
+                     DEN = 1.0/(NX*TY - NY*TX)
                      QX_EX = ( TY*Q_N_EXT - NY*Q_T_EXT)*DEN
                      QY_EX = (-TX*Q_N_EXT + NX*Q_T_EXT)*DEN
                      ZE_EX = ZE_IN
@@ -591,15 +591,15 @@ C........Check to make sure mass flux is not coming from a dry element
                      H_HAT_IN = H_HAT
 
                      ! zero out momentum flux on the dry side (ex)
-                     G_HAT_EX = 0.D0 
-                     H_HAT_EX = 0.D0 
+                     G_HAT_EX = 0.0 
+                     H_HAT_EX = 0.0 
                   ELSE
                      ! Flux comming from the wet side (in)
                      ! Leave fluxes on in side intact and use zero gravity for flux for dry (ex) side     
                      NLEQG_TMP = NLEQG
-                     NLEQG = 0.D0
+                     NLEQG = 0.0
                      G_TMP = G
-                     G = 0.D0
+                     G = 0.0
                      CALL NUMERICAL_FLUX(IT,test_el)
                      NLEQG = NLEQG_TMP
                      G = G_TMP
@@ -758,7 +758,7 @@ C     ----------------------------- EL_IN ------------------------------
 #endif
 
 #ifdef SED_LAY                  !Must add up the layers as they shift
-            HB(1,EL_IN,irk) = 0.D0
+            HB(1,EL_IN,irk) = 0.0
             do ll=1,layers
                bed_IN(ll) = bed(1,EL_IN,irk,ll)
                HB(1,EL_IN,irk) = HB(1,EL_IN,irk) + bed(1,EL_IN,irk,ll)
@@ -852,7 +852,7 @@ C.....Reflect the velocity in the normal direction
 
 C.....Compute the x and y components of the external state flow
 
-            DEN = 1.D0/(NX*TY - NY*TX)
+            DEN = 1.0/(NX*TY - NY*TX)
             QX_EX = ( TY*Q_N_EXT - NY*Q_T_EXT)*DEN
             QY_EX = (-TX*Q_N_EXT + NX*Q_T_EXT)*DEN
 
@@ -881,16 +881,16 @@ C.....Compute the numerical flux
 
             IF(WDFLG(EL_IN).EQ.0) THEN
                NLEQG_TMP = NLEQG
-               NLEQG = 0.D0
+               NLEQG = 0.0
                G_TMP = G
-               G = 0.D0
+               G = 0.0
                CALL NUMERICAL_FLUX(IT,test_el)
                NLEQG = NLEQG_TMP
                G = G_TMP
             ELSE
                CALL NUMERICAL_FLUX(IT,test_el)
             ENDIF
-            F_HAT = 0.D0        ! Ensure zero mass flux
+            F_HAT = 0.0        ! Ensure zero mass flux
 
 C.....Add LDG terms for eddy viscosity
 
@@ -973,7 +973,7 @@ C     ----------------------------- EL_EX ------------------------------
 #endif
 
 #ifdef SED_LAY                  !Must add up the layers as they shift
-            HB(1,EL_EX,irk) = 0.D0
+            HB(1,EL_EX,irk) = 0.0
             do ll=1,layers
                bed_EX(ll) = bed(1,EL_EX,irk,ll)
                HB(1,EL_EX,irk) = HB(1,EL_EX,irk) + bed(1,EL_EX,irk,ll)
@@ -1071,7 +1071,7 @@ C.....Reflect the velocity in the normal direction
 
 C.....Compute the x and y components of the external state flow
 
-            DEN = 1.D0/(NX*TY - NY*TX)
+            DEN = 1.0/(NX*TY - NY*TX)
             QX_IN = ( TY*Q_N_INT - NY*Q_T_INT)*DEN
             QY_IN = (-TX*Q_N_INT + NX*Q_T_INT)*DEN
 
@@ -1101,16 +1101,16 @@ C.....Compute the numerical flux
 
             IF(WDFLG(EL_EX).EQ.0) THEN
                NLEQG_TMP = NLEQG
-               NLEQG = 0.D0
+               NLEQG = 0.0
                G_TMP = G
-               G = 0.D0
+               G = 0.0
                CALL NUMERICAL_FLUX(IT,test_el)
                NLEQG = NLEQG_TMP
                G = G_TMP
             ELSE
                CALL NUMERICAL_FLUX(IT,test_el)
             ENDIF
-            F_HAT = 0.D0        ! Ensure zero mass flux
+            F_HAT = 0.0        ! Ensure zero mass flux
 
 C.....Add LDG terms for eddy viscosity
 #ifdef WAVE_DIF

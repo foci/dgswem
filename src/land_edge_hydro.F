@@ -93,8 +93,8 @@ C.....Compute ZE, QX, QY, and HB at each Gauss point
 #endif
 
 #ifdef CHEM
-            iota_IN = 0.D0 !iota(1,EL_IN,IRK)
-            iota2_IN = 0.D0 !iota2(1,EL_IN,IRK)
+            iota_IN = 0.0 !iota(1,EL_IN,IRK)
+            iota2_IN = 0.0 !iota2(1,EL_IN,IRK)
 #endif
 
 #ifdef DYNP
@@ -102,7 +102,7 @@ C.....Compute ZE, QX, QY, and HB at each Gauss point
 #endif
 
 #ifdef SED_LAY                  !When layered, these change
-            HB(1,EL_IN,irk) = 0.D0
+            HB(1,EL_IN,irk) = 0.0
             do ll=1,layers
                HB(1,EL_IN,irk) = HB(1,EL_IN,irk) + bed(1,EL_IN,irk,ll)
 
@@ -204,7 +204,7 @@ C.....Reflect the velocity in the normal direction
 C.....Compute the x and y components of the external state flow
 
  
-            DEN = 1.D0/(NX*TY - NY*TX)
+            DEN = 1.0/(NX*TY - NY*TX)
             QX_EX = ( TY*Q_N_EXT - NY*Q_T_EXT)*DEN
             QY_EX = (-TX*Q_N_EXT + NX*Q_T_EXT)*DEN
 
@@ -213,7 +213,7 @@ C.....Compute the x and y components of the external state flow
             SFAC_EX = SFAC_IN
 
 #ifdef TRACE
-            iota_EX = 0.D0 !iota_IN
+            iota_EX = 0.0 !iota_IN
             !print*, 'test'
 #endif
 
@@ -261,7 +261,7 @@ C.....(modified for wetting and drying)
 C.....Compute the edge integral
             DO K = 1,DOFS(EL_IN)
 
-               W_IN = 2.0d0*M_INV(K,pa)/AREAS(EL_IN)*XLEN(GED)*
+               W_IN = 2.0*M_INV(K,pa)/AREAS(EL_IN)*XLEN(GED)*
      &              PHI_EDGE(K,I,LED,pa)*WEGP(I,pa)
 
                RHS_ZE(K,EL_IN,IRK) = RHS_ZE(K,EL_IN,IRK) - W_IN*F_HAT

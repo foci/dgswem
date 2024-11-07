@@ -59,8 +59,8 @@ C.....Declare local variables
 C.....Compute the current time
 
       ITDT = IT*DTDP
-      TIME_A = ITDT + STATIM*86400.D0
-      TIMEH  = ITDT + (STATIM - REFTIM)*86400.D0
+      TIME_A = ITDT + STATIM*86400.0
+      TIMEH  = ITDT + (STATIM - REFTIM)*86400.0
 
 C.....Update ETA1 (shintaro: do we need this?)
 
@@ -77,20 +77,20 @@ C.......Compute the DG time and DG ramp
 #ifdef RKSSP
  
          TIMEDG = TIME_A - DTDP + DTVD(IRK)*DTDP
-         RAMPDG = 1.D0
-         RAMPExtFlux = 1.0d0
+         RAMPDG = 1.0
+         RAMPExtFlux = 1.0
          IF (NRAMP.GE.1) THEN
             IF (NRAMP.EQ.1) THEN
-               RAMPDG = TANH((2.D0*((IT-1) +
-     & DTVD(IRK))*DTDP/86400.D0)/DRAMP)
-               RAMPExtFlux = TANH((2.D0*((IT-1) +
-     & DTVD(IRK))*DTDP/86400.D0)/DRAMPExtFlux)
+               RAMPDG = TANH((2.0*((IT-1) +
+     & DTVD(IRK))*DTDP/86400.0)/DRAMP)
+               RAMPExtFlux = TANH((2.0*((IT-1) +
+     & DTVD(IRK))*DTDP/86400.0)/DRAMPExtFlux)
             ENDIF
             IF (NRAMP.EQ.2) THEN
-               RAMPDG = TANH((2.D0*((IT-1) +
-     & DTVD(IRK))*DTDP/86400.D0)/DRAMP)
-               RAMPExtFlux = TANH((2.D0*((IT-1) +
-     & DTVD(IRK))*DTDP/86400.D0)/DRAMPExtFlux)
+               RAMPDG = TANH((2.0*((IT-1) +
+     & DTVD(IRK))*DTDP/86400.0)/DRAMP)
+               RAMPExtFlux = TANH((2.0*((IT-1) +
+     & DTVD(IRK))*DTDP/86400.0)/DRAMPExtFlux)
             ENDIF
             IF (NRAMP.EQ.3) THEN
                WRITE(*,*) 'NRAMP = 3 not supported '
@@ -175,7 +175,7 @@ C.......For non-periodic flux bcs
              QTIME2 = QTIME1 + FTIMINC
              DO J=1,NVEL
                QNIN1(J)=QNIN2(J)
-               QNIN2(J)=0.D0
+               QNIN2(J)=0.0
                IF((LBCODEI(J).EQ.2).OR.(LBCODEI(J).EQ.12)
      &                             .OR.(LBCODEI(J).EQ.22))    
      &         READ(20,*) QNIN2(J)
@@ -190,10 +190,10 @@ C.......For non-periodic flux bcs
                IF (NQEDS .LE. NFEDS) THEN
                  QNAM_DG(1,NQEDS,1) = RAMPDG*( QNIN1(I) + QTRATIO*
      &                                         ( QNIN2(I) - QNIN1(I) ) )
-                 QNPH_DG(1,NQEDS,1) = 0.D0
+                 QNPH_DG(1,NQEDS,1) = 0.0
                  QNAM_DG(1,NQEDS,2) = RAMPDG*( QNIN1(I+1) + QTRATIO*
      &                                     ( QNIN2(I+1) - QNIN1(I+1) ) )
-                 QNPH_DG(1,NQEDS,2) = 0.D0
+                 QNPH_DG(1,NQEDS,2) = 0.0
                ENDIF
              ENDIF
            ENDDO
@@ -294,21 +294,21 @@ C.......Compute the dynamic pressure if flagged
 #ifdef RKC
 
          TIMEDG = TIME_A - DTDP + RKC_c(IRK)*DTDP
-         RAMPDG = 1.D0
-         RAMPExtFlux = 1.0d0
+         RAMPDG = 1.0
+         RAMPExtFlux = 1.0
          IF (NRAMP.GE.1) THEN
             IF (NRAMP.EQ.1) THEN
-               RAMPDG = TANH((2.D0*(IT + RKC_c(IRK))*DTDP/86400.D0)
+               RAMPDG = TANH((2.0*(IT + RKC_c(IRK))*DTDP/86400.0)
      &            /DRAMP)
                RAMPExtFlux = 
-     &              TANH((2.D0*(IT + RKC_c(IRK))*DTDP/86400.D0)
+     &              TANH((2.0*(IT + RKC_c(IRK))*DTDP/86400.0)
      &            /DRAMPExtFlux)
             ENDIF
             IF (NRAMP.EQ.2) THEN
-               RAMPDG = TANH((2.D0*(IT + RKC_c(IRK))*DTDP/86400.D0)
+               RAMPDG = TANH((2.0*(IT + RKC_c(IRK))*DTDP/86400.0)
      &            /DRAMP)
                RAMPExtFlux = 
-     &              TANH((2.D0*(IT + RKC_c(IRK))*DTDP/86400.D0)
+     &              TANH((2.0*(IT + RKC_c(IRK))*DTDP/86400.0)
      &           /DRAMPExtFlux)
             ENDIF
             IF (NRAMP.EQ.3) THEN
@@ -328,7 +328,7 @@ C.......Compute tidal potential terms
 
 C.......Compute LDG auxiliary equations
          
-         IF (EVMSUM.NE.0.D0.or.artdif.eq.1) CALL LDG_HYDRO(IT)
+         IF (EVMSUM.NE.0.0.or.artdif.eq.1) CALL LDG_HYDRO(IT)
          
 C.......Compute elevation specified edges
 
@@ -417,7 +417,7 @@ C.......Compute the dynamic pressure if flagged
             
          else
 
-            ARK = 1.D0 - RKC_mu(irk)-RKC_nu(irk)
+            ARK = 1.0 - RKC_mu(irk)-RKC_nu(irk)
             CRK = RKC_mu(irk)
             DRK = RKC_nu(irk)
 
@@ -539,7 +539,7 @@ C.......Apply the wet-dry algorithm if appropriate
 
 c$$$C...Apply the slopelimiter again if auxiliary variable is being used
 c$$$
-c$$$         if (EVMSUM.NE.0.D0.or.artdif.eq.1) then
+c$$$         if (EVMSUM.NE.0.0.or.artdif.eq.1) then
 c$$$#ifdef SLOPEALL
 c$$$            CALL SLOPELIMITER()
 c$$$#endif
@@ -620,23 +620,23 @@ C.....Update variables for next time step
       DO J = 1,NE
          DO K = 2,DOFS(J)
 
-            alph = 10.D0
+            alph = 10.0
             s = RK_stage
 
             if (k.le.3) then
-               eta = 1.D0 / ( pdg_el(j)+1.D0 )
+               eta = 1.0 / ( pdg_el(j)+1.0 )
             elseif (k.gt.3.and.k.le.6) then
-               eta = 2.D0 / ( pdg_el(j)+1.D0 )
+               eta = 2.0 / ( pdg_el(j)+1.0 )
             elseif (k.gt.6.and.k.le.10) then
-               eta = 3.D0 / ( pdg_el(j)+1.D0 )
+               eta = 3.0 / ( pdg_el(j)+1.0 )
             elseif (k.gt.11.and.k.le.15) then
-               eta = 4.D0 / ( pdg_el(j)+1.D0 )
+               eta = 4.0 / ( pdg_el(j)+1.0 )
             elseif (k.gt.16.and.k.le.21) then
-               eta = 5.D0 / ( pdg_el(j)+1.D0 )       
+               eta = 5.0 / ( pdg_el(j)+1.0 )       
             elseif (k.gt.22.and.k.le.28) then
-               eta = 6.D0 / ( pdg_el(j)+1.D0 )   
+               eta = 6.0 / ( pdg_el(j)+1.0 )   
             elseif (k.gt.29.and.k.le.36) then
-               eta = 7.D0 / ( pdg_el(j)+1.D0 )               
+               eta = 7.0 / ( pdg_el(j)+1.0 )               
             endif
 
             seta = eta**s
@@ -714,33 +714,33 @@ C......Filter chemistry transported terms if flagged
       DO KK = 2,NRK+1
          DO J = 1,MNE
             DO K = 1,DOFH
-               ZE(K,J,KK) = 0.D0
-               QX(K,J,KK) = 0.D0
-               QY(K,J,KK) = 0.D0
-               RHS_ZE(K,J,KK-1) = 0.D0
-               RHS_QX(K,J,KK-1) = 0.D0
-               RHS_QY(K,J,KK-1) = 0.D0
+               ZE(K,J,KK) = 0.0
+               QX(K,J,KK) = 0.0
+               QY(K,J,KK) = 0.0
+               RHS_ZE(K,J,KK-1) = 0.0
+               RHS_QX(K,J,KK-1) = 0.0
+               RHS_QY(K,J,KK-1) = 0.0
 #ifdef TRACE
-               iota(K,J,KK) = 0.D0
-               RHS_iota(K,J,KK-1) = 0.D0
+               iota(K,J,KK) = 0.0
+               RHS_iota(K,J,KK-1) = 0.0
 #endif
 
 #ifdef CHEM
-               iota(K,J,KK) = 0.D0
-               iota2(K,J,KK) = 0.D0
-               RHS_iota(K,J,KK-1) = 0.D0
-               RHS_iota2(K,J,KK-1) = 0.D0
+               iota(K,J,KK) = 0.0
+               iota2(K,J,KK) = 0.0
+               RHS_iota(K,J,KK-1) = 0.0
+               RHS_iota2(K,J,KK-1) = 0.0
 #endif
 
 #ifdef DYNP
-               dynP(K,J,KK) = 0.D0
-               RHS_dynP(K,J,KK-1) = 0.D0
+               dynP(K,J,KK) = 0.0
+               RHS_dynP(K,J,KK-1) = 0.0
 #endif
 
 #ifdef SED_LAY
-               bed(K,J,KK,:) = 0.D0
-               hb(K,J,KK) = 0.D0
-               RHS_bed(K,J,KK-1,:) = 0.D0
+               bed(K,J,KK,:) = 0.0
+               hb(K,J,KK) = 0.0
+               RHS_bed(K,J,KK-1,:) = 0.0
 #endif
 
 

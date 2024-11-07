@@ -80,29 +80,29 @@ Casey 130211: Debug.
           NODEREP(I)=MAX0(NODEWETMIN,NODEDRYMIN)
           END DO
 
-        RAMP2=1.0D0
-        RAMP1=1.0D0
+        RAMP2=1.0
+        RAMP1=1.0
         IF(NRAMP.EQ.1) THEN
-          RAMP1=TANH((2.D0*(ITHS-1)*DTDP/86400.D0)/DRAMP)
-          RAMP2=TANH((2.D0*ITHS*DTDP/86400.D0)/DRAMP)
+          RAMP1=TANH((2.0*(ITHS-1)*DTDP/86400.0)/DRAMP)
+          RAMP2=TANH((2.0*ITHS*DTDP/86400.0)/DRAMP)
         ENDIF
         
         IF (NRamp.eq.0) THEN
-          RampExtFlux1 = 1.0d0
-          RampExtFlux2 = 1.0d0
-          RampIntFlux1 = 1.0d0
-          RampIntFlux2 = 1.0d0
-          RampTip2     = 1.0d0
-          RampMete2    = 1.0d0
-          RampWRad2    = 1.0d0
+          RampExtFlux1 = 1.0
+          RampExtFlux2 = 1.0
+          RampIntFlux1 = 1.0
+          RampIntFlux2 = 1.0
+          RampTip2     = 1.0
+          RampMete2    = 1.0
+          RampWRad2    = 1.0
         ELSE
-          RampExtFlux1= TANH((2.D0*(ITHS-1)*DTDP/86400.D0)/DRampExtFlux)
-          RampExtFlux2= TANH((2.D0*(ITHS)*DTDP/86400.D0)/DRampExtFlux)
-          RampIntFlux1= TANH((2.D0*(ITHS-1)*DTDP/86400.D0)/DRampIntFlux)
-          RampIntFlux2= TANH((2.D0*(ITHS)*DTDP/86400.D0)/DRampIntFlux)
-          RampTip2    = TANH((2.D0*(ITHS)*DTDP/86400.D0)/DRampTip)
-          RampMete2   = TANH((2.D0*(ITHS)*DTDP/86400.D0)/DRampMete)
-          RampWRad2   = TANH((2.D0*(ITHS)*DTDP/86400.D0)/DRampWRad)
+          RampExtFlux1= TANH((2.0*(ITHS-1)*DTDP/86400.0)/DRampExtFlux)
+          RampExtFlux2= TANH((2.0*(ITHS)*DTDP/86400.0)/DRampExtFlux)
+          RampIntFlux1= TANH((2.0*(ITHS-1)*DTDP/86400.0)/DRampIntFlux)
+          RampIntFlux2= TANH((2.0*(ITHS)*DTDP/86400.0)/DRampIntFlux)
+          RampTip2    = TANH((2.0*(ITHS)*DTDP/86400.0)/DRampTip)
+          RampMete2   = TANH((2.0*(ITHS)*DTDP/86400.0)/DRampMete)
+          RampWRad2   = TANH((2.0*(ITHS)*DTDP/86400.0)/DRampWRad)
         ENDIF
 
 C
@@ -127,7 +127,7 @@ C....CONDITION FILE IF IT IS REQURIED.
      &                'UNIT 19',/)
           OPEN(19,FILE=DIRNAME//'/'//'fort.19')
           READ(19,*) ETIMINC
-          ETIME1=STATIM*86400.D0
+          ETIME1=STATIM*86400.0
           ETIME2=ETIME1+ETIMINC
           DO J=1,NETA
             READ(19,*) ESBIN1(J)
@@ -136,7 +136,7 @@ C....CONDITION FILE IF IT IS REQURIED.
             READ(19,*) ESBIN2(J)
           END DO
           DO IT=1,ITHS-1
-            TIMEIT=IT*DTDP + STATIM*86400.D0
+            TIMEIT=IT*DTDP + STATIM*86400.0
             IF(TIMEIT.GT.ETIME2) THEN
               ETIME1=ETIME2
               ETIME2=ETIME1+ETIMINC
@@ -168,28 +168,28 @@ C......FILE IF IT IS REQUIRED
  1978     FORMAT(/,1X,'LOCATING NORMAL FLOW INFORMATION IN UNIT 20',/)
           OPEN(20,FILE=DIRNAME//'/'//'fort.20')
           READ(20,*) FTIMINC
-          QTIME1=STATIM*86400.D0
+          QTIME1=STATIM*86400.0
           QTIME2=QTIME1+FTIMINC
           DO J=1,NVEL
-            QNIN1(J)=0.D0
+            QNIN1(J)=0.0
             IF((LBCODEI(J).EQ.2).OR.(LBCODEI(J).EQ.12)
      &                          .OR.(LBCODEI(J).EQ.22))
      &      READ(20,*) QNIN1(J)
           END DO
           DO J=1,NVEL
-            QNIN2(J)=0.D0
+            QNIN2(J)=0.0
             IF((LBCODEI(J).EQ.2).OR.(LBCODEI(J).EQ.12)
      &                          .OR.(LBCODEI(J).EQ.22))
      &      READ(20,*) QNIN2(J)
           END DO
           DO IT=1,ITHS-1
-            TIMEIT=IT*DTDP + STATIM*86400.D0
+            TIMEIT=IT*DTDP + STATIM*86400.0
             IF(TIMEIT.GT.QTIME2) THEN
               QTIME1=QTIME2
               QTIME2=QTIME2+FTIMINC
               DO J=1,NVEL
                 QNIN1(J)=QNIN2(J) 
-                QNIN2(J)=0.D0
+                QNIN2(J)=0.0
                 IF((LBCODEI(J).EQ.2).OR.(LBCODEI(J).EQ.12)
      &                              .OR.(LBCODEI(J).EQ.22))      
      &          READ(20,*) QNIN2(J)
@@ -201,7 +201,7 @@ C......FILE IF IT IS REQUIRED
             QTIME2=QTIME1+FTIMINC
             DO J=1,NVEL
               QNIN1(J)=QNIN2(J)
-              QNIN2(J)=0.D0
+              QNIN2(J)=0.0
               IF((LBCODEI(J).EQ.2).OR.(LBCODEI(J).EQ.12)
      &                            .OR.(LBCODEI(J).EQ.22))     
      &        READ(20,*) QNIN2(J)
@@ -228,11 +228,11 @@ C......RESTART WIND AND PRESSURE INFORMATION
 
         IF(NWS.EQ.2) THEN
           OPEN(22,FILE=DIRNAME//'/'//'fort.22')
-          WTIME1 = STATIM*86400.D0
+          WTIME1 = STATIM*86400.0
           WTIME2 = WTIME1 + WTIMINC
           READ(22,*) (NHG,WVNX2(I),WVNY2(I),PRN2(I),I=1,NP)
           DO IT=1,ITHS
-            TIMEIT=IT*DTDP + STATIM*86400.D0
+            TIMEIT=IT*DTDP + STATIM*86400.0
             IF(TIMEIT.GT.WTIME2) THEN
               WTIME1=WTIME2
               WTIME2=WTIME2+WTIMINC
@@ -297,7 +297,7 @@ C......RESTART WIND AND PRESSURE INFORMATION
           WTIME2=WTIMED-WREFTIM          !CAST INTO MODEL TIME REFERENCE
           WTIME1=WTIME2-WTIMINC
           DO IT=1,ITHS
-            TIMEIT=IT*DTDP + STATIM*86400.D0
+            TIMEIT=IT*DTDP + STATIM*86400.0
             IF(TIMEIT.GT.WTIME2) THEN
               WTIME1=WTIME2
               WTIME2=WTIME2+WTIMINC
@@ -327,11 +327,11 @@ C......RESTART WIND AND PRESSURE INFORMATION
 
         IF(NWS.EQ.4) THEN
           OPEN(22,FILE=DIRNAME//'/'//'fort.22')
-          WTIME1 = STATIM*86400.D0
+          WTIME1 = STATIM*86400.0
           WTIME2 = WTIME1 + WTIMINC
           CALL NWS4GET(WVNX2,WVNY2,PRN2,NP,RHOWAT0,G)
           DO IT=1,ITHS
-            TIMEIT=IT*DTDP + STATIM*86400.D0
+            TIMEIT=IT*DTDP + STATIM*86400.0
             IF(TIMEIT.GT.WTIME2) THEN
               WTIME1=WTIME2
               WTIME2=WTIME2+WTIMINC
@@ -376,11 +376,11 @@ C......RESTART WIND AND PRESSURE INFORMATION
 
         IF(NWS.EQ.5) THEN
           OPEN(22,FILE=DIRNAME//'/'//'fort.22')
-          WTIME1 = STATIM*86400.D0
+          WTIME1 = STATIM*86400.0
           WTIME2 = WTIME1 + WTIMINC
           READ(22,*) (NHG,WVNX2(I),WVNY2(I),PRN2(I),I=1,NP)
           DO IT=1,ITHS
-            TIMEIT=IT*DTDP + STATIM*86400.D0
+            TIMEIT=IT*DTDP + STATIM*86400.0
             IF(TIMEIT.GT.WTIME2) THEN
               WTIME1=WTIME2
               WTIME2=WTIME2+WTIMINC
@@ -511,12 +511,12 @@ C   The following CALL should be uncommented for normal operation
 Cek added NWS = 12 and -12 from version 46
           
         IF (NWS.EQ.12) THEN
-          WTIME1 = STATIM*86400.D0
+          WTIME1 = STATIM*86400.0
           WTIME2 = WTIME1 + WTIMINC
           CALL NWS12INIT(WVNX1,WVNY1,PRN1,NP,RHOWAT0,G)
           CALL NWS12GET(WVNX2,WVNY2,PRN2,NP,RHOWAT0,G)
           DO IT = 1,ITHS
-            TIMEIT = IT*DTDP + STATIM*86400.D0
+            TIMEIT = IT*DTDP + STATIM*86400.0
             IF (TIMEIT.GT.WTIME2) THEN
               WTIME1 = WTIME2
               WTIME2 = WTIME2+WTIMINC
@@ -593,7 +593,7 @@ Cek added NWS = 12 and -12 from version 46
             WSY2(I) = RampMete2*0.001293d0*WDragCo*WindY*WindMag
 C  tcm v49.16 20100617
 !            PR2(I)=RampMete2*PRN2(I)
-            PRBCKGRND_MH2O = 100.0D0*PRBCKGRND/(RHOWAT0*G)
+            PRBCKGRND_MH2O = 100.0*PRBCKGRND/(RHOWAT0*G)
             PRDIFF = RampMete2*(PRN2(I)-PRBCKGRND_MH2O)
             PR2(I) = PRBCKGRND_MH2O + PRDIFF
             WVNXOUT(I)=RampMete2*WindX
@@ -667,7 +667,7 @@ CTIP  LINES TO USE TIDAL POTENTIAL FORCING
                ARGSALT=ARGT-SALTPHA(J,I)
 cjjw/vjpm002 - modified/added the following 5 lines
 #ifdef REAL8
-               S2SFEA=SIN(2.d0*SFEA(I))
+               S2SFEA=SIN(2.0*SFEA(I))
 #else
                S2SFEA=SIN(2.e0*SFEA(I))
 #endif
@@ -1692,12 +1692,12 @@ C........ANALYSIS
             IF(NHAGV.EQ.1) CALL HACOLDSVG(NP)
             IF ( CHARMV) THEN
               DO I=1,NP
-                 ELAV(I)=0.D0
-                 XVELAV(I)=0.D0
-                 YVELAV(I)=0.D0
-                 ELVA(I)=0.D0
-                 XVELVA(I)=0.D0
-                 YVELVA(I)=0.D0
+                 ELAV(I)=0.0
+                 XVELAV(I)=0.0
+                 YVELAV(I)=0.0
+                 ELVA(I)=0.0
+                 XVELVA(I)=0.0
+                 YVELVA(I)=0.0
               END DO
              ENDIF   !   charmv
 

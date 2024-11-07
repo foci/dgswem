@@ -140,12 +140,12 @@ C.........Obtain the height of the barrier at the quadrature point
 #endif
 
 #ifdef SED_LAY !This does not affect much here, hb and bed do not change at weirs
-            HB(1,ELB,irk) = 0.D0
+            HB(1,ELB,irk) = 0.0
             do ll=1,layers
                HB(1,ELB,irk) = HB(1,ELB,irk) + bed(1,ELB,irk,ll)
             enddo
             HBB = HB(1,ELB,irk)
-            HB(1,ELF,irk) = 0.D0
+            HB(1,ELF,irk) = 0.0
             do ll=1,layers
                HB(1,ELF,irk) = HB(1,ELF,irk) + bed(1,ELF,irk,ll)
             enddo
@@ -187,8 +187,8 @@ C.........Obtain the height of the barrier at the quadrature point
             SFACB = SFACED(GPB,LEDB,ELB,pa)
             SFACF = SFACED(GPF,LEDF,ELF,pa)
             
-            ABOVEB = 0.D0
-            ABOVEF = 0.D0 
+            ABOVEB = 0.0
+            ABOVEF = 0.0 
             IF (WDFLG(ELB).EQ.1) ABOVEB = ZEB - IBHT(L)
             IF (WDFLG(ELF).EQ.1) ABOVEF = ZEF - IBHT(L)
             
@@ -215,8 +215,8 @@ C     ------------------------------------------------------------
                GOTO 100
             ENDIF
 
-            SUBSUPF = 2.D0*ABOVEF/3.D0
-            SUBSUPB = 2.D0*ABOVEB/3.D0
+            SUBSUPF = 2.0*ABOVEF/3.0
+            SUBSUPB = 2.0*ABOVEB/3.0
 
 C.........Case 3: Overtopping of barrier with water higher on front side
 C     Flow from front to back side
@@ -231,15 +231,15 @@ C     -------------------------
 
                IF (ABOVEB.GT.SUBSUPF) THEN
                   QF_N_INT = RAMPDG*IBCFSB(L)*ABOVEB
-     &                 *SQRT((2.D0*G*(ABOVEF-ABOVEB)))
-                  QF_T_INT = 0.D0
+     &                 *SQRT((2.0*G*(ABOVEF-ABOVEB)))
+                  QF_T_INT = 0.0
                   
 C...........Case 3b) Supercritical flow
 C     ---------------------------
 
                ELSE
                   QF_N_INT = RAMPDG*IBCFSP(L)*SUBSUPF*SQRT(SUBSUPF*G)
-                  QF_T_INT = 0.D0
+                  QF_T_INT = 0.0
                ENDIF
                GOTO 100
 
@@ -258,15 +258,15 @@ C     -------------------------
 
                IF (ABOVEF.GT.SUBSUPB) THEN
                   QB_N_INT = RAMPDG*IBCFSB(L)*ABOVEF
-     &                 *SQRT((2.D0*G*(ABOVEB-ABOVEF)))
-                  QB_T_INT = 0.D0
+     &                 *SQRT((2.0*G*(ABOVEB-ABOVEF)))
+                  QB_T_INT = 0.0
                   
 C...........Case 4b) Supercritical flow
 C     ---------------------------
                   
                ELSE
                   QB_N_INT = RAMPDG*IBCFSP(L)*SUBSUPB*SQRT(SUBSUPB*G)
-                  QB_T_INT = 0.D0
+                  QB_T_INT = 0.0
                ENDIF
                GOTO 100
             ENDIF
@@ -382,9 +382,9 @@ C...........Compute the numerical flux
 
                   IF (WDFLG(ELF).EQ.0) THEN
                      NLEQG_TMP = NLEQG
-                     NLEQG = 0.D0
+                     NLEQG = 0.0
                      G_TMP = G
-                     G = 0.D0
+                     G = 0.0
                   ENDIF
                   CALL NUMERICAL_FLUX(IT,test_el)
                   FF_HAT = F_HAT
@@ -507,9 +507,9 @@ C...........Compute the x and y components of the external state flow
                   NY = NYB
                   IF (WDFLG(ELB).EQ.0) THEN
                      NLEQG_TMP = NLEQG
-                     NLEQG = 0.D0
+                     NLEQG = 0.0
                      G_TMP = G
-                     G = 0.D0
+                     G = 0.0
                   ENDIF
                   CALL NUMERICAL_FLUX(IT,test_el)
                   FB_HAT = F_HAT
@@ -541,9 +541,9 @@ C...........Compute the x and y components of the external state flow
 c     
             DO K = 1,DOFS(el)
 
-               WEGPB = 2.0d0*M_INV(K,pa)/AREAS(ELB)*XLEN(GEDB)
+               WEGPB = 2.0*M_INV(K,pa)/AREAS(ELB)*XLEN(GEDB)
      &              *PHI_EDGE(K,GPB,LEDB,pa)*WEGP(GPB,pa)
-               WEGPF = 2.0d0*M_INV(K,pa)/AREAS(ELF)*XLEN(GEDF)
+               WEGPF = 2.0*M_INV(K,pa)/AREAS(ELF)*XLEN(GEDF)
      &              *PHI_EDGE(K,GPF,LEDF,pa)*WEGP(GPF,pa)
 
                RHS_ZE(K,ELB,IRK) = RHS_ZE(K,ELB,IRK) - WEGPB*FB_HAT

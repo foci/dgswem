@@ -37,7 +37,7 @@ C***********************************************************************
         N1 = NM(II,1)
         N2 = NM(II,2)
         N3 = NM(II,3)
-        SOURCE_R1 =  1.D0/3.D0*(PREC2(N1) + PREC2(N2) + PREC2(N3))
+        SOURCE_R1 =  1.0/3.0*(PREC2(N1) + PREC2(N2) + PREC2(N3))
         if (SOURCE_R1 .LT. 0.0) then
            SOURCE_R1 = 0.0
         ENDIF
@@ -61,7 +61,7 @@ C***********************************************************************
         END IF
 
         ! Convert mm/hr to m/s
-        TRR = TRR * 1e-3 / 3600.d0
+        TRR = TRR * 1e-3 / 3600.0
       END FUNCTION
 
       function computeTRR_RCLIPER(dist, Vmax) result(TRR)
@@ -81,17 +81,17 @@ C***********************************************************************
         REAL(sz) :: rm
         REAL(sz) :: re
 
-        a1 = -1.10d0 !inches/day
+        a1 = -1.10 !inches/day
         a2 = -1.6d0 !inches/day
         a3 =  64.5d0 !kilometers
-        a4 =  150.d0 !kilometers
+        a4 =  150.0 !kilometers
         b1 =  3.96d0 !inches/day
-        b2 =  4.80d0 !inches/day
-        b3 = -13.0d0 !kilometers
-        b4 = -16.0d0 !kilometers
+        b2 =  4.80 !inches/day
+        b3 = -13.0 !kilometers
+        b4 = -16.0 !kilometers
 
         ! Equations 
-        NMW=(1.d0 + ((Vmax-35.d0)/33.d0)) !normalized maximum wind
+        NMW=(1.0 + ((Vmax-35.0)/33.0)) !normalized maximum wind
         T0=a1+(b1*NMW) ! rain rate at TC center r=0
         Tm=a2+(b2*NMW) !maximum rain rate
         rm=a3+(b3*NMW) !radius from the center at which maximum rain rate occurs
@@ -108,7 +108,7 @@ C***********************************************************************
         ENDIF
 
         !convert inches/day-> m/sec
-        TRR=TRR/3401568.d0
+        TRR=TRR/3401568.0
       
       end function  
 

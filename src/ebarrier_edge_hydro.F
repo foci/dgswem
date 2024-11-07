@@ -69,7 +69,7 @@ C.........Obtain the height of the barrier at the quadrature point
 #endif
 
 #ifdef SED_LAY
-            HB(:,EL,irk) = 0.D0
+            HB(:,EL,irk) = 0.0
             do ll=1,layers
                HB(1,EL,irk) = HB(1,EL,irk) + bed(1,EL,irk,ll)
             enddo
@@ -113,7 +113,7 @@ C.........Obtain the height of the barrier at the quadrature point
             SFAC_IN = SFACED(I,LED,EL,pa)
 
             ABOVE  = ZE_IN - EBHT(L)
-            SUBSUP = 2.D0*ABOVE/3.D0
+            SUBSUP = 2.0*ABOVE/3.0
             
 C.........Case 1:  Water is below barrier
 C     ---------------------------------------------
@@ -127,7 +127,7 @@ C     ------------------------------------------------------------
                
             ELSE
                Q_N_EXT = RAMPDG*EBCFSP(L)*SUBSUP*SQRT(SUBSUP*G)
-               Q_T_EXT = 0.D0
+               Q_T_EXT = 0.0
             ENDIF
             
 C.....Set the exterior bed and surface elevation equal to the interior
@@ -166,7 +166,7 @@ C.........Compute numerical flux
 
             DO K = 1,DOFS(EL)
 
-               W_IN = 2.d0*M_INV(K,pa)/AREAS(EL)*XLEN(GED)
+               W_IN = 2.0*M_INV(K,pa)/AREAS(EL)*XLEN(GED)
      &              *PHI_EDGE(K,I,LED,pa)*WEGP(I,pa)
 
                RHS_ZE(K,EL,IRK) = RHS_ZE(K,EL,IRK) - W_IN*F_HAT

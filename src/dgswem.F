@@ -8,7 +8,7 @@ C******************************************************************************
         ! rainfall
       use precipitation, only : alloc_precipitation, prec2
       use owi_rain, only : ncrain1_init, ncrain_get
-C     
+C
 C     sb-disabled for Linux&Intel compiler
 #ifdef VF
       USE DFPORT
@@ -73,7 +73,7 @@ c     nd
         CRAIN_TIMINC = 3600
         call ncrain1_init(PREC2, NP)
         call ncrain_get(PREC2, NP)
-        CRAIN_TIME1 = STATIM*86400.D0
+        CRAIN_TIME1 = STATIM*86400.0
         CRAIN_TIME2 = CRAIN_TIME1 + CRAIN_TIMINC
       ENDIF
       
@@ -150,21 +150,21 @@ C...  NONLINEAR FLAGS
       ENDIF
       IF(NOLICA.EQ.0) THEN
          IFNLCT=0
-         NLEQ = 0.D0
-         LEQ = 1.D0
+         NLEQ = 0.0
+         LEQ = 1.0
       ELSE
          IFNLCT=1
-         NLEQ = 1.D0
-         LEQ = 0.D0
+         NLEQ = 1.0
+         LEQ = 0.0
       ENDIF
       IF(NOLICAT.EQ.0) THEN
          IFNLCAT=0
-         NLEQ = 0.D0
-         LEQ = 1.D0
+         NLEQ = 0.0
+         LEQ = 1.0
       ELSE
          IFNLCAT=1
-         NLEQ = 1.D0
-         LEQ = 0.D0
+         NLEQ = 1.0
+         LEQ = 0.0
       ENDIF
       NLEQG = NLEQ*G
       FG_L = LEQ*G
@@ -181,12 +181,12 @@ cjj   w      TT0R=((0.5*TAU0*DT-1.0)/DT)/DT
       GC00=G*C00
       TADVODT=IFNLCAT/DT
       GB00A00=G*(B00+A00)
-      GFAO2=G*IFNLFA/2.D0
-      GO3=G/3.D0
-      DTO2=DT/2.D0
-      DT2=DT*2.D0
-      GDTO2=G*DT/2.D0
-      SADVDTO3=IFNLCT*DT/3.D0
+      GFAO2=G*IFNLFA/2.0
+      GO3=G/3.0
+      DTO2=DT/2.0
+      DT2=DT*2.0
+      GDTO2=G*DT/2.0
+      SADVDTO3=IFNLCT*DT/3.0
       
 C*************************DG SWEM*******************************
 
@@ -398,7 +398,7 @@ C
                   XVELVA(I) = XVELVA(I)/NTSTEPS - XVELAV(I)*XVELAV(I)
                   YVELVA(I) = YVELVA(I)/NTSTEPS - YVELAV(I)*YVELAV(I)
                END DO
-               TIMEBEG=ITMV*DTDP + (STATIM-REFTIM)*86400.D0
+               TIMEBEG=ITMV*DTDP + (STATIM-REFTIM)*86400.0
                OPEN(55,FILE=DIRNAME//'/'//'fort.55')
                WRITE(55,*) NP
             ENDIF
@@ -482,15 +482,15 @@ C
       INTEGER NP,NE,NEIMIN,NEIMAX,NSCREEN,N,NN,EN1,EN2,EN3,I,J
       INTEGER :: NEIGH(MNP,MNEI),NNEIGH(MNP),NNEIGH_ELEM(MNP)
       INTEGER NM(MNE,3),NEIGH_ELEM(MNP,MNEI)
-      REAL(8) X(MNP),Y(MNP),DELX,DELY,DIST
-      REAL(8) ANGLELOW,ANGLEMORE,RAD2DEG
-      REAL(8), ALLOCATABLE :: ANGLE(:)
+      real(sz) X(MNP),Y(MNP),DELX,DELY,DIST
+      real(sz) ANGLELOW,ANGLEMORE,RAD2DEG
+      real(sz), ALLOCATABLE :: ANGLE(:)
       INTEGER,ALLOCATABLE :: NEITEM(:)
 C     
       ALLOCATE ( ANGLE(MNEI) )
       ALLOCATE ( NEITEM(MNP) )
 C     
-      RAD2DEG=45.0d0/ATAN(1.0d0)
+      RAD2DEG=45.0/ATAN(1.0)
 C     
       DO N=1,NP
          NNEIGH(N) = 0
@@ -542,19 +542,19 @@ C
                      DELX=X(NEITEM(J))-X(I)
                      DELY=Y(NEITEM(J))-Y(I)
                      DIST=SQRT(DELX*DELX+DELY*DELY)
-                     IF(DIST.EQ.0.0d0) GOTO 998
-                     IF(DELY.NE.0.0d0) THEN
+                     IF(DIST.EQ.0.0) GOTO 998
+                     IF(DELY.NE.0.0) THEN
                         ANGLE(J)=RAD2DEG*ACOS(DELX/DIST)
-                        IF(DELY.GT.0.0) ANGLE(J)=360.0d0-ANGLE(J)
+                        IF(DELY.GT.0.0) ANGLE(J)=360.0-ANGLE(J)
                      ENDIF
-                     IF(DELY.EQ.0.0d0) THEN
-                        IF(DELX.GT.0.0d0) ANGLE(J)=0.0d0
-                        IF(DELX.LT.0.d0) ANGLE(J)=180.0d0
+                     IF(DELY.EQ.0.0) THEN
+                        IF(DELX.GT.0.0) ANGLE(J)=0.0
+                        IF(DELX.LT.0.0) ANGLE(J)=180.0
                      ENDIF
                   END DO
-                  ANGLEMORE=-1.d0
+                  ANGLEMORE=-1.0
                   DO JJ=1,NNEIGH(I)
-                     ANGLELOW=400.d0
+                     ANGLELOW=400.0
                      DO J=1,NNEIGH(I)
                  IF((ANGLE(J).LT.ANGLELOW).AND.(ANGLE(J).GT.ANGLEMORE))
      &                       THEN
@@ -612,7 +612,8 @@ C                                                                             *
 C******************************************************************************
 
       SUBROUTINE CPP(X,Y,RLAMBDA,PHI,RLAMBDA0,PHI0)
-      REAL*8 X,Y,RLAMBDA,PHI,RLAMBDA0,PHI0,R
+      use sizes, only : sz
+      real(sz) X,Y,RLAMBDA,PHI,RLAMBDA0,PHI0,R
       R=6378206.4d0
       X=R*(RLAMBDA-RLAMBDA0)*COS(PHI0)
       Y=PHI*R
@@ -628,7 +629,8 @@ C                                                                             *
 C******************************************************************************
 
       SUBROUTINE INVCP(XXCP,YYCP,RLAMBDA,PHI,RLAMBDA0,PHI0)
-      REAL*8 XXCP,YYCP,RLAMBDA,PHI,RLAMBDA0,PHI0,R
+      use sizes, only : sz
+      real(sz) XXCP,YYCP,RLAMBDA,PHI,RLAMBDA0,PHI0,R
       R=6378206.4d0
       RLAMBDA=RLAMBDA0+XXCP/(R*COS(PHI0))
       PHI=YYCP/R

@@ -7,19 +7,19 @@
 C      use messenger, only : msg_fini
 #endif
 
-      REAL(8),PRIVATE,PARAMETER :: PI=3.141592653589793D0, 
-     &                             TWOPI=PI*2.D0,
-     &                             HFPI=PI/2.D0,
-     &                             RAD2DEG = 180.D0/PI,
-     &                             DEG2RAD = PI/180.D0
+      real(sz),PRIVATE,PARAMETER :: PI=3.141592653589793D0, 
+     &                             TWOPI=PI*2.0,
+     &                             HFPI=PI/2.0,
+     &                             RAD2DEG = 180.0/PI,
+     &                             DEG2RAD = PI/180.0
       INTEGER StormNumber !jgf46.28 For Holland Wind model wind multiplier
-      REAL(8) WindRefTime !jgf46.29 seconds since beginning of year, this
+      real(sz) WindRefTime !jgf46.29 seconds since beginning of year, this
                           !corresponds to time=0 of the simulation 
-      REAL(8) BLAdj       !jgf46.32 boundary layer adjustment for Holland model
+      real(sz) BLAdj       !jgf46.32 boundary layer adjustment for Holland model
 
 Casey 110518: Added for Mark Powell's sectorial wind drag.
-      REAL(SZ) :: EyeLatR(3) = 0.D0
-      REAL(SZ) :: EyeLonR(3) = 0.D0
+      REAL(SZ) :: EyeLatR(3) = 0.0
+      REAL(SZ) :: EyeLonR(3) = 0.0
       LOGICAL  :: FoundEye
 
       ! jgf49.1001 Variables for use in NWS=29, for embedding an asymmetric
@@ -32,8 +32,8 @@ Casey 110518: Added for Mark Powell's sectorial wind drag.
       REAL(SZ), ALLOCATABLE :: vortexWVNY2(:) ! v wind vel from vortex model
       REAL(SZ), ALLOCATABLE :: vortexPRN2(:)  ! bar. press. from vortex model
 
-      REAL(8)  :: EyeLat(3) = 0.D0
-      REAL(8)  :: EyeLon(3) = 0.D0
+      real(sz)  :: EyeLat(3) = 0.0
+      real(sz)  :: EyeLon(3) = 0.0
       
       REAL(SZ) :: WindDragLimit          ! maximum wind drag value
       CHARACTER(len=10) :: DragLawString ! controls wind drag formulation
@@ -138,16 +138,16 @@ C
 Casey 110518: Added Mark Powell's sector-based wind drag.
       CASE("Powell","POWELL","powell")
 C.. Check whether we have previously found the eye.
-         IF((EyeLatR(1).EQ.0.D0).OR.(EyeLonR(1).EQ.0.D0).OR.
-     &      (EyeLatR(2).EQ.0.D0).OR.(EyeLonR(2).EQ.0.D0).OR.
-     &      (EyeLatR(3).EQ.0.D0).OR.(EyeLonR(3).EQ.0.D0))THEN
+         IF((EyeLatR(1).EQ.0.0).OR.(EyeLonR(1).EQ.0.0).OR.
+     &      (EyeLatR(2).EQ.0.0).OR.(EyeLonR(2).EQ.0.0).OR.
+     &      (EyeLatR(3).EQ.0.0).OR.(EyeLonR(3).EQ.0.0))THEN
             FoundEye = .FALSE.
          ENDIF
 C.. If the eye has not been found then apply Garratt.
          WindDrag = 0.001D0*(0.75D0+0.067D0*WindSpeed)
          IF(.NOT.FoundEye)THEN
             FoundSector = .FALSE.
-            Weight = 0.D0
+            Weight = 0.0
             IF(WindDrag.GT.WindDragLimit) WindDrag = WindDragLimit
          ELSE
 C.. We have found the eye!
@@ -157,18 +157,18 @@ C.. being zero degrees, and then cycling clockwise.
             Dir2 = ATAN2(EyeLatR(3)-EyeLatR(2),EyeLonR(3)-EyeLonR(2))
             StormDirection = ATAN2(SIN(Dir1)+SIN(Dir2),COS(Dir1)+COS(Dir2))
             StormDirection = StormDirection/DEG2RAD
-            StormDirection = 90.D0 - StormDirection
-            IF(StormDirection.LT.0.D0)THEN
-               StormDirection = StormDirection + 360.D0
+            StormDirection = 90.0 - StormDirection
+            IF(StormDirection.LT.0.0)THEN
+               StormDirection = StormDirection + 360.0
             ENDIF
 C.. Compute the direction of node relative to the eye.
             NodeLon = SLAM(NodeNumber)/DEG2RAD
             NodeLat = SFEA(NodeNumber)/DEG2RAD
             NodeDirection = ATAN2(NodeLat-EyeLatR(3),NodeLon-EyeLonR(3))
             NodeDirection = NodeDirection/DEG2RAD
-            NodeDirection = 90.D0 - NodeDirection
-            IF(NodeDirection.LT.0.D0)THEN
-               NodeDirection = NodeDirection + 360.D0
+            NodeDirection = 90.0 - NodeDirection
+            IF(NodeDirection.LT.0.0)THEN
+               NodeDirection = NodeDirection + 360.0
             ENDIF
 C.. Compute the weights for the sector in which the node is located.
 C..     0- 40 : Transition from left (3) to right (1).
@@ -180,42 +180,42 @@ C..   260-  0 : Left (3).
             FoundSector = .FALSE.
             DO IS=1,6
                IF(IS.EQ.1)THEN
-                  Dir1 = MOD(StormDirection+  0.D0,360.D0)
-                  Dir2 = MOD(StormDirection+ 40.D0,360.D0)
+                  Dir1 = MOD(StormDirection+  0.0,360.0)
+                  Dir2 = MOD(StormDirection+ 40.0,360.0)
                ELSEIF(IS.EQ.2)THEN
-                  Dir1 = MOD(StormDirection+ 40.D0,360.D0)
-                  Dir2 = MOD(StormDirection+130.D0,360.D0)
+                  Dir1 = MOD(StormDirection+ 40.0,360.0)
+                  Dir2 = MOD(StormDirection+130.0,360.0)
                ELSEIF(IS.EQ.3)THEN
-                  Dir1 = MOD(StormDirection+130.D0,360.D0)
-                  Dir2 = MOD(StormDirection+170.D0,360.D0)
+                  Dir1 = MOD(StormDirection+130.0,360.0)
+                  Dir2 = MOD(StormDirection+170.0,360.0)
                ELSEIF(IS.EQ.4)THEN
-                  Dir1 = MOD(StormDirection+170.D0,360.D0)
-                  Dir2 = MOD(StormDirection+220.D0,360.D0)
+                  Dir1 = MOD(StormDirection+170.0,360.0)
+                  Dir2 = MOD(StormDirection+220.0,360.0)
                ELSEIF(IS.EQ.5)THEN
-                  Dir1 = MOD(StormDirection+220.D0,360.D0)
-                  Dir2 = MOD(StormDirection+260.D0,360.D0)
+                  Dir1 = MOD(StormDirection+220.0,360.0)
+                  Dir2 = MOD(StormDirection+260.0,360.0)
                ELSEIF(IS.EQ.6)THEN
-                  Dir1 = MOD(StormDirection+260.D0,360.D0)
-                  Dir2 = MOD(StormDirection+  0.D0,360.D0)
+                  Dir1 = MOD(StormDirection+260.0,360.0)
+                  Dir2 = MOD(StormDirection+  0.0,360.0)
                ENDIF
                IF(Dir1.GT.Dir2)THEN
                   IF((Dir1.LE.NodeDirection).AND.
-     &             (NodeDirection.LE.360.D0))THEN
-                     Dir2 = Dir2 + 360.D0
-                  ELSEIF((0.D0.LE.NodeDirection).AND.
+     &             (NodeDirection.LE.360.0))THEN
+                     Dir2 = Dir2 + 360.0
+                  ELSEIF((0.0.LE.NodeDirection).AND.
      &             (NodeDirection.LE.Dir2))THEN
-                     Dir1 = Dir1 - 360.D0
+                     Dir1 = Dir1 - 360.0
                   ENDIF
                ENDIF
                IF((Dir1.LE.NodeDirection).AND.(NodeDirection.LE.Dir2))
      &          THEN
                   IF(MOD(IS,2).EQ.0)THEN
                      FoundSector = .TRUE.
-                     Weight = 0.D0
-                     Weight(IS/2) = 1.D0
+                     Weight = 0.0
+                     Weight(IS/2) = 1.0
                   ELSE
                      FoundSector = .TRUE.
-                     Weight = 0.D0
+                     Weight = 0.0
                      IF(IS.EQ.1)THEN
                         IW1 = 3
                         IW2 = 1
@@ -226,16 +226,16 @@ C..   260-  0 : Left (3).
                         IW1 = 2
                         IW2 = 3
                      ENDIF
-                     Weight(IW1) = 1.D0 + (0.D0-1.D0)/(Dir2-Dir1)*
+                     Weight(IW1) = 1.0 + (0.0-1.0)/(Dir2-Dir1)*
      &                (NodeDirection-Dir1)
-                     Weight(IW2) = 0.D0 + (1.D0-0.D0)/(Dir2-Dir1)*
+                     Weight(IW2) = 0.0 + (1.0-0.0)/(Dir2-Dir1)*
      &                (NodeDirection-Dir1)
                   ENDIF
                ENDIF
             ENDDO
 C.. Apply the wind drag limit in case of emergency.
             IF(.NOT.FoundSector)THEN
-               Weight = 0.D0
+               Weight = 0.0
                IF(WindDrag.GT.WindDragLimit) WindDrag = WindDragLimit
             ELSE
 C.. Determine the wind drag for sector 1 (right).
@@ -312,7 +312,7 @@ C***********************************************************************
       IMPLICIT NONE
       INTEGER IYR,IMO,IDAY,IHR,IMIN,ILEAP
       INTEGER MyProc, NScreen, ScreenUnit
-      REAL*8 TIMESEC,SEC
+      REAL(sz) TIMESEC,SEC
 C
       TIMESEC = (IDAY-1)*86400 + IHR*3600 + IMIN*60 + SEC
       IF(IMO.GE.2)  TIMESEC = TIMESEC + 31*86400
@@ -370,8 +370,8 @@ C***********************************************************************
       INTEGER, SAVE :: FIRSTCALL = 0
       INTEGER IWTIME,IWYR,IWMO,IWDAY,IWHR,NP,NWLON,NWLAT,ICS,I,J
       INTEGER NScreen,ScreenUnit
-      REAL*8 WTIMED
-      REAL*8 X(*),Y(*),SLAM(*),SFEA(*),XCOOR,YCOOR
+      REAL(sz) WTIMED
+      REAL(sz) X(*),Y(*),SLAM(*),SFEA(*),XCOOR,YCOOR
       INTEGER  LATIND1,LATIND2,LONIND1,LONIND2
       REAL(SZ) WLATMAX,WLONMIN,WLATINC,WLONINC,WSPEED,WDIR
       REAL(SZ) WLATM,WLONM,XWRATIO,YWRATIO
@@ -389,7 +389,7 @@ C
       IWMO = IWTIME/10000 - IWYR*100
       IWDAY = IWTIME/100 - IWYR*10000 - IWMO*100
       IWHR = IWTIME - IWYR*1000000 - IWMO*10000 - IWDAY*100
-      CALL TIMECONV(IWYR,IWMO,IWDAY,IWHR,0,0.0D0,WTIMED,
+      CALL TIMECONV(IWYR,IWMO,IWDAY,IWHR,0,0.0,WTIMED,
      &     MyProc,NScreen,ScreenUnit)
 C
       DO I=1,NWLAT
@@ -429,13 +429,13 @@ C
          YWRATIO=(YCOOR-WLATM)/WLATINC
 C     
          WVNX(I) = WVXFN(LATIND2,LONIND2)*XWRATIO*YWRATIO
-     &        + WVXFN(LATIND2,LONIND1)*(1.d0-XWRATIO)*YWRATIO
-     &        + WVXFN(LATIND1,LONIND2)*XWRATIO*(1.d0-YWRATIO)
-     &        + WVXFN(LATIND1,LONIND1)*(1.d0-XWRATIO)*(1.d0-YWRATIO)
+     &        + WVXFN(LATIND2,LONIND1)*(1.0-XWRATIO)*YWRATIO
+     &        + WVXFN(LATIND1,LONIND2)*XWRATIO*(1.0-YWRATIO)
+     &        + WVXFN(LATIND1,LONIND1)*(1.0-XWRATIO)*(1.0-YWRATIO)
          WVNY(I) = WVYFN(LATIND2,LONIND2)*XWRATIO*YWRATIO
-     &        + WVYFN(LATIND2,LONIND1)*(1.d0-XWRATIO)*YWRATIO
-     &        + WVYFN(LATIND1,LONIND2)*XWRATIO*(1.d0-YWRATIO)
-     &        + WVYFN(LATIND1,LONIND1)*(1.d0-XWRATIO)*(1.d0-YWRATIO)
+     &        + WVYFN(LATIND2,LONIND1)*(1.0-XWRATIO)*YWRATIO
+     &        + WVYFN(LATIND1,LONIND2)*XWRATIO*(1.0-YWRATIO)
+     &        + WVYFN(LATIND1,LONIND1)*(1.0-XWRATIO)*(1.0-YWRATIO)
       END DO
 C     
       RETURN
@@ -468,9 +468,9 @@ C***********************************************************************
 C
       RHOWATG=RHOWAT0*G
       DO I=1,NP
-        WVNX(I)=0.d0
-        WVNY(I)=0.d0
-        PRN(I)=101300.d0/RHOWATG
+        WVNX(I)=0.0
+        WVNY(I)=0.0
+        PRN(I)=101300.0/RHOWATG
       END DO
  170  READ(22,'(A80)') PBLJAGF
       IF(PBLJAGF(2:2).EQ.'#') GOTO 170
@@ -485,8 +485,8 @@ C     WVNY(NHG)=WVNY(NHG)*1.04d0*0.5144d0 !KNOTS TO 10-MIN WIND IN M/S
 C     jgf46.02 Added the following two lines.
       WVNX(NHG)=WVNX(NHG)*0.5144d0 !CONVERT KNOTS TO  M/S
       WVNY(NHG)=WVNY(NHG)*0.5144d0 
-      PRN(NHG)=100.d0*PRN(NHG)/RHOWATG !CONVERT MILLIBARS TO M OF WATER
-      IF(PRN(NHG).EQ.0.) PRN(NHG)=101300.d0/RHOWATG                     !RAL0315+ OK
+      PRN(NHG)=100.0*PRN(NHG)/RHOWATG !CONVERT MILLIBARS TO M OF WATER
+      IF(PRN(NHG).EQ.0.) PRN(NHG)=101300.0/RHOWATG                     !RAL0315+ OK
       READ(22,'(A80)') PBLJAGF
       IF(PBLJAGF(2:2).NE.'#') GOTO 171
       RETURN
@@ -580,7 +580,7 @@ C***********************************************************************
       INTEGER  LATIND1,LATIND2,LONIND1,LONIND2
       REAL(SZ) WLATMAX,WLONMIN,WLATINC,WLONINC,XWRATIO,YWRATIO
       REAL(SZ) WLATM,WLONM
-      REAL*8 X(*),Y(*),SLAM(*),SFEA(*),XCOOR,YCOOR
+      real(sz) X(*),Y(*),SLAM(*),SFEA(*),XCOOR,YCOOR
       REAL(SZ) WVNX(*),WVNY(*),PRESS(*)
       REAL(SZ),SAVE,ALLOCATABLE :: WVXFN(:,:),WVYFN(:,:),PRN(:,:)
 C     
@@ -621,17 +621,17 @@ C
          IF(LONIND1.EQ.NWLON) LONIND2=1
 C     
          WVNX(I) = WVXFN(LATIND2,LONIND2)*XWRATIO*YWRATIO
-     &        + WVXFN(LATIND2,LONIND1)*(1.d0-XWRATIO)*YWRATIO
-     &        + WVXFN(LATIND1,LONIND2)*XWRATIO*(1.d0-YWRATIO)
-     &        + WVXFN(LATIND1,LONIND1)*(1.d0-XWRATIO)*(1.d0-YWRATIO)
+     &        + WVXFN(LATIND2,LONIND1)*(1.0-XWRATIO)*YWRATIO
+     &        + WVXFN(LATIND1,LONIND2)*XWRATIO*(1.0-YWRATIO)
+     &        + WVXFN(LATIND1,LONIND1)*(1.0-XWRATIO)*(1.0-YWRATIO)
          WVNY(I) = WVYFN(LATIND2,LONIND2)*XWRATIO*YWRATIO
-     &        + WVYFN(LATIND2,LONIND1)*(1.d0-XWRATIO)*YWRATIO
-     &        + WVYFN(LATIND1,LONIND2)*XWRATIO*(1.d0-YWRATIO)
-     &        + WVYFN(LATIND1,LONIND1)*(1.d0-XWRATIO)*(1.d0-YWRATIO)
+     &        + WVYFN(LATIND2,LONIND1)*(1.0-XWRATIO)*YWRATIO
+     &        + WVYFN(LATIND1,LONIND2)*XWRATIO*(1.0-YWRATIO)
+     &        + WVYFN(LATIND1,LONIND1)*(1.0-XWRATIO)*(1.0-YWRATIO)
          PRESS(I) = PRN(LATIND2,LONIND2)*XWRATIO*YWRATIO
-     &        + PRN(LATIND2,LONIND1)*(1.d0-XWRATIO)*YWRATIO
-     &        + PRN(LATIND1,LONIND2)*XWRATIO*(1.d0-YWRATIO)
-     &        + PRN(LATIND1,LONIND1)*(1.d0-XWRATIO)*(1.d0-YWRATIO)
+     &        + PRN(LATIND2,LONIND1)*(1.0-XWRATIO)*YWRATIO
+     &        + PRN(LATIND1,LONIND2)*XWRATIO*(1.0-YWRATIO)
+     &        + PRN(LATIND1,LONIND1)*(1.0-XWRATIO)*(1.0-YWRATIO)
          PRESS(I) = PRESS(I)/RHOWATG
 
       END DO
@@ -698,10 +698,10 @@ C     ----------------------------------------------------------------
      &     WLATMAX,WLONMIN,WLATINC,WLONINC,ICS,RHOWAT0,G)
       IMPLICIT NONE
       INTEGER, intent(in) :: NP     ! number of nodes
-      REAL(8), intent(in), dimension(NP) :: X
-      REAL(8), intent(in), dimension(NP) :: Y
-      REAL(8), intent(in), dimension(NP) :: SLAM
-      REAL(8), intent(in), dimension(NP) :: SFEA
+      real(sz), intent(in), dimension(NP) :: X
+      real(sz), intent(in), dimension(NP) :: Y
+      real(sz), intent(in), dimension(NP) :: SLAM
+      real(sz), intent(in), dimension(NP) :: SFEA
       REAL(SZ), intent(out), dimension(NP) :: WVNX
       REAL(SZ), intent(out), dimension(NP) :: WVNY
       REAL(SZ), intent(out), dimension(NP) :: PRESS
@@ -720,7 +720,7 @@ C     ----------------------------------------------------------------
       REAL(SZ) RHOWATG             ! ref. dens. of water * grav. constant
       INTEGER  LATIND1,LATIND2,LONIND1,LONIND2
       REAL(SZ) WLATM,WLONM,XWRATIO,YWRATIO
-      REAL(8) XCOOR,YCOOR
+      real(sz) XCOOR,YCOOR
       REAL(SZ), SAVE, ALLOCATABLE :: WVXFN(:,:),WVYFN(:,:),PRN(:,:)
       LOGICAL, SAVE :: MemoryAllocated = .False.
 C     
@@ -761,17 +761,17 @@ C
          IF(LONIND1.EQ.NWLON) LONIND2=1
 C     
          WVNX(I) = WVXFN(LATIND2,LONIND2)*XWRATIO*YWRATIO
-     &        + WVXFN(LATIND2,LONIND1)*(1.d0-XWRATIO)*YWRATIO
-     &        + WVXFN(LATIND1,LONIND2)*XWRATIO*(1.d0-YWRATIO)
-     &        + WVXFN(LATIND1,LONIND1)*(1.d0-XWRATIO)*(1.d0-YWRATIO)
+     &        + WVXFN(LATIND2,LONIND1)*(1.0-XWRATIO)*YWRATIO
+     &        + WVXFN(LATIND1,LONIND2)*XWRATIO*(1.0-YWRATIO)
+     &        + WVXFN(LATIND1,LONIND1)*(1.0-XWRATIO)*(1.0-YWRATIO)
          WVNY(I) = WVYFN(LATIND2,LONIND2)*XWRATIO*YWRATIO
-     &        + WVYFN(LATIND2,LONIND1)*(1.d0-XWRATIO)*YWRATIO
-     &        + WVYFN(LATIND1,LONIND2)*XWRATIO*(1.d0-YWRATIO)
-     &        + WVYFN(LATIND1,LONIND1)*(1.d0-XWRATIO)*(1.d0-YWRATIO)
+     &        + WVYFN(LATIND2,LONIND1)*(1.0-XWRATIO)*YWRATIO
+     &        + WVYFN(LATIND1,LONIND2)*XWRATIO*(1.0-YWRATIO)
+     &        + WVYFN(LATIND1,LONIND1)*(1.0-XWRATIO)*(1.0-YWRATIO)
          PRESS(I) = PRN(LATIND2,LONIND2)*XWRATIO*YWRATIO
-     &        + PRN(LATIND2,LONIND1)*(1.d0-XWRATIO)*YWRATIO
-     &        + PRN(LATIND1,LONIND2)*XWRATIO*(1.d0-YWRATIO)
-     &        + PRN(LATIND1,LONIND1)*(1.d0-XWRATIO)*(1.d0-YWRATIO)
+     &        + PRN(LATIND2,LONIND1)*(1.0-XWRATIO)*YWRATIO
+     &        + PRN(LATIND1,LONIND2)*XWRATIO*(1.0-YWRATIO)
+     &        + PRN(LATIND1,LONIND1)*(1.0-XWRATIO)*(1.0-YWRATIO)
          PRESS(I) = PRESS(I)/RHOWATG
       END DO
 C
@@ -819,8 +819,8 @@ C***********************************************************************
       INTEGER, SAVE :: FIRSTCALL = 0
       INTEGER N,NP,NWSGGWI,LONB,LATB,I,J,JJ,IEXT,IDIG1,IDIG2,
      &     IDIG3,KERR
-      REAL*8 WTIMINC
-      REAL*8 FLAT(*),FLON(*)
+      real(sz) WTIMINC
+      real(sz) FLAT(*),FLON(*)
       REAL(SZ)  ULL(*),VLL(*),PLL(*)
       REAL(SZ) RHOWAT0,RHOWATG,G,GDLON,P1,P2,P3,P4,U1,U2,U3,U4,
      &     V1,V2,V3,V4
@@ -968,12 +968,12 @@ C     PRINT 101
 C     101  FORMAT ('0 I   COLAT   COLRAD     WGT', 12X, 'WGTCS',
 CCCC  1 10X, 'ITER  RES')
 C     
-      SI = 1.0d0
+      SI = 1.0
       L2=2*LGGHAF
       RL2=L2
-      SCALE = 2.0d0/(RL2*RL2)
+      SCALE = 2.0/(RL2*RL2)
       K1=L2-1
-      DRADZ = PI / 360.d0
+      DRADZ = PI / 360.0
       RAD = 0.0
       DO 1000 K=1,LGGHAF
          ITER=0
@@ -990,15 +990,15 @@ C
          GO TO 1
  3       CONTINUE
          COLRAD(K)=RAD
-         PHI = RAD * 180.d0 / PI
+         PHI = RAD * 180.0 / PI
          CALL POLY(K1,RAD,P1)
          X = COS(RAD)
-         W = SCALE * (1.0d0 - X*X)/ (P1*P1)
+         W = SCALE * (1.0 - X*X)/ (P1*P1)
          WGT(K) = W
          SN = SIN(RAD)
          W=W/(SN*SN)
          WGTCS(K) = W
-         RC=1.d0/(SN*SN)
+         RC=1.0/(SN*SN)
          RCS2(K) = RC
          CALL POLY(L2,RAD,P1)
 C     PRINT 102,K,PHI,COLRAD(K),WGT(K),WGTCS(K),ITER,P1
@@ -1021,7 +1021,7 @@ C***********************************************************************
       REAL(SZ) RAD,P,X,Y1,Y2,Y3,G
 C     
       X = COS(RAD)
-      Y1 = 1.0d0
+      Y1 = 1.0
       Y2=X
       DO 1 I=2,N
          G=X*Y2
@@ -1050,9 +1050,9 @@ C***********************************************************************
       IMPLICIT NONE
       INTEGER,SAVE :: ICALL = 0
       INTEGER NP,N,I,LONB,LATB,NLAT,NLON,LON,LONP1,LAT,LATP1
-      REAL*8 DLAT,DLON,FLONWORK,COLAT,DDLAT,XLAT,DFLAT,DFLAT1,
+      real(sz) DLAT,DLON,FLONWORK,COLAT,DDLAT,XLAT,DFLAT,DFLAT1,
      &     DDLON,XLON,DFLON,DFLON1
-      REAL*8 FLAT(*),FLON(*)
+      real(sz) FLAT(*),FLON(*)
       REAL(SZ) GCLAT(*),GCLON(*)
       INTEGER  N00(*),N10(*),N11(*),N01(*)
       REAL(SZ) D00(*),D10(*),D11(*),D01(*)
@@ -1141,13 +1141,13 @@ C               call msg_fini()
             DDLAT=GCLAT(LATP1)-GCLAT(LAT)
             XLAT=GCLAT(LAT)
             DFLAT1=(COLAT-XLAT)/DDLAT
-            IF(LAT.EQ.1) DFLAT1=MAX(0.d0,DFLAT1) !MODIFY THIS FOR POLAR POINTS
-            IF(LATP1.EQ.NLAT) DFLAT1=MIN(1.d0,DFLAT1) !MODIFY THIS FOR POLAR POINTS
-            DFLAT=1.d0-DFLAT1
+            IF(LAT.EQ.1) DFLAT1=MAX(0.0,DFLAT1) !MODIFY THIS FOR POLAR POINTS
+            IF(LATP1.EQ.NLAT) DFLAT1=MIN(1.0,DFLAT1) !MODIFY THIS FOR POLAR POINTS
+            DFLAT=1.0-DFLAT1
             DDLON=DLON
             XLON=GCLON(LON)
             DFLON1=(FLONWORK-XLON)/DDLON
-            DFLON=1.d0-DFLON1
+            DFLON=1.0-DFLON1
             N=N+1
             D00(N)=DFLON*DFLAT
             D10(N)=DFLON1*DFLAT
@@ -1207,11 +1207,11 @@ C***********************************************************************
       INTEGER,SAVE  ::  ICALL = 0
       INTEGER NWSEGWI,IDSETFLG,NP,I,IEXT,IDIG1,IDIG2,IDIG3,KERR,N
       INTEGER IYEAR,IMONTH,IDAY,IHOUR
-      REAL*8 RHOWATG100,FLONDEG,FLATDEG
+      REAL(sz) RHOWATG100,FLONDEG,FLATDEG
       REAL(SZ) P1,P2,P3,U1,U2,U3,V1,V2,V3,UE29,VE29,CBETAU,SBETAU,G
       REAL(SZ) RHOWAT0
       REAL(SZ) ULL(*),VLL(*),PLL(*)
-      REAL*8 FLAT(*),FLON(*)
+      REAL(sz) FLAT(*),FLON(*)
 C     
       INTEGER,SAVE,ALLOCATABLE ::  N1(:),N2(:),N3(:)
       REAL(SZ),SAVE,ALLOCATABLE :: D1(:),D2(:),D3(:),BETAU(:)
@@ -1229,7 +1229,7 @@ C
          ALLOCATE ( UE(181*271),VE(181*271),PE(181*271) )
       ENDIF
 C     
-      RHOWATG100=RHOWAT0*G*100.d0
+      RHOWATG100=RHOWAT0*G*100.0
 
 C...  The first time the subroutine is called, setup the interpolating factors
 C...  between the Eta-29 grid and the ADCIRC grid.
@@ -1335,7 +1335,7 @@ C***********************************************************************
      &  ie,je,ne,ig,jg,ng,if
       real(sz) dd1,dd2,dd3,betau,ri,x1,x2,x3,x4,y1,y2,y3,y4
       real(sz) aemin,areas,a1,a2,a3,aa,ae,lambda
-      real(8) lamda0,phi0,rphi0,cphi0,sphi0,tphi0,dlamda,dphi,rdlamda,
+      real(sz) lamda0,phi0,rphi0,cphi0,sphi0,tphi0,dlamda,dphi,rdlamda,
      &       rdphi,rflat,tflat,sflat,cflat,a,rlamar,cphiicrlamda,phiarg,
      &       rphii,rlamda,ri1,ri2,rj,dgtora,flon,flat
       real(sz) lamda,lamdaa,lamdab,lamdac,lamdad,lamdae,lamdag
@@ -1345,14 +1345,14 @@ c
       nwlon=181
       nwlat=271
       dgtora=deg2rad
-      lamda0=-97.0d0
-      phi0=41.0d0
+      lamda0=-97.0
+      phi0=41.0
       rphi0=dgtora*phi0
       cphi0=cos(rphi0)
       sphi0=sin(rphi0)
       tphi0=tan(rphi0)
-      dlamda=7.d0/36.d0
-      dphi=5.d0/27.d0
+      dlamda=7.0/36.0
+      dphi=5.0/27.0
       rdlamda=dgtora*dlamda
       rdphi=dgtora*dphi
 c
@@ -1546,7 +1546,7 @@ C     endif
       Y1=phi
       Y4=flat
       ifflag=0
-      AEMIN=99999.d0
+      AEMIN=99999.0
 
 c     test if the point is in triangle ij - b - a
 
@@ -1800,20 +1800,20 @@ C***********************************************************************
       integer i,j,n,nwlon,nwlat,im2,jm2,i1,i2,i1p1,i1m1,i2p1,i2m1,
      &     i3p1,i3m1
       real(sz) lamda,phi,phii,dlon,dlat,dlnt,arg,betau1,betau2,betau3
-      real(8) lamda0,phi0,rphi0,cphi0,sphi0,tphi0,dlamda,dphi,rdlamda,
+      real(sz) lamda0,phi0,rphi0,cphi0,sphi0,tphi0,dlamda,dphi,rdlamda,
      &     rdphi,a,rlamar,phiarg,rlamda,dgtora
 c     
       nwlon=181
       nwlat=271
       dgtora=deg2rad
-      lamda0=-97.0d0
-      phi0=41.0d0
+      lamda0=-97.0
+      phi0=41.0
       rphi0=dgtora*phi0
       cphi0=cos(rphi0)
       sphi0=sin(rphi0)
       tphi0=tan(rphi0)
-      dlamda=7.d0/36.d0
-      dphi=5.d0/27.d0
+      dlamda=7.0/36.0
+      dphi=5.0/27.0
       rdlamda=dgtora*dlamda
       rdphi=dgtora*dphi
 c     
@@ -1829,12 +1829,12 @@ c
          rlamda=rdlamda*float(i1-nwlon)
       endif
       phiarg= sin(phii)*cphi0+cos(phii)*sphi0*cos(rlamda)
-      if(phiarg.gt.1.0d0) phiarg=1.0d0
-      if(phiarg.lt.-1.0d0) phiarg=-1.0d0
+      if(phiarg.gt.1.0) phiarg=1.0
+      if(phiarg.lt.-1.0) phiarg=-1.0
       phi=asin(phiarg)
       rlamar= cos(phii)*cos(rlamda)/(cos(phi)*cphi0)-tan(phi)*tphi0
-      if(rlamar.gt.1.0d0) rlamar=1.0d0
-      if(rlamar.lt.-1.d0) rlamar=-1.d0
+      if(rlamar.gt.1.0) rlamar=1.0
+      if(rlamar.lt.-1.0) rlamar=-1.0
       a=acos(rlamar)/dgtora
       if(rlamda.le.0.) then
          lamda=lamda0-a
@@ -1881,8 +1881,8 @@ c
       dlat=phip1-phim1
       dlnt=sqrt(dlon*dlon+dlat*dlat)
       arg=dlat/dlnt
-      if(arg.gt.1.d0) arg=1.d0
-      if(arg.lt.-1.d0) arg=-1.d0
+      if(arg.gt.1.0) arg=1.0
+      if(arg.lt.-1.0) arg=-1.0
       betau1=asin(arg)
 c     
       if(i2.ne.181) then
@@ -1904,8 +1904,8 @@ c
       dlat=phip1-phim1
       dlnt=sqrt(dlon*dlon+dlat*dlat)
       arg=dlat/dlnt
-      if(arg.gt.1.d0) arg=1.d0
-      if(arg.lt.-1.d0) arg=-1.d0
+      if(arg.gt.1.0) arg=1.0
+      if(arg.lt.-1.0) arg=-1.0
       betau2=asin(arg)
 c     
       if(i3.ne.181) then
@@ -1927,8 +1927,8 @@ c
       dlat=phip1-phim1
       dlnt=sqrt(dlon*dlon+dlat*dlat)
       arg=dlat/dlnt
-      if(arg.gt.1.d0) arg=1.d0
-      if(arg.lt.-1.d0) arg=-1.d0
+      if(arg.gt.1.0) arg=1.0
+      if(arg.lt.-1.0) arg=-1.0
       betau3=asin(arg)
       betau=dd1*betau1+dd2*betau2+dd3*betau3
 C     
@@ -1962,7 +1962,7 @@ C     ----------------------------------------------------------------
       IMPLICIT NONE
       INTEGER, intent(in) :: NP,ICS
       REAL(SZ), intent(in) :: RHOWAT0,G,TIME
-      REAL(8), intent(in), dimension(NP) :: X, Y, SLAM, SFEA
+      real(sz), intent(in), dimension(NP) :: X, Y, SLAM, SFEA
       REAL(SZ), intent(out), dimension(NP) :: WVNX,WVNY
       REAL(SZ), intent(out), dimension(NP) :: PRESS
       INTEGER, intent(in) :: NSCREEN
@@ -1979,21 +1979,21 @@ C     ----------------------------------------------------------------
       REAL(SZ) :: WindMultiplier         ! for storm 2 in LPFS ensemble
       REAL(SZ) :: centralPressureDeficit ! difference btw ambient and cpress
 C
-      REAL(8), PARAMETER :: Ambient_Pressure=101300.d0      ! Pascals!!
-C      REAL(8), PARAMETER :: Coriolis=7.287588493541447D-05  ! 1/sec
-      REAL(8), PARAMETER :: Rho_Air = 1.15d0                ! kg/m/m/m
-      REAL(8), PARAMETER :: e=2.718281828459045d0
-      REAL(8), PARAMETER :: SamplingTimeAdj=0.88d0 ! from 1 min to 10 min winds
-      REAL(8), PARAMETER :: re=6378206.4d0
-      REAL(8) :: pi,omega, coriolis
-      REAL(8) :: mperdeg,DEG2RAD
+      real(sz), PARAMETER :: Ambient_Pressure=101300.0      ! Pascals!!
+C      real(sz), PARAMETER :: Coriolis=7.287588493541447D-05  ! 1/sec
+      real(sz), PARAMETER :: Rho_Air = 1.15d0                ! kg/m/m/m
+      real(sz), PARAMETER :: e=2.718281828459045d0
+      real(sz), PARAMETER :: SamplingTimeAdj=0.88d0 ! from 1 min to 10 min winds
+      real(sz), PARAMETER :: re=6378206.4d0
+      real(sz) :: pi,omega, coriolis
+      real(sz) :: mperdeg,DEG2RAD
 
       LOGICAL, SAVE :: FIRSTCALL = .True.
 C
-      pi = 4.0d0 * atan(1.0d0)
-      mperdeg  = re * pi / 180.0d0
-      DEG2RAD = pi / 180.0d0
-      omega = 2.0d0*pi / 86164.2d0
+      pi = 4.0 * atan(1.0)
+      mperdeg  = re * pi / 180.0
+      DEG2RAD = pi / 180.0
+      omega = 2.0*pi / 86164.2d0
 C
       IF (FIRSTCALL) THEN
          FIRSTCALL = .False.
@@ -2016,8 +2016,8 @@ C     Calculate and limit central pressure deficit; some track files
 C     (e.g., Charley 2004) may have a central pressure greater than the
 C     ambient pressure that this subroutine assumes
       centralPressureDeficit = Ambient_Pressure - cpress
-      IF ( centralPressureDeficit .lt. 100.d0 ) THEN
-         centralPressureDeficit = 100.d0
+      IF ( centralPressureDeficit .lt. 100.0 ) THEN
+         centralPressureDeficit = 100.0
       ENDIF
 
 C     jgf46.29 Subtract the translational speed of the storm from the
@@ -2034,11 +2034,11 @@ C
 C     Calculate Holland parameters and limit the result to its appropriate
 C     range.
       B = Rho_Air*e*(spd**2)/(centralPressureDeficit)
-      IF (B.lt.1.0d0) B=1.0d0
+      IF (B.lt.1.0) B=1.0
       IF (B.gt.2.5d0) B=2.5d0
 C
 C     Calculate Holland A parameter. (jgf46.32jgf4 commented out)
-C      A = (RMW*1000.d0)**B
+C      A = (RMW*1000.0)**B
 C
 #ifdef DEBUG_HOLLAND
       WRITE(16,4321) B
@@ -2050,7 +2050,7 @@ C     multiplied by 1.2.
       IF (StormNumber.eq.2) THEN
          WindMultiplier=1.2d0
       ELSE
-         WindMultiplier=1.0d0
+         WindMultiplier=1.0
       ENDIF
 C
 C     Calculate wind velocity and pressure at each node.
@@ -2065,29 +2065,29 @@ C         DY(I)=YCOOR(I)-lat
          THETA(I)=ATAN2(DY(I),DX(I))
 C   RJW v48.45
 C     compute the distances based on haversine formula for distance along a sphere
-         Rad(i)=re*(2.0d0*ASIN(sqrt(sin(DY(I)/2.0d0)**2+
-     & cos(lat*DEG2RAD)*cos(YCOOR(i)*DEG2RAD)*sin(DX(I)/2.0d0)**2)))
+         Rad(i)=re*(2.0*ASIN(sqrt(sin(DY(I)/2.0)**2+
+     & cos(lat*DEG2RAD)*cos(YCOOR(i)*DEG2RAD)*sin(DX(I)/2.0)**2)))
 C calculate the coriolis at YCOOR
-         coriolis = 2.0d0 * omega * sin(YCOOR(I)*DEG2RAD)
+         coriolis = 2.0 * omega * sin(YCOOR(I)*DEG2RAD)
 
-C        RAD(I)=SQRT(DX(I)*DX(I)+DY(I)*DY(I))*100.d0*1000.d0 ! into meters!!
+C        RAD(I)=SQRT(DX(I)*DX(I)+DY(I)*DY(I))*100.0*1000.0 ! into meters!!
 C
 C         PRESS(I)=(cpress+(Ambient_Pressure-cpress)*EXP(-A/RAD(I)**B))
 C    &        / (RHOWAT0*G) ! jgf46.32jgf4 commented out
          PRESS(I)=(cpress+(centralPressureDeficit)*
-     &        EXP(-(RMW*1000.d0/RAD(I))**B)) / (RHOWAT0*G)
+     &        EXP(-(RMW*1000.0/RAD(I))**B)) / (RHOWAT0*G)
 C         V_r(I) = sqrt(
 C     &        A*B*(Ambient_Pressure-cpress)*EXP(-A/RAD(I)**B)
 C     &        / ( Rho_Air*RAD(I)**B )
-C     &        + (RAD(I)**2)*(CORIOLIS**2)/4.d0
+C     &        + (RAD(I)**2)*(CORIOLIS**2)/4.0
 C     &        )
-C     &        - RAD(I)*CORIOLIS/2.d0 ! jgf46.32jgf4 commented out
+C     &        - RAD(I)*CORIOLIS/2.0 ! jgf46.32jgf4 commented out
          V_r(I) = sqrt(
-     &        (RMW*1000.d0/RAD(I))**B *
-     &        EXP(1.d0-(RMW*1000.d0/RAD(I))**B)*spd**2
-     &        + (RAD(I)**2)*(CORIOLIS**2)/4.d0
+     &        (RMW*1000.0/RAD(I))**B *
+     &        EXP(1.0-(RMW*1000.0/RAD(I))**B)*spd**2
+     &        + (RAD(I)**2)*(CORIOLIS**2)/4.0
      &        )
-     &        - RAD(I)*CORIOLIS/2.d0
+     &        - RAD(I)*CORIOLIS/2.0
 C
 C     jgf46.31 Determine translation speed that should be added to final
 C     storm wind speed. This is tapered to zero as the storm wind tapers
@@ -2121,8 +2121,8 @@ C
 C     jgf46.31 Set the wind velocities to zero outside the last closed
 C     isobar.
 C         IF (RAD(I).gt.rrp) THEN
-C            WVNX(I)=0.0d0
-C            WVNY(I)=0.0d0
+C            WVNX(I)=0.0
+C            WVNY(I)=0.0
 C         ENDIF
 C
       END DO
@@ -2164,19 +2164,19 @@ C
       INTEGER, ALLOCATABLE, SAVE :: iFcstInc(:) ! hours
       REAL(SZ), ALLOCATABLE, SAVE :: FcstInc(:) ! seconds
       REAL(SZ),SAVE :: WTRATIO          !time ratio used for interpolation
-      REAL(8), ALLOCATABLE, SAVE :: CastTime(:) ! seconds since start of year
+      real(sz), ALLOCATABLE, SAVE :: CastTime(:) ! seconds since start of year
       INTEGER,SAVE :: iNowcastCPress, iNowcastRRP, iNowcastRMW
       LOGICAL,SAVE :: FIRSTCALL = .True.
       INTEGER,SAVE :: i  ! Current array counter for fort.22 file
       INTEGER,SAVE :: nl ! Number of lines in the fort.22 file
       INTEGER,SAVE :: pl ! populated length of Holland Data array
-      REAL(8), PARAMETER :: re=6378206.4d0
-      REAL(8) :: pi
-      REAL(8) :: mperdeg,DEG2RAD
+      real(sz), PARAMETER :: re=6378206.4d0
+      real(sz) :: pi
+      real(sz) :: mperdeg,DEG2RAD
 
-      pi = 4.0d0 * atan(1.0d0)
-      mperdeg  = re * pi / 180.0d0
-      DEG2RAD = pi / 180.0d0
+      pi = 4.0 * atan(1.0)
+      mperdeg  = re * pi / 180.0
+      DEG2RAD = pi / 180.0
 
 C     ------------------------------------------------------
 C     BEGIN Code executed upon first call to this subroutine
@@ -2246,7 +2246,7 @@ C     radius to max wind for use in forecasts
 C
 C     Determine the time of this hindcast in seconds since the beginning
 C     of the year.
-               CALL TimeConv(iYear(i),iMth(i),iDay(i),iHr(i),0,0.d0,
+               CALL TimeConv(iYear(i),iMth(i),iDay(i),iHr(i),0,0.0,
      &              CastTime(i),MyProc,NScreen,ScreenUnit)
 C
 C     Determine the CastTime in seconds since the beginning of the simulation.
@@ -2272,11 +2272,11 @@ C
 C     Determine the time of this forecast in seconds since the beginning
 C     of the year.
                IF ( iFcstInc(i).eq.0 ) THEN
-                  CALL TimeConv(iYear(i),iMth(i),iDay(i),iHr(i),0,0.d0,
+                  CALL TimeConv(iYear(i),iMth(i),iDay(i),iHr(i),0,0.0,
      &                 CastTime(i),MyProc,NScreen,ScreenUnit)
                   CastTime(i)=CastTime(i)-WindRefTime
                ELSE
-                  FcstInc(i) = FcstInc(i) * 3600.d0 ! convert hours to seconds
+                  FcstInc(i) = FcstInc(i) * 3600.0 ! convert hours to seconds
                   CastTime(i) = CastTime(i-1) +
      &                 ( FcstInc(i) - FcstInc(i-1) )
                ENDIF
@@ -2310,11 +2310,11 @@ C     Convert integers to reals.
             RMW(i) = iRMW(i)
 C
 C     Convert units.
-            Lat(i) = Lat(i) / 10.d0 ! convert 10ths of degs to degs
-            Lon(i) = Lon(i) / 10.d0 ! convert 10ths of degs to degs
-            Lon(i) = -1.d0 * Lon(i) ! negative b/c WEST longitude
-            CPress(i) = CPress(i) * 100.d0 ! convert mbar to Pa
-            RRP(i) = RRP(i) * 1.852000003180799d0 * 1000.0d0 ! convert nm to m
+            Lat(i) = Lat(i) / 10.0 ! convert 10ths of degs to degs
+            Lon(i) = Lon(i) / 10.0 ! convert 10ths of degs to degs
+            Lon(i) = -1.0 * Lon(i) ! negative b/c WEST longitude
+            CPress(i) = CPress(i) * 100.0 ! convert mbar to Pa
+            RRP(i) = RRP(i) * 1.852000003180799d0 * 1000.0 ! convert nm to m
             RMW(i) = RMW(i) * 1.852000003180799d0 ! convert nm to km
             Spd(i) = Spd(i) * 0.51444444d0 ! convert kts to m/s
 C
@@ -2354,21 +2354,21 @@ C     &  cos(lat*DEG2RAD)*cos(YCOOR(i)*DEG2RAD)*sin(DX(I)/2)**2) ) )
 
 C     Calculate storm translation velocities based on change in position,
 
-            TVX(i)=SIGN( (re*(2.0d0*ASIN(sqrt(cos(LAT(I)*DEG2RAD)
+            TVX(i)=SIGN( (re*(2.0*ASIN(sqrt(cos(LAT(I)*DEG2RAD)
      & * cos(LAT(I-1)*DEG2RAD)
-     & * sin((LON(I)*DEG2RAD-LON(I-1)*DEG2RAD)/2.0d0)**2) ) ) )
+     & * sin((LON(I)*DEG2RAD-LON(I-1)*DEG2RAD)/2.0)**2) ) ) )
      &              /(CastTime(i)-CastTime(i-1))
      & ,(Lon(i)-Lon(i-1))  )  ! get correct sign
 c
-            TVY(i)=SIGN( (re*(2.0d0*ASIN(sqrt(
-     &  sin( (LAT(I)*DEG2RAD-LAT(I-1)*DEG2RAD)/2.0d0)**2))) )
+            TVY(i)=SIGN( (re*(2.0*ASIN(sqrt(
+     &  sin( (LAT(I)*DEG2RAD-LAT(I-1)*DEG2RAD)/2.0)**2))) )
      &              /(CastTime(i)-CastTime(i-1))
      & ,(Lat(i)-Lat(i-1))  )  ! get correct sign
 
 
-C            TVX(i)=(Lon(i)-Lon(i-1))*100.d0*1000.d0
+C            TVX(i)=(Lon(i)-Lon(i-1))*100.0*1000.0
 C     &              /(CastTime(i)-CastTime(i-1))
-C            TVY(i)=(Lat(i)-Lat(i-1))*100.d0*1000.d0
+C            TVY(i)=(Lat(i)-Lat(i-1))*100.0*1000.0
 C     &              /(CastTime(i)-CastTime(i-1))
          ENDDO
          TVX(1)=TVX(2)
@@ -2482,9 +2482,9 @@ C23456
      &     RHOWAT0,G,TIME,WTIMINC,WTIME1,WTIME2)
       USE SIZES
       IMPLICIT NONE
-      REAL(8), PARAMETER :: Ambient_Pressure=101300.d0      !   Pascals!!
-      REAL(8), PARAMETER :: Coriolis=7.287588493541447D-05  ! 1/sec
-      REAL(8), PARAMETER :: Rho_Air = 1.15d0                ! kg/ m/m/m
+      real(sz), PARAMETER :: Ambient_Pressure=101300.0      !   Pascals!!
+      real(sz), PARAMETER :: Coriolis=7.287588493541447D-05  ! 1/sec
+      real(sz), PARAMETER :: Rho_Air = 1.15d0                ! kg/ m/m/m
       INTEGER, SAVE :: FIRSTCALL = 0
       INTEGER NP,I,J,ICS
       REAL(SZ) RHOWAT0,G,WTIME1,WTIME2,TIME,WTIMINC
@@ -2546,7 +2546,7 @@ C23456
       DX=XCOOR-XC
       DY=YCOOR-YC
       THETA=ATAN2(DY,DX)
-      RAD=SQRT(DX*DX+DY*DY)*100.d0*1000.d0  ! into meters!!
+      RAD=SQRT(DX*DX+DY*DY)*100.0*1000.0  ! into meters!!
       EARG=EXP(-A/RAD**B)
 
       ! WVNX,WVNY,PRESS are returned!!
@@ -2555,8 +2555,8 @@ C23456
          D=Rho_Air*RAD(I)**B
          N=A*B*DP*EARG(I)
          T1=N/D
-         T2=((CORIOLIS**2)/4.d0)*RAD(I)**2
-         T3=RAD(I)*CORIOLIS/2.d0
+         T2=((CORIOLIS**2)/4.0)*RAD(I)**2
+         T3=RAD(I)*CORIOLIS/2.0
          VG(I)=sqrt(T1+T2)-T3
          TM=(RAD(I)/(RMW*1000))-5.
          IF (TM.LT.0.)THEN
@@ -2681,9 +2681,9 @@ C     &  fitRmaxes, uvp, getLatestRmax, getLatestAngle
       INTEGER  :: i, nwi
       INTEGER  :: num_entry
       REAL(sz) :: TIMELOC, time1, wtratio
-      REAL( 8), SAVE, ALLOCATABLE :: xcoor(:),ycoor(:)
-      REAL( 8) :: slam(np),sfea(np)
-      REAL( 8) :: wvnx(np),wvny(np), press(np)
+      real(sz), SAVE, ALLOCATABLE :: xcoor(:),ycoor(:)
+      real(sz) :: slam(np),sfea(np)
+      real(sz) :: wvnx(np),wvny(np), press(np)
       REAL(sz) :: RhoWatG
 
       REAL,DIMENSION(:),ALLOCATABLE,SAVE::lat,lon
@@ -2859,7 +2859,7 @@ C      call allMessage(DEBUG,"Enter.")
          uTrans(icyc) = sin(dir1(ient)*deg2rad)*speed1(ient)
          vTrans(icyc) = cos(dir1(ient)*deg2rad)*speed1(ient)
 
-         CycleTime(icyc) =  iFcstInc1(ient) * 3600.d0 + timeOffset
+         CycleTime(icyc) =  iFcstInc1(ient) * 3600.0 + timeOffset
 !         The logic for the code is set for W and N so if E or S
 !         multiply lats and lons by -1
 !
@@ -2869,7 +2869,7 @@ C      call allMessage(DEBUG,"Enter.")
          IF(ns.EQ.'S')THEN
             ilat(icyc)=(-1)*ilat(icyc)
          ENDIF
-         lon(icyc) = (-1.0d0) * ilon(icyc) * 0.1d0
+         lon(icyc) = (-1.0) * ilon(icyc) * 0.1d0
          lat(icyc)=ilat(icyc) * 0.1d0
 
          ! PICK OUT THE CYCLE DATA THAT THE USER WANTS TO USE
@@ -2926,7 +2926,7 @@ C      call allMessage(DEBUG,"Enter.")
               uTrans(icyc)=sin(dir1(ient)*deg2rad)*speed1(ient)
               vTrans(icyc)=cos(dir1(ient)*deg2rad)*speed1(ient)
 
-               CycleTime(icyc) =  iFcstInc(icyc) * 3600.d0 + timeOffset
+               CycleTime(icyc) =  iFcstInc(icyc) * 3600.0 + timeOffset
 
 !              The logic for the code is set for W and N so if E or S
 !              multiply lats and lons by -1
@@ -2936,7 +2936,7 @@ C      call allMessage(DEBUG,"Enter.")
                IF(ns.EQ.'S')THEN
                   ilat(icyc)=(-1)*ilat(icyc)
                ENDIF
-               lon(icyc) = (-1.0d0) * ilon(icyc) * 0.1d0
+               lon(icyc) = (-1.0) * ilon(icyc) * 0.1d0
                lat(icyc) = ilat(icyc) * 0.1d0
 
             endif
@@ -2988,11 +2988,11 @@ C     &      "The simulation has run out of meteorological data.")
       !
       ! Perform time interpolation, transform variables from integers
       ! to real numbers for hurricane vortex calcualtions.
-      Vmax  =  1.d0*(ispd(icyc-1) +
+      Vmax  =  1.0*(ispd(icyc-1) +
      &                         wtratio * (ispd(icyc)-ispd(icyc-1)))
-      Pn    =  1.d0*(ipn(icyc-1)  +
+      Pn    =  1.0*(ipn(icyc-1)  +
      &                         wtratio * (ipn(icyc)-ipn(icyc-1)))
-      Pc    =  1.d0*(icpress(icyc-1) +
+      Pc    =  1.0*(icpress(icyc-1) +
      &                         wtratio*(icpress(icyc)-icpress(icyc-1)))
       cLat   =  lat(icyc-1)  +
      &                         wtratio * (lat(icyc)-lat(icyc-1))
@@ -3013,7 +3013,7 @@ C     &      "The simulation has run out of meteorological data.")
       ! available at the module level for use in NWS29
       vortexLat = cLat
       vortexLon = cLon
-      vortexRMW = 0.0d0
+      vortexRMW = 0.0
       !jgf50.32: For sector-based wind drag, record the center
       !of the storm.
       IF ((cLat.ne.EyeLatR(3)).or.(cLon.ne.EyeLonR(3))) THEN
@@ -3038,7 +3038,7 @@ C     &      "The simulation has run out of meteorological data.")
       ! scale (Vmax - Vt) and Vr up to the top of the surface,
       ! where the cylcostrophic wind balance is valid.
       !-------------------------------------------------------
-      stormMotion = 1.5d0*(SQRT(uTransNow**2.d0+vTransNow**2.d0))
+      stormMotion = 1.5d0*(SQRT(uTransNow**2.0+vTransNow**2.0))
      & **0.63d0
       VmaxBL = (Vmax-stormMotion)/windReduction
       call newVortex(Pn,Pc,cLat,cLon,VmaxBL)
@@ -3196,9 +3196,9 @@ C***********************************************************************
       INTEGER  :: num_entry
 
       REAL(sz) :: TIMELOC, wtratio
-      REAL( 8), SAVE, ALLOCATABLE :: xcoor(:),ycoor(:)
-      REAL( 8) :: slam(np),sfea(np)
-      REAL( 8) :: wvnx(np),wvny(np), press(np)
+      real(sz), SAVE, ALLOCATABLE :: xcoor(:),ycoor(:)
+      real(sz) :: slam(np),sfea(np)
+      real(sz) :: wvnx(np),wvny(np), press(np)
       REAL(sz) :: RhoWatG
       REAL(sz) :: corio
 
@@ -3315,8 +3315,8 @@ C      call allMessage(DEBUG,"Enter.")
             ycoor(i) = sfea(i) * rad2deg
          END DO
 
-         timeOffset = nint(TIMELOC/60d0)*60d0 ! round initial time to nearest minute
-         rndaySeconds = RNDAY * 86400.d0
+         timeOffset = nint(TIMELOC/60)*60 ! round initial time to nearest minute
+         rndaySeconds = RNDAY * 86400.0
       END IF   ! end of first Time data allocations and such
       !
       ! the mesh changes at each time step if we are writing out
@@ -3375,10 +3375,10 @@ C      call allMessage(DEBUG,"Enter.")
 
          ! initialize arrays to zero
          ir = 0
-         rmaxw = 0.0d0
+         rmaxw = 0.0
          quadflag = 0
-         HollBs = 0.0d0
-         VmaxesBL = 0.0d0
+         HollBs = 0.0
+         VmaxesBL = 0.0
 
          ! Read parsed NHC advisory in modified best-track format
 27       FORMAT(3x, i3, 2x, i4, 3i2, 6x, a4, 2(2x,i3),a1, 2x, i4,a1, 2x,
@@ -3426,7 +3426,7 @@ C      call allMessage(DEBUG,"Enter.")
          uTrans(icyc) = sin(dir1(ient)*deg2rad)*speed1(ient)
          vTrans(icyc) = cos(dir1(ient)*deg2rad)*speed1(ient)
 
-         CycleTime(icyc) =  iFcstInc1(ient) * 3600.d0 + timeOffset
+         CycleTime(icyc) =  iFcstInc1(ient) * 3600.0 + timeOffset
 !         The logic for the code is set for W and N so if E or S
 !         multiply lats and lons by -1
 !
@@ -3436,7 +3436,7 @@ C      call allMessage(DEBUG,"Enter.")
          IF(ns.EQ.'S')THEN
             ilat(icyc)=(-1)*ilat(icyc)
          ENDIF
-         lon(icyc) = (-1.0d0) * ilon(icyc) * 0.1d0
+         lon(icyc) = (-1.0) * ilon(icyc) * 0.1d0
          lat(icyc)=ilat(icyc) * 0.1d0
 
          ! PICK OUT THE CYCLE DATA THAT THE USER WANTS TO USE
@@ -3499,7 +3499,7 @@ C                  call windTerminate()
                ! switch sin and cos b/c these are compass directions
                uTrans(icyc)=sin(dir1(ient)*deg2rad)*speed1(ient)
                vTrans(icyc)=cos(dir1(ient)*deg2rad)*speed1(ient)
-               CycleTime(icyc) =  iFcstInc(icyc) * 3600.d0 + timeOffset
+               CycleTime(icyc) =  iFcstInc(icyc) * 3600.0 + timeOffset
 
 !              The logic for the code is set for W and N so if E or S
 !              multiply lats and lons by -1
@@ -3509,7 +3509,7 @@ C                  call windTerminate()
                IF(ns.EQ.'S')THEN
                   ilat(icyc)=(-1)*ilat(icyc)
                ENDIF
-               lon(icyc) = (-1.0d0) * ilon(icyc) * 0.1d0
+               lon(icyc) = (-1.0) * ilon(icyc) * 0.1d0
                lat(icyc) = ilat(icyc) * 0.1d0
 
             endif
@@ -3558,8 +3558,8 @@ C     &      "The simulation has run out of meteorological data.")
       ENDIF
 ! @jasonfleming: Add handling of "CALM"
 c      if ((trim(type(icyc)).eq.'CALM').or.trim(type(icyc-1)).eq.'CALM') then
-c         wvnx(:)=0.d0
-c         wvny(:)=0.d0
+c         wvnx(:)=0.0
+c         wvny(:)=0.0
 c         press(:)=PRBCKGRND*mb2pa/(rhowat0*g)
 c         wtratio=(TIMELOC-CycleTime(icyc-1))/
 c     &                  (CycleTime(icyc)-CycleTime(icyc-1))
@@ -3569,7 +3569,7 @@ c         cLon  =  lon(icyc-1)  +
 c     &                         wtratio * (lon(icyc)-lon(icyc-1))
 c         vortexLat = cLat
 c         vortexLon = cLon
-c         vortexRMW = 0.0d0
+c         vortexRMW = 0.0
 c         EyeLat(1) = EyeLat(2)
 c         EyeLon(1) = EyeLon(2)
 c         EyeLat(2) = EyeLat(3)
@@ -3598,8 +3598,8 @@ c      endif
          dx = deg2rad * Rearth * (xcoor(i) - cLon)*COS(deg2rad*cLat)
          dy = deg2rad * Rearth * (ycoor(i) - cLat)
          dist(i) = SQRT(dx*dx + dy*dy)* m2nm
-         aziangle(i) = 360.0d0 + rad2deg * ATAN2(dx,dy)
-         IF (aziangle(i) > 360.d0) aziangle(i) = aziangle(i) - 360.d0
+         aziangle(i) = 360.0 + rad2deg * ATAN2(dx,dy)
+         IF (aziangle(i) > 360.0) aziangle(i) = aziangle(i) - 360.0
       enddo
  ! set parameters at icyc-1
  !        call setQuadFlag4(reshape(quadflag(icyc-1,:,:),(/4,4/)))
@@ -3621,7 +3621,7 @@ c      endif
  !    &                   ' CycleTime=', CycleTime(icyc-1)
       do i=1,np
          crmaxw1(i) = spInterp(aziangle(i),dist(i),1)
-         crmaxwTrue1(i) = spInterp(aziangle(i),1.d0,1)
+         crmaxwTrue1(i) = spInterp(aziangle(i),1.0,1)
          !an artificial number 1.0 is chosen to ensure only
          !rmax from the highest isotach is picked
          cHollBs1(i)= spInterp(aziangle(i),dist(i),2)
@@ -3650,7 +3650,7 @@ c      endif
  !    &                   ' CycleTime=', CycleTime(icyc)
       do i=1,np
          crmaxw2(i) = spInterp(aziangle(i),dist(i),1)
-         crmaxwTrue2(i) = spInterp(aziangle(i),1.d0,1)
+         crmaxwTrue2(i) = spInterp(aziangle(i),1.0,1)
          !an artificial number 1.0 is chosen to ensure only
          !rmax from the highest isotach is picked
          cHollBs2(i)= spInterp(aziangle(i),dist(i),2)
@@ -3661,9 +3661,9 @@ c      endif
       end do
       ! Perform time interpolation, transform variables from integers
       ! to real numbers for hurricane vortex calcualtions.
-      Pn    =  1.d0*(ipn(icyc-1)  +
+      Pn    =  1.0*(ipn(icyc-1)  +
      &                         wtratio*(ipn(icyc)-ipn(icyc-1)))
-      Pc    =  1.d0*(icpress(icyc-1) +
+      Pc    =  1.0*(icpress(icyc-1) +
      &                         wtratio*(icpress(icyc)-icpress(icyc-1)))
       crmaxw   =  crmaxw1(:) +
      &                         wtratio*(crmaxw2(:)-crmaxw1(:))
@@ -3673,11 +3673,11 @@ c      endif
      &                         wtratio*(cHollBs2(:)-cHollBs1(:))
       cVmwBL   =  cVmwBL1(:) +
      &                         wtratio*(cVmwBL2(:)-cVmwBL1(:))
-      corio = 2.0d0 * omega * SIN(deg2rad*cLat)
+      corio = 2.0 * omega * SIN(deg2rad*cLat)
      &
-      Rmax  = 1.d0*(atcfRMW(icyc-1) + wtratio * (atcfRMW(icyc)-atcfRMW(icyc-1)))
+      Rmax  = 1.0*(atcfRMW(icyc-1) + wtratio * (atcfRMW(icyc)-atcfRMW(icyc-1)))
      &
-      Vmax = 1.d0*(ispd(icyc-1) + wtratio * (ispd(icyc)-ispd(icyc-1))) 
+      Vmax = 1.0*(ispd(icyc-1) + wtratio * (ispd(icyc)-ispd(icyc-1))) 
 !Jie debug GAHM
 !         WRITE(16,700) 'Temporal interpolation:',
 !     &           CycleTime(icyc-1), TIMELOC, CycleTime(icyc)
@@ -3703,7 +3703,7 @@ c      endif
       ! available at the module level for use in NWS29
       vortexLat = cLat
       vortexLon = cLon
-      vortexRMW = 0.0d0
+      vortexRMW = 0.0
       !jgf50.32: For sector-based wind drag, record the center
       !of the storm.
       IF ((cLat.ne.EyeLat(3)).or.(cLon.ne.EyeLon(3))) THEN
@@ -3717,22 +3717,22 @@ c      endif
       ENDIF
       ! jgf: arithmetic mean of the Rmax in the selected storm quadrants from
       ! the selected isotachs
-      numRmaxes = 0.d0 ! count how many Rmax values we have to work with
+      numRmaxes = 0.0 ! count how many Rmax values we have to work with
       do i=1,4  ! loop quads
          do j=1,3 ! loop isotachs
             if (quadflag(icyc-1,i,j)==1) then
                oldVortexRMW = oldVortexRMW + rmaxw(icyc-1,i,j)
-               numRmaxes = numRmaxes + 1.d0
+               numRmaxes = numRmaxes + 1.0
             endif
          end do
       enddo
       oldVortexRMW = oldVortexRMW / numRmaxes
-      numRmaxes = 0.d0 ! count how many Rmax values we have to work with
+      numRmaxes = 0.0 ! count how many Rmax values we have to work with
       do i=1,4  ! loop quads
          do j=1,3 ! loop isotachs
             if (quadflag(icyc,i,j)==1) then
                newVortexRMW = newVortexRMW + rmaxw(icyc,i,j)
-               numRmaxes = numRmaxes + 1.d0
+               numRmaxes = numRmaxes + 1.0
             endif
          end do
       enddo
@@ -3753,9 +3753,9 @@ c      endif
       ! a 1-minute (max sustained) to a 10-minute average prior to
       ! adding the translational velocity in subroutine uvp.
       !-------------------------------------------------------------
-      stormMotion = 1.5d0*(SQRT(uTransNow**2.d0+vTransNow**2.d0))**0.63d0
+      stormMotion = 1.5d0*(SQRT(uTransNow**2.0+vTransNow**2.0))**0.63d0
       dirNow = rad2deg * ATAN2(uTransNow, vTransNow)
-      if (dirNow .lt. 0.d0) dirNow = dirNow + 360.d0
+      if (dirNow .lt. 0.0) dirNow = dirNow + 360.0
       stormMotionU = sin(dirNow/rad2deg)*stormMotion
       stormMotionV = cos(dirNow/rad2deg)*stormMotion
       call setVortex(Pn,Pc,cLat,cLon)
@@ -3864,9 +3864,9 @@ C         IMPLICIT NONE
 
 C         INTEGER  :: np, ics
 C         REAL(sz) :: time, time1,time2, wtratio
-C         REAL( 8), SAVE, ALLOCATABLE :: xcoor(:),ycoor(:)
-C         REAL( 8) :: slam(np),sfea(np)
-C         REAL( 8) :: wvnx(np),wvny(np), press(np)
+C         real(sz), SAVE, ALLOCATABLE :: xcoor(:),ycoor(:)
+C         real(sz) :: slam(np),sfea(np)
+C         real(sz) :: wvnx(np),wvny(np), press(np)
 
 C         INTEGER , SAVE :: iyear1, imth1, iday1, ihr1
 C         INTEGER , SAVE :: iyear2, imth2, iday2, ihr2
@@ -3908,7 +3908,7 @@ C         INTEGER , PARAMETER :: node2print = 6205
 C         timeNew = time
 
 C     jgf46.16 commented out according to cf
-!         IF (firstCall .EQ. 0 .OR. MOD(time,100.d0) .EQ. 0) then
+!         IF (firstCall .EQ. 0 .OR. MOD(time,100.0) .EQ. 0) then
 !           if (myproc == 0) then
 !            WRITE(screenunit, '("SUBROUTINE nws9get: Time = ", F11.1)') time
 !           endif
@@ -4238,8 +4238,8 @@ C***********************************************************************
       CHARACTER*80 PBLJAGF
 C     
       DO I=1,NP
-         RSNX(I)=0.d0
-         RSNY(I)=0.d0
+         RSNX(I)=0.0
+         RSNY(I)=0.0
       END DO
  170  READ(23,'(A80)') PBLJAGF
       IF(PBLJAGF(2:2).EQ.'#') GOTO 170

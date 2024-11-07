@@ -218,7 +218,7 @@ Casey 101118: Make changes compact.
       LoadSwanWaveRefrac     = .FALSE.
       FoundSwanWaveRefrac    = .FALSE.
       SwanWaveRefracNoOfVals = 1
-      SwanWaveRefracDefVal   = 0.D0
+      SwanWaveRefracDefVal   = 0.0
 C
       LoadTau0           = .False.
       LoadStartDry       = .False. 
@@ -272,9 +272,9 @@ C
       EVMDefVal              = 0.0
       EVCDefVal              = 0.0
 C
-      HBREAK=1.d0
-      FTHETA=1.d0
-      FGAMMA=1.d0
+      HBREAK=1.0
+      FTHETA=1.0
+      FGAMMA=1.0
 C
       ESLM=0.0
       ESLC=0.0
@@ -845,7 +845,7 @@ C         IF (NWP.eq.0) THEN
 C            ALLOCATE(STARTDRY(NP))
 C         ENDIF
          DO I=1, NP
-            STARTDRY(I) = 0.0D0
+            STARTDRY(I) = 0.0
          ENDDO
       ENDIF
 C
@@ -912,7 +912,7 @@ C     jjw&sb46.39.sb01 Save the Tau0Var in Tau0Base for later use
 C
 C     jjw&sb46.38.sb01 If tau0 is loaded from nodal attributes file and 
 C     Tau0 is -3, time-varing tau0 optimizer will be applied in timestep.F
-      if(LoadTau0.AND.Tau0.eq.-3.d0) then
+      if(LoadTau0.AND.Tau0.eq.-3.0) then
          WRITE(16,7)
       endif
  8    FORMAT(/,5X,'A SPATIALLY TEMPORALLY VARIABLE OPTIMIZED '
@@ -955,7 +955,7 @@ C
       IF (LoadBridgePilings) THEN
          DO I=1, NP
             IF (BridgePilings(I,1).ne.0) THEN ! only for nodes w/piers
-               BridgePilings(I,3) = 4.d0 * 
+               BridgePilings(I,3) = 4.0 * 
      &              BridgePilings(I,3) / BridgePilings(I,4)
             ENDIF
          END DO
@@ -998,7 +998,7 @@ C     ----------------------------------------------------------------
       REAL(SZ) Scheme         
       REAL(SZ) Depth
 C
-      IF (Scheme.eq.-2.d0) THEN 
+      IF (Scheme.eq.-2.0) THEN 
 C     Smoothly varying tau0 with depth.
          IF(Depth.GE.200.) Tau0NodalValue=0.005
          IF((Depth.LT.200.).AND.(Depth.GE.1.)) THEN
@@ -1007,7 +1007,7 @@ C     Smoothly varying tau0 with depth.
          IF(Depth.LT.1.) Tau0NodalValue=1.0
       ELSE
 C     Abrupt variation in tau0 with depth.           
-         IF(Depth.LE.10.) Tau0NodalValue=0.020d0    
+         IF(Depth.LE.10.) Tau0NodalValue=0.020    
          IF(Depth.GT.10.) Tau0NodalValue=0.005d0
       ENDIF         
 C     ----------------------------------------------------------------
@@ -1054,8 +1054,8 @@ C
 C     Step 0. Convert Manning's N to Cd, if necessary.
       IF (LoadManningsN) THEN
          DO I=1, NP
-            FRIC(I)=g*ManningsN(I)**2.d0
-     &           /( ( DP(I)+IFNLFA*ETA2(I) )**(1.d0/3.d0) ) ! sb46.28sb02
+            FRIC(I)=g*ManningsN(I)**2.0
+     &           /( ( DP(I)+IFNLFA*ETA2(I) )**(1.0/3.0) ) ! sb46.28sb02
             !sb46.28sb02  Lower limit is applied here.
             IF(FRIC(I).LT.LL) THEN
                FRIC(I) = LL
@@ -1091,8 +1091,8 @@ C     pilings, if required.
             BK = BridgePilings(I,1) 
             BALPHA = BridgePilings(I,2) 
             BDELX = BridgePilings(I,3) 
-            FricBP=(H1/BDELX)*BK*(BK+5.d0*Fr*Fr-0.6d0)
-     &           *(BALPHA+15.d0*BALPHA**4)
+            FricBP=(H1/BDELX)*BK*(BK+5.0*Fr*Fr-0.6d0)
+     &           *(BALPHA+15.0*BALPHA**4)
             TK(I)=TK(I)+FricBP*UV1/H1
          END DO
       ENDIF
@@ -1138,11 +1138,11 @@ C     ----------------------------------------------------------------
       REAL(SZ) fr    ! land wind reduction factor
 C
 C     compute marine roughness coefficient based on Garratt's formula
-      z0m=(0.018d0/G)*WindDragCo*WindMag**2.d0
+      z0m=(0.018d0/G)*WindDragCo*WindMag**2.0
 C
 C     compute direction  that the wind is coming from
       if((WindX.eq.0).and.(WindY.eq.0))then
-         angle=0.d0
+         angle=0.0
       else
          angle=atan2(WindY,WindX)
       endif
@@ -1186,9 +1186,9 @@ c     compute land wind reduction factor
       if(z0l.gt.0.0001) then
          fr=(z0m/z0l)**0.0706d0
       else
-         fr=1.000d0
+         fr=1.000
       endif
-      if(fr.gt.1.0000d0) fr=1.0000d0
+      if(fr.gt.1.0000) fr=1.0000
 c     adjust time interpolated wind field
       WindX = vcanopy(NodeNumber)*fr*WindX 
       WindY = vcanopy(NodeNumber)*fr*WindY 

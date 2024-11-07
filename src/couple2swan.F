@@ -212,13 +212,13 @@ Casey 110111: Create new data structure with discontinuous information for SWAN.
          IF(.NOT.ALLOCATED(RSNX2))THEN
             ALLOCATE(RSNX2(1:NP))
             DO IP=1,NP
-               RSNX2(IP) = 0.D0
+               RSNX2(IP) = 0.0
             ENDDO
          ENDIF
          IF(.NOT.ALLOCATED(RSNY2))THEN
             ALLOCATE(RSNY2(1:NP))
             DO IP=1,NP
-               RSNY2(IP) = 0.D0
+               RSNY2(IP) = 0.0
             ENDDO
          ENDIF
 
@@ -258,22 +258,22 @@ Casey 110111: Create new data structure with discontinuous information for SWAN.
            Node2 = NM(IE,2)
            Node3 = NM(IE,3)
 
-           DSXXDX(IE) = (1.D0/AREAS(IE)) *
+           DSXXDX(IE) = (1.0/AREAS(IE)) *
      &                ( TEMP_SXX(Node1) * (Y(Node2) - Y(Node3))
      &                + TEMP_SXX(Node2) * (Y(Node3) - Y(Node1))
      &                + TEMP_SXX(Node3) * (Y(Node1) - Y(Node2)) )
 
-           DSXYDY(IE) = (1.D0/AREAS(IE)) *
+           DSXYDY(IE) = (1.0/AREAS(IE)) *
      &                ( TEMP_SXY(Node1) * (X(Node3) - X(Node2))
      &                + TEMP_SXY(Node2) * (X(Node1) - X(Node3))
      &                + TEMP_SXY(Node3) * (X(Node2) - X(Node1)) )
 
-           DSXYDX(IE) = (1.D0/AREAS(IE)) *
+           DSXYDX(IE) = (1.0/AREAS(IE)) *
      &                ( TEMP_SXY(Node1) * (Y(Node2) - Y(Node3))
      &                + TEMP_SXY(Node2) * (Y(Node3) - Y(Node1))
      &                + TEMP_SXY(Node3) * (Y(Node1) - Y(Node2)) )
 
-           DSYYDY(IE) = (1.D0/AREAS(IE)) *
+           DSYYDY(IE) = (1.0/AREAS(IE)) *
      &                ( TEMP_SYY(Node1) * (X(Node3) - X(Node2))
      &                + TEMP_SYY(Node2) * (X(Node1) - X(Node3))
      &                + TEMP_SYY(Node3) * (X(Node2) - X(Node1)) )
@@ -295,10 +295,10 @@ Casey 110111: Create new data structure with discontinuous information for SWAN.
 !... to a node.
          outer: DO IP=1,NP
 
-           RSNX2(IP) = 0.D0
-           RSNY2(IP) = 0.D0
+           RSNX2(IP) = 0.0
+           RSNY2(IP) = 0.0
 
-           TOTALAREA = 0.D0
+           TOTALAREA = 0.0
 
            IE = 0
            NUMFOUND = 0
@@ -415,11 +415,11 @@ C             friction formulation inside SWAN.
 Casey 100608: Enforce a lower limit on the Manning's n seen by SWAN.
          IF(N.LT.0.03D0) N = 0.03D0
 
-         Z0 = ( H ) * EXP( -1.D0 * ( 1.D0 + K * H**(1.D0/6.D0)
+         Z0 = ( H ) * EXP( -1.0 * ( 1.0 + K * H**(1.0/6.0)
      &      / ( N * SQRT(G) ) ) )
 
 Casey 091216: If we get a junk number, then use the default value.
-         IF(Z0.LE.0.D0)THEN
+         IF(Z0.LE.0.0)THEN
             Z0 = 0.05D0
          ENDIF
 
@@ -912,10 +912,10 @@ Casey 090302: Initialize the arrays.
       DO IN=1,NP
          SWAN_ETA2(IN,1) = ETA2(IN)
          SWAN_ETA2(IN,2) = ETA2(IN)
-         SWAN_UU2 (IN,1) = 0.D0
-         SWAN_UU2 (IN,2) = 0.D0
-         SWAN_VV2 (IN,1) = 0.D0
-         SWAN_VV2 (IN,2) = 0.D0
+         SWAN_UU2 (IN,1) = 0.0
+         SWAN_UU2 (IN,2) = 0.0
+         SWAN_VV2 (IN,1) = 0.0
+         SWAN_VV2 (IN,2) = 0.0
       ENDDO
 
 Casey 090302: Need to pass correct first wind snaps to SWAN.
@@ -988,8 +988,8 @@ Casey 090302: Find the 'new' values for the second columns.
             SWAN_VV2 (IN,2) = VV2 (IN)
          ELSE
             SWAN_ETA2(IN,2) = - DP(IN)
-            SWAN_UU2 (IN,2) = 0.D0
-            SWAN_VV2 (IN,2) = 0.D0
+            SWAN_UU2 (IN,2) = 0.0
+            SWAN_VV2 (IN,2) = 0.0
          ENDIF
       ENDDO
 
