@@ -325,7 +325,7 @@ ifeq ($(compiler),intel-lonestar)
   FC            :=  ifort
   PFC           :=  mpif90
   CC            :=  icx
-  FFLAGS1       :=  $(INCDIRS) -O2 -msse3 -132  #-traceback -check all #-prof-gen -prof-dir /bevo2/michoski/v21/work -pg -prof-use
+  FFLAGS1       :=  -r8 $(INCDIRS) -O2 -msse3 -132  #-traceback -check all #-prof-gen -prof-dir /bevo2/michoski/v21/work -pg -prof-use
   FFLAGS2       :=  $(FFLAGS1)
   FFLAGS3       :=  $(FFLAGS1)
   FFLAGS4       :=  $(FFLAGS1)
