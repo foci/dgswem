@@ -1,6 +1,5 @@
 prep_src = files([
 'adcprep.F',
-'cfl_prep.F',
 'decomp.F',
 'interp.F',
 'machdep.F',
@@ -12,3 +11,9 @@ prep_src = files([
 'presizes.F',
 'read_global.F'
 ])
+
+inc = include_directories('inc')
+
+executable('adcprep', sources: prep_src, dependencies: [metis_dep, mpi_dep], include_directories: inc, 
+        link_language: 'fortran',
+        ) #have to specify link_language to avoid meson trying to link with C compiler

@@ -1,0 +1,4 @@
+option('overfit', type: 'boolean', value: false, description:
+    'Attempt to optimize (beyond basic -O flags) by compiling for a specific host compiler and architecture.')
+option('reckless', type: 'boolean', value: false, description:
+    'Attempt to optimize (beyond basic -O flags) by relaxing some accuracy standards')
