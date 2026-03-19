@@ -3,6 +3,33 @@ dgswem release 11.13
 Discontinuous Galerkin Shallow Water Equation Model
 
 Building the CPU version
+
+# NOTES FOR MESON 
+
+Note from Kenton: This is the experimental branch using the Meson build system. Adopting 
+Meson provides (theoretically): 
+
+- have faster build times
+- multiple out-of-source builds (if you want to maintain a debug and performance build, for example)
+- build introspection (information is logged on what kind of build a binary is) 
+- abstraction of dependency location (no explicit construction of link/includes, reuse of system libraries)
+- automatic analysis of source dependencies (no reliance on make patterns -> better coverage) 
+- automatically generates .gitignores for builds 
+- with some minimal work, should cross-compile across OSes and environments  
+
+Hotfixes:
+
+Meson is a "opinionated build system", which means I had to move stuff around, and this 
+breaks the makefile (sorry namo). Also, only the CPU version builds currently. Also, if you
+use **modern intel compilers (ifx), there is a meson bug for MPI location**, so you have to setup using 
+
+```
+meson setup <build> --native-file=intel.ini 
+```
+Also SSP, RK modes are fixed, and precision is fixed to double. Should be extendable with a little work. 
+C++ standard library is also manually linked make-style, but this should be made more Mesonic/portable at some point. 
+
+
 --------
 Compilation should be done in the `work/` directory. The program can be compiled
 with several compilers based on the environmental variable `FC`; check the file

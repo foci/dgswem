@@ -2,3 +2,5 @@ option('overfit', type: 'boolean', value: false, description:
     'Attempt to optimize (beyond basic -O flags) by compiling for a specific host compiler and architecture.')
 option('reckless', type: 'boolean', value: false, description:
     'Attempt to optimize (beyond basic -O flags) by relaxing some accuracy standards')
+option('precision', type: 'combo', choices: ['single', 'double'], value: 'double', description:
+    'Choose between single and double precision builds. Single precision builds are not currently supported, but this option will be repaired in the future.')

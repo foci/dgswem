@@ -1,4 +1,4 @@
-project('dagswem',['cpp','fortran'], meson_version: '>=1.0.0')
+project('dgswem',['cpp','fortran'], meson_version: '>=1.0.0')
 
 # DEVELOPER NOTES 
   # Many common flags are implictly handled by Meson. Please review them here, before you
@@ -15,64 +15,76 @@ project('dagswem',['cpp','fortran'], meson_version: '>=1.0.0')
 # CONFIG LOGIC 
   compiler = meson.get_compiler('fortran')
 
-  if compiler.has_argument('-132') 
-    add_project_arguments('-132', language: 'fortran') 
-  endif 
-  if compiler.has_argument('-ffixed-line-length-132')
-    add_project_arguments('-ffixed-line-length-132', language: 'fortran')
-  endif 
-  
-  add_project_arguments('-DREAL8', language: 'fortran') #WIP Let's ignore single precision builds :) 
-  add_project_arguments('-DLINUX', language: 'fortran') 
-  add_project_arguments('-DCSCA', language: 'fortran')  
-
-  # Custom optimization options
-  if get_option('overfit')
-    if get_option('optimization') != '3'
-      error('Enable O3 optimization level before trying overfitting.')
-    endif  
-    # Intel 
-    intel_overfit_flags = ['-xHost', '-ipo']
-    foreach flag : intel_overfit_flags
-      if compiler.has_argument(flag)
-        add_project_arguments(flag, language: 'fortran')
-      endif
-    endforeach
-    # GNU
-    gnu_overfit_flags = ['-march=native', '-mtune=native']
-    foreach flag : gnu_overfit_flags
-      if compiler.has_argument(flag)
-        add_project_arguments(flag, language: 'fortran')
-      endif
-    endforeach
-  endif
-
-  if get_option('reckless')
-    if get_option('optimization') != '3'
-      error('Enable O3 optimization level before trying reckless execution.')
-    endif
-    # Intel 
-    intel_reckless_flags = ['-fp-model fast=2', '-no-prec-div']
-    foreach flag : intel_reckless_flags
-      if compiler.has_argument(flag)
-        add_project_arguments(flag, language: 'fortran')
-      endif
-    endforeach
-    # GNU
-    gnu_reckless_flags = ['-ffast-math', '-Ofast']
-    foreach flag : gnu_reckless_flags
-      if compiler.has_argument(flag)
-        add_project_arguments(flag, language: 'fortran')
-      endif
-    endforeach
-  endif
+  # General config
+    if compiler.has_argument('-132') 
+      add_project_arguments('-132', language: 'fortran') 
+    endif 
+    if compiler.has_argument('-ffixed-line-length-132')
+      add_project_arguments('-ffixed-line-length-132', language: 'fortran')
+    endif 
     
+    add_project_arguments('-DLINUX', language: 'fortran') 
+    add_project_arguments('-DCSCA', language: 'fortran')
+    add_project_arguments('-DRKSSP', language: 'fortran')
+    add_project_arguments('-DSLOPE5', language: 'fortran')
 
-# BUILD LOGIC 
-  mpi_dep = dependency('mpi', required: true, fallback: ['mpi', 'mpi_dep'], language: 'fortran')
-  metis_dep = dependency('metis', version: '>=4.0.1', required: true, fallback: ['metis', 'metis_dep'])
+    # Kenton: force the use of the modern import interface 
+    #add_project_arguments('-DHAVE_MPI_MOD', language: 'fortran')
+
+  # Precision handling 
+    #DUCT TAPE TO IGNORE SINGLE PRECISION BUILDS, THIS SHOULD BE REPAIRED AT SOME POINT!!!
+    if get_option('precision') == 'single'
+      error('Single precision builds are currently not broken, please switch to double precision or wait for a future update.')
+    else 
+      add_project_arguments('-r8', language: 'fortran') 
+      add_project_arguments('-DREAL8', language: 'fortran') 
+    endif
+
+  # Optimization handling 
+    if get_option('overfit')
+      if get_option('optimization') != '3'
+        error('Enable O3 optimization level before trying overfitting.')
+      endif  
+      # Intel 
+      intel_overfit_flags = ['-xHost', '-ipo']
+      foreach flag : intel_overfit_flags
+        if compiler.has_argument(flag)
+          add_project_arguments(flag, language: 'fortran')
+        endif
+      endforeach
+      # GNU
+      gnu_overfit_flags = ['-march=native', '-mtune=native']
+      foreach flag : gnu_overfit_flags
+        if compiler.has_argument(flag)
+          add_project_arguments(flag, language: 'fortran')
+        endif
+      endforeach
+    endif
+
+    if get_option('reckless')
+      if get_option('optimization') != '3'
+        error('Enable O3 optimization level before trying reckless execution.')
+      endif
+      # Intel 
+      intel_reckless_flags = ['-fp-model fast=2', '-no-prec-div']
+      foreach flag : intel_reckless_flags
+        if compiler.has_argument(flag)
+          add_project_arguments(flag, language: 'fortran')
+        endif
+      endforeach
+      # GNU
+      gnu_reckless_flags = ['-ffast-math', '-Ofast']
+      foreach flag : gnu_reckless_flags
+        if compiler.has_argument(flag)
+          add_project_arguments(flag, language: 'fortran')
+        endif
+      endforeach
+    endif
+      
+
+# GLOBAL BUILD LOGIC 
+  mpi_dep = dependency('mpi', required: true, fallback: ['mpi', 'mpi_dep'], language: 'fortran') 
   
-  #ADCPREP Preprocessor 
   subdir('src')
 
 # Summarize
