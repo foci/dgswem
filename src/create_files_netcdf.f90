@@ -41,10 +41,10 @@ module create_files_netcdf
         integer :: max_nvell_dimid ! ID of max_nvell dimension
         integer :: mesh_dimid ! ID of mesh dimension
         integer :: time_varid ! ID of time variable
-        integer :: _varid ! ID of  variable
-        integer :: _varid ! ID of  variable
-        integer :: _varid ! ID of  variable
-        integer :: _varid ! ID of  variable
+        integer :: x_varid ! ID of x variable
+        integer :: y_varid ! ID of y variable
+        integer :: element_varid ! ID of element variable
+        integer :: adcirc_mesh_varid ! ID of adcirc_mesh variable
         integer :: _varid ! ID of  variable
         integer :: _varid ! ID of  variable
         integer :: _varid ! ID of  variable
