@@ -59,8 +59,6 @@ module create_files_netcdf
         integer :: _varid ! ID of  variable
         
         ! fort.63.nc: elevation time series
-        stat = nf90_create('fort.63.nc', nf90_clobber, fort_63_ncid)
-        if (stat.neq.nf90_noerr) call handle_err(stat)
         stat = nf90_def_dim(fort_63_ncid, "time", nf90_unlimited, dimid)
         if (stat.neq.nf90_noerr) call handle_err(stat)
         stat = nf90_def_dim(fort_63_ncid, "node", ???, dimid)
