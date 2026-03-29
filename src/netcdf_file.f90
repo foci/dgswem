@@ -60,7 +60,7 @@ module netcdf_file
         else
             stat = nf90_create(self%path, nf90_clobber, self%ncid)
         endif
-        if (stat.neq.nf90_noerr) call ncfile_handle_error(stat)
+        call ncfile_check_error(stat)
     end subroutine ncfile_init
     
     subroutine ncfile_open(self, mode)
@@ -80,7 +80,7 @@ module netcdf_file
         else
             stat = nf90_open(self%path, nf90_nowrite, self%ncid)
         endif
-        if (stat.neq.nf90_noerr) call ncfile_handle_error(stat)
+        call ncfile_check_error(stat)
     end subroutine ncfile_open
     
     subroutine ncfile_close(self)
@@ -94,10 +94,21 @@ module netcdf_file
         integer :: stat ! Status of most recent operation
         
         stat = nf90_close(self%ncid)
-        if (stat.neq.nf90_noerr) call ncfile_handle_error(stat)
+        call ncfile_check_error(stat)
         
         self%ncid = -1
     end subroutine ncfile_close
+    
+    subroutine ncfile_check_error(stat)
+        !! Look for and handle an error code from the NetCDF library.
+        
+        implicit none
+        
+        integer, intent(in) :: stat
+        !! Status output by NetCDF library function call
+        
+        if (stat.neq.nf90_noerr) call ncfile_handle_error(stat)
+    end subroutine ncfile_check_error
     
     subroutine ncfile_handle_error(stat)
         !! Handle an error code from the NetCDF library.
