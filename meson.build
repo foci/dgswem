@@ -1,4 +1,4 @@
-project('dg-swem', ['cpp', 'fortran'],
+project('dg-swem', ['c', 'cpp', 'fortran'],
         version: '4.0.0',
         default_options: ['buildtype=debugoptimized'],
         meson_version: '>=1.5.0')
@@ -18,6 +18,8 @@ else
   sz = 4
 endif 
 
+extra_adcprep_args = []
+
 if compiler_name == 'gcc'
   if get_option('gpu')
     warning(f'GPU not supported for @compiler_name@. Compiling for CPUs instead.')
@@ -31,6 +33,8 @@ if compiler_name == 'gcc'
                           '-march=native',
                           language: 'fortran')
   endif
+  extra_adcprep_args = ['-Wno-incompatible-pointer-types']
+
 elif compiler_name == 'nvidia_hpc'
   add_project_arguments('-Mextend',
                         f'-r@sz@',
@@ -60,7 +64,8 @@ else
 endif
 
 if get_option('netcdf')
-  netcdf_dep = [dependency('netcdf', language: 'fortran')]
+  netcdf_dep = [dependency('netcdf', language: 'fortran'),
+               dependency('netcdf', language: 'c')]
   compiler.run(
   '''
   PROGRAM netCDF3Test
@@ -97,7 +102,7 @@ endif
 
 executable('adcprep', sources: prep_src,
            dependencies: [metis_dep] + netcdf_dep,
-           c_args: ['-Wno-incompatible-pointer-types'],
+           c_args: extra_adcprep_args,
            link_language: 'fortran',
         ) #have to specify link_language to avoid meson trying to link with C compiler
 
