@@ -15,6 +15,7 @@ jobs:
           auto-activate: false
       - run: |
           conda info
+          export PKG_CONFIG_PATH=$CONDA_PREFIX/lib/pkgconfig
           meson setup build -Dparallel=true -Dnetcdf=true
           cd build
           meson compile
