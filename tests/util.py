@@ -40,8 +40,11 @@ def run_serial(binpath, testpath, rtol=0.05, atol=0.01):
     if not os.path.exists(os.path.join(binpath, "dgswem_serial")):
         raise FileNotFoundError('dgswem_serial not found')
 
-    subprocess.run(os.path.join(binpath, "dgswem_serial") + " &> run.log",
+    result = subprocess.run(os.path.join(binpath, "dgswem_serial"),
                     check=True, cwd=testpath, shell=True)
+    print("Return code:", result.returncode)
+    # print("Output:", result.stdout)
+    # print("Error:", result.stderr)
 
     d1, _ = last_snapshot(os.path.join(testpath , "fort.63.true"))
     d2, _ = last_snapshot(os.path.join(testpath , "fort.63"))
