@@ -9,6 +9,7 @@ jobs:
       - run: |
           conda env create --file environment_gcc.yml
       - run: |
+          conda init
           conda activate env-gcc
           meson setup build -Dparallel=true -Dnetcdf=true
           cd build
