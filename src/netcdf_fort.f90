@@ -57,12 +57,12 @@ module netcdf_fort
         integer :: adcirc_mesh_varid ! ID of adcirc_mesh variable
         
         ! Variable IDs
-        integer :: _varid ! ID of  variable
-        integer :: _varid ! ID of  variable
-        integer :: _varid ! ID of  variable
-        integer :: _varid ! ID of  variable
-        integer :: _varid ! ID of  variable
-        integer :: _varid ! ID of  variable
+        integer :: time_varid ! ID of time variable
+        integer :: x_varid ! ID of x variable
+        integer :: y_varid ! ID of y variable
+        integer :: element_varid ! ID of element variable
+        integer :: adcirc_mesh_varid ! ID of adcirc_mesh variable
+        integer :: neta_varid ! ID of neta variable
         integer :: _varid ! ID of  variable
         integer :: _varid ! ID of  variable
         integer :: _varid ! ID of  variable
@@ -77,37 +77,52 @@ module netcdf_fort
         !!!!!!!!!!!!!!!!
         
         ! Define dimensions
-        stat = nf90_def_dim(self%ncid, "time", ???, dimid)
+        stat = nf90_def_dim(self%ncid, "time", nf90_unlimited, time_dimid)
         call ncfile_check_error(stat)
-        stat = nf90_def_dim(self%ncid, "node", ???, dimid)
+        stat = nf90_def_dim(self%ncid, "node", ???, node_dimid)
         call ncfile_check_error(stat)
-        stat = nf90_def_dim(self%ncid, "nele", ???, dimid)
+        stat = nf90_def_dim(self%ncid, "nele", ???, nele_dimid)
         call ncfile_check_error(stat)
-        stat = nf90_def_dim(self%ncid, "nvertex", ???, dimid)
+        stat = nf90_def_dim(self%ncid, "nvertex", ???, nvertex_dimid)
         call ncfile_check_error(stat)
-        stat = nf90_def_dim(self%ncid, "nope", ???, dimid)
+        stat = nf90_def_dim(self%ncid, "nope", ???, nope_dimid)
         call ncfile_check_error(stat)
-        stat = nf90_def_dim(self%ncid, "neta", ???, dimid)
+        stat = nf90_def_dim(self%ncid, "neta", ???, neta_dimid)
         call ncfile_check_error(stat)
-        stat = nf90_def_dim(self%ncid, "max_nvdll", ???, dimid)
+        stat = nf90_def_dim(self%ncid, "max_nvdll", ???, max_nvdll_dimid)
         call ncfile_check_error(stat)
-        stat = nf90_def_dim(self%ncid, "nbou", ???, dimid)
+        stat = nf90_def_dim(self%ncid, "nbou", ???, nbou_dimid)
         call ncfile_check_error(stat)
-        stat = nf90_def_dim(self%ncid, "nvel", ???, dimid)
+        stat = nf90_def_dim(self%ncid, "nvel", ???, nvel_dimid)
         call ncfile_check_error(stat)
-        stat = nf90_def_dim(self%ncid, "max_nvell", ???, dimid)
+        stat = nf90_def_dim(self%ncid, "max_nvell", ???, max_nvell_dimid)
         call ncfile_check_error(stat)
-        stat = nf90_def_dim(self%ncid, "mesh", ???, dimid)
+        stat = nf90_def_dim(self%ncid, "mesh", ???, mesh_dimid)
         call ncfile_check_error(stat)
         
         ! Define variables
-        stat = nf90_def_var(fort_63_ncid, "time", nf90_double, &
-            (/  /), varid)
+        stat = nf90_def_var(self%ncid, "time", nf90_double, &
+            time, time_varid)
         call ncfile_check_error(stat)
-        stat = nf90_put_att
+        stat = nf90_def_var(self%ncid, "x", nf90_double, &
+            node, x_varid)
+        call ncfile_check_error(stat)
+        stat = nf90_def_var(self%ncid, "y", nf90_double, &
+            node, y_varid)
+        call ncfile_check_error(stat)
+        stat = nf90_def_var(self%ncid, "element", nf90_int, &
+            (/ nele_dimid, nvertex_dimid /), element_varid)
+        call ncfile_check_error(stat)
+        stat = nf90_def_var(self%ncid, "adcirc_mesh", nf90_int, &
+            mesh_dimid, adcirc_mesh_varid)
+        call ncfile_check_error(stat)
+        stat = nf90_def_var(self%ncid, "neta", nf90_int, &
+            ???, neta_varid)
         call ncfile_check_error(stat)
         
         ! Add attributes to each variable
+        stat = nf90_put_att()
+        call ncfile_check_error(stat)
         
         ! Close file
     end subroutine init
