@@ -3,6 +3,9 @@ on: [push]
 jobs:
   compile:
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        shell: bash -el {0}
     steps:
       - uses: actions/checkout@v5
       - uses: conda-incubator/setup-miniconda@v3
