@@ -19,3 +19,7 @@ jobs:
           meson setup build -Dparallel=true -Dnetcdf=true
           cd build
           meson compile
+
+      - run: |
+          cd tests
+          pytest test_run.py --binpath ../build
