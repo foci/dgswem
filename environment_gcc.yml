@@ -109,4 +109,3 @@ dependencies:
   - ucc=1.7.0=hcedbda0_0
   - ucx=1.20.0=hf72d326_1
   - zstd=1.5.7=hb78ec9c_6
-prefix: /home/namo/miniforge3/envs/dg

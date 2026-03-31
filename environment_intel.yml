@@ -73,4 +73,3 @@ dependencies:
   - tzdata=2025c=hc9c84f9_1
   - umf=1.0.3=intel_17
   - zstd=1.5.7=hb78ec9c_6
-prefix: /home/namo/miniforge3/envs/env-intel
