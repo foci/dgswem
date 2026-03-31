@@ -9,6 +9,7 @@ jobs:
         with:
           activate-environment: env-gcc
           environment-file: environment_gcc.yml
+          auto-activate: false
       - run: |
           conda info
           meson setup build -Dparallel=true -Dnetcdf=true
