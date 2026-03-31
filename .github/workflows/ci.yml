@@ -4,13 +4,13 @@ jobs:
   compile:
     runs-on: ubuntu-latest
     steps:
-      - uses: conda-incubator/setup-miniconda@v3
       - uses: actions/checkout@v5
+      - uses: conda-incubator/setup-miniconda@v3
+        with:
+          activate-environment: env-gcc
+          environment-file: environment_gcc.yml
       - run: |
-          conda env create --file environment_gcc.yml
-      - run: |
-          conda init
-          conda activate env-gcc
+          conda info
           meson setup build -Dparallel=true -Dnetcdf=true
           cd build
           meson compile
