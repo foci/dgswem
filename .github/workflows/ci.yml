@@ -13,13 +13,15 @@ jobs:
           activate-environment: env-gcc
           environment-file: environment_gcc.yml
           auto-activate: false
-      - run: |
+      - name: Compile
+        run: |
           conda info
           export PKG_CONFIG_PATH=$CONDA_PREFIX/lib/pkgconfig
           meson setup build -Dparallel=true -Dnetcdf=true
           cd build
           meson compile
 
-      - run: |
+      - name: Test
+        run: |
           cd tests
           pytest -s test_run.py --binpath ../build

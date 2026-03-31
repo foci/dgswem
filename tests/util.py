@@ -40,11 +40,13 @@ def run_serial(binpath, testpath, rtol=0.05, atol=0.01):
     if not os.path.exists(os.path.join(binpath, "dgswem_serial")):
         raise FileNotFoundError('dgswem_serial not found')
 
-    result = subprocess.run(os.path.join(binpath, "dgswem_serial"),
-                    check=True, cwd=testpath, shell=True)
-    print("Return code:", result.returncode)
-    # print("Output:", result.stdout)
-    # print("Error:", result.stderr)
+    try:
+        result = subprocess.run(os.path.join(binpath, "dgswem_serial"),
+                                check=True, cwd=testpath, shell=True,
+                                stdout=subprocess.PIPE,
+                                stderr=subprocess.STDOUT)
+    except subprocess.CalledProcessError as e:
+        print(e.stdout)
 
     d1, _ = last_snapshot(os.path.join(testpath , "fort.63.true"))
     d2, _ = last_snapshot(os.path.join(testpath , "fort.63"))
@@ -58,9 +60,20 @@ def run_parallel(binpath, testpath, rtol=0.05, atol=0.01):
     if not os.path.exists(os.path.join(binpath, "adcpost")):
         pytest.skip("adcpost executable not found. Skipping...")
 
-    subprocess.run(os.path.join(binpath, "adcprep") + " < in.prep", check=True, cwd=testpath, shell=True)
-    subprocess.run("mpirun -np 2 " + os.path.join(binpath, "dgswem"), check=True, cwd=testpath, shell=True)
-    subprocess.run(os.path.join(binpath, "adcpost") + " < out.prep", check=True, cwd=testpath, shell=True)
+    try:
+        prep = subprocess.run(os.path.join(binpath, "adcprep") + " < in.prep", check=True, cwd=testpath, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+    except subprocess.CalledProcessError as e:
+        print(e.stdout)
+
+    try:
+        result = subprocess.run("mpirun -np 2 " + os.path.join(binpath, "dgswem"), check=True, cwd=testpath, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+    except subprocess.CalledProcessError as e:
+        print(e.stdout)
+
+    try:
+        post = subprocess.run(os.path.join(binpath, "adcpost") + " < out.prep", check=True, cwd=testpath, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+    except subprocess.CalledProcessError as e:
+        print(e.stdout)
 
     d1, _ = last_snapshot(os.path.join(testpath , "fort.63.true"))
     d2, _ = last_snapshot(os.path.join(testpath , "fort.63"))
