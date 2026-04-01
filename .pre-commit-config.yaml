@@ -1,0 +1,26 @@
+# Taken from ADCIRC pre-commit config
+ 
+exclude: '^(thirdparty|docs)/'
+repos:
+-   repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v5.0.0
+    hooks:
+    -   id: end-of-file-fixer
+        files: '\.(F90|cmake|py|cpp)$'
+    -   id: mixed-line-ending
+        files: '\.(F90|cmake|py|cpp)$'
+-   repo: https://github.com/PlasmaFAIR/fortitude-pre-commit
+    rev: v0.7.2
+    hooks:
+    -   id: fortitude
+        name: fortitude fortran linter
+        files: '\.F90$'
+        args: ["--fix", "--line-length=132"]
+-   repo: https://github.com/fortran-lang/fprettify
+    rev: v0.3.7
+    hooks:
+      -   id: fprettify
+          name: fprettify fortran formatter
+          files: '\.F90$'
+          language: python
+          args: ["--strip-comments", "--c-relations", "--enable-replacement", "--case", "1", "1", "1", "1"]
