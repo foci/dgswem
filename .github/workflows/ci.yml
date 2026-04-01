@@ -19,7 +19,7 @@ jobs:
       - name: Build
         run: |
           conda info
-          bash build_${{ matrix.compiler }}.sh
+          bash .github/workflows/build_${{ matrix.compiler }}.sh
 
       - name: Test
         run: |
