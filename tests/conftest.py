@@ -15,4 +15,3 @@ def pytest_addoption(parser):
 def binpath(request):
     p = request.config.getoption("--binpath")
     return dir_path(p)
-

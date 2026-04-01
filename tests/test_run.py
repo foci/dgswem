@@ -18,4 +18,3 @@ def test_wetdry_parallel(binpath):
 
 def test_mass_conservation(binpath):
     run_serial(binpath, "mass_conservation", 1e-3, 1e-7)
-

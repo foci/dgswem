@@ -79,4 +79,3 @@ def run_parallel(binpath, testpath, rtol=0.05, atol=0.01):
     d1, _ = last_snapshot(os.path.join(testpath , "fort.63.true"))
     d2, _ = last_snapshot(os.path.join(testpath , "fort.63"))
     np.testing.assert_allclose(d2, d1, rtol=rtol, atol=atol)
-
