@@ -1,6 +1,14 @@
-dgswem release 11.13
+dgswem
 =========
 Discontinuous Galerkin Shallow Water Equation Model
+
+For reference, see
+
+- Kubatko, Ethan J., Joannes J. Westerink, and Clint Dawson. 2006. “Hp Discontinuous Galerkin Methods for Advection Dominated Problems in Shallow Water Flow.” Computer Methods in Applied Mechanics and Engineering 196 (1): 437–51.
+- Dawson, Clint, Ethan J. Kubatko, Joannes J. Westerink, Corey Trahan, Christopher Mirabito, Craig Michoski, and Nishant Panda. 2011. “Discontinuous Galerkin Methods for Modeling Hurricane Storm Surge.” Advances in Water Resources 34 (9): 1165–76.
+- Wichitrnithed, Chayanon, Eirik Valseth, Ethan J. Kubatko, Younghun Kang, Mackenzie Hudson, and Clint Dawson. 2024. “A Discontinuous Galerkin Finite Element Model for Compound Flood Simulations.” Computer Methods in Applied Mechanics and Engineering 420 (February): 116707.
+
+
 
 Building the CPU version
 --------
