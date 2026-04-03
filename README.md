@@ -1,4 +1,4 @@
-dgswem
+DG-SWEM
 =========
 Discontinuous Galerkin Shallow Water Equation Model
 
@@ -8,28 +8,57 @@ For reference, see
 - Dawson, Clint, Ethan J. Kubatko, Joannes J. Westerink, Corey Trahan, Christopher Mirabito, Craig Michoski, and Nishant Panda. 2011. “Discontinuous Galerkin Methods for Modeling Hurricane Storm Surge.” Advances in Water Resources 34 (9): 1165–76.
 - Wichitrnithed, Chayanon, Eirik Valseth, Ethan J. Kubatko, Younghun Kang, Mackenzie Hudson, and Clint Dawson. 2024. “A Discontinuous Galerkin Finite Element Model for Compound Flood Simulations.” Computer Methods in Applied Mechanics and Engineering 420 (February): 116707.
 
-
-
-Building the CPU version
---------
-Compilation should be done in the `work/` directory. The program can be compiled
-with several compilers based on the environmental variable `FC`; check the file
-`cmplrflags.mk` for details. Floating point precision is set using the `sz` variable.
-```
-cd work/
-export FC=ifx        # Intel compilers
-export FC=nvfortran  # NVHPC compilers
-export FC=           # Else use GNU compilers
-make all sz=8 -j4    # Use double-precision (default)
-make all sz=4 -j4    # Use single-precision
-```
-To build everything from scratch, use
-```
-make clobber
-```
-Building the GPU version
+Building
 ---
-DG-SWEM also runs on NVIDIA gpus through OpenACC, but requires NVHPC and unified memory support. 
+DG-SWEM uses the [Meson build system](https://mesonbuild.com/) for configuration and compilation. It can be installed through `pip`:
+
+    pip install meson
+
+As a first example, first enter the root directory of this repo and run
+
+    FC=gfortran CC=gcc CXX=g++ meson setup build-gcc
+
+to create a build directory called `build-gcc` and use GNU compilers to build single-core DG-SWEM.
+
+To also build the parallel DG-SWEM code, specify the MPI wrapper and enable the parallel option
+
+    FC=gfortran CC=gcc CXX=g++ MPIFC=mpif90 meson setup build-gcc -Dparallel=true
+
+Other compilers currently supported are:
+
+- Intel LLVM (`ifx`, `icx`, `icpx`, `mpiifx`)
+- NVIDIA HPC (`nvfortran`, `nvc`, `nvc++`, `mpif90`)
+
+For systems with multiple compilers, it may be best to specify the full path to the desired compilers.
+
+Options are specified in the format `-D<option>=<value>`. To see the available options for the above build, run
+
+    meson configure build-gcc
+
+Options specific to DG-SWEM are:
+
+| Option name | Description | Possible values | Default |
+| --- | --- | --- | --- |
+| gpu | Enable GPU build through OpenACC | true, false | false |
+| parallel | Build parallel DG-SWEM, adcprep, and adcpost | true, false | false |
+| precision | Floating point precision | single, double | double |
+
+Once configured, we can compile the program in the build directory:
+
+    cd build-gcc 
+    meson compile -v   # show compilation commands
+
+This will produce the executable `dgswem_serial`, and if `-Dparallel=true`, also `dgswem`, `adcprep`, and `adcpost`. 
+
+To redo a clean build, say with a different configuration, go back to the root directory and run
+
+    meson setup build-gcc [OPTIONS] --wipe
+
+and repeat the process.
+
+***Notes on building the GPU version***
+
+DG-SWEM (both serial and parallel) can be configured to run on NVIDIA gpus through OpenACC using `-Dgpu=true`, but requires NVHPC and unified memory support. 
 To find out if your system supports this, run
 ```
 nvidia-smi -q | grep -i 'addressing mode'
@@ -37,18 +66,12 @@ nvidia-smi -q | grep -i 'addressing mode'
 If the output is `HMM` or `ATS`, then the GPU code can be built. Some systems like Grace Hopper support the latter by default. 
 To enable `HMM` on a system with a consumer GPU like the RTX series, read https://forums.developer.nvidia.com/t/issue-activating-hmm-feature-on-nvidia-rtx-a4500-with-cuda-toolkit-12-4-on-debian-bookworm/285142/3 .
 
-To compile, run
-```
-cd work/
-export FC=nvfortran
-make all sz=8 gpu=1 -j4  # Use double-precision (default)
-make all sz=4 gpu=1 -j4  # Use single-precision
-```
+
 Testing
 ---
-Several test cases are contained in `work/test`. This requires pytest. After having compiled the executables as above, run
+Several test cases are contained in `tests`. This requires `pytest`. After having compiled the executables as above, go inside `tests` and run
 ```
-make test
+pytest test_run.py --binpath <build_dir>
 ```
 Running
 ---
