@@ -63,19 +63,30 @@ else
   error(f'Compiler @compiler_name@ not supported.')
 endif
 
+# Get hostname
+hostname_cmd = run_command('hostname',  check: true)
+hostname = hostname_cmd.stdout().strip()
+
 if get_option('netcdf')
   netcdf_dep = [dependency('netcdf', language: 'fortran'),
                dependency('netcdf', language: 'c')]
-  compiler.run(
-  '''
-  PROGRAM netCDF3Test
-    USE NETCDF
-    IMPLICIT NONE
-    INTEGER :: IERR, NCID
-    IERR = NF90_OPEN('test.nc', NF90_NOWRITE, NCID)
-  END PROGRAM ''' ,
-  required: true,
-  dependencies: netcdf_dep)
+
+  # Temporary fix for netcdf pkg-config bug on TACC systems,
+  # skip netcdf test program
+
+  if not hostname.contains('tacc.utexas.edu')
+	compiler.run(
+	'''
+	PROGRAM netCDF3Test
+	  USE NETCDF
+	  IMPLICIT NONE
+	  INTEGER :: IERR, NCID
+	  IERR = NF90_OPEN('test.nc', NF90_NOWRITE, NCID)
+	END PROGRAM ''' ,
+	required: true,
+	dependencies: netcdf_dep)
+  endif
+
 else
   netcdf_dep = []
 endif
