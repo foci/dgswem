@@ -96,6 +96,11 @@ endif
 subdir('src')
 subdir('prep')
 
+# NetCDF test program
+if get_option('netcdf')
+    subdir('nctest')
+endif
+
 # Serial DGSWEM Main Program
 executable('dgswem_serial',
            sources: dgswem_src + c_interface_src,
@@ -121,3 +126,14 @@ executable('adcpost',
            sources: post_src,
            dependencies: netcdf_dep,
           link_language: 'fortran')
+
+# NetCDF test program
+if get_option('netcdf')
+    executable(
+        'nctest',
+        sources: ncfort_src + nctest_src,
+        dependencies: netcdf_dep
+        fortran_args: '',
+        link_language: 'fortran'
+    )
+endif
