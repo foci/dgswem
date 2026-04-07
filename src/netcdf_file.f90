@@ -34,7 +34,7 @@ module netcdf_file
     
     subroutine ncfile_init(self, path, cmode)
         !! Initialization function for
-        !! [[netcdf_file(module):netcdf_file(type)]].
+        !! [[netcdf_file(module):netcdf_file(type)]]. Left in define mode.
         !!
         !! @warning "File Not Closed"
         !! After initialization, the underlying file object is in define mode.
