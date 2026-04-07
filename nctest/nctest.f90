@@ -6,6 +6,10 @@ program nctest
     
     Type(fort_63_nc) :: my_fort_63_nc
         
+    print *, "Creating fort.63.nc"
     my_fort_63_nc%init("fort.63.nc")
+    print *, "Closing fort.63.nc"
+    my_fort_63_nc%close()
+    print *, "Program complete"
     
 end program nctest
