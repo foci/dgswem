@@ -123,9 +123,6 @@ module netcdf_fort
         ! Add attributes to each variable
         stat = nf90_put_att()
         call ncfile_check_error(stat)
-        
-        ! Close file
-        call self%close()
     end subroutine init
     
 end module netcdf_fort
