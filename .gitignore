@@ -6,4 +6,5 @@ adcpost
 adcprep
 dgswem
 dgswem_serial
+.DS_Store
 tests/
