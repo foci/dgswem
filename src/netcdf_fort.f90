@@ -125,6 +125,7 @@ module netcdf_fort
         call ncfile_check_error(stat)
         
         ! Close file
+        call self%close()
     end subroutine init
     
 end module netcdf_fort
