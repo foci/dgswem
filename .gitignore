@@ -8,3 +8,4 @@ dgswem
 dgswem_serial
 .DS_Store
 tests/
+.wraplock
