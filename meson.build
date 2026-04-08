@@ -130,10 +130,9 @@ executable('adcpost',
 # NetCDF test program
 if get_option('netcdf')
     executable(
-        'nctest',
+        'nctest.exe',
         sources: ncfort_src + nctest_src,
         dependencies: netcdf_dep,
-        fortran_args: '',
         link_language: 'fortran'
     )
 endif
