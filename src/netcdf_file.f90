@@ -107,7 +107,7 @@ module netcdf_file
         integer, intent(in) :: stat
         !! Status output by NetCDF library function call
         
-        if (stat.neq.nf90_noerr) call ncfile_handle_error(stat)
+        if (stat.ne.nf90_noerr) call ncfile_handle_error(stat)
     end subroutine ncfile_check_error
     
     subroutine ncfile_handle_error(stat)

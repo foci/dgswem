@@ -132,7 +132,7 @@ if get_option('netcdf')
     executable(
         'nctest',
         sources: ncfort_src + nctest_src,
-        dependencies: netcdf_dep
+        dependencies: netcdf_dep,
         fortran_args: '',
         link_language: 'fortran'
     )
