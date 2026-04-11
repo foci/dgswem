@@ -14,14 +14,17 @@ C***********************************************************************
 
 C.....Use appropriate modules
 
-      USE GLOBAL, only : x, y, sfac
-      USE DG, only : xlen, cosnx, sinnx, nedges, nedno,  sav
+      USE GLOBAL, only : x, y, sfac, MNE, neled
+      USE DG, only : xlen, cosnx, sinnx, nedges, nedno,  sav, elem_size
+      use sizes, only : sz
+      use iso_fortran_env, only : output_unit
       
       IMPLICIT NONE
       
 C.....Declare local variables
 
       INTEGER IEL, IED,i, n1, n2
+      real(sz) l1, l2, l3, s
 
 C.....Loop over the edges
 
@@ -47,6 +50,15 @@ C.....Compute the components of the normal vector
        COSNX(I) = (Y(N2) - Y(N1))/XLEN(I)
        SINNX(I) = -(X(N2) - X(N1))/XLEN(I)
       ENDDO
+
+      DO i = 1, MNE
+         l1 = XLEN(NELED(1,i))
+         l2 = XLEN(NELED(2,i))
+         l3 = XLEN(NELED(3,i))
+         s = 0.5 * (l1 + l2 + l3)
+         elem_size(i) = 2 * sqrt( (s-l1)*(s-l2)*(s-l3) / s ) ! diameter of the incircle
+      ENDDO
+      write(output_unit, '( "Smallest triangle diameter = ", F9.2, " m")') minval(elem_size)
         
       RETURN
       END

@@ -8,6 +8,10 @@ add_project_arguments('-DRKSSP',
                       '-DSLOPE5',
                       language: 'fortran')
 
+if get_option('cfl')
+  add_project_arguments('-DCFL=1', language: 'fortran')
+endif
+
 compiler_name = meson.get_compiler('fortran').get_id()
 compiler = meson.get_compiler('fortran')
 message('Using compiler', compiler_name)
@@ -90,6 +94,7 @@ if get_option('netcdf')
 else
   netcdf_dep = []
 endif
+
     
 
 
