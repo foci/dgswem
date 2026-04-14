@@ -1,7 +1,27 @@
 DG-SWEM
 =========
-Discontinuous Galerkin Shallow Water Equation Model
+Experimental Fused Kernel Branch 
+---------
+Trying to improve cache usage by fusing the long internal_edge_hydro loop with the long area loop. This may 
+reduce the cache eviction that occurs between the two kernels, but requires that the internal_edge_hydro loop 
+be rewritten to be element centric (instead of edge), and relying on atomics/locks to coordinate the flux computations between each thread, so that fluxes won't be computed twice for each edge. 
 
+Open Questions: 
+
+Some reasons this might work: 
+- Code is highly memory bound (even with with high order elements) 
+
+Some reasons this might not work: 
+- increased reliance on locks may reduce occupancy/serialize warps 
+- extra data structures may compete for memory  
+- long loops may introduce warp divergence 
+
+- Which one of the above factors dominates the kernel? 
+- Are locks necessary, or is the program so memory bound the double flux calculation is actually okay? 
+
+
+Discontinuous Galerkin Shallow Water Equation Model
+------------
 For reference, see
 
 - Kubatko, Ethan J., Joannes J. Westerink, and Clint Dawson. 2006. “Hp Discontinuous Galerkin Methods for Advection Dominated Problems in Shallow Water Flow.” Computer Methods in Applied Mechanics and Engineering 196 (1): 437–51.
