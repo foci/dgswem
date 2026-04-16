@@ -7,12 +7,14 @@ module netcdf_fort
     implicit none
     
     type, extends(ncfile) :: fort_63_nc
-        !! fort.63.nc
+        !! fort.63.nc file editing object
         
         contains
             
         procedure, public :: init => fort_63_nc_init
         !! Create a new file
+        procedure, public :: set_metadata => fort_63_nc_set_metadata
+        !! Set variables, dimensions, and attributes
         procedure, public :: write_step => fort_63_nc_write_step
         !! Write data to the file for a single time step
         
@@ -20,7 +22,7 @@ module netcdf_fort
     
     contains
         
-    subroutine fort_63_nc_init(self, path, cmode)
+    subroutine fort_63_nc_init(self, cmode)
         !! Initialization function for
         !! [[netcdf_fort(module):fort_63_nc(type)]].
         !!
@@ -33,11 +35,53 @@ module netcdf_fort
         
         class(fort_63_nc), intent(inout) :: self
         !! The wrapper object being initialized
-        character(len=*), intent(in) :: path
-        !! Path and name for the NetCDF file
         integer, optional, intent(in) :: cmode
         !! NetCDF creation mode. See
         !! [[netcdf_file(module):ncfile(type):init(subroutine)]] for default.
+        
+        integer :: stat ! Status of most recent operation
+        
+        ! Call the parent initialization function
+        if (present(cmode)) then
+            call self%ncfile%init("fort.63.nc", cmode)
+        else
+            call self%ncfile%init("fort.63.nc")
+        endif
+    end subroutine fort_63_nc_init
+    
+    subroutine fort_63_nc_set_metadata(self, time_dimsize, node_dimsize, &
+        nele_dimsize, nvertex_dimsize, nope_dimsize, neta_dimsize, &
+        max_nvdll_dimsize, nbou_dimsize, nvel_dimsize, max_nvell_dimsize, &
+        mesh_dimsize)
+        !! Set variables, dimensions, and metadata for
+        !! [[netcdf_fort(module):fort_63_nc(type)]].
+        
+        implicit none
+        
+        class(fort_63_nc), intent(inout) :: self
+        !! The wrapper object being initialized
+        integer :: time_dimsize
+        !! Size of time dimension
+        integer :: node_dimsize
+        !! Size of node dimension
+        integer :: nele_dimsize
+        !! Size of nele dimension
+        integer :: nvertex_dimsize
+        !! Size of nvertex dimension
+        integer :: nope_dimsize
+        !! Size of nope dimension
+        integer :: neta_dimsize 
+        !! Size of neta dimension
+        integer :: max_nvdll_dimsize
+        !! Size of max_nvdll dimension
+        integer :: nbou_dimsize
+        !! Size of nbou dimension
+        integer :: nvel_dimsize
+        !! Size of nvel dimension
+        integer :: max_nvell_dimsize
+        !! Size of max_nvell dimension
+        integer :: mesh_dimsize
+        !! Size of mesh dimension
         
         integer :: stat ! Status of most recent operation
         
@@ -73,35 +117,35 @@ module netcdf_fort
         integer :: depth_varid ! ID of depth variable
         integer :: zeta_varid ! ID of zeta variable
         
-        ! Call the parent initialization function
-        call self%ncfile%init(path)
-        
-        ! Starts in define mode
+        ! Put in define mode
+        stat = nf90_redef(self%ncid)
+        call ncfile_check_error(stat)
         
         ! Define dimensions
-        stat = nf90_def_dim(self%ncid, "time", 1, time_dimid)
+        stat = nf90_def_dim(self%ncid, "time", time_dimsize, time_dimid)
         call ncfile_check_error(stat)
-        stat = nf90_def_dim(self%ncid, "node", 1, node_dimid)
+        stat = nf90_def_dim(self%ncid, "node", node_dimsize, node_dimid)
         call ncfile_check_error(stat)
-        stat = nf90_def_dim(self%ncid, "nele", 1, nele_dimid)
+        stat = nf90_def_dim(self%ncid, "nele", nele_dimsize, nele_dimid)
         call ncfile_check_error(stat)
-        stat = nf90_def_dim(self%ncid, "nvertex", 1, nvertex_dimid)
+        stat = nf90_def_dim(self%ncid, "nvertex", nvertex_dimsize, &
+            nvertex_dimid)
         call ncfile_check_error(stat)
-        stat = nf90_def_dim(self%ncid, "nope", 1, nope_dimid)
+        stat = nf90_def_dim(self%ncid, "nope", nope_dimsize, nope_dimid)
         call ncfile_check_error(stat)
-        stat = nf90_def_dim(self%ncid, "neta", 1, neta_dimid)
+        stat = nf90_def_dim(self%ncid, "neta", neta_dimsize, neta_dimid)
         call ncfile_check_error(stat)
         stat = nf90_def_dim(self%ncid, "max_nvdll", 1, &
             max_nvdll_dimid)
         call ncfile_check_error(stat)
-        stat = nf90_def_dim(self%ncid, "nbou", 1, nbou_dimid)
+        stat = nf90_def_dim(self%ncid, "nbou", nbou_dimsize, nbou_dimid)
         call ncfile_check_error(stat)
-        stat = nf90_def_dim(self%ncid, "nvel", 1, nvel_dimid)
+        stat = nf90_def_dim(self%ncid, "nvel", nvel_dimsize, nvel_dimid)
         call ncfile_check_error(stat)
-        stat = nf90_def_dim(self%ncid, "max_nvell", 1, &
+        stat = nf90_def_dim(self%ncid, "max_nvell", max_nvell_dimsize, &
             max_nvell_dimid)
         call ncfile_check_error(stat)
-        stat = nf90_def_dim(self%ncid, "mesh", 1, mesh_dimid)
+        stat = nf90_def_dim(self%ncid, "mesh", mesh_dimsize, mesh_dimid)
         call ncfile_check_error(stat)
         
         ! Define variables and their attributes
@@ -176,11 +220,7 @@ module netcdf_fort
         ! Add attributes to each variable
         ! stat = nf90_put_att()
         ! call ncfile_check_error(stat)
-        
-        ! Leave define mode?
-        ! stat = nf90_enddef(self%ncid)
-        ! call ncfile_check_error(stat)
-    end subroutine fort_63_nc_init
+    end subroutine fort_63_nc_set_metadata
     
     subroutine fort_63_nc_write_step(self)
         !! Timestep writing function for
