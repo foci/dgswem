@@ -10,9 +10,7 @@ module netcdf_fort
         !! fort.63.nc file editing object
         
         contains
-            
-        procedure, public :: init => fort_63_nc_init
-        !! Create a new file
+        
         procedure, public :: set_metadata => fort_63_nc_set_metadata
         !! Set variables, dimensions, and attributes
         procedure, public :: write_step => fort_63_nc_write_step
@@ -21,33 +19,6 @@ module netcdf_fort
     end type fort_63_nc
     
     contains
-        
-    subroutine fort_63_nc_init(self, cmode)
-        !! Initialization function for
-        !! [[netcdf_fort(module):fort_63_nc(type)]].
-        !!
-        !! @warning "File Not Closed"
-        !! After initialization, the underlying file object is in define mode.
-        !! The user must remember to close it.
-        !! @endwarning
-        
-        implicit none
-        
-        class(fort_63_nc), intent(inout) :: self
-        !! The wrapper object being initialized
-        integer, optional, intent(in) :: cmode
-        !! NetCDF creation mode. See
-        !! [[netcdf_file(module):ncfile(type):init(subroutine)]] for default.
-        
-        integer :: stat ! Status of most recent operation
-        
-        ! Call the parent initialization function
-        if (present(cmode)) then
-            call self%ncfile%init("fort.63.nc", cmode)
-        else
-            call self%ncfile%init("fort.63.nc")
-        endif
-    end subroutine fort_63_nc_init
     
     subroutine fort_63_nc_set_metadata(self, time_dimsize, node_dimsize, &
         nele_dimsize, nvertex_dimsize, nope_dimsize, neta_dimsize, &
@@ -119,7 +90,9 @@ module netcdf_fort
         
         ! Put in define mode
         stat = nf90_redef(self%ncid)
-        call ncfile_check_error(stat)
+        if (stat .ne. nf90_eindefine) then
+            call ncfile_check_error(stat)
+        endif
         
         ! Define dimensions
         stat = nf90_def_dim(self%ncid, "time", time_dimsize, time_dimid)

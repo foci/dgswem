@@ -7,7 +7,7 @@ program nctest
     Type(fort_63_nc) :: my_fort_63_nc
         
     print *, "Creating fort.63.nc"
-    call my_fort_63_nc%init()
+    call my_fort_63_nc%init("fort.63.nc")
     print *, "Setting metadata"
     call my_fort_63_nc%set_metadata( &
         time_dimsize = 1, &
