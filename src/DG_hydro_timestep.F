@@ -356,11 +356,13 @@ C.......Compute external barrier edges
          
 C.......Compute internal edges
 
-         CALL INTERNAL_EDGE_HYDRO(IT)
+      ! CALL INTERNAL_EDGE_HYDRO(IT)
 
 C.......Compute elements to finish building the rhs
          
-         CALL RHS_DG_HYDRO(IT)
+      !  CALL RHS_DG_HYDRO(IT)
+
+         CALL FUSED_EDGE_RHS_HYDRO(IT)
 
 C.......RKC Time Scheme
 

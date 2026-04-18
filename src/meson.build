@@ -57,7 +57,9 @@ dgswem_src = files([
 'wetdry.F',
 'wind.F',
 'write_output.F',
-'write_results.F'])
+'write_results.F',
+'fused_hydro.F',
+'internal_edge_hydro_elem.F'])
 
 mpi_handlers = files(['messenger.F', 'messenger_elem.F'])
 c_interface_src = files(['count_edges.cpp', 'c_interface.F90'])
