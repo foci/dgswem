@@ -91,7 +91,7 @@ submodule (netcdf_fort) netcdf_fort_63_nc
         call ncfile_check_error(stat)
         
         stat = nf90_def_var(self%ncid, "element", nf90_int, &
-            (/ nele_dimid, nvertex_dimid /), varid=element_varid)
+            (/ nvertex_dimid, nele_dimid /), varid=element_varid)
         call ncfile_check_error(stat)
         
         stat = nf90_def_var(self%ncid, "adcirc_mesh", nf90_int, &
@@ -143,7 +143,7 @@ submodule (netcdf_fort) netcdf_fort_63_nc
         call ncfile_check_error(stat)
         
         stat = nf90_def_var(self%ncid, "zeta", nf90_double, &
-            (/ time_dimid, node_dimid /), varid=zeta_varid)
+            (/ node_dimid, time_dimid /), varid=zeta_varid)
         call ncfile_check_error(stat)
         
         ! Add attributes to each variable

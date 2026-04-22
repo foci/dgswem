@@ -1,8 +1,9 @@
 module netcdf_create_files
 !! Module for initializing NetCDF files.
 
-    !use global, only : none
+    use global, only : nbou, ne, neta, nope, np, nvel, nvell, nvdll
     !use dg, only : none
+    use netcdf, only : nf90_unlimited
     use netcdf_fort, only : fort_63_nc
     
     implicit none
@@ -23,16 +24,16 @@ module netcdf_create_files
         
         call my_fort_63_nc%init("fort.63.nc")
         call my_fort_63_nc%set_metadata( &
-            time_dimsize = 1, &
-            node_dimsize = 1, &
-            nele_dimsize = 1, &
-            nvertex_dimsize = 1, &
-            nope_dimsize = 1, &
-            neta_dimsize = 1, &
-            max_nvdll_dimsize = 1, &
-            nbou_dimsize = 1, &
-            nvel_dimsize = 1, &
-            max_nvell_dimsize = 1, &
+            time_dimsize = nf90_unlimited, &
+            node_dimsize = np, &
+            nele_dimsize = ne, &
+            nvertex_dimsize = 3, &
+            nope_dimsize = nope, &
+            neta_dimsize = neta, &
+            max_nvdll_dimsize = maxval(nvdll), &
+            nbou_dimsize = nbou, &
+            nvel_dimsize = nvel, &
+            max_nvell_dimsize = maxval(nvell), &
             mesh_dimsize = 1 &
         )
         call my_fort_63_nc%close()
