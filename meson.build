@@ -103,10 +103,20 @@ if get_option('netcdf')
 endif
 
 # Serial DGSWEM Main Program
-executable('dgswem_serial',
-           sources: dgswem_src + c_interface_src,
-           dependencies: [cpp_dep] + netcdf_dep,
-           link_language: 'fortran')
+if get_option('netcdf')
+    executable(
+        'dgswem_serial',
+        sources: dgswem_src + c_interface_src + ncfort_src + dgswem_netcdf_src,
+        dependencies: [cpp_dep] + netcdf_dep,
+        link_language: 'fortran',
+        fortran_args: '-DNETCDF'
+    )
+else
+    executable('dgswem_serial',
+               sources: dgswem_src + c_interface_src,
+               dependencies: [cpp_dep] + netcdf_dep,
+               link_language: 'fortran')
+endif
 
 # Parallel DGSWEM Main Program
 if get_option('parallel')

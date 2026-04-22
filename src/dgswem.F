@@ -20,6 +20,9 @@ C     sb-disabled for Linux&Intel compiler
      &     NoLiBF, NWP, Tau0, HBreak, FTheta, FGamma, Tau, CF, IFNLBF,
      &     InitNAModule, ReadNodalAttr, InitNodalAttr, ESLM, ESLC,
      &     IFLINBF, IFHYBF
+#ifdef NETCDF
+      USE NETCDF_CREATE_FILES, ONLY : NETCDF_CREATE_FILES_SERIAL
+#endif
 #ifdef SWAN
 Casey 110422: Create a new data structure with discontinuous information.
 Casey 121126: DEBUG.
@@ -337,6 +340,16 @@ C     sb...Write initial conditions
 !     stop
 !     endif
 #endif
+
+C.....Initialize NetCDF files, if needed
+#ifdef NETCDF
+#ifndef CMPI
+      PRINT *, "NOW WITH NETCDF OUTPUT!"
+      PRINT *, "CREATING FILES..."
+      CALL NETCDF_CREATE_FILES_SERIAL()
+#endif
+#endif
+
 C.....Begin time stepping
       DO 200 ITIME_A = ITHS+1,NT
 c$$$         if (mod(itime_a,1000).eq.1) then

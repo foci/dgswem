@@ -59,6 +59,12 @@ dgswem_src = files([
 'write_output.F',
 'write_results.F'])
 
+if get_option('netcdf')
+    dgswem_netcdf_src = files([
+        'netcdf_create_files.f90'
+    ])
+endif
+
 mpi_handlers = files(['messenger.F', 'messenger_elem.F'])
 c_interface_src = files(['count_edges.cpp', 'c_interface.F90'])
 
