@@ -9,3 +9,4 @@ dgswem_serial
 .DS_Store
 tests/
 .wraplock
+.ipynb_checkpoints

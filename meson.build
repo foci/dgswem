@@ -98,6 +98,7 @@ subdir('prep')
 
 # NetCDF test program
 if get_option('netcdf')
+    subdir('netcdf')
     subdir('nctest')
 endif
 
