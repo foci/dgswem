@@ -59,8 +59,14 @@ elif compiler_name == 'intel-llvm'
                         '-xHost',
                         '-132',
                         language: 'fortran')
-else
-  error(f'Compiler @compiler_name@ not supported.')
+else 
+  #Fallback for nonstandard names
+  flags = ['-ffixed-line-length-132', '-132', f'-r@sz@']
+  foreach flag : flags
+    if compiler.has_argument(flag)
+      add_project_arguments(flag, language: 'fortran')
+    endif
+  endforeach
 endif
 
 # Get hostname
