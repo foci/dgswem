@@ -6,3 +6,5 @@ option('parallel', type: 'boolean', value: false, description:
       'Build parallel DG-SWEM, adcprep, and adcpost.')
 option('netcdf', type: 'boolean', value: false, description:
       'Enable netCDF output.')
+option('cfl', type: 'boolean', value: false, description:
+      'Compute and display max Courant number at each time step.')
