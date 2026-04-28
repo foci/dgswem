@@ -52,7 +52,7 @@ def run_serial(binpath, testpath, rtol=0.05, atol=0.01):
     d2, _ = last_snapshot(os.path.join(testpath , "fort.63"))
     np.testing.assert_allclose(d2, d1, rtol=rtol, atol=atol)
 
-def run_parallel(binpath, testpath, rtol=0.05, atol=0.01, np = 2):
+def run_parallel(binpath, testpath, rtol=0.05, atol=0.01, num_ranks = 2):
     if not os.path.exists(os.path.join(binpath, "dgswem")):
         pytest.skip("dgswem executable not found. Skipping...")
     if not os.path.exists(os.path.join(binpath, "adcprep")):
@@ -63,7 +63,7 @@ def run_parallel(binpath, testpath, rtol=0.05, atol=0.01, np = 2):
     with open(os.path.join(testpath, "in.prep"), "r") as file:
         lines = file.readlines()
 
-    lines[0] = f"{np}\n"
+    lines[0] = f"{num_ranks}\n"
 
     with open(os.path.join(testpath, "in.prep"), "w") as file:
         file.writelines(lines)
@@ -74,7 +74,7 @@ def run_parallel(binpath, testpath, rtol=0.05, atol=0.01, np = 2):
         sys.exit("ADCPREP failed. See output above.")
 
 
-    result = subprocess.run(f"mpirun -np  {np:d}" + os.path.join(binpath, "dgswem"), check=False, cwd=testpath, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+    result = subprocess.run(f"mpirun -np  {num_ranks:d} " + os.path.join(binpath, "dgswem"), check=False, cwd=testpath, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
     if result.returncode != 0:
         print(result.stdout.decode())
         sys.exit("DG-SWEM parallel run failed. See output above.")
