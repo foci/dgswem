@@ -1,4 +1,4 @@
-module netcdf_file
+module nc
 !! Module for manipulating a generic NetCDF file.
 
     use netcdf
@@ -22,11 +22,8 @@ module netcdf_file
         contains
         
         procedure, public :: init => ncfile_init
-        !! Create a new NetCDF file
         procedure, public :: open => ncfile_open
-        !! Open the file
         procedure, public :: close => ncfile_close
-        !! Close the file
         
     end type ncfile
     
@@ -50,17 +47,17 @@ module netcdf_file
         integer, optional, intent(in) :: cmode
         !! NetCDF creation mode. Default is nf90_clobber.
         
-        integer :: stat ! Status of most recent operation
+        integer :: ncstat ! Status of most recent operation
         
         self%path = path
         
         ! Create file
         if (present(cmode)) then
-            stat = nf90_create(self%path, cmode, self%ncid)
+            ncstat = nf90_create(self%path, cmode, self%ncid)
         else
-            stat = nf90_create(self%path, nf90_clobber, self%ncid)
+            ncstat = nf90_create(self%path, nf90_clobber, self%ncid)
         endif
-        call ncfile_check_error(stat)
+        call ncfile_check_error(ncstat)
     end subroutine ncfile_init
     
     subroutine ncfile_open(self, mode)
@@ -73,14 +70,14 @@ module netcdf_file
         integer, optional, intent(in) :: mode
         !! NetCDF open mode. Default is nf90_nowrite, i.e. read-only.
         
-        integer :: stat ! Status of most recent operation
+        integer :: ncstat ! Status of most recent operation
         
         if (present(mode)) then
-            stat = nf90_open(self%path, mode, self%ncid)
+            ncstat = nf90_open(self%path, mode, self%ncid)
         else
-            stat = nf90_open(self%path, nf90_nowrite, self%ncid)
+            ncstat = nf90_open(self%path, nf90_nowrite, self%ncid)
         endif
-        call ncfile_check_error(stat)
+        call ncfile_check_error(ncstat)
     end subroutine ncfile_open
     
     subroutine ncfile_close(self)
@@ -91,34 +88,34 @@ module netcdf_file
         class(ncfile), intent(inout) :: self
         !! The wrapper object of the file
         
-        integer :: stat ! Status of most recent operation
+        integer :: ncstat ! Status of most recent operation
         
-        stat = nf90_close(self%ncid)
-        call ncfile_check_error(stat)
+        ncstat = nf90_close(self%ncid)
+        call ncfile_check_error(ncstat)
         
         self%ncid = -1
     end subroutine ncfile_close
     
-    subroutine ncfile_check_error(stat)
+    subroutine ncfile_check_error(ncstat)
         !! Look for and handle an error code from the NetCDF library.
         
         implicit none
         
-        integer, intent(in) :: stat
+        integer, intent(in) :: ncstat
         !! Status output by NetCDF library function call
         
-        if (stat.ne.nf90_noerr) call ncfile_handle_error(stat)
+        if (ncstat /= nf90_noerr) call ncfile_handle_error(ncstat)
     end subroutine ncfile_check_error
     
-    subroutine ncfile_handle_error(stat)
+    subroutine ncfile_handle_error(ncstat)
         !! Handle an error code from the NetCDF library.
         
         implicit none
         
-        integer, intent(in) :: stat
+        integer, intent(in) :: ncstat
         !! Status of most recent operation
         
-        print *, "NetCDF Error: ", nf90_strerror(stat)
+        print *, "NetCDF Error: ", nf90_strerror(ncstat)
         stop
     end subroutine ncfile_handle_error
 

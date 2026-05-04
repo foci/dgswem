@@ -1,5 +1,8 @@
 ncfort_src = files([
-    'netcdf_file.f90',
-    'netcdf_fort.f90',
-    'netcdf_fort_63_nc.f90'
+    'ncutil.f90',
+    'ncdg.f90',
+    'ncdg_file_sub.f90',
+    'ncdg_nodal_sub.f90',
+    'ncdg_63_sub.f90',
+    'ncdg_station_sub.f90'
 ])

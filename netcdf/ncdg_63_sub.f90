@@ -1,11 +1,11 @@
-submodule (netcdf_fort) netcdf_fort_63_nc
+submodule (ncdg : ncdg_nodal_sub) ncdg_63_sub
 !! Implementation of fort.63.nc
 
     implicit none
 
     contains
 
-    module procedure fort_63_nc_set_metadata
+    module procedure ncdg_63_set_metadata
         ! See interface for arguments and documentation
         
         implicit none
@@ -149,11 +149,12 @@ submodule (netcdf_fort) netcdf_fort_63_nc
         ! Add attributes to each variable
         ! stat = nf90_put_att()
         ! call ncfile_check_error(stat)
-    end procedure fort_63_nc_set_metadata
+    end procedure ncdg_63_set_metadata
 
-    module procedure fort_63_nc_write_step
+    module procedure ncdg_63_write_step
         ! See interface for arguments and documentation
 
         ! N/A
-    end procedure fort_63_nc_write_step
-end submodule
+    end procedure ncdg_63_write_step
+    
+end submodule ncdg_63_sub
