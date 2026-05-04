@@ -12,6 +12,8 @@ module ncdg
     ! parent types are just for organization, exploiting inheritance.
     public :: ncdg_63
 
+    ! Begin type definitions
+
     type, extends(ncfile) :: ncdg_file
         !! Generic DGSWEM NetCDF file parent type. This contains data
         !! common to all DGSWEM output files.
@@ -46,12 +48,112 @@ module ncdg
         !! common to all nodal files.
 
         ! Dimension IDs
+        integer :: node_dimid = -1
+        !! ID of node dimension
+        integer :: nele_dimid = -1
+        !! ID of nele dimension
+        integer :: nvertex_dimid = -1
+        !! ID of nvertex dimension
+        integer :: nope_dimid = -1
+        !! ID of nope dimension
+        integer :: neta_dimid = -1
+        !! ID of neta dimension
+        integer :: max_nvdll_dimid = -1
+        !! ID of max_nvdll dimension
+        integer :: nbou_dimid = -1
+        !! ID of nbou dimension
+        integer :: nvel_dimid = -1
+        !! ID of nvel dimension
+        integer :: max_nvell_dimid = -1
+        !! ID of max_nvell dimension
+        integer :: mesh_dimid = -1
+        !! ID of mesh dimension
 
         ! Dimension names
+        character(len=:), allocatable :: node_dimname = "node"
+        !! Name of node dimension
+        character(len=:), allocatable :: nele_dimname = "nele"
+        !! Name of nele dimension
+        character(len=:), allocatable :: nvertex_dimname = "nvertex"
+        !! Name of nvertex dimension
+        character(len=:), allocatable :: nope_dimname = "nope"
+        !! Name of nope dimension
+        character(len=:), allocatable :: neta_dimname = "neta"
+        !! Name of neta dimension
+        character(len=:), allocatable :: max_nvdll_dimname = "max_nvdll"
+        !! Name of max_nvdll dimension
+        character(len=:), allocatable :: nbou_dimname = "nbou"
+        !! Name of nbou dimension
+        character(len=:), allocatable :: nvel_dimname = "nvel"
+        !! Name of nvel dimension
+        character(len=:), allocatable :: max_nvell_dimname = "max_nvell"
+        !! Name of max_nvell dimension
+        character(len=:), allocatable :: mesh_dimname = "mesh"
+        !! Name of mesh dimension
 
         ! Variable IDs
+        integer :: x_varid = -1
+        !! ID of x variable
+        integer :: y_varid = -1
+        !! ID of y variable
+        integer :: element_varid = -1
+        !! ID of element variable
+        integer :: adcirc_mesh_varid = -1
+        !! ID of adcirc_mesh variable
+        integer :: neta_varid = -1
+        !! ID of neta variable, renamed
+        integer :: nvdll_varid = -1
+        !! ID of nvdll variable
+        integer :: max_nvdll_varid = -1
+        !! ID of max_nvdll variable
+        integer :: ibtypee_varid = -1
+        !! ID of ibtypee variable
+        integer :: nbdv_varid = -1
+        !! ID of nbdv variable
+        integer :: nvel_varid = -1
+        !! ID of nvel variable, renamed
+        integer :: nvell_varid = -1
+        !! ID of nvell variable
+        integer :: max_nvell_varid = -1
+        !! ID of max_nvell variable
+        integer :: ibtype_varid = -1
+        !! ID of ibtype variable
+        integer :: nbvv_varid = -1
+        !! ID of nbvv variable
+        integer :: depth_varid = -1
+        !! ID of depth variable
 
         ! Variable names
+        character(len=:), allocatable :: x_varname = "x"
+        !! Name of x variable
+        character(len=:), allocatable :: y_varname = "y"
+        !! Name of y variable
+        character(len=:), allocatable :: element_varname = "element"
+        !! Name of element variable
+        character(len=:), allocatable :: adcirc_mesh_varname = "adcirc_mesh"
+        !! Name of adcirc_mesh variable
+        character(len=:), allocatable :: neta_varname = "neta_var"
+        !! Name of neta variable
+        character(len=:), allocatable :: nvdll_varname = "nvdll"
+        !! Name of nvdll variable
+        character(len=:), allocatable :: max_nvdll_varname = "max_nvdll"
+        !! Name of max_nvdll variable
+        character(len=:), allocatable :: ibtypee_varname = "ibtypee"
+        !! Name of ibtypee variable
+        character(len=:), allocatable :: nbdv_varname = "nbdv"
+        !! Name of nbdv variable
+        character(len=:), allocatable :: nvel_varname = "nvel_var"
+        !! Name of nvel variable
+        character(len=:), allocatable :: nvell_varname = "nvell"
+        !! Name of nvell variable
+        character(len=:), allocatable :: max_nvell_varname = "max_nvell"
+        !! Name of max_nvell variable
+        character(len=:), allocatable :: ibtype_varname = "ibtype"
+        !! Name of ibtype variable
+        character(len=:), allocatable :: nbvv_varname = "nbvv"
+        !! Name of nbvv variable
+        character(len=:), allocatable :: depth_varname = "depth"
+        !! Name of depth variable
 
         contains
 
@@ -91,8 +193,12 @@ module ncdg
         ! Dimension names
 
         ! Variable IDs
+        integer :: zeta_varid = -1
+        !! ID of zeta variable
 
         ! Variable names
+        character(len=:), allocatable :: zeta_varname = "zeta"
+        !! Name of zeta variable
 
         contains
 
@@ -102,6 +208,8 @@ module ncdg
         procedure, public :: ncdg_63_write_step
         
     end type ncdg_63
+
+    ! Begin interface
 
     interface
 
@@ -128,6 +236,18 @@ module ncdg
             !! The wrapper object of the file
         end subroutine ncdg_file_close
 
+        module subroutine ncdg_file_set_metadata(self, time_dimsize)
+            !! Set variables, dimensions, and metadata for a DGSWEM
+            !! output file.
+
+            implicit none
+
+            class(ncdg_file), intent(inout) :: self
+            !! The wrapper object of the file
+            integer, intent(in) :: time_dimsize
+            !! Size of time dimension
+        end subroutine ncdg_file_set_metadata
+
         ! ncdg_nodal subroutines
         ! Common to all nodal files
 
@@ -151,6 +271,42 @@ module ncdg
             !! The wrapper object of the file
         end subroutine ncdg_nodal_close
 
+        module subroutine ncdg_nodal_set_metadata(self, time_dimsize, &
+            node_dimsize, nele_dimsize, nvertex_dimsize, &
+            nope_dimsize, neta_dimsize, max_nvdll_dimsize, &
+            nbou_dimsize, nvel_dimsize, max_nvell_dimsize, &
+            mesh_dimsize)
+            !! Set variables, dimensions, and metadata for a nodal
+            !! output file.
+
+            implicit none
+
+            class(ncdg_nodal), intent(inout) :: self
+            !! The wrapper object of the file
+            integer, intent(in):: time_dimsize
+            !! Size of time dimension
+            integer, intent(in):: node_dimsize
+            !! Size of node dimension
+            integer, intent(in) :: nele_dimsize
+            !! Size of nele dimension
+            integer, intent(in) :: nvertex_dimsize
+            !! Size of nvertex dimension
+            integer, intent(in) :: nope_dimsize
+            !! Size of nope dimension
+            integer, intent(in) :: neta_dimsize 
+            !! Size of neta dimension
+            integer, intent(in) :: max_nvdll_dimsize
+            !! Size of max_nvdll dimension
+            integer, intent(in) :: nbou_dimsize
+            !! Size of nbou dimension
+            integer, intent(in) :: nvel_dimsize
+            !! Size of nvel dimension
+            integer, intent(in) :: max_nvell_dimsize
+            !! Size of max_nvell dimension
+            integer, intent(in) :: mesh_dimsize
+            !! Size of mesh dimension
+        end subroutine ncdg_nodal_set_metadata
+
         ! ncdg_station subroutines
         ! Common to all station files
 
@@ -173,6 +329,16 @@ module ncdg
             class(ncdg_file), intent(inout) :: self
             !! The wrapper object of the file
         end subroutine ncdg_station_close
+
+        module subroutine ncdg_station_set_metadata(self)
+            !! Set variables, dimensions, and metadata for a nodal
+            !! output file.
+
+            implicit none
+
+            class(ncdg_station), intent(inout) :: self
+            !! The wrapper object of the file
+        end subroutine ncdg_station_set_metadata
 
         ! ncdg_63 subroutines
         ! For fort.63.nc
@@ -202,14 +368,14 @@ module ncdg
             nope_dimsize, neta_dimsize, max_nvdll_dimsize, &
             nbou_dimsize, nvel_dimsize, max_nvell_dimsize, &
             mesh_dimsize)
-            !! Set variables, dimensions, and metadata for
-            !! [[netcdf_fort(module):fort_63_nc(type)]].
+            !! Set variables, dimensions, and metadata for a fort.63.nc
+            !! output file.
 
             implicit none
 
             class(ncdg_63), intent(inout) :: self
             !! The wrapper object being initialized
-            integer, intent(in) :: time_dimsize
+            integer, intent(in):: time_dimsize
             !! Size of time dimension
             integer, intent(in):: node_dimsize
             !! Size of node dimension
@@ -234,8 +400,7 @@ module ncdg
         end subroutine ncdg_63_set_metadata
 
         module subroutine ncdg_63_write_step(self)
-        !! Timestep writing function for
-        !! [[netcdf_fort(module):fort_63_nc(type)]].
+        !! Timestep writing function for a fort.63.nc output file.
 
         implicit none
         

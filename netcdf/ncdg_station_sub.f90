@@ -37,6 +37,19 @@ submodule (ncdg) ncdg_station_sub
         ! N/A, for now
     end procedure ncdg_station_close
 
-    ! Station file initialization
+    module procedure ncdg_station_set_metadata
+        ! See interface for arguments and documentation
 
-end submodule netcdf_fort_common
+        ! Call parent function
+
+        ! Define dimensions and their attributes
+        ! N/A, for now
+
+        ! Define variables and their attributes
+        ! N/A, for now
+
+        ! Define attributes
+        ! N/A, for now
+    end procedure ncdg_station_set_metadata
+
+end submodule ncdg_station_sub

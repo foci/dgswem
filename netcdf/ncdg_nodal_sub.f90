@@ -36,9 +36,22 @@ submodule (ncdg) ncdg_nodal_sub
         ! Flush variable IDs
         ! N/A, for now
     end procedure ncdg_nodal_close
-    
-    ! Nodal data file initialization
-    ! Metadata construction
-    ! Mesh construction
 
-end submodule netcdf_fort_common
+    module procedure ncdg_nodal_set_metadata
+        ! See interface for arguments and documentation
+        
+        integer :: stat ! Status of most recent operation
+
+        ! Call parent function
+
+        ! Define dimensions and their attributes
+        ! N/A, for now
+
+        ! Define variables and their attributes
+        ! N/A, for now
+
+        ! Define attributes
+        ! N/A, for now
+    end procedure ncdg_nodal_set_metadata
+
+end submodule ncdg_nodal_sub

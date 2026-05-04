@@ -41,4 +41,21 @@ submodule (ncdg) ncdg_common_sub
         self%time_varid = -1
     end procedure ncdg_file_close
 
+    module procedure ncdg_file_set_metadata
+        ! See interface for arguments and documentation
+
+        ! Define dimensions and their attributes
+        ncstat = nf90_def_dim(self%ncid, self%time_dimname, &
+            time_dimsize, self%time_dimid)
+        call ncfile_check_error(ncstat)
+
+        ! Define variables and their attributes
+        ncstat = nf90_def_var(self%ncid, self%time_varname, &
+            nf90_double, self%time_dimid, varid=self%time_varid)
+        call ncfile_check_error(ncstat)
+
+        ! Define attributes
+        ! N/A, for now
+    end procedure ncdg_file_set_metadata
+
 end submodule netcdf_fort_common
