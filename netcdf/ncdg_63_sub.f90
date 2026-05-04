@@ -8,7 +8,7 @@ submodule (ncdg : ncdg_nodal_sub) ncdg_63_sub
     module procedure ncdg_63_open
         ! See interface for arguments and documentation
         
-        integer :: ncstat ! Status of most recent operation
+        ! integer :: ncstat ! Status of most recent operation
 
         ! Call parent function
         if (present(mode)) then
@@ -26,6 +26,8 @@ submodule (ncdg : ncdg_nodal_sub) ncdg_63_sub
 
     module procedure ncdg_63_close
         ! See interface for arguments and documentation
+        
+        ! integer :: ncstat ! Status of most recent operation
 
         ! Call parent function
         call self%ncdg_nodal%close()
@@ -40,111 +42,46 @@ submodule (ncdg : ncdg_nodal_sub) ncdg_63_sub
     module procedure ncdg_63_set_metadata
         ! See interface for arguments and documentation
         
-        
+        integer :: ncstat ! Status of most recent operation
         
         ! Put in define mode
         ncstat = nf90_redef(self%ncid)
-        if (stat /= nf90_eindefine) then
-            call ncfile_check_error(stat)
+        if (ncstat /= nf90_eindefine) then
+            call ncfile_check_error(ncstat)
         endif
+
+        ! Call parent function
+        call self%ncdg_nodal%ncdg_nodal_set_metadata( &
+            time_dimsize = time_dimsize, &
+            node_dimsize = node_dimsize, &
+            nele_dimsize = nele_dimsize, &
+            nvertex_dimsize = nvertex_dimsize, &
+            nope_dimsize = nope_dimsize, &
+            neta_dimsize = neta_dimsize, &
+            max_nvdll_dimsize = max_nvdll_dimsize, &
+            nbou_dimsize = nbou_dimsize, &
+            nvel_dimsize = nvel_dimsize, &
+            max_nvell_dimsize = max_nvell_dimsize, &
+            mesh_dimsize = mesh_dimsize &
+        )
         
-        ! Define dimensions
-        stat = nf90_def_dim(self%ncid, "node", node_dimsize, node_dimid)
-        call ncfile_check_error(stat)
-        stat = nf90_def_dim(self%ncid, "nele", nele_dimsize, nele_dimid)
-        call ncfile_check_error(stat)
-        stat = nf90_def_dim(self%ncid, "nvertex", nvertex_dimsize, &
-            nvertex_dimid)
-        call ncfile_check_error(stat)
-        stat = nf90_def_dim(self%ncid, "nope", nope_dimsize, nope_dimid)
-        call ncfile_check_error(stat)
-        stat = nf90_def_dim(self%ncid, "neta", neta_dimsize, neta_dimid)
-        call ncfile_check_error(stat)
-        stat = nf90_def_dim(self%ncid, "max_nvdll", 1, &
-            max_nvdll_dimid)
-        call ncfile_check_error(stat)
-        stat = nf90_def_dim(self%ncid, "nbou", nbou_dimsize, nbou_dimid)
-        call ncfile_check_error(stat)
-        stat = nf90_def_dim(self%ncid, "nvel", nvel_dimsize, nvel_dimid)
-        call ncfile_check_error(stat)
-        stat = nf90_def_dim(self%ncid, "max_nvell", max_nvell_dimsize, &
-            max_nvell_dimid)
-        call ncfile_check_error(stat)
-        stat = nf90_def_dim(self%ncid, "mesh", mesh_dimsize, mesh_dimid)
-        call ncfile_check_error(stat)
+        ! Define dimensions and their attributes
+        ! N/A, for now
         
         ! Define variables and their attributes
-        stat = nf90_def_var(self%ncid, "x", nf90_double, &
-            node_dimid, varid=x_varid)
-        call ncfile_check_error(stat)
+        ncstat = nf90_def_var(self%ncid, self%zeta_varname, &
+            nf90_double, (/ self%node_dimid, self%time_dimid /), &
+            varid=self%zeta_varid)
+        call ncfile_check_error(ncstat)
         
-        stat = nf90_def_var(self%ncid, "y", nf90_double, &
-            node_dimid, varid=y_varid)
-        call ncfile_check_error(stat)
-        
-        stat = nf90_def_var(self%ncid, "element", nf90_int, &
-            (/ nvertex_dimid, nele_dimid /), varid=element_varid)
-        call ncfile_check_error(stat)
-        
-        stat = nf90_def_var(self%ncid, "adcirc_mesh", nf90_int, &
-            mesh_dimid, varid=adcirc_mesh_varid)
-        call ncfile_check_error(stat)
-        
-        stat = nf90_def_var(self%ncid, "neta_var", nf90_int, &
-            varid=neta_var_varid)
-        call ncfile_check_error(stat)
-        
-        stat = nf90_def_var(self%ncid, "nvdll", nf90_int, &
-            nope_dimid, varid=nvdll_varid)
-        call ncfile_check_error(stat)
-        
-        stat = nf90_def_var(self%ncid, "max_nvdll", nf90_int, &
-            varid=max_nvdll_varid)
-        call ncfile_check_error(stat)
-        
-        stat = nf90_def_var(self%ncid, "ibtypee", nf90_int, &
-            nope_dimid, varid=ibtypee_varid)
-        call ncfile_check_error(stat)
-        
-        stat = nf90_def_var(self%ncid, "nbdv", nf90_int, &
-            neta_dimid, varid=nbdv_varid)
-        call ncfile_check_error(stat)
-        
-        stat = nf90_def_var(self%ncid, "nvel_var", nf90_int, &
-            varid=nvel_var_varid)
-        call ncfile_check_error(stat)
-        
-        stat = nf90_def_var(self%ncid, "nvell", nf90_int, &
-            nbou_dimid, varid=nvell_varid)
-        call ncfile_check_error(stat)
-        
-        stat = nf90_def_var(self%ncid, "max_nvell", nf90_int, &
-            varid=max_nvell_varid)
-        call ncfile_check_error(stat)
-        
-        stat = nf90_def_var(self%ncid, "ibtype", nf90_int, &
-            nbou_dimid, varid=ibtype_varid)
-        call ncfile_check_error(stat)
-        
-        stat = nf90_def_var(self%ncid, "nbvv", nf90_int, &
-            nvel_dimid, varid=nbvv_varid)
-        call ncfile_check_error(stat)
-        
-        stat = nf90_def_var(self%ncid, "depth", nf90_double, &
-            node_dimid, varid=depth_varid)
-        call ncfile_check_error(stat)
-        
-        stat = nf90_def_var(self%ncid, "zeta", nf90_double, &
-            (/ node_dimid, time_dimid /), varid=zeta_varid)
-        call ncfile_check_error(stat)
-        
-        ! Add attributes to each variable
-        ! stat = nf90_put_att()
-        ! call ncfile_check_error(stat)
+        ! Define attributes
+        ! N/A, for now
     end procedure ncdg_63_set_metadata
 
     module procedure ncdg_63_write_step
         ! See interface for arguments and documentation
+        
+        ! integer :: ncstat ! Status of most recent operation
 
         ! N/A
     end procedure ncdg_63_write_step

@@ -1,4 +1,4 @@
-submodule (ncdg) ncdg_station_sub
+submodule (ncdg : ncdg_file_sub) ncdg_station_sub
 !! Implementation of functions common to all DGSWEM station output files.
 
     implicit none
@@ -8,7 +8,7 @@ submodule (ncdg) ncdg_station_sub
     module procedure ncdg_station_open
         ! See interface for arguments and documentation
         
-        integer :: ncstat ! Status of most recent operation
+        ! integer :: ncstat ! Status of most recent operation
 
         ! Call parent function
         if (present(mode)) then
@@ -26,6 +26,8 @@ submodule (ncdg) ncdg_station_sub
 
     module procedure ncdg_station_close
         ! See interface for arguments and documentation
+        
+        ! integer :: ncstat ! Status of most recent operation
 
         ! Call parent function
         call self%ncdg_file%close()
@@ -39,6 +41,8 @@ submodule (ncdg) ncdg_station_sub
 
     module procedure ncdg_station_set_metadata
         ! See interface for arguments and documentation
+        
+        ! integer :: ncstat ! Status of most recent operation
 
         ! Call parent function
 

@@ -1,4 +1,4 @@
-submodule (ncdg) ncdg_common_sub
+submodule (ncdg) ncdg_file_sub
 !! Implementation of functions common to all DGSWEM output files.
 
     implicit none
@@ -43,6 +43,8 @@ submodule (ncdg) ncdg_common_sub
 
     module procedure ncdg_file_set_metadata
         ! See interface for arguments and documentation
+        
+        integer :: ncstat ! Status of most recent operation
 
         ! Define dimensions and their attributes
         ncstat = nf90_def_dim(self%ncid, self%time_dimname, &
@@ -58,4 +60,4 @@ submodule (ncdg) ncdg_common_sub
         ! N/A, for now
     end procedure ncdg_file_set_metadata
 
-end submodule netcdf_fort_common
+end submodule ncdg_file_sub

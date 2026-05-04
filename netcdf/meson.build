@@ -1,4 +1,4 @@
-ncfort_src = files([
+ncdg_src = files([
     'ncutil.f90',
     'ncdg.f90',
     'ncdg_file_sub.f90',

@@ -23,16 +23,15 @@ module ncdg
         !! ID of time dimension
 
         ! Dimension names
-        character(len=:), allocatable :: time_dimname = "time"
+        character(len=4) :: time_dimname = "time"
         !! Name of time dimension
 
         ! Variable IDs
         integer :: time_varid = -1
         !! ID of time variable
-        character(len=:), allocatable ::
 
         ! Variable names
-        character(len=:), allocatable :: time_varname = "time"
+        character(len=4) :: time_varname = "time"
         !! Name of time variable
 
         contains
@@ -70,25 +69,25 @@ module ncdg
         !! ID of mesh dimension
 
         ! Dimension names
-        character(len=:), allocatable :: node_dimname = "node"
+        character(len=4) :: node_dimname = "node"
         !! Name of node dimension
-        character(len=:), allocatable :: nele_dimname = "nele"
+        character(len=4) :: nele_dimname = "nele"
         !! Name of nele dimension
-        character(len=:), allocatable :: nvertex_dimname = "nvertex"
+        character(len=7) :: nvertex_dimname = "nvertex"
         !! Name of nvertex dimension
-        character(len=:), allocatable :: nope_dimname = "nope"
+        character(len=4) :: nope_dimname = "nope"
         !! Name of nope dimension
-        character(len=:), allocatable :: neta_dimname = "neta"
+        character(len=4) :: neta_dimname = "neta"
         !! Name of neta dimension
-        character(len=:), allocatable :: max_nvdll_dimname = "max_nvdll"
+        character(len=9) :: max_nvdll_dimname = "max_nvdll"
         !! Name of max_nvdll dimension
-        character(len=:), allocatable :: nbou_dimname = "nbou"
+        character(len=4) :: nbou_dimname = "nbou"
         !! Name of nbou dimension
-        character(len=:), allocatable :: nvel_dimname = "nvel"
+        character(len=4) :: nvel_dimname = "nvel"
         !! Name of nvel dimension
-        character(len=:), allocatable :: max_nvell_dimname = "max_nvell"
+        character(len=9) :: max_nvell_dimname = "max_nvell"
         !! Name of max_nvell dimension
-        character(len=:), allocatable :: mesh_dimname = "mesh"
+        character(len=4) :: mesh_dimname = "mesh"
         !! Name of mesh dimension
 
         ! Variable IDs
@@ -124,35 +123,35 @@ module ncdg
         !! ID of depth variable
 
         ! Variable names
-        character(len=:), allocatable :: x_varname = "x"
+        character(len=1) :: x_varname = "x"
         !! Name of x variable
-        character(len=:), allocatable :: y_varname = "y"
+        character(len=1) :: y_varname = "y"
         !! Name of y variable
-        character(len=:), allocatable :: element_varname = "element"
+        character(len=7) :: element_varname = "element"
         !! Name of element variable
-        character(len=:), allocatable :: adcirc_mesh_varname = "adcirc_mesh"
+        character(len=11) :: adcirc_mesh_varname = "adcirc_mesh"
         !! Name of adcirc_mesh variable
-        character(len=:), allocatable :: neta_varname = "neta_var"
+        character(len=8) :: neta_varname = "neta_var"
         !! Name of neta variable
-        character(len=:), allocatable :: nvdll_varname = "nvdll"
+        character(len=5) :: nvdll_varname = "nvdll"
         !! Name of nvdll variable
-        character(len=:), allocatable :: max_nvdll_varname = "max_nvdll"
+        character(len=9) :: max_nvdll_varname = "max_nvdll"
         !! Name of max_nvdll variable
-        character(len=:), allocatable :: ibtypee_varname = "ibtypee"
+        character(len=8) :: ibtypee_varname = "ibtypee"
         !! Name of ibtypee variable
-        character(len=:), allocatable :: nbdv_varname = "nbdv"
+        character(len=4) :: nbdv_varname = "nbdv"
         !! Name of nbdv variable
-        character(len=:), allocatable :: nvel_varname = "nvel_var"
+        character(len=8) :: nvel_varname = "nvel_var"
         !! Name of nvel variable
-        character(len=:), allocatable :: nvell_varname = "nvell"
+        character(len=5) :: nvell_varname = "nvell"
         !! Name of nvell variable
-        character(len=:), allocatable :: max_nvell_varname = "max_nvell"
+        character(len=9) :: max_nvell_varname = "max_nvell"
         !! Name of max_nvell variable
-        character(len=:), allocatable :: ibtype_varname = "ibtype"
+        character(len=6) :: ibtype_varname = "ibtype"
         !! Name of ibtype variable
-        character(len=:), allocatable :: nbvv_varname = "nbvv"
+        character(len=4) :: nbvv_varname = "nbvv"
         !! Name of nbvv variable
-        character(len=:), allocatable :: depth_varname = "depth"
+        character(len=5) :: depth_varname = "depth"
         !! Name of depth variable
 
         contains
@@ -160,7 +159,7 @@ module ncdg
         procedure, public :: open => ncdg_nodal_open
         procedure, public :: close => ncdg_nodal_close
         procedure, public :: ncdg_nodal_set_metadata
-        procedure, public :: ncdg_nodal_write_mesh
+        ! procedure, public :: ncdg_nodal_write_mesh
 
     end type ncdg_nodal
 
@@ -181,7 +180,7 @@ module ncdg
         procedure, public :: open => ncdg_station_open
         procedure, public :: close => ncdg_station_close
         procedure, public :: ncdg_station_set_metadata
-        procedure, public :: ncdg_station_write_stations
+        ! procedure, public :: ncdg_station_write_stations
 
     end type ncdg_station
     
@@ -197,7 +196,7 @@ module ncdg
         !! ID of zeta variable
 
         ! Variable names
-        character(len=:), allocatable :: zeta_varname = "zeta"
+        character(len=4) :: zeta_varname = "zeta"
         !! Name of zeta variable
 
         contains
@@ -326,7 +325,7 @@ module ncdg
             
             implicit none
             
-            class(ncdg_file), intent(inout) :: self
+            class(ncdg_station), intent(inout) :: self
             !! The wrapper object of the file
         end subroutine ncdg_station_close
 

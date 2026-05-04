@@ -1,4 +1,4 @@
-module nc
+module ncutil
 !! Module for manipulating a generic NetCDF file.
 
     use netcdf
@@ -119,4 +119,4 @@ module nc
         stop
     end subroutine ncfile_handle_error
 
-end module netcdf_file
+end module ncutil

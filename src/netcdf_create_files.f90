@@ -4,7 +4,7 @@ module netcdf_create_files
     use global, only : nbou, ne, neta, nope, np, nvel, nvell, nvdll
     !use dg, only : none
     use netcdf, only : nf90_unlimited
-    use netcdf_fort, only : fort_63_nc
+    use ncdg, only : ncdg_63
     
     implicit none
     
@@ -20,10 +20,10 @@ module netcdf_create_files
         
         implicit none
 
-        type(fort_63_nc) :: my_fort_63_nc
+        type(ncdg_63) :: my_63
         
-        call my_fort_63_nc%init("fort.63.nc")
-        call my_fort_63_nc%set_metadata( &
+        call my_63%init("fort.63.nc")
+        call my_63%ncdg_63_set_metadata( &
             time_dimsize = nf90_unlimited, &
             node_dimsize = np, &
             nele_dimsize = ne, &
@@ -36,7 +36,7 @@ module netcdf_create_files
             max_nvell_dimsize = maxval(nvell), &
             mesh_dimsize = 1 &
         )
-        call my_fort_63_nc%close()
+        call my_63%close()
     end subroutine netcdf_create_files_serial
 
 end module netcdf_create_files

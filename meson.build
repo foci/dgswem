@@ -68,8 +68,8 @@ hostname_cmd = run_command('hostname',  check: true)
 hostname = hostname_cmd.stdout().strip()
 
 if get_option('netcdf')
-  netcdf_dep = [dependency('netcdf', language: 'fortran'),
-               dependency('netcdf', language: 'c')]
+  netcdf_dep = [dependency('netcdf', language: 'fortran', required: true),
+               dependency('netcdf', language: 'c', required: true)]
 
   # Temporary fix for netcdf pkg-config bug on TACC systems,
   # skip netcdf test program
@@ -106,7 +106,7 @@ endif
 if get_option('netcdf')
     executable(
         'dgswem_serial',
-        sources: dgswem_src + c_interface_src + ncfort_src + dgswem_netcdf_src,
+        sources: dgswem_src + c_interface_src + ncdg_src + dgswem_netcdf_src,
         dependencies: [cpp_dep] + netcdf_dep,
         link_language: 'fortran',
         fortran_args: '-DNETCDF'
@@ -142,7 +142,7 @@ executable('adcpost',
 if get_option('netcdf')
     executable(
         'nctest.exe',
-        sources: ncfort_src + nctest_src,
+        sources: ncdg_src + nctest_src,
         dependencies: netcdf_dep,
         link_language: 'fortran'
     )
