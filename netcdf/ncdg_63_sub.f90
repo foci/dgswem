@@ -8,8 +8,6 @@ submodule (ncdg : ncdg_nodal_sub) ncdg_63_sub
     module procedure ncdg_63_set_metadata
         ! See interface for arguments and documentation
         
-        implicit none
-        
         integer :: stat ! Status of most recent operation
         
         ! Dimension IDs

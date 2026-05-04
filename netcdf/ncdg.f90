@@ -87,14 +87,94 @@ module ncdg
         ! ncdg_file subroutines
         ! Common to all DGSWEM output files
 
+        module subroutine ncdg_file_open(self, mode)
+            !! Open a DGSWEM output file, and set all IDs.
+
+            implicit none
+
+            class(ncdg_file), intent(inout) :: self
+            !! The wrapper object of the file
+            integer, optional, intent(in) :: mode
+            !! NetCDF open mode. Default is nf90_nowrite, i.e. read-only.
+        end subroutine ncdg_file_open
+        
+        module subroutine ncdg_file_close(self)
+            !! Close a DGSWEM output file, and flush all IDs.
+            
+            implicit none
+            
+            class(ncdg_file), intent(inout) :: self
+            !! The wrapper object of the file
+        end subroutine ncdg_file_close
+
         ! ncdg_nodal subroutines
         ! Common to all nodal files
+
+        module subroutine ncdg_nodal_open(self, mode)
+            !! Open a nodal output file, and set all IDs.
+
+            implicit none
+
+            class(ncdg_nodal), intent(inout) :: self
+            !! The wrapper object of the file
+            integer, optional, intent(in) :: mode
+            !! NetCDF open mode. Default is nf90_nowrite, i.e. read-only.
+        end subroutine ncdg_nodal_open
+        
+        module subroutine ncdg_nodal_close(self)
+            !! Close a nodal output file, and flush all IDs.
+            
+            implicit none
+            
+            class(ncdg_nodal), intent(inout) :: self
+            !! The wrapper object of the file
+        end subroutine ncdg_nodal_close
 
         ! ncdg_station subroutines
         ! Common to all station files
 
+        module subroutine ncdg_station_open(self, mode)
+            !! Open a station output file, and set all IDs.
+
+            implicit none
+
+            class(ncdg_station), intent(inout) :: self
+            !! The wrapper object of the file
+            integer, optional, intent(in) :: mode
+            !! NetCDF open mode. Default is nf90_nowrite, i.e. read-only.
+        end subroutine ncdg_station_open
+        
+        module subroutine ncdg_station_close(self)
+            !! Close a station output file, and flush all IDs.
+            
+            implicit none
+            
+            class(ncdg_file), intent(inout) :: self
+            !! The wrapper object of the file
+        end subroutine ncdg_station_close
+
         ! ncdg_63 subroutines
         ! For fort.63.nc
+
+        module subroutine ncdg_63_open(self, mode)
+            !! Open a fort.63.nc output file, and set all IDs.
+
+            implicit none
+
+            class(ncdg_63), intent(inout) :: self
+            !! The wrapper object of the file
+            integer, optional, intent(in) :: mode
+            !! NetCDF open mode. Default is nf90_nowrite, i.e. read-only.
+        end subroutine ncdg_63_open
+        
+        module subroutine ncdg_63_close(self)
+            !! Close a fort.63.nc output file, and flush all IDs.
+            
+            implicit none
+            
+            class(ncdg_63), intent(inout) :: self
+            !! The wrapper object of the file
+        end subroutine ncdg_63_close
         
         module subroutine ncdg_63_set_metadata(self, time_dimsize, &
             node_dimsize, nele_dimsize, nvertex_dimsize, &
@@ -103,6 +183,8 @@ module ncdg
             mesh_dimsize)
             !! Set variables, dimensions, and metadata for
             !! [[netcdf_fort(module):fort_63_nc(type)]].
+
+            implicit none
 
             class(ncdg_63), intent(inout) :: self
             !! The wrapper object being initialized
@@ -133,6 +215,8 @@ module ncdg
         module subroutine ncdg_63_write_step(self)
         !! Timestep writing function for
         !! [[netcdf_fort(module):fort_63_nc(type)]].
+
+        implicit none
         
         class(ncdg_63), intent(inout) :: self
         !! The wrapper object being written to
