@@ -17,12 +17,21 @@ module ncdg
         !! common to all DGSWEM output files.
 
         ! Dimension IDs
-        integer :: time_varid = -1
+        integer :: time_dimid = -1
         !! ID of time dimension
 
+        ! Dimension names
+        character(len=:), allocatable :: time_dimname = "time"
+        !! Name of time dimension
+
         ! Variable IDs
-        integer :: time_dimid = -1
+        integer :: time_varid = -1
         !! ID of time variable
+        character(len=:), allocatable ::
+
+        ! Variable names
+        character(len=:), allocatable :: time_varname = "time"
+        !! Name of time variable
 
         contains
 
@@ -38,7 +47,11 @@ module ncdg
 
         ! Dimension IDs
 
+        ! Dimension names
+
         ! Variable IDs
+
+        ! Variable names
 
         contains
 
@@ -55,7 +68,11 @@ module ncdg
 
         ! Dimension IDs
 
+        ! Dimension names
+
         ! Variable IDs
+
+        ! Variable names
 
         contains
 
@@ -71,7 +88,11 @@ module ncdg
 
         ! Dimension IDs
 
+        ! Dimension names
+
         ! Variable IDs
+
+        ! Variable names
 
         contains
 

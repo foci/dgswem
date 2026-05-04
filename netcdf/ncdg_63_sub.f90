@@ -5,13 +5,44 @@ submodule (ncdg : ncdg_nodal_sub) ncdg_63_sub
 
     contains
 
+    module procedure ncdg_63_open
+        ! See interface for arguments and documentation
+        
+        integer :: ncstat ! Status of most recent operation
+
+        ! Call parent function
+        if (present(mode)) then
+            call self%ncdg_nodal%open(mode)
+        else
+            call self%ncdg_nodal%open()
+        endif
+
+        ! Set dimension IDs
+        ! N/A, for now
+
+        ! Set variable IDs
+        ! N/A, for now
+    end procedure ncdg_63_open
+
+    module procedure ncdg_63_close
+        ! See interface for arguments and documentation
+
+        ! Call parent function
+        call self%ncdg_nodal%close()
+
+        ! Flush dimension IDs
+        ! N/A, for now
+
+        ! Flush variable IDs
+        ! N/A, for now
+    end procedure ncdg_63_close
+
     module procedure ncdg_63_set_metadata
         ! See interface for arguments and documentation
         
         integer :: stat ! Status of most recent operation
         
         ! Dimension IDs
-        integer :: time_dimid ! ID of time dimension
         integer :: node_dimid ! ID of node dimension
         integer :: nele_dimid ! ID of nele dimension
         integer :: nvertex_dimid ! ID of nvertex dimension
@@ -24,7 +55,6 @@ submodule (ncdg : ncdg_nodal_sub) ncdg_63_sub
         integer :: mesh_dimid ! ID of mesh dimension
         
         ! Variable IDs
-        integer :: time_varid ! ID of time variable
         integer :: x_varid ! ID of x variable
         integer :: y_varid ! ID of y variable
         integer :: element_varid ! ID of element variable

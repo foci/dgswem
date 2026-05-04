@@ -5,4 +5,40 @@ submodule (ncdg) ncdg_common_sub
 
     contains
 
+    module procedure ncdg_file_open
+        ! See interface for arguments and documentation
+        
+        integer :: ncstat ! Status of most recent operation
+
+        ! Call parent function
+        if (present(mode)) then
+            call self%ncfile%open(mode)
+        else
+            call self%ncfile%open()
+        endif
+
+        ! Set dimension IDs
+        ncstat = nf90_inq_dimid(self%ncid, self%time_dimname, &
+            self%time_dimid)
+        call ncfile_check_error(ncstat)
+
+        ! Set variable IDs
+        ncstat = nf90_inq_varid(self%ncid, self%time_varname, &
+            self%time_varid)
+        call ncfile_check_error(ncstat)
+    end procedure ncdg_file_open
+
+    module procedure ncdg_file_close
+        ! See interface for arguments and documentation
+
+        ! Call parent function
+        call self%ncfile%close()
+
+        ! Flush dimension IDs
+        self%time_dimid = -1
+
+        ! Flush variable IDs
+        self%time_varid = -1
+    end procedure ncdg_file_close
+
 end submodule netcdf_fort_common
