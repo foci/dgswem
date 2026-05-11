@@ -68,8 +68,30 @@ hostname_cmd = run_command('hostname',  check: true)
 hostname = hostname_cmd.stdout().strip()
 
 if get_option('netcdf')
-  netcdf_dep = [dependency('netcdf', language: 'fortran', required: true),
-               dependency('netcdf', language: 'c', required: true)]
+  #netcdf_dep = [dependency('netcdf', language: 'fortran', required: true),
+  #             dependency('netcdf', language: 'c', required: true)]
+  # Problem: pkg-config --cflags netcdf-fortran returns blank -I flag
+  # Fix: filter it out manually
+
+  nf_flags_raw = run_command('nf-config', '--fflags', check: true).stdout().strip().split()
+  nf_libs_raw = run_command('nf-config', '--flibs', check: true).stdout().strip().split()
+  nc_flags_raw = run_command('nc-config', '--cflags', check: true).stdout().strip().split()
+  nc_libs_raw = run_command('nc-config', '--libs', check: true).stdout().strip().split()
+
+  # Filter out the empty '-I'
+  clean_flags = []
+  foreach flag : nf_flags_raw + nc_flags_raw
+    if flag != '-I'
+      clean_flags += flag
+    endif
+  endforeach
+
+  netcdf_dep = declare_dependency(
+    compile_args: clean_flags,
+    link_args: nf_libs_raw + nc_libs_raw
+  )
+
+  message('Sanitized NetCDF compile args:', clean_flags)
 
   # Temporary fix for netcdf pkg-config bug on TACC systems,
   # skip netcdf test program
