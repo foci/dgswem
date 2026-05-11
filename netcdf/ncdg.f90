@@ -306,7 +306,9 @@ module ncdg
             !! Size of mesh dimension
         end subroutine ncdg_nodal_set_metadata
 
-        module subroutine ncdg_nodal_write_mesh(self, x, y, depth)
+        module subroutine ncdg_nodal_write_mesh(self, x, y, depth &
+            element, nface_len, ne, nope, ibtypee, nvdll, &
+            nbdv, nbou, ibtype, nvell, nbvv)
             !! Write the mesh data for a nodal file.
 
             implicit none
@@ -319,6 +321,45 @@ module ncdg
             !! The y-coordinate of each node.
             real, intent(in) :: depth(:)
             !! The bathymetry of each node.
+            integer, intent(in) :: element(:, :)
+            !! The node numbers for each element. This corresponds to
+            !! [[global(Module):nm(Variable)]].
+            !! @warning "Transposed Format"
+            !! The first dimension should be the local node number,
+            !! while the second should be the element number.
+            !! @endwarning
+            integer, intent(in) :: nface_len
+            !! The number of segments per element.
+            integer, intent(in) :: ne
+            !! The number of elements in the mesh.
+            integer, intent(in) :: nope
+            !! The number of elevation boundary segments.
+            integer, intent(in) :: ibtypee(:)
+            !! The elevation boundary type.
+            integer, intent(in) :: nvdll(:)
+            !! The number of nodes in a given elevation boundary
+            !! segment.
+            integer, intent(in) :: nbdv(:, :)
+            !! The node numbers for each elevation boundary segment.
+            !! @warning "Transposed Format"
+            !! The first dimension should be the ???,
+            !! while the second should be the ???.
+            !! @endwarning
+            integer, intent(in) :: nbou
+            !! The number of normal flow (discharge) boundary
+            !! segments.
+            integer, intent(in) :: ibtype(:)
+            !! The boundary type.
+            integer, intent(in) :: nvell(:)
+            !! The number of nodes in a given normal flow (discharge)
+            !! boundary segment.
+            integer, intent(in) :: nbvv(:, :)
+            !! The node numbers for each normal flow (discharge)
+            !! boundary segment.
+            !! @warning "Transposed Format"
+            !! The first dimension should be the ???,
+            !! while the second should be the ???.
+            !! @endwarning
         end subroutine ncdg_nodal_write_mesh
 
         ! ncdg_station subroutines
