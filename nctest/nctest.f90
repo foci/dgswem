@@ -56,8 +56,9 @@ end module nctest_util
 
 program nctest
 
-    use nctest_util
     use ncdg, only : ncdg_63
+    use nctest_util
+    use netcdf
     
     implicit none
     
@@ -85,8 +86,14 @@ program nctest
     call my_63%close()
     ! call print_metadata(my_63)
     print *, "Opening fort.63.nc"
-    call my_63%open()
+    call my_63%open(nf90_write)
     ! call print_metadata(my_63)
+    print *, "Writing mesh data"
+    call my_63%ncdg_nodal_write_mesh( &
+        x = (/ 0.0, 1.0, 1.0 /), &
+        y =  (/ 0.0, 0.0, 1.0 /), &
+        depth = (/ 0.0, 1.0, 2.0 /) &
+    )
     print *, "Closing fort.63.nc"
     call my_63%close()
     print *, "Program complete"

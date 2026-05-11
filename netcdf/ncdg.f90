@@ -159,7 +159,7 @@ module ncdg
         procedure, public :: open => ncdg_nodal_open
         procedure, public :: close => ncdg_nodal_close
         procedure, public :: ncdg_nodal_set_metadata
-        ! procedure, public :: ncdg_nodal_write_mesh
+        procedure, public :: ncdg_nodal_write_mesh
 
     end type ncdg_nodal
 
@@ -305,6 +305,21 @@ module ncdg
             integer, intent(in) :: mesh_dimsize
             !! Size of mesh dimension
         end subroutine ncdg_nodal_set_metadata
+
+        module subroutine ncdg_nodal_write_mesh(self, x, y, depth)
+            !! Write the mesh data for a nodal file.
+
+            implicit none
+
+            class(ncdg_nodal), intent(inout) :: self
+            !! The wrapper object of the file
+            real, intent(in) :: x(:)
+            !! The x-coordinate of each node.
+            real, intent(in) :: y(:)
+            !! The y-coordinate of each node.
+            real, intent(in) :: depth(:)
+            !! The bathymetry of each node.
+        end subroutine ncdg_nodal_write_mesh
 
         ! ncdg_station subroutines
         ! Common to all station files

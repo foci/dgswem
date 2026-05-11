@@ -243,4 +243,17 @@ submodule (ncdg:ncdg_file_sub) ncdg_nodal_sub
         ! N/A, for now
     end procedure ncdg_nodal_set_metadata
 
+    module procedure ncdg_nodal_write_mesh
+        ! See interface for arguments and documentation
+        
+        integer :: ncstat ! Status of most recent operation
+
+        ncstat = nf90_put_var(self%ncid, self%x_varid, x)
+        call ncfile_check_error(ncstat)
+        ncstat = nf90_put_var(self%ncid, self%y_varid, y)
+        call ncfile_check_error(ncstat)
+        ncstat = nf90_put_var(self%ncid, self%depth_varid, depth)
+        call ncfile_check_error(ncstat)
+    end procedure ncdg_nodal_write_mesh
+
 end submodule ncdg_nodal_sub
