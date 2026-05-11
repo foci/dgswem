@@ -81,7 +81,7 @@ if get_option('netcdf')
   # Filter out the empty '-I'
   clean_flags = []
   foreach flag : nf_flags_raw + nc_flags_raw
-    if flag != '-I'
+    if flag != '-I' and flag != '' and flag not in clean_flags
       clean_flags += flag
     endif
   endforeach
@@ -90,8 +90,6 @@ if get_option('netcdf')
     compile_args: clean_flags,
     link_args: nf_libs_raw + nc_libs_raw
   )
-
-  message('Sanitized NetCDF compile args:', clean_flags)
 
   # Temporary fix for netcdf pkg-config bug on TACC systems,
   # skip netcdf test program
