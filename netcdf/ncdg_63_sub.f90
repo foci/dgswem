@@ -1,4 +1,4 @@
-submodule (ncdg : ncdg_nodal_sub) ncdg_63_sub
+submodule (ncdg:ncdg_nodal_sub) ncdg_63_sub
 !! Implementation of fort.63.nc
 
     implicit none
@@ -8,7 +8,7 @@ submodule (ncdg : ncdg_nodal_sub) ncdg_63_sub
     module procedure ncdg_63_open
         ! See interface for arguments and documentation
         
-        ! integer :: ncstat ! Status of most recent operation
+        integer :: ncstat ! Status of most recent operation
 
         ! Call parent function
         if (present(mode)) then
@@ -18,10 +18,12 @@ submodule (ncdg : ncdg_nodal_sub) ncdg_63_sub
         endif
 
         ! Set dimension IDs
-        ! N/A, for now
+        ! N/A
 
         ! Set variable IDs
-        ! N/A, for now
+        ncstat = nf90_inq_varid(self%ncid, self%zeta_varname, &
+            self%zeta_varid)
+        call ncfile_check_error(ncstat)
     end procedure ncdg_63_open
 
     module procedure ncdg_63_close
@@ -33,10 +35,10 @@ submodule (ncdg : ncdg_nodal_sub) ncdg_63_sub
         call self%ncdg_nodal%close()
 
         ! Flush dimension IDs
-        ! N/A, for now
+        ! N/A
 
         ! Flush variable IDs
-        ! N/A, for now
+        self%zeta_varid = -1
     end procedure ncdg_63_close
 
     module procedure ncdg_63_set_metadata
@@ -66,7 +68,7 @@ submodule (ncdg : ncdg_nodal_sub) ncdg_63_sub
         )
         
         ! Define dimensions and their attributes
-        ! N/A, for now
+        ! N/A
         
         ! Define variables and their attributes
         ncstat = nf90_def_var(self%ncid, self%zeta_varname, &
