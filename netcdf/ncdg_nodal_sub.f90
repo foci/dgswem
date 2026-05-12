@@ -247,10 +247,44 @@ submodule (ncdg:ncdg_file_sub) ncdg_nodal_sub
         ! See interface for arguments and documentation
         
         integer :: ncstat ! Status of most recent operation
+        real :: element(nhy, ne) ! Transpose of nm
         integer :: element_start(2) ! Starting position for element data
         integer :: element_count(2) ! Element data block size
+        real :: nbdv2(neta) ! Rearrangement of nbdv for compactness
+        real :: nbvv2(nvel) ! Rearrangement of nbvv for compactness
+        integer :: i, j, k, kj ! Indices
 
-        !!!!! Exit define mode
+        ! Exit define mode
+        ncstat = nf90_enddef(self%ncid)
+        if (ncstat /= nf90_enotindefine) then
+            call ncfile_check_error(ncstat)
+        end if
+
+        print *, "re-arranging data arrays"
+
+        ! Re-arrange data arrays
+        ! nm -> element
+        do i = 1, ne
+            do j = 1, nhy
+                element(j, i) = nm(i, j)
+            end do
+        end do
+        ! nbdv -> nbdv2
+        kj = 1
+        do k = 1, nope
+            do j = 1, nvdll(k)
+                nbdv2(kj) = nbdv(k, j)
+                kj = kj + 1
+            end do
+        end do
+        ! nbvv -> nbvv2
+        kj = 1
+        do k = 1, nbou
+            do j = 1, nvell(k)
+                nbvv2(kj) = nbvv(k, j)
+                kj = kj + 1
+            end do
+        end do
 
         ! Coordinates
         ncstat = nf90_put_var(self%ncid, self%x_varid, x)
@@ -259,15 +293,15 @@ submodule (ncdg:ncdg_file_sub) ncdg_nodal_sub
         call ncfile_check_error(ncstat)
 
         ! Bathymetry
-        ncstat = nf90_put_var(self%ncid, self%depth_varid, depth)
+        ncstat = nf90_put_var(self%ncid, self%depth_varid, dp)
         call ncfile_check_error(ncstat)
 
         ! Elements
         element_start(1) = 1
-        element_start(2) = 2
-        element_count(1) = nface_len
+        element_start(2) = 1
+        element_count(1) = nhy
         element_count(2) = ne
-        ncstat = nf90_put_var(self%ncid, self%depth_varid, element &
+        ncstat = nf90_put_var(self%ncid, self%element_varid, element, &
             element_start, element_count)
         call ncfile_check_error(ncstat)
         
@@ -280,11 +314,11 @@ submodule (ncdg:ncdg_file_sub) ncdg_nodal_sub
             ncstat = nf90_put_var(self%ncid, self%nvdll_varid, nvdll)
             call ncfile_check_error(ncstat)
             ! Node numbers for each segment
-            ncstat = nf90_put_var(self%ncid, self%nbdv_varid, nbdv)
+            ncstat = nf90_put_var(self%ncid, self%nbdv_varid, nbdv2)
             call ncfile_check_error(ncstat)
         endif
         
-        ! Normal flow boundaries
+        ! Normal flow (discharge) boundaries
         if (nbou /= 0) then
             ! Boundary segment types
             ncstat = nf90_put_var(self%ncid, self%ibtype_varid, ibtype)
@@ -293,9 +327,9 @@ submodule (ncdg:ncdg_file_sub) ncdg_nodal_sub
             ncstat = nf90_put_var(self%ncid, self%nvell_varid, nvell)
             call ncfile_check_error(ncstat)
             ! Node numbers for each segment
-            ncstat = nf90_put_var(self%ncid, self%nbvv_varid, nbvv)
+            ncstat = nf90_put_var(self%ncid, self%nbvv_varid, nbvv2)
             call ncfile_check_error(ncstat)
-            ! weirs and pipes???
+            ! Weirs and pipes would be implemented here
         endif
     end procedure ncdg_nodal_write_mesh
 

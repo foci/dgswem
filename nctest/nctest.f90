@@ -63,23 +63,54 @@ program nctest
     implicit none
     
     type(ncdg_63) :: my_63
-        
+
+    ! Bare-bones mesh consisting of a single triangle
+    integer, parameter :: np = 3 ! Number of nodes
+    integer, parameter :: ne = 1 ! Number of elements
+    integer, parameter :: nhy = 3 ! Number of nodes per element
+    integer :: nm(ne, nhy) ! Node numbers for each element
+
+    ! Coordinates and bathymetry
+    real :: x(np) = [0.0, 1.0, 1.0]
+    real :: y(np) = [0.0, 0.0, 1.0]
+    real :: dp(np) = [0.0, 1.0, 2.0]
+
+    ! Elevation boundary
+    integer, parameter :: nope = 1 ! Number of elevation segments
+    integer, parameter :: neta = 2 ! Number of elevation nodes
+    integer :: ibtypee(nope) = [0] ! Segment types
+    integer :: nvdll(nope) = [2] ! Nodes per segment
+    integer :: nbdv(nope, neta) ! Node numbers for each segment
+
+    ! Normal flow (discharge) boundary
+    integer, parameter :: nbou = 1 ! Number of normal flow segments
+    integer, parameter :: nvel = 3 ! Number of normal flow nodes
+    integer :: ibtype(nbou) = [1] ! Segment types
+    integer :: nvell(nbou) = [3] ! Nodes per segment
+    integer :: nbvv(nbou, nvel) ! Node numbers for each segment
+
+    ! Fill in arrays
+    nm(1, :) = [1, 2, 3]
+    nbdv(1, :) = [1, 2]
+    nbvv(1, :) = [2, 3, 1]
+
+    ! Test the NetCDF tools
     print *, "Creating fort.63.nc"
     ! call print_metadata(my_63)
     call my_63%init("fort.63.nc")
     print *, "Setting metadata"
     call my_63%ncdg_63_set_metadata( &
-        time_dimsize = 2, &
-        node_dimsize = 3, &
-        nele_dimsize = 4, &
-        nvertex_dimsize = 5, &
-        nope_dimsize = 6, &
-        neta_dimsize = 7, &
-        max_nvdll_dimsize = 8, &
-        nbou_dimsize = 9, &
-        nvel_dimsize = 10, &
-        max_nvell_dimsize = 11, &
-        mesh_dimsize = 12 &
+        time_dimsize = nf90_unlimited, &
+        node_dimsize = np, &
+        nele_dimsize = ne, &
+        nvertex_dimsize = nhy, &
+        nope_dimsize = nope, &
+        neta_dimsize = neta, &
+        max_nvdll_dimsize = maxval(nvdll), &
+        nbou_dimsize = nbou, &
+        nvel_dimsize = nvel, &
+        max_nvell_dimsize = maxval(nvell), &
+        mesh_dimsize = 1 &
     )
     ! call print_metadata(my_63)
     print *, "Closing fort.63.nc"
@@ -90,9 +121,22 @@ program nctest
     ! call print_metadata(my_63)
     print *, "Writing mesh data"
     call my_63%ncdg_nodal_write_mesh( &
-        x = (/ 0.0, 1.0, 1.0 /), &
-        y =  (/ 0.0, 0.0, 1.0 /), &
-        depth = (/ 0.0, 1.0, 2.0 /) &
+        x = x, &
+        y = y, &
+        dp = dp, &
+        nm = nm, &
+        nhy = nhy, &
+        ne = ne, &
+        nope = nope, &
+        neta = neta, &
+        ibtypee = ibtypee, &
+        nvdll = nvdll, &
+        nbdv = nbdv, &
+        nbou = nbou, &
+        nvel = nvel, &
+        ibtype = ibtype, &
+        nvell = nvell, &
+        nbvv = nbvv &
     )
     print *, "Closing fort.63.nc"
     call my_63%close()
