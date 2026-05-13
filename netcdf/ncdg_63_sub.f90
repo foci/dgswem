@@ -64,19 +64,45 @@ submodule (ncdg:ncdg_nodal_sub) ncdg_63_sub
             nbou_dimsize = nbou_dimsize, &
             nvel_dimsize = nvel_dimsize, &
             max_nvell_dimsize = max_nvell_dimsize, &
-            mesh_dimsize = mesh_dimsize &
+            mesh_dimsize = mesh_dimsize, &
+            nope = nope, &
+            nbou = nbou, &
+            ics = ics &
         )
         
-        ! Define dimensions and their attributes
+        ! Define dimensions
         ! N/A
         
         ! Define variables and their attributes
+
+        ! zeta
         ncstat = nf90_def_var(self%ncid, self%zeta_varname, &
             nf90_double, (/ self%node_dimid, self%time_dimid /), &
             varid=self%zeta_varid)
         call ncfile_check_error(ncstat)
+        ncstat = nf90_put_att(self%ncid, self%zeta_varid, &
+            "long_name", "water surface elevation above geoid")
+        call ncfile_check_error(ncstat)
+        ncstat = nf90_put_att(self%ncid, self%zeta_varid, &
+            "standard_name", "sea_surface_height_above_geoid")
+        call ncfile_check_error(ncstat)
+        ncstat = nf90_put_att(self%ncid, self%zeta_varid, &
+            "coordinates", "time y x")
+        call ncfile_check_error(ncstat)
+        ncstat = nf90_put_att(self%ncid, self%zeta_varid, &
+            "location", "node")
+        call ncfile_check_error(ncstat)
+        ncstat = nf90_put_att(self%ncid, self%zeta_varid, &
+            "mesh", "adcirc_mesh")
+        call ncfile_check_error(ncstat)
+        ncstat = nf90_put_att(self%ncid, self%zeta_varid, &
+            "units", "m")
+        call ncfile_check_error(ncstat)
+        ncstat = nf90_put_att(self%ncid, self%zeta_varid, &
+            "_FillValue", real_fill_value)
+        call ncfile_check_error(ncstat)
         
-        ! Define attributes
+        ! Define global attributes
         ! N/A, for now
     end procedure ncdg_63_set_metadata
 

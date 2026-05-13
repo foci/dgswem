@@ -12,6 +12,11 @@ module ncdg
     ! parent types are just for organization, exploiting inheritance.
     public :: ncdg_63
 
+    ! Intra-module constants
+
+    integer, parameter :: integer_fill_value = -99999 ! Consistent with ADCIRC
+    real(8), parameter :: real_fill_value = -99999.d0 ! Consistent with ADCIRC
+
     ! Begin type definitions
 
     type, extends(ncfile) :: ncdg_file
@@ -274,7 +279,7 @@ module ncdg
             node_dimsize, nele_dimsize, nvertex_dimsize, &
             nope_dimsize, neta_dimsize, max_nvdll_dimsize, &
             nbou_dimsize, nvel_dimsize, max_nvell_dimsize, &
-            mesh_dimsize)
+            mesh_dimsize, nope, nbou, ics)
             !! Set variables, dimensions, and metadata for a nodal
             !! output file.
 
@@ -304,6 +309,17 @@ module ncdg
             !! Size of max_nvell dimension
             integer, intent(in) :: mesh_dimsize
             !! Size of mesh dimension
+            ! BEGIN ADCIRC VARIABLES
+            integer, intent(in) :: nope
+            !! The number of elevation boundary segments. This corresponds
+            !! to [[global(module):nope(variable)]].
+            integer, intent(in) :: nbou
+            !! The number of normal flow (discharge) boundary
+            !! segments. This corresponds to
+            !! [[global(module):nbou(variable)]].
+            integer, intent(in) :: ics
+            !! The number of elevation boundary segments. This corresponds
+            !! to [[global(module):ics(variable)]].
         end subroutine ncdg_nodal_set_metadata
 
         module subroutine ncdg_nodal_write_mesh(self, x, y, dp, &
@@ -317,16 +333,16 @@ module ncdg
             !! The wrapper object of the file
             real, intent(in) :: x(:)
             !! The x-coordinate of each node. This corresponds to
-            !! [[dg(module):x(variable)]], of size
-            !! [[dg(module):mnp(variable)]].
+            !! [[global(module):x(variable)]], of size
+            !! [[global(module):mnp(variable)]].
             real, intent(in) :: y(:)
             !! The y-coordinate of each node. This corresponds to
-            !! [[dg(module):x(variable)]], of size
-            !! [[dg(module):mnp(variable)]].
+            !! [[global(module):x(variable)]], of size
+            !! [[global(module):mnp(variable)]].
             real, intent(in) :: dp(:)
             !! The bathymetry of each node. This corresponds to
-            !! [[dg(module):dp(variable)]], of size
-            !! [[dg(module):mnp(variable)]].
+            !! [[global(module):dp(variable)]], of size
+            !! [[global(module):mnp(variable)]].
             integer, intent(in) :: nm(:, :)
             !! The node numbers for each element. This corresponds to
             !! [[global(module):nm(variable)]], of size
@@ -340,51 +356,51 @@ module ncdg
             !! [[global(module):ne(variable)]].
             integer, intent(in) :: nope
             !! The number of elevation boundary segments. This corresponds
-            !! to [[dg(module):nope(variable)]].
+            !! to [[global(module):nope(variable)]].
             integer, intent(in) :: neta
             !! The number of elevation boundary nodes. This corresponds
-            !! to [[dg(module):neta(variable)]].
+            !! to [[global(module):neta(variable)]].
             integer, intent(in) :: ibtypee(:)
             !! The elevation boundary type for each boundary segment.
             !! This does not yet correspond to a DGSWEM variable. The
             !! only accepted flag currently is 0. For now, just
             !! substitute a zero array of size
-            !! [[dg(module):nope(variable)]].
+            !! [[global(module):nope(variable)]].
             integer, intent(in) :: nvdll(:)
             !! The number of nodes in a given elevation boundary
             !! segment. This corresponds to
-            !! [[dg(module):nvdll(variable)]], of size
-            !! [[dg(module):mnope(variable)]].
+            !! [[global(module):nvdll(variable)]], of size
+            !! [[global(module):mnope(variable)]].
             integer, intent(in) :: nbdv(:, :)
             !! The node numbers for each elevation boundary segment.
             !! This corresponds to
-            !! [[dg(module):nbdv(variable)]], of size
-            !! [[dg(module):mnope(variable)]] by
-            !! [[dg(module):mneta(variable)]].
+            !! [[global(module):nbdv(variable)]], of size
+            !! [[global(module):mnope(variable)]] by
+            !! [[global(module):mneta(variable)]].
             integer, intent(in) :: nbou
             !! The number of normal flow (discharge) boundary
             !! segments. This corresponds to
-            !! [[dg(module):nbou(variable)]].
+            !! [[global(module):nbou(variable)]].
             integer, intent(in) :: nvel
             !! The number of normal flow (discharge) boundary nodes.
             !! This corresponds to
-            !! [[dg(module):nvel(variable)]].
+            !! [[global(module):nvel(variable)]].
             integer, intent(in) :: ibtype(:)
             !! The normal flow (discharge) boundary type for each
             !! boundary segment. This corresponds to
-            !! [[dg(module):segtype(variable)]] of size
-            !! [[dg(module):mnbou(variable)]].
+            !! [[global(module):segtype(variable)]] of size
+            !! [[global(module):mnbou(variable)]].
             integer, intent(in) :: nvell(:)
             !! The number of nodes in a given normal flow (discharge)
             !! boundary segment. This corresponds to
-            !! [[dg(module):nvell(variable)]], of size
-            !! [[dg(module):mnbou(variable)]].
+            !! [[global(module):nvell(variable)]], of size
+            !! [[global(module):mnbou(variable)]].
             integer, intent(in) :: nbvv(:, :)
             !! The node numbers for each normal flow (discharge)
             !! boundary segment. This corresponds to
-            !! [[dg(module):nbvv(variable)]], of size
-            !! [[dg(module):mnbou(variable)]] by
-            !! 0:[[dg(module):mnvel(variable)]].
+            !! [[global(module):nbvv(variable)]], of size
+            !! [[global(module):mnbou(variable)]] by
+            !! 0:[[global(module):mnvel(variable)]].
         end subroutine ncdg_nodal_write_mesh
 
         ! ncdg_station subroutines
@@ -447,7 +463,7 @@ module ncdg
             node_dimsize, nele_dimsize, nvertex_dimsize, &
             nope_dimsize, neta_dimsize, max_nvdll_dimsize, &
             nbou_dimsize, nvel_dimsize, max_nvell_dimsize, &
-            mesh_dimsize)
+            mesh_dimsize, nope, nbou, ics)
             !! Set variables, dimensions, and metadata for a fort.63.nc
             !! output file.
 
@@ -477,6 +493,17 @@ module ncdg
             !! Size of max_nvell dimension
             integer, intent(in) :: mesh_dimsize
             !! Size of mesh dimension
+            ! BEGIN ADCIRC VARIABLES
+            integer, intent(in) :: nope
+            !! The number of elevation boundary segments. This corresponds
+            !! to [[global(module):nope(variable)]].
+            integer, intent(in) :: nbou
+            !! The number of normal flow (discharge) boundary
+            !! segments. This corresponds to
+            !! [[global(module):nbou(variable)]].
+            integer, intent(in) :: ics
+            !! The number of elevation boundary segments. This corresponds
+            !! to [[global(module):ics(variable)]].
         end subroutine ncdg_63_set_metadata
 
         module subroutine ncdg_63_write_step(self)

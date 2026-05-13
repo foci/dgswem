@@ -65,6 +65,7 @@ program nctest
     type(ncdg_63) :: my_63
 
     ! Bare-bones mesh consisting of a single triangle
+    integer, parameter :: ics = 1 ! Cartesian
     integer, parameter :: np = 3 ! Number of nodes
     integer, parameter :: ne = 1 ! Number of elements
     integer, parameter :: nhy = 3 ! Number of nodes per element
@@ -110,7 +111,10 @@ program nctest
         nbou_dimsize = nbou, &
         nvel_dimsize = nvel, &
         max_nvell_dimsize = maxval(nvell), &
-        mesh_dimsize = 1 &
+        mesh_dimsize = 1, &
+        nope = nope, &
+        nbou = nbou, &
+        ics = ics &
     )
     ! call print_metadata(my_63)
     print *, "Closing fort.63.nc"

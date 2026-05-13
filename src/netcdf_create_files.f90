@@ -1,7 +1,7 @@
 module netcdf_create_files
 !! Module for initializing NetCDF files.
 
-    use global, only : dp, mnbou, mnope, nbdv, nbou, nbvv, ne, neta, nhy, nm, nope, np, nvel, nvdll, nvell, segtype, x, y
+    use global, only : dp, ics, mnbou, mnope, nbdv, nbou, nbvv, ne, neta, nhy, nm, nope, np, nvel, nvdll, nvell, segtype, x, y
     !use dg, only : none
     use netcdf, only : nf90_unlimited
     use ncdg, only : ncdg_63
@@ -43,7 +43,10 @@ module netcdf_create_files
             nbou_dimsize = nbou, &
             nvel_dimsize = nvel, &
             max_nvell_dimsize = maxval(nvell), &
-            mesh_dimsize = 1 &
+            mesh_dimsize = 1, &
+            nope = nope, &
+            nbou = nbou, &
+            ics = ics &
         )
         call my_63%ncdg_nodal_write_mesh( &
             x = x, &
