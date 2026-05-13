@@ -506,13 +506,17 @@ module ncdg
             !! to [[global(module):ics(variable)]].
         end subroutine ncdg_63_set_metadata
 
-        module subroutine ncdg_63_write_step(self)
-        !! Timestep writing function for a fort.63.nc output file.
-
-        implicit none
-        
-        class(ncdg_63), intent(inout) :: self
-        !! The wrapper object being written to
+        module subroutine ncdg_63_write_step(self, t, zeta)
+            !! Timestep writing function for a fort.63.nc output file.
+    
+            implicit none
+            
+            class(ncdg_63), intent(inout) :: self
+            !! The wrapper object being written to
+            real, intent(in) :: t
+            !! The current time
+            real, intent(in) :: zeta(:)
+            !! The current zeta values
         end subroutine ncdg_63_write_step
     end interface
     
