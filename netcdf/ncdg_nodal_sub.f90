@@ -494,10 +494,10 @@ submodule (ncdg:ncdg_file_sub) ncdg_nodal_sub
         call ncfile_check_error(ncstat)
 
         ! Elements
-        element_start(1) = 1
-        element_start(2) = 1
-        element_count(1) = nhy
-        element_count(2) = ne
+        element_start(1) = 1 ! nvertex (local node number) dimension start
+        element_start(2) = 1 ! nele dimension start
+        element_count(1) = nhy ! nvertex (local node number) dimension span
+        element_count(2) = ne ! nele dimension span
         ncstat = nf90_put_var(self%ncid, self%element_varid, element, &
             element_start, element_count)
         call ncfile_check_error(ncstat)
