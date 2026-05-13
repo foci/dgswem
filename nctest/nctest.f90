@@ -142,6 +142,21 @@ program nctest
         nvell = nvell, &
         nbvv = nbvv &
     )
+    print *, "Writing step"
+    call my_63%ncdg_63_write_step( &
+        t = 0.0, &
+        zeta = [1.0, 2.0, 3.0] &
+    )
+    print *, "Writing step"
+    call my_63%ncdg_63_write_step( &
+        t = 1.0, &
+        zeta = [4.0, 5.0, 6.0] &
+    )
+    print *, "Writing step"
+    call my_63%ncdg_63_write_step( &
+        t = 2.0, &
+        zeta = [7.0, 8.0, 9.0] &
+    )
     print *, "Closing fort.63.nc"
     call my_63%close()
     print *, "Program complete"
