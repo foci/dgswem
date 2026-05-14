@@ -345,7 +345,7 @@ C.....Initialize NetCDF files, if needed
 #ifdef NETCDF
 #ifndef CMPI
       PRINT *, "NOW WITH NETCDF OUTPUT!"
-      PRINT *, "CREATING FILES..."
+      PRINT *, "CREATING NETCDF FILES..."
       CALL NETCDF_CREATE_FILES_SERIAL()
 #endif
 #endif
