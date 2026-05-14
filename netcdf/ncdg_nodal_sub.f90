@@ -272,7 +272,7 @@ submodule (ncdg:ncdg_file_sub) ncdg_nodal_sub
             "cf_role", "mesh_topology")
         call ncfile_check_error(ncstat)
         ncstat = nf90_put_att(self%ncid, self%adcirc_mesh_varid, &
-            "topology_dimension", "2")
+            "topology_dimension", 2)
         call ncfile_check_error(ncstat)
         ncstat = nf90_put_att(self%ncid, self%adcirc_mesh_varid, &
             "node_coordinates", "x y")

@@ -14,6 +14,7 @@ C.....Use appropriate modules
       
       USE SIZES, ONLY : SZ,layers
       USE GLOBAL, ONLY : SEDFLAG
+      USE netcdf_io, only : netcdf_write_step_serial
 
 #ifdef CMPI
       USE MESSENGER_ELEM
@@ -41,6 +42,12 @@ C.....Write out results
 #ifdef CMPI
 #ifdef BLKOUT
       CALL MSG_BLOCKSYNC_FINISH()
+#endif
+#endif
+
+#ifdef NETCDF
+#ifndef CMPI
+      call netcdf_write_step_serial()
 #endif
 #endif
 

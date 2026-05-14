@@ -21,7 +21,7 @@ C     sb-disabled for Linux&Intel compiler
      &     InitNAModule, ReadNodalAttr, InitNodalAttr, ESLM, ESLC,
      &     IFLINBF, IFHYBF
 #ifdef NETCDF
-      USE NETCDF_CREATE_FILES, ONLY : NETCDF_CREATE_FILES_SERIAL
+      use netcdf_io, only : netcdf_create_files_serial, netcdf_close_files_serial
 #endif
 #ifdef SWAN
 Casey 110422: Create a new data structure with discontinuous information.
@@ -392,6 +392,15 @@ Casey 121126: DEBUG.
 C...  
 C...  ****************** TIME STEPPING LOOP ENDS HERE ********************
 C...  
+
+C.....Close NetCDF files, if needed
+#ifdef NETCDF
+#ifndef CMPI
+      PRINT *, "CLOSING NETCDF FILES..."
+      CALL NETCDF_CLOSE_FILES_SERIAL()
+#endif
+#endif
+
 C...  
 C...  IF IHARIND=1 SOLVE THE HARMONIC ANALYSIS PROBLEM AND WRITE OUTPUT
 C...  

@@ -1,26 +1,29 @@
-module netcdf_create_files
-!! Module for initializing NetCDF files.
+module netcdf_io
+!! Module for interacting with NetCDF files.
 
-    use global, only : dp, ics, mnbou, mnope, nbdv, nbou, nbvv, ne, neta, nhy, nm, nope, np, nvel, nvdll, nvell, segtype, x, y
     !use dg, only : none
     use netcdf, only : nf90_unlimited
     use ncdg, only : ncdg_63
     
     implicit none
+
+    ! Committing the sin of global variables, for now
+    type(ncdg_63) :: my_63
     
     contains
     
     subroutine netcdf_create_files_serial()
-    !! Initialize all NetCDF output files for the simulation.
-    !!
-    !! @warning "Serial Use Only"
-    !! This subroutine is not designed for use with MPI. If used in parallel,
-    !! it should only be called from a single processor.
-    !! @endwarning
+        !! Initialize all NetCDF output files for the simulation.
+        !!
+        !! @warning "Serial Use Only"
+        !! This subroutine is not designed for use with MPI. If used in parallel,
+        !! it should only be called from a single processor.
+        !! @endwarning
+        
+        use global, only : dp, ics, mnbou, mnope, nbdv, nbou, nbvv, ne, neta, &
+            nhy, nm, nope, np, nvel, nvdll, nvell, segtype, x, y
         
         implicit none
-
-        type(ncdg_63) :: my_63
 
         integer, allocatable :: ibtypee(:)
         integer, allocatable :: ibtype(:)
@@ -28,7 +31,7 @@ module netcdf_create_files
         allocate(ibtypee(nope))
         allocate(ibtype(nbou))
 
-        ibtypee = 0 ! This is valid syntax
+        ibtypee = 0 ! This is valid syntax for array of 0s
         ibtype = segtype
         
         call my_63%init("fort.63.nc")
@@ -66,10 +69,25 @@ module netcdf_create_files
             nvell = nvell, &
             nbvv = nbvv &
         )
-        call my_63%close()
 
         deallocate(ibtypee)
         deallocate(ibtype)
     end subroutine netcdf_create_files_serial
 
-end module netcdf_create_files
+    subroutine netcdf_write_step_serial()
+        !! Write current state to all NetCDF output files for the simulation.
+
+        use global, only : eta2, time_a
+
+        implicit none
+        
+        call my_63%ncdg_63_write_step(t=time_a, zeta=eta2)
+    end subroutine netcdf_write_step_serial
+
+    subroutine netcdf_close_files_serial()
+        !! Close all NetCDF output files
+        
+        call my_63%close()
+    end subroutine netcdf_close_files_serial
+
+end module netcdf_io

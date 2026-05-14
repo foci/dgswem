@@ -117,6 +117,12 @@ submodule (ncdg:ncdg_nodal_sub) ncdg_63_sub
         integer :: zeta_start(2) ! Starting position for zeta data
         integer :: zeta_count(2) ! zeta data block size
         integer :: record_count ! For indexing time step
+        
+        ! Exit define mode
+        ncstat = nf90_enddef(self%ncid)
+        if (ncstat /= nf90_enotindefine) then
+            call ncfile_check_error(ncstat)
+        endif
 
         ! Get number of nodes from node dimension length
         ncstat = nf90_inquire_dimension(self%ncid, self%node_dimid, &
@@ -143,6 +149,10 @@ submodule (ncdg:ncdg_nodal_sub) ncdg_63_sub
         zeta_count(2) = 1 ! time dimension span
         ncstat = nf90_put_var(self%ncid, self%zeta_varid, &
             zeta, zeta_start, zeta_count)
+        call ncfile_check_error(ncstat)
+
+        ! After each write, sync
+        ncstat = nf90_sync(self%ncid)
         call ncfile_check_error(ncstat)
     end procedure ncdg_63_write_step
     

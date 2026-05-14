@@ -61,7 +61,7 @@ dgswem_src = files([
 
 if get_option('netcdf')
     dgswem_netcdf_src = files([
-        'netcdf_create_files.f90'
+        'netcdf_io.f90'
     ])
 endif
 

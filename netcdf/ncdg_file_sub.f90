@@ -64,15 +64,18 @@ submodule (ncdg) ncdg_file_sub
             "standard_name", "time")
         call ncfile_check_error(ncstat)
         ncstat = nf90_put_att(self%ncid, self%time_varid, &
-            "units", "seconds since UNDEFINED")
+            "units", "seconds since 2026-01-01 00:00:00")
         call ncfile_check_error(ncstat)
         ncstat = nf90_put_att(self%ncid, self%time_varid, &
-            "base_date", "UNDEFINED")
+            "base_date", "2026-01-01 00:00:00")
+        call ncfile_check_error(ncstat)
+        ncstat = nf90_put_att(self%ncid, self%time_varid, &
+            "axis", "T")
         call ncfile_check_error(ncstat)
 
         ! Define global attributes
         ncstat = nf90_put_att(self%ncid, nf90_global, &
-            "model", "DGSWEM")
+            "model", "ADCIRC")
         call ncfile_check_error(ncstat)
         ncstat = nf90_put_att(self%ncid, nf90_global, &
             "version", "")
