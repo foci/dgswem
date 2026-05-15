@@ -10,7 +10,7 @@ module ncdg
 
     ! Only these specific child types are exposed to the public. The
     ! parent types are just for organization, exploiting inheritance.
-    public :: ncdg_63
+    public :: ncdg_63, ncdg_64
 
     ! Intra-module constants
 
@@ -212,6 +212,34 @@ module ncdg
         procedure, public :: ncdg_63_write_step
         
     end type ncdg_63
+
+    type, extends(ncdg_nodal) :: ncdg_64
+        !! fort.64.nc file editing object
+
+        ! Dimension IDs
+
+        ! Dimension names
+
+        ! Variable IDs
+        integer :: u_vel_varid = -1
+        !! ID of u_vel variable
+        integer :: v_vel_varid = -1
+        !! ID of v_vel variable
+
+        ! Variable names
+        character(len=5) :: u_vel_varname = "u-vel"
+        !! Name of u_vel variable
+        character(len=5) :: v_vel_varname = "v-vel"
+        !! Name of v_vel variable
+
+        contains
+
+        procedure, public :: open => ncdg_64_open
+        procedure, public :: close => ncdg_64_close
+        procedure, public :: ncdg_64_set_metadata
+        procedure, public :: ncdg_64_write_step
+        
+    end type ncdg_64
 
     ! Begin interface
 
@@ -518,6 +546,92 @@ module ncdg
             real, intent(in) :: zeta(:)
             !! The current zeta values
         end subroutine ncdg_63_write_step
+
+        ! ncdg_64 subroutines
+        ! For fort.64.nc
+
+        module subroutine ncdg_64_open(self, mode)
+            !! Open a fort.64.nc output file, and set all IDs.
+
+            implicit none
+
+            class(ncdg_64), intent(inout) :: self
+            !! The wrapper object of the file
+            integer, optional, intent(in) :: mode
+            !! NetCDF open mode. Default is nf90_nowrite, i.e. read-only.
+        end subroutine ncdg_64_open
+        
+        module subroutine ncdg_64_close(self)
+            !! Close a fort.64.nc output file, and flush all IDs.
+            
+            implicit none
+            
+            class(ncdg_64), intent(inout) :: self
+            !! The wrapper object of the file
+        end subroutine ncdg_64_close
+
+        module subroutine ncdg_64_set_metadata(self, time_dimsize, &
+            node_dimsize, nele_dimsize, nvertex_dimsize, &
+            nope_dimsize, neta_dimsize, max_nvdll_dimsize, &
+            nbou_dimsize, nvel_dimsize, max_nvell_dimsize, &
+            mesh_dimsize, nope, nbou, ics)
+            !! Set variables, dimensions, and metadata for a fort.64.nc
+            !! output file.
+
+            implicit none
+
+            class(ncdg_64), intent(inout) :: self
+            !! The wrapper object being initialized
+            integer, intent(in):: time_dimsize
+            !! Size of time dimension
+            integer, intent(in):: node_dimsize
+            !! Size of node dimension
+            integer, intent(in) :: nele_dimsize
+            !! Size of nele dimension
+            integer, intent(in) :: nvertex_dimsize
+            !! Size of nvertex dimension
+            integer, intent(in) :: nope_dimsize
+            !! Size of nope dimension
+            integer, intent(in) :: neta_dimsize 
+            !! Size of neta dimension
+            integer, intent(in) :: max_nvdll_dimsize
+            !! Size of max_nvdll dimension
+            integer, intent(in) :: nbou_dimsize
+            !! Size of nbou dimension
+            integer, intent(in) :: nvel_dimsize
+            !! Size of nvel dimension
+            integer, intent(in) :: max_nvell_dimsize
+            !! Size of max_nvell dimension
+            integer, intent(in) :: mesh_dimsize
+            !! Size of mesh dimension
+            ! BEGIN ADCIRC VARIABLES
+            integer, intent(in) :: nope
+            !! The number of elevation boundary segments. This corresponds
+            !! to [[global(module):nope(variable)]].
+            integer, intent(in) :: nbou
+            !! The number of normal flow (discharge) boundary
+            !! segments. This corresponds to
+            !! [[global(module):nbou(variable)]].
+            integer, intent(in) :: ics
+            !! The number of elevation boundary segments. This corresponds
+            !! to [[global(module):ics(variable)]].
+        end subroutine ncdg_64_set_metadata
+
+        module subroutine ncdg_64_write_step(self, t, u_vel, v_vel)
+            !! Timestep writing function for a fort.64.nc output file.
+    
+            implicit none
+            
+            class(ncdg_64), intent(inout) :: self
+            !! The wrapper object being written to
+            real, intent(in) :: t
+            !! The current time
+            real, intent(in) :: u_vel(:)
+            !! The current u_vel values
+            real, intent(in) :: v_vel(:)
+            !! The current v_vel values
+        end subroutine ncdg_64_write_step
+        
     end interface
     
 end module ncdg
