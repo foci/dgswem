@@ -281,12 +281,6 @@ submodule (ncdg:ncdg_file_sub) ncdg_nodal_sub
             "face_node_connectivity", "element")
         call ncfile_check_error(ncstat)
 
-        ! Additional 
-        if (ics == 1) then
-            print *, "Cartesian coordinate system detected. GIS " &
-                // "rendering may fail."
-        end if
-
         ! Elevation boundary variables
         if (nope /= 0) then
             ! neta
@@ -294,7 +288,7 @@ submodule (ncdg:ncdg_file_sub) ncdg_nodal_sub
                 nf90_int, varid=self%neta_varid)
             call ncfile_check_error(ncstat)
             ncstat = nf90_put_att(self%ncid, self%neta_varid, &
-                "long_name", "total numbar of elevation specified " &
+                "long_name", "total number of elevation specified " &
                 // "boundary nodes")
             call ncfile_check_error(ncstat)
             ncstat = nf90_put_att(self%ncid, self%neta_varid, &
@@ -394,7 +388,7 @@ submodule (ncdg:ncdg_file_sub) ncdg_nodal_sub
             call ncfile_check_error(ncstat)
             ncstat = nf90_put_att(self%ncid, self%ibtype_varid, &
                 "long_name", "type of each normal flow (discharge) " &
-                // " specified boundary segment")
+                // "specified boundary segment")
             call ncfile_check_error(ncstat)
             ncstat = nf90_put_att(self%ncid, self%ibtype_varid, &
                 "units", "nondimensional")
@@ -421,10 +415,10 @@ submodule (ncdg:ncdg_file_sub) ncdg_nodal_sub
             "long_name", "distance below geoid")
         call ncfile_check_error(ncstat)
         ncstat = nf90_put_att(self%ncid, self%depth_varid, &
-            "standard_name", "depth below geoid")
+            "standard_name", "depth_below_geoid")
         call ncfile_check_error(ncstat)
         ncstat = nf90_put_att(self%ncid, self%depth_varid, &
-            "coordinates", "time y x")
+            "coordinates", "y x")
         call ncfile_check_error(ncstat)
         ncstat = nf90_put_att(self%ncid, self%depth_varid, &
             "location", "node")
