@@ -111,7 +111,7 @@ submodule (ncdg:ncdg_nodal_sub) ncdg_64_sub
                 "positive", "east")
             call ncfile_check_error(ncstat)
         end if
-        if (ics == 0 .or. ics == 1) then ! For all cases
+        if (ics == 1 .or. ics == 2) then ! For all cases
             ncstat = nf90_put_att(self%ncid, self%u_vel_varid, &
                 "coordinates", "time y x")
             call ncfile_check_error(ncstat)
@@ -165,7 +165,7 @@ submodule (ncdg:ncdg_nodal_sub) ncdg_64_sub
                 "positive", "north")
             call ncfile_check_error(ncstat)
         end if
-        if (ics == 0 .or. ics == 1) then ! For all cases
+        if (ics == 1 .or. ics == 2) then ! For all cases
             ncstat = nf90_put_att(self%ncid, self%v_vel_varid, &
                 "coordinates", "time y x")
             call ncfile_check_error(ncstat)
