@@ -111,24 +111,26 @@ submodule (ncdg:ncdg_nodal_sub) ncdg_64_sub
                 "positive", "east")
             call ncfile_check_error(ncstat)
         end if
-        ncstat = nf90_put_att(self%ncid, self%u_vel_varid, &
-            "coordinates", "time y x")
-        call ncfile_check_error(ncstat)
-        ncstat = nf90_put_att(self%ncid, self%u_vel_varid, &
-            "location", "node")
-        call ncfile_check_error(ncstat)
-        ncstat = nf90_put_att(self%ncid, self%u_vel_varid, &
-            "mesh", "adcirc_mesh")
-        call ncfile_check_error(ncstat)
-        ncstat = nf90_put_att(self%ncid, self%u_vel_varid, &
-            "units", "m s-1")
-        call ncfile_check_error(ncstat)
-        ncstat = nf90_put_att(self%ncid, self%u_vel_varid, &
-            "_FillValue", real_fill_value)
-        call ncfile_check_error(ncstat)
-        ncstat = nf90_put_att(self%ncid, self%u_vel_varid, &
-            "dry_Value", real_fill_value)
-        call ncfile_check_error(ncstat)
+        if (ics == 0 .or. ics == 1) then ! For all cases
+            ncstat = nf90_put_att(self%ncid, self%u_vel_varid, &
+                "coordinates", "time y x")
+            call ncfile_check_error(ncstat)
+            ncstat = nf90_put_att(self%ncid, self%u_vel_varid, &
+                "location", "node")
+            call ncfile_check_error(ncstat)
+            ncstat = nf90_put_att(self%ncid, self%u_vel_varid, &
+                "mesh", "adcirc_mesh")
+            call ncfile_check_error(ncstat)
+            ncstat = nf90_put_att(self%ncid, self%u_vel_varid, &
+                "units", "m s-1")
+            call ncfile_check_error(ncstat)
+            ncstat = nf90_put_att(self%ncid, self%u_vel_varid, &
+                "_FillValue", real_fill_value)
+            call ncfile_check_error(ncstat)
+            ncstat = nf90_put_att(self%ncid, self%u_vel_varid, &
+                "dry_Value", real_fill_value)
+            call ncfile_check_error(ncstat)
+        endif
 
         ! v_vel
         if (ics == 1) then ! Cartesian
@@ -163,24 +165,26 @@ submodule (ncdg:ncdg_nodal_sub) ncdg_64_sub
                 "positive", "north")
             call ncfile_check_error(ncstat)
         end if
-        ncstat = nf90_put_att(self%ncid, self%v_vel_varid, &
-            "coordinates", "time y x")
-        call ncfile_check_error(ncstat)
-        ncstat = nf90_put_att(self%ncid, self%v_vel_varid, &
-            "location", "node")
-        call ncfile_check_error(ncstat)
-        ncstat = nf90_put_att(self%ncid, self%v_vel_varid, &
-            "mesh", "adcirc_mesh")
-        call ncfile_check_error(ncstat)
-        ncstat = nf90_put_att(self%ncid, self%v_vel_varid, &
-            "units", "m s-1")
-        call ncfile_check_error(ncstat)
-        ncstat = nf90_put_att(self%ncid, self%v_vel_varid, &
-            "_FillValue", real_fill_value)
-        call ncfile_check_error(ncstat)
-        ncstat = nf90_put_att(self%ncid, self%v_vel_varid, &
-            "dry_Value", real_fill_value)
-        call ncfile_check_error(ncstat)
+        if (ics == 0 .or. ics == 1) then ! For all cases
+            ncstat = nf90_put_att(self%ncid, self%v_vel_varid, &
+                "coordinates", "time y x")
+            call ncfile_check_error(ncstat)
+            ncstat = nf90_put_att(self%ncid, self%v_vel_varid, &
+                "location", "node")
+            call ncfile_check_error(ncstat)
+            ncstat = nf90_put_att(self%ncid, self%v_vel_varid, &
+                "mesh", "adcirc_mesh")
+            call ncfile_check_error(ncstat)
+            ncstat = nf90_put_att(self%ncid, self%v_vel_varid, &
+                "units", "m s-1")
+            call ncfile_check_error(ncstat)
+            ncstat = nf90_put_att(self%ncid, self%v_vel_varid, &
+                "_FillValue", real_fill_value)
+            call ncfile_check_error(ncstat)
+            ncstat = nf90_put_att(self%ncid, self%v_vel_varid, &
+                "dry_Value", real_fill_value)
+            call ncfile_check_error(ncstat)
+        endif
         
         ! Define global attributes
         ! N/A, for now
