@@ -227,9 +227,9 @@ module ncdg
         !! ID of v_vel variable
 
         ! Variable names
-        character(len=5) :: u_vel_varname = "u-vel"
+        character(len=5) :: u_vel_varname = "u_vel"
         !! Name of u_vel variable
-        character(len=5) :: v_vel_varname = "v-vel"
+        character(len=5) :: v_vel_varname = "v_vel"
         !! Name of v_vel variable
 
         contains
