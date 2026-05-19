@@ -124,7 +124,7 @@ submodule (ncdg) ncdg_file_sub
             "convention", "CF")
         call ncfile_check_error(ncstat)
         ncstat = nf90_put_att(self%ncid, nf90_global, &
-            "Conventions", "UGRID-1.0")
+            "Conventions", "CF-1.6, UGRID-1.0")
         call ncfile_check_error(ncstat)
         ! Begin excluded block
         ! Implementation deferred
