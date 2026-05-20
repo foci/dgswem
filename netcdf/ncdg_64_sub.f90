@@ -90,7 +90,7 @@ submodule (ncdg:ncdg_nodal_sub) ncdg_64_sub
                 // "in x-direction")
             call ncfile_check_error(ncstat)
             ncstat = nf90_put_att(self%ncid, self%u_vel_varid, &
-                "standard_name", "x_water_velocity_depth_averaged")
+                "standard_name", "sea_water_x_velocity")
             call ncfile_check_error(ncstat)
             ncstat = nf90_put_att(self%ncid, self%u_vel_varid, &
                 "positive", "right")
@@ -143,7 +143,7 @@ submodule (ncdg:ncdg_nodal_sub) ncdg_64_sub
                 // "in y-direction")
             call ncfile_check_error(ncstat)
             ncstat = nf90_put_att(self%ncid, self%v_vel_varid, &
-                "standard_name", "y_water_velocity_depth_averaged")
+                "standard_name", "sea_water_y_velocity")
             call ncfile_check_error(ncstat)
             ncstat = nf90_put_att(self%ncid, self%v_vel_varid, &
                 "positive", "90 degrees counterclockwise from x " &
