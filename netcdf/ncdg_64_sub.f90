@@ -87,7 +87,7 @@ submodule (ncdg:ncdg_nodal_sub) ncdg_64_sub
             call ncfile_check_error(ncstat)
             ncstat = nf90_put_att(self%ncid, self%u_vel_varid, &
                 "long_name", "water column vertically averaged " &
-                // "in x-direction")
+                // "x-component")
             call ncfile_check_error(ncstat)
             ncstat = nf90_put_att(self%ncid, self%u_vel_varid, &
                 "standard_name", "sea_water_x_velocity")
@@ -140,7 +140,7 @@ submodule (ncdg:ncdg_nodal_sub) ncdg_64_sub
             call ncfile_check_error(ncstat)
             ncstat = nf90_put_att(self%ncid, self%v_vel_varid, &
                 "long_name", "water column vertically averaged " &
-                // "in y-direction")
+                // "y-component")
             call ncfile_check_error(ncstat)
             ncstat = nf90_put_att(self%ncid, self%v_vel_varid, &
                 "standard_name", "sea_water_y_velocity")
