@@ -42,14 +42,19 @@ module ncutil
         
         class(ncfile), intent(inout) :: self
         !! The wrapper object being initialized
-        character(len=*), intent(in) :: path
-        !! Path and name for the NetCDF file
+        character(len=*), optional, intent(in) :: path
+        !! Path and name for the NetCDF file. Default is untitled.nc.
         integer, optional, intent(in) :: cmode
         !! NetCDF creation mode. Default is nf90_clobber.
         
         integer :: ncstat ! Status of most recent operation
-        
-        self%path = path
+
+        ! Set path
+        if (present(path)) then
+            self%path = path
+        else
+            self%path = "untitled.nc"
+        endif
         
         ! Create file
         if (present(cmode)) then

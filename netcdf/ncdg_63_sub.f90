@@ -5,6 +5,20 @@ submodule (ncdg:ncdg_nodal_sub) ncdg_63_sub
 
     contains
 
+    module procedure ncdg_63_init
+        ! See interface for arguments and documentation
+
+        if (present(path) .and. present(cmode)) then
+            call self%ncfile%init(path=path, cmode=cmode)
+        else if (present(path)) then
+            call self%ncfile%init(path=path)
+        else if (present(cmode)) then
+            call self%ncfile%init(path="fort.63.nc", cmode=cmode)
+        else
+            call self%ncfile%init(path="fort.63.nc")
+        end if
+    end procedure ncdg_63_init
+
     module procedure ncdg_63_open
         ! See interface for arguments and documentation
         

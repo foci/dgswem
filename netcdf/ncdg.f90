@@ -206,6 +206,7 @@ module ncdg
 
         contains
 
+        procedure, public :: init => ncdg_63_init
         procedure, public :: open => ncdg_63_open
         procedure, public :: close => ncdg_63_close
         procedure, public :: ncdg_63_set_metadata
@@ -234,6 +235,7 @@ module ncdg
 
         contains
 
+        procedure, public :: init => ncdg_64_init
         procedure, public :: open => ncdg_64_open
         procedure, public :: close => ncdg_64_close
         procedure, public :: ncdg_64_set_metadata
@@ -470,6 +472,25 @@ module ncdg
         ! ncdg_63 subroutines
         ! For fort.63.nc
 
+        module subroutine ncdg_63_init(self, path, cmode)
+            !! Initialization function for
+            !! [[ncdg(module):ncdg_63(type)]]. Left in define mode.
+            !!
+            !! @warning "File Not Closed"
+            !! After initialization, the underlying file object is in
+            !! define mode. The user must remember to close it.
+            !! @endwarning
+
+            implicit none
+
+            class(ncdg_63), intent(inout) :: self
+            !! The wrapper object of the file
+            character(len=*), optional, intent(in) :: path
+            !! Path and name for the NetCDF file. Default is fort.63.nc.
+            integer, optional, intent(in) :: cmode
+            !! NetCDF creation mode. Default is nf90_clobber.
+        end subroutine ncdg_63_init
+
         module subroutine ncdg_63_open(self, mode)
             !! Open a fort.63.nc output file, and set all IDs.
 
@@ -554,6 +575,25 @@ module ncdg
 
         ! ncdg_64 subroutines
         ! For fort.64.nc
+
+        module subroutine ncdg_64_init(self, path, cmode)
+            !! Initialization function for
+            !! [[ncdg(module):ncdg_64(type)]]. Left in define mode.
+            !!
+            !! @warning "File Not Closed"
+            !! After initialization, the underlying file object is in
+            !! define mode. The user must remember to close it.
+            !! @endwarning
+
+            implicit none
+
+            class(ncdg_64), intent(inout) :: self
+            !! The wrapper object of the file
+            character(len=*), optional, intent(in) :: path
+            !! Path and name for the NetCDF file. Default is fort.64.nc.
+            integer, optional, intent(in) :: cmode
+            !! NetCDF creation mode. Default is nf90_clobber.
+        end subroutine ncdg_64_init
 
         module subroutine ncdg_64_open(self, mode)
             !! Open a fort.64.nc output file, and set all IDs.

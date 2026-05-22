@@ -36,7 +36,7 @@ module netcdf_io
         ibtype = segtype
 
         ! fort.63.nc
-        call my_63%init("fort.63.nc")
+        call my_63%init()
         call my_63%ncdg_63_set_metadata( &
             nt=nf90_unlimited, &
             np=np, &
@@ -70,7 +70,7 @@ module netcdf_io
         )
 
         ! fort.64.nc
-        call my_64%init("fort.64.nc")
+        call my_64%init()
         call my_64%ncdg_64_set_metadata( &
             nt=nf90_unlimited, &
             np=np, &
