@@ -268,7 +268,7 @@ module ncdg
             !! The wrapper object of the file
         end subroutine ncdg_file_close
 
-        module subroutine ncdg_file_set_metadata(self, time_dimsize)
+        module subroutine ncdg_file_set_metadata(self, nt)
             !! Set variables, dimensions, and metadata for a DGSWEM
             !! output file.
 
@@ -276,8 +276,9 @@ module ncdg
 
             class(ncdg_file), intent(inout) :: self
             !! The wrapper object of the file
-            integer, intent(in) :: time_dimsize
-            !! Size of time dimension
+            integer, intent(in):: nt
+            !! Number of time steps. This corresponds to
+            !! [[global(module):nt(variable)]] or nf90_unlimited.
         end subroutine ncdg_file_set_metadata
 
         ! ncdg_nodal subroutines
@@ -303,11 +304,8 @@ module ncdg
             !! The wrapper object of the file
         end subroutine ncdg_nodal_close
 
-        module subroutine ncdg_nodal_set_metadata(self, time_dimsize, &
-            node_dimsize, nele_dimsize, nvertex_dimsize, &
-            nope_dimsize, neta_dimsize, max_nvdll_dimsize, &
-            nbou_dimsize, nvel_dimsize, max_nvell_dimsize, &
-            mesh_dimsize, nope, nbou, ics)
+        module subroutine ncdg_nodal_set_metadata(self, nt, np, ne, &
+            nhy, nope, neta, max_nvdll, nbou, nvel, max_nvell, ics)
             !! Set variables, dimensions, and metadata for a nodal
             !! output file.
 
@@ -315,39 +313,44 @@ module ncdg
 
             class(ncdg_nodal), intent(inout) :: self
             !! The wrapper object of the file
-            integer, intent(in):: time_dimsize
-            !! Size of time dimension
-            integer, intent(in):: node_dimsize
-            !! Size of node dimension
-            integer, intent(in) :: nele_dimsize
-            !! Size of nele dimension
-            integer, intent(in) :: nvertex_dimsize
-            !! Size of nvertex dimension
-            integer, intent(in) :: nope_dimsize
-            !! Size of nope dimension
-            integer, intent(in) :: neta_dimsize 
-            !! Size of neta dimension
-            integer, intent(in) :: max_nvdll_dimsize
-            !! Size of max_nvdll dimension
-            integer, intent(in) :: nbou_dimsize
-            !! Size of nbou dimension
-            integer, intent(in) :: nvel_dimsize
-            !! Size of nvel dimension
-            integer, intent(in) :: max_nvell_dimsize
-            !! Size of max_nvell dimension
-            integer, intent(in) :: mesh_dimsize
-            !! Size of mesh dimension
-            ! BEGIN ADCIRC VARIABLES
+            integer, intent(in):: nt
+            !! Number of time steps. This corresponds to
+            !! [[global(module):nt(variable)]] or nf90_unlimited.
+            integer, intent(in):: np
+            !! Number of nodes. This corresponds to
+            !! [[global(module):np(variable)]].
+            integer, intent(in) :: ne
+            !! Number of elements. This corresponds to
+            !! [[global(module):ne(variable)]].
+            integer, intent(in) :: nhy
+            !! The number of vertices per element. This corresponds to
+            !! [[global(module):nhy(variable)]].
             integer, intent(in) :: nope
             !! The number of elevation boundary segments. This corresponds
             !! to [[global(module):nope(variable)]].
+            integer, intent(in) :: neta
+            !! The number of elevation boundary nodes. This corresponds
+            !! to [[global(module):neta(variable)]].
+            integer, intent(in) :: max_nvdll
+            !! The maximum number of nodes in a given elevation
+            !! boundary segment. This corresponds the maximum value
+            !! of [[global(module):nvdll(variable)]].
             integer, intent(in) :: nbou
             !! The number of normal flow (discharge) boundary
             !! segments. This corresponds to
             !! [[global(module):nbou(variable)]].
+            integer, intent(in) :: nvel
+            !! The number of normal flow (discharge) boundary nodes.
+            !! This corresponds to
+            !! [[global(module):nvel(variable)]].
+            integer, intent(in) :: max_nvell
+            !! The maximum number of nodes in a given normal flow
+            !! (discharge) boundary segment. This corresponds to
+            !! the maximum value of
+            !! [[global(module):nvell(variable)]].
             integer, intent(in) :: ics
-            !! The number of elevation boundary segments. This corresponds
-            !! to [[global(module):ics(variable)]].
+            !! Mesh type. This corresponds to
+            !! [[global(module):ics(variable)]]
         end subroutine ncdg_nodal_set_metadata
 
         module subroutine ncdg_nodal_write_mesh(self, x, y, dp, &
@@ -487,51 +490,53 @@ module ncdg
             !! The wrapper object of the file
         end subroutine ncdg_63_close
         
-        module subroutine ncdg_63_set_metadata(self, time_dimsize, &
-            node_dimsize, nele_dimsize, nvertex_dimsize, &
-            nope_dimsize, neta_dimsize, max_nvdll_dimsize, &
-            nbou_dimsize, nvel_dimsize, max_nvell_dimsize, &
-            mesh_dimsize, nope, nbou, ics)
+        module subroutine ncdg_63_set_metadata(self, nt, np, ne, &
+            nhy, nope, neta, max_nvdll, nbou, nvel, max_nvell, ics)
             !! Set variables, dimensions, and metadata for a fort.63.nc
             !! output file.
 
             implicit none
 
             class(ncdg_63), intent(inout) :: self
-            !! The wrapper object being initialized
-            integer, intent(in):: time_dimsize
-            !! Size of time dimension
-            integer, intent(in):: node_dimsize
-            !! Size of node dimension
-            integer, intent(in) :: nele_dimsize
-            !! Size of nele dimension
-            integer, intent(in) :: nvertex_dimsize
-            !! Size of nvertex dimension
-            integer, intent(in) :: nope_dimsize
-            !! Size of nope dimension
-            integer, intent(in) :: neta_dimsize 
-            !! Size of neta dimension
-            integer, intent(in) :: max_nvdll_dimsize
-            !! Size of max_nvdll dimension
-            integer, intent(in) :: nbou_dimsize
-            !! Size of nbou dimension
-            integer, intent(in) :: nvel_dimsize
-            !! Size of nvel dimension
-            integer, intent(in) :: max_nvell_dimsize
-            !! Size of max_nvell dimension
-            integer, intent(in) :: mesh_dimsize
-            !! Size of mesh dimension
-            ! BEGIN ADCIRC VARIABLES
+            !! The wrapper object of the file
+            integer, intent(in):: nt
+            !! Number of time steps. This corresponds to
+            !! [[global(module):nt(variable)]] or nf90_unlimited.
+            integer, intent(in):: np
+            !! Number of nodes. This corresponds to
+            !! [[global(module):np(variable)]].
+            integer, intent(in) :: ne
+            !! Number of elements. This corresponds to
+            !! [[global(module):ne(variable)]].
+            integer, intent(in) :: nhy
+            !! The number of vertices per element. This corresponds to
+            !! [[global(module):nhy(variable)]].
             integer, intent(in) :: nope
             !! The number of elevation boundary segments. This corresponds
             !! to [[global(module):nope(variable)]].
+            integer, intent(in) :: neta
+            !! The number of elevation boundary nodes. This corresponds
+            !! to [[global(module):neta(variable)]].
+            integer, intent(in) :: max_nvdll
+            !! The maximum number of nodes in a given elevation
+            !! boundary segment. This corresponds the maximum value
+            !! of [[global(module):nvdll(variable)]].
             integer, intent(in) :: nbou
             !! The number of normal flow (discharge) boundary
             !! segments. This corresponds to
             !! [[global(module):nbou(variable)]].
+            integer, intent(in) :: nvel
+            !! The number of normal flow (discharge) boundary nodes.
+            !! This corresponds to
+            !! [[global(module):nvel(variable)]].
+            integer, intent(in) :: max_nvell
+            !! The maximum number of nodes in a given normal flow
+            !! (discharge) boundary segment. This corresponds to
+            !! the maximum value of
+            !! [[global(module):nvell(variable)]].
             integer, intent(in) :: ics
-            !! The number of elevation boundary segments. This corresponds
-            !! to [[global(module):ics(variable)]].
+            !! Mesh type. This corresponds to
+            !! [[global(module):ics(variable)]]
         end subroutine ncdg_63_set_metadata
 
         module subroutine ncdg_63_write_step(self, t, zeta)
@@ -570,51 +575,53 @@ module ncdg
             !! The wrapper object of the file
         end subroutine ncdg_64_close
 
-        module subroutine ncdg_64_set_metadata(self, time_dimsize, &
-            node_dimsize, nele_dimsize, nvertex_dimsize, &
-            nope_dimsize, neta_dimsize, max_nvdll_dimsize, &
-            nbou_dimsize, nvel_dimsize, max_nvell_dimsize, &
-            mesh_dimsize, nope, nbou, ics)
+        module subroutine ncdg_64_set_metadata(self, nt, np, ne, &
+            nhy, nope, neta, max_nvdll, nbou, nvel, max_nvell, ics)
             !! Set variables, dimensions, and metadata for a fort.64.nc
             !! output file.
 
             implicit none
 
             class(ncdg_64), intent(inout) :: self
-            !! The wrapper object being initialized
-            integer, intent(in):: time_dimsize
-            !! Size of time dimension
-            integer, intent(in):: node_dimsize
-            !! Size of node dimension
-            integer, intent(in) :: nele_dimsize
-            !! Size of nele dimension
-            integer, intent(in) :: nvertex_dimsize
-            !! Size of nvertex dimension
-            integer, intent(in) :: nope_dimsize
-            !! Size of nope dimension
-            integer, intent(in) :: neta_dimsize 
-            !! Size of neta dimension
-            integer, intent(in) :: max_nvdll_dimsize
-            !! Size of max_nvdll dimension
-            integer, intent(in) :: nbou_dimsize
-            !! Size of nbou dimension
-            integer, intent(in) :: nvel_dimsize
-            !! Size of nvel dimension
-            integer, intent(in) :: max_nvell_dimsize
-            !! Size of max_nvell dimension
-            integer, intent(in) :: mesh_dimsize
-            !! Size of mesh dimension
-            ! BEGIN ADCIRC VARIABLES
+            !! The wrapper object of the file
+            integer, intent(in):: nt
+            !! Number of time steps. This corresponds to
+            !! [[global(module):nt(variable)]] or nf90_unlimited.
+            integer, intent(in):: np
+            !! Number of nodes. This corresponds to
+            !! [[global(module):np(variable)]].
+            integer, intent(in) :: ne
+            !! Number of elements. This corresponds to
+            !! [[global(module):ne(variable)]].
+            integer, intent(in) :: nhy
+            !! The number of vertices per element. This corresponds to
+            !! [[global(module):nhy(variable)]].
             integer, intent(in) :: nope
             !! The number of elevation boundary segments. This corresponds
             !! to [[global(module):nope(variable)]].
+            integer, intent(in) :: neta
+            !! The number of elevation boundary nodes. This corresponds
+            !! to [[global(module):neta(variable)]].
+            integer, intent(in) :: max_nvdll
+            !! The maximum number of nodes in a given elevation
+            !! boundary segment. This corresponds the maximum value
+            !! of [[global(module):nvdll(variable)]].
             integer, intent(in) :: nbou
             !! The number of normal flow (discharge) boundary
             !! segments. This corresponds to
             !! [[global(module):nbou(variable)]].
+            integer, intent(in) :: nvel
+            !! The number of normal flow (discharge) boundary nodes.
+            !! This corresponds to
+            !! [[global(module):nvel(variable)]].
+            integer, intent(in) :: max_nvell
+            !! The maximum number of nodes in a given normal flow
+            !! (discharge) boundary segment. This corresponds to
+            !! the maximum value of
+            !! [[global(module):nvell(variable)]].
             integer, intent(in) :: ics
-            !! The number of elevation boundary segments. This corresponds
-            !! to [[global(module):ics(variable)]].
+            !! Mesh type. This corresponds to
+            !! [[global(module):ics(variable)]]
         end subroutine ncdg_64_set_metadata
 
         module subroutine ncdg_64_write_step(self, t, u_vel, v_vel)
@@ -631,6 +638,12 @@ module ncdg
             real, intent(in) :: v_vel(:)
             !! The current v_vel values
         end subroutine ncdg_64_write_step
+
+        ! ncdg_maxele subroutines
+        ! For maxele.63.nc
+
+        ! ncdg_maxvel subroutines
+        ! For maxvel.64.nc
         
     end interface
     

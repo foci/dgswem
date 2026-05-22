@@ -142,39 +142,39 @@ submodule (ncdg:ncdg_file_sub) ncdg_nodal_sub
 
         ! Call parent function
         call self%ncdg_file%ncdg_file_set_metadata( &
-            time_dimsize = time_dimsize &
+            nt=nt &
         )
 
         ! Define dimensions
         ncstat = nf90_def_dim(self%ncid, self%node_dimname, &
-            node_dimsize, self%node_dimid)
+            np, self%node_dimid)
         call ncfile_check_error(ncstat)
         ncstat = nf90_def_dim(self%ncid, self%nele_dimname, &
-            nele_dimsize, self%nele_dimid)
+            ne, self%nele_dimid)
         call ncfile_check_error(ncstat)
         ncstat = nf90_def_dim(self%ncid, self%nvertex_dimname, &
-            nvertex_dimsize, self%nvertex_dimid)
+            nhy, self%nvertex_dimid)
         call ncfile_check_error(ncstat)
         ncstat = nf90_def_dim(self%ncid, self%nope_dimname, &
-            nope_dimsize, self%nope_dimid)
+            nope, self%nope_dimid)
         call ncfile_check_error(ncstat)
         ncstat = nf90_def_dim(self%ncid, self%neta_dimname, &
-            neta_dimsize, self%neta_dimid)
+            neta, self%neta_dimid)
         call ncfile_check_error(ncstat)
         ncstat = nf90_def_dim(self%ncid, self%max_nvdll_dimname, &
-            max_nvdll_dimsize, self%max_nvdll_dimid)
+            max_nvdll, self%max_nvdll_dimid)
         call ncfile_check_error(ncstat)
         ncstat = nf90_def_dim(self%ncid, self%nbou_dimname, &
-            nbou_dimsize, self%nbou_dimid)
+            nbou, self%nbou_dimid)
         call ncfile_check_error(ncstat)
         ncstat = nf90_def_dim(self%ncid, self%nvel_dimname, &
-            nvel_dimsize, self%nvel_dimid)
+            nvel, self%nvel_dimid)
         call ncfile_check_error(ncstat)
         ncstat = nf90_def_dim(self%ncid, self%max_nvell_dimname, &
-            max_nvell_dimsize, self%max_nvell_dimid)
+            max_nvell, self%max_nvell_dimid)
         call ncfile_check_error(ncstat)
         ncstat = nf90_def_dim(self%ncid, self%mesh_dimname, &
-            mesh_dimsize, self%mesh_dimid)
+            1, self%mesh_dimid)
         call ncfile_check_error(ncstat)
 
         ! Define variables and their attributes

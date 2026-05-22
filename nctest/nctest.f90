@@ -154,36 +154,30 @@ program nctest
     endif
     print *, "Setting metadata"
     call my_63%ncdg_63_set_metadata( &
-        time_dimsize = nf90_unlimited, &
-        node_dimsize = np, &
-        nele_dimsize = ne, &
-        nvertex_dimsize = nhy, &
-        nope_dimsize = nope, &
-        neta_dimsize = neta, &
-        max_nvdll_dimsize = maxval(nvdll), &
-        nbou_dimsize = nbou, &
-        nvel_dimsize = nvel, &
-        max_nvell_dimsize = maxval(nvell), &
-        mesh_dimsize = 1, &
-        nope = nope, &
-        nbou = nbou, &
-        ics = ics &
+        nt=nf90_unlimited, &
+        np=np, &
+        ne=ne, &
+        nhy=nhy, &
+        nope=nope, &
+        neta=neta, &
+        max_nvdll=maxval(nvdll), &
+        nbou=nbou, &
+        nvel=nvel, &
+        max_nvell=maxval(nvell), &
+        ics=ics &
     )
     call my_64%ncdg_64_set_metadata( &
-        time_dimsize = nf90_unlimited, &
-        node_dimsize = np, &
-        nele_dimsize = ne, &
-        nvertex_dimsize = nhy, &
-        nope_dimsize = nope, &
-        neta_dimsize = neta, &
-        max_nvdll_dimsize = maxval(nvdll), &
-        nbou_dimsize = nbou, &
-        nvel_dimsize = nvel, &
-        max_nvell_dimsize = maxval(nvell), &
-        mesh_dimsize = 1, &
-        nope = nope, &
-        nbou = nbou, &
-        ics = ics &
+        nt=nf90_unlimited, &
+        np=np, &
+        ne=ne, &
+        nhy=nhy, &
+        nope=nope, &
+        neta=neta, &
+        max_nvdll=maxval(nvdll), &
+        nbou=nbou, &
+        nvel=nvel, &
+        max_nvell=maxval(nvell), &
+        ics=ics &
     )
     if (write_metadata) then
         call print_metadata_63(my_63)
@@ -207,40 +201,40 @@ program nctest
     endif
     print *, "Writing mesh data"
     call my_63%ncdg_nodal_write_mesh( &
-        x = x, &
-        y = y, &
-        dp = dp, &
-        nm = nm, &
-        nhy = nhy, &
-        ne = ne, &
-        nope = nope, &
-        neta = neta, &
-        ibtypee = ibtypee, &
-        nvdll = nvdll, &
-        nbdv = nbdv, &
-        nbou = nbou, &
-        nvel = nvel, &
-        ibtype = ibtype, &
-        nvell = nvell, &
-        nbvv = nbvv &
+        x=x, &
+        y=y, &
+        dp=dp, &
+        nm=nm, &
+        nhy=nhy, &
+        ne=ne, &
+        nope=nope, &
+        neta=neta, &
+        ibtypee=ibtypee, &
+        nvdll=nvdll, &
+        nbdv=nbdv, &
+        nbou=nbou, &
+        nvel=nvel, &
+        ibtype=ibtype, &
+        nvell=nvell, &
+        nbvv=nbvv &
     )
     call my_64%ncdg_nodal_write_mesh( &
-        x = x, &
-        y = y, &
-        dp = dp, &
-        nm = nm, &
-        nhy = nhy, &
-        ne = ne, &
-        nope = nope, &
-        neta = neta, &
-        ibtypee = ibtypee, &
-        nvdll = nvdll, &
-        nbdv = nbdv, &
-        nbou = nbou, &
-        nvel = nvel, &
-        ibtype = ibtype, &
-        nvell = nvell, &
-        nbvv = nbvv &
+        x=x, &
+        y=y, &
+        dp=dp, &
+        nm=nm, &
+        nhy=nhy, &
+        ne=ne, &
+        nope=nope, &
+        neta=neta, &
+        ibtypee=ibtypee, &
+        nvdll=nvdll, &
+        nbdv=nbdv, &
+        nbou=nbou, &
+        nvel=nvel, &
+        ibtype=ibtype, &
+        nvell=nvell, &
+        nbvv=nbvv &
     )
     print *, "Writing step"
     call my_63%ncdg_63_write_step( &

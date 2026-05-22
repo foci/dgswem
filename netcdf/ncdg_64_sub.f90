@@ -58,20 +58,17 @@ submodule (ncdg:ncdg_nodal_sub) ncdg_64_sub
 
         ! Call parent function
         call self%ncdg_nodal%ncdg_nodal_set_metadata( &
-            time_dimsize = time_dimsize, &
-            node_dimsize = node_dimsize, &
-            nele_dimsize = nele_dimsize, &
-            nvertex_dimsize = nvertex_dimsize, &
-            nope_dimsize = nope_dimsize, &
-            neta_dimsize = neta_dimsize, &
-            max_nvdll_dimsize = max_nvdll_dimsize, &
-            nbou_dimsize = nbou_dimsize, &
-            nvel_dimsize = nvel_dimsize, &
-            max_nvell_dimsize = max_nvell_dimsize, &
-            mesh_dimsize = mesh_dimsize, &
-            nope = nope, &
-            nbou = nbou, &
-            ics = ics &
+            nt=nt, &
+            np=np, &
+            ne=ne, &
+            nhy=nhy, &
+            nope=nope, &
+            neta=neta, &
+            max_nvdll=max_nvdll, &
+            nbou=nbou, &
+            nvel=nvel, &
+            max_nvell=max_nvell, &
+            ics=ics &
         )
         
         ! Define dimensions

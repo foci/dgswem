@@ -48,7 +48,7 @@ submodule (ncdg) ncdg_file_sub
 
         ! Define dimensions
         ncstat = nf90_def_dim(self%ncid, self%time_dimname, &
-            time_dimsize, self%time_dimid)
+            nt, self%time_dimid)
         call ncfile_check_error(ncstat)
 
         ! Define variables and their attributes
