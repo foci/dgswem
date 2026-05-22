@@ -97,8 +97,7 @@ submodule (ncdg:ncdg_nodal_sub) ncdg_64_sub
                 varid=self%u_vel_varid)
             call ncfile_check_error(ncstat)
             ncstat = nf90_put_att(self%ncid, self%u_vel_varid, &
-                "long_name", "water column vertically averaged " &
-                // "x-component")
+                "long_name", "x component of depth-averaged velocity")
             call ncfile_check_error(ncstat)
             ncstat = nf90_put_att(self%ncid, self%u_vel_varid, &
                 "standard_name", "sea_water_x_velocity")
@@ -112,8 +111,8 @@ submodule (ncdg:ncdg_nodal_sub) ncdg_64_sub
                 varid=self%u_vel_varid)
             call ncfile_check_error(ncstat)
             ncstat = nf90_put_att(self%ncid, self%u_vel_varid, &
-                "long_name", "water column vertically averaged " &
-                // "east/west velocity")
+                "long_name", "eastward component of depth-averaged " &
+                // "velocity")
             call ncfile_check_error(ncstat)
             ncstat = nf90_put_att(self%ncid, self%u_vel_varid, &
                 "standard_name", "eastward_water_velocity")
@@ -150,8 +149,7 @@ submodule (ncdg:ncdg_nodal_sub) ncdg_64_sub
                 varid=self%v_vel_varid)
             call ncfile_check_error(ncstat)
             ncstat = nf90_put_att(self%ncid, self%v_vel_varid, &
-                "long_name", "water column vertically averaged " &
-                // "y-component")
+                "long_name", "y component of depth-averaged velocity")
             call ncfile_check_error(ncstat)
             ncstat = nf90_put_att(self%ncid, self%v_vel_varid, &
                 "standard_name", "sea_water_y_velocity")
@@ -166,8 +164,8 @@ submodule (ncdg:ncdg_nodal_sub) ncdg_64_sub
                 varid=self%v_vel_varid)
             call ncfile_check_error(ncstat)
             ncstat = nf90_put_att(self%ncid, self%v_vel_varid, &
-                "long_name", "water column vertically averaged " &
-                // "north/south velocity")
+                "long_name", "northward component of depth-averaged " &
+                // "velocity")
             call ncfile_check_error(ncstat)
             ncstat = nf90_put_att(self%ncid, self%v_vel_varid, &
                 "standard_name", "northward_water_velocity")
