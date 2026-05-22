@@ -50,7 +50,7 @@ module netcdf_io
             max_nvell=maxval(nvell), &
             ics=ics &
         )
-        call my_63%ncdg_nodal_write_mesh( &
+        call my_63%write_mesh( &
             x=x, &
             y=y, &
             dp=dp, &
@@ -84,7 +84,7 @@ module netcdf_io
             max_nvell=maxval(nvell), &
             ics=ics &
         )
-        call my_64%ncdg_nodal_write_mesh( &
+        call my_64%write_mesh( &
             x=x, &
             y=y, &
             dp=dp, &

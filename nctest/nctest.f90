@@ -200,7 +200,7 @@ program nctest
         call print_metadata_64(my_64)
     endif
     print *, "Writing mesh data"
-    call my_63%ncdg_nodal_write_mesh( &
+    call my_63%write_mesh( &
         x=x, &
         y=y, &
         dp=dp, &
@@ -218,7 +218,7 @@ program nctest
         nvell=nvell, &
         nbvv=nbvv &
     )
-    call my_64%ncdg_nodal_write_mesh( &
+    call my_64%write_mesh( &
         x=x, &
         y=y, &
         dp=dp, &

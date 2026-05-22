@@ -164,7 +164,7 @@ module ncdg
         procedure, public :: open => ncdg_nodal_open
         procedure, public :: close => ncdg_nodal_close
         procedure, public :: ncdg_nodal_set_metadata
-        procedure, public :: ncdg_nodal_write_mesh
+        procedure, public :: write_mesh => ncdg_nodal_write_mesh
 
     end type ncdg_nodal
 
