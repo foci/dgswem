@@ -10,7 +10,7 @@ module ncdg
 
     ! Only these specific child types are exposed to the public. The
     ! parent types are just for organization, exploiting inheritance.
-    public :: ncdg_63, ncdg_64
+    public :: ncdg_63, ncdg_64, ncdg_maxele
 
     ! Intra-module constants
 
@@ -242,6 +242,35 @@ module ncdg
         procedure, public :: ncdg_64_write_step
         
     end type ncdg_64
+
+    type, extends(ncdg_nodal) :: ncdg_maxele
+        !! maxele.53 file editing object
+
+        ! Dimension IDs
+
+        ! Dimension names
+
+        ! Variable IDs
+        integer :: zeta_max_varid = -1
+        !! ID of zeta_max variable
+        integer :: time_of_zeta_max_varid = -1
+        !! ID of time_of_zeta_max variable
+
+        ! Variable names
+        character(len=8) :: zeta_max_varname = "zeta_max"
+        !! Name of zeta_max variable
+        character(len=16) :: time_of_zeta_max_varname = "time_of_zeta_max"
+        !! Name of time_of_zeta_max variable
+
+        contains
+
+        procedure, public :: init => ncdg_maxele_init
+        procedure, public :: open => ncdg_maxele_open
+        procedure, public :: close => ncdg_maxele_close
+        procedure, public :: ncdg_maxele_set_metadata
+        procedure, public :: ncdg_maxele_write_step
+
+    end type ncdg_maxele
 
     ! Begin interface
 
@@ -681,6 +710,107 @@ module ncdg
 
         ! ncdg_maxele subroutines
         ! For maxele.63.nc
+
+        module subroutine ncdg_maxele_init(self, path, cmode)
+            !! Initialization function for
+            !! [[ncdg(module):ncdg_maxele(type)]]. Left in define mode.
+            !!
+            !! @warning "File Not Closed"
+            !! After initialization, the underlying file object is in
+            !! define mode. The user must remember to close it.
+            !! @endwarning
+
+            implicit none
+
+            class(ncdg_maxele), intent(inout) :: self
+            !! The wrapper object of the file
+            character(len=*), optional, intent(in) :: path
+            !! Path and name for the NetCDF file. Default is maxele.63.nc.
+            integer, optional, intent(in) :: cmode
+            !! NetCDF creation mode. Default is nf90_clobber.
+        end subroutine ncdg_maxele_init
+
+        module subroutine ncdg_maxele_open(self, mode)
+            !! Open a fort.maxele.nc output file, and set all IDs.
+
+            implicit none
+
+            class(ncdg_maxele), intent(inout) :: self
+            !! The wrapper object of the file
+            integer, optional, intent(in) :: mode
+            !! NetCDF open mode. Default is nf90_nowrite, i.e. read-only.
+        end subroutine ncdg_maxele_open
+        
+        module subroutine ncdg_maxele_close(self)
+            !! Close a maxele.63.nc output file, and flush all IDs.
+            
+            implicit none
+            
+            class(ncdg_maxele), intent(inout) :: self
+            !! The wrapper object of the file
+        end subroutine ncdg_maxele_close
+        
+        module subroutine ncdg_maxele_set_metadata(self, nt, np, ne, &
+            nhy, nope, neta, max_nvdll, nbou, nvel, max_nvell, ics)
+            !! Set variables, dimensions, and metadata for a maxele.63.nc
+            !! output file.
+
+            implicit none
+
+            class(ncdg_maxele), intent(inout) :: self
+            !! The wrapper object of the file
+            integer, intent(in):: nt
+            !! Number of time steps. This corresponds to
+            !! [[global(module):nt(variable)]] or nf90_unlimited.
+            integer, intent(in):: np
+            !! Number of nodes. This corresponds to
+            !! [[global(module):np(variable)]].
+            integer, intent(in) :: ne
+            !! Number of elements. This corresponds to
+            !! [[global(module):ne(variable)]].
+            integer, intent(in) :: nhy
+            !! The number of vertices per element. This corresponds to
+            !! [[global(module):nhy(variable)]].
+            integer, intent(in) :: nope
+            !! The number of elevation boundary segments. This corresponds
+            !! to [[global(module):nope(variable)]].
+            integer, intent(in) :: neta
+            !! The number of elevation boundary nodes. This corresponds
+            !! to [[global(module):neta(variable)]].
+            integer, intent(in) :: max_nvdll
+            !! The maximum number of nodes in a given elevation
+            !! boundary segment. This corresponds the maximum value
+            !! of [[global(module):nvdll(variable)]].
+            integer, intent(in) :: nbou
+            !! The number of normal flow (discharge) boundary
+            !! segments. This corresponds to
+            !! [[global(module):nbou(variable)]].
+            integer, intent(in) :: nvel
+            !! The number of normal flow (discharge) boundary nodes.
+            !! This corresponds to
+            !! [[global(module):nvel(variable)]].
+            integer, intent(in) :: max_nvell
+            !! The maximum number of nodes in a given normal flow
+            !! (discharge) boundary segment. This corresponds to
+            !! the maximum value of
+            !! [[global(module):nvell(variable)]].
+            integer, intent(in) :: ics
+            !! Mesh type. This corresponds to
+            !! [[global(module):ics(variable)]]
+        end subroutine ncdg_maxele_set_metadata
+
+        module subroutine ncdg_maxele_write_step(self, t, zeta_max)
+            !! Timestep writing function for a maxele.63.nc output file.
+    
+            implicit none
+            
+            class(ncdg_maxele), intent(inout) :: self
+            !! The wrapper object being written to
+            real, intent(in) :: t
+            !! The current time
+            real, intent(in) :: zeta_max(:)
+            !! The current zeta_max values
+        end subroutine ncdg_maxele_write_step
 
         ! ncdg_maxvel subroutines
         ! For maxvel.64.nc

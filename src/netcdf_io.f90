@@ -3,13 +3,14 @@ module netcdf_io
 
     !use dg, only : none
     use netcdf, only : nf90_unlimited
-    use ncdg, only : ncdg_63, ncdg_64
+    use ncdg, only : ncdg_63, ncdg_64, ncdg_maxele
     
     implicit none
 
     ! Committing the sin of global variables, for now
     type(ncdg_63) :: my_63
     type(ncdg_64) :: my_64
+    type(ncdg_maxele) :: my_maxele
     
     contains
     
@@ -103,6 +104,40 @@ module netcdf_io
             nbvv=nbvv &
         )
 
+        ! maxele.63.nc
+        call my_maxele%init()
+        call my_maxele%ncdg_maxele_set_metadata( &
+            nt=nf90_unlimited, &
+            np=np, &
+            ne=ne, &
+            nhy=3, &
+            nope=nope, &
+            neta=neta, &
+            max_nvdll=maxval(nvdll), &
+            nbou=nbou, &
+            nvel=nvel, &
+            max_nvell=maxval(nvell), &
+            ics=ics &
+        )
+        call my_maxele%write_mesh( &
+            x=x, &
+            y=y, &
+            dp=dp, &
+            nm=nm, &
+            nhy=nhy, &
+            ne=ne, &
+            nope=nope, &
+            neta=neta, &
+            ibtypee=ibtypee, &
+            nvdll=nvdll, &
+            nbdv=nbdv, &
+            nbou=nbou, &
+            nvel=nvel, &
+            ibtype=ibtype, &
+            nvell=nvell, &
+            nbvv=nbvv &
+        )
+
         deallocate(ibtypee)
         deallocate(ibtype)
     end subroutine netcdf_create_files_serial
@@ -110,12 +145,13 @@ module netcdf_io
     subroutine netcdf_write_step_serial()
         !! Write current state to all NetCDF output files for the simulation.
 
-        use global, only : eta2, time_a, uu2, vv2
+        use global, only : eta2, etamax, time_a, uu2, vv2
 
         implicit none
         
         call my_63%ncdg_63_write_step(t=time_a, zeta=eta2)
         call my_64%ncdg_64_write_step(t=time_a, u_vel=uu2, v_vel=vv2)
+        call my_maxele%ncdg_maxele_write_step(t=time_a, zeta_max=etamax)
     end subroutine netcdf_write_step_serial
 
     subroutine netcdf_close_files_serial()
@@ -123,6 +159,7 @@ module netcdf_io
         
         call my_63%close()
         call my_64%close()
+        call my_maxele%close()
     end subroutine netcdf_close_files_serial
 
 end module netcdf_io

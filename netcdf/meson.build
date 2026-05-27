@@ -5,5 +5,6 @@ ncdg_src = files([
     'ncdg_nodal_sub.f90',
     'ncdg_63_sub.f90',
     'ncdg_64_sub.f90',
+    'ncdg_maxele_sub.f90',
     'ncdg_station_sub.f90'
 ])
