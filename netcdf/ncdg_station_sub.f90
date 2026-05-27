@@ -11,11 +11,15 @@ submodule (ncdg:ncdg_file_sub) ncdg_station_sub
         ! integer :: ncstat ! Status of most recent operation
 
         ! Call parent function
-        if (present(mode)) then
-            call self%ncdg_file%open(mode)
+        if (present(mode) .and. present(comm) .and. present(info)) then
+            call self%ncdg_file%open(mode=mode, comm=comm, info=info)
+        else if (present(mode)) then
+            call self%ncdg_file%open(mode=mode)
+        else if (present(comm) .and. present(info)) then
+            call self%ncdg_file%open(comm=comm, info=info)
         else
             call self%ncdg_file%open()
-        endif
+        end if
 
         ! Set dimension IDs
         ! N/A, for now

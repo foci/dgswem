@@ -8,15 +8,29 @@ submodule (ncdg:ncdg_nodal_sub) ncdg_64_sub
     module procedure ncdg_64_init
         ! See interface for arguments and documentation
 
-        if (present(path) .and. present(cmode)) then
-            call self%ncfile%init(path=path, cmode=cmode)
-        else if (present(path)) then
-            call self%ncfile%init(path=path)
-        else if (present(cmode)) then
-            call self%ncfile%init(path="fort.64.nc", cmode=cmode)
+        character(len=:), allocatable :: the_path ! For defaulting
+
+        ! Set path
+        if (present(path)) then
+            the_path = path
         else
-            call self%ncfile%init(path="fort.64.nc")
+            the_path = "fort.64.nc"
         end if
+
+        ! Call parent function
+        if (present(cmode) .and. &
+            present(comm) .and. present(info)) then
+            call self%ncfile%init(path=the_path, cmode=cmode, &
+                comm=comm, info=info)
+        else if (present(cmode)) then
+            call self%ncfile%init(path=the_path, cmode=cmode)
+        else if (present(comm) .and. present(info)) then
+            call self%ncfile%init(path=the_path, comm=comm, info=info)
+        else
+            call self%ncfile%init(path=the_path)
+        end if
+
+        deallocate(the_path)
     end procedure ncdg_64_init
 
     module procedure ncdg_64_open
@@ -25,11 +39,15 @@ submodule (ncdg:ncdg_nodal_sub) ncdg_64_sub
         integer :: ncstat ! Status of most recent operation
 
         ! Call parent function
-        if (present(mode)) then
-            call self%ncdg_nodal%open(mode)
+        if (present(mode) .and. present(comm) .and. present(info)) then
+            call self%ncdg_nodal%open(mode=mode, comm=comm, info=info)
+        else if (present(mode)) then
+            call self%ncdg_nodal%open(mode=mode)
+        else if (present(comm) .and. present(info)) then
+            call self%ncdg_nodal%open(comm=comm, info=info)
         else
             call self%ncdg_nodal%open()
-        endif
+        end if
 
         ! Set dimension IDs
         ! N/A
