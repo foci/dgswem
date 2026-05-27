@@ -731,7 +731,7 @@ module ncdg
         end subroutine ncdg_maxele_init
 
         module subroutine ncdg_maxele_open(self, mode)
-            !! Open a fort.maxele.nc output file, and set all IDs.
+            !! Open a maxele.63.nc output file, and set all IDs.
 
             implicit none
 
@@ -811,9 +811,6 @@ module ncdg
             real, intent(in) :: zeta_max(:)
             !! The current zeta_max values
         end subroutine ncdg_maxele_write_step
-
-        ! ncdg_maxvel subroutines
-        ! For maxvel.64.nc
         
     end interface
     

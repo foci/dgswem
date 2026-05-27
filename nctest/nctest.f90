@@ -198,19 +198,6 @@ program nctest
         max_nvell=maxval(nvell), &
         ics=ics &
     )
-    !call my_maxvel%ncdg_maxvel_set_metadata( &
-    !    nt=nf90_unlimited, &
-    !    np=np, &
-    !    ne=ne, &
-    !    nhy=nhy, &
-    !    nope=nope, &
-    !    neta=neta, &
-    !    max_nvdll=maxval(nvdll), &
-    !    nbou=nbou, &
-    !    nvel=nvel, &
-    !    max_nvell=maxval(nvell), &
-    !    ics=ics &
-    !)
     if (write_metadata) then
         call print_metadata_63(my_63)
         call print_metadata_64(my_64)
@@ -221,8 +208,6 @@ program nctest
     call my_64%close()
     print *, "Closing maxele.63.nc"
     call my_maxele%close()
-    !print *, "Closing maxvel.64.nc"
-    !call my_maxvel%close()
     if (write_metadata) then
         call print_metadata_63(my_63)
         call print_metadata_64(my_64)
@@ -233,8 +218,6 @@ program nctest
     call my_64%open(nf90_write)
     print *, "Opening maxele.63.nc"
     call my_maxele%open(nf90_write)
-    !print *, "Opening maxvel.64.nc"
-    !call my_maxvel%open(nf90_write)
     if (write_metadata) then
         call print_metadata_63(my_63)
         call print_metadata_64(my_64)
@@ -294,24 +277,6 @@ program nctest
         nvell=nvell, &
         nbvv=nbvv &
     )
-    !call my_maxvel%write_mesh( &
-    !    x=x, &
-    !    y=y, &
-    !    dp=dp, &
-    !    nm=nm, &
-    !    nhy=nhy, &
-    !    ne=ne, &
-    !    nope=nope, &
-    !    neta=neta, &
-    !    ibtypee=ibtypee, &
-    !    nvdll=nvdll, &
-    !    nbdv=nbdv, &
-    !    nbou=nbou, &
-    !    nvel=nvel, &
-    !    ibtype=ibtype, &
-    !    nvell=nvell, &
-    !    nbvv=nbvv &
-    !)
     print *, "Writing step"
     call my_63%ncdg_63_write_step( &
         t=0.0, &
@@ -326,11 +291,6 @@ program nctest
         t=0.0, &
         zeta_max=[1.0, 2.0, 3.0] &
     )
-    !call my_maxvel%ncdg_maxvel_write_step( &
-    !    t = 0.0, &
-    !    u_vel = [1.0, 2.0, 3.0], &
-    !    v_vel = [4.0, 5.0, 6.0] &
-    !)
     print *, "Writing step"
     call my_63%ncdg_63_write_step( &
         t=1.0, &
@@ -345,11 +305,6 @@ program nctest
         t=1.0, &
         zeta_max=[2.0, 2.0, 3.0] &
     )
-    !call my_maxvel%ncdg_maxvel_write_step( &
-    !    t = 0.0, &
-    !    u_vel = [1.0, 2.0, 3.0], &
-    !    v_vel = [4.0, 5.0, 6.0] &
-    !)
     print *, "Writing step"
     call my_63%ncdg_63_write_step( &
         t=2.0, &
@@ -364,19 +319,12 @@ program nctest
         t=2.0, &
         zeta_max=[2.0, 1.0, 4.0] & ! Bad zeta_max update at position 2
     )
-    !call my_maxvel%ncdg_maxvel_write_step( &
-    !    t = 0.0, &
-    !    u_vel = [1.0, 2.0, 3.0], &
-    !    v_vel = [4.0, 5.0, 6.0] &
-    !)
     print *, "Closing fort.63.nc"
     call my_63%close()
     print *, "Closing fort.64.nc"
     call my_64%close()
     print *, "Closing maxele.63.nc"
     call my_maxele%close()
-    !print *, "Closing maxvel.64.nc"
-    !call my_maxvel%close()
     print *, "Program complete"
     
 end program nctest
