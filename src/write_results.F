@@ -168,15 +168,46 @@ C.....to single nodal values
 
           ENDDO nbor_loop2
        ENDDO
-       
-
-        
       end subroutine
 
+      function compute_cfl()
+      use DG
+      use GLOBAL
+#ifdef CMPI
+      use messenger_elem, only : realtype
+      implicit none
+      include 'mpif.h'
+      !use mpi
+#else
+      implicit none
+#endif
+
+      integer :: i, ierr
+      real(sz) :: u, depth, u_avg, v_avg
+      real(sz) :: compute_cfl, courant, max_courant
+
+      courant = 0.
+      compute_cfl = 0.
+!$acc parallel loop reduction(max:courant) default(present)
+      do i = 1, NE
+         u_avg = qx(1,i,1)
+         v_avg = qy(1,i,1)
+         u = sqrt(u_avg*u_avg + v_avg*v_avg)
+         depth = ze(1,i,1) + HB(1,i,1)
+         courant = max(courant, real(wdflg(i))*(u + sqrt(G*depth)) * dtdp / elem_size(i))
+      enddo   
+#ifdef CMPI
+      call MPI_ALLREDUCE( courant, max_courant, 1,
+     &     realtype, MPI_MAX, MPI_COMM_world, ierr)
+      courant = max_courant
+#endif
+      compute_cfl = courant
+      end function
 
       SUBROUTINE WRITE_RESULTS(IT,FORCE_WRITE)
 
       use, intrinsic :: ieee_arithmetic
+      use iso_fortran_env, only: output_unit
       USE precipitation, only: prec3
       USE GLOBAL
       USE DG
@@ -192,8 +223,9 @@ C.....Declare local variables
 
       INTEGER IT,Minp(0:8)
       REAL(SZ) AREA, DEPTH, ANGLE_SUM, FH_NL, DP1, DP2, DP3, DP00, ZE00
+      real(sz) percent_complete
       LOGICAL FORCE_WRITE
-      real(sz) qmaxe,elmaxe
+      real(sz) qmaxe,elmaxe, courant
       integer :: imaxze,imaxq,ErrorElevExceeded, istat
 C...
 C...OUTPUT ELEVATION RECORDING STATION INFORMATION IF NOUTE<>0 AND THE
@@ -1069,13 +1101,22 @@ c
 
 C
           VELMAX=VELMAX**0.5d0
-C          
+          percent_complete = real(it-iths) / real(NT-iths) * 100d0
+
+#ifdef CFL
+          courant = compute_cfl()
+          if (myproc == 0) then
+             write(output_unit, '(2x, "MAX COURANT NUMBER = ", F6.4)') courant
+          endif
+#endif
+
 #ifdef CMPI
           IF( (MYPROC.EQ.0).AND.(ELMAX.LT.1000.0).AND.
      &        (MOD(IT,NSCREEN_INC).EQ.0) ) THEN
-             WRITE(6,1991) IT,TIME_A/86400.0,
+             WRITE(output_unit,1991) IT,percent_complete,TIME_A/86400.0,
      $            ELMAX,KEMAX,VELMAX,KVMAX,MYPROC
- 1991        FORMAT(1X,'TIME STEP =',I8,5X,'TIME = ',F12.6,
+ 1991        FORMAT(1X,'TIME STEP =',I8,1X, F6.2, '% COMPLETE',
+     &            5X, 'TIME = ',F12.6,
      &            /,2X,'ELMAX = ', E11.4,' AT NODE',I7,
      &            2X,'SPEEDMAX = ',E11.4,' AT NODE',I7,
      &            2X,'ON MYPRnOC = ',I4)
@@ -1106,30 +1147,8 @@ C
                print*,'With',ne,'total elements'               
              endif
           ENDIF
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-          
-          
-          
-          
-          
           IF(ELMAX.GT.1000.0) THEN
-            WRITE(6,1993) IT,TIME_A/86400.0,
+            WRITE(output_unit,1993) IT,TIME_A/86400.0,
      &            ELMAX,KEMAX,VELMAX,KVMAX,MYPROC
             WRITE(16,1993) IT,TIME_A/86400.0,
      &           ELMAX,KEMAX,VELMAX,KVMAX,MYPROC
@@ -1146,8 +1165,9 @@ C
          ENDIF
 #else
          IF(ELMAX.LT.1000.0.and.(MOD(IT,NSCREEN_INC).EQ.0) ) THEN
-           WRITE(6,1992) IT,TIME_A/86400.0,ELMAX,KEMAX,VELMAX,KVMAX
- 1992      FORMAT(1X,'TIME STEP =',I8,5X,'TIME =',F12.6,
+           WRITE(output_unit,1992) IT,percent_complete,TIME_A/86400.0,ELMAX,KEMAX,VELMAX,KVMAX
+ 1992      FORMAT(1X,'TIME STEP =',I8, 1x, F6.2, '% COMPLETE',
+     &       5X,'TIME =',F12.6,
      &           /,2X,'ELMAX = ', E11.4,' AT NODE',I7,
      &           2X,'SPEEDMAX = ',E11.4,' AT NODE',I7)
            if (padapt.eq.1) then
@@ -1176,7 +1196,7 @@ C
          ENDIF
 C
          IF(ELMAX.GT.1000.0) THEN
-            WRITE(6,1994) IT,TIME_A/86400.0,
+            WRITE(output_unit,1994) IT,TIME_A/86400.0,
      $           ELMAX,KEMAX,VELMAX,KVMAX
             WRITE(16,1994) IT,TIME_A/86400.0,
      $           ELMAX,KEMAX,VELMAX,KVMAX

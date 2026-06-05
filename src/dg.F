@@ -134,6 +134,7 @@ C.....Declare allocatable real arrays
       REAL(SZ), ALLOCATABLE :: UFA_DG(:,:,:), UMO_DG(:,:,:)
       REAL(SZ), ALLOCATABLE :: VFA_DG(:,:,:), VMO_DG(:,:,:)
       REAL(SZ), ALLOCATABLE :: XLEN(:)
+      REAL(SZ), ALLOCATABLE :: elem_size(:)
       REAL(SZ), ALLOCATABLE :: HB(:,:,:)
       REAL(SZ), ALLOCATABLE :: MANN(:,:)
       REAL(SZ), ALLOCATABLE :: IBHT(:), EBHT(:)
@@ -258,6 +259,7 @@ C.....Set edge array sizes
       ALLOCATE ( NFEDN(MNED),  NREDN(MNED), NIBEDN(MNED), NEBEDN(MNED) )
       ALLOCATE ( NCOUNT(MNED) )
       ALLOCATE ( COSNX(MNED), SINNX(MNED), XLEN(MNED) )
+      allocate (elem_size(mne))
       ALLOCATE ( Q_HAT(MNED) )
       RETURN
       END SUBROUTINE
