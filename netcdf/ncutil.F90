@@ -25,7 +25,13 @@ module ncutil
         contains
 
         procedure, public :: init => ncfile_init
+#ifdef CMPI
+        procedure, public :: pinit => ncfile_init_parallel
+#endif
         procedure, public :: open => ncfile_open
+#ifdef CMPI
+        procedure, public :: popen => ncfile_open_parallel
+#endif
         procedure, public :: close => ncfile_close
 
     end type ncfile
@@ -68,15 +74,73 @@ module ncutil
         end if
 
         ! Create file
-#ifndef CMPI
         ncstat = nf90_create(self%path, the_cmode, self%ncid)
         call ncfile_check_error(ncstat)
-#else
-        ncstat = nf90_create(self%path, the_cmode, self%ncid, &
-            comm=mpi_comm_world, info=mpi_info_null)
-        call ncfile_check_error(ncstat)
-#endif
     end subroutine ncfile_init
+
+#ifdef CMPI
+    subroutine ncfile_init_parallel(self, path, cmode, comm, info)
+        !! Parallel-access initialization function for
+        !! [[netcdf_file(module):netcdf_file(type)]]. Left in define mode.
+        !!
+        !! @warning "File Not Closed"
+        !! After initialization, the underlying file object is in define mode.
+        !! The user must remember to close it.
+        !! @endwarning
+
+        implicit none
+
+        class(ncfile), intent(inout) :: self
+        !! The wrapper object being initialized
+        character(len=*), optional, intent(in) :: path
+        !! Path and name for the NetCDF file. Default is untitled.nc.
+        integer, optional, intent(in) :: cmode
+        !! NetCDF creation mode. Default is ior(nf90_clobber, nf90_netcdf4).
+        integer, optional, intent(in) :: comm
+        !! The MPI communicator of processes operating on the file. Default is
+        !! mpi_comm_world.
+        integer, optional, intent(in) :: info
+        !! The MPI information. Default is mpi_info_null.
+
+        integer :: ncstat ! Status of most recent operation
+        integer :: the_cmode ! For defaulting
+        integer :: the_comm ! For defaulting
+        integer :: the_info ! For defaulting
+
+        ! Set path
+        if (present(path)) then
+            self%path = path
+        else
+            self%path = "untitled.nc"
+        end if
+
+        ! Set cmode
+        if (present(cmode)) then
+            the_cmode = cmode
+        else
+            the_cmode = ior(nf90_clobber, nf90_netcdf4)
+        end if
+
+        ! Set comm
+        if (present(comm)) then
+            the_comm = comm
+        else
+            the_comm = mpi_comm_world
+        end if
+
+        ! Set info
+        if (present(info)) then
+            the_info = info
+        else
+            the_info = mpi_info_null
+        end if
+
+        ! Create file
+        ncstat = nf90_create(self%path, the_cmode, self%ncid, &
+            comm=comm, info=info)
+        call ncfile_check_error(ncstat)
+    end subroutine ncfile_init_parallel
+#endif
 
     subroutine ncfile_open(self, mode)
         !! Open the NetCDF file for manipulation.
@@ -99,15 +163,58 @@ module ncutil
         end if
 
         ! Open file
-#ifndef CMPI
         ncstat = nf90_open(self%path, mode, self%ncid)
         call ncfile_check_error(ncstat)
-#else
-        ncstat = nf90_open(self%path, mode, self%ncid, &
-            comm=mpi_comm_world, info=mpi_info_null)
-        call ncfile_check_error(ncstat)
-#endif
     end subroutine ncfile_open
+
+#ifdef CMPI
+    subroutine ncfile_open_parallel(self, mode, comm, info)
+        !! Open the NetCDF file for parallel manipulation.
+
+        implicit none
+
+        class(ncfile), intent(inout) :: self
+        !! The wrapper object of the file
+        integer, optional, intent(in) :: mode
+        !! NetCDF open mode. Default is nf90_nowrite, i.e. read-only.
+        integer, optional, intent(in) :: comm
+        !! The MPI communicator of processes operating on the file. Default is
+        !! mpi_comm_world.
+        integer, optional, intent(in) :: info
+        !! The MPI information. Default is mpi_info_null.
+
+        integer :: ncstat ! Status of most recent operation
+        integer :: the_mode ! For defaulting
+        integer :: the_comm ! For defaulting
+        integer :: the_info ! For defaulting
+
+        ! Set mode
+        if (present(mode)) then
+            the_mode = mode
+        else
+            the_mode = nf90_nowrite
+        end if
+
+        ! Set comm
+        if (present(comm)) then
+            the_comm = comm
+        else
+            the_comm = mpi_comm_world
+        end if
+
+        ! Set info
+        if (present(info)) then
+            the_info = info
+        else
+            the_info = mpi_info_null
+        end if
+
+        ! Open file
+        ncstat = nf90_open(self%path, mode, self%ncid, &
+            comm=comm, info=info)
+        call ncfile_check_error(ncstat)
+    end subroutine ncfile_open_parallel
+#endif
 
     subroutine ncfile_close(self)
         !! Close the NetCDF file.

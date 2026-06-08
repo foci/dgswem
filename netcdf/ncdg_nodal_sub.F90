@@ -9,13 +9,17 @@ submodule (ncdg:ncdg_file_sub) ncdg_nodal_sub
         ! See interface for arguments and documentation
 
         integer :: ncstat ! Status of most recent operation
+        integer :: the_mode ! For defaulting
+
+        ! Set mode
+        if (present(mode)) then
+            the_mode = mode
+        else
+            the_mode = nf90_nowrite
+        end if
 
         ! Call parent function
-        if (present(mode)) then
-            call self%ncdg_file%open(mode=mode)
-        else
-            call self%ncdg_file%open()
-        end if
+        call self%ncdg_file%open(mode=the_mode)
 
         ! Set dimension IDs
         ncstat = nf90_inq_dimid(self%ncid, self%node_dimname, &
@@ -96,6 +100,120 @@ submodule (ncdg:ncdg_file_sub) ncdg_nodal_sub
             self%depth_varid)
         call ncfile_check_error(ncstat)
     end procedure ncdg_nodal_open
+
+#ifdef CMPI
+    module procedure ncdg_nodal_open_parallel
+        ! See interface for arguments and documentation
+
+        integer :: ncstat ! Status of most recent operation
+        integer :: the_mode ! For defaulting
+        integer :: the_comm ! For defaulting
+        integer :: the_info ! For defaulting
+
+        ! Set mode
+        if (present(mode)) then
+            the_mode = mode
+        else
+            the_mode = nf90_nowrite
+        end if
+
+        ! Set comm
+        if (present(comm)) then
+            the_comm = comm
+        else
+            the_comm = mpi_comm_world
+        end if
+
+        ! Set info
+        if (present(info)) then
+            the_info = info
+        else
+            the_info = mpi_info_null
+        end if
+
+        ! Call parent function
+        call self%ncdg_file%popen(mode=the_mode, comm=the_comm, info=the_info)
+
+        ! Set dimension IDs
+        ncstat = nf90_inq_dimid(self%ncid, self%node_dimname, &
+            self%node_dimid)
+        call ncfile_check_error(ncstat)
+        ncstat = nf90_inq_dimid(self%ncid, self%nele_dimname, &
+            self%nele_dimid)
+        call ncfile_check_error(ncstat)
+        ncstat = nf90_inq_dimid(self%ncid, self%nvertex_dimname, &
+            self%nvertex_dimid)
+        call ncfile_check_error(ncstat)
+        ncstat = nf90_inq_dimid(self%ncid, self%nope_dimname, &
+            self%nope_dimid)
+        call ncfile_check_error(ncstat)
+        ncstat = nf90_inq_dimid(self%ncid, self%neta_dimname, &
+            self%neta_dimid)
+        call ncfile_check_error(ncstat)
+        ncstat = nf90_inq_dimid(self%ncid, self%max_nvdll_dimname, &
+            self%max_nvdll_dimid)
+        call ncfile_check_error(ncstat)
+        ncstat = nf90_inq_dimid(self%ncid, self%nbou_dimname, &
+            self%nbou_dimid)
+        call ncfile_check_error(ncstat)
+        ncstat = nf90_inq_dimid(self%ncid, self%nvel_dimname, &
+            self%nvel_dimid)
+        call ncfile_check_error(ncstat)
+        ncstat = nf90_inq_dimid(self%ncid, self%max_nvell_dimname, &
+            self%max_nvell_dimid)
+        call ncfile_check_error(ncstat)
+        ncstat = nf90_inq_dimid(self%ncid, self%mesh_dimname, &
+            self%mesh_dimid)
+        call ncfile_check_error(ncstat)
+
+        ! Set variable IDs
+        ncstat = nf90_inq_varid(self%ncid, self%x_varname, &
+            self%x_varid)
+        call ncfile_check_error(ncstat)
+        ncstat = nf90_inq_varid(self%ncid, self%y_varname, &
+            self%y_varid)
+        call ncfile_check_error(ncstat)
+        ncstat = nf90_inq_varid(self%ncid, self%element_varname, &
+            self%element_varid)
+        call ncfile_check_error(ncstat)
+        ncstat = nf90_inq_varid(self%ncid, self%adcirc_mesh_varname, &
+            self%adcirc_mesh_varid)
+        call ncfile_check_error(ncstat)
+        ncstat = nf90_inq_varid(self%ncid, self%neta_varname, &
+            self%neta_varid)
+        call ncfile_check_error(ncstat)
+        ncstat = nf90_inq_varid(self%ncid, self%nvdll_varname, &
+            self%nvdll_varid)
+        call ncfile_check_error(ncstat)
+        ncstat = nf90_inq_varid(self%ncid, self%max_nvdll_varname, &
+            self%max_nvdll_varid)
+        call ncfile_check_error(ncstat)
+        ncstat = nf90_inq_varid(self%ncid, self%ibtypee_varname, &
+            self%ibtypee_varid)
+        call ncfile_check_error(ncstat)
+        ncstat = nf90_inq_varid(self%ncid, self%nbdv_varname, &
+            self%nbdv_varid)
+        call ncfile_check_error(ncstat)
+        ncstat = nf90_inq_varid(self%ncid, self%nvel_varname, &
+            self%nvel_varid)
+        call ncfile_check_error(ncstat)
+        ncstat = nf90_inq_varid(self%ncid, self%nvell_varname, &
+            self%nvell_varid)
+        call ncfile_check_error(ncstat)
+        ncstat = nf90_inq_varid(self%ncid, self%max_nvell_varname, &
+            self%max_nvell_varid)
+        call ncfile_check_error(ncstat)
+        ncstat = nf90_inq_varid(self%ncid, self%ibtype_varname, &
+            self%ibtype_varid)
+        call ncfile_check_error(ncstat)
+        ncstat = nf90_inq_varid(self%ncid, self%nbvv_varname, &
+            self%nbvv_varid)
+        call ncfile_check_error(ncstat)
+        ncstat = nf90_inq_varid(self%ncid, self%depth_varname, &
+            self%depth_varid)
+        call ncfile_check_error(ncstat)
+    end procedure ncdg_nodal_open_parallel
+#endif
 
     module procedure ncdg_nodal_close
         ! See interface for arguments and documentation

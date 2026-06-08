@@ -3,6 +3,9 @@ module ncdg
 
     use netcdf
     use ncutil, only : ncfile, ncfile_check_error
+#ifdef CMPI
+    use mpi, only: mpi_comm_world, mpi_info_null
+#endif
 
     implicit none
 
@@ -42,6 +45,9 @@ module ncdg
         contains
 
         procedure, public :: open => ncdg_file_open
+#ifdef CMPI
+        procedure, public :: popen => ncdg_file_open_parallel
+#endif
         procedure, public :: close => ncdg_file_close
         procedure, public :: ncdg_file_set_metadata
 
@@ -162,6 +168,9 @@ module ncdg
         contains
 
         procedure, public :: open => ncdg_nodal_open
+#ifdef CMPI
+        procedure, public :: popen => ncdg_nodal_open_parallel
+#endif
         procedure, public :: close => ncdg_nodal_close
         procedure, public :: ncdg_nodal_set_metadata
         procedure, public :: write_mesh => ncdg_nodal_write_mesh
@@ -183,6 +192,9 @@ module ncdg
         contains
 
         procedure, public :: open => ncdg_station_open
+#ifdef CMPI
+        procedure, public :: popen => ncdg_station_open_parallel
+#endif
         procedure, public :: close => ncdg_station_close
         procedure, public :: ncdg_station_set_metadata
         ! procedure, public :: ncdg_station_write_stations
@@ -207,7 +219,13 @@ module ncdg
         contains
 
         procedure, public :: init => ncdg_63_init
+#ifdef CMPI
+        procedure, public :: pinit => ncdg_63_init_parallel
+#endif
         procedure, public :: open => ncdg_63_open
+#ifdef CMPI
+        procedure, public :: popen => ncdg_63_open_parallel
+#endif
         procedure, public :: close => ncdg_63_close
         procedure, public :: ncdg_63_set_metadata
         procedure, public :: ncdg_63_write_step
@@ -236,7 +254,13 @@ module ncdg
         contains
 
         procedure, public :: init => ncdg_64_init
+#ifdef CMPI
+        procedure, public :: pinit => ncdg_64_init_parallel
+#endif
         procedure, public :: open => ncdg_64_open
+#ifdef CMPI
+        procedure, public :: popen => ncdg_64_open_parallel
+#endif
         procedure, public :: close => ncdg_64_close
         procedure, public :: ncdg_64_set_metadata
         procedure, public :: ncdg_64_write_step
@@ -265,7 +289,13 @@ module ncdg
         contains
 
         procedure, public :: init => ncdg_maxele_init
+#ifdef CMPI
+        procedure, public :: pinit => ncdg_maxele_init_parallel
+#endif
         procedure, public :: open => ncdg_maxele_open
+#ifdef CMPI
+        procedure, public :: popen => ncdg_maxele_open_parallel
+#endif
         procedure, public :: close => ncdg_maxele_close
         procedure, public :: ncdg_maxele_set_metadata
         procedure, public :: ncdg_maxele_write_step
@@ -289,6 +319,24 @@ module ncdg
             integer, optional, intent(in) :: mode
             !! NetCDF open mode. Default is nf90_nowrite, i.e. read-only.
         end subroutine ncdg_file_open
+
+#ifdef CMPI
+        module subroutine ncdg_file_open_parallel(self, mode, comm, info)
+            !! Open a DGSWEM output file with parallel access, and set all IDs.
+
+            implicit none
+
+            class(ncdg_file), intent(inout) :: self
+            !! The wrapper object of the file
+            integer, optional, intent(in) :: mode
+            !! NetCDF open mode. Default is nf90_nowrite, i.e. read-only.
+            integer, optional, intent(in) :: comm
+            !! The MPI communicator of processes operating on the file. Default
+            !! is mpi_comm_world.
+            integer, optional, intent(in) :: info
+            !! The MPI information. Default is mpi_info_null.
+        end subroutine ncdg_file_open_parallel
+#endif
 
         module subroutine ncdg_file_close(self)
             !! Close a DGSWEM output file, and flush all IDs.
@@ -325,6 +373,24 @@ module ncdg
             integer, optional, intent(in) :: mode
             !! NetCDF open mode. Default is nf90_nowrite, i.e. read-only.
         end subroutine ncdg_nodal_open
+
+#ifdef CMPI
+        module subroutine ncdg_nodal_open_parallel(self, mode, comm, info)
+            !! Open a nodal output file with parallel access, and set all IDs.
+
+            implicit none
+
+            class(ncdg_nodal), intent(inout) :: self
+            !! The wrapper object of the file
+            integer, optional, intent(in) :: mode
+            !! NetCDF open mode. Default is nf90_nowrite, i.e. read-only.
+            integer, optional, intent(in) :: comm
+            !! The MPI communicator of processes operating on the file. Default
+            !! is mpi_comm_world.
+            integer, optional, intent(in) :: info
+            !! The MPI information. Default is mpi_info_null.
+        end subroutine ncdg_nodal_open_parallel
+#endif
 
         module subroutine ncdg_nodal_close(self)
             !! Close a nodal output file, and flush all IDs.
@@ -479,6 +545,24 @@ module ncdg
             !! NetCDF open mode. Default is nf90_nowrite, i.e. read-only.
         end subroutine ncdg_station_open
 
+#ifdef CMPI
+        module subroutine ncdg_station_open_parallel(self, mode, comm, info)
+            !! Open a station output file with parallel access, and set all IDs.
+
+            implicit none
+
+            class(ncdg_station), intent(inout) :: self
+            !! The wrapper object of the file
+            integer, optional, intent(in) :: mode
+            !! NetCDF open mode. Default is nf90_nowrite, i.e. read-only.
+            integer, optional, intent(in) :: comm
+            !! The MPI communicator of processes operating on the file. Default
+            !! is mpi_comm_world.
+            integer, optional, intent(in) :: info
+            !! The MPI information. Default is mpi_info_null.
+        end subroutine ncdg_station_open_parallel
+#endif
+
         module subroutine ncdg_station_close(self)
             !! Close a station output file, and flush all IDs.
 
@@ -520,6 +604,32 @@ module ncdg
             !! NetCDF creation mode. Default is ior(nf90_clobber, nf90_netcdf4).
         end subroutine ncdg_63_init
 
+#ifdef CMPI
+        module subroutine ncdg_63_init_parallel(self, path, cmode, comm, info)
+            !! Parallel-access initialization function for
+            !! [[ncdg(module):ncdg_63(type)]]. Left in define mode.
+            !!
+            !! @warning "File Not Closed"
+            !! After initialization, the underlying file object is in
+            !! define mode. The user must remember to close it.
+            !! @endwarning
+
+            implicit none
+
+            class(ncdg_63), intent(inout) :: self
+            !! The wrapper object of the file
+            character(len=*), optional, intent(in) :: path
+            !! Path and name for the NetCDF file. Default is fort.63.nc.
+            integer, optional, intent(in) :: cmode
+            !! NetCDF creation mode. Default is ior(nf90_clobber, nf90_netcdf4).
+            integer, optional, intent(in) :: comm
+            !! The MPI communicator of processes operating on the file. Default
+            !! is mpi_comm_world.
+            integer, optional, intent(in) :: info
+            !! The MPI information. Default is mpi_info_null.
+        end subroutine ncdg_63_init_parallel
+#endif
+
         module subroutine ncdg_63_open(self, mode)
             !! Open a fort.63.nc output file, and set all IDs.
 
@@ -530,6 +640,25 @@ module ncdg
             integer, optional, intent(in) :: mode
             !! NetCDF open mode. Default is nf90_nowrite, i.e. read-only.
         end subroutine ncdg_63_open
+
+#ifdef CMPI
+        module subroutine ncdg_63_open_parallel(self, mode, comm, info)
+            !! Open a fort.63.nc output file with parallel access, and set all
+            !! IDs.
+
+            implicit none
+
+            class(ncdg_63), intent(inout) :: self
+            !! The wrapper object of the file
+            integer, optional, intent(in) :: mode
+            !! NetCDF open mode. Default is nf90_nowrite, i.e. read-only.
+            integer, optional, intent(in) :: comm
+            !! The MPI communicator of processes operating on the file. Default is
+            !! mpi_comm_world.
+            integer, optional, intent(in) :: info
+            !! The MPI information. Default is mpi_info_null.
+        end subroutine ncdg_63_open_parallel
+#endif
 
         module subroutine ncdg_63_close(self)
             !! Close a fort.63.nc output file, and flush all IDs.
@@ -624,6 +753,32 @@ module ncdg
             !! NetCDF creation mode. Default is ior(nf90_clobber, nf90_netcdf4).
         end subroutine ncdg_64_init
 
+#ifdef CMPI
+        module subroutine ncdg_64_init_parallel(self, path, cmode, comm, info)
+            !! Parallel-access initialization function for
+            !! [[ncdg(module):ncdg_64(type)]]. Left in define mode.
+            !!
+            !! @warning "File Not Closed"
+            !! After initialization, the underlying file object is in
+            !! define mode. The user must remember to close it.
+            !! @endwarning
+
+            implicit none
+
+            class(ncdg_64), intent(inout) :: self
+            !! The wrapper object of the file
+            character(len=*), optional, intent(in) :: path
+            !! Path and name for the NetCDF file. Default is fort.64.nc.
+            integer, optional, intent(in) :: cmode
+            !! NetCDF creation mode. Default is ior(nf90_clobber, nf90_netcdf4).
+            integer, optional, intent(in) :: comm
+            !! The MPI communicator of processes operating on the file. Default
+            !! is mpi_comm_world.
+            integer, optional, intent(in) :: info
+            !! The MPI information. Default is mpi_info_null.
+        end subroutine ncdg_64_init_parallel
+#endif
+
         module subroutine ncdg_64_open(self, mode)
             !! Open a fort.64.nc output file, and set all IDs.
 
@@ -634,6 +789,25 @@ module ncdg
             integer, optional, intent(in) :: mode
             !! NetCDF open mode. Default is nf90_nowrite, i.e. read-only.
         end subroutine ncdg_64_open
+
+#ifdef CMPI
+        module subroutine ncdg_64_open_parallel(self, mode, comm, info)
+            !! Open a fort.64.nc output file with parallel access, and set all
+            !! IDs.
+
+            implicit none
+
+            class(ncdg_64), intent(inout) :: self
+            !! The wrapper object of the file
+            integer, optional, intent(in) :: mode
+            !! NetCDF open mode. Default is nf90_nowrite, i.e. read-only.
+            integer, optional, intent(in) :: comm
+            !! The MPI communicator of processes operating on the file. Default is
+            !! mpi_comm_world.
+            integer, optional, intent(in) :: info
+            !! The MPI information. Default is mpi_info_null.
+        end subroutine ncdg_64_open_parallel
+#endif
 
         module subroutine ncdg_64_close(self)
             !! Close a fort.64.nc output file, and flush all IDs.
@@ -730,6 +904,33 @@ module ncdg
             !! NetCDF creation mode. Default is ior(nf90_clobber, nf90_netcdf4).
         end subroutine ncdg_maxele_init
 
+#ifdef CMPI
+        module subroutine ncdg_maxele_init_parallel(self, path, cmode, comm, &
+            info)
+            !! Parallel-access initialization function for
+            !! [[ncdg(module):ncdg_maxele(type)]]. Left in define mode.
+            !!
+            !! @warning "File Not Closed"
+            !! After initialization, the underlying file object is in
+            !! define mode. The user must remember to close it.
+            !! @endwarning
+
+            implicit none
+
+            class(ncdg_maxele), intent(inout) :: self
+            !! The wrapper object of the file
+            character(len=*), optional, intent(in) :: path
+            !! Path and name for the NetCDF file. Default is maxele.63.nc.
+            integer, optional, intent(in) :: cmode
+            !! NetCDF creation mode. Default is ior(nf90_clobber, nf90_netcdf4).
+            integer, optional, intent(in) :: comm
+            !! The MPI communicator of processes operating on the file. Default
+            !! is mpi_comm_world.
+            integer, optional, intent(in) :: info
+            !! The MPI information. Default is mpi_info_null.
+        end subroutine ncdg_maxele_init_parallel
+#endif
+
         module subroutine ncdg_maxele_open(self, mode)
             !! Open a maxele.63.nc output file, and set all IDs.
 
@@ -740,6 +941,25 @@ module ncdg
             integer, optional, intent(in) :: mode
             !! NetCDF open mode. Default is nf90_nowrite, i.e. read-only.
         end subroutine ncdg_maxele_open
+
+#ifdef CMPI
+        module subroutine ncdg_maxele_open_parallel(self, mode, comm, info)
+            !! Open a maxele.63.nc output file with parallel access, and set all
+            !! IDs.
+
+            implicit none
+
+            class(ncdg_maxele), intent(inout) :: self
+            !! The wrapper object of the file
+            integer, optional, intent(in) :: mode
+            !! NetCDF open mode. Default is nf90_nowrite, i.e. read-only.
+            integer, optional, intent(in) :: comm
+            !! The MPI communicator of processes operating on the file. Default
+            !! is mpi_comm_world.
+            integer, optional, intent(in) :: info
+            !! The MPI information. Default is mpi_info_null.
+        end subroutine ncdg_maxele_open_parallel
+#endif
 
         module subroutine ncdg_maxele_close(self)
             !! Close a maxele.63.nc output file, and flush all IDs.
