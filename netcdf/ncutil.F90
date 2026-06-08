@@ -2,6 +2,9 @@ module ncutil
 !! Module for manipulating a generic NetCDF file.
 
     use netcdf
+#ifdef CMPI
+    use mpi, only: mpi_comm_world, mpi_info_null
+#endif
 
     implicit none
 
@@ -65,8 +68,14 @@ module ncutil
         end if
 
         ! Create file
+#ifndef CMPI
         ncstat = nf90_create(self%path, the_cmode, self%ncid)
         call ncfile_check_error(ncstat)
+#else
+        ncstat = nf90_create(self%path, the_cmode, self%ncid, &
+            comm=mpi_comm_world, info=mpi_info_null)
+        call ncfile_check_error(ncstat)
+#endif
     end subroutine ncfile_init
 
     subroutine ncfile_open(self, mode)
@@ -90,8 +99,14 @@ module ncutil
         end if
 
         ! Open file
+#ifndef CMPI
         ncstat = nf90_open(self%path, mode, self%ncid)
         call ncfile_check_error(ncstat)
+#else
+        ncstat = nf90_open(self%path, mode, self%ncid, &
+            comm=mpi_comm_world, info=mpi_info_null)
+        call ncfile_check_error(ncstat)
+#endif
     end subroutine ncfile_open
 
     subroutine ncfile_close(self)
