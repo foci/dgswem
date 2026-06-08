@@ -18,14 +18,8 @@ submodule (ncdg:ncdg_nodal_sub) ncdg_maxele_sub
         end if
 
         ! Call parent function
-        if (present(cmode) .and. &
-            present(comm) .and. present(info)) then
-            call self%ncfile%init(path=the_path, cmode=cmode, &
-                comm=comm, info=info)
-        else if (present(cmode)) then
+        if (present(cmode)) then
             call self%ncfile%init(path=the_path, cmode=cmode)
-        else if (present(comm) .and. present(info)) then
-            call self%ncfile%init(path=the_path, comm=comm, info=info)
         else
             call self%ncfile%init(path=the_path)
         end if
@@ -35,16 +29,12 @@ submodule (ncdg:ncdg_nodal_sub) ncdg_maxele_sub
 
     module procedure ncdg_maxele_open
         ! See interface for arguments and documentation
-        
+
         integer :: ncstat ! Status of most recent operation
 
         ! Call parent function
-        if (present(mode) .and. present(comm) .and. present(info)) then
-            call self%ncdg_nodal%open(mode=mode, comm=comm, info=info)
-        else if (present(mode)) then
+        if (present(mode)) then
             call self%ncdg_nodal%open(mode=mode)
-        else if (present(comm) .and. present(info)) then
-            call self%ncdg_nodal%open(comm=comm, info=info)
         else
             call self%ncdg_nodal%open()
         end if
@@ -63,7 +53,7 @@ submodule (ncdg:ncdg_nodal_sub) ncdg_maxele_sub
 
     module procedure ncdg_maxele_close
         ! See interface for arguments and documentation
-        
+
         ! integer :: ncstat ! Status of most recent operation
 
         ! Call parent function
@@ -79,9 +69,9 @@ submodule (ncdg:ncdg_nodal_sub) ncdg_maxele_sub
 
     module procedure ncdg_maxele_set_metadata
         ! See interface for arguments and documentation
-        
+
         integer :: ncstat ! Status of most recent operation
-        
+
         ! Put in define mode
         ncstat = nf90_redef(self%ncid)
         if (ncstat /= nf90_eindefine) then
@@ -102,10 +92,10 @@ submodule (ncdg:ncdg_nodal_sub) ncdg_maxele_sub
             max_nvell=max_nvell, &
             ics=ics &
         )
-        
+
         ! Define dimensions
         ! N/A
-        
+
         ! Define variables and their attributes
 
         ! zeta_max
@@ -161,21 +151,21 @@ submodule (ncdg:ncdg_nodal_sub) ncdg_maxele_sub
         ncstat = nf90_put_att(self%ncid, self%time_of_zeta_max_varid, &
             "_FillValue", real_fill_value)
         call ncfile_check_error(ncstat)
-        
+
         ! Define global attributes
         ! N/A, for now
     end procedure ncdg_maxele_set_metadata
 
     module procedure ncdg_maxele_write_step
          ! See interface for arguments and documentation
-        
+
         integer :: ncstat ! Status of most recent operation
         integer :: np ! Number of nodes
         real, allocatable :: zeta_max_old(:) ! Previous maximums,
                                              ! if present
         real, allocatable :: time_of_zeta_max(:) ! Nodewise times when
                                                  ! zeta_max is achieved
-        
+
         ! Exit define mode
         ncstat = nf90_enddef(self%ncid)
         if (ncstat /= nf90_enotindefine) then

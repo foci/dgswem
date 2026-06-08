@@ -7,16 +7,12 @@ submodule (ncdg) ncdg_file_sub
 
     module procedure ncdg_file_open
         ! See interface for arguments and documentation
-        
+
         integer :: ncstat ! Status of most recent operation
 
         ! Call parent function
-        if (present(mode) .and. present(comm) .and. present(info)) then
-            call self%ncfile%open(mode=mode, comm=comm, info=info)
-        else if (present(mode)) then
+        if (present(mode)) then
             call self%ncfile%open(mode=mode)
-        else if (present(comm) .and. present(info)) then
-            call self%ncfile%open(comm=comm, info=info)
         else
             call self%ncfile%open()
         end if
@@ -47,7 +43,7 @@ submodule (ncdg) ncdg_file_sub
 
     module procedure ncdg_file_set_metadata
         ! See interface for arguments and documentation
-        
+
         integer :: ncstat ! Status of most recent operation
 
         ! Define dimensions
@@ -56,7 +52,7 @@ submodule (ncdg) ncdg_file_sub
         call ncfile_check_error(ncstat)
 
         ! Define variables and their attributes
-        
+
         ! time
         ncstat = nf90_def_var(self%ncid, self%time_varname, &
             nf90_double, self%time_dimid, varid=self%time_varid)

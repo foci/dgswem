@@ -7,16 +7,12 @@ submodule (ncdg:ncdg_file_sub) ncdg_nodal_sub
 
     module procedure ncdg_nodal_open
         ! See interface for arguments and documentation
-        
+
         integer :: ncstat ! Status of most recent operation
 
         ! Call parent function
-        if (present(mode) .and. present(comm) .and. present(info)) then
-            call self%ncdg_file%open(mode=mode, comm=comm, info=info)
-        else if (present(mode)) then
+        if (present(mode)) then
             call self%ncdg_file%open(mode=mode)
-        else if (present(comm) .and. present(info)) then
-            call self%ncdg_file%open(comm=comm, info=info)
         else
             call self%ncdg_file%open()
         end if
@@ -103,7 +99,7 @@ submodule (ncdg:ncdg_file_sub) ncdg_nodal_sub
 
     module procedure ncdg_nodal_close
         ! See interface for arguments and documentation
-        
+
         ! integer :: ncstat ! Status of most recent operation
 
         ! Call parent function
@@ -141,7 +137,7 @@ submodule (ncdg:ncdg_file_sub) ncdg_nodal_sub
 
     module procedure ncdg_nodal_set_metadata
         ! See interface for arguments and documentation
-        
+
         integer :: ncstat ! Status of most recent operation
 
         ! Call parent function
@@ -182,7 +178,7 @@ submodule (ncdg:ncdg_file_sub) ncdg_nodal_sub
         call ncfile_check_error(ncstat)
 
         ! Define variables and their attributes
-        
+
         ! x
         ncstat = nf90_def_var(self%ncid, self%x_varname, &
             nf90_double, self%node_dimid, varid=self%x_varid)
@@ -298,7 +294,7 @@ submodule (ncdg:ncdg_file_sub) ncdg_nodal_sub
             ncstat = nf90_put_att(self%ncid, self%neta_varid, &
                 "units", "nondimensional")
             call ncfile_check_error(ncstat)
-    
+
             ! nvdll
             ncstat = nf90_def_var(self%ncid, self%nvdll_varname, &
                 nf90_int, self%nope_dimid, varid=self%nvdll_varid)
@@ -310,7 +306,7 @@ submodule (ncdg:ncdg_file_sub) ncdg_nodal_sub
             ncstat = nf90_put_att(self%ncid, self%nvdll_varid, &
                 "units", "nondimensional")
             call ncfile_check_error(ncstat)
-    
+
             ! max_nvdll
             ncstat = nf90_def_var(self%ncid, self%max_nvdll_varname, &
                 nf90_int, varid=self%max_nvdll_varid)
@@ -322,7 +318,7 @@ submodule (ncdg:ncdg_file_sub) ncdg_nodal_sub
             ncstat = nf90_put_att(self%ncid, self%max_nvdll_varid, &
                 "units", "nondimensional")
             call ncfile_check_error(ncstat)
-    
+
             ! ibtypee
             ncstat = nf90_def_var(self%ncid, self%ibtypee_varname, &
                 nf90_int, self%nope_dimid, varid=self%ibtypee_varid)
@@ -334,7 +330,7 @@ submodule (ncdg:ncdg_file_sub) ncdg_nodal_sub
             ncstat = nf90_put_att(self%ncid, self%ibtypee_varid, &
                 "units", "nondimensional")
             call ncfile_check_error(ncstat)
-    
+
             ! nbdv
             ncstat = nf90_def_var(self%ncid, self%nbdv_varname, &
                 nf90_int, self%neta_dimid, varid=self%nbdv_varid)
@@ -361,7 +357,7 @@ submodule (ncdg:ncdg_file_sub) ncdg_nodal_sub
             ncstat = nf90_put_att(self%ncid, self%nvel_varid, &
                 "units", "nondimensional")
             call ncfile_check_error(ncstat)
-    
+
             ! nvell
             ncstat = nf90_def_var(self%ncid, self%nvell_varname, &
                 nf90_int, self%nbou_dimid, varid=self%nvell_varid)
@@ -373,7 +369,7 @@ submodule (ncdg:ncdg_file_sub) ncdg_nodal_sub
             ncstat = nf90_put_att(self%ncid, self%nvell_varid, &
                 "units", "nondimensional")
             call ncfile_check_error(ncstat)
-    
+
             ! max_nvell
             ncstat = nf90_def_var(self%ncid, self%max_nvell_varname, &
                 nf90_int, varid=self%max_nvell_varid)
@@ -385,7 +381,7 @@ submodule (ncdg:ncdg_file_sub) ncdg_nodal_sub
             ncstat = nf90_put_att(self%ncid, self%max_nvell_varid, &
                 "units", "nondimensional")
             call ncfile_check_error(ncstat)
-    
+
             ! ibtype
             ncstat = nf90_def_var(self%ncid, self%ibtype_varname, &
                 nf90_int, self%nbou_dimid, varid=self%ibtype_varid)
@@ -397,7 +393,7 @@ submodule (ncdg:ncdg_file_sub) ncdg_nodal_sub
             ncstat = nf90_put_att(self%ncid, self%ibtype_varid, &
                 "units", "nondimensional")
             call ncfile_check_error(ncstat)
-    
+
             ! nbvv
             ncstat = nf90_def_var(self%ncid, self%nbvv_varname, &
                 nf90_int, self%nvel_dimid, varid=self%nbvv_varid)
@@ -433,14 +429,14 @@ submodule (ncdg:ncdg_file_sub) ncdg_nodal_sub
         ncstat = nf90_put_att(self%ncid, self%depth_varid, &
             "units", "m")
         call ncfile_check_error(ncstat)
-        
+
         ! Define global attributes
         ! N/A
     end procedure ncdg_nodal_set_metadata
 
     module procedure ncdg_nodal_write_mesh
         ! See interface for arguments and documentation
-        
+
         integer :: ncstat ! Status of most recent operation
         real :: element(nhy, ne) ! Transpose of nm
         integer :: element_start(2) ! Starting position for element data
@@ -499,7 +495,7 @@ submodule (ncdg:ncdg_file_sub) ncdg_nodal_sub
         ncstat = nf90_put_var(self%ncid, self%element_varid, element, &
             element_start, element_count)
         call ncfile_check_error(ncstat)
-        
+
         ! Elevation boundaries
         if (nope /= 0) then
             ! Boundary segment types
@@ -512,7 +508,7 @@ submodule (ncdg:ncdg_file_sub) ncdg_nodal_sub
             ncstat = nf90_put_var(self%ncid, self%nbdv_varid, nbdv2)
             call ncfile_check_error(ncstat)
         endif
-        
+
         ! Normal flow (discharge) boundaries
         if (nbou /= 0) then
             ! Boundary segment types
