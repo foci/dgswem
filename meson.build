@@ -22,7 +22,7 @@ if get_option('precision') == 'double'
   sz = 8
 else
   sz = 4
-endif 
+endif
 
 extra_adcprep_args = []
 
@@ -33,7 +33,7 @@ if compiler_name == 'gcc'
 
   add_project_arguments('-ffixed-line-length-132', language: 'fortran')
   if sz == 8
-    add_project_arguments('-fdefault-real-8', 
+    add_project_arguments('-fdefault-real-8',
                           '-fdefault-double-8',
                           '-fallow-argument-mismatch',
                           '-march=native',
@@ -118,7 +118,7 @@ if get_option('netcdf')
 else
   netcdf_dep = []
 endif
-    
+
 
 
 #############################
@@ -173,7 +173,7 @@ if get_option('parallel')
         executable(
             'dgswem',
             sources: dgswem_src + mpi_handlers + c_interface_src,
-            dependencies: [mpi_dep] + cpp_dep + netcdf_dep,
+            dependencies: [mpi_dep] + cpp_dep,
             fortran_args: '-DCMPI',
             link_language: 'fortran'
         )
@@ -205,4 +205,14 @@ if get_option('netcdf')
         dependencies: netcdf_dep,
         link_language: 'fortran'
     )
+
+    if get_option('parallel')
+        executable(
+            'nctest_parallel.exe',
+            sources: ncdg_src + nctest_parallel_src,
+            dependencies: [mpi_dep] + netcdf_dep,
+            link_language: 'fortran',
+            fortran_args: '-DCMPI',
+        )
+    endif
 endif
