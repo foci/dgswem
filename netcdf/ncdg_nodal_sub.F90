@@ -569,8 +569,6 @@ submodule (ncdg:ncdg_file_sub) ncdg_nodal_sub
             call ncfile_check_error(ncstat)
         end if
 
-        print *, "re-arranging data arrays"
-
         ! Re-arrange data arrays
         ! nm -> element
         do i = 1, ne
