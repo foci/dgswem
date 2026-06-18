@@ -1,19 +1,18 @@
 module netcdf_io
 !! Module for interacting with NetCDF files.
 
-    !use dg, only : none
     use netcdf, only : nf90_unlimited
     use ncdg, only : ncdg_63, ncdg_64, ncdg_maxele
-    
+
     implicit none
 
     ! Committing the sin of global variables, for now
     type(ncdg_63) :: my_63
     type(ncdg_64) :: my_64
     type(ncdg_maxele) :: my_maxele
-    
+
     contains
-    
+
     subroutine netcdf_create_files_serial()
         !! Initialize all NetCDF output files for the simulation.
         !!
@@ -21,18 +20,19 @@ module netcdf_io
         !! This subroutine is not designed for use with MPI. If used in parallel,
         !! it should only be called from a single processor.
         !! @endwarning
-        
-        use global, only : dp, ics, mnbou, mnope, nbdv, nbou, nbvv, ne, neta, &
+
+        use global, only : dp, ics, nbdv, nbou, nbvv, ne, neta, &
             nhy, nm, nope, np, nvel, nvdll, nvell, segtype, x, y
-        
+
         implicit none
 
-        integer, allocatable :: ibtypee(:)
-        integer, allocatable :: ibtype(:)
+        integer, allocatable :: ibtypee(:) ! Not included in src
+        integer, allocatable :: ibtype(:) ! Not included in src
 
         allocate(ibtypee(nope))
         allocate(ibtype(nbou))
 
+        ! Only current supported value is 0
         ibtypee = 0 ! This is valid syntax for array of 0s
         ibtype = segtype
 
@@ -42,7 +42,7 @@ module netcdf_io
             nt=nf90_unlimited, &
             np=np, &
             ne=ne, &
-            nhy=3, &
+            nhy=nhy, &
             nope=nope, &
             neta=neta, &
             max_nvdll=maxval(nvdll), &
@@ -67,7 +67,7 @@ module netcdf_io
             nvel=nvel, &
             ibtype=ibtype, &
             nvell=nvell, &
-            nbvv=nbvv &
+            nbvv=nbvv(:, 1:) &
         )
 
         ! fort.64.nc
@@ -76,7 +76,7 @@ module netcdf_io
             nt=nf90_unlimited, &
             np=np, &
             ne=ne, &
-            nhy=3, &
+            nhy=nhy, &
             nope=nope, &
             neta=neta, &
             max_nvdll=maxval(nvdll), &
@@ -101,7 +101,7 @@ module netcdf_io
             nvel=nvel, &
             ibtype=ibtype, &
             nvell=nvell, &
-            nbvv=nbvv &
+            nbvv=nbvv(:, 1:) &
         )
 
         ! maxele.63.nc
@@ -110,7 +110,7 @@ module netcdf_io
             nt=nf90_unlimited, &
             np=np, &
             ne=ne, &
-            nhy=3, &
+            nhy=nhy, &
             nope=nope, &
             neta=neta, &
             max_nvdll=maxval(nvdll), &
@@ -135,7 +135,7 @@ module netcdf_io
             nvel=nvel, &
             ibtype=ibtype, &
             nvell=nvell, &
-            nbvv=nbvv &
+            nbvv=nbvv(:, 1:) &
         )
 
         deallocate(ibtypee)
@@ -148,7 +148,7 @@ module netcdf_io
         use global, only : eta2, etamax, time_a, uu2, vv2
 
         implicit none
-        
+
         call my_63%ncdg_63_write_step(t=time_a, zeta=eta2)
         call my_64%ncdg_64_write_step(t=time_a, u_vel=uu2, v_vel=vv2)
         call my_maxele%ncdg_maxele_write_step(t=time_a, zeta_max=etamax)
@@ -156,7 +156,7 @@ module netcdf_io
 
     subroutine netcdf_close_files_serial()
         !! Close all NetCDF output files
-        
+
         call my_63%close()
         call my_64%close()
         call my_maxele%close()
