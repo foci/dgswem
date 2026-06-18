@@ -37,7 +37,7 @@ C
 C    prep     =  localize grid and input files for a cold start
 C    hotprep1 =  assumes all directories and files already in place from previous run segment
 C                uses fort.15 file in master directory and creates new localized fort.15 files
-C                for a hot start in the local processor directories.  In doing so it 
+C                for a hot start in the local processor directories.  In doing so it
 C                converts NWS = 2,4,5 to NWS = -2,-4,-5.  This forces 1st entry in met file to
 C                correspond to the hot start time.
 C    hotprep2 =  localize grid and input files (including hotstart file) for a hot start
@@ -46,14 +46,14 @@ C                      hotstart file if these are present.
 C
 C  Pre-processor
 C  -------------
-C  The Pre-processor "prep" performs data decomposition of the ADCIRC grid 
-C  and localizes global input files to subdomains of the decomposition for 
+C  The Pre-processor "prep" performs data decomposition of the ADCIRC grid
+C  and localizes global input files to subdomains of the decomposition for
 C  parallel runs of ADCIRC.
-C   
-C  Subdirectories "PExxxx" of the working directory ( where "xxxx" is a 
-C  4-digit integer representing the MPI_rank of a Processing Element ) 
-C  are created and "localized" input files are placed in the appropriate 
-C  subdirectory with the same filename as the global file in the working 
+C
+C  Subdirectories "PExxxx" of the working directory ( where "xxxx" is a
+C  4-digit integer representing the MPI_rank of a Processing Element )
+C  are created and "localized" input files are placed in the appropriate
+C  subdirectory with the same filename as the global file in the working
 C  directory.  A unit 14 and 15 file, called respectively, setup.14 and
 C  setup.15  are written to the working directory to allow setup to
 C  prepare the source code for a parallel run.
@@ -72,14 +72,19 @@ C   fort.67    Global Hot Start file
 C   fort.68    Global Hot Start file
 C   fort.150   METIS input information
 C   fort.151   METIS output information
-C 
-C  When a parallel ADCIRC job is run, each PExxxx takes its input from its 
+C
+C  When a parallel ADCIRC job is run, each PExxxx takes its input from its
 C  subdirectory PExxxx and writes local output files to the same directory.
 C
 C----------------------------------------------------------------------------
 C
       PROGRAM ADCPREP
-      USE PRE_GLOBAL 
+      USE PRE_GLOBAL
+#ifdef NETCDF
+#ifndef CMPI
+      use netcdf_prep, only : netcdf_prep_files_serial
+#endif
+#endif
 C
       INTEGER I,PE,NWTYPE
       REAL TOL
@@ -104,7 +109,7 @@ C
       R  =  6378206.4D0
       DEG2RAD = 3.141592653589793D0/180.0D0
       RAD2DEG = 180.0D0/3.141592653589793D0
-      
+
 C
 C     Initialize flags.
 C
@@ -160,7 +165,7 @@ C     a hotstart assuming all other files are already in place.
 C
       IF(TRIM(JOB).EQ."hotprep1") THEN
         CALL HOTPREP()
-        GO TO 999 
+        GO TO 999
       ENDIF
 
 C
@@ -174,7 +179,7 @@ C
 C
 C-- Read the Global Grid File ( Unit 14 )
 C
-        CALL READ14() 
+        CALL READ14()
         print *, 'Global Grid file read successfully'
 
 
@@ -190,7 +195,7 @@ C
         DO I=1, NWEIR
            WRITE(150,'(2I8)') WEIR(I), WEIRD(I)
         ENDDO
-        CLOSE(150) 
+        CLOSE(150)
 #endif
 C
 C-- Read the Global Input File ( Unit 15 )
@@ -202,16 +207,25 @@ C
 C-- Read Hard Bottom File ( fort.hb )
 C
         IF(HBFLAG.EQ.1) THEN
-          CALL READHB() 
+          CALL READHB()
           print *, 'Hard Bottom file read successfully'
         ENDIF
+
+C.....Initialize NetCDF files, if needed
+#ifdef NETCDF
+#ifndef CMPI
+      PRINT *, "NOW WITH NETCDF OUTPUT!"
+      PRINT *, "CREATING NETCDF FILES..."
+      CALL NETCDF_PREP_FILES_SERIAL()
+#endif
+#endif
 
 C
 C-- Partiton Nodes with METIS 4.0 Graph Partition Library
 C
 
 #ifdef  CMPI
- 99     CONTINUE 
+ 99     CONTINUE
         CALL SYNCHRONIZE()
         IF (MYRANK_PRE.EQ.1) THEN
           READ(150,*) MNPROC2
@@ -219,7 +233,7 @@ C
           READ(150,*) MNE2
           READ(150,*) MNEI2
           READ(150,*) NWEIR2
-          ALLOCATE(NNEG2(3,MNE2)) 
+          ALLOCATE(NNEG2(3,MNE2))
           DO I=1, MNE2
              READ(150,'(3I8)') NNEG2(1,I),NNEG2(2,I),NNEG2(3,I)
           ENDDO
@@ -228,7 +242,7 @@ C
           DO I=1, NWEIR2
              READ(150,'(2I8)') WEIR2(I), WEIRD2(I)
           ENDDO
-          CLOSE(150) 
+          CLOSE(150)
           CALL METIS2(MNPROC2,MNP2,MNE2,MNEI2,NWEIR2,
      &                NNEG2,WEIR2,WEIRD2)
         ENDIF
@@ -267,7 +281,7 @@ C
            CMD = 'mkdir '
            PENUM  = 'PE0000'
            CALL IWRITE(PENUM,3,6,PE)
-           DIRCMD= CMD//PENUM  
+           DIRCMD= CMD//PENUM
            CALL ISHELL(DIRCMD)
         ENDDO
 C
@@ -335,7 +349,7 @@ C-- If required write a Local Wind Stress file for each PE
 C
         IF (NWS.NE.0)  THEN
           print *, "Ready to Write Local UNIT 22 File for each PE"
-          IF((NWS.EQ.1).OR.(ABS(NWS).EQ.2).OR.(ABS(NWS).EQ.4).OR.    
+          IF((NWS.EQ.1).OR.(ABS(NWS).EQ.2).OR.(ABS(NWS).EQ.4).OR.
      &       (NWS.EQ.3).OR.(ABS(NWS).EQ.5).OR.(    NWS .EQ.6) ) THEN
             CALL PREP22()
 c         ELSEIF (NWS.EQ.10.OR.NWS.EQ.11) THEN
@@ -381,7 +395,7 @@ C
  999    CONTINUE
 #ifdef CMPI
         CALL SYNCHRONIZE()
-        CALL MESSAGE_FINI()    
+        CALL MESSAGE_FINI()
 #endif
 C
         STOP
@@ -516,7 +530,7 @@ c
            GOTO 10
          ENDIF
       ENDDO
- 10   CONTINUE  
+ 10   CONTINUE
 c
 c-- Scan input string for character after old number list
 c
@@ -615,7 +629,7 @@ C
            CLOSE(10)
 C
            CMD(1:21) = "mv tmp "//LOCFN(1:14)
-           CALL ISHELL(CMD)    
+           CALL ISHELL(CMD)
         ENDDO
 C
         RETURN

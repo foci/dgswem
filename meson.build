@@ -181,19 +181,30 @@ if get_option('parallel')
 endif
 
 # Pre-processing program
-executable(
-    'adcprep',
-    sources: prep_src,
-    dependencies: [metis_dep] + netcdf_dep,
-    c_args: extra_adcprep_args,
-    link_language: 'fortran', # have to specify link_language to avoid meson trying to link with C compiler
+if get_option('netcdf')
+    executable(
+        'adcprep',
+        sources: prep_src + ncdg_src + prep_netcdf_src,
+        dependencies: [metis_dep] + netcdf_dep,
+        c_args: extra_adcprep_args,
+        link_language: 'fortran', # have to specify link_language to avoid meson trying to link with C compiler
+        fortran_args: ['-DNETCDF']
 )
+else
+    executable(
+        'adcprep',
+        sources: prep_src,
+        dependencies: [metis_dep],
+        c_args: extra_adcprep_args,
+        link_language: 'fortran', # have to specify link_language to avoid meson trying to link with C compiler
+    )
+endif
 
 # Post-processing program
 executable(
     'adcpost',
     sources: post_src,
-    dependencies: netcdf_dep,
+    # dependencies: netcdf_dep,
     link_language: 'fortran'
 )
 
