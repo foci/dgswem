@@ -2,7 +2,7 @@ program nctest_parallel
 
     use ncdg, only: ncdg_63, ncdg_64, ncdg_maxele
     use mpi
-    use netcdf ! For now
+    use pio
 
     implicit none
 
@@ -42,6 +42,9 @@ program nctest_parallel
     integer, allocatable :: nbvv(:, :) ! Node numbers for each segment
 
     ! Parallell decomposition variables
+    type(iosystem) :: my_iosystem
+    type(iodesc) :: my_iodesc
+    integer, allocatable :: imap_nod(:) ! Mapping to global node index
     logical, allocatable :: resnode(:) ! Whether local nodes are resident or ghost
     logical, allocatable :: resele(:) ! Whether local elements are resident or ghost
 
@@ -53,19 +56,6 @@ program nctest_parallel
     if (procno == 0) print *, "Roll call!"
     call mpi_barrier(mpi_comm_world, ierr)
     print *, "Hello, I am processor ", procno, " of ", nprocs, "!"
-    call mpi_barrier(mpi_comm_world, ierr)
-    if (procno == 0) then
-        select case (nprocs)
-            case (:1)
-                stop "Error: Fewer processes than domains."
-            case (2)
-                print *, "No surplus, so every process will write"
-            case (3:)
-                print *, "Surplus of ", nprocs - 2, " processes detected."
-            case default
-                stop "Error: How did I get here?"
-        end select
-    end if
     call mpi_barrier(mpi_comm_world, ierr)
 
     if (procno == 0) then
@@ -275,6 +265,8 @@ program nctest_parallel
             nbvv(1, :) = [5, 3, 1]
 
             ! Parallell decomposition variables
+            allocate(imap_nod(np))
+            imap_nod(:) = [5, 4, 3, 2, 1]
             allocate(resnode(np)) ! Whether local nodes are resident or ghost
             resnode = [.false., .true., .true., .true., .true.]
             allocate(resele(ne)) ! Whether local elements are resident or ghost
@@ -319,6 +311,8 @@ program nctest_parallel
             nbvv(1, :) = [3, 1, 2]
 
             ! Parallell decomposition variables
+            allocate(imap_nod(np))
+            imap_nod(:) = [5, 6, 3, 4, 2]
             allocate(resnode(np)) ! Whether local nodes are resident or ghost
             resnode(:) = [.true., .true., .false., .false., .false.]
             allocate(resele(ne)) ! Whether local elements are resident or ghost
@@ -327,22 +321,47 @@ program nctest_parallel
             ! Do nothing
     end select
 
-    ! Initialize PIO
+    ! Initialize PIO and decompose
+    select case (nprocs)
+        case (:1)
+            stop "Error: Fewer processes than domains."
+        case (2)
+            if (procno == 0) print *, "No surplus, so every process will write"
+            call pio_init_intracomm( &
+                comp_rank=procno, &
+                comp_comm=mpi_comm_world, &ncells
+                num_iotasks=2, &
+                num_aggregator=2, &
+                stride=1, &
+                rearr=pio_rearr_box, &
+                iosystem=my_iosystem &
+            )
+            call pio_initdecomp( &
+                iosystem=my_iosystem, &
+                basepiotype=pio_double, &
+                dims=nnodg, &
+                compdof=imap_nod, &
+                iodesc=my_iodesc, &
+            )
+        case (3:)
+            if (procno == 0) print *, "Surplus of ", nprocs - 2, " processes detected."
+            stop "Not implemented yet"
+        case default
+            stop "Error: How did I get here?"
+    end select
 
-    ! Open again
-    ! call my_63%pio_open(mode=ior(nf90_write, nf90_mpiio))
-    ! call my_64%pio_open(mode=ior(nf90_write, nf90_mpiio))
-    ! call my_maxele%pio_open(mode=ior(nf90_write, nf90_mpiio))
+    select case (procno)
+        case (0:1)
+            ! Open files
+            ! call my_63%pio_open()
+            ! call my_64%pio_open()
+            ! call my_maxele%pio_open()
+            ! First time step
+            ! Second time step
+            ! Third time step
+            ! Close
+    end select
 
-    ! First time step
-    ! call my_63%ncdg_63_write_step(self, t, zeta, resele, imap_nod_lg)
-    ! Second time step
-    ! Third times step
-    ! Close again
-    ! call my_63%close()
-    ! call my_64%close()
-    ! call my_maxele%close()
-    !
     ! Deallocate
     if (procno == 0 .or. procno == 1) then
         deallocate(nm)
@@ -358,6 +377,8 @@ program nctest_parallel
         deallocate(resnode)
         deallocate(resele)
     end if
+
+    ! Finalize PIO
 
     ! Finalize MPI
     call mpi_finalize(ierr)
