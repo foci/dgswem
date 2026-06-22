@@ -279,13 +279,17 @@ module ncdg
         ! ncdg_file subroutines
         ! Common to all DGSWEM output files
 
-        module subroutine ncdg_file_open(self, mode)
+        module subroutine ncdg_file_open(self, path, mode)
             !! Open a DGSWEM output file, and set all IDs.
 
             implicit none
 
             class(ncdg_file), intent(inout) :: self
             !! The wrapper object of the file
+            character(len=*), optional, intent(in) :: path
+            !! Path and name for the NetCDF file. Default is whatever path is
+            !! already set. If the path is not already set and nothing is provided,
+            !! the program will stop with an error.
             integer, optional, intent(in) :: mode
             !! NetCDF open mode. Default is nf90_nowrite, i.e. read-only.
         end subroutine ncdg_file_open
@@ -315,13 +319,17 @@ module ncdg
         ! ncdg_nodal subroutines
         ! Common to all nodal files
 
-        module subroutine ncdg_nodal_open(self, mode)
+        module subroutine ncdg_nodal_open(self, path, mode)
             !! Open a nodal output file, and set all IDs.
 
             implicit none
 
             class(ncdg_nodal), intent(inout) :: self
             !! The wrapper object of the file
+            character(len=*), optional, intent(in) :: path
+            !! Path and name for the NetCDF file. Default is whatever path is
+            !! already set. If the path is not already set and nothing is provided,
+            !! the program will stop with an error.
             integer, optional, intent(in) :: mode
             !! NetCDF open mode. Default is nf90_nowrite, i.e. read-only.
         end subroutine ncdg_nodal_open
@@ -468,13 +476,17 @@ module ncdg
         ! ncdg_station subroutines
         ! Common to all station files
 
-        module subroutine ncdg_station_open(self, mode)
+        module subroutine ncdg_station_open(self, path, mode)
             !! Open a station output file, and set all IDs.
 
             implicit none
 
             class(ncdg_station), intent(inout) :: self
             !! The wrapper object of the file
+            character(len=*), optional, intent(in) :: path
+            !! Path and name for the NetCDF file. Default is whatever path is
+            !! already set. If the path is not already set and nothing is provided,
+            !! the program will stop with an error.
             integer, optional, intent(in) :: mode
             !! NetCDF open mode. Default is nf90_nowrite, i.e. read-only.
         end subroutine ncdg_station_open
@@ -520,13 +532,17 @@ module ncdg
             !! NetCDF creation mode. Default is ior(nf90_clobber, nf90_netcdf4).
         end subroutine ncdg_63_init
 
-        module subroutine ncdg_63_open(self, mode)
+        module subroutine ncdg_63_open(self, path, mode)
             !! Open a fort.63.nc output file, and set all IDs.
 
             implicit none
 
             class(ncdg_63), intent(inout) :: self
             !! The wrapper object of the file
+            character(len=*), optional, intent(in) :: path
+            !! Path and name for the NetCDF file. Default is whatever path is
+            !! already set. If the path is not already set and nothing is provided,
+            !! the program will assume fort.63.nc.
             integer, optional, intent(in) :: mode
             !! NetCDF open mode. Default is nf90_nowrite, i.e. read-only.
         end subroutine ncdg_63_open
@@ -624,13 +640,17 @@ module ncdg
             !! NetCDF creation mode. Default is ior(nf90_clobber, nf90_netcdf4).
         end subroutine ncdg_64_init
 
-        module subroutine ncdg_64_open(self, mode)
+        module subroutine ncdg_64_open(self, path, mode)
             !! Open a fort.64.nc output file, and set all IDs.
 
             implicit none
 
             class(ncdg_64), intent(inout) :: self
             !! The wrapper object of the file
+            character(len=*), optional, intent(in) :: path
+            !! Path and name for the NetCDF file. Default is whatever path is
+            !! already set. If the path is not already set and nothing is provided,
+            !! the program will assume fort.64.nc.
             integer, optional, intent(in) :: mode
             !! NetCDF open mode. Default is nf90_nowrite, i.e. read-only.
         end subroutine ncdg_64_open
@@ -730,13 +750,17 @@ module ncdg
             !! NetCDF creation mode. Default is ior(nf90_clobber, nf90_netcdf4).
         end subroutine ncdg_maxele_init
 
-        module subroutine ncdg_maxele_open(self, mode)
+        module subroutine ncdg_maxele_open(self, path, mode)
             !! Open a maxele.63.nc output file, and set all IDs.
 
             implicit none
 
             class(ncdg_maxele), intent(inout) :: self
             !! The wrapper object of the file
+            character(len=*), optional, intent(in) :: path
+            !! Path and name for the NetCDF file. Default is whatever path is
+            !! already set. If the path is not already set and nothing is provided,
+            !! the program will assume maxele.63.nc.
             integer, optional, intent(in) :: mode
             !! NetCDF open mode. Default is nf90_nowrite, i.e. read-only.
         end subroutine ncdg_maxele_open

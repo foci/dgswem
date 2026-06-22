@@ -37,6 +37,14 @@ submodule (ncdg:ncdg_nodal_sub) ncdg_maxele_sub
         integer :: ncstat ! Status of most recent operation
         integer :: the_mode ! For defaulting
 
+        ! Set path
+        ! Default is whatever is already there
+        if (present(path)) then
+            self%path = path
+        else if (.not. allocated(self%path)) then
+            self%path = "maxele.63.nc"
+        end if
+
         ! Set mode
         if (present(mode)) then
             the_mode = mode
@@ -45,7 +53,7 @@ submodule (ncdg:ncdg_nodal_sub) ncdg_maxele_sub
         end if
 
         ! Call parent function
-        call self%ncdg_nodal%open(mode=the_mode)
+        call self%ncdg_nodal%open(path=self%path, mode=the_mode)
 
         ! Set dimension IDs
         ! N/A

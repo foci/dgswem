@@ -11,6 +11,14 @@ submodule (ncdg:ncdg_file_sub) ncdg_station_sub
         ! integer :: ncstat ! Status of most recent operation
         integer :: the_mode ! For defaulting
 
+        ! Set path
+        ! Default is whatever is already there
+        if (present(path)) then
+            self%path = path
+        else if (.not. allocated(self%path)) then
+            error stop "NCDG station error: Tried to open file with no path."
+        end if
+
         ! Set mode
         if (present(mode)) then
             the_mode = mode
@@ -19,7 +27,7 @@ submodule (ncdg:ncdg_file_sub) ncdg_station_sub
         end if
 
         ! Call parent function
-        call self%ncdg_file%open(mode=the_mode)
+        call self%ncdg_file%open(path=self%path, mode=the_mode)
 
         ! Set dimension IDs
         ! N/A, for now

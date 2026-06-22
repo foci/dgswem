@@ -1,7 +1,7 @@
 module nctest_util
 
     use ncdg, only: ncdg_63, ncdg_64
-    
+
     implicit none
 
     contains
@@ -13,7 +13,7 @@ module nctest_util
 
         print *, "DGSWEM Dimension IDs"
         print *, file%time_dimname, file%time_dimid
-        
+
         print *, "Nodal Dimension IDs"
         print *, file%node_dimname, file%node_dimid
         print *, file%nele_dimname, file%nele_dimid
@@ -25,10 +25,10 @@ module nctest_util
         print *, file%nvel_dimname, file%nvel_dimid
         print *, file%max_nvell_dimname, file%max_nvell_dimid
         print *, file%mesh_dimname, file%mesh_dimid
-        
+
         print *, "DGSWEM Variable IDs"
         print *, file%time_varname, file%time_varid
-        
+
         print *, "Nodal Variable IDs"
         print *, file%x_varname, file%x_varid
         print *, file%y_varname, file%y_varid
@@ -57,7 +57,7 @@ module nctest_util
 
         print *, "DGSWEM Dimension IDs"
         print *, file%time_dimname, file%time_dimid
-        
+
         print *, "Nodal Dimension IDs"
         print *, file%node_dimname, file%node_dimid
         print *, file%nele_dimname, file%nele_dimid
@@ -69,10 +69,10 @@ module nctest_util
         print *, file%nvel_dimname, file%nvel_dimid
         print *, file%max_nvell_dimname, file%max_nvell_dimid
         print *, file%mesh_dimname, file%mesh_dimid
-        
+
         print *, "DGSWEM Variable IDs"
         print *, file%time_varname, file%time_varid
-        
+
         print *, "Nodal Variable IDs"
         print *, file%x_varname, file%x_varid
         print *, file%y_varname, file%y_varid
@@ -94,7 +94,7 @@ module nctest_util
         print *, file%u_vel_varname, file%u_vel_varid
         print *, file%v_vel_varname, file%v_vel_varid
     end subroutine print_metadata_64
-    
+
 end module nctest_util
 
 
@@ -104,9 +104,9 @@ program nctest
     use ncdg, only : ncdg_63, ncdg_64, ncdg_maxele
     use nctest_util
     use netcdf
-    
+
     implicit none
-    
+
     type(ncdg_63) :: my_63
     type(ncdg_64) :: my_64
     type(ncdg_maxele) :: my_maxele
@@ -213,11 +213,11 @@ program nctest
         call print_metadata_64(my_64)
     endif
     print *, "Opening fort.63.nc"
-    call my_63%open(nf90_write)
+    call my_63%open(mode=nf90_write)
     print *, "Opening fort.64.nc"
-    call my_64%open(nf90_write)
+    call my_64%open(mode=nf90_write)
     print *, "Opening maxele.63.nc"
-    call my_maxele%open(nf90_write)
+    call my_maxele%open(mode=nf90_write)
     if (write_metadata) then
         call print_metadata_63(my_63)
         call print_metadata_64(my_64)
@@ -326,5 +326,5 @@ program nctest
     print *, "Closing maxele.63.nc"
     call my_maxele%close()
     print *, "Program complete"
-    
+
 end program nctest

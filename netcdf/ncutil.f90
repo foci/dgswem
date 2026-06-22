@@ -31,7 +31,8 @@ module ncutil
 
     subroutine ncfile_init(self, path, cmode)
         !! Initialization function for
-        !! [[ncutil(module):ncfile(type)]]. Left in define mode.
+        !! [[ncutil(module):ncfile(type)]] which creates a new file. Left in
+        !! define mode.
         !!
         !! @warning "File Not Closed"
         !! After initialization, the underlying file object is in define mode.
@@ -69,18 +70,37 @@ module ncutil
         call ncfile_check_error(ncstat)
     end subroutine ncfile_init
 
-    subroutine ncfile_open(self, mode)
-        !! Open the NetCDF file for manipulation.
+    subroutine ncfile_open(self, path, mode)
+        !! Initialization function for
+        !! [[ncutil(module):ncfile(type)]] which opens an existing file. Left in
+        !! define mode.
+        !!
+        !! @warning "File Not Closed"
+        !! After initialization, the underlying file object is in define mode.
+        !! The user must remember to close it.
+        !! @endwarning
 
         implicit none
 
         class(ncfile), intent(inout) :: self
         !! The wrapper object of the file
+        character(len=*), optional, intent(in) :: path
+        !! Path and name for the NetCDF file. Default is whatever path is
+        !! already set. If the path is not already set and nothing is provided,
+        !! the program will stop with an error.
         integer, optional, intent(in) :: mode
         !! NetCDF open mode. Default is nf90_nowrite, i.e. read-only.
 
         integer :: ncstat ! Status of most recent operation
         integer :: the_mode ! For defaulting
+
+        ! Set path
+        ! Default is whatever is already there
+        if (present(path)) then
+            self%path = path
+        else if (.not. allocated(self%path)) then
+            error stop "NC util error: Tried to open file with no path."
+        end if
 
         ! Set mode
         if (present(mode)) then
