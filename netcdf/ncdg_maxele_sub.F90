@@ -31,51 +31,6 @@ submodule (ncdg:ncdg_nodal_sub) ncdg_maxele_sub
         deallocate(the_path)
     end procedure ncdg_maxele_init
 
-#ifdef CMPI
-    module procedure ncdg_maxele_init_parallel
-        ! See interface for arguments and documentation
-
-        character(len=:), allocatable :: the_path ! For defaulting
-        integer :: the_cmode ! For defaulting
-        integer :: the_comm ! For defaulting
-        integer :: the_info ! For defaulting
-
-        ! Set path
-        if (present(path)) then
-            the_path = path
-        else
-            the_path = "maxele.63.nc"
-        end if
-
-        ! Set cmode
-        if (present(cmode)) then
-            the_cmode = cmode
-        else
-            the_cmode = ior(nf90_clobber, nf90_netcdf4)
-        end if
-
-        ! Set comm
-        if (present(comm)) then
-            the_comm = comm
-        else
-            the_comm = mpi_comm_world
-        end if
-
-        ! Set info
-        if (present(info)) then
-            the_info = info
-        else
-            the_info = mpi_info_null
-        end if
-
-        ! Call parent function
-        call self%ncfile%pinit(path=the_path, cmode=the_cmode, &
-            comm=the_comm, info=the_info)
-
-        deallocate(the_path)
-    end procedure ncdg_maxele_init_parallel
-#endif
-
     module procedure ncdg_maxele_open
         ! See interface for arguments and documentation
 

@@ -31,51 +31,6 @@ submodule (ncdg:ncdg_nodal_sub) ncdg_64_sub
         deallocate(the_path)
     end procedure ncdg_64_init
 
-#ifdef CMPI
-    module procedure ncdg_64_init_parallel
-        ! See interface for arguments and documentation
-
-        character(len=:), allocatable :: the_path ! For defaulting
-        integer :: the_cmode ! For defaulting
-        integer :: the_comm ! For defaulting
-        integer :: the_info ! For defaulting
-
-        ! Set path
-        if (present(path)) then
-            the_path = path
-        else
-            the_path = "fort.64.nc"
-        end if
-
-        ! Set cmode
-        if (present(cmode)) then
-            the_cmode = cmode
-        else
-            the_cmode = ior(nf90_clobber, nf90_netcdf4)
-        end if
-
-        ! Set comm
-        if (present(comm)) then
-            the_comm = comm
-        else
-            the_comm = mpi_comm_world
-        end if
-
-        ! Set info
-        if (present(info)) then
-            the_info = info
-        else
-            the_info = mpi_info_null
-        end if
-
-        ! Call parent function
-        call self%ncfile%pinit(path=the_path, cmode=the_cmode, &
-            comm=the_comm, info=the_info)
-
-        deallocate(the_path)
-    end procedure ncdg_64_init_parallel
-#endif
-
     module procedure ncdg_64_open
         ! See interface for arguments and documentation
 
@@ -103,52 +58,6 @@ submodule (ncdg:ncdg_nodal_sub) ncdg_64_sub
             self%v_vel_varid)
         call ncfile_check_error(ncstat)
     end procedure ncdg_64_open
-
-#ifdef CMPI
-    module procedure ncdg_64_open_parallel
-        ! See interface for arguments and documentation
-
-        integer :: ncstat ! Status of most recent operation
-        integer :: the_mode ! For defaulting
-        integer :: the_comm ! For defaulting
-        integer :: the_info ! For defaulting
-
-        ! Set mode
-        if (present(mode)) then
-            the_mode = mode
-        else
-            the_mode = nf90_nowrite
-        end if
-
-        ! Set comm
-        if (present(comm)) then
-            the_comm = comm
-        else
-            the_comm = mpi_comm_world
-        end if
-
-        ! Set info
-        if (present(info)) then
-            the_info = info
-        else
-            the_info = mpi_info_null
-        end if
-
-        ! Call parent function
-        call self%ncdg_nodal%popen(mode=the_mode, comm=the_comm, info=the_info)
-
-        ! Set dimension IDs
-        ! N/A, for now
-
-        ! Set variable IDs
-        ncstat = nf90_inq_varid(self%ncid, self%u_vel_varname, &
-            self%u_vel_varid)
-        call ncfile_check_error(ncstat)
-        ncstat = nf90_inq_varid(self%ncid, self%v_vel_varname, &
-            self%v_vel_varid)
-        call ncfile_check_error(ncstat)
-    end procedure ncdg_64_open_parallel
-#endif
 
     module procedure ncdg_64_close
         ! See interface for arguments and documentation
