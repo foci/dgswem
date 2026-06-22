@@ -1,12 +1,12 @@
 if get_option('netcdf')
     ncdg_src = files([
-        'ncutil.F90',
-        'ncdg.F90',
-        'ncdg_file_sub.F90',
-        'ncdg_nodal_sub.F90',
-        'ncdg_63_sub.F90',
-        'ncdg_64_sub.F90',
-        'ncdg_maxele_sub.F90',
-        'ncdg_station_sub.F90'
+        'ncutil.f90',
+        'ncdg.f90',
+        'ncdg_file_sub.f90',
+        'ncdg_nodal_sub.f90',
+        'ncdg_63_sub.f90',
+        'ncdg_64_sub.f90',
+        'ncdg_maxele_sub.f90',
+        'ncdg_station_sub.f90'
     ])
 endif
