@@ -5,7 +5,7 @@ submodule (ncdg:ncdg_nodal_sub) ncdg_64_sub
 
     contains
 
-    module procedure ncdg_64_init
+    module procedure ncdg_64_create
         ! See interface for arguments and documentation
 
         character(len=:), allocatable :: the_path ! For defaulting
@@ -26,10 +26,10 @@ submodule (ncdg:ncdg_nodal_sub) ncdg_64_sub
         end if
 
         ! Call parent function
-        call self%ncfile%init(path=the_path, cmode=the_cmode)
+        call self%ncfile%create(path=the_path, cmode=the_cmode)
 
         deallocate(the_path)
-    end procedure ncdg_64_init
+    end procedure ncdg_64_create
 
     module procedure ncdg_64_open
         ! See interface for arguments and documentation

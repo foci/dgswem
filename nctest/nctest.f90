@@ -147,13 +147,13 @@ program nctest
 
     ! Test the NetCDF tools
     print *, "Creating fort.63.nc"
-    call my_63%init()
+    call my_63%create()
     print *, "Creating fort.64.nc"
-    call my_64%init()
+    call my_64%create()
     print *, "Creating maxele.63.nc"
-    call my_maxele%init()
+    call my_maxele%create()
     !print *, "Creating maxvel.64.nc"
-    !call my_maxvel%init()
+    !call my_maxvel%create()
     if (write_metadata) then
         call print_metadata_63(my_63)
         call print_metadata_64(my_64)

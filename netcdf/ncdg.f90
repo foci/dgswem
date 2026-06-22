@@ -206,7 +206,7 @@ module ncdg
 
         contains
 
-        procedure, public :: init => ncdg_63_init
+        procedure, public :: create => ncdg_63_create
         procedure, public :: open => ncdg_63_open
         procedure, public :: close => ncdg_63_close
         procedure, public :: ncdg_63_set_metadata
@@ -235,7 +235,7 @@ module ncdg
 
         contains
 
-        procedure, public :: init => ncdg_64_init
+        procedure, public :: create => ncdg_64_create
         procedure, public :: open => ncdg_64_open
         procedure, public :: close => ncdg_64_close
         procedure, public :: ncdg_64_set_metadata
@@ -264,7 +264,7 @@ module ncdg
 
         contains
 
-        procedure, public :: init => ncdg_maxele_init
+        procedure, public :: create => ncdg_maxele_create
         procedure, public :: open => ncdg_maxele_open
         procedure, public :: close => ncdg_maxele_close
         procedure, public :: ncdg_maxele_set_metadata
@@ -513,7 +513,7 @@ module ncdg
         ! ncdg_63 subroutines
         ! For fort.63.nc
 
-        module subroutine ncdg_63_init(self, path, cmode)
+        module subroutine ncdg_63_create(self, path, cmode)
             !! Initialization function for
             !! [[ncdg(module):ncdg_63(type)]]. Left in define mode.
             !!
@@ -530,7 +530,7 @@ module ncdg
             !! Path and name for the NetCDF file. Default is fort.63.nc.
             integer, optional, intent(in) :: cmode
             !! NetCDF creation mode. Default is ior(nf90_clobber, nf90_netcdf4).
-        end subroutine ncdg_63_init
+        end subroutine ncdg_63_create
 
         module subroutine ncdg_63_open(self, path, mode)
             !! Open a fort.63.nc output file, and set all IDs.
@@ -621,7 +621,7 @@ module ncdg
         ! ncdg_64 subroutines
         ! For fort.64.nc
 
-        module subroutine ncdg_64_init(self, path, cmode)
+        module subroutine ncdg_64_create(self, path, cmode)
             !! Initialization function for
             !! [[ncdg(module):ncdg_64(type)]]. Left in define mode.
             !!
@@ -638,7 +638,7 @@ module ncdg
             !! Path and name for the NetCDF file. Default is fort.64.nc.
             integer, optional, intent(in) :: cmode
             !! NetCDF creation mode. Default is ior(nf90_clobber, nf90_netcdf4).
-        end subroutine ncdg_64_init
+        end subroutine ncdg_64_create
 
         module subroutine ncdg_64_open(self, path, mode)
             !! Open a fort.64.nc output file, and set all IDs.
@@ -731,7 +731,7 @@ module ncdg
         ! ncdg_maxele subroutines
         ! For maxele.63.nc
 
-        module subroutine ncdg_maxele_init(self, path, cmode)
+        module subroutine ncdg_maxele_create(self, path, cmode)
             !! Initialization function for
             !! [[ncdg(module):ncdg_maxele(type)]]. Left in define mode.
             !!
@@ -748,7 +748,7 @@ module ncdg
             !! Path and name for the NetCDF file. Default is maxele.63.nc.
             integer, optional, intent(in) :: cmode
             !! NetCDF creation mode. Default is ior(nf90_clobber, nf90_netcdf4).
-        end subroutine ncdg_maxele_init
+        end subroutine ncdg_maxele_create
 
         module subroutine ncdg_maxele_open(self, path, mode)
             !! Open a maxele.63.nc output file, and set all IDs.

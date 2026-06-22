@@ -35,7 +35,7 @@ module netcdf_prep
         ibtypee = 0 ! This is valid syntax for array of 0s
 
         ! fort.63.nc
-        call my_63%init()
+        call my_63%create()
         call my_63%ncdg_63_set_metadata( &
             nt=nf90_unlimited, &
             np=nnodg, &
@@ -70,7 +70,7 @@ module netcdf_prep
         call my_63%close()
 
         ! fort.64.nc
-        call my_64%init()
+        call my_64%create()
         call my_64%ncdg_64_set_metadata( &
             nt=nf90_unlimited, &
             np=nnodg, &
@@ -105,7 +105,7 @@ module netcdf_prep
         call my_64%close()
 
         ! maxele.63.nc
-        call my_maxele%init()
+        call my_maxele%create()
         call my_maxele%ncdg_maxele_set_metadata( &
             nt=nf90_unlimited, &
             np=nnodg, &

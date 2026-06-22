@@ -21,7 +21,7 @@ module ncutil
 
         contains
 
-        procedure, public :: init => ncfile_init
+        procedure, public :: create => ncfile_create
         procedure, public :: open => ncfile_open
         procedure, public :: close => ncfile_close
 
@@ -29,7 +29,7 @@ module ncutil
 
     contains
 
-    subroutine ncfile_init(self, path, cmode)
+    subroutine ncfile_create(self, path, cmode)
         !! Initialization function for
         !! [[ncutil(module):ncfile(type)]] which creates a new file. Left in
         !! define mode.
@@ -68,7 +68,7 @@ module ncutil
         ! Create file
         ncstat = nf90_create(self%path, the_cmode, self%ncid)
         call ncfile_check_error(ncstat)
-    end subroutine ncfile_init
+    end subroutine ncfile_create
 
     subroutine ncfile_open(self, path, mode)
         !! Initialization function for

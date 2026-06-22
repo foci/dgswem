@@ -37,7 +37,7 @@ module netcdf_io
         ibtype = segtype
 
         ! fort.63.nc
-        call my_63%init()
+        call my_63%create()
         call my_63%ncdg_63_set_metadata( &
             nt=nf90_unlimited, &
             np=np, &
@@ -71,7 +71,7 @@ module netcdf_io
         )
 
         ! fort.64.nc
-        call my_64%init()
+        call my_64%create()
         call my_64%ncdg_64_set_metadata( &
             nt=nf90_unlimited, &
             np=np, &
@@ -105,7 +105,7 @@ module netcdf_io
         )
 
         ! maxele.63.nc
-        call my_maxele%init()
+        call my_maxele%create()
         call my_maxele%ncdg_maxele_set_metadata( &
             nt=nf90_unlimited, &
             np=np, &
