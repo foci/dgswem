@@ -74,49 +74,57 @@ hostname_cmd = run_command('hostname',  check: true)
 hostname = hostname_cmd.stdout().strip()
 
 if get_option('netcdf')
-  if not hostname.contains('tacc.utexas.edu')
-    netcdf_dep = [dependency('netcdf', language: 'fortran', required: true),
-                 dependency('netcdf', language: 'c', required: true)]
-  else
-    # Problem: pkg-config --cflags netcdf-fortran returns blank -I flag
-    # Fix: filter it out manually
-    nf_flags_raw = run_command('nf-config', '--fflags', check: true).stdout().strip().split()
-    nf_libs_raw = run_command('nf-config', '--flibs', check: true).stdout().strip().split()
-    nc_flags_raw = run_command('nc-config', '--cflags', check: true).stdout().strip().split()
-    nc_libs_raw = run_command('nc-config', '--libs', check: true).stdout().strip().split()
+    # Declare the dependency
+    # Special treatment is needed on TACC because of a bug
+    if not hostname.contains('tacc.utexas.edu')
+        netcdf_dep = [
+            dependency('netcdf', language: 'fortran', required: true),
+            dependency('netcdf', language: 'c', required: true)
+        ]
+    else
+        # Problem: pkg-config --cflags netcdf-fortran returns blank -I flag
+        # Fix: filter it out manually
+        nf_flags_raw = run_command('nf-config', '--fflags', check: true).stdout().strip().split()
+        nf_libs_raw = run_command('nf-config', '--flibs', check: true).stdout().strip().split()
+        nc_flags_raw = run_command('nc-config', '--cflags', check: true).stdout().strip().split()
+        nc_libs_raw = run_command('nc-config', '--libs', check: true).stdout().strip().split()
 
-    # Filter out the empty '-I'
-    clean_flags = []
-    foreach flag : nf_flags_raw + nc_flags_raw
-      if flag != '-I' and flag != '' and flag not in clean_flags
-        clean_flags += flag
-      endif
-    endforeach
+        # Filter out the empty '-I'
+        clean_flags = []
+        foreach flag : nf_flags_raw + nc_flags_raw
+            if flag != '-I' and flag != '' and flag not in clean_flags
+                clean_flags += flag
+            endif
+        endforeach
 
-    netcdf_dep = declare_dependency(
-      compile_args: clean_flags,
-      link_args: nf_libs_raw + nc_libs_raw
-    )
-  endif
+        netcdf_dep = declare_dependency(
+            compile_args: clean_flags,
+            link_args: nf_libs_raw + nc_libs_raw
+        )
+    endif
 
-  # Temporary fix for netcdf pkg-config bug on TACC systems,
-  # skip netcdf test program
+    # Temporary fix for netcdf pkg-config bug on TACC systems,
+    # skip netcdf test program
+    if not hostname.contains('tacc.utexas.edu')
+    	compiler.run(
+    	'''
+    	PROGRAM netCDF3Test
+    	  USE NETCDF
+    	  IMPLICIT NONE
+    	  INTEGER :: IERR, NCID
+    	  IERR = NF90_OPEN('test.nc', NF90_NOWRITE, NCID)
+    	END PROGRAM ''' ,
+    	required: true,
+    	dependencies: netcdf_dep)
+    endif
 
-  if not hostname.contains('tacc.utexas.edu')
-	compiler.run(
-	'''
-	PROGRAM netCDF3Test
-	  USE NETCDF
-	  IMPLICIT NONE
-	  INTEGER :: IERR, NCID
-	  IERR = NF90_OPEN('test.nc', NF90_NOWRITE, NCID)
-	END PROGRAM ''' ,
-	required: true,
-	dependencies: netcdf_dep)
-  endif
 
-else
-  netcdf_dep = []
+    # Set up PIO for the parallel case
+    if get_option('parallel')
+        pio_lib = compiler.find_library('piof', required: true)
+        pio_dep = declare_dependency(dependencies: pio_lib)
+    endif
+
 endif
 
 
@@ -222,8 +230,13 @@ if get_option('netcdf')
             'nctest_parallel.exe',
             sources: ncdg_src + nctest_parallel_src,
             dependencies: [mpi_dep] + netcdf_dep,
-            link_language: 'fortran',
-            fortran_args: '-DCMPI',
+            link_language: 'fortran'
+        )
+        executable(
+            'piotest.exe',
+            sources: piodg_src + piotest_src,
+            dependencies: [mpi_dep] + pio_dep,
+            link_language: 'fortran'
         )
     endif
 endif

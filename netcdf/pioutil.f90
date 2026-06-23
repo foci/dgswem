@@ -18,7 +18,7 @@ module pioutil
 
         procedure, public :: create => piofile_create
         procedure, public :: open => piofile_open
-        procedure, public :: pclose => piofile_close
+        procedure, public :: close => piofile_close
     end type piofile
 
     contains
@@ -37,14 +37,14 @@ module pioutil
 
         class(piofile), intent(inout) :: self
         !! The wrapper object being initialized
-        type(iosystem_desc_t), intent(inout) :: piosystem
+        type(iosystem_desc_t), intent(inout), target :: piosystem
         !! The PIO system object
         character(len=*), optional, intent(in) :: path
         !! Path and name for the NetCDF file. Default is untitled.nc.
         integer, optional, intent(in) :: piotype
         !! PIO file and I/O type. Default is pio_iotype_netcdf4p.
         integer, optional, intent(in) :: cmode
-        !! PIO creation mode. Default is pio_write.
+        !! PIO creation mode. Default is pio_clobber.
 
         integer :: piostat ! Status of most recent operation
         integer :: the_piotype ! For defaulting
@@ -68,14 +68,14 @@ module pioutil
         if (present(cmode)) then
             the_cmode = cmode
         else
-            the_cmode = pio_write
+            the_cmode = pio_clobber
         end if
 
         ! Create file
-        piostat = pio_createfile(self%piosystem, self%piofile, &
+        piostat = pio_createfile(piosystem, self%piofile, &
             the_piotype, self%path, the_cmode)
         call piofile_check_error(piostat)
-    end subroutine piofile_init
+    end subroutine piofile_create
 
     subroutine piofile_open(self, piosystem, path, piotype, omode)
         !! Parallel-access initialization function for
@@ -91,11 +91,12 @@ module pioutil
 
         class(piofile), intent(inout) :: self
         !! The wrapper object of the file
-        type(iosystem_desc_t), intent(inout) :: piosystem
+        type(iosystem_desc_t), intent(inout), target :: piosystem
         !! The PIO system object
         character(len=*), optional, intent(in) :: path
         !! Path and name for the NetCDF file. Default is whatever path is
-        !! already set or untitled.nc.
+        !! already set. If the path is not already set and nothing is provided,
+        !! the program will stop with an error.
         integer, optional, intent(in) :: piotype
         !! PIO file and I/O type. Default is pio_iotype_netcdf4p.
         integer, optional, intent(in) :: omode
@@ -106,12 +107,11 @@ module pioutil
         integer :: the_omode ! For defaulting
 
         ! Set path
-        ! Default is either untitled.nc
-        ! or whatever is already there
+        ! Default is whatever is already there
         if (present(path)) then
             self%path = path
-        else if (.not. allocated(self%path))
-            self%path = "untitled.nc"
+        else if (.not. allocated(self%path)) then
+            error stop "PIO util error: Tried to open file with no path."
         end if
 
         ! Set piotype
@@ -122,14 +122,30 @@ module pioutil
         end if
 
         ! Set cmode
-        if (present(cmode)) then
-            the_cmode = cmode
+        if (present(omode)) then
+            the_omode = omode
         else
-            the_cmode = pio_write
+            the_omode = pio_write
         end if
 
         ! Open file
+        piostat = pio_openfile(piosystem, self%piofile, &
+            the_piotype, self%path, the_omode)
+        call piofile_check_error(piostat)
     end subroutine piofile_open
+
+    subroutine piofile_close(self)
+        !! Close the NetCDF file.
+
+        implicit none
+
+        class(piofile), intent(inout) :: self
+        !! The wrapper object of the file
+
+        ! integer :: piostat ! Status of most recent operation
+
+        call pio_closefile(self%piofile)
+    end subroutine piofile_close
 
     subroutine piofile_check_error(piostat)
         !! Look for and handle an error code from the PIO library.
@@ -140,11 +156,11 @@ module pioutil
         !! Status output by the PIO library function call
 
         integer :: ierr ! Ironically, an error code for the error function
-        character(len=:), allocatable :: msg ! For retrieving the PIO message
+        character(len=256) :: msg ! For retrieving the PIO message
 
         if (piostat /= pio_noerr) then
             ierr = pio_strerror(piostat, msg)
-            error stop "PIO Error: " // msg
+            error stop "PIO Error: " // trim(msg)
         end if
     end subroutine piofile_check_error
 
