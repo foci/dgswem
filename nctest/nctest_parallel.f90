@@ -2,6 +2,7 @@ program nctest_parallel
 
     use ncdg, only: ncdg_63, ncdg_64, ncdg_maxele
     use mpi
+    use netcdf, only: nf90_unlimited
     use pio
 
     implicit none
@@ -11,6 +12,10 @@ program nctest_parallel
     integer :: procno
     integer :: ierr
 
+    ! PIO variables
+    type(iosystem_desc_t) :: my_iosystem
+
+    ! NCDG variables
     type(ncdg_63) :: my_63
     type(ncdg_64) :: my_64
     type(ncdg_maxele) :: my_maxele
@@ -42,8 +47,6 @@ program nctest_parallel
     integer, allocatable :: nbvv(:, :) ! Node numbers for each segment
 
     ! Parallell decomposition variables
-    type(iosystem) :: my_iosystem
-    type(iodesc) :: my_iodesc
     integer, allocatable :: imap_nod(:) ! Mapping to global node index
     logical, allocatable :: resnode(:) ! Whether local nodes are resident or ghost
     logical, allocatable :: resele(:) ! Whether local elements are resident or ghost
@@ -100,9 +103,9 @@ program nctest_parallel
         nbvv(1, :) = [1, 3, 5, 6]
 
         ! Initialization (in serial)
-        call my_63%init()
-        call my_64%init()
-        call my_maxele%init()
+        call my_63%create()
+        call my_64%create()
+        call my_maxele%create()
 
         ! Set metadata (in serial)
         call my_63%ncdg_63_set_metadata( &
@@ -322,45 +325,45 @@ program nctest_parallel
     end select
 
     ! Initialize PIO and decompose
-    select case (nprocs)
-        case (:1)
-            stop "Error: Fewer processes than domains."
-        case (2)
-            if (procno == 0) print *, "No surplus, so every process will write"
-            call pio_init_intracomm( &
-                comp_rank=procno, &
-                comp_comm=mpi_comm_world, &ncells
-                num_iotasks=2, &
-                num_aggregator=2, &
-                stride=1, &
-                rearr=pio_rearr_box, &
-                iosystem=my_iosystem &
-            )
-            call pio_initdecomp( &
-                iosystem=my_iosystem, &
-                basepiotype=pio_double, &
-                dims=nnodg, &
-                compdof=imap_nod, &
-                iodesc=my_iodesc, &
-            )
-        case (3:)
-            if (procno == 0) print *, "Surplus of ", nprocs - 2, " processes detected."
-            stop "Not implemented yet"
-        case default
-            stop "Error: How did I get here?"
-    end select
+    ! select case (nprocs)
+    !     case (:1)
+    !         stop "Error: Fewer processes than domains."
+    !     case (2)
+    !         if (procno == 0) print *, "No surplus, so every process will write"
+    !         call pio_init_intracomm( &
+    !             comp_rank=procno, &
+    !             comp_comm=mpi_comm_world, &ncells
+    !             num_iotasks=2, &
+    !             num_aggregator=2, &
+    !             stride=1, &
+    !             rearr=pio_rearr_box, &
+    !             iosystem=my_iosystem &
+    !         )
+    !         call pio_initdecomp( &
+    !             iosystem=my_iosystem, &
+    !             basepiotype=pio_double, &
+    !             dims=nnodg, &
+    !             compdof=imap_nod, &
+    !             iodesc=my_iodesc, &
+    !         )
+    !     case (3:)
+    !         if (procno == 0) print *, "Surplus of ", nprocs - 2, " processes detected."
+    !         stop "Not implemented yet"
+    !     case default
+    !         stop "Error: How did I get here?"
+    ! end select
 
-    select case (procno)
-        case (0:1)
-            ! Open files
-            ! call my_63%pio_open()
-            ! call my_64%pio_open()
-            ! call my_maxele%pio_open()
-            ! First time step
-            ! Second time step
-            ! Third time step
-            ! Close
-    end select
+    ! select case (procno)
+    !     case (0:1)
+    !         ! Open files
+    !         ! call my_63%pio_open()
+    !         ! call my_64%pio_open()
+    !         ! call my_maxele%pio_open()
+    !         ! First time step
+    !         ! Second time step
+    !         ! Third time step
+    !         ! Close
+    ! end select
 
     ! Deallocate
     if (procno == 0 .or. procno == 1) then

@@ -100,7 +100,7 @@ module pioutil
         integer, optional, intent(in) :: piotype
         !! PIO file and I/O type. Default is pio_iotype_netcdf4p.
         integer, optional, intent(in) :: omode
-        !! PIO open mode. Default is pio_write.
+        !! PIO open mode. Default is pio_nowrite.
 
         integer :: piostat ! Status of most recent operation
         integer :: the_piotype ! For defaulting
@@ -125,7 +125,7 @@ module pioutil
         if (present(omode)) then
             the_omode = omode
         else
-            the_omode = pio_write
+            the_omode = pio_nowrite
         end if
 
         ! Open file
@@ -143,8 +143,12 @@ module pioutil
         !! The wrapper object of the file
 
         ! integer :: piostat ! Status of most recent operation
+        type(file_desc_t) :: piofile_unset ! Blank struct
 
         call pio_closefile(self%piofile)
+
+        ! Flush file struct
+        self%piofile = piofile_unset
     end subroutine piofile_close
 
     subroutine piofile_check_error(piostat)

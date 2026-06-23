@@ -19,6 +19,9 @@ program piotest
     ! PIODG variables
     type(piofile) :: my_piofile
     type(piofile) :: my_piofile2
+    integer :: dimid
+    integer :: varid
+    type(var_desc_t) :: vardesc
 
     ! Initialize MPI
     call mpi_init(ierr)
@@ -62,6 +65,16 @@ program piotest
     call my_piofile%close()
     call my_piofile2%open(piosystem, path="file1.nc", &
         piotype=pio_iotype_netcdf, omode=pio_write)
+
+    ! Test dimensions and variables
+    ierr = pio_def_dim(my_piofile2%piofile, "dimension", 3, dimid)
+    ierr = pio_def_var(my_piofile2%piofile%fh, "variable", pio_int, &
+        [dimid], varid)
+    vardesc%ncid = my_piofile2%piofile%fh
+    vardesc%varid = varid
+    ierr = pio_put_att(my_piofile2%piofile, vardesc, "name", "variable")
+
+    call my_piofile2%close()
 
     ! Finalize PIO
     call pio_finalize(piosystem, ierr)
