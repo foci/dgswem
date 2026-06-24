@@ -61,6 +61,9 @@ dgswem_src = files([
 
 if get_option('netcdf')
     dgswem_netcdf_src = files(['netcdf_io.f90'])
+    if get_option('parallel')
+        dgswem_pio_src = files(['parallelio_io.f90'])
+    endif
 endif
 
 mpi_handlers = files(['messenger.F', 'messenger_elem.F'])

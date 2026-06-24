@@ -11,7 +11,13 @@ if get_option('netcdf')
     ])
     if get_option('parallel')
     piodg_src = files([
-        'pioutil.f90'
+        'pioutil.f90',
+        'piodg.f90',
+        'piodg_file_sub.f90',
+        'piodg_nodal_sub.f90',
+        'piodg_63_sub.f90',
+        'piodg_64_sub.f90',
+        'piodg_maxele_sub.f90'
     ])
     endif
 endif

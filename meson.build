@@ -172,8 +172,9 @@ if get_option('parallel')
     if get_option('netcdf')
         executable(
             'dgswem',
-            sources: dgswem_src + mpi_handlers + c_interface_src + ncdg_src + dgswem_netcdf_src,
-            dependencies: [mpi_dep] + cpp_dep + netcdf_dep,
+            sources: dgswem_src + mpi_handlers + c_interface_src + ncdg_src +
+                dgswem_netcdf_src + piodg_src + dgswem_pio_src,
+            dependencies: [mpi_dep] + cpp_dep + netcdf_dep + pio_dep,
             link_language: 'fortran',
             fortran_args: ['-DCMPI', '-DNETCDF']
         )
@@ -197,7 +198,7 @@ if get_option('netcdf')
         c_args: extra_adcprep_args,
         link_language: 'fortran', # have to specify link_language to avoid meson trying to link with C compiler
         fortran_args: ['-DNETCDF']
-)
+    )
 else
     executable(
         'adcprep',

@@ -23,6 +23,9 @@ C     sb-disabled for Linux&Intel compiler
 #ifdef NETCDF
 #ifndef CMPI
       use netcdf_io, only : netcdf_create_files_serial, netcdf_close_files_serial
+#else
+      use parallelio_io, only : parallelio_open_files_parallel,
+     &     parallelio_close_files_parallel
 #endif
 #endif
 #ifdef SWAN
@@ -349,6 +352,10 @@ C.....Initialize NetCDF files, if needed
       PRINT *, "NOW WITH NETCDF OUTPUT!"
       PRINT *, "CREATING NETCDF FILES..."
       CALL NETCDF_CREATE_FILES_SERIAL()
+#else
+      IF (MYPROC == 0) PRINT *, "NOW WITH NETCDF OUTPUT, IN PARALLEL!"
+      PRINT *, "OPENING FILES..."
+      CALL PARALLELIO_OPEN_FILES_PARALLEL()
 #endif
 #endif
 
@@ -400,6 +407,9 @@ C.....Close NetCDF files, if needed
 #ifndef CMPI
       PRINT *, "CLOSING NETCDF FILES..."
       CALL NETCDF_CLOSE_FILES_SERIAL()
+#else
+      if (MYPROC == 0) PRINT *, "CLOSING NETCDF FILES..."
+      CALL PARALLELIO_CLOSE_FILES_PARALLEL()
 #endif
 #endif
 
