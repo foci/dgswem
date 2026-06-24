@@ -1,9 +1,10 @@
 program nctest_parallel
 
-    use ncdg, only: ncdg_63, ncdg_64, ncdg_maxele
     use mpi
     use netcdf, only: nf90_unlimited
+    use ncdg, only: ncdg_63, ncdg_64, ncdg_maxele
     use pio
+    use piodg, only: piodg_63, piodg_64, piodg_maxele
 
     implicit none
 
@@ -14,11 +15,17 @@ program nctest_parallel
 
     ! PIO variables
     type(iosystem_desc_t) :: my_iosystem
+    type(io_desc_t) :: my_iodesc
 
     ! NCDG variables
-    type(ncdg_63) :: my_63
-    type(ncdg_64) :: my_64
-    type(ncdg_maxele) :: my_maxele
+    type(ncdg_63) :: my_n63
+    type(ncdg_64) :: my_n64
+    type(ncdg_maxele) :: my_nmaxele
+
+    ! PIODG variables
+    type(piodg_63) :: my_p63
+    type(piodg_64) :: my_p64
+    type(piodg_maxele) :: my_pmaxele
 
     ! Mesh (local)
     integer :: ics ! Cartesian
@@ -47,7 +54,9 @@ program nctest_parallel
     integer, allocatable :: nbvv(:, :) ! Node numbers for each segment
 
     ! Parallell decomposition variables
+    integer :: nnodg ! Total number of global nodes
     integer, allocatable :: imap_nod(:) ! Mapping to global node index
+    integer, allocatable :: imap_nod_gh0(:) ! Zero for ghost nodes
     logical, allocatable :: resnode(:) ! Whether local nodes are resident or ghost
     logical, allocatable :: resele(:) ! Whether local elements are resident or ghost
 
@@ -61,6 +70,7 @@ program nctest_parallel
     print *, "Hello, I am processor ", procno, " of ", nprocs, "!"
     call mpi_barrier(mpi_comm_world, ierr)
 
+    ! Write mesh in serial
     if (procno == 0) then
         print *, "Creating files and writing mesh like adcprep"
         ! Mesh (global)
@@ -103,12 +113,12 @@ program nctest_parallel
         nbvv(1, :) = [1, 3, 5, 6]
 
         ! Initialization (in serial)
-        call my_63%create()
-        call my_64%create()
-        call my_maxele%create()
+        call my_n63%create()
+        call my_n64%create()
+        call my_nmaxele%create()
 
         ! Set metadata (in serial)
-        call my_63%ncdg_63_set_metadata( &
+        call my_n63%ncdg_63_set_metadata( &
             nt=nf90_unlimited, &
             np=np, &
             ne=ne, &
@@ -121,7 +131,7 @@ program nctest_parallel
             max_nvell=maxval(nvell), &
             ics=ics &
         )
-        call my_64%ncdg_64_set_metadata( &
+        call my_n64%ncdg_64_set_metadata( &
             nt=nf90_unlimited, &
             np=np, &
             ne=ne, &
@@ -134,7 +144,7 @@ program nctest_parallel
             max_nvell=maxval(nvell), &
             ics=ics &
         )
-        call my_maxele%ncdg_maxele_set_metadata( &
+        call my_nmaxele%ncdg_maxele_set_metadata( &
             nt=nf90_unlimited, &
             np=np, &
             ne=ne, &
@@ -149,7 +159,7 @@ program nctest_parallel
         )
 
         ! Write mesh (in serial)
-        call my_63%write_mesh( &
+        call my_n63%write_mesh( &
             x=x, &
             y=y, &
             dp=dp, &
@@ -167,7 +177,7 @@ program nctest_parallel
             nvell=nvell, &
             nbvv=nbvv&
         )
-        call my_64%write_mesh( &
+        call my_n64%write_mesh( &
             x=x, &
             y=y, &
             dp=dp, &
@@ -185,7 +195,7 @@ program nctest_parallel
             nvell=nvell, &
             nbvv=nbvv&
         )
-        call my_maxele%write_mesh( &
+        call my_nmaxele%write_mesh( &
             x=x, &
             y=y, &
             dp=dp, &
@@ -205,9 +215,9 @@ program nctest_parallel
         )
 
         ! Close (in serial)
-        call my_63%close()
-        call my_64%close()
-        call my_maxele%close()
+        call my_n63%close()
+        call my_n64%close()
+        call my_nmaxele%close()
 
         ! Deallocate
         deallocate(nm)
@@ -268,10 +278,17 @@ program nctest_parallel
             nbvv(1, :) = [5, 3, 1]
 
             ! Parallell decomposition variables
-            allocate(imap_nod(np))
+            nnodg = 6
+            allocate(imap_nod(np)) ! Mapping to global node index
             imap_nod(:) = [5, 4, 3, 2, 1]
             allocate(resnode(np)) ! Whether local nodes are resident or ghost
             resnode = [.false., .true., .true., .true., .true.]
+            allocate(imap_nod_gh0(np)) ! Zero for ghost nodes
+            where (resnode)
+                imap_nod_gh0 = imap_nod
+            else where
+                imap_nod_gh0 = 0
+            end where
             allocate(resele(ne)) ! Whether local elements are resident or ghost
             resele = [.true., .true., .false.]
         case (1)
@@ -314,10 +331,17 @@ program nctest_parallel
             nbvv(1, :) = [3, 1, 2]
 
             ! Parallell decomposition variables
-            allocate(imap_nod(np))
+            nnodg = 6
+            allocate(imap_nod(np)) ! Mapping to global node index
             imap_nod(:) = [5, 6, 3, 4, 2]
             allocate(resnode(np)) ! Whether local nodes are resident or ghost
             resnode(:) = [.true., .true., .false., .false., .false.]
+            allocate(imap_nod_gh0(np)) ! Zero for ghost nodes
+            where (resnode)
+                imap_nod_gh0 = imap_nod
+            else where
+                imap_nod_gh0 = 0
+            end where
             allocate(resele(ne)) ! Whether local elements are resident or ghost
             resele(:) = [.true., .false., .true.]
         case default
@@ -325,45 +349,51 @@ program nctest_parallel
     end select
 
     ! Initialize PIO and decompose
-    ! select case (nprocs)
-    !     case (:1)
-    !         stop "Error: Fewer processes than domains."
-    !     case (2)
-    !         if (procno == 0) print *, "No surplus, so every process will write"
-    !         call pio_init_intracomm( &
-    !             comp_rank=procno, &
-    !             comp_comm=mpi_comm_world, &ncells
-    !             num_iotasks=2, &
-    !             num_aggregator=2, &
-    !             stride=1, &
-    !             rearr=pio_rearr_box, &
-    !             iosystem=my_iosystem &
-    !         )
-    !         call pio_initdecomp( &
-    !             iosystem=my_iosystem, &
-    !             basepiotype=pio_double, &
-    !             dims=nnodg, &
-    !             compdof=imap_nod, &
-    !             iodesc=my_iodesc, &
-    !         )
-    !     case (3:)
-    !         if (procno == 0) print *, "Surplus of ", nprocs - 2, " processes detected."
-    !         stop "Not implemented yet"
-    !     case default
-    !         stop "Error: How did I get here?"
-    ! end select
+    select case (nprocs)
+        case (:1)
+            stop "Error: Fewer processes than domains."
+        case (2)
+            if (procno == 0) print *, "No surplus, so every process will write"
+            call pio_init( &
+                comp_rank=procno, &
+                comp_comm=mpi_comm_world, &
+                num_iotasks=2, &
+                num_aggregator=2, &
+                stride=1, &
+                rearr=pio_rearr_box, &
+                iosystem=my_iosystem &
+            )
+            call pio_initdecomp( &
+                iosystem=my_iosystem, &
+                basepiotype=pio_double, &
+                dims=[nnodg], &
+                compdof=imap_nod_gh0, &
+                iodesc=my_iodesc &
+            )
+        case (3:)
+            if (procno == 0) print *, "Surplus of ", nprocs - 2, " processes detected."
+            stop "Not implemented yet"
+        case default
+            stop "Error: How did I get here?"
+    end select
 
-    ! select case (procno)
-    !     case (0:1)
-    !         ! Open files
-    !         ! call my_63%pio_open()
-    !         ! call my_64%pio_open()
-    !         ! call my_maxele%pio_open()
-    !         ! First time step
-    !         ! Second time step
-    !         ! Third time step
-    !         ! Close
-    ! end select
+    ! Open files
+    call my_p63%open(my_iosystem, omode=pio_write)
+    call my_p64%open(my_iosystem, omode=pio_write)
+    call my_pmaxele%open(my_iosystem, omode=pio_write)
+
+    ! Write
+    select case (procno)
+        case (0:1)
+            ! First time step
+            ! Second time step
+            ! Third time step
+    end select
+
+    ! Close files
+    call my_p63%close()
+    call my_p64%close()
+    call my_pmaxele%close()
 
     ! Deallocate
     if (procno == 0 .or. procno == 1) then

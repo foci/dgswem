@@ -229,8 +229,8 @@ if get_option('netcdf')
     if get_option('parallel')
         executable(
             'nctest_parallel.exe',
-            sources: ncdg_src + nctest_parallel_src,
-            dependencies: [mpi_dep] + netcdf_dep,
+            sources: ncdg_src + piodg_src + nctest_parallel_src,
+            dependencies: [mpi_dep] + netcdf_dep + pio_dep,
             link_language: 'fortran'
         )
         executable(
