@@ -11,7 +11,7 @@ module pioutil
 
         character(len=:), allocatable :: path
         !! Path of the NetCDF file
-        type(file_desc_t) :: piofile
+        type(file_desc_t) :: piofiledesc
         !! Reference to the NetCDF file
 
         contains
@@ -72,7 +72,7 @@ module pioutil
         end if
 
         ! Create file
-        piostat = pio_createfile(piosystem, self%piofile, &
+        piostat = pio_createfile(piosystem, self%piofiledesc, &
             the_piotype, self%path, the_cmode)
         call piofile_check_error(piostat)
     end subroutine piofile_create
@@ -129,7 +129,7 @@ module pioutil
         end if
 
         ! Open file
-        piostat = pio_openfile(piosystem, self%piofile, &
+        piostat = pio_openfile(piosystem, self%piofiledesc, &
             the_piotype, self%path, the_omode)
         call piofile_check_error(piostat)
     end subroutine piofile_open
@@ -143,12 +143,12 @@ module pioutil
         !! The wrapper object of the file
 
         ! integer :: piostat ! Status of most recent operation
-        type(file_desc_t) :: piofile_unset ! Blank struct
+        type(file_desc_t) :: piofiledesc_unset ! Blank struct
 
-        call pio_closefile(self%piofile)
+        call pio_closefile(self%piofiledesc)
 
         ! Flush file struct
-        self%piofile = piofile_unset
+        self%piofiledesc = piofiledesc_unset
     end subroutine piofile_close
 
     subroutine piofile_check_error(piostat)
