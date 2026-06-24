@@ -67,12 +67,14 @@ program piotest
         piotype=pio_iotype_netcdf, omode=pio_write)
 
     ! Test dimensions and variables
-    ierr = pio_def_dim(my_piofile2%piofile, "dimension", 3, dimid)
-    ierr = pio_def_var(my_piofile2%piofile%fh, "variable", pio_int, &
+    ierr = pio_def_dim(my_piofile2%piofiledesc, "dimension", 3, dimid)
+    ierr = pio_def_var(my_piofile2%piofiledesc%fh, "variable", pio_int, &
         [dimid], varid)
-    vardesc%ncid = my_piofile2%piofile%fh
+    vardesc%ncid = my_piofile2%piofiledesc%fh
     vardesc%varid = varid
-    ierr = pio_put_att(my_piofile2%piofile, vardesc, "name", "variable")
+    ierr = pio_put_att(my_piofile2%piofiledesc, vardesc, "name", "variable")
+    ierr = pio_inq_dimid(my_piofile2%piofiledesc, "dimension", dimid)
+    ierr = pio_inq_varid(my_piofile2%piofiledesc, "variable", vardesc)
 
     call my_piofile2%close()
 
