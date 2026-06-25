@@ -1,6 +1,7 @@
 module piodg
     !! Module for creating and writing ADCIRC-style fort files in parallel.
 
+    use netcdf, only : nf90_enotindefine
     use pio
     use pioutil, only: piofile, piofile_check_error
 
@@ -198,7 +199,7 @@ module piodg
 
         procedure, public :: open => piodg_63_open
         procedure, public :: close => piodg_63_close
-        ! procedure, public :: piodg_63_write_step
+        procedure, public :: piodg_63_write_step
 
     end type piodg_63
 
@@ -356,6 +357,21 @@ module piodg
             class(piodg_63), intent(inout) :: self
             !! The wrapper object of the file
         end subroutine piodg_63_close
+
+        module subroutine piodg_63_write_step(self, t, zeta, piodesc)
+            !! Parallel timestep writing function for a fort.63.nc output file.
+
+            implicit none
+
+            class(piodg_63), intent(inout) :: self
+            !! The wrapper object being written to
+            real, intent(in) :: t
+            !! The current time
+            real, intent(in) :: zeta(:)
+            !! The current zeta values
+            type(io_desc_t), intent(inout) :: piodesc
+            !! An I/O parameter struct associated with a decomposition
+        end subroutine piodg_63_write_step
 
         ! piodg_64 subroutines
         ! For fort.64.nc

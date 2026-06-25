@@ -1,5 +1,6 @@
 submodule (piodg:piodg_nodal_sub) piodg_63_sub
     !! Implementation of fort.63.nc
+    use netcdf, only : nf90_enotindefine
 
     implicit none
 
@@ -60,5 +61,40 @@ submodule (piodg:piodg_nodal_sub) piodg_63_sub
         ! Flush variable IDs
         self%zeta_vardesc = zeta_vardesc_unset
     end procedure piodg_63_close
+
+    module procedure piodg_63_write_step
+        ! See interface for arguments and documentation
+
+        integer :: piostat ! Status of most recent operation
+        ! real :: t_arr(1) ! Vector structure for writing t
+        ! integer :: time_start(1) ! Starting position for time data
+        ! integer :: time_count(1) ! time data block size
+        integer :: record_count ! For indexing time step
+
+        ! File is expected in data mode
+
+        ! Get time slice from time dimension length
+        piostat = pio_inquire_dimension(self%piofiledesc, self%time_dimid, &
+            len=record_count)
+        call piofile_check_error(piostat)
+
+        ! time
+        ! t_arr(1) = t
+        ! time_start(1) = record_count + 1 ! Position to write at
+        ! time_count(1) = 1 ! Number of steps to write
+        piostat = pio_put_var(self%piofiledesc, self%time_vardesc, &
+            [record_count + 1], t)
+        call piofile_check_error(piostat)
+
+        ! zeta
+        call pio_setframe(self%piofiledesc, self%zeta_vardesc, &
+            int(record_count, pio_offset_kind))
+        call pio_write_darray(self%piofiledesc, self%zeta_vardesc, &
+            piodesc, zeta, piostat)
+        call piofile_check_error(piostat)
+        ! call pio_advanceframe(self%piofiledesc, self%zeta_vardesc) ! Broken
+
+        ! After each write, sync?
+    end procedure piodg_63_write_step
 
 end submodule piodg_63_sub

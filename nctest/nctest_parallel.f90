@@ -384,10 +384,48 @@ program nctest_parallel
 
     ! Write
     select case (procno)
-        case (0:1)
+        case (0)
             ! First time step
+            call my_p63%piodg_63_write_step( &
+                t=0.1, &
+                zeta=[5.1, 4.1, 3.1, 2.1, 1.1], & ! Global index
+                piodesc=my_iodesc &
+            )
+
             ! Second time step
+            call my_p63%piodg_63_write_step( &
+                t=0.2, &
+                zeta=[5.2, 4.2, 3.2, 2.2, 1.2], & ! Global index
+                piodesc=my_iodesc &
+            )
+
             ! Third time step
+            call my_p63%piodg_63_write_step( &
+                t=0.3, &
+                zeta=[5.3, 4.3, 3.3, 2.3, 1.3], & ! Global index
+                piodesc=my_iodesc &
+            )
+        case (1)
+            ! First time step
+            call my_p63%piodg_63_write_step( &
+                t=0.1, &
+                zeta=[5.1, 6.1, 3.1, 4.1, 2.1], & ! Global index
+                piodesc=my_iodesc &
+            )
+
+            ! Second time step
+            call my_p63%piodg_63_write_step( &
+                t=0.2, &
+                zeta=[5.2, 6.2, 3.2, 4.2, 2.2], & ! Global index
+                piodesc=my_iodesc &
+            )
+
+            ! Third time step
+            call my_p63%piodg_63_write_step( &
+                t=0.3, &
+                zeta=[5.3, 6.3, 3.3, 4.3, 2.3], & ! Global index
+                piodesc=my_iodesc &
+            )
     end select
 
     ! Close files
