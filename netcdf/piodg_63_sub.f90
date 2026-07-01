@@ -66,9 +66,6 @@ submodule (piodg:piodg_nodal_sub) piodg_63_sub
         ! See interface for arguments and documentation
 
         integer :: piostat ! Status of most recent operation
-        ! real :: t_arr(1) ! Vector structure for writing t
-        ! integer :: time_start(1) ! Starting position for time data
-        ! integer :: time_count(1) ! time data block size
         integer :: record_count ! For indexing time step
 
         ! File is expected in data mode
@@ -79,9 +76,6 @@ submodule (piodg:piodg_nodal_sub) piodg_63_sub
         call piofile_check_error(piostat)
 
         ! time
-        ! t_arr(1) = t
-        ! time_start(1) = record_count + 1 ! Position to write at
-        ! time_count(1) = 1 ! Number of steps to write
         piostat = pio_put_var(self%piofiledesc, self%time_vardesc, &
             [record_count + 1], t)
         call piofile_check_error(piostat)
@@ -92,7 +86,6 @@ submodule (piodg:piodg_nodal_sub) piodg_63_sub
         call pio_write_darray(self%piofiledesc, self%zeta_vardesc, &
             piodesc, zeta, piostat)
         call piofile_check_error(piostat)
-        ! call pio_advanceframe(self%piofiledesc, self%zeta_vardesc) ! Broken
 
         ! Call sync to write to file
         call pio_syncfile(self%piofiledesc)
