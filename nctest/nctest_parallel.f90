@@ -391,11 +391,23 @@ program nctest_parallel
                 zeta=[5.1, 4.1, 3.1, 2.1, 1.1], & ! Global index
                 piodesc=my_iodesc &
             )
+            call my_p64%piodg_64_write_step( &
+                t=0.1, &
+                u_vel=[5.19, 4.19, 3.19, 2.19, 1.19], & ! Global index
+                v_vel=[5.10, 4.10, 3.10, 2.10, 1.10], & ! Global index
+                piodesc=my_iodesc &
+            )
 
             ! Second time step
             call my_p63%piodg_63_write_step( &
                 t=0.2, &
                 zeta=[5.2, 4.2, 3.2, 2.2, 1.2], & ! Global index
+                piodesc=my_iodesc &
+            )
+            call my_p64%piodg_64_write_step( &
+                t=0.2, &
+                u_vel=[5.29, 4.29, 3.29, 2.29, 1.29], & ! Global index
+                v_vel=[5.20, 4.20, 3.20, 2.20, 1.20], & ! Global index
                 piodesc=my_iodesc &
             )
 
@@ -405,11 +417,23 @@ program nctest_parallel
                 zeta=[5.3, 4.3, 3.3, 2.3, 1.3], & ! Global index
                 piodesc=my_iodesc &
             )
+            call my_p64%piodg_64_write_step( &
+                t=0.3, &
+                u_vel=[5.39, 4.39, 3.39, 2.39, 1.39], & ! Global index
+                v_vel=[5.30, 4.30, 3.30, 2.30, 1.30], & ! Global index
+                piodesc=my_iodesc &
+            )
         case (1)
             ! First time step
             call my_p63%piodg_63_write_step( &
                 t=0.1, &
                 zeta=[5.1, 6.1, 3.1, 4.1, 2.1], & ! Global index
+                piodesc=my_iodesc &
+            )
+            call my_p64%piodg_64_write_step( &
+                t=0.1, &
+                u_vel=[5.18, 6.18, 3.18, 4.18, 2.18], & ! Global index
+                v_vel=[5.11, 6.11, 3.11, 4.11, 2.11], & ! Global index
                 piodesc=my_iodesc &
             )
 
@@ -419,6 +443,12 @@ program nctest_parallel
                 zeta=[5.2, 6.2, 3.2, 4.2, 2.2], & ! Global index
                 piodesc=my_iodesc &
             )
+            call my_p64%piodg_64_write_step( &
+                t=0.2, &
+                u_vel=[5.28, 6.28, 3.28, 4.28, 2.28], & ! Global index
+                v_vel=[5.21, 6.21, 3.21, 4.21, 2.21], & ! Global index
+                piodesc=my_iodesc &
+            )
 
             ! Third time step
             call my_p63%piodg_63_write_step( &
@@ -426,6 +456,14 @@ program nctest_parallel
                 zeta=[5.3, 6.3, 3.3, 4.3, 2.3], & ! Global index
                 piodesc=my_iodesc &
             )
+            call my_p64%piodg_64_write_step( &
+                t=0.3, &
+                u_vel=[5.38, 6.38, 3.38, 4.38, 2.38], & ! Global index
+                v_vel=[5.31, 6.31, 3.31, 4.31, 2.31], & ! Global index
+                piodesc=my_iodesc &
+            )
+        case default
+            ! Do nothing
     end select
 
     ! Close files

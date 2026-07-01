@@ -66,4 +66,40 @@ submodule (piodg:piodg_nodal_sub) piodg_64_sub
         self%v_vel_vardesc = v_vel_vardesc_unset
     end procedure piodg_64_close
 
+    module procedure piodg_64_write_step
+        ! See interface for arguments and documentation
+
+        integer :: piostat ! Status of most recent operation
+        integer :: record_count ! For indexing time step
+
+        ! File is expected in data mode
+
+        ! Get time slice from time dimension length
+        piostat = pio_inquire_dimension(self%piofiledesc, self%time_dimid, &
+            len=record_count)
+        call piofile_check_error(piostat)
+
+        ! time
+        piostat = pio_put_var(self%piofiledesc, self%time_vardesc, &
+            [record_count + 1], t)
+        call piofile_check_error(piostat)
+
+        ! u_vel
+        call pio_setframe(self%piofiledesc, self%u_vel_vardesc, &
+            int(record_count + 1, pio_offset_kind))
+        call pio_write_darray(self%piofiledesc, self%u_vel_vardesc, &
+            piodesc, u_vel, piostat)
+        call piofile_check_error(piostat)
+
+        ! v_vel
+        call pio_setframe(self%piofiledesc, self%v_vel_vardesc, &
+            int(record_count + 1, pio_offset_kind))
+        call pio_write_darray(self%piofiledesc, self%v_vel_vardesc, &
+            piodesc, v_vel, piostat)
+        call piofile_check_error(piostat)
+
+        ! Call sync to write to file
+        call pio_syncfile(self%piofiledesc)
+    end procedure piodg_64_write_step
+
 end submodule piodg_64_sub

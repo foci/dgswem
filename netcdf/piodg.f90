@@ -226,7 +226,7 @@ module piodg
 
         procedure, public :: open => piodg_64_open
         procedure, public :: close => piodg_64_close
-        ! procedure, public :: piodg_64_write_step
+        procedure, public :: piodg_64_write_step
 
     end type piodg_64
 
@@ -403,6 +403,23 @@ module piodg
             class(piodg_64), intent(inout) :: self
             !! The wrapper object of the file
         end subroutine piodg_64_close
+
+        module subroutine piodg_64_write_step(self, t, u_vel, v_vel, piodesc)
+            !! Parallel timestep writing function for a fort.64.nc output file.
+
+            implicit none
+
+            class(piodg_64), intent(inout) :: self
+            !! The wrapper object being written to
+            real, intent(in) :: t
+            !! The current time
+            real, intent(in) :: u_vel(:)
+            !! The current u_vel values
+            real, intent(in) :: v_vel(:)
+            !! The current v_vel values
+            type(io_desc_t), intent(inout) :: piodesc
+            !! An I/O parameter struct associated with a decomposition
+        end subroutine piodg_64_write_step
 
         ! piodg_maxele subroutines
         ! For maxele.63.nc
