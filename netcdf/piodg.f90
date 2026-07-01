@@ -253,7 +253,7 @@ module piodg
 
         procedure, public :: open => piodg_maxele_open
         procedure, public :: close => piodg_maxele_close
-        ! procedure, public :: piodg_maxele_write_step
+        procedure, public :: piodg_maxele_write_step
 
     end type piodg_maxele
 
@@ -451,6 +451,23 @@ module piodg
             class(piodg_maxele), intent(inout) :: self
             !! The wrapper object of the file
         end subroutine piodg_maxele_close
+
+        module subroutine piodg_maxele_write_step(self, t, zeta_max, np, piodesc)
+            !! Timestep writing function for a maxele.63.nc output file.
+
+            implicit none
+
+            class(piodg_maxele), intent(inout) :: self
+            !! The wrapper object being written to
+            real, intent(in) :: t
+            !! The current time
+            real, intent(in) :: zeta_max(:)
+            !! The current zeta_max values
+            integer, intent(in) :: np
+            !! The total number of nodes on the current process
+            type(io_desc_t), intent(inout) :: piodesc
+            !! An I/O parameter struct associated with a decomposition
+        end subroutine piodg_maxele_write_step
 
     end interface
 

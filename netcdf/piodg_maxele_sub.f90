@@ -66,4 +66,44 @@ submodule (piodg:piodg_nodal_sub) piodg_maxele_sub
         self%time_of_zeta_max_vardesc = time_of_zeta_max_vardesc_unset
     end procedure piodg_maxele_close
 
+    module procedure piodg_maxele_write_step
+        ! See interface for arguments and documentation
+
+        integer :: piostat ! Status of most recent operation
+        real, allocatable :: zeta_max_old(:)
+        real, allocatable :: time_of_zeta_max(:)
+
+        ! File is expected in data mode
+
+        ! Get existing data for comparison
+        allocate(zeta_max_old(np))
+        allocate(time_of_zeta_max(np))
+        call pio_read_darray(self%piofiledesc, self%zeta_max_vardesc, &
+            piodesc, zeta_max_old, piostat)
+        call piofile_check_error(piostat)
+        call pio_read_darray(self%piofiledesc, self%time_of_zeta_max_vardesc, &
+            piodesc, time_of_zeta_max, piostat)
+        call piofile_check_error(piostat)
+
+        ! zeta_max
+        call pio_write_darray(self%piofiledesc, self%zeta_max_vardesc, &
+            piodesc, zeta_max, piostat)
+        call piofile_check_error(piostat)
+
+        ! time_of_zeta_max
+        time_of_zeta_max = merge( &
+            spread(t, 1, np), & ! Used if true: current time
+            time_of_zeta_max, & ! Used if false: old time
+            zeta_max > zeta_max_old & ! Condition: new maximum is strictly greater
+        )
+        call pio_write_darray(self%piofiledesc, self%time_of_zeta_max_vardesc, &
+            piodesc, time_of_zeta_max, piostat)
+        call piofile_check_error(piostat)
+        deallocate(zeta_max_old)
+        deallocate(time_of_zeta_max)
+
+        ! Call sync to write to file
+        call pio_syncfile(self%piofiledesc)
+    end procedure piodg_maxele_write_step
+
 end submodule piodg_maxele_sub

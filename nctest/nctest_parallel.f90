@@ -397,6 +397,12 @@ program nctest_parallel
                 v_vel=[5.10, 4.10, 3.10, 2.10, 1.10], & ! Global index
                 piodesc=my_iodesc &
             )
+            call my_pmaxele%piodg_maxele_write_step( &
+                t=0.1, &
+                zeta_max=[0.51, 0.41, 0.31, 0.21, 0.11], & ! Global index
+                np=np, &
+                piodesc=my_iodesc &
+            )
 
             ! Second time step
             call my_p63%piodg_63_write_step( &
@@ -408,6 +414,12 @@ program nctest_parallel
                 t=0.2, &
                 u_vel=[5.29, 4.29, 3.29, 2.29, 1.29], & ! Global index
                 v_vel=[5.20, 4.20, 3.20, 2.20, 1.20], & ! Global index
+                piodesc=my_iodesc &
+            )
+            call my_pmaxele%piodg_maxele_write_step( &
+                t=0.2, &
+                zeta_max=[0.51, 0.41, 0.31, 1.21, 1.11], & ! Global index
+                np=np, &
                 piodesc=my_iodesc &
             )
 
@@ -423,6 +435,12 @@ program nctest_parallel
                 v_vel=[5.30, 4.30, 3.30, 2.30, 1.30], & ! Global index
                 piodesc=my_iodesc &
             )
+            call my_pmaxele%piodg_maxele_write_step( &
+                t=0.3, &
+                zeta_max=[1.51, 0.41, 1.31, 1.21, 2.11], & ! Global index
+                np=np, &
+                piodesc=my_iodesc &
+            )
         case (1)
             ! First time step
             call my_p63%piodg_63_write_step( &
@@ -434,6 +452,12 @@ program nctest_parallel
                 t=0.1, &
                 u_vel=[5.18, 6.18, 3.18, 4.18, 2.18], & ! Global index
                 v_vel=[5.11, 6.11, 3.11, 4.11, 2.11], & ! Global index
+                piodesc=my_iodesc &
+            )
+            call my_pmaxele%piodg_maxele_write_step( &
+                t=0.1, &
+                zeta_max=[0.51, 0.61, 0.31, 0.41, 0.21], & ! Global index
+                np=np, &
                 piodesc=my_iodesc &
             )
 
@@ -449,6 +473,12 @@ program nctest_parallel
                 v_vel=[5.21, 6.21, 3.21, 4.21, 2.21], & ! Global index
                 piodesc=my_iodesc &
             )
+            call my_pmaxele%piodg_maxele_write_step( &
+                t=0.2, &
+                zeta_max=[0.51, 1.61, 0.31, 0.41, 1.21], & ! Global index
+                np=np, &
+                piodesc=my_iodesc &
+            )
 
             ! Third time step
             call my_p63%piodg_63_write_step( &
@@ -460,6 +490,12 @@ program nctest_parallel
                 t=0.3, &
                 u_vel=[5.38, 6.38, 3.38, 4.38, 2.38], & ! Global index
                 v_vel=[5.31, 6.31, 3.31, 4.31, 2.31], & ! Global index
+                piodesc=my_iodesc &
+            )
+            call my_pmaxele%piodg_maxele_write_step( &
+                t=0.3, &
+                zeta_max=[1.51, 2.61, 1.31, 0.41, 1.21], & ! Global index
+                np=np, &
                 piodesc=my_iodesc &
             )
         case default
