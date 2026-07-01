@@ -360,7 +360,7 @@ program nctest_parallel
                 num_iotasks=2, &
                 num_aggregator=2, &
                 stride=1, &
-                rearr=pio_rearr_box, &
+                rearr=pio_rearr_subset, &
                 iosystem=my_iosystem &
             )
             call pio_initdecomp( &
@@ -392,19 +392,19 @@ program nctest_parallel
                 piodesc=my_iodesc &
             )
 
-            ! Second time step
-            call my_p63%piodg_63_write_step( &
-                t=0.2, &
-                zeta=[5.2, 4.2, 3.2, 2.2, 1.2], & ! Global index
-                piodesc=my_iodesc &
-            )
+            ! ! Second time step
+            ! call my_p63%piodg_63_write_step( &
+            !     t=0.2, &
+            !     zeta=[5.2, 4.2, 3.2, 2.2, 1.2], & ! Global index
+            !     piodesc=my_iodesc &
+            ! )
 
-            ! Third time step
-            call my_p63%piodg_63_write_step( &
-                t=0.3, &
-                zeta=[5.3, 4.3, 3.3, 2.3, 1.3], & ! Global index
-                piodesc=my_iodesc &
-            )
+            ! ! Third time step
+            ! call my_p63%piodg_63_write_step( &
+            !     t=0.3, &
+            !     zeta=[5.3, 4.3, 3.3, 2.3, 1.3], & ! Global index
+            !     piodesc=my_iodesc &
+            ! )
         case (1)
             ! First time step
             call my_p63%piodg_63_write_step( &
@@ -413,19 +413,19 @@ program nctest_parallel
                 piodesc=my_iodesc &
             )
 
-            ! Second time step
-            call my_p63%piodg_63_write_step( &
-                t=0.2, &
-                zeta=[5.2, 6.2, 3.2, 4.2, 2.2], & ! Global index
-                piodesc=my_iodesc &
-            )
+            ! ! Second time step
+            ! call my_p63%piodg_63_write_step( &
+            !     t=0.2, &
+            !     zeta=[5.2, 6.2, 3.2, 4.2, 2.2], & ! Global index
+            !     piodesc=my_iodesc &
+            ! )
 
-            ! Third time step
-            call my_p63%piodg_63_write_step( &
-                t=0.3, &
-                zeta=[5.3, 6.3, 3.3, 4.3, 2.3], & ! Global index
-                piodesc=my_iodesc &
-            )
+            ! ! Third time step
+            ! call my_p63%piodg_63_write_step( &
+            !     t=0.3, &
+            !     zeta=[5.3, 6.3, 3.3, 4.3, 2.3], & ! Global index
+            !     piodesc=my_iodesc &
+            ! )
     end select
 
     ! Close files

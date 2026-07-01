@@ -88,13 +88,14 @@ submodule (piodg:piodg_nodal_sub) piodg_63_sub
 
         ! zeta
         call pio_setframe(self%piofiledesc, self%zeta_vardesc, &
-            int(record_count, pio_offset_kind))
+            int(record_count + 1, pio_offset_kind))
         call pio_write_darray(self%piofiledesc, self%zeta_vardesc, &
             piodesc, zeta, piostat)
         call piofile_check_error(piostat)
         ! call pio_advanceframe(self%piofiledesc, self%zeta_vardesc) ! Broken
 
-        ! After each write, sync?
+        ! Call sync to write to file
+        call pio_syncfile(self%piofiledesc)
     end procedure piodg_63_write_step
 
 end submodule piodg_63_sub
