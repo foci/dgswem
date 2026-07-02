@@ -360,7 +360,7 @@ program nctest_parallel
                 num_iotasks=2, &
                 num_aggregator=2, &
                 stride=1, &
-                rearr=pio_rearr_subset, &
+                rearr=pio_rearr_subset, & ! Required for unstructured data
                 iosystem=my_iosystem &
             )
             call pio_initdecomp( &
