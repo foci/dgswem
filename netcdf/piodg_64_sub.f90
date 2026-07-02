@@ -70,7 +70,15 @@ submodule (piodg:piodg_nodal_sub) piodg_64_sub
         ! See interface for arguments and documentation
 
         integer :: piostat ! Status of most recent operation
+        logical :: the_sync ! For defaulting
         integer :: record_count ! For indexing time step
+
+        ! Set sync
+        if (present(sync)) then
+            the_sync = sync
+        else
+            the_sync = .false.
+        end if
 
         ! File is expected in data mode
 
@@ -99,7 +107,7 @@ submodule (piodg:piodg_nodal_sub) piodg_64_sub
         call piofile_check_error(piostat)
 
         ! Call sync to write to file
-        call pio_syncfile(self%piofiledesc)
+        if (the_sync) call pio_syncfile(self%piofiledesc)
     end procedure piodg_64_write_step
 
 end submodule piodg_64_sub

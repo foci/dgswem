@@ -358,7 +358,7 @@ module piodg
             !! The wrapper object of the file
         end subroutine piodg_63_close
 
-        module subroutine piodg_63_write_step(self, t, zeta, piodesc)
+        module subroutine piodg_63_write_step(self, t, zeta, piodesc, sync)
             !! Parallel timestep writing function for a fort.63.nc output file.
 
             implicit none
@@ -371,6 +371,8 @@ module piodg
             !! The current zeta values
             type(io_desc_t), intent(inout) :: piodesc
             !! An I/O parameter struct associated with a decomposition
+            logical, optional, intent(in) :: sync
+            !! Whether to write to disk immediately. Default is .false.
         end subroutine piodg_63_write_step
 
         ! piodg_64 subroutines
@@ -404,7 +406,8 @@ module piodg
             !! The wrapper object of the file
         end subroutine piodg_64_close
 
-        module subroutine piodg_64_write_step(self, t, u_vel, v_vel, piodesc)
+        module subroutine piodg_64_write_step(self, t, u_vel, v_vel, &
+            piodesc, sync)
             !! Parallel timestep writing function for a fort.64.nc output file.
 
             implicit none
@@ -419,6 +422,8 @@ module piodg
             !! The current v_vel values
             type(io_desc_t), intent(inout) :: piodesc
             !! An I/O parameter struct associated with a decomposition
+            logical, optional, intent(in) :: sync
+            !! Whether to write to disk immediately. Default is .false.
         end subroutine piodg_64_write_step
 
         ! piodg_maxele subroutines
@@ -452,7 +457,8 @@ module piodg
             !! The wrapper object of the file
         end subroutine piodg_maxele_close
 
-        module subroutine piodg_maxele_write_step(self, t, zeta_max, np, piodesc)
+        module subroutine piodg_maxele_write_step(self, t, zeta_max, np, &
+            piodesc, sync)
             !! Timestep writing function for a maxele.63.nc output file.
 
             implicit none
@@ -467,6 +473,8 @@ module piodg
             !! The total number of nodes on the current process
             type(io_desc_t), intent(inout) :: piodesc
             !! An I/O parameter struct associated with a decomposition
+            logical, optional, intent(in) :: sync
+            !! Whether to write to disk immediately. Default is .false.
         end subroutine piodg_maxele_write_step
 
     end interface

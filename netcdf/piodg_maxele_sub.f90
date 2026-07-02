@@ -70,8 +70,16 @@ submodule (piodg:piodg_nodal_sub) piodg_maxele_sub
         ! See interface for arguments and documentation
 
         integer :: piostat ! Status of most recent operation
+        logical :: the_sync ! For defaulting
         real, allocatable :: zeta_max_old(:)
         real, allocatable :: time_of_zeta_max(:)
+
+        ! Set sync
+        if (present(sync)) then
+            the_sync = sync
+        else
+            the_sync = .false.
+        end if
 
         ! File is expected in data mode
 
@@ -103,7 +111,7 @@ submodule (piodg:piodg_nodal_sub) piodg_maxele_sub
         deallocate(time_of_zeta_max)
 
         ! Call sync to write to file
-        call pio_syncfile(self%piofiledesc)
+        if (the_sync) call pio_syncfile(self%piofiledesc)
     end procedure piodg_maxele_write_step
 
 end submodule piodg_maxele_sub
