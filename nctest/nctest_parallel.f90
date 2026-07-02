@@ -12,9 +12,12 @@ program nctest_parallel
     integer :: nprocs
     integer :: procno
     integer :: ierr
+    integer :: my_comm_comps(1) ! For nprocs > 2, and only 1 kind of program
+    integer :: my_comm_io ! For nprocs > 2
 
     ! PIO variables
     type(iosystem_desc_t) :: my_iosystem
+    type(iosystem_desc_t) :: my_iosystems(1) ! For nprocs > 2, and only 1 kind of program
     type(io_desc_t) :: my_iodesc
 
     ! NCDG variables
@@ -59,6 +62,9 @@ program nctest_parallel
     integer, allocatable :: imap_nod_gh0(:) ! Zero for ghost nodes
     logical, allocatable :: resnode(:) ! Whether local nodes are resident or ghost
     logical, allocatable :: resele(:) ! Whether local elements are resident or ghost
+
+    ! Loop variable
+    integer :: i
 
     ! Initialize MPI
     call mpi_init(ierr)
@@ -372,176 +378,223 @@ program nctest_parallel
             )
         case (3:)
             if (procno == 0) print *, "Surplus of ", nprocs - 2, " processes detected."
-            stop "Not implemented yet"
+            if (procno >= 2) print *, "Process ", procno, " is a write process."
+            call pio_init( &
+                iosystem=my_iosystems, & ! One for each compute program type
+                incomm=mpi_comm_world, &
+                procs_per_component=[2], & ! Only one kind of computation
+                comp_proc_list=reshape([0, 1], shape=[2, 1]), & ! One for each compute program type
+                io_proc_list=[(i, i=2, nprocs - 1)], &
+                rearranger=pio_rearr_subset, &
+                comp_comm=my_comm_comps, & ! One for each compute program type
+                io_comm=my_comm_io &
+            ) ! I/O processes do not return from this call
+            my_iosystem = my_iosystems(1)
+            select case (procno)
+                case (:1)
+                    call pio_initdecomp( &
+                        iosystem=my_iosystem, &
+                        basepiotype=pio_double, &
+                        dims=[nnodg], &
+                        compdof=imap_nod_gh0, &
+                        iodesc=my_iodesc &
+                    )
+            end select
         case default
             stop "Error: How did I get here?"
     end select
 
-    ! Open files
-    call my_p63%open(my_iosystem, omode=pio_write)
-    call my_p64%open(my_iosystem, omode=pio_write)
-    call my_pmaxele%open(my_iosystem, omode=pio_write)
-
-    ! Write
     select case (procno)
-        case (0)
-            ! First time step
-            call my_p63%piodg_63_write_step( &
-                t=0.1, &
-                zeta=[5.1, 4.1, 3.1, 2.1, 1.1], & ! Global index
-                piodesc=my_iodesc, &
-                sync=.false. &
-            )
-            call my_p64%piodg_64_write_step( &
-                t=0.1, &
-                u_vel=[5.19, 4.19, 3.19, 2.19, 1.19], & ! Global index
-                v_vel=[5.10, 4.10, 3.10, 2.10, 1.10], & ! Global index
-                piodesc=my_iodesc, &
-                sync=.false. &
-            )
-            call my_pmaxele%piodg_maxele_write_step( &
-                t=0.1, &
-                zeta_max=[0.51, 0.41, 0.31, 0.21, 0.11], & ! Global index
-                np=np, &
-                piodesc=my_iodesc, &
-                sync=.false. &
-            )
+        case(0:1)
+            print *, "Process ", procno, " is a compute process."
 
-            ! Second time step
-            call my_p63%piodg_63_write_step( &
-                t=0.2, &
-                zeta=[5.2, 4.2, 3.2, 2.2, 1.2], & ! Global index
-                piodesc=my_iodesc, &
-                sync=.false. &
-            )
-            call my_p64%piodg_64_write_step( &
-                t=0.2, &
-                u_vel=[5.29, 4.29, 3.29, 2.29, 1.29], & ! Global index
-                v_vel=[5.20, 4.20, 3.20, 2.20, 1.20], & ! Global index
-                piodesc=my_iodesc, &
-                sync=.false. &
-            )
-            call my_pmaxele%piodg_maxele_write_step( &
-                t=0.2, &
-                zeta_max=[0.51, 0.41, 0.31, 1.21, 1.11], & ! Global index
-                np=np, &
-                piodesc=my_iodesc, &
-                sync=.false. &
-            )
+            ! Open files
+            call my_p63%open(my_iosystem, omode=pio_write)
+            call my_p64%open(my_iosystem, omode=pio_write)
+            call my_pmaxele%open(my_iosystem, omode=pio_write)
 
-            ! Third time step
-            call my_p63%piodg_63_write_step( &
-                t=0.3, &
-                zeta=[5.3, 4.3, 3.3, 2.3, 1.3], & ! Global index
-                piodesc=my_iodesc, &
-                sync=.false. &
-            )
-            call my_p64%piodg_64_write_step( &
-                t=0.3, &
-                u_vel=[5.39, 4.39, 3.39, 2.39, 1.39], & ! Global index
-                v_vel=[5.30, 4.30, 3.30, 2.30, 1.30], & ! Global index
-                piodesc=my_iodesc, &
-                sync=.false. &
-            )
-            call my_pmaxele%piodg_maxele_write_step( &
-                t=0.3, &
-                zeta_max=[1.51, 0.41, 1.31, 1.21, 2.11], & ! Global index
-                np=np, &
-                piodesc=my_iodesc, &
-                sync=.false. &
-            )
-        case (1)
-            ! First time step
-            call my_p63%piodg_63_write_step( &
-                t=0.1, &
-                zeta=[5.1, 6.1, 3.1, 4.1, 2.1], & ! Global index
-                piodesc=my_iodesc, &
-                sync=.false. &
-            )
-            call my_p64%piodg_64_write_step( &
-                t=0.1, &
-                u_vel=[5.18, 6.18, 3.18, 4.18, 2.18], & ! Global index
-                v_vel=[5.11, 6.11, 3.11, 4.11, 2.11], & ! Global index
-                piodesc=my_iodesc, &
-                sync=.false. &
-            )
-            call my_pmaxele%piodg_maxele_write_step( &
-                t=0.1, &
-                zeta_max=[0.51, 0.61, 0.31, 0.41, 0.21], & ! Global index
-                np=np, &
-                piodesc=my_iodesc, &
-                sync=.false. &
-            )
+            ! Write
+            select case (procno)
+                case (0)
+                    ! First time step
+                    call my_p63%piodg_63_write_step( &
+                        t=0.1, &
+                        zeta=[5.1, 4.1, 3.1, 2.1, 1.1], & ! Global index
+                        piodesc=my_iodesc, &
+                        sync=.false. &
+                    )
+                    call my_p64%piodg_64_write_step( &
+                        t=0.1, &
+                        u_vel=[5.19, 4.19, 3.19, 2.19, 1.19], & ! Global index
+                        v_vel=[5.10, 4.10, 3.10, 2.10, 1.10], & ! Global index
+                        piodesc=my_iodesc, &
+                        sync=.false. &
+                    )
+                    call my_pmaxele%piodg_maxele_write_step( &
+                        t=0.1, &
+                        zeta_max=[0.51, 0.41, 0.31, 0.21, 0.11], & ! Global index
+                        np=np, &
+                        piodesc=my_iodesc, &
+                        sync=.false. &
+                    )
 
-            ! Second time step
-            call my_p63%piodg_63_write_step( &
-                t=0.2, &
-                zeta=[5.2, 6.2, 3.2, 4.2, 2.2], & ! Global index
-                piodesc=my_iodesc, &
-                sync=.false. &
-            )
-            call my_p64%piodg_64_write_step( &
-                t=0.2, &
-                u_vel=[5.28, 6.28, 3.28, 4.28, 2.28], & ! Global index
-                v_vel=[5.21, 6.21, 3.21, 4.21, 2.21], & ! Global index
-                piodesc=my_iodesc, &
-                sync=.false. &
-            )
-            call my_pmaxele%piodg_maxele_write_step( &
-                t=0.2, &
-                zeta_max=[0.51, 1.61, 0.31, 0.41, 1.21], & ! Global index
-                np=np, &
-                piodesc=my_iodesc, &
-                sync=.false. &
-            )
+                    ! Second time step
+                    call my_p63%piodg_63_write_step( &
+                        t=0.2, &
+                        zeta=[5.2, 4.2, 3.2, 2.2, 1.2], & ! Global index
+                        piodesc=my_iodesc, &
+                        sync=.false. &
+                    )
+                    call my_p64%piodg_64_write_step( &
+                        t=0.2, &
+                        u_vel=[5.29, 4.29, 3.29, 2.29, 1.29], & ! Global index
+                        v_vel=[5.20, 4.20, 3.20, 2.20, 1.20], & ! Global index
+                        piodesc=my_iodesc, &
+                        sync=.false. &
+                    )
+                    call my_pmaxele%piodg_maxele_write_step( &
+                        t=0.2, &
+                        zeta_max=[0.51, 0.41, 0.31, 1.21, 1.11], & ! Global index
+                        np=np, &
+                        piodesc=my_iodesc, &
+                        sync=.false. &
+                    )
 
-            ! Third time step
-            call my_p63%piodg_63_write_step( &
-                t=0.3, &
-                zeta=[5.3, 6.3, 3.3, 4.3, 2.3], & ! Global index
-                piodesc=my_iodesc, &
-                sync=.false. &
-            )
-            call my_p64%piodg_64_write_step( &
-                t=0.3, &
-                u_vel=[5.38, 6.38, 3.38, 4.38, 2.38], & ! Global index
-                v_vel=[5.31, 6.31, 3.31, 4.31, 2.31], & ! Global index
-                piodesc=my_iodesc, &
-                sync=.false. &
-            )
-            call my_pmaxele%piodg_maxele_write_step( &
-                t=0.3, &
-                zeta_max=[1.51, 2.61, 1.31, 0.41, 1.21], & ! Global index
-                np=np, &
-                piodesc=my_iodesc, &
-                sync=.false. &
-            )
-        case default
-            ! Do nothing
+                    ! Third time step
+                    call my_p63%piodg_63_write_step( &
+                        t=0.3, &
+                        zeta=[5.3, 4.3, 3.3, 2.3, 1.3], & ! Global index
+                        piodesc=my_iodesc, &
+                        sync=.false. &
+                    )
+                    call my_p64%piodg_64_write_step( &
+                        t=0.3, &
+                        u_vel=[5.39, 4.39, 3.39, 2.39, 1.39], & ! Global index
+                        v_vel=[5.30, 4.30, 3.30, 2.30, 1.30], & ! Global index
+                        piodesc=my_iodesc, &
+                        sync=.false. &
+                    )
+                    call my_pmaxele%piodg_maxele_write_step( &
+                        t=0.3, &
+                        zeta_max=[1.51, 0.41, 1.31, 1.21, 2.11], & ! Global index
+                        np=np, &
+                        piodesc=my_iodesc, &
+                        sync=.false. &
+                    )
+                case (1)
+                    ! First time step
+                    call my_p63%piodg_63_write_step( &
+                        t=0.1, &
+                        zeta=[5.1, 6.1, 3.1, 4.1, 2.1], & ! Global index
+                        piodesc=my_iodesc, &
+                        sync=.false. &
+                    )
+                    call my_p64%piodg_64_write_step( &
+                        t=0.1, &
+                        u_vel=[5.18, 6.18, 3.18, 4.18, 2.18], & ! Global index
+                        v_vel=[5.11, 6.11, 3.11, 4.11, 2.11], & ! Global index
+                        piodesc=my_iodesc, &
+                        sync=.false. &
+                    )
+                    call my_pmaxele%piodg_maxele_write_step( &
+                        t=0.1, &
+                        zeta_max=[0.51, 0.61, 0.31, 0.41, 0.21], & ! Global index
+                        np=np, &
+                        piodesc=my_iodesc, &
+                        sync=.false. &
+                    )
+
+                    ! Second time step
+                    call my_p63%piodg_63_write_step( &
+                        t=0.2, &
+                        zeta=[5.2, 6.2, 3.2, 4.2, 2.2], & ! Global index
+                        piodesc=my_iodesc, &
+                        sync=.false. &
+                    )
+                    call my_p64%piodg_64_write_step( &
+                        t=0.2, &
+                        u_vel=[5.28, 6.28, 3.28, 4.28, 2.28], & ! Global index
+                        v_vel=[5.21, 6.21, 3.21, 4.21, 2.21], & ! Global index
+                        piodesc=my_iodesc, &
+                        sync=.false. &
+                    )
+                    call my_pmaxele%piodg_maxele_write_step( &
+                        t=0.2, &
+                        zeta_max=[0.51, 1.61, 0.31, 0.41, 1.21], & ! Global index
+                        np=np, &
+                        piodesc=my_iodesc, &
+                        sync=.false. &
+                    )
+
+                    ! Third time step
+                    call my_p63%piodg_63_write_step( &
+                        t=0.3, &
+                        zeta=[5.3, 6.3, 3.3, 4.3, 2.3], & ! Global index
+                        piodesc=my_iodesc, &
+                        sync=.false. &
+                    )
+                    call my_p64%piodg_64_write_step( &
+                        t=0.3, &
+                        u_vel=[5.38, 6.38, 3.38, 4.38, 2.38], & ! Global index
+                        v_vel=[5.31, 6.31, 3.31, 4.31, 2.31], & ! Global index
+                        piodesc=my_iodesc, &
+                        sync=.false. &
+                    )
+                    call my_pmaxele%piodg_maxele_write_step( &
+                        t=0.3, &
+                        zeta_max=[1.51, 2.61, 1.31, 0.41, 1.21], & ! Global index
+                        np=np, &
+                        piodesc=my_iodesc, &
+                        sync=.false. &
+                    )
+                case default
+                    ! Do nothing
+            end select
+
+            ! Close files
+            call my_p63%close()
+            call my_p64%close()
+            call my_pmaxele%close()
+
+            ! Deallocate
+            deallocate(nm)
+            deallocate(x)
+            deallocate(y)
+            deallocate(dp)
+            deallocate(ibtypee)
+            deallocate(nvdll)
+            deallocate(nbdv)
+            deallocate(ibtype)
+            deallocate(nvell)
+            deallocate(nbvv)
+            deallocate(resnode)
+            deallocate(resele)
+
+            ! Free decomposition and finalize PIO (compute processes only)
+            if (procno == 0) print *, "Finalizing PIO"
+            select case (nprocs)
+                case (:1)
+                    stop
+                case (2)
+                    ! call pio_syncfile(my_p63%piofiledesc)
+                    ! call pio_syncfile(my_p64%piofiledesc)
+                    ! call pio_syncfile(my_pmaxele%piofiledesc)
+                    call pio_freedecomp(my_iosystem, my_iodesc)
+                    call pio_finalize(my_iosystem, ierr)
+                case (3:)
+                    ! call pio_syncfile(my_p63%piofiledesc)
+                    ! call pio_syncfile(my_p64%piofiledesc)
+                    ! call pio_syncfile(my_pmaxele%piofiledesc)
+                    call pio_freedecomp(my_iosystems(1), my_iodesc)
+                    call pio_finalize(my_iosystems(1), ierr) ! Whichever corresponds
+            end select
+
+        case (2:)
+            ! Nada
+
     end select
 
-    ! Close files
-    call my_p63%close()
-    call my_p64%close()
-    call my_pmaxele%close()
-
-    ! Deallocate
-    if (procno == 0 .or. procno == 1) then
-        deallocate(nm)
-        deallocate(x)
-        deallocate(y)
-        deallocate(dp)
-        deallocate(ibtypee)
-        deallocate(nvdll)
-        deallocate(nbdv)
-        deallocate(ibtype)
-        deallocate(nvell)
-        deallocate(nbvv)
-        deallocate(resnode)
-        deallocate(resele)
-    end if
-
-    ! Finalize PIO
+    if (procno == 0) print *, "Finalizing MPI"
 
     ! Finalize MPI
     call mpi_finalize(ierr)
