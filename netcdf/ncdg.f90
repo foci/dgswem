@@ -605,7 +605,7 @@ module ncdg
             !! [[global(module):ics(variable)]]
         end subroutine ncdg_63_set_metadata
 
-        module subroutine ncdg_63_write_step(self, t, zeta)
+        module subroutine ncdg_63_write_step(self, t, zeta, sync)
             !! Timestep writing function for a fort.63.nc output file.
 
             implicit none
@@ -616,6 +616,8 @@ module ncdg
             !! The current time
             real, intent(in) :: zeta(:)
             !! The current zeta values
+            logical, optional, intent(in) :: sync
+            !! Whether to write to disk immediately. Default is .false.
         end subroutine ncdg_63_write_step
 
         ! ncdg_64 subroutines
@@ -713,7 +715,7 @@ module ncdg
             !! [[global(module):ics(variable)]]
         end subroutine ncdg_64_set_metadata
 
-        module subroutine ncdg_64_write_step(self, t, u_vel, v_vel)
+        module subroutine ncdg_64_write_step(self, t, u_vel, v_vel, sync)
             !! Timestep writing function for a fort.64.nc output file.
 
             implicit none
@@ -726,6 +728,8 @@ module ncdg
             !! The current u_vel values
             real, intent(in) :: v_vel(:)
             !! The current v_vel values
+            logical, optional, intent(in) :: sync
+            !! Whether to write to disk immediately. Default is .false.
         end subroutine ncdg_64_write_step
 
         ! ncdg_maxele subroutines
@@ -823,7 +827,7 @@ module ncdg
             !! [[global(module):ics(variable)]]
         end subroutine ncdg_maxele_set_metadata
 
-        module subroutine ncdg_maxele_write_step(self, t, zeta_max)
+        module subroutine ncdg_maxele_write_step(self, t, zeta_max, sync)
             !! Timestep writing function for a maxele.63.nc output file.
 
             implicit none
@@ -834,6 +838,8 @@ module ncdg
             !! The current time
             real, intent(in) :: zeta_max(:)
             !! The current zeta_max values
+            logical, optional, intent(in) :: sync
+            !! Whether to write to disk immediately. Default is .false.
         end subroutine ncdg_maxele_write_step
 
     end interface

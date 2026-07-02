@@ -176,11 +176,19 @@ submodule (ncdg:ncdg_nodal_sub) ncdg_maxele_sub
          ! See interface for arguments and documentation
 
         integer :: ncstat ! Status of most recent operation
+        logical :: the_sync ! For defaulting
         integer :: np ! Number of nodes
         real, allocatable :: zeta_max_old(:) ! Previous maximums,
                                              ! if present
         real, allocatable :: time_of_zeta_max(:) ! Nodewise times when
                                                  ! zeta_max is achieved
+
+        ! Set sync
+        if (present(sync)) then
+            the_sync = sync
+        else
+            the_sync = .false.
+        end if
 
         ! Exit define mode
         ncstat = nf90_enddef(self%ncid)
@@ -221,8 +229,10 @@ submodule (ncdg:ncdg_nodal_sub) ncdg_maxele_sub
         deallocate(time_of_zeta_max)
 
         ! After each write, sync
-        ncstat = nf90_sync(self%ncid)
-        call ncfile_check_error(ncstat)
+        if (the_sync) then
+            ncstat = nf90_sync(self%ncid)
+            call ncfile_check_error(ncstat)
+        end if
     end procedure ncdg_maxele_write_step
 
 end submodule ncdg_maxele_sub

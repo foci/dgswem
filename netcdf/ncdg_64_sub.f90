@@ -227,6 +227,7 @@ submodule (ncdg:ncdg_nodal_sub) ncdg_64_sub
         ! See interface for arguments and documentation
 
         integer :: ncstat ! Status of most recent operation
+        logical :: the_sync ! For defaulting
         integer :: np ! Number of nodes
         real :: t_arr(1) ! Vector structure for writing t
         integer :: time_start(1) ! Starting position for time data
@@ -234,6 +235,13 @@ submodule (ncdg:ncdg_nodal_sub) ncdg_64_sub
         integer :: vel_start(2) ! Starting position for vel data
         integer :: vel_count(2) ! vel data block size
         integer :: record_count ! For indexing time step
+
+        ! Set sync
+        if (present(sync)) then
+            the_sync = sync
+        else
+            the_sync = .false.
+        end if
 
         ! Exit define mode
         ncstat = nf90_enddef(self%ncid)
@@ -276,8 +284,10 @@ submodule (ncdg:ncdg_nodal_sub) ncdg_64_sub
         call ncfile_check_error(ncstat)
 
         ! After each write, sync
-        ncstat = nf90_sync(self%ncid)
-        call ncfile_check_error(ncstat)
+        if (the_sync) then
+            ncstat = nf90_sync(self%ncid)
+            call ncfile_check_error(ncstat)
+        end if
     end procedure ncdg_64_write_step
 
 end submodule ncdg_64_sub
