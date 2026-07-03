@@ -44,7 +44,7 @@ module pioutil
         integer, optional, intent(in) :: piotype
         !! PIO file and I/O type. Default is pio_iotype_netcdf4p.
         integer, optional, intent(in) :: cmode
-        !! PIO creation mode. Default is pio_clobber.
+        !! PIO creation mode. Default is pio_noclobber.
 
         integer :: piostat ! Status of most recent operation
         integer :: the_piotype ! For defaulting
@@ -68,7 +68,7 @@ module pioutil
         if (present(cmode)) then
             the_cmode = cmode
         else
-            the_cmode = pio_clobber
+            the_cmode = pio_noclobber
         end if
 
         ! Create file
