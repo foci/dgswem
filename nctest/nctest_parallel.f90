@@ -551,6 +551,11 @@ program nctest_parallel
                     ! Do nothing
             end select
 
+            ! Sync files
+            call pio_syncfile(my_p63%piofiledesc)
+            call pio_syncfile(my_p64%piofiledesc)
+            call pio_syncfile(my_pmaxele%piofiledesc)
+
             ! Close files
             call my_p63%close()
             call my_p64%close()
@@ -576,15 +581,9 @@ program nctest_parallel
                 case (:1)
                     stop
                 case (2)
-                    ! call pio_syncfile(my_p63%piofiledesc)
-                    ! call pio_syncfile(my_p64%piofiledesc)
-                    ! call pio_syncfile(my_pmaxele%piofiledesc)
                     call pio_freedecomp(my_iosystem, my_iodesc)
                     call pio_finalize(my_iosystem, ierr)
                 case (3:)
-                    ! call pio_syncfile(my_p63%piofiledesc)
-                    ! call pio_syncfile(my_p64%piofiledesc)
-                    ! call pio_syncfile(my_pmaxele%piofiledesc)
                     call pio_freedecomp(my_iosystems(1), my_iodesc)
                     call pio_finalize(my_iosystems(1), ierr) ! Whichever corresponds
             end select
