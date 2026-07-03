@@ -529,7 +529,7 @@ module ncdg
             character(len=*), optional, intent(in) :: path
             !! Path and name for the NetCDF file. Default is fort.63.nc.
             integer, optional, intent(in) :: cmode
-            !! NetCDF creation mode. Default is ior(nf90_clobber, nf90_netcdf4).
+            !! NetCDF creation mode. Default is ior(nf90_noclobber, nf90_netcdf4).
         end subroutine ncdg_63_create
 
         module subroutine ncdg_63_open(self, path, mode)
@@ -639,7 +639,7 @@ module ncdg
             character(len=*), optional, intent(in) :: path
             !! Path and name for the NetCDF file. Default is fort.64.nc.
             integer, optional, intent(in) :: cmode
-            !! NetCDF creation mode. Default is ior(nf90_clobber, nf90_netcdf4).
+            !! NetCDF creation mode. Default is ior(nf90_noclobber, nf90_netcdf4).
         end subroutine ncdg_64_create
 
         module subroutine ncdg_64_open(self, path, mode)
@@ -751,7 +751,7 @@ module ncdg
             character(len=*), optional, intent(in) :: path
             !! Path and name for the NetCDF file. Default is maxele.63.nc.
             integer, optional, intent(in) :: cmode
-            !! NetCDF creation mode. Default is ior(nf90_clobber, nf90_netcdf4).
+            !! NetCDF creation mode. Default is ior(nf90_noclobber, nf90_netcdf4).
         end subroutine ncdg_maxele_create
 
         module subroutine ncdg_maxele_open(self, path, mode)

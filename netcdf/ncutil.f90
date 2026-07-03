@@ -46,7 +46,7 @@ module ncutil
         character(len=*), optional, intent(in) :: path
         !! Path and name for the NetCDF file. Default is untitled.nc.
         integer, optional, intent(in) :: cmode
-        !! NetCDF creation mode. Default is ior(nf90_clobber, nf90_netcdf4).
+        !! NetCDF creation mode. Default is ior(nf90_noclobber, nf90_netcdf4).
 
         integer :: ncstat ! Status of most recent operation
         integer :: the_cmode ! For defaulting
@@ -62,7 +62,7 @@ module ncutil
         if (present(cmode)) then
             the_cmode = cmode
         else
-            the_cmode = ior(nf90_clobber, nf90_netcdf4)
+            the_cmode = ior(nf90_noclobber, nf90_netcdf4)
         end if
 
         ! Create file

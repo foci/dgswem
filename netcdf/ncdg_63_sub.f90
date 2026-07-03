@@ -22,7 +22,7 @@ submodule (ncdg:ncdg_nodal_sub) ncdg_63_sub
         if (present(cmode)) then
             the_cmode = cmode
         else
-            the_cmode = ior(nf90_clobber, nf90_netcdf4)
+            the_cmode = ior(nf90_noclobber, nf90_netcdf4)
         end if
 
         ! Call parent function
