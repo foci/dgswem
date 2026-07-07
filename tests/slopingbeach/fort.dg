@@ -1,0 +1,20 @@
+1         ! DGSWE, 0 = CG ADCIRC, 1 = DG ADCIRC
+1         ! P, Polynomial order of the DG approximation (0-8)
+2         | Numerical flux
+2,2       | RK stage, order
+1 2 3 1.0 1000 1.0 0.0     ! Lts Flag, Mbar, Ndom, dt_min0, dtcheck, cflfac, z0
+0         ! LTSmodflag 
+2         ! DG_TO_CG, 1 = Area Average, 2 = Angle Average
+0         ! MODAL_IC, 0 = cold start, 1 = hot start using modal dof
+0, 0      ! DGHOT, 0 = do not write H.S. file, 1 = write out H.S. file, DGHOTSPOOL = # of timesteps to write out hot start file
+5         ! SLOPEFLAG, 0 = slope limiter off, 1 = slope limiter on
+0         ! SEDFLAG, 0 = no sed, 1 = sed due to currents, 2 = sed due to waves
+10        ! MORPH - Morphological time step = MIT*(Hydro timestep)
+1000      ! MAG_SED - Magnification factor for sediment transport rates
+0.20      ! D50 - Median grain size (in mm)
+0.40      ! POROSITY - Bed porosity
+2650      ! RHOSED0 - Sediment density
+1035      ! RHOWAT0 - Water density
+20        ! TEMPC - Water temperature
+0         ! Hard Bottom
+
