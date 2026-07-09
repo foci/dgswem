@@ -155,3 +155,7 @@ pre-commit run --all-files
 **Vista (NVIDIA GPU):** load `nvidia/24.7`, `openmpi/5.0.5`, `TACC`; build with `-Dgpu=true`; check unified memory support first with `nvidia-smi -q | grep -i 'addressing mode'`. Run with one MPI rank per GPU (`--tasks-per-node=1`).
 
 On TACC, set `PKG_CONFIG_PATH` to the netCDF pkg-config path before `meson setup` (the CI script `build_gcc.sh` shows the conda-based approach).
+
+## Test fixtures
+
+**mpi_aps** - fixture located in @tests/conftest.py that automates intercepting any mpi call to shell with the aps wrapper. 33
