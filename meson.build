@@ -73,13 +73,14 @@ endif
 hostname_cmd = run_command('hostname',  check: true)
 hostname = hostname_cmd.stdout().strip()
 
-if get_option('netcdf')
-  netcdf_dep = [dependency('netcdf', language: 'fortran'),
-               dependency('netcdf', language: 'c')]
+netcdf_dep = [dependency('netcdf', language: 'fortran', 
+                                                    required: get_option('netcdf')),
+                        dependency('netcdf', language: 'c',
+                                                    required: get_option('netcdf'))]  
 
   # Temporary fix for netcdf pkg-config bug on TACC systems,
   # skip netcdf test program
-
+if get_option('netcdf').enabled()
   if not hostname.contains('tacc.utexas.edu')
 	compiler.run(
 	'''
@@ -92,12 +93,7 @@ if get_option('netcdf')
 	required: true,
 	dependencies: netcdf_dep)
   endif
-
-else
-  netcdf_dep = []
-endif
-    
-
+endif 
 
 subdir('src')
 subdir('prep')

@@ -7,4 +7,5 @@ adcprep
 dgswem
 dgswem_serial
 tests/
-CLAUDE.local.md
+__pycache__
+.wraplock

@@ -42,6 +42,7 @@ Options specific to DG-SWEM are:
 | gpu | Enable GPU build through OpenACC | true, false | false |
 | parallel | Build parallel DG-SWEM, adcprep, and adcpost | true, false | false |
 | precision | Floating point precision | single, double | double |
+| netcdf | netcdf output | [meson feature](https://mesonbuild.com/Build-options.html#features) | auto |
 
 Once configured, we can compile the program in the build directory:
 

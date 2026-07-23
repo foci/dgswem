@@ -4,5 +4,5 @@ option('precision', type: 'combo', choices: ['single', 'double'], value: 'double
       'Floating point precision.')
 option('parallel', type: 'boolean', value: false, description:
       'Build parallel DG-SWEM, adcprep, and adcpost.')
-option('netcdf', type: 'boolean', value: false, description:
+option('netcdf', type: 'feature', value: 'auto', description:
       'Enable netCDF output.')
