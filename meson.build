@@ -113,6 +113,13 @@ if get_option('parallel')
              link_language: 'fortran')
 endif
 
+if get_option('task-parallel')
+  executable('dagswem', sources: dgswem_src + c_interface_src + starpu_layer_src,
+             dependencies: [starpu_dep] + cpp_dep + netcdf_dep,
+             link_language: 'fortran', 
+             link_with: fstarpu_mod_lib)
+endif  
+
 executable('adcprep', sources: prep_src,
            dependencies: [metis_dep] + netcdf_dep,
            c_args: extra_adcprep_args,
