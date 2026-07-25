@@ -6,3 +6,5 @@ option('parallel', type: 'boolean', value: false, description:
       'Build parallel DG-SWEM, adcprep, and adcpost.')
 option('netcdf', type: 'feature', value: 'auto', description:
       'Enable netCDF output.')
+option('task-parallel', type: 'boolean', value: false, description:
+      'Link with the StarPU library to provide a task-based parallel implementation of DG-SWEM.')
