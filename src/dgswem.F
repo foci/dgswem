@@ -354,7 +354,7 @@ C.....Initialize NetCDF files, if needed
       CALL NETCDF_CREATE_FILES_SERIAL()
 #else
       IF (MYPROC == 0) PRINT *, "NOW WITH NETCDF OUTPUT, IN PARALLEL!"
-      PRINT *, "OPENING FILES..."
+      IF (MYPROC == 0) PRINT *, "OPENING FILES..."
       CALL PARALLELIO_OPEN_FILES_PARALLEL()
 #endif
 #endif
