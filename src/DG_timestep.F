@@ -17,6 +17,8 @@ C.....Use appropriate modules
 #ifdef NETCDF
 #ifndef CMPI
       USE netcdf_io, only : netcdf_write_step_serial
+#else
+      USE parallelio_io, only : parallelio_write_step_parallel
 #endif
 #endif
 
@@ -52,6 +54,8 @@ C.....Write out results
 #ifdef NETCDF
 #ifndef CMPI
       call netcdf_write_step_serial()
+#else
+      call parallelio_write_step_parallel()
 #endif
 #endif
 

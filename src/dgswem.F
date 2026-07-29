@@ -22,10 +22,12 @@ C     sb-disabled for Linux&Intel compiler
      &     IFLINBF, IFHYBF
 #ifdef NETCDF
 #ifndef CMPI
-      use netcdf_io, only : netcdf_create_files_serial, netcdf_close_files_serial
+      use netcdf_io, only : netcdf_create_files_serial,
+     &    netcdf_close_files_serial
 #else
-      use parallelio_io, only : parallelio_open_files_parallel,
-     &     parallelio_close_files_parallel
+      use parallelio_io, only : parallelio_init_parallel,
+     &    parallelio_open_files_parallel,
+     &    parallelio_close_files_parallel
 #endif
 #endif
 #ifdef SWAN
@@ -355,6 +357,7 @@ C.....Initialize NetCDF files, if needed
 #else
       IF (MYPROC == 0) PRINT *, "NOW WITH NETCDF OUTPUT, IN PARALLEL!"
       IF (MYPROC == 0) PRINT *, "OPENING FILES..."
+      CALL PARALLELIO_INIT_PARALLEL()
       CALL PARALLELIO_OPEN_FILES_PARALLEL()
 #endif
 #endif
