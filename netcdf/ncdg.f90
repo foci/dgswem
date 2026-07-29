@@ -394,7 +394,7 @@ module ncdg
 
         module subroutine ncdg_nodal_write_mesh(self, x, y, dp, &
             nm, nhy, ne, nope, neta, ibtypee, nvdll, &
-            nbdv, nbou, nvel, ibtype, nvell, nbvv)
+            nbdv, nbou, nvel, ibtype, nvell, nbvv, transpose_nm)
             !! Write the mesh data for a nodal file.
 
             implicit none
@@ -471,6 +471,10 @@ module ncdg
             !! [[global(module):nbvv(variable)]], of size
             !! [[global(module):mnbou(variable)]] by
             !! 0:[[global(module):mnvel(variable)]].
+            logical, intent(in), optional :: transpose_nm
+            !! Whether to perform a transpose on the nm argument. The final
+            !! array should be (nhy, ne). In DGSWEM, nm(ne, nhy) does need to be
+            !! transposed, while nneg(nhy, ne) does not. Default is true.
         end subroutine ncdg_nodal_write_mesh
 
         ! ncdg_station subroutines

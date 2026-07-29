@@ -449,6 +449,7 @@ submodule (ncdg:ncdg_file_sub) ncdg_nodal_sub
     module procedure ncdg_nodal_write_mesh
         ! See interface for arguments and documentation
 
+        logical :: the_transpose_nm ! For defaulting
         integer :: ncstat ! Status of most recent operation
         real :: element(nhy, ne) ! Transpose of nm
         integer :: element_start(2) ! Starting position for element data
@@ -456,6 +457,12 @@ submodule (ncdg:ncdg_file_sub) ncdg_nodal_sub
         real :: nbdv2(neta) ! Rearrangement of nbdv for compactness
         real :: nbvv2(nvel) ! Rearrangement of nbvv for compactness
         integer :: i, j, k, kj ! Indices
+
+        if (present(transpose_nm)) then
+            the_transpose_nm = transpose_nm
+        else
+            the_transpose_nm = .true.
+        end if
 
         ! Exit define mode
         ncstat = nf90_enddef(self%ncid)
@@ -465,11 +472,15 @@ submodule (ncdg:ncdg_file_sub) ncdg_nodal_sub
 
         ! Re-arrange data arrays
         ! nm -> element
-        do i = 1, ne
-            do j = 1, nhy
-                element(j, i) = nm(i, j)
+        if (the_transpose_nm) then
+            do i = 1, ne
+                do j = 1, nhy
+                    element(j, i) = nm(i, j)
+                end do
             end do
-        end do
+        else
+            element = nm
+        end if
         ! nbdv -> nbdv2
         kj = 1
         do k = 1, nope

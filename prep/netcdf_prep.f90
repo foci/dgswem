@@ -65,7 +65,8 @@ module netcdf_prep
             nvel=nvel, &
             ibtype=ibtype, &
             nvell=nvell, &
-            nbvv=nbvv(:, 1:) &
+            nbvv=nbvv(:, 1:), &
+            transpose_nm=.false. &
         )
         call my_63%close()
 
@@ -100,7 +101,8 @@ module netcdf_prep
             nvel=nvel, &
             ibtype=ibtype, &
             nvell=nvell, &
-            nbvv=nbvv(:, 1:) &
+            nbvv=nbvv(:, 1:), &
+            transpose_nm=.false. &
         )
         call my_64%close()
 
@@ -135,7 +137,8 @@ module netcdf_prep
             nvel=nvel, &
             ibtype=ibtype, &
             nvell=nvell, &
-            nbvv=nbvv(:, 1:) &
+            nbvv=nbvv(:, 1:), &
+            transpose_nm=.false. &
         )
         call my_maxele%close()
 
