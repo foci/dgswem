@@ -4,11 +4,11 @@ C
 C  mod history
 C  v41.11 - 09/14/01 - RL - eliminated MNWLAT, MNWLON
 C  v41.06 - 04/02/01 - RL - eliminated MNWP
-C  v41.06mxxx - date - programmer - describe change 
+C  v41.06mxxx - date - programmer - describe change
 C                    - mark change in code with  cinitials-mxxx
 C-----------------------------------------------------------------------
 C
-C     
+C
 C     v10_sb5    - 10/11/05 - sb - Table that associates nodes to elements (NDEL)
 C
 C**************************************************************************
@@ -16,7 +16,7 @@ C
       MODULE SIZES
       IMPLICIT NONE
 C
-C...SET NUMBER OF BYTES "SZ" IN REAL(SZ) DECLARATIONS       
+C...SET NUMBER OF BYTES "SZ" IN REAL(SZ) DECLARATIONS
 C...SET "NBYTE" FOR PROCESSING INPUT DATA RECORD LENGTH
 
 #ifdef  REAL4
@@ -38,7 +38,7 @@ C...SET MAX OF DIGITS OF PRECISION "NPREC" THE GRID CAN BE EXPECTED TO HAVE
 C...NOTE: IF THE GRID WAS BUILT ON A 32 BIT COMPUTER, IT SHOULD BE
 C   ACCURATE TO ABOUT 7 DIGITS.  THUS, IF THE NODAL SPACING REQUIRES MORE
 C   THAN 5 DIGITS OF PRECISION, THE MODEL RESULTS MAY NOT BE TRUSTWORTHY.
- 
+
       INTEGER, PARAMETER ::  NPREC=7
 C
       INTEGER ::  MNPROC,MNE,MNP,MNEI,MNOPE,MNETA,MNBOU,MNVEL,
@@ -67,7 +67,23 @@ C
       CHARACTER(256),  SAVE :: ROOTDIR
       CHARACTER(2048), SAVE :: INPUTDIR, GLOBALDIR, LOCALDIR
       CHARACTER(2048), SAVE :: GBLINPUTDIR, HOTSTARTDIR
-      
+
+#ifdef CMPI
+#ifdef NETCDF
+      integer :: nnodg
+C! Total number of nodes in the mesh. Read from fort.80.
+      integer :: nsubdom
+C! Number of subdomains in fort.80. This should be less than or equal to mnproc.
+      integer, allocatable :: imap_nod(:)
+C! Maping from nodes on this process to their global node numbers.
+      integer, allocatable :: imap_nod_gh0(:)
+C! Maping from nodes on this process to their global node numbers. Ghost nodes
+C! that are not resident to this processs map to 0. Used for ParallelIO.
+      logical, allocatable :: resnode_pio(:)
+C! Whether a node resides on this process, or is a ghost node.
+#endif
+#endif
+
 C---------------------end of data declarations--------------------------------C
 
 
@@ -83,14 +99,14 @@ C---------------------end of data declarations--------------------------------C
       GLOBALDIR = ""
       LOCALDIR  = ""
       ARGCOUNT  = IARGC()
-      
+
 !      WRITE_LOCAL_FILES = MNPROC == 1
 Casey 121128: The DG output will be written to local files anyway.
 C             This setting only affects the SWAN files.
 C     WRITE_LOCAL_FILES = 1
       WRITE_LOCAL_FILES = .FALSE.
       WRITE_LOCAL_HOT_START_FILES = .TRUE.
-      
+
 #ifdef CMPI
       WRITE(DIRNAME(3:6),'(I4.4)') MYPROC
 #else
@@ -122,11 +138,11 @@ C.....Default root working directory
       ELSE
         ROOTDIR = INPUTDIR
       ENDIF
-      
+
 C.....Set the global input directory
 
       GBLINPUTDIR = ROOTDIR
-      
+
 #ifdef CMPI
 C      iprefix = 0
 C      do i = 1, 2
