@@ -123,20 +123,20 @@ module parallelio_io
 
         call my_63%piodg_63_write_step( &
             t=time_a, &
-            zeta=eta2, &
+            zeta=eta2(1:np), &
             piodesc=my_iodesc, &
             sync=.true. &
         )
         call my_64%piodg_64_write_step( &
             t=time_a, &
-            u_vel=uu2, &
-            v_vel=vv2, &
+            u_vel=uu2(1:np), &
+            v_vel=vv2(1:np), &
             piodesc=my_iodesc, &
             sync=.true. &
         )
         call my_maxele%piodg_maxele_write_step( &
             t=time_a, &
-            zeta_max=etamax, &
+            zeta_max=etamax(1:np), &
             np=np, &
             piodesc=my_iodesc, &
             sync=.true. &
