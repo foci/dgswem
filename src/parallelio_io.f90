@@ -21,8 +21,6 @@ module parallelio_io
     type(iosystem_desc_t) :: my_iosystem
     type(iosystem_desc_t) :: my_iosystems(1) ! Only 1 kind of compute task
     type(io_desc_t) :: my_iodesc
-    integer :: my_comm_comps(1) ! For nprocs > 2, and only 1 kind of program
-    integer :: my_comm_io ! For nprocs > 2
 
     contains
 
@@ -44,13 +42,18 @@ module parallelio_io
         !! collectively call pio_finalize. Because of this, independent write
         !! processes call mpi_finalize and stop within this subroutine.
 
-        use sizes, only : mnproc, myproc, nsubdom, nnodg, imap_nod_gh0
+        use sizes, only : mnproc, myproc, nsubdom, nnodg, imap_nod_gh0, &
+            comm_comp, comm_io
         use messenger_elem, only : message_fini
 
         implicit none
 
         integer :: i ! For looping
+        integer :: my_comm_comps(1) ! For nprocs > 2, and only 1 kind of program
 
+        ! Check number of processes vs. subdomains
+        ! Option 1: compute processes write their own data
+        ! Option 2: surplus writer processes aggregate and write data
         if (mnproc < nsubdom) then
             if (myproc == 0) print *, "Error: Fewer processes than domains."
             stop
@@ -65,6 +68,8 @@ module parallelio_io
                 rearr=pio_rearr_subset, &
                 iosystem=my_iosystem &
             )
+            comm_comp = mpi_comm_world
+            comm_io = mpi_comm_world
             call pio_initdecomp( &
                 iosystem=my_iosystem, &
                 basepiotype=pio_double, &
@@ -84,9 +89,11 @@ module parallelio_io
                 io_proc_list=[(i, i=nsubdom, mnproc - 1)], &
                 rearranger=pio_rearr_subset, &
                 comp_comm=my_comm_comps, & ! One for each compute program type
-                io_comm=my_comm_io &
+                io_comm=comm_io &
             ) ! I/O processes do not return from this call
             my_iosystem = my_iosystems(1)
+            comm_comp = my_comm_comps(1)
+            ! comm_io already set
             if (myproc < nsubdom) then
                 call pio_initdecomp( &
                     iosystem=my_iosystem, &

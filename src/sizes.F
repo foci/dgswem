@@ -69,6 +69,10 @@ C
       CHARACTER(2048), SAVE :: GBLINPUTDIR, HOTSTARTDIR
 
 #ifdef CMPI
+      integer :: comm_comp
+C! Subcommunicator for compute processes.
+      integer :: comm_io
+C! Subcommunicatpr for I/O processes.
       integer :: nsubdom
 C! Number of subdomains in fort.80. This should be less than or equal to mnproc.
 #ifdef NETCDF

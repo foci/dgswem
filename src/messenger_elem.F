@@ -99,6 +99,8 @@ C--------------------------------------------------------------------------
       CALL MPI_INIT(IERR)                               ! Initialize MPI
       CALL MPI_COMM_SIZE (MPI_COMM_WORLD,MNPROC,IERR)   ! Get number of procs
       CALL MPI_COMM_RANK (MPI_COMM_WORLD,MYPROC,IERR)   ! Get MPI rank
+      comm_comp = mpi_comm_world                        ! Default computation
+      comm_io = mpi_comm_world                          ! Default I/O
       RETURN
       END SUBROUTINE
 
