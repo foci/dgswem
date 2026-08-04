@@ -61,6 +61,9 @@ c     nd
       ENDIF
       CALL MAKE_DIRNAME()       ! Establish Working Directory Name
       CALL READ_INPUT()         ! Establish sizes by reading fort.14 and fort.15
+#ifdef NETCDF
+      CALL PARALLELIO_INIT_PARALLEL()
+#endif
 #else
       IMPLICIT NONE
       real(4) crain_time1, crain_time2, crain_timinc
@@ -357,7 +360,6 @@ C.....Initialize NetCDF files, if needed
 #else
       IF (MYPROC == 0) PRINT *, "NOW WITH NETCDF OUTPUT, IN PARALLEL!"
       IF (MYPROC == 0) PRINT *, "OPENING FILES..."
-      CALL PARALLELIO_INIT_PARALLEL()
       CALL PARALLELIO_OPEN_FILES_PARALLEL()
 #endif
 #endif
