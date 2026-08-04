@@ -162,6 +162,19 @@ C     Ignore the remainder of the file
          STOP
       ENDIF
 
+      IF((mnproc - nsubdom) .gt. nsubdom) THEN
+         IF(MYPROC.EQ.0) THEN
+            WRITE(*,'(A)') '*** ERROR IN PARALLEL SETUP!'
+           WRITE(*,'(2A,I4,A)') '*** Number of CPUS for submitted job ',
+     &           '(NCPU = ',MNPROC,') is more than 2x the'
+            WRITE(*,'(2A,I4,A)') '*** number of CPUS specified during',
+     &           ' ADCPREP (see fort.80: NCPU = ',nsubdom,').'
+            WRITE(*,'(A)') '*** dgswem will now quit!'
+         ENDIF
+         CALL MESSAGE_FINI()
+         STOP
+      ENDIF
+
 C     If process number is greater than or equal to the number of subdomains,
 C     anticipate that there is not a directory available for it and exit.
       if (myproc.ge.nsubdom) then
