@@ -69,11 +69,11 @@ C
       CHARACTER(2048), SAVE :: GBLINPUTDIR, HOTSTARTDIR
 
 #ifdef CMPI
+      integer :: nsubdom
+C! Number of subdomains in fort.80. This should be less than or equal to mnproc.
 #ifdef NETCDF
       integer :: nnodg
 C! Total number of nodes in the mesh. Read from fort.80.
-      integer :: nsubdom
-C! Number of subdomains in fort.80. This should be less than or equal to mnproc.
       integer, allocatable :: imap_nod(:)
 C! Maping from nodes on this process to their global node numbers.
       integer, allocatable :: imap_nod_gh0(:)
