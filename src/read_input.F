@@ -23,6 +23,7 @@ C.....Use appropriate modules
       USE fort_dg, ONLY: read_keyword_fort_dg,read_fixed_fort_dg
 #ifdef CMPI
       USE MESSENGER_ELEM
+      use sizes, only : nsubdom
 #ifdef NETCDF
       USE SIZES, ONLY: nnodg, imap_nod, imap_nod_gh0, resnode_pio
 #endif
@@ -75,47 +76,62 @@ C
       READ(80,*) nsubdom        !Read in NPROC
       read(80,*) np_max80       !Read in maximum np across all processors
 #ifdef NETCDF
+
 C     For NetCDF, local-global maps are needed
-      read(80,*) ne_max80       !Read in maximum ne across all processors
-      read(80,*) idum80         !Skip NSTAE
-      read(80,*) idum80         !Skip NSTAV
-      read(80,*) idum80         !Skip MNHARF
-      read(80,*) idum80         !Skip NWLON,NWLAT
+C     Only for compute processes, skip if writer
+
+      if (myproc.lt.nsubdom) then
+        read(80,*) ne_max80       !Read in maximum ne across all processors
+        read(80,*) idum80         !Skip NSTAE
+        read(80,*) idum80         !Skip NSTAV
+        read(80,*) idum80         !Skip MNHARF
+        read(80,*) idum80         !Skip NWLON,NWLAT
+
 C     Read imap_nod(:) = imap_nod_lg(:, myproc + 1)
-      allocate(temp_arr80(np_max80))
-      do i = 0, (nsubdom - 1)
-        read(80,*) pe80, nnodp80, nod_res_tot80 !Read in PE, NNODP(PE), ...
-        read(80,*) temp_arr80(1:nnodp80)
-        if (pe80.eq.myproc) then
-          nnodploc = nnodp80
-          allocate(imap_nod(nnodploc))
-          imap_nod(:) = temp_arr80(1:nnodploc)
-        endif
-      enddo
-      deallocate(temp_arr80)
+
+        allocate(temp_arr80(np_max80))
+        do i = 0, (nsubdom - 1)
+          read(80,*) pe80, nnodp80, nod_res_tot80 !Read in PE, NNODP(PE), ...
+          read(80,*) temp_arr80(1:nnodp80)
+          if (pe80.eq.myproc) then
+            nnodploc = nnodp80
+            allocate(imap_nod(nnodploc))
+            imap_nod(:) = temp_arr80(1:nnodploc)
+          endif
+        enddo
+        deallocate(temp_arr80)
+
 C     Ignore element mappings
-      allocate(temp_arr80(ne_max80))
-      do i = 0, (nsubdom - 1)
-        read(80,*) pe80, nelp80
-        read(80,*) temp_arr80(1:nelp80)
-      enddo
-      deallocate(temp_arr80)
+
+        allocate(temp_arr80(ne_max80))
+        do i = 0, (nsubdom - 1)
+          read(80,*) pe80, nelp80
+          read(80,*) temp_arr80(1:nelp80)
+        enddo
+        deallocate(temp_arr80)
+
 C     Infer resnode_pio from columns 2 and 3
-      allocate(resnode_pio(nnodploc))
-      resnode_pio = .false. !Set all to false by default
-      READ(80,'(A)') CDUM80     !Skip header
-      do i = 1, nnodg
-        read(80,*) idum80, pe80, nod80
-        if (pe80.eq.myproc) resnode_pio(nod80) = .true.
-      end do
+
+        allocate(resnode_pio(nnodploc))
+        resnode_pio = .false. !Set all to false by default
+        READ(80,'(A)') CDUM80     !Skip header
+        do i = 1, nnodg
+          read(80,*) idum80, pe80, nod80
+          if (pe80.eq.myproc) resnode_pio(nod80) = .true.
+        end do
+
 C     Derive imap_nod_gh0 from imap_nod, as 0 where not a resident node
-      allocate(imap_nod_gh0(nnodploc))
-      where (resnode_pio)
-        imap_nod_gh0 = imap_nod
-      elsewhere
-        imap_nod_gh0 = 0
-      endwhere
+
+        allocate(imap_nod_gh0(nnodploc))
+        where (resnode_pio)
+          imap_nod_gh0 = imap_nod
+        elsewhere
+          imap_nod_gh0 = 0
+        endwhere
+
 C     Ignore the remainder of the file
+
+      end if
 #endif
       CLOSE(80)
 
@@ -145,6 +161,12 @@ C     Ignore the remainder of the file
          CALL MESSAGE_FINI()
          STOP
       ENDIF
+
+C     If process number is greater than or equal to the number of subdomains,
+C     anticipate that there is not a directory available for it and exit.
+      if (myproc.ge.nsubdom) then
+          return
+      end if
 #endif
 #endif
 C--
