@@ -3,8 +3,8 @@ C  last changes in this file VERSION 12.sb01                                  *
 C  S.Bunya changed this file a bit. 07/13/2005                                *
 C  S.Bunya changed this file a bit. 01/04/2007                                *
 C                                                                             *
-C     01-10-2011 - cem - adapted for p_enrichment and multicomponent          * C****************************************************************************** 
-C 
+C     01-10-2011 - cem - adapted for p_enrichment and multicomponent          * C******************************************************************************
+C
       MODULE MESSENGER_ELEM
 C
       USE SIZES
@@ -14,7 +14,7 @@ C
 
 
 #ifdef HAVE_MPI_MOD
-      use mpi  
+      use mpi
       IMPLICIT NONE
 #else
       IMPLICIT NONE
@@ -37,11 +37,7 @@ C
 Csb-PDG1
       PUBLIC
 
-      INTEGER, SAVE :: MPI_COMM_ADCIRC
-      INTEGER, SAVE ::  COMM_COMP     
-      INTEGER, SAVE ::  GROUP_WORLD, GROUP_COMP
-
-      INTEGER,SAVE,PRIVATE :: REALTYPE, DBLETYPE, COMM   
+      INTEGER,SAVE,PRIVATE :: REALTYPE, DBLETYPE
       INTEGER,SAVE,PRIVATE ::  NEIGHPROC_R, NEIGHPROC_S, RDIM, IERR
       INTEGER,SAVE,PRIVATE ::  TAG = 101
       LOGICAL,SAVE,ALLOCATABLE :: RESELEM(:)
@@ -53,8 +49,8 @@ C
       INTEGER, PRIVATE, ALLOCATABLE :: REQ_I1(:), REQ_I2(:)
       INTEGER, PRIVATE, ALLOCATABLE :: STAT_I1(:,:), STAT_I2(:,:)
       INTEGER, PRIVATE, ALLOCATABLE :: REQ_R1(:), REQ_R2(:), REQ_R3(:),
-     &                                 REQ_LZ(:) 
-      INTEGER, PRIVATE, ALLOCATABLE :: STAT_R1(:,:), STAT_R2(:,:), 
+     &                                 REQ_LZ(:)
+      INTEGER, PRIVATE, ALLOCATABLE :: STAT_R1(:,:), STAT_R2(:,:),
      &                                 STAT_R3(:,:), STAT_LZ(:,:)
       INTEGER, PRIVATE, ALLOCATABLE :: REQ_R3D(:), STAT_R3D(:,:)
       INTEGER, PRIVATE, ALLOCATABLE :: REQ_C3D(:), STAT_C3D(:,:)
@@ -90,44 +86,21 @@ c
       SUBROUTINE MESSAGE_INIT ()
 C--------------------------------------------------------------------------
 C  Routine performs following steps:
-C   (1)  initialize MPI, 
+C   (1)  initialize MPI,
 C   (2)  get number of processors,
-C   (3)  get MPI rank of processor 
+C   (3)  get MPI rank of processor
 C  vjp  8/06/1999
 C--------------------------------------------------------------------------
       IMPLICIT NONE
 #ifndef HAVE_MPI_MOD
       include 'mpif.h'
 #endif
-CND
-      Integer I
-      INTEGER, ALLOCATABLE :: RANKS(:)
 
       CALL MPI_INIT(IERR)                               ! Initialize MPI
       CALL MPI_COMM_SIZE (MPI_COMM_WORLD,MNPROC,IERR)   ! Get number of procs
       CALL MPI_COMM_RANK (MPI_COMM_WORLD,MYPROC,IERR)   ! Get MPI rank
-CND
-      ALLOCATE(RANKS(MNPROC+1))
-      DO I=1,MNPROC
-         RANKS(I)=I-1
-      ENDDO
-      CALL MPI_COMM_GROUP(MPI_COMM_WORLD,GROUP_WORLD,IERR)
-      CALL MPI_GROUP_INCL(GROUP_WORLD,MNPROC,RANKS,GROUP_COMP,IERR)
-      CALL MPI_COMM_CREATE(MPI_COMM_WORLD,GROUP_COMP,COMM_COMP,IERR)
-      DEALLOCATE(RANKS)
-      COMM = COMM_COMP
       RETURN
       END SUBROUTINE
-
-c$$$      IMPLICIT NONE
-c$$$#ifndef HAVE_MPI_MOD
-c$$$      include 'mpif.h'
-c$$$#endif
-c$$$      CALL MPI_INIT(IERR)                               ! Initialize MPI
-c$$$      CALL MPI_COMM_SIZE (MPI_COMM_WORLD,MNPROC,IERR)   ! Get number of procs
-c$$$      CALL MPI_COMM_RANK (MPI_COMM_WORLD,MYPROC,IERR)   ! Get MPI rank
-c$$$      RETURN
-c$$$      END SUBROUTINE
 
       SUBROUTINE ErrorElevSum( ErrorElevExceeded )
 #ifndef HAVE_MPI_MOD
@@ -136,7 +109,7 @@ c$$$      END SUBROUTINE
       INTEGER ErrorElevExceeded !=1 if this subdomain has exceeded warning elev
       INTEGER SumErrorElevExceeded !sum total of all flags from all subdomains
       INTEGER kount             ! to avoid compiler bug on certain platforms
-      
+
       SumErrorElevExceeded = 0
       kount=1
       call MPI_ALLREDUCE( ErrorElevExceeded, SumErrorElevExceeded, kount,
@@ -144,7 +117,7 @@ c$$$      END SUBROUTINE
       ErrorElevExceeded = SumErrorElevExceeded
       END SUBROUTINE ErrorElevSum
 
- 
+
       SUBROUTINE MESSAGE_FINI ()
 C--------------------------------------------------------------------------
 C  Shutdown MPI library.
@@ -156,12 +129,12 @@ C--------------------------------------------------------------------------
       INTEGER IERR,I
 C
       CALL MPI_FINALIZE(IERR)
-      IF (MYPROC.EQ.0)  
-     &  print *, "MPI terminated with Status = ",IERR      
+      IF (MYPROC.EQ.0)
+     &  print *, "MPI terminated with Status = ",IERR
       RETURN
       END SUBROUTINE
 
- 
+
       SUBROUTINE MESSAGE_ABORT ()
 C--------------------------------------------------------------------------
 C  Shutdown MPI library.
@@ -173,21 +146,21 @@ C--------------------------------------------------------------------------
       INTEGER IERR,I
 C
       CALL MPI_ABORT(MPI_COMM_WORLD,IERR)
-      IF (MYPROC.EQ.0)  
-     &  print *, "MPI Aborted with Status = ",IERR      
+      IF (MYPROC.EQ.0)
+     &  print *, "MPI Aborted with Status = ",IERR
       RETURN
       END SUBROUTINE
 
 
 
-      SUBROUTINE MSG_TABLE_ELEM () 
+      SUBROUTINE MSG_TABLE_ELEM ()
 C
 C--------------------------------------------------------------------------
 C  Routine preforms following steps:
 C
 C   (1) Read Message-Passing Information from file "DG.18"
 C   (2) Determine resident nodes: RESNODE(I) is true  if I is resident node
-C   (3) Determine ghost nodes:    RESNODE(I) is false if I is ghost node    
+C   (3) Determine ghost nodes:    RESNODE(I) is false if I is ghost node
 C   (4) Determine number of neighbor subdomains
 C   (5) MPI rank of each neighbor and number of ghosts nodes to receive
 C   (6) Read Message-Passing Receive List
@@ -222,7 +195,7 @@ C
       DO I=1, MNE
          IF (IBELONGTO(I)-1.EQ.MYPROC) THEN
            RESELEM(I) = .TRUE.
-         ELSE 
+         ELSE
            RESELEM(I) = .FALSE.
          ENDIF
       ENDDO
@@ -298,10 +271,10 @@ C
       ALLOCATE ( REQ_I1(RDIM),REQ_I2(RDIM) )
       ALLOCATE ( REQ_R1(RDIM),REQ_R2(RDIM),REQ_R3(RDIM),REQ_LZ(RDIM) )
 C
-      ALLOCATE ( STAT_I1(MPI_STATUS_SIZE,RDIM),       
+      ALLOCATE ( STAT_I1(MPI_STATUS_SIZE,RDIM),
      &           STAT_I2(MPI_STATUS_SIZE,RDIM) )
 
-      ALLOCATE ( STAT_R1(MPI_STATUS_SIZE,RDIM),       
+      ALLOCATE ( STAT_R1(MPI_STATUS_SIZE,RDIM),
      &           STAT_R2(MPI_STATUS_SIZE,RDIM),
      &           STAT_R3(MPI_STATUS_SIZE,RDIM),
      &           STAT_LZ(MPI_STATUS_SIZE,RDIM) )
@@ -317,24 +290,24 @@ C
              !  Setup persistent structures for integer arrays
 C
       DO J=1,NEIGHPROC_R
-         CALL MPI_RECV_INIT ( IRECVBUF(1,J), NELEMRECV(J), 
+         CALL MPI_RECV_INIT ( IRECVBUF(1,J), NELEMRECV(J),
      &     MPI_INTEGER,IPROC_R(J), TAG, MPI_COMM_WORLD,
      &     REQ_I1(J),IERR)
       ENDDO
       DO J=1,NEIGHPROC_S
-         CALL MPI_SEND_INIT ( ISENDBUF(1,J), NELEMSEND(J), 
+         CALL MPI_SEND_INIT ( ISENDBUF(1,J), NELEMSEND(J),
      &    MPI_INTEGER,IPROC_S(J), TAG, MPI_COMM_WORLD,
      &    REQ_I1(J+NEIGHPROC_R),IERR )
       ENDDO
 C
 C
       DO J=1,NEIGHPROC_R
-         CALL MPI_RECV_INIT ( IRECVBUF(1,J), 2*NELEMRECV(J), 
+         CALL MPI_RECV_INIT ( IRECVBUF(1,J), 2*NELEMRECV(J),
      &     MPI_INTEGER,IPROC_R(J), TAG, MPI_COMM_WORLD,
      &     REQ_I2(J),IERR)
       ENDDO
       DO J=1,NEIGHPROC_S
-         CALL MPI_SEND_INIT ( ISENDBUF(1,J), 2*NELEMSEND(J), 
+         CALL MPI_SEND_INIT ( ISENDBUF(1,J), 2*NELEMSEND(J),
      &    MPI_INTEGER,IPROC_S(J), TAG, MPI_COMM_WORLD,
      &    REQ_I2(J+NEIGHPROC_R),IERR )
       ENDDO
@@ -342,67 +315,67 @@ C
             !  Setup persistent structures for real arrays
 C
       DO J=1,NEIGHPROC_R
-         CALL MPI_RECV_INIT ( RECVBUF(1,J), DOFH*NELEMRECV(J), 
+         CALL MPI_RECV_INIT ( RECVBUF(1,J), DOFH*NELEMRECV(J),
      &     REALTYPE,IPROC_R(J), TAG, MPI_COMM_WORLD,
      &     REQ_R1(J),IERR)
       ENDDO
       DO J=1,NEIGHPROC_S
-         CALL MPI_SEND_INIT ( SENDBUF(1,J), DOFH*NELEMSEND(J), 
+         CALL MPI_SEND_INIT ( SENDBUF(1,J), DOFH*NELEMSEND(J),
      &     REALTYPE,IPROC_S(J), TAG, MPI_COMM_WORLD,
      &     REQ_R1(J+NEIGHPROC_R),IERR)
       ENDDO
 C
       DO J=1,NEIGHPROC_R
-         CALL MPI_RECV_INIT ( RECVBUF(1,J), 2*DOFH*NELEMRECV(J), 
+         CALL MPI_RECV_INIT ( RECVBUF(1,J), 2*DOFH*NELEMRECV(J),
      &     REALTYPE,IPROC_R(J), TAG, MPI_COMM_WORLD,
      &     REQ_R2(J),IERR)
       ENDDO
       DO J=1,NEIGHPROC_S
-         CALL MPI_SEND_INIT ( SENDBUF(1,J), 2*DOFH*NELEMSEND(J), 
+         CALL MPI_SEND_INIT ( SENDBUF(1,J), 2*DOFH*NELEMSEND(J),
      &     REALTYPE,IPROC_S(J), TAG, MPI_COMM_WORLD,
      &     REQ_R2(J+NEIGHPROC_R),IERR)
       ENDDO
 C
       DO J=1,NEIGHPROC_R
-         CALL MPI_RECV_INIT ( RECVBUF(1,J), 3*DOFH*NELEMRECV(J), 
+         CALL MPI_RECV_INIT ( RECVBUF(1,J), 3*DOFH*NELEMRECV(J),
      &     REALTYPE,IPROC_R(J), TAG, MPI_COMM_WORLD,
      &     REQ_R3(J),IERR)
       ENDDO
       DO J=1,NEIGHPROC_S
-         CALL MPI_SEND_INIT ( SENDBUF(1,J), 3*DOFH*NELEMSEND(J), 
+         CALL MPI_SEND_INIT ( SENDBUF(1,J), 3*DOFH*NELEMSEND(J),
      &     REALTYPE,IPROC_S(J), TAG, MPI_COMM_WORLD,
      &     REQ_R3(J+NEIGHPROC_R),IERR)
       ENDDO
 C
       DO J=1,NEIGHPROC_R
-         CALL MPI_RECV_INIT ( RECVBUF(1,J), 4*DOFH*NELEMRECV(J), 
+         CALL MPI_RECV_INIT ( RECVBUF(1,J), 4*DOFH*NELEMRECV(J),
      &     REALTYPE,IPROC_R(J), TAG, MPI_COMM_WORLD,
      &     REQ_LZ(J),IERR)
       ENDDO
       DO J=1,NEIGHPROC_S
-         CALL MPI_SEND_INIT ( SENDBUF(1,J), 4*DOFH*NELEMSEND(J), 
+         CALL MPI_SEND_INIT ( SENDBUF(1,J), 4*DOFH*NELEMSEND(J),
      &     REALTYPE,IPROC_S(J), TAG, MPI_COMM_WORLD,
      &     REQ_LZ(J+NEIGHPROC_R),IERR)
       ENDDO
 C
       IF (C3D) THEN
-C         DO J=1,NEIGHPROC  
-C            CALL MPI_RECV_INIT ( RECVBUF(1,J), MNODES*NNODRECV(J), 
+C         DO J=1,NEIGHPROC
+C            CALL MPI_RECV_INIT ( RECVBUF(1,J), MNODES*NNODRECV(J),
 C     &        REALTYPE,IPROC(J), TAG, MPI_COMM_WORLD,
 C     &        REQ_R3D(J),IERR)
 C         ENDDO
-C         DO J=1,NEIGHPROC  
-C            CALL MPI_SEND_INIT ( SENDBUF(1,J), MNODES*NNODSEND(J), 
+C         DO J=1,NEIGHPROC
+C            CALL MPI_SEND_INIT ( SENDBUF(1,J), MNODES*NNODSEND(J),
 C     &        REALTYPE,IPROC(J), TAG, MPI_COMM_WORLD,
 C     &        REQ_R3D(J+NEIGHPROC),IERR)
 C         ENDDO
-C         DO J=1,NEIGHPROC  
-C            CALL MPI_RECV_INIT ( RECVBUF(1,J), 2*MNODES*NNODRECV(J), 
+C         DO J=1,NEIGHPROC
+C            CALL MPI_RECV_INIT ( RECVBUF(1,J), 2*MNODES*NNODRECV(J),
 C     &        REALTYPE,IPROC(J), TAG, MPI_COMM_WORLD,
 C     &        REQ_C3D(J),IERR)
 C         ENDDO
-C         DO J=1,NEIGHPROC  
-C            CALL MPI_SEND_INIT ( SENDBUF(1,J), 2*MNODES*NNODSEND(J), 
+C         DO J=1,NEIGHPROC
+C            CALL MPI_SEND_INIT ( SENDBUF(1,J), 2*MNODES*NNODSEND(J),
 C     &        REALTYPE,IPROC(J), TAG, MPI_COMM_WORLD,
 C     &        REQ_C3D(J+NEIGHPROC),IERR)
 C         ENDDO
@@ -421,7 +394,7 @@ C  and persistent message-passing.
 C
 C  vjp  8/06/1999
 C--------------------------------------------------------------------------
-C 
+C
       IMPLICIT NONE
 #ifndef HAVE_MPI_MOD
       include 'mpif.h'
@@ -445,7 +418,7 @@ C
            ENDDO
          ENDIF
       ENDDO
-C                     
+C
                           ! Send/receive messages to/from all neighbors
       IF (NMSG.EQ.1) THEN
         CALL MPI_STARTALL ( RDIM, REQ_R1, IERR )
@@ -453,9 +426,9 @@ C
         CALL MPI_STARTALL ( RDIM, REQ_R2, IERR )
       ENDIF
 C
-                          !..Unpack Received messages as they arrive  
+                          !..Unpack Received messages as they arrive
 
-      IF (NMSG.EQ.1) THEN   
+      IF (NMSG.EQ.1) THEN
         TOT = 0
         DO WHILE (TOT.LT.RDIM)
            DO N=1, RDIM
@@ -502,7 +475,7 @@ C
            ENDDO
         ENDDO
       ENDIF
-C 
+C
  999  continue
       RETURN
       END SUBROUTINE
@@ -516,7 +489,7 @@ C  and persistent message-passing.
 C
 C  vjp  8/06/1999
 C--------------------------------------------------------------------------
-C 
+C
       IMPLICIT NONE
 #ifndef HAVE_MPI_MOD
       include 'mpif.h'
@@ -552,7 +525,7 @@ C
            ENDDO
          ENDIF
       ENDDO
-C                    
+C
               ! Send/receive messages to/from all neighbors
 C
       IF (NMSG.EQ.1) THEN
@@ -562,9 +535,9 @@ C
       ELSE
         CALL MPI_STARTALL ( RDIM, REQ_R3, IERR )
       ENDIF
-              !..Unpack Received messages as they arrive     
+              !..Unpack Received messages as they arrive
 C
-      IF (NMSG.EQ.1) THEN   
+      IF (NMSG.EQ.1) THEN
         TOT = 0
         DO WHILE (TOT.LT.RDIM)
            DO N=1, RDIM
@@ -656,7 +629,7 @@ cdebug     print *, myproc, tot,nfini,index(1),index(2)
         ENDDO
         GOTO 999
       ENDIF
-C 
+C
  999  continue
       RETURN
       END SUBROUTINE
@@ -670,7 +643,7 @@ C  and persistent message-passing.
 C
 C  sb  1/04/2007
 C--------------------------------------------------------------------------
-C 
+C
       IMPLICIT NONE
 #ifndef HAVE_MPI_MOD
       include 'mpif.h'
@@ -692,12 +665,12 @@ C
             ENDDO
          ENDDO
       ENDDO
-C                    
+C
               ! Send/receive messages to/from all neighbors
 C
       CALL MPI_STARTALL ( RDIM, REQ_LZ, IERR )
 
-              !..Unpack Received messages as they arrive     
+              !..Unpack Received messages as they arrive
 C
       TOT = 0
       DO WHILE (TOT.LT.RDIM)
@@ -736,7 +709,7 @@ C  and persistent message-passing.
 C
 C  sb  1/04/2007
 C--------------------------------------------------------------------------
-C 
+C
       IMPLICIT NONE
 #ifndef HAVE_MPI_MOD
       include 'mpif.h'
@@ -756,12 +729,12 @@ C
             ENDDO
          ENDDO
       ENDDO
-C                    
+C
               ! Send/receive messages to/from all neighbors
 C
       CALL MPI_STARTALL ( RDIM, REQ_LZ, IERR )
 
-              !..Unpack Received messages as they arrive     
+              !..Unpack Received messages as they arrive
 C
       TOT = 0
       DO WHILE (TOT.LT.RDIM)
@@ -800,7 +773,7 @@ C
 
       integer :: j, i
 
-!$acc parallel loop default(present) async(num) 
+!$acc parallel loop default(present) async(num)
       do i = 1,nsend
          j = sendloc(i)
          packed((i-1)*dof+1:i*dof) = vec1(:,j)
@@ -837,7 +810,7 @@ C  and persistent message-passing.
 C
 C  vjp  8/06/1999
 C--------------------------------------------------------------------------
-C 
+C
       IMPLICIT NONE
 #ifndef HAVE_MPI_MOD
       include 'mpif.h'
@@ -852,7 +825,7 @@ C
 C      DO JJ=1,NEIGHPROC_S
 C         J = MOD(JJ-1+MYPROC,NEIGHPROC_S)+1
 !$acc wait
-      num = 1                             
+      num = 1
       DO J=1,NEIGHPROC_S
          NCOUNT = 0
          call packElems(num,DOFH, nelemsend(j), isendloc(:,j), vec1(:,:,irk), sendbuf(:nelemsend(j)*dofh,j))
@@ -879,7 +852,7 @@ C         J = MOD(JJ-1+MYPROC,NEIGHPROC_S)+1
             CALL MPI_START ( REQ_R3(J+NEIGHPROC_R), IERR )
          ENDIF
       ENDDO
-C                    
+C
               ! Send/receive messages to/from all neighbors
 C
       IF (NMSG.EQ.1) THEN
@@ -890,9 +863,9 @@ C
         CALL MPI_STARTALL ( RDIM-NEIGHPROC_S, REQ_R3, IERR )
       ENDIF
 C
-              !..Unpack Received messages as they arrive     
+              !..Unpack Received messages as they arrive
 C
-      IF (NMSG.EQ.1) THEN   
+      IF (NMSG.EQ.1) THEN
         TOT = 0
         DO WHILE (TOT.LT.RDIM)
            DO N=1, RDIM
@@ -976,7 +949,7 @@ cdebug     print *, myproc, tot,nfini,index(1),index(2)
         ENDDO
         GOTO 999
       ENDIF
-C 
+C
  999  continue
 !$acc wait
       END SUBROUTINE
@@ -989,7 +962,7 @@ C  and persistent message-passing.
 C
 C  vjp  8/06/1999
 C--------------------------------------------------------------------------
-C 
+C
       IMPLICIT NONE
 #ifndef HAVE_MPI_MOD
       include 'mpif.h'
@@ -1036,7 +1009,7 @@ C         J = MOD(JJ-1+MYPROC,NEIGHPROC_S)+1
             CALL MPI_START ( REQ_R3(J+NEIGHPROC_R), IERR )
          ENDIF
       ENDDO
-C                    
+C
               ! Send/receive messages to/from all neighbors
 C
       IF (NMSG.EQ.1) THEN
@@ -1047,9 +1020,9 @@ C
         CALL MPI_STARTALL ( RDIM-NEIGHPROC_S, REQ_R3, IERR )
       ENDIF
 C
-              !..Unpack Received messages as they arrive     
+              !..Unpack Received messages as they arrive
 C
-      IF (NMSG.EQ.1) THEN   
+      IF (NMSG.EQ.1) THEN
         TOT = 0
         DO WHILE (TOT.LT.RDIM)
            DO N=1, RDIM
@@ -1141,7 +1114,7 @@ cdebug     print *, myproc, tot,nfini,index(1),index(2)
         ENDDO
         GOTO 9998
       ENDIF
-C 
+C
  9998 continue
       RETURN
       END SUBROUTINE
@@ -1154,7 +1127,7 @@ C  and persistent message-passing.
 C
 C  vjp  8/06/1999
 C--------------------------------------------------------------------------
-C 
+C
       IMPLICIT NONE
 #ifndef HAVE_MPI_MOD
       include 'mpif.h'
@@ -1201,7 +1174,7 @@ C         J = MOD(JJ-1+MYPROC,NEIGHPROC_S)+1
             CALL MPI_START ( REQ_R3(J+NEIGHPROC_R), IERR )
          ENDIF
       ENDDO
-C                    
+C
               ! Send/receive messages to/from all neighbors
 C
       IF (NMSG.EQ.1) THEN
@@ -1212,9 +1185,9 @@ C
         CALL MPI_STARTALL ( RDIM-NEIGHPROC_S, REQ_R3, IERR )
       ENDIF
 C
-              !..Unpack Received messages as they arrive     
+              !..Unpack Received messages as they arrive
 C
-      IF (NMSG.EQ.1) THEN   
+      IF (NMSG.EQ.1) THEN
         TOT = 0
         DO WHILE (TOT.LT.RDIM)
            DO N=1, RDIM
@@ -1306,7 +1279,7 @@ cdebug     print *, myproc, tot,nfini,index(1),index(2)
         ENDDO
         GOTO 9998
       ENDIF
-C 
+C
  9998 continue
       RETURN
       END SUBROUTINE
@@ -1321,7 +1294,7 @@ C  and persistent message-passing.
 C
 C  tjc  6/24/2002
 C--------------------------------------------------------------------------
-C 
+C
       IMPLICIT NONE
 #ifndef HAVE_MPI_MOD
       include 'mpif.h'
@@ -1340,12 +1313,12 @@ c$$$               SENDBUF(NCOUNT,J)=VEC(ISENDLOC(I,J),K)
 c$$$            ENDDO
 c$$$         ENDDO
 c$$$      ENDDO
-c$$$C                    
+c$$$C
 c$$$              ! Send/receive messages to/from all neighbors
 c$$$C
 c$$$      CALL MPI_STARTALL ( RDIM, REQ_R3D, IERR )
 c$$$C
-c$$$              !..Unpack Received messages as they arrive     
+c$$$              !..Unpack Received messages as they arrive
 c$$$C
 c$$$      TOT = 0
 c$$$      DO WHILE (TOT.LT.RDIM)
@@ -1369,7 +1342,7 @@ c$$$              ENDIF
 c$$$            ENDIF
 c$$$         ENDDO
 c$$$      ENDDO
-c$$$C 
+c$$$C
       STOP 'NOT UPDATED'
       RETURN
       END SUBROUTINE
@@ -1383,7 +1356,7 @@ C  and persistent message-passing.
 C
 C  tjc  6/24/2002
 C--------------------------------------------------------------------------
-C 
+C
       IMPLICIT NONE
 #ifndef HAVE_MPI_MOD
       include 'mpif.h'
@@ -1404,12 +1377,12 @@ c$$$               SENDBUF(NCOUNT,J)=AIMAG(VEC(ISENDLOC(I,J),K))
 c$$$            ENDDO
 c$$$         ENDDO
 c$$$      ENDDO
-c$$$C                    
+c$$$C
 c$$$              ! Send/receive messages to/from all neighbors
 c$$$C
 c$$$      CALL MPI_STARTALL ( RDIM, REQ_C3D, IERR )
 c$$$C
-c$$$              !..Unpack Received messages as they arrive     
+c$$$              !..Unpack Received messages as they arrive
 c$$$C
 c$$$      TOT = 0
 c$$$      DO WHILE (TOT.LT.RDIM)
@@ -1425,7 +1398,7 @@ c$$$                J = INDEX(N)
 c$$$                NCOUNT = 0
 c$$$                DO I=1,NELEMRECV(J)
 c$$$                   DO K=1,MNODES
-c$$$                      VEC(IRECVLOC(I,J),K) = 
+c$$$                      VEC(IRECVLOC(I,J),K) =
 c$$$     &                   CMPLX(RECVBUF(NCOUNT+1,J),RECVBUF(NCOUNT+2,J))
 c$$$                      NCOUNT = NCOUNT+2
 c$$$                   ENDDO
@@ -1434,7 +1407,7 @@ c$$$              ENDIF
 c$$$            ENDIF
 c$$$         ENDDO
 c$$$      ENDDO
-c$$$C 
+c$$$C
       STOP 'NOT UPDATED'
       RETURN
       END SUBROUTINE
@@ -1453,7 +1426,7 @@ c$$$C
 
       CALL MPI_RECV(DUM,1,MPI_INTEGER,SRC,TAG+1,MPI_COMM_WORLD,STAT,IERR)
 
-      END SUBROUTINE 
+      END SUBROUTINE
 
       SUBROUTINE MSG_BLOCKSYNC_FINISH()
       IMPLICIT NONE
@@ -1471,7 +1444,7 @@ c$$$C
 
       CALL MPI_SEND(DUM,1,MPI_INTEGER,DST,TAG+1,MPI_COMM_WORLD,STAT,IERR)
 
-      END SUBROUTINE 
+      END SUBROUTINE
 
       SUBROUTINE para_sum( sum_this )
       IMPLICIT NONE
@@ -1481,17 +1454,17 @@ c$$$C
 
 
       Real(SZ), INTENT(INOUT) ::sum_this
-      Real(SZ) sum_of_this 
-      Integer kount       
+      Real(SZ) sum_of_this
+      Integer kount
 
       sum_of_this = 0.0
 
       kount=1
 
       call MPI_ALLREDUCE( sum_this, sum_of_this, kount,
-     &     REALTYPE, MPI_SUM, COMM, ierr)
+     &     REALTYPE, MPI_SUM, MPI_COMM_WORLD, ierr)
 
-      sum_this = sum_of_this 
+      sum_this = sum_of_this
 
       END SUBROUTINE para_sum
 
@@ -1502,22 +1475,22 @@ c$$$C
 #endif
 
       Real(SZ), INTENT(INOUT) :: max_this
-      Real(SZ) max_of_this     
-      Integer kount            
+      Real(SZ) max_of_this
+      Integer kount
 
       max_of_this = -100.0
 
       kount=1
 
       call MPI_ALLREDUCE( max_this, max_of_this, kount,
-     &     REALTYPE, MPI_MAX, COMM, ierr)
+     &     REALTYPE, MPI_MAX, MPI_COMM_WORLD, ierr)
 
       max_this = max_of_this
 
       END SUBROUTINE para_max
 
       SUBROUTINE para_min( min_this )
-      
+
       IMPLICIT NONE
 
 #ifndef HAVE_MPI_MOD
@@ -1526,19 +1499,18 @@ c$$$C
 
 
       Real(SZ), INTENT(INOUT) :: min_this
-      Real(SZ) min_of_this    
-      Integer kount           
+      Real(SZ) min_of_this
+      Integer kount
 
       min_of_this = 100.0
 
       kount=1
 
       call MPI_ALLREDUCE( min_this, min_of_this, kount,
-     &     REALTYPE, MPI_MIN, COMM, ierr)
+     &     REALTYPE, MPI_MIN, MPI_COMM_WORLD, ierr)
 
       min_this = min_of_this
 
       END SUBROUTINE para_min
 
       END MODULE MESSENGER_ELEM
-       
