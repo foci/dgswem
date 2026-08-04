@@ -45,6 +45,7 @@ module parallelio_io
         !! processes call mpi_finalize and stop within this subroutine.
 
         use sizes, only : mnproc, myproc, nsubdom, nnodg, imap_nod_gh0
+        use messenger_elem, only : message_fini
 
         implicit none
 
@@ -94,6 +95,10 @@ module parallelio_io
                     compdof=imap_nod_gh0, &
                     iodesc=my_iodesc &
                 )
+            else
+                ! Writer processes end here
+                call message_fini()
+                stop
             end if
         end if
     end subroutine parallelio_init_parallel
