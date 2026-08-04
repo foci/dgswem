@@ -115,7 +115,7 @@ C--------------------------------------------------------------------------
       SumErrorElevExceeded = 0
       kount=1
       call MPI_ALLREDUCE( ErrorElevExceeded, SumErrorElevExceeded, kount,
-     &     MPI_INTEGER, MPI_SUM, MPI_COMM_world, ierr)
+     &     MPI_INTEGER, MPI_SUM, comm_comp, ierr)
       ErrorElevExceeded = SumErrorElevExceeded
       END SUBROUTINE ErrorElevSum
 
@@ -293,24 +293,24 @@ C
 C
       DO J=1,NEIGHPROC_R
          CALL MPI_RECV_INIT ( IRECVBUF(1,J), NELEMRECV(J),
-     &     MPI_INTEGER,IPROC_R(J), TAG, MPI_COMM_WORLD,
+     &     MPI_INTEGER,IPROC_R(J), TAG, comm_comp,
      &     REQ_I1(J),IERR)
       ENDDO
       DO J=1,NEIGHPROC_S
          CALL MPI_SEND_INIT ( ISENDBUF(1,J), NELEMSEND(J),
-     &    MPI_INTEGER,IPROC_S(J), TAG, MPI_COMM_WORLD,
+     &    MPI_INTEGER,IPROC_S(J), TAG, comm_comp,
      &    REQ_I1(J+NEIGHPROC_R),IERR )
       ENDDO
 C
 C
       DO J=1,NEIGHPROC_R
          CALL MPI_RECV_INIT ( IRECVBUF(1,J), 2*NELEMRECV(J),
-     &     MPI_INTEGER,IPROC_R(J), TAG, MPI_COMM_WORLD,
+     &     MPI_INTEGER,IPROC_R(J), TAG, comm_comp,
      &     REQ_I2(J),IERR)
       ENDDO
       DO J=1,NEIGHPROC_S
          CALL MPI_SEND_INIT ( ISENDBUF(1,J), 2*NELEMSEND(J),
-     &    MPI_INTEGER,IPROC_S(J), TAG, MPI_COMM_WORLD,
+     &    MPI_INTEGER,IPROC_S(J), TAG, comm_comp,
      &    REQ_I2(J+NEIGHPROC_R),IERR )
       ENDDO
 C
@@ -318,67 +318,67 @@ C
 C
       DO J=1,NEIGHPROC_R
          CALL MPI_RECV_INIT ( RECVBUF(1,J), DOFH*NELEMRECV(J),
-     &     REALTYPE,IPROC_R(J), TAG, MPI_COMM_WORLD,
+     &     REALTYPE,IPROC_R(J), TAG, comm_comp,
      &     REQ_R1(J),IERR)
       ENDDO
       DO J=1,NEIGHPROC_S
          CALL MPI_SEND_INIT ( SENDBUF(1,J), DOFH*NELEMSEND(J),
-     &     REALTYPE,IPROC_S(J), TAG, MPI_COMM_WORLD,
+     &     REALTYPE,IPROC_S(J), TAG, comm_comp,
      &     REQ_R1(J+NEIGHPROC_R),IERR)
       ENDDO
 C
       DO J=1,NEIGHPROC_R
          CALL MPI_RECV_INIT ( RECVBUF(1,J), 2*DOFH*NELEMRECV(J),
-     &     REALTYPE,IPROC_R(J), TAG, MPI_COMM_WORLD,
+     &     REALTYPE,IPROC_R(J), TAG, comm_comp,
      &     REQ_R2(J),IERR)
       ENDDO
       DO J=1,NEIGHPROC_S
          CALL MPI_SEND_INIT ( SENDBUF(1,J), 2*DOFH*NELEMSEND(J),
-     &     REALTYPE,IPROC_S(J), TAG, MPI_COMM_WORLD,
+     &     REALTYPE,IPROC_S(J), TAG, comm_comp,
      &     REQ_R2(J+NEIGHPROC_R),IERR)
       ENDDO
 C
       DO J=1,NEIGHPROC_R
          CALL MPI_RECV_INIT ( RECVBUF(1,J), 3*DOFH*NELEMRECV(J),
-     &     REALTYPE,IPROC_R(J), TAG, MPI_COMM_WORLD,
+     &     REALTYPE,IPROC_R(J), TAG, comm_comp,
      &     REQ_R3(J),IERR)
       ENDDO
       DO J=1,NEIGHPROC_S
          CALL MPI_SEND_INIT ( SENDBUF(1,J), 3*DOFH*NELEMSEND(J),
-     &     REALTYPE,IPROC_S(J), TAG, MPI_COMM_WORLD,
+     &     REALTYPE,IPROC_S(J), TAG, comm_comp,
      &     REQ_R3(J+NEIGHPROC_R),IERR)
       ENDDO
 C
       DO J=1,NEIGHPROC_R
          CALL MPI_RECV_INIT ( RECVBUF(1,J), 4*DOFH*NELEMRECV(J),
-     &     REALTYPE,IPROC_R(J), TAG, MPI_COMM_WORLD,
+     &     REALTYPE,IPROC_R(J), TAG, comm_comp,
      &     REQ_LZ(J),IERR)
       ENDDO
       DO J=1,NEIGHPROC_S
          CALL MPI_SEND_INIT ( SENDBUF(1,J), 4*DOFH*NELEMSEND(J),
-     &     REALTYPE,IPROC_S(J), TAG, MPI_COMM_WORLD,
+     &     REALTYPE,IPROC_S(J), TAG, comm_comp,
      &     REQ_LZ(J+NEIGHPROC_R),IERR)
       ENDDO
 C
       IF (C3D) THEN
 C         DO J=1,NEIGHPROC
 C            CALL MPI_RECV_INIT ( RECVBUF(1,J), MNODES*NNODRECV(J),
-C     &        REALTYPE,IPROC(J), TAG, MPI_COMM_WORLD,
+C     &        REALTYPE,IPROC(J), TAG, comm_comp,
 C     &        REQ_R3D(J),IERR)
 C         ENDDO
 C         DO J=1,NEIGHPROC
 C            CALL MPI_SEND_INIT ( SENDBUF(1,J), MNODES*NNODSEND(J),
-C     &        REALTYPE,IPROC(J), TAG, MPI_COMM_WORLD,
+C     &        REALTYPE,IPROC(J), TAG, comm_comp,
 C     &        REQ_R3D(J+NEIGHPROC),IERR)
 C         ENDDO
 C         DO J=1,NEIGHPROC
 C            CALL MPI_RECV_INIT ( RECVBUF(1,J), 2*MNODES*NNODRECV(J),
-C     &        REALTYPE,IPROC(J), TAG, MPI_COMM_WORLD,
+C     &        REALTYPE,IPROC(J), TAG, comm_comp,
 C     &        REQ_C3D(J),IERR)
 C         ENDDO
 C         DO J=1,NEIGHPROC
 C            CALL MPI_SEND_INIT ( SENDBUF(1,J), 2*MNODES*NNODSEND(J),
-C     &        REALTYPE,IPROC(J), TAG, MPI_COMM_WORLD,
+C     &        REALTYPE,IPROC(J), TAG, comm_comp,
 C     &        REQ_C3D(J+NEIGHPROC),IERR)
 C         ENDDO
         STOP 'NOT UPDATED'
@@ -1426,7 +1426,7 @@ c$$$C
       SRC = MYPROC - BLOCK
       IF(SRC.LT.0) RETURN
 
-      CALL MPI_RECV(DUM,1,MPI_INTEGER,SRC,TAG+1,MPI_COMM_WORLD,STAT,IERR)
+      CALL MPI_RECV(DUM,1,MPI_INTEGER,SRC,TAG+1,comm_comp,STAT,IERR)
 
       END SUBROUTINE
 
@@ -1444,7 +1444,7 @@ c$$$C
 
       DUM = 1
 
-      CALL MPI_SEND(DUM,1,MPI_INTEGER,DST,TAG+1,MPI_COMM_WORLD,STAT,IERR)
+      CALL MPI_SEND(DUM,1,MPI_INTEGER,DST,TAG+1,comm_comp,STAT,IERR)
 
       END SUBROUTINE
 
@@ -1464,7 +1464,7 @@ c$$$C
       kount=1
 
       call MPI_ALLREDUCE( sum_this, sum_of_this, kount,
-     &     REALTYPE, MPI_SUM, MPI_COMM_WORLD, ierr)
+     &     REALTYPE, MPI_SUM, comm_comp, ierr)
 
       sum_this = sum_of_this
 
@@ -1485,7 +1485,7 @@ c$$$C
       kount=1
 
       call MPI_ALLREDUCE( max_this, max_of_this, kount,
-     &     REALTYPE, MPI_MAX, MPI_COMM_WORLD, ierr)
+     &     REALTYPE, MPI_MAX, comm_comp, ierr)
 
       max_this = max_of_this
 
@@ -1509,7 +1509,7 @@ c$$$C
       kount=1
 
       call MPI_ALLREDUCE( min_this, min_of_this, kount,
-     &     REALTYPE, MPI_MIN, MPI_COMM_WORLD, ierr)
+     &     REALTYPE, MPI_MIN, comm_comp, ierr)
 
       min_this = min_of_this
 
