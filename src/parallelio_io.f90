@@ -72,7 +72,7 @@ module parallelio_io
                 iodesc=my_iodesc &
             )
         else if (mnproc > nsubdom) then
-            if (myproc == 0) print *, "Surplus of ", mnproc - 2, &
+            if (myproc == 0) print *, "Surplus of ", mnproc - nsubdom, &
                 " processes detected for writing."
             call pio_init( &
                 iosystem=my_iosystems, & ! One for each compute program type
