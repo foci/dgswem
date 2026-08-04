@@ -157,6 +157,9 @@ module parallelio_io
 
     subroutine parallelio_close_files_parallel()
         !! Called immediately after the time stepping loop.
+
+        use sizes, only : imap_nod, imap_nod_gh0, resnode_pio
+
         implicit none
 
         integer :: piostat
@@ -165,6 +168,11 @@ module parallelio_io
         call my_63%close()
         call my_64%close()
         call my_maxele%close()
+
+        ! Deallocate associated arrays
+        if (allocated(imap_nod)) deallocate(imap_nod)
+        if (allocated(imap_nod_gh0)) deallocate(imap_nod_gh0)
+        if (allocated(resnode_pio)) deallocate(resnode_pio)
 
         ! Finalize PIO
         call pio_finalize(my_iosystem, piostat)
