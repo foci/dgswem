@@ -114,12 +114,40 @@ module parallelio_io
         !! Initialize all NetCDF output files for the simulation in parallel.
         !! Called immediately before the time stepping loop.
 
+        use global, only : &
+            noute, noutv, noutc, noutm, &
+            noutge, noutgv, noutgc, noutgw, &
+            toutse, toutsv, toutsc, toutsm, &
+            toutsge, toutsgv, toutsgc, toutsgw, &
+            toutfe, toutfv, toutfc, toutfm, &
+            toutfge, toutfgv, toutfgc, toutfgw, &
+            ! Output flag guide
+            ! nout*: whether to write the file
+            ! touts*: when to start
+            ! toutf*: when to stop
+            ! nspool* : write interval
+            ! *e: station elevation
+            ! *v: station velocity
+            ! *c: station concentration
+            ! *m: station air pressure/wind velocity
+            ! *ge: nodal elevation
+            ! *gv: nodal velocity
+            ! *gc: nodal concentration
+            ! *gw: nodal air pressure/wind velocity
         use sizes, only : myproc, nsubdom
 
         implicit none
 
         ! Just in case, filter only compute processes
         if (myproc < nsubdom) then
+            ! station elevation
+            ! station velocity
+            ! station concentration
+            ! station air pressure/wind velocity
+            ! nodal elevation
+            ! nodal velocity
+            ! nodal concentration
+            ! nodal air pressure/wind velocity
             call my_63%open(my_iosystem, omode=pio_write)
             call my_64%open(my_iosystem, omode=pio_write)
             call my_maxele%open(my_iosystem, omode=pio_write)
@@ -132,6 +160,14 @@ module parallelio_io
         use global, only : eta2, etamax, np, time_a, uu2, vv2
 
         implicit none
+        ! station elevation
+        ! station velocity
+        ! station concentration
+        ! station air pressure/wind velocity
+        ! nodal elevation
+        ! nodal velocity
+        ! nodal concentration
+        ! nodal air pressure/wind velocity
 
         call my_63%piodg_63_write_step( &
             t=time_a, &
@@ -165,6 +201,14 @@ module parallelio_io
         integer :: piostat
 
         ! Close files
+        ! station elevation
+        ! station velocity
+        ! station concentration
+        ! station air pressure/wind velocity
+        ! nodal elevation
+        ! nodal velocity
+        ! nodal concentration
+        ! nodal air pressure/wind velocity
         call my_63%close()
         call my_64%close()
         call my_maxele%close()
