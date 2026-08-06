@@ -1,0 +1,2 @@
+conda create --name dgswem-env -c conda-forge meson gcc gxx gfortran pkg-config openmpi "libnetcdf>=4.9.3,!=*.0,!=*.1,!=*.2=mpi*" "netcdf-fortran=*=mpi*" parallelio
+
