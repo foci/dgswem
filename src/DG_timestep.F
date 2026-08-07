@@ -53,9 +53,9 @@ C.....Write out results
 
 #ifdef NETCDF
 #ifndef CMPI
-      call netcdf_write_step_serial()
+      call netcdf_write_step_serial(it, .false.)
 #else
-      call parallelio_write_step_parallel()
+      call parallelio_write_step_parallel(it, .false.)
 #endif
 #endif
 

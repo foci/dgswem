@@ -1,6 +1,22 @@
 module parallelio_io
     !! Module for interacting with NetCDF files in parallel.
 
+    ! Output flag guide
+    ! nout*: whether to write the file
+    ! touts*: when to start
+    ! toutf*: when to stop
+    ! ntcys*: start interval
+    ! ntcyf*: stop interval
+    ! nspool* : write interval
+    ! *e: station elevation
+    ! *v: station velocity
+    ! *c: station concentration
+    ! *m: station air pressure/wind velocity
+    ! *ge: nodal elevation
+    ! *gv: nodal velocity
+    ! *gc: nodal concentration
+    ! *gw: nodal air pressure/wind velocity
+
     use mpi, only : mpi_comm_world
     use pio, only : iosystem_desc_t, io_desc_t, pio_init, pio_finalize, &
         pio_iotype_netcdf4p, pio_rearr_box, pio_rearr_subset, pio_write, &
@@ -132,19 +148,6 @@ module parallelio_io
         !! Initialize all NetCDF output files for the simulation in parallel.
         !! Called immediately before the time stepping loop.
 
-        ! Output flag guide
-        ! nout*: whether to write the file
-        ! touts*: when to start
-        ! toutf*: when to stop
-        ! nspool* : write interval
-        ! *e: station elevation
-        ! *v: station velocity
-        ! *c: station concentration
-        ! *m: station air pressure/wind velocity
-        ! *ge: nodal elevation
-        ! *gv: nodal velocity
-        ! *gc: nodal concentration
-        ! *gw: nodal air pressure/wind velocity
         use global, only : &
             noute, noutv, noutc, noutm, & ! Whether to write to NetCDF
             noutge, noutgv, noutgc, noutgw
@@ -155,7 +158,17 @@ module parallelio_io
         ! Just in case, filter only compute processes
         if (myproc < nsubdom) then
 
-            ! Close files
+            ! Set counters to 0
+            nscoue = 0
+            nscouv = 0
+            nscouc = 0
+            nscoum = 0
+            nscouge = 0
+            nscougv = 0
+            nscougc = 0
+            nscougw = 0
+
+            ! Open files
 
             ! station elevation
             if (abs(noute) == 3) then
@@ -181,7 +194,7 @@ module parallelio_io
 
             ! nodal velocity
             if (abs(noutgv) == 3) then
-                call my_maxele%open(my_iosystem, omode=pio_write
+                call my_maxele%open(my_iosystem, omode=pio_write)
             end if
 
             ! nodal concentration
@@ -190,26 +203,13 @@ module parallelio_io
 
             ! nodal air pressure/wind velocity
             if (abs(noutgw) == 3) then
-            end if)
+            end if
         end if
     end subroutine parallelio_open_files_parallel
 
     subroutine parallelio_write_step_parallel(it, force_write)
         !! Write current state to all NetCDF output files for the simulation.
 
-        ! Output flag guide
-        ! nout*: whether to write the file
-        ! touts*: when to start
-        ! toutf*: when to stop
-        ! nspool* : write interval
-        ! *e: station elevation
-        ! *v: station velocity
-        ! *c: station concentration
-        ! *m: station air pressure/wind velocity
-        ! *ge: nodal elevation
-        ! *gv: nodal velocity
-        ! *gc: nodal concentration
-        ! *gw: nodal air pressure/wind velocity
         use global, only : &
             eta2, etamax, np, time_a, uu2, vv2, &
             noute, noutv, noutc, noutm, & ! Whether to write to NetCDF
@@ -237,7 +237,7 @@ module parallelio_io
 
         ! station elevation
         if (abs(noute) == 3) then
-            if ((it > ntcyse) .and. (it <= ntcyfe) .or. force_write)) then
+            if ((it > ntcyse) .and. (it <= ntcyfe) .or. force_write) then
                 nscoue = nscoue + 1
                 if (nscoue == nspoole .or. force_write) then
                     nscoue = 0
@@ -247,7 +247,7 @@ module parallelio_io
 
         ! station velocity
         if (abs(noutv) == 3) then
-            if ((it > ntcysv) .and. (it <= ntcyfv) .or. force_write)) then
+            if ((it > ntcysv) .and. (it <= ntcyfv) .or. force_write) then
                 nscouv = nscouv + 1
                 if (nscouv == nspoolv .or. force_write) then
                     nscouv = 0
@@ -257,7 +257,7 @@ module parallelio_io
 
         ! station concentration
         if (abs(noutc) == 3) then
-            if ((it > ntcysc) .and. (it <= ntcyfc) .or. force_write)) then
+            if ((it > ntcysc) .and. (it <= ntcyfc) .or. force_write) then
                 nscouc = nscouc + 1
                 if (nscouc == nspoolc .or. force_write) then
                     nscouc = 0
@@ -267,7 +267,7 @@ module parallelio_io
 
         ! station air pressure/wind velocity
         if (abs(noutm) == 3) then
-            if ((it > ntcysm) .and. (it <= ntcyfm) .or. force_write)) then
+            if ((it > ntcysm) .and. (it <= ntcyfm) .or. force_write) then
                 nscoum = nscoum + 1
                 if (nscoum == nspoolm .or. force_write) then
                     nscoum = 0
@@ -277,7 +277,7 @@ module parallelio_io
 
         ! nodal elevation
         if (abs(noutge) == 3) then
-            if ((it > ntcysge) .and. (it <= ntcyfge) .or. force_write)) then
+            if ((it > ntcysge) .and. (it <= ntcyfge) .or. force_write) then
                 nscouge = nscouge + 1
                 if (nscouge == nspoolge .or. force_write) then
                     call my_63%piodg_63_write_step( &
@@ -300,7 +300,7 @@ module parallelio_io
 
         ! nodal velocity
         if (abs(noutgv) == 3) then
-            if ((it > ntcysgv) .and. (it <= ntcyfgv) .or. force_write)) then
+            if ((it > ntcysgv) .and. (it <= ntcyfgv) .or. force_write) then
                 nscougv = nscougv + 1
                 if (nscougv == nspoolgv .or. force_write) then
                     call my_64%piodg_64_write_step( &
@@ -317,7 +317,7 @@ module parallelio_io
 
         ! nodal concentration
         if (abs(noutgc) == 3) then
-            if ((it > ntcysgc) .and. (it <= ntcyfgc) .or. force_write)) then
+            if ((it > ntcysgc) .and. (it <= ntcyfgc) .or. force_write) then
                 nscougc = nscougc + 1
                 if (nscougc == nspoolgc .or. force_write) then
                     nscougc = 0
@@ -327,7 +327,7 @@ module parallelio_io
 
         ! nodal air pressure/wind velocity
         if (abs(noutgw) == 3) then
-            if ((it > ntcysgw) .and. (it <= ntcyfgw) .or. force_write)) then
+            if ((it > ntcysgw) .and. (it <= ntcyfgw) .or. force_write) then
                 nscougw = nscougw + 1
                 if (nscougw == nspoolgw .or. force_write) then
                     nscougw = 0
@@ -339,28 +339,9 @@ module parallelio_io
     subroutine parallelio_close_files_parallel()
         !! Called immediately after the time stepping loop.
 
-        ! Output flag guide
-        ! nout*: whether to write the file
-        ! touts*: when to start
-        ! toutf*: when to stop
-        ! nspool* : write interval
-        ! *e: station elevation
-        ! *v: station velocity
-        ! *c: station concentration
-        ! *m: station air pressure/wind velocity
-        ! *ge: nodal elevation
-        ! *gv: nodal velocity
-        ! *gc: nodal concentration
-        ! *gw: nodal air pressure/wind velocity
         use global, only : &
             noute, noutv, noutc, noutm, &
-            noutge, noutgv, noutgc, noutgw, &
-            toutse, toutsv, toutsc, toutsm, &
-            toutsge, toutsgv, toutsgc, toutsgw, &
-            toutfe, toutfv, toutfc, toutfm, &
-            toutfge, toutfgv, toutfgc, toutfgw, &
-            nspoole, nspoolv, nspoolc, nspoolm, &
-            nspoolge, nspoolgv, nspoolgc, nspoolgw
+            noutge, noutgv, noutgc, noutgw
         use sizes, only : imap_nod, imap_nod_gh0, resnode_pio
 
         implicit none
