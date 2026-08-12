@@ -189,12 +189,12 @@ module parallelio_io
             ! nodal elevation
             if (abs(noutge) == 3) then
                 call my_63%open(my_iosystem, omode=pio_write)
-                call my_64%open(my_iosystem, omode=pio_write)
+                call my_maxele%open(my_iosystem, omode=pio_write)
             end if
 
             ! nodal velocity
             if (abs(noutgv) == 3) then
-                call my_maxele%open(my_iosystem, omode=pio_write)
+                call my_64%open(my_iosystem, omode=pio_write)
             end if
 
             ! nodal concentration

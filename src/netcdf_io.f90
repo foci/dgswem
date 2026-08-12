@@ -187,7 +187,7 @@ module netcdf_io
         if (abs(noutgv) == 3) then
             ! Create or open fort.64.nc
             inquire(file="fort.64.nc", exist=file_exists)
-            if (noutge == -3 .or. .not. file_exists) then ! create new
+            if (noutgv == -3 .or. .not. file_exists) then ! create new
                 call my_64%create()
                 call my_64%ncdg_64_set_metadata( &
                     nt=nf90_unlimited, &
@@ -220,7 +220,7 @@ module netcdf_io
                     nvell=nvell, &
                     nbvv=nbvv(:, 1:) &
                 )
-            else if (noutge == 3) then ! append to existing
+            else if (noutgv == 3) then ! append to existing
                 call my_64%open(mode=nf90_write)
             end if
         end if
