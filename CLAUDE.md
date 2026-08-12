@@ -130,11 +130,12 @@ work/         — sample input files and run scripts
 - `dg.F` — DG module containing mesh-level DG data structures (modal coefficients, edge data).
 - `read_input.F` / `read_fort_dg.F90` — mesh and parameter I/O.
 - `DG_timestep.F` / `DG_hydro_timestep.F` — Runge-Kutta time integration.
-- `rhs_dg_hydro.F` — right-hand side assembly (calls edge flux routines).
+- `rhs_dg_hydro.F` — computes local area integrals and assembles into RHS. 
 - `numerical_flux.F` — Riemann solvers (Roe, LLF, HLLC, NCP).
-- `*_edge_hydro.F` — boundary condition flux handlers: `internal_edge`, `ocean_edge`, `land_edge`, `flow_edge`, `radiation_edge`, `ibarrier_edge`, `ebarrier_edge`.
+- `*_edge_hydro.F` — boundary condition flux handlers: `ocean_edge`, `land_edge`, `flow_edge`, `radiation_edge`, `ibarrier_edge`, `ebarrier_edge`.
 - `slopelimiter.F` / `prep_slopelim.F` — slope limiting for shock capture.
-- `wetdry.F` — wetting and drying treatment.
+- `internal_edge_hydro.F` - computes edge flux integrals and assembles into RHS.
+`wetdry.F` — wetting and drying treatment.
 - `precipitation.F` / `owi_rain.F` — rainfall forcing.
 - `messenger.F` / `messenger_elem.F` — MPI halo exchange (compiled in only with `-DCMPI`).
 - `write_output.F` / `write_results.F` — output routines (ADCIRC-format ASCII; netCDF if `-Dnetcdf=true`).
@@ -151,6 +152,21 @@ work/         — sample input files and run scripts
 | `SLOPE5` | Always defined; enables slope limiter variant |
 | `SWAN` | Couples to the SWAN wave model |
 | `VF` | Intel Visual Fortran on Windows (not used in current CI) |
+
+## Parallel Architecture
+DGSWEM is parallelized using a flat MPI structure. The domain is decomposed using METIS (via `adcprep`). Each rank is treated identically, with every rank entering a synchronous message-passing phase at the end of every timestep. During this phase, state (elevation, momentum) data is exchanged between ghost elements through persistent channels. To maximize bandwidth, the state data associated with ghost elements are packed into a buffer, sent, and then unpacked into the state vector on the recieving side. 
+
+### Topological organization 
+The connectivity of the ranks are outlined by: 
+
+- `fort.14`: locally ordered elements and nodes, including ghost elements/nodes
+- `DG.18`: local element-to-rank mapping
+    - `RES ELEM`: 'resident' elements belonging to this rank
+    - `COMM PE` : adjacent ranks 
+    - `RECV PE *`: elements that are being received 
+    - `SEND PE *`: elements that are being sent
+- `fort.18`: local node-to-rank mapping, follows the above. 
+- `metis_graph.txt`: local-to-global mapping 
 
 ### Parallel workflow
 
