@@ -177,6 +177,7 @@ C.....to single nodal values
       SUBROUTINE WRITE_RESULTS(IT,FORCE_WRITE)
 
       use, intrinsic :: ieee_arithmetic
+      use iso_fortran_env, only: output_unit
       USE precipitation, only: prec3
       USE GLOBAL
       USE DG
@@ -192,6 +193,7 @@ C.....Declare local variables
 
       INTEGER IT,Minp(0:8)
       REAL(SZ) AREA, DEPTH, ANGLE_SUM, FH_NL, DP1, DP2, DP3, DP00, ZE00
+      real(sz) percent_complete
       LOGICAL FORCE_WRITE
       real(sz) qmaxe,elmaxe
       integer :: imaxze,imaxq,ErrorElevExceeded, istat
@@ -1069,13 +1071,15 @@ c
 
 C
           VELMAX=VELMAX**0.5d0
+          percent_complete = real(it-iths) / real(NT-iths)*100.d0
 C          
 #ifdef CMPI
           IF( (MYPROC.EQ.0).AND.(ELMAX.LT.1000.0).AND.
      &        (MOD(IT,NSCREEN_INC).EQ.0) ) THEN
-             WRITE(6,1991) IT,TIME_A/86400.0,
+             WRITE(output_unit,1991) IT,percent_complete,TIME_A/86400.0,
      $            ELMAX,KEMAX,VELMAX,KVMAX,MYPROC
- 1991        FORMAT(1X,'TIME STEP =',I8,5X,'TIME = ',F12.6,
+ 1991        FORMAT(1X,'TIME STEP =',I8,1X, F6.2, '% COMPLETE',
+     &            5X, 'TIME = ',F12.6,
      &            /,2X,'ELMAX = ', E11.4,' AT NODE',I7,
      &            2X,'SPEEDMAX = ',E11.4,' AT NODE',I7,
      &            2X,'ON MYPRnOC = ',I4)
@@ -1146,8 +1150,9 @@ C
          ENDIF
 #else
          IF(ELMAX.LT.1000.0.and.(MOD(IT,NSCREEN_INC).EQ.0) ) THEN
-           WRITE(6,1992) IT,TIME_A/86400.0,ELMAX,KEMAX,VELMAX,KVMAX
- 1992      FORMAT(1X,'TIME STEP =',I8,5X,'TIME =',F12.6,
+           WRITE(output_unit,1992) IT,percent_complete,TIME_A/86400.0,ELMAX,KEMAX,VELMAX,KVMAX
+ 1992      FORMAT(1X,'TIME STEP =',I8,1X,F6.2, '% COMPLETE',
+     &      5X,'TIME =',F12.6,
      &           /,2X,'ELMAX = ', E11.4,' AT NODE',I7,
      &           2X,'SPEEDMAX = ',E11.4,' AT NODE',I7)
            if (padapt.eq.1) then

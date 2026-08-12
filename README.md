@@ -14,6 +14,14 @@ DG-SWEM uses the [Meson build system](https://mesonbuild.com/) for configuration
 
     pip install meson
 
+To build, use the Meson verse: 
+
+    meson setup <build> -D<option>=<value> 
+    cd build
+    meson compile 
+
+Meson will detect and use system compilers and packages. To specify a specific compiler, set the environment variables. 
+
 As a first example, first enter the root directory of this repo and run
 
     FC=gfortran CC=gcc CXX=g++ meson setup build-gcc
@@ -29,6 +37,8 @@ Other compilers currently supported are:
 - Intel LLVM (`ifx`, `icx`, `icpx`, `mpiifx`)
 - NVIDIA HPC (`nvfortran`, `nvc`, `nvc++`, `mpif90`)
 
+**Note:** There is a bug in Intel oneAPI MPI >=2021.17 currently that breaks meson's detection of the right mpi wrappers. See (https://github.com/mesonbuild/meson/pull/16053) for reference. 
+
 For systems with multiple compilers, it may be best to specify the full path to the desired compilers.
 
 Options are specified in the format `-D<option>=<value>`. To see the available options for the above build, run
@@ -42,6 +52,7 @@ Options specific to DG-SWEM are:
 | gpu | Enable GPU build through OpenACC | true, false | false |
 | parallel | Build parallel DG-SWEM, adcprep, and adcpost | true, false | false |
 | precision | Floating point precision | single, double | double |
+| netcdf | netcdf output | [meson feature](https://mesonbuild.com/Build-options.html#features) | auto |
 
 Once configured, we can compile the program in the build directory:
 

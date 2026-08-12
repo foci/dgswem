@@ -505,6 +505,7 @@ Casey 101118: Allow SWAN to handle wave refraction as a nodal attribute.
             ENDIF
             READ(13,'(A80)') Skipped  ! skip the Units for the invalid name
             READ(13,'(A80)') Skipped  ! skip the NoOfVals for invalid name
+            READ(13,'(A80)') Skipped  ! skip the default value for invalid name
          END SELECT
       END DO
 C

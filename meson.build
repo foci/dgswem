@@ -59,21 +59,28 @@ elif compiler_name == 'intel-llvm'
                         '-xHost',
                         '-132',
                         language: 'fortran')
-else
-  error(f'Compiler @compiler_name@ not supported.')
+else 
+  #Fallback for nonstandard names
+  flags = ['-ffixed-line-length-132', '-132', f'-r@sz@']
+  foreach flag : flags
+    if compiler.has_argument(flag)
+      add_project_arguments(flag, language: 'fortran')
+    endif
+  endforeach
 endif
 
 # Get hostname
 hostname_cmd = run_command('hostname',  check: true)
 hostname = hostname_cmd.stdout().strip()
 
-if get_option('netcdf')
-  netcdf_dep = [dependency('netcdf', language: 'fortran'),
-               dependency('netcdf', language: 'c')]
+netcdf_dep = [dependency('netcdf', language: 'fortran', 
+                                                    required: get_option('netcdf')),
+                        dependency('netcdf', language: 'c',
+                                                    required: get_option('netcdf'))]  
 
   # Temporary fix for netcdf pkg-config bug on TACC systems,
   # skip netcdf test program
-
+if get_option('netcdf').enabled()
   if not hostname.contains('tacc.utexas.edu')
 	compiler.run(
 	'''
@@ -86,12 +93,7 @@ if get_option('netcdf')
 	required: true,
 	dependencies: netcdf_dep)
   endif
-
-else
-  netcdf_dep = []
-endif
-    
-
+endif 
 
 subdir('src')
 subdir('prep')

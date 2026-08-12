@@ -326,10 +326,6 @@ C-- Namo 7/12/21: Write a local fort.20 file for each PE
 
 C-- If required write a Local fort.21 file for each PE
 C
-        IF (NWP.EQ.1)  THEN
-          print *, "Ready to Write Local UNIT 21 File for each PE"
-          CALL PREP21()
-        ENDIF
 C
 C-- If required write a Local Wind Stress file for each PE
 C
