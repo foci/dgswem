@@ -3,7 +3,6 @@
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
 ## What This Is
-
 DG-SWEM (Discontinuous Galerkin Shallow Water Equation Model) — a Fortran/C++ computational model for simulating shallow water flow (coastal flooding, storm surge, compound flooding). Source files use fixed-form Fortran `.F` with preprocessor macros and free-form `.F90`/`.f90`.
 
 ## Build System
@@ -89,6 +88,28 @@ mpirun -np <N> ./dgswem
 
 Output files follow ADCIRC conventions (`fort.63` = water surface elevation time series, etc.).
 
+## Mathematical Architecture 
+DGSWEM is a Runge-Kutta Discontinuous Galerkin (RKDG) solver for the 2D shallow water equations. The formulation involves time-integrating terms that comprise of a local integral (area integral) over each element, and an edge integral of a numerical flux. The solver assumes triangular elements, over which the basis functions are modal/orthogonal polynomials, meaning that the mass matrix is trivially diagonal. Numerical fluxes are computed by evaluating the modal solution on the edges of each element. Post-processing includes slope-limiting, and wetting and drying treatment. Wetting and drying are treated primarily using a local thin-layer approach, which branches to a flux limiter or mass/momentum filler upon triggering certain thresholds. The treatments are applied between every Runge-Kutta stage. 
+
+## Computational Architecture 
+The algorithm follows a three point stencil pattern, with assembly of a right hand side (RHS) being done prior to time integration.  
+
+```
+for timestep 
+    for runge-kutta stage 
+        boundary treatment routines
+        for edge 
+            integrate numerical flux and place in RHS
+        for element
+            local integrals and place in RHS
+        for element 
+            for runge-kutta substage 
+                for degrees of freedom 
+                    compute next substage from RHS
+        apply slope limiting
+        apply wetting and drying treatment     
+```
+
 ## Code Architecture
 
 ### Source organization
@@ -135,6 +156,8 @@ work/         — sample input files and run scripts
 
 Domain decomposition uses METIS (via `adcprep`). The parallel executable (`dgswem`) runs one MPI rank per subdomain; each rank reads from its `PE****` subdirectory. `adcpost` reassembles the per-rank output files.
 
+
+
 ## Code Style
 
 - Fixed-form Fortran (`.F`) uses the 132-column line length limit.
@@ -148,14 +171,4 @@ pre-commit install
 pre-commit run --all-files
 ```
 
-## TACC Systems
-
-**Lonestar6 (GNU):** load `gcc/11.2.0`, `mvapich2/2.3.7`, `TACC`.
-
-**Vista (NVIDIA GPU):** load `nvidia/24.7`, `openmpi/5.0.5`, `TACC`; build with `-Dgpu=true`; check unified memory support first with `nvidia-smi -q | grep -i 'addressing mode'`. Run with one MPI rank per GPU (`--tasks-per-node=1`).
-
-On TACC, set `PKG_CONFIG_PATH` to the netCDF pkg-config path before `meson setup` (the CI script `build_gcc.sh` shows the conda-based approach).
-
 ## Test fixtures
-
-**mpi_aps** - fixture located in @tests/conftest.py that automates intercepting any mpi call to shell with the aps wrapper. 33
