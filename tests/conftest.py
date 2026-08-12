@@ -38,7 +38,8 @@ def mpi_aps(monkeypatch):
 
             result = original_run('aps ' + cmd, *args[1:], **kwargs)
             if result.returncode != 0:
-                print(f"Error executing command: {result.stderr.decode()}")
+                error_message = result.stderr.decode() if result.stderr else "No error message available."
+                print(f"Error executing command: {error_message}")
             else:
                 working_dir = kwargs.get('cwd')
                 aps_reports = [d for d in glob.glob(os.path.join(working_dir, 'aps_result*')) if os.path.isdir(d)]
