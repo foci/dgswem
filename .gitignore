@@ -10,3 +10,4 @@ dgswem_serial
 tests/
 __pycache__
 .wraplock
+.ipynb_checkpoints

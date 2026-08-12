@@ -19,9 +19,10 @@ post_src = files([
   'post.F',
   'post_global.F'])
 
+if get_option('netcdf')
+    prep_netcdf_src = files(['netcdf_prep.f90'])
+endif
 
 metis_dep = dependency('metis', version: '>=4.0.1',
                        required: true,
                        fallback: ['metis', 'metis_dep'])
- 
-

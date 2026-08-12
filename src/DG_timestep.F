@@ -1,19 +1,26 @@
 C***********************************************************************
-C     
+C
 C     SUBROUTINE DG_TIMESTEP(IT)
-C     
+C
 C     This is the main subroutine for the DG hydro
-C     
+C
 C     Written by Shintaro Bunya (01-01-2007)
-C     
+C
 C***********************************************************************
 
       SUBROUTINE DG_TIMESTEP(IT)
 
 C.....Use appropriate modules
-      
+
       USE SIZES, ONLY : SZ,layers
       USE GLOBAL, ONLY : SEDFLAG
+#ifdef NETCDF
+#ifndef CMPI
+      USE netcdf_io, only : netcdf_write_step_serial
+#else
+      USE parallelio_io, only : parallelio_write_step_parallel
+#endif
+#endif
 
 #ifdef CMPI
       USE MESSENGER_ELEM
@@ -24,7 +31,7 @@ C.....Use appropriate modules
 C.....Declare local variables
 
       INTEGER IT
-      
+
 C.....Hydrodynamics
 
       CALL DG_HYDRO_TIMESTEP(IT)
@@ -44,6 +51,14 @@ C.....Write out results
 #endif
 #endif
 
+#ifdef NETCDF
+#ifndef CMPI
+      call netcdf_write_step_serial(it, .false.)
+#else
+      call parallelio_write_step_parallel(it, .false.)
+#endif
+#endif
+
       !CALL SCRUTINIZE_SOLUTION()
 
       RETURN
@@ -51,20 +66,20 @@ C.....Write out results
 
 
 C***********************************************************************
-C     
+C
 C     SUBROUTINE SCRUTINIZE_SOLUTION(IT)
-C     
-C     Detect a negative water depth and a NaN in solution arrays and 
+C
+C     Detect a negative water depth and a NaN in solution arrays and
 C     terminate if either of them is found.
-C     
+C
 C     Written by Shintaro Bunya (01-01-2007)
-C     
+C
 C***********************************************************************
 
       SUBROUTINE SCRUTINIZE_SOLUTION(IT)
 
 C.....Use appropriate modules
-      
+
 #ifdef CMPI
       USE SIZES, ONLY : SZ,MYPROC,layers
       USE MESSENGER_ELEM, ONLY: MESSAGE_FINI, ErrorElevSum
@@ -76,7 +91,7 @@ C.....Use appropriate modules
       USE DG, ONLY : DOF,ZE,QX,QY,iota,iota2,dynP,bed,ncheck,dp_node
 
       IMPLICIT NONE
-      
+
 C.....Declare local variables
 
       INTEGER IT,J,K,l
@@ -103,7 +118,7 @@ C.....Detect negative mass
             PRINT *, ' x,  y ',SLAM(NM(J,1))/DEG2RAD,
      $           SFEA(NM(J,1))/DEG2RAD
             Detected = .TRUE.
-            ErrorElevExceeded=1    
+            ErrorElevExceeded=1
          ENDIF
       ENDDO
 #ifdef CMPI
@@ -147,7 +162,7 @@ c$$$         ENDIF
 c$$$      ENDDO
 
 C.....Detect NaN
-      
+
       DO J = 1,NE
          DO K = 1,DOF
 
@@ -199,7 +214,7 @@ C.....Detect NaN
                ErrorElevExceeded = 1
             ENDIF
 #endif
-            
+
 #ifdef CHEM
             IF(iota(K,J,1).NE.iota(K,J,1)) THEN
                PRINT *, ''
@@ -236,11 +251,11 @@ C.....Detect NaN
             ENDIF
 #endif
 #ifdef SED_LAY
-            
+
             do l = 1,layers
                IF(bed(K,J,1,l).NE.bed(K,J,1,l)) THEN
                   PRINT *, ''
-                  
+
 #ifdef CMPI
                   PRINT *, 'IN SUBDOMAIN ',MYPROC
 #endif
@@ -285,5 +300,3 @@ c$$$      ENDIF
 
       RETURN
       END SUBROUTINE
-
-
