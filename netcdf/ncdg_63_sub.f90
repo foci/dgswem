@@ -29,7 +29,7 @@ submodule (ncdg:ncdg_nodal_scalar_sub) ncdg_63_sub
         self%scalar_varname = "zeta"
 
         ! Call parent function
-        call self%ncdg_nodal_scalar%create(path=the_path, cmode=the_cmode)
+        call self%ncfile%create(path=the_path, cmode=the_cmode)
 
         deallocate(the_path)
     end procedure ncdg_63_create

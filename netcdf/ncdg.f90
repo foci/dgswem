@@ -206,7 +206,6 @@ module ncdg
 
         contains
 
-        procedure, public :: create => ncdg_nodal_scalar_create
         procedure, public :: open => ncdg_nodal_scalar_open
         procedure, public :: close => ncdg_nodal_scalar_close
         procedure, public :: write_step => ncdg_nodal_scalar_write_step
@@ -489,25 +488,6 @@ module ncdg
 
         ! ncdg_nodal_scalar subroutines
         ! Common to all nodal scalar files
-
-        module subroutine ncdg_nodal_scalar_create(self, path, cmode)
-            !! Initialization function for
-            !! [[ncdg(module):ncdg_nodal_scalar(type)]]. Left in define mode.
-            !!
-            !! @warning "File Not Closed"
-            !! After initialization, the underlying file object is in
-            !! define mode. The user must remember to close it.
-            !! @endwarning
-
-            implicit none
-
-            class(ncdg_nodal_scalar), intent(inout) :: self
-            !! The wrapper object of the file
-            character(len=*), optional, intent(in) :: path
-            !! Path and name for the NetCDF file. Default is nodalscalar.nc.
-            integer, optional, intent(in) :: cmode
-            !! NetCDF creation mode. Default is ior(nf90_noclobber, nf90_netcdf4).
-        end subroutine ncdg_nodal_scalar_create
 
         module subroutine ncdg_nodal_scalar_open(self, path, mode)
             !! Open a nodal scalar output file, and set all IDs.

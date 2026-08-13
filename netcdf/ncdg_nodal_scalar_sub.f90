@@ -5,32 +5,6 @@ submodule (ncdg:ncdg_nodal_sub) ncdg_nodal_scalar_sub
 
     contains
 
-    module procedure ncdg_nodal_scalar_create
-        ! See interface for arguments and documentation
-
-        character(len=:), allocatable :: the_path ! For defaulting
-        integer :: the_cmode ! For defaulting
-
-        ! Set path
-        if (present(path)) then
-            the_path = path
-        else
-            the_path = "nodalscalar.nc"
-        end if
-
-        ! Set cmode
-        if (present(cmode)) then
-            the_cmode = cmode
-        else
-            the_cmode = ior(nf90_noclobber, nf90_netcdf4)
-        end if
-
-        ! Call parent function
-        call self%ncfile%create(path=the_path, cmode=the_cmode)
-
-        deallocate(the_path)
-    end procedure ncdg_nodal_scalar_create
-
     module procedure ncdg_nodal_scalar_open
         ! See interface for arguments and documentation
 
