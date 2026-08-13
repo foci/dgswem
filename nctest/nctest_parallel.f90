@@ -124,7 +124,7 @@ program nctest_parallel
         call my_nmaxele%create()
 
         ! Set metadata (in serial)
-        call my_n63%ncdg_63_set_metadata( &
+        call my_n63%set_metadata( &
             nt=nf90_unlimited, &
             np=np, &
             ne=ne, &

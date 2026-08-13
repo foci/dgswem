@@ -4,6 +4,7 @@ if get_option('netcdf')
         'ncdg.f90',
         'ncdg_file_sub.f90',
         'ncdg_nodal_sub.f90',
+        'ncdg_nodal_scalar_sub.f90',
         'ncdg_63_sub.f90',
         'ncdg_64_sub.f90',
         'ncdg_maxele_sub.f90',

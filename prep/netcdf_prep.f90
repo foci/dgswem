@@ -60,7 +60,7 @@ module netcdf_prep
         if (abs(noutge) == 3) then
             ! Create fort.63
             call my_63%create()
-            call my_63%ncdg_63_set_metadata( &
+            call my_63%set_metadata( &
                 nt=nf90_unlimited, &
                 np=nnodg, &
                 ne=nelg, &

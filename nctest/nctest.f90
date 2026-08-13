@@ -47,7 +47,7 @@ module nctest_util
         print *, file%depth_varname, file%depth_varid
 
         print *, "fort.63.nc Variable IDs"
-        print *, file%zeta_varname, file%zeta_varid
+        print *, file%scalar_varname, file%scalar_varid
     end subroutine print_metadata_63
 
     subroutine print_metadata_64(file)
@@ -159,7 +159,7 @@ program nctest
         call print_metadata_64(my_64)
     endif
     print *, "Setting metadata"
-    call my_63%ncdg_63_set_metadata( &
+    call my_63%set_metadata( &
         nt=nf90_unlimited, &
         np=np, &
         ne=ne, &
@@ -278,9 +278,9 @@ program nctest
         nbvv=nbvv &
     )
     print *, "Writing step"
-    call my_63%ncdg_63_write_step( &
+    call my_63%write_step( &
         t=0.0, &
-        zeta=[1.0, 2.0, 3.0] &
+        scalar=[1.0, 2.0, 3.0] &
     )
     call my_64%ncdg_64_write_step( &
         t=0.0, &
@@ -292,9 +292,9 @@ program nctest
         zeta_max=[1.0, 2.0, 3.0] &
     )
     print *, "Writing step"
-    call my_63%ncdg_63_write_step( &
+    call my_63%write_step( &
         t=1.0, &
-        zeta=[4.0, 5.0, 6.0] &
+        scalar=[4.0, 5.0, 6.0] &
     )
     call my_64%ncdg_64_write_step( &
         t=1.0, &
@@ -306,9 +306,9 @@ program nctest
         zeta_max=[2.0, 2.0, 3.0] &
     )
     print *, "Writing step"
-    call my_63%ncdg_63_write_step( &
+    call my_63%write_step( &
         t=2.0, &
-        zeta=[7.0, 8.0, 9.0] &
+        scalar=[7.0, 8.0, 9.0] &
     )
     call my_64%ncdg_64_write_step( &
         t=2.0, &

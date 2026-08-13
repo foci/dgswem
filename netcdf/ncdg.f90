@@ -189,28 +189,38 @@ module ncdg
 
     end type ncdg_station
 
-    type, extends(ncdg_nodal) :: ncdg_63
-        !! fort.63.nc file editing object
+    type, extends(ncdg_nodal) :: ncdg_nodal_scalar
+        !! Generic nodal scalar file editing object
 
         ! Dimension IDs
 
         ! Dimension names
 
         ! Variable IDs
-        integer :: zeta_varid = -1
+        integer :: scalar_varid = -1
         !! ID of zeta variable
 
         ! Variable names
-        character(len=4) :: zeta_varname = "zeta"
+        character(len=:), allocatable :: scalar_varname
         !! Name of zeta variable
+
+        contains
+
+        procedure, public :: create => ncdg_nodal_scalar_create
+        procedure, public :: open => ncdg_nodal_scalar_open
+        procedure, public :: close => ncdg_nodal_scalar_close
+        procedure, public :: write_step => ncdg_nodal_scalar_write_step
+
+    end type ncdg_nodal_scalar
+
+    type, extends(ncdg_nodal_scalar) :: ncdg_63
+        !! fort.63.nc file editing object
 
         contains
 
         procedure, public :: create => ncdg_63_create
         procedure, public :: open => ncdg_63_open
-        procedure, public :: close => ncdg_63_close
-        procedure, public :: ncdg_63_set_metadata
-        procedure, public :: ncdg_63_write_step
+        procedure, public :: set_metadata => ncdg_63_set_metadata
 
     end type ncdg_63
 
@@ -477,6 +487,67 @@ module ncdg
             !! transposed, while nneg(nhy, ne) does not. Default is true.
         end subroutine ncdg_nodal_write_mesh
 
+        ! ncdg_nodal_scalar subroutines
+        ! Common to all nodal scalar files
+
+        module subroutine ncdg_nodal_scalar_create(self, path, cmode)
+            !! Initialization function for
+            !! [[ncdg(module):ncdg_nodal_scalar(type)]]. Left in define mode.
+            !!
+            !! @warning "File Not Closed"
+            !! After initialization, the underlying file object is in
+            !! define mode. The user must remember to close it.
+            !! @endwarning
+
+            implicit none
+
+            class(ncdg_nodal_scalar), intent(inout) :: self
+            !! The wrapper object of the file
+            character(len=*), optional, intent(in) :: path
+            !! Path and name for the NetCDF file. Default is nodalscalar.nc.
+            integer, optional, intent(in) :: cmode
+            !! NetCDF creation mode. Default is ior(nf90_noclobber, nf90_netcdf4).
+        end subroutine ncdg_nodal_scalar_create
+
+        module subroutine ncdg_nodal_scalar_open(self, path, mode)
+            !! Open a nodal scalar output file, and set all IDs.
+
+            implicit none
+
+            class(ncdg_nodal_scalar), intent(inout) :: self
+            !! The wrapper object of the file
+            character(len=*), optional, intent(in) :: path
+            !! Path and name for the NetCDF file. Default is whatever path is
+            !! already set. If the path is not already set and nothing is provided,
+            !! the program will assume nodalscalar.nc.
+            integer, optional, intent(in) :: mode
+            !! NetCDF open mode. Default is nf90_nowrite, i.e. read-only.
+        end subroutine ncdg_nodal_scalar_open
+
+        module subroutine ncdg_nodal_scalar_close(self)
+            !! Close a fort.63.nc output file, and flush all IDs.
+
+            implicit none
+
+            class(ncdg_nodal_scalar), intent(inout) :: self
+            !! The wrapper object of the file
+        end subroutine ncdg_nodal_scalar_close
+
+        module subroutine ncdg_nodal_scalar_write_step(self, t, scalar, sync)
+            !! Timestep writing function for a fort.63.nc output file.
+
+            implicit none
+
+            class(ncdg_nodal_scalar), intent(inout) :: self
+            !! The wrapper object being written to
+            real, intent(in) :: t
+            !! The current time
+            real, intent(in) :: scalar(:)
+            !! The current nodal scalar values
+            logical, optional, intent(in) :: sync
+            !! Whether to write to disk immediately. Default is .false.
+        end subroutine ncdg_nodal_scalar_write_step
+
         ! ncdg_station subroutines
         ! Common to all station files
 
@@ -551,15 +622,6 @@ module ncdg
             !! NetCDF open mode. Default is nf90_nowrite, i.e. read-only.
         end subroutine ncdg_63_open
 
-        module subroutine ncdg_63_close(self)
-            !! Close a fort.63.nc output file, and flush all IDs.
-
-            implicit none
-
-            class(ncdg_63), intent(inout) :: self
-            !! The wrapper object of the file
-        end subroutine ncdg_63_close
-
         module subroutine ncdg_63_set_metadata(self, nt, np, ne, &
             nhy, nope, neta, max_nvdll, nbou, nvel, max_nvell, ics)
             !! Set variables, dimensions, and metadata for a fort.63.nc
@@ -608,21 +670,6 @@ module ncdg
             !! Mesh type. This corresponds to
             !! [[global(module):ics(variable)]]
         end subroutine ncdg_63_set_metadata
-
-        module subroutine ncdg_63_write_step(self, t, zeta, sync)
-            !! Timestep writing function for a fort.63.nc output file.
-
-            implicit none
-
-            class(ncdg_63), intent(inout) :: self
-            !! The wrapper object being written to
-            real, intent(in) :: t
-            !! The current time
-            real, intent(in) :: zeta(:)
-            !! The current zeta values
-            logical, optional, intent(in) :: sync
-            !! Whether to write to disk immediately. Default is .false.
-        end subroutine ncdg_63_write_step
 
         ! ncdg_64 subroutines
         ! For fort.64.nc

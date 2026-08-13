@@ -109,7 +109,7 @@ module netcdf_io
             inquire(file="fort.63.nc", exist=file_exists)
             if (noutge == -3 .or. .not. file_exists) then ! create new
                 call my_63%create()
-                call my_63%ncdg_63_set_metadata( &
+                call my_63%set_metadata( &
                     nt=nf90_unlimited, &
                     np=np, &
                     ne=ne, &
@@ -310,9 +310,10 @@ module netcdf_io
             if ((it > ntcysge) .and. (it <= ntcyfge) .or. force_write) then
                 nscouge = nscouge + 1
                 if (nscouge == nspoolge .or. force_write) then
-                    call my_63%ncdg_63_write_step( &
+                    call my_63%write_step( &
                         t=time_a, &
-                        zeta=eta2 &
+                        scalar=eta2, &
+                        sync=.false. &
                     )
                     call my_maxele%ncdg_maxele_write_step( &
                         t=time_a, &
