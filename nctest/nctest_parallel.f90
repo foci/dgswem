@@ -137,7 +137,7 @@ program nctest_parallel
             max_nvell=maxval(nvell), &
             ics=ics &
         )
-        call my_n64%ncdg_64_set_metadata( &
+        call my_n64%set_metadata( &
             nt=nf90_unlimited, &
             np=np, &
             ne=ne, &
@@ -150,7 +150,7 @@ program nctest_parallel
             max_nvell=maxval(nvell), &
             ics=ics &
         )
-        call my_nmaxele%ncdg_maxele_set_metadata( &
+        call my_nmaxele%set_metadata( &
             nt=nf90_unlimited, &
             np=np, &
             ne=ne, &

@@ -212,6 +212,33 @@ module ncdg
 
     end type ncdg_nodal_scalar
 
+    type, extends (ncdg_nodal) :: ncdg_nodal_scalar_max
+        !! Generic nodal scalar max file editing object
+
+        ! Dimension IDs
+
+        ! Dimension names
+
+        ! Variable IDs
+        integer :: scalar_max_varid = -1
+        !! ID of scalar_max variable
+        integer :: time_of_scalar_max_varid = -1
+        !! ID of time_of_scalar_max variable
+
+        ! Variable names
+        character(len=:), allocatable :: scalar_max_varname
+        !! Name of scalar_max variable
+        character(len=:), allocatable :: time_of_scalar_max_varname
+        !! Name of time_of_scalar_max variable
+
+        contains
+
+        procedure, public :: open => ncdg_nodal_scalar_max_open
+        procedure, public :: close => ncdg_nodal_scalar_max_close
+        procedure, public :: write_step => ncdg_nodal_scalar_max_write_step
+
+    end type ncdg_nodal_scalar_max
+
     type, extends(ncdg_nodal_scalar) :: ncdg_63
         !! fort.63.nc file editing object
 
@@ -261,32 +288,14 @@ module ncdg
 
     end type ncdg_64
 
-    type, extends(ncdg_nodal) :: ncdg_maxele
+    type, extends(ncdg_nodal_scalar_max) :: ncdg_maxele
         !! maxele.63 file editing object
-
-        ! Dimension IDs
-
-        ! Dimension names
-
-        ! Variable IDs
-        integer :: zeta_max_varid = -1
-        !! ID of zeta_max variable
-        integer :: time_of_zeta_max_varid = -1
-        !! ID of time_of_zeta_max variable
-
-        ! Variable names
-        character(len=8) :: zeta_max_varname = "zeta_max"
-        !! Name of zeta_max variable
-        character(len=16) :: time_of_zeta_max_varname = "time_of_zeta_max"
-        !! Name of time_of_zeta_max variable
 
         contains
 
         procedure, public :: create => ncdg_maxele_create
         procedure, public :: open => ncdg_maxele_open
-        procedure, public :: close => ncdg_maxele_close
-        procedure, public :: ncdg_maxele_set_metadata
-        procedure, public :: ncdg_maxele_write_step
+        procedure, public :: set_metadata => ncdg_maxele_set_metadata
 
     end type ncdg_maxele
 
@@ -536,6 +545,52 @@ module ncdg
             logical, optional, intent(in) :: sync
             !! Whether to write to disk immediately. Default is .false.
         end subroutine ncdg_nodal_scalar_write_step
+
+        ! ncdg_nodal_scalar_max subroutines
+        ! Common to all nodal vector files having a max variable
+
+        module subroutine ncdg_nodal_scalar_max_open(self, path, mode)
+            !! Open a nodal scalar max output file, and set all IDs.
+
+            implicit none
+
+            class(ncdg_nodal_scalar_max), intent(inout) :: self
+            !! The wrapper object of the file
+            character(len=*), optional, intent(in) :: path
+            !! Path and name for the NetCDF file. Default is whatever path is
+            !! already set. If the path is not already set and nothing is provided,
+            !! the program will assume nodalscalarmax.nc.
+            integer, optional, intent(in) :: mode
+            !! NetCDF open mode. Default is nf90_nowrite, i.e. read-only.
+        end subroutine ncdg_nodal_scalar_max_open
+
+        module subroutine ncdg_nodal_scalar_max_close(self)
+            !! Close a nodal scalar max output file, and flush all IDs.
+
+            implicit none
+
+            class(ncdg_nodal_scalar_max), intent(inout) :: self
+            !! The wrapper object of the file
+        end subroutine ncdg_nodal_scalar_max_close
+
+        module subroutine ncdg_nodal_scalar_max_write_step(self, t, &
+            scalar, compute_max, sync)
+            !! Timestep writing function for a nodal scalar max output file.
+
+            implicit none
+
+            class(ncdg_nodal_scalar_max), intent(inout) :: self
+            !! The wrapper object being written to
+            real, intent(in) :: t
+            !! The current time
+            real, intent(in) :: scalar(:)
+            !! The current or current maximum scalar values
+            logical, optional, intent(in) :: compute_max
+            !! Whether to compute a new maximum, or overwrite everything with
+            !! the value in scalar. Default is .false.
+            logical, optional, intent(in) :: sync
+            !! Whether to write to disk immediately. Default is .false.
+        end subroutine ncdg_nodal_scalar_max_write_step
 
         ! ncdg_nodal_vector subroutines
         ! Common to all nodal vector files
@@ -828,15 +883,6 @@ module ncdg
             !! NetCDF open mode. Default is nf90_nowrite, i.e. read-only.
         end subroutine ncdg_maxele_open
 
-        module subroutine ncdg_maxele_close(self)
-            !! Close a maxele.63.nc output file, and flush all IDs.
-
-            implicit none
-
-            class(ncdg_maxele), intent(inout) :: self
-            !! The wrapper object of the file
-        end subroutine ncdg_maxele_close
-
         module subroutine ncdg_maxele_set_metadata(self, nt, np, ne, &
             nhy, nope, neta, max_nvdll, nbou, nvel, max_nvell, ics)
             !! Set variables, dimensions, and metadata for a maxele.63.nc
@@ -885,21 +931,6 @@ module ncdg
             !! Mesh type. This corresponds to
             !! [[global(module):ics(variable)]]
         end subroutine ncdg_maxele_set_metadata
-
-        module subroutine ncdg_maxele_write_step(self, t, zeta_max, sync)
-            !! Timestep writing function for a maxele.63.nc output file.
-
-            implicit none
-
-            class(ncdg_maxele), intent(inout) :: self
-            !! The wrapper object being written to
-            real, intent(in) :: t
-            !! The current time
-            real, intent(in) :: zeta_max(:)
-            !! The current zeta_max values
-            logical, optional, intent(in) :: sync
-            !! Whether to write to disk immediately. Default is .false.
-        end subroutine ncdg_maxele_write_step
 
     end interface
 

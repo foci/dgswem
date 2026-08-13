@@ -185,7 +185,7 @@ program nctest
         max_nvell=maxval(nvell), &
         ics=ics &
     )
-    call my_maxele%ncdg_maxele_set_metadata( &
+    call my_maxele%set_metadata( &
         nt=nf90_unlimited, &
         np=np, &
         ne=ne, &
@@ -287,9 +287,9 @@ program nctest
         vector_u=[1.0, 2.0, 3.0], &
         vector_v=[4.0, 5.0, 6.0] &
     )
-    call my_maxele%ncdg_maxele_write_step( &
+    call my_maxele%write_step( &
         t=0.0, &
-        zeta_max=[1.0, 2.0, 3.0] &
+        scalar=[1.0, 2.0, 3.0] &
     )
     print *, "Writing step"
     call my_63%write_step( &
@@ -301,9 +301,9 @@ program nctest
         vector_u=[7.0, 8.0, 9.0], &
         vector_v=[10.0, 11.0, 12.0] &
     )
-    call my_maxele%ncdg_maxele_write_step( &
+    call my_maxele%write_step( &
         t=1.0, &
-        zeta_max=[2.0, 2.0, 3.0] &
+        scalar=[2.0, 2.0, 3.0] &
     )
     print *, "Writing step"
     call my_63%write_step( &
@@ -315,9 +315,9 @@ program nctest
         vector_u=[13.0, 14.0, 15.0], &
         vector_v=[16.0, 17.0, 18.0] &
     )
-    call my_maxele%ncdg_maxele_write_step( &
+    call my_maxele%write_step( &
         t=2.0, &
-        zeta_max=[2.0, 1.0, 4.0] & ! Bad zeta_max update at position 2
+        scalar=[2.0, 1.0, 4.0] & ! Bad zeta_max update at position 2
     )
     print *, "Closing fort.63.nc"
     call my_63%close()

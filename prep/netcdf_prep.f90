@@ -95,7 +95,7 @@ module netcdf_prep
             call my_63%close()
             ! Create maxele.63
             call my_maxele%create()
-            call my_maxele%ncdg_maxele_set_metadata( &
+            call my_maxele%set_metadata( &
                 nt=nf90_unlimited, &
                 np=nnodg, &
                 ne=nelg, &

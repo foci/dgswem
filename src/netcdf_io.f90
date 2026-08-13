@@ -147,7 +147,7 @@ module netcdf_io
             inquire(file="maxele.63.nc", exist=file_exists)
             if (noutge == -3 .or. .not. file_exists) then ! create new
                 call my_maxele%create()
-                call my_maxele%ncdg_maxele_set_metadata( &
+                call my_maxele%set_metadata( &
                     nt=nf90_unlimited, &
                     np=np, &
                     ne=ne, &
@@ -315,9 +315,11 @@ module netcdf_io
                         scalar=eta2, &
                         sync=.false. &
                     )
-                    call my_maxele%ncdg_maxele_write_step( &
+                    call my_maxele%write_step( &
                         t=time_a, &
-                        zeta_max=etamax &
+                        scalar=etamax, &
+                        compute_max=.false., &
+                        sync=.false. &
                     )
                     nscouge = 0
                 end if
@@ -332,7 +334,8 @@ module netcdf_io
                     call my_64%write_step( &
                         t=time_a, &
                         vector_u=uu2, &
-                        vector_v=vv2 &
+                        vector_v=vv2, &
+                        sync=.false. &
                     )
                     nscougv = 0
                 end if
