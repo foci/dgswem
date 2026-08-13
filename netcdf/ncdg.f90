@@ -514,7 +514,7 @@ module ncdg
         end subroutine ncdg_nodal_scalar_open
 
         module subroutine ncdg_nodal_scalar_close(self)
-            !! Close a fort.63.nc output file, and flush all IDs.
+            !! Close a nodal scalar output file, and flush all IDs.
 
             implicit none
 
@@ -523,7 +523,7 @@ module ncdg
         end subroutine ncdg_nodal_scalar_close
 
         module subroutine ncdg_nodal_scalar_write_step(self, t, scalar, sync)
-            !! Timestep writing function for a fort.63.nc output file.
+            !! Timestep writing function for a nodal scalar output file.
 
             implicit none
 
