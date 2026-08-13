@@ -198,11 +198,11 @@ module ncdg
 
         ! Variable IDs
         integer :: scalar_varid = -1
-        !! ID of zeta variable
+        !! ID of scalar variable
 
         ! Variable names
         character(len=:), allocatable :: scalar_varname
-        !! Name of zeta variable
+        !! Name of scalar variable
 
         contains
 
@@ -253,7 +253,7 @@ module ncdg
     end type ncdg_64
 
     type, extends(ncdg_nodal) :: ncdg_maxele
-        !! maxele.53 file editing object
+        !! maxele.63 file editing object
 
         ! Dimension IDs
 

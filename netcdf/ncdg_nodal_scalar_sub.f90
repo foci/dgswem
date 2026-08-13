@@ -1,5 +1,5 @@
 submodule (ncdg:ncdg_nodal_sub) ncdg_nodal_scalar_sub
-!! Implementation of fort.63.nc
+!! Implementation of generic nodal scalar
 
     implicit none
 
@@ -62,8 +62,8 @@ submodule (ncdg:ncdg_nodal_sub) ncdg_nodal_scalar_sub
         real :: t_arr(1) ! Vector structure for writing t
         integer :: time_start(1) ! Starting position for time data
         integer :: time_count(1) ! time data block size
-        integer :: scalar_start(2) ! Starting position for zeta data
-        integer :: scalar_count(2) ! zeta data block size
+        integer :: scalar_start(2) ! Starting position for scalar data
+        integer :: scalar_count(2) ! scalar data block size
         integer :: record_count ! For indexing time step
 
         ! Set sync
