@@ -189,7 +189,7 @@ module netcdf_io
             inquire(file="fort.64.nc", exist=file_exists)
             if (noutgv == -3 .or. .not. file_exists) then ! create new
                 call my_64%create()
-                call my_64%ncdg_64_set_metadata( &
+                call my_64%set_metadata( &
                     nt=nf90_unlimited, &
                     np=np, &
                     ne=ne, &
@@ -329,10 +329,10 @@ module netcdf_io
             if ((it > ntcysgv) .and. (it <= ntcyfgv) .or. force_write) then
                 nscougv = nscougv + 1
                 if (nscougv == nspoolgv .or. force_write) then
-                    call my_64%ncdg_64_write_step( &
+                    call my_64%write_step( &
                         t=time_a, &
-                        u_vel=uu2, &
-                        v_vel=vv2 &
+                        vector_u=uu2, &
+                        vector_v=vv2 &
                     )
                     nscougv = 0
                 end if

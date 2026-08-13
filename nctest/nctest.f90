@@ -91,8 +91,8 @@ module nctest_util
         print *, file%depth_varname, file%depth_varid
 
         print *, "fort.64.nc Variable IDs"
-        print *, file%u_vel_varname, file%u_vel_varid
-        print *, file%v_vel_varname, file%v_vel_varid
+        print *, file%vector_u_varname, file%vector_u_varid
+        print *, file%vector_v_varname, file%vector_v_varid
     end subroutine print_metadata_64
 
 end module nctest_util
@@ -172,7 +172,7 @@ program nctest
         max_nvell=maxval(nvell), &
         ics=ics &
     )
-    call my_64%ncdg_64_set_metadata( &
+    call my_64%set_metadata( &
         nt=nf90_unlimited, &
         np=np, &
         ne=ne, &
@@ -282,10 +282,10 @@ program nctest
         t=0.0, &
         scalar=[1.0, 2.0, 3.0] &
     )
-    call my_64%ncdg_64_write_step( &
+    call my_64%write_step( &
         t=0.0, &
-        u_vel=[1.0, 2.0, 3.0], &
-        v_vel=[4.0, 5.0, 6.0] &
+        vector_u=[1.0, 2.0, 3.0], &
+        vector_v=[4.0, 5.0, 6.0] &
     )
     call my_maxele%ncdg_maxele_write_step( &
         t=0.0, &
@@ -296,10 +296,10 @@ program nctest
         t=1.0, &
         scalar=[4.0, 5.0, 6.0] &
     )
-    call my_64%ncdg_64_write_step( &
+    call my_64%write_step( &
         t=1.0, &
-        u_vel=[7.0, 8.0, 9.0], &
-        v_vel=[10.0, 11.0, 12.0] &
+        vector_u=[7.0, 8.0, 9.0], &
+        vector_v=[10.0, 11.0, 12.0] &
     )
     call my_maxele%ncdg_maxele_write_step( &
         t=1.0, &
@@ -310,10 +310,10 @@ program nctest
         t=2.0, &
         scalar=[7.0, 8.0, 9.0] &
     )
-    call my_64%ncdg_64_write_step( &
+    call my_64%write_step( &
         t=2.0, &
-        u_vel=[13.0, 14.0, 15.0], &
-        v_vel=[16.0, 17.0, 18.0] &
+        vector_u=[13.0, 14.0, 15.0], &
+        vector_v=[16.0, 17.0, 18.0] &
     )
     call my_maxele%ncdg_maxele_write_step( &
         t=2.0, &

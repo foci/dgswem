@@ -134,7 +134,7 @@ module netcdf_prep
         if (abs(noutgv) == 3) then
             ! Create fort.64
             call my_64%create()
-            call my_64%ncdg_64_set_metadata( &
+            call my_64%set_metadata( &
                 nt=nf90_unlimited, &
                 np=nnodg, &
                 ne=nelg, &

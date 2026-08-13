@@ -223,32 +223,41 @@ module ncdg
 
     end type ncdg_63
 
-    type, extends(ncdg_nodal) :: ncdg_64
-        !! fort.64.nc file editing object
+    type, extends(ncdg_nodal) :: ncdg_nodal_vector
+        !! Generic nodal vector file editing object
 
         ! Dimension IDs
 
         ! Dimension names
 
         ! Variable IDs
-        integer :: u_vel_varid = -1
-        !! ID of u_vel variable
-        integer :: v_vel_varid = -1
-        !! ID of v_vel variable
+        integer :: vector_u_varid = -1
+        !! ID of vector_u variable
+        integer :: vector_v_varid = -1
+        !! ID of vector_v variable
 
         ! Variable names
-        character(len=5) :: u_vel_varname = "u_vel"
-        !! Name of u_vel variable
-        character(len=5) :: v_vel_varname = "v_vel"
-        !! Name of v_vel variable
+        character(len=:), allocatable :: vector_u_varname
+        !! Name of vector_u variable
+        character(len=:), allocatable :: vector_v_varname
+        !! Name of vector_v variable
+
+        contains
+
+        procedure, public :: open => ncdg_nodal_vector_open
+        procedure, public :: close => ncdg_nodal_vector_close
+        procedure, public :: write_step => ncdg_nodal_vector_write_step
+
+    end type ncdg_nodal_vector
+
+    type, extends(ncdg_nodal_vector) :: ncdg_64
+        !! fort.64.nc file editing object
 
         contains
 
         procedure, public :: create => ncdg_64_create
         procedure, public :: open => ncdg_64_open
-        procedure, public :: close => ncdg_64_close
-        procedure, public :: ncdg_64_set_metadata
-        procedure, public :: ncdg_64_write_step
+        procedure, public :: set_metadata => ncdg_64_set_metadata
 
     end type ncdg_64
 
@@ -528,6 +537,51 @@ module ncdg
             !! Whether to write to disk immediately. Default is .false.
         end subroutine ncdg_nodal_scalar_write_step
 
+        ! ncdg_nodal_vector subroutines
+        ! Common to all nodal vector files
+
+        module subroutine ncdg_nodal_vector_open(self, path, mode)
+            !! Open a nodal vector output file, and set all IDs.
+
+            implicit none
+
+            class(ncdg_nodal_vector), intent(inout) :: self
+            !! The wrapper object of the file
+            character(len=*), optional, intent(in) :: path
+            !! Path and name for the NetCDF file. Default is whatever path is
+            !! already set. If the path is not already set and nothing is provided,
+            !! the program will assume nodalvector.nc.
+            integer, optional, intent(in) :: mode
+            !! NetCDF open mode. Default is nf90_nowrite, i.e. read-only.
+        end subroutine ncdg_nodal_vector_open
+
+        module subroutine ncdg_nodal_vector_close(self)
+            !! Close a nodal vector output file, and flush all IDs.
+
+            implicit none
+
+            class(ncdg_nodal_vector), intent(inout) :: self
+            !! The wrapper object of the file
+        end subroutine ncdg_nodal_vector_close
+
+        module subroutine ncdg_nodal_vector_write_step(self, t, vector_u, &
+            vector_v, sync)
+            !! Timestep writing function for a nodal vector output file.
+
+            implicit none
+
+            class(ncdg_nodal_vector), intent(inout) :: self
+            !! The wrapper object being written to
+            real, intent(in) :: t
+            !! The current time
+            real, intent(in) :: vector_u(:)
+            !! The current vector_u values
+            real, intent(in) :: vector_v(:)
+            !! The current vector_v values
+            logical, optional, intent(in) :: sync
+            !! Whether to write to disk immediately. Default is .false.
+        end subroutine ncdg_nodal_vector_write_step
+
         ! ncdg_station subroutines
         ! Common to all station files
 
@@ -688,15 +742,6 @@ module ncdg
             !! NetCDF open mode. Default is nf90_nowrite, i.e. read-only.
         end subroutine ncdg_64_open
 
-        module subroutine ncdg_64_close(self)
-            !! Close a fort.64.nc output file, and flush all IDs.
-
-            implicit none
-
-            class(ncdg_64), intent(inout) :: self
-            !! The wrapper object of the file
-        end subroutine ncdg_64_close
-
         module subroutine ncdg_64_set_metadata(self, nt, np, ne, &
             nhy, nope, neta, max_nvdll, nbou, nvel, max_nvell, ics)
             !! Set variables, dimensions, and metadata for a fort.64.nc
@@ -745,23 +790,6 @@ module ncdg
             !! Mesh type. This corresponds to
             !! [[global(module):ics(variable)]]
         end subroutine ncdg_64_set_metadata
-
-        module subroutine ncdg_64_write_step(self, t, u_vel, v_vel, sync)
-            !! Timestep writing function for a fort.64.nc output file.
-
-            implicit none
-
-            class(ncdg_64), intent(inout) :: self
-            !! The wrapper object being written to
-            real, intent(in) :: t
-            !! The current time
-            real, intent(in) :: u_vel(:)
-            !! The current u_vel values
-            real, intent(in) :: v_vel(:)
-            !! The current v_vel values
-            logical, optional, intent(in) :: sync
-            !! Whether to write to disk immediately. Default is .false.
-        end subroutine ncdg_64_write_step
 
         ! ncdg_maxele subroutines
         ! For maxele.63.nc
