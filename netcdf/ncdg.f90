@@ -1,5 +1,17 @@
 module ncdg
     !! Module for creating and writing to ADCIRC-style fort files.
+    !!
+    !! The derived type inheritance hierarchy is as follows.
+    !! - ncfile
+    !!     - ncdg_file
+    !!         - ncdg_nodal
+    !!             - ncdg_nodal_scalar
+    !!                 - ncdg_63
+    !!             - ncdg_nodal_scalar_max
+    !!                 - ncdg_maxele
+    !!             - ncdg_nodal_vector
+    !!                 - ncdg_64
+    !!         - ncdg_station
 
     use netcdf
     use ncutil, only : ncfile, ncfile_check_error
