@@ -280,17 +280,18 @@ module parallelio_io
             if ((it > ntcysge) .and. (it <= ntcyfge) .or. force_write) then
                 nscouge = nscouge + 1
                 if (nscouge == nspoolge .or. force_write) then
-                    call my_63%piodg_63_write_step( &
+                    call my_63%write_step( &
                         t=time_a, &
-                        zeta=eta2(1:np), &
+                        scalar=eta2(1:np), &
                         piodesc=my_iodesc, &
                         sync=.true. &
                     )
-                    call my_maxele%piodg_maxele_write_step( &
+                    call my_maxele%write_step( &
                         t=time_a, &
-                        zeta_max=etamax(1:np), &
+                        scalar=etamax(1:np), &
                         np=np, &
                         piodesc=my_iodesc, &
+                        compute_max=.false., &
                         sync=.true. &
                     )
                     nscouge = 0
@@ -303,10 +304,10 @@ module parallelio_io
             if ((it > ntcysgv) .and. (it <= ntcyfgv) .or. force_write) then
                 nscougv = nscougv + 1
                 if (nscougv == nspoolgv .or. force_write) then
-                    call my_64%piodg_64_write_step( &
+                    call my_64%write_step( &
                         t=time_a, &
-                        u_vel=uu2(1:np), &
-                        v_vel=vv2(1:np), &
+                        vector_u=uu2(1:np), &
+                        vector_v=vv2(1:np), &
                         piodesc=my_iodesc, &
                         sync=.true. &
                     )

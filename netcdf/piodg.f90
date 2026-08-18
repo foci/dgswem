@@ -1,5 +1,17 @@
 module piodg
     !! Module for creating and writing ADCIRC-style fort files in parallel.
+    !!
+    !! The derived type inheritance hierarchy is as follows.
+    !! - piofile
+    !!     - piodg_file
+    !!         - piog_nodal
+    !!             - piodg_nodal_scalar
+    !!                 - piodg_63
+    !!             - piodg_nodal_scalar_max
+    !!                 - piodg_maxele
+    !!             - piodg_nodal_vector
+    !!                 - piodg_64
+    !!         - piodg_station
 
     use netcdf, only : nf90_enotindefine
     use pio
@@ -161,6 +173,110 @@ module piodg
 
     end type piodg_nodal
 
+    type, extends(piodg_nodal) :: piodg_nodal_scalar
+        !! Generic nodal scalar file editing object
+
+        ! Dimension IDs
+
+        ! Dimension names
+
+        ! Variable IDs
+        type(var_desc_t) :: scalar_vardesc
+        !! ID of scalar variable
+
+        ! Variable names
+        character(len=:), allocatable :: scalar_varname
+        !! Name of scalar variable
+
+        contains
+
+        procedure, public :: open => piodg_nodal_scalar_open
+        procedure, public :: close => piodg_nodal_scalar_close
+        procedure, public :: write_step => piodg_nodal_scalar_write_step
+
+    end type piodg_nodal_scalar
+
+    type, extends(piodg_nodal_scalar) :: piodg_63
+        !! fort.63.nc file editing object
+
+        contains
+
+        procedure, public :: open => piodg_63_open
+
+    end type piodg_63
+
+    type, extends(piodg_nodal) :: piodg_nodal_scalar_max
+        !! Generic nodal scalar max file editing object
+
+        ! Dimension IDs
+
+        ! Dimension names
+
+        ! Variable IDs
+        type(var_desc_t) :: scalar_max_vardesc
+        !! ID of scalar_max variable
+        type(var_desc_t) :: time_of_scalar_max_vardesc
+        !! ID of time_of_scalar_max variable
+
+        ! Variable names
+        character(len=:), allocatable :: scalar_max_varname
+        !! Name of scalar_max variable
+        character(len=:), allocatable :: time_of_scalar_max_varname
+        !! Name of time_of_scalar_max variable
+
+        contains
+
+        procedure, public :: open => piodg_nodal_scalar_max_open
+        procedure, public :: close => piodg_nodal_scalar_max_close
+        procedure, public :: write_step => piodg_nodal_scalar_max_write_step
+
+    end type piodg_nodal_scalar_max
+
+    type, extends(piodg_nodal_scalar_max) :: piodg_maxele
+        !! maxele.63.nc file editing object
+
+        contains
+
+        procedure, public :: open => piodg_maxele_open
+
+    end type piodg_maxele
+
+    type, extends(piodg_nodal) :: piodg_nodal_vector
+        !! Generic nodal vector file editing object
+
+        ! Dimension IDs
+
+        ! Dimension names
+
+        ! Variable IDs
+        type(var_desc_t) :: vector_u_vardesc
+        !! ID of vector_u variable
+        type(var_desc_t) :: vector_v_vardesc
+        !! ID of vector_v variable
+
+        ! Variable names
+        character(len=:), allocatable :: vector_u_varname
+        !! Name of vector_u variable
+        character(len=:), allocatable :: vector_v_varname
+        !! Name of vector_v variable
+
+        contains
+
+        procedure, public :: open => piodg_nodal_vector_open
+        procedure, public :: close => piodg_nodal_vector_close
+        procedure, public :: write_step => piodg_nodal_vector_write_step
+
+    end type piodg_nodal_vector
+
+    type, extends(piodg_nodal_vector) :: piodg_64
+        !! fort.64.nc file editing object
+
+        contains
+
+        procedure, public :: open => piodg_64_open
+
+    end type piodg_64
+
     ! type, extends(piodg_file) :: piodg_station
     !     !! Generic DGSWEM station file parent type. This contains data
     !     !! common to all station files.
@@ -179,83 +295,6 @@ module piodg
     !     procedure, public :: close => piodg_station_close
 
     ! end type piodg_station
-
-    type, extends(piodg_nodal) :: piodg_63
-        !! fort.63.nc file editing object
-
-        ! Dimension IDs
-
-        ! Dimension names
-
-        ! Variable IDs
-        type(var_desc_t) :: zeta_vardesc
-        !! ID struct of zeta variable
-
-        ! Variable names
-        character(len=4) :: zeta_varname = "zeta"
-        !! Name of zeta variable
-
-        contains
-
-        procedure, public :: open => piodg_63_open
-        procedure, public :: close => piodg_63_close
-        procedure, public :: piodg_63_write_step
-
-    end type piodg_63
-
-    type, extends(piodg_nodal) :: piodg_64
-        !! fort.64.nc file editing object
-
-        ! Dimension IDs
-
-        ! Dimension names
-
-        ! Variable IDs
-        type(var_desc_t) :: u_vel_vardesc
-        !! ID struct of u_vel variable
-        type(var_desc_t) :: v_vel_vardesc
-        !! ID struct of v_vel variable
-
-        ! Variable names
-        character(len=5) :: u_vel_varname = "u_vel"
-        !! Name of u_vel variable
-        character(len=5) :: v_vel_varname = "v_vel"
-        !! Name of v_vel variable
-
-        contains
-
-        procedure, public :: open => piodg_64_open
-        procedure, public :: close => piodg_64_close
-        procedure, public :: piodg_64_write_step
-
-    end type piodg_64
-
-    type, extends(piodg_nodal) :: piodg_maxele
-        !! maxele.53 file editing object
-
-        ! Dimension IDs
-
-        ! Dimension names
-
-        ! Variable IDs
-        type(var_desc_t) :: zeta_max_vardesc
-        !! ID struct of zeta_max variable
-        type(var_desc_t) :: time_of_zeta_max_vardesc
-        !! ID struct of time_of_zeta_max variable
-
-        ! Variable names
-        character(len=8) :: zeta_max_varname = "zeta_max"
-        !! Name of zeta_max variable
-        character(len=16) :: time_of_zeta_max_varname = "time_of_zeta_max"
-        !! Name of time_of_zeta_max variable
-
-        contains
-
-        procedure, public :: open => piodg_maxele_open
-        procedure, public :: close => piodg_maxele_close
-        procedure, public :: piodg_maxele_write_step
-
-    end type piodg_maxele
 
     ! Begin interface
 
@@ -324,8 +363,57 @@ module piodg
             !! The wrapper object of the file
         end subroutine piodg_nodal_close
 
-        ! piodg_station subroutines
-        ! Common to all station files
+        ! piodg_nodal_scalar subroutines
+        ! Common to all nodal scalar files
+        ! open, close, write step
+
+        module subroutine piodg_nodal_scalar_open(self, piosystem, path, &
+            piotype, omode)
+            !! Open a nodal scalar output file, and set all IDs
+
+            implicit none
+
+            class(piodg_nodal_scalar), intent(inout) :: self
+            !! The wrapper object of the file
+            type(iosystem_desc_t), intent(inout), target :: piosystem
+            !! The PIO system object
+            character(len=*), optional, intent(in) :: path
+            !! Path and name for the NetCDF file. Default is whatever path is
+            !! already set. If the path is not already set and nothing is provided,
+            !! the program will assume nodalscalar.nc.
+            integer, optional, intent(in) :: piotype
+            !! PIO file and I/O type. Default is pio_iotype_netcdf4p.
+            integer, optional, intent(in) :: omode
+            !! PIO open mode. Default is pio_nowrite.
+        end subroutine piodg_nodal_scalar_open
+
+        module subroutine piodg_nodal_scalar_close(self)
+            !! Close a nodal scalar output file, and flush all IDs.
+
+            implicit none
+
+            class(piodg_nodal_scalar), intent(inout) :: self
+            !! The wrapper object of the file
+        end subroutine piodg_nodal_scalar_close
+
+        module subroutine piodg_nodal_scalar_write_step(self, t, scalar, &
+            piodesc, sync)
+            !! Parallel timestep writing function for a nodal scalar output
+            !! file.
+
+            implicit none
+
+            class(piodg_nodal_scalar), intent(inout) :: self
+            !! The wrapper object being written to
+            real, intent(in) :: t
+            !! The current time
+            real, intent(in) :: scalar(:)
+            !! The current zeta values
+            type(io_desc_t), intent(inout) :: piodesc
+            !! An I/O parameter struct associated with a decomposition
+            logical, optional, intent(in) :: sync
+            !! Whether to write to disk immediately. Default is .false.
+        end subroutine piodg_nodal_scalar_write_step
 
         ! piodg_63 subroutines
         ! For fort.63.nc
@@ -349,41 +437,16 @@ module piodg
             !! PIO open mode. Default is pio_nowrite.
         end subroutine piodg_63_open
 
-        module subroutine piodg_63_close(self)
-            !! Close a fort.63.nc output file, and flush all IDs.
+        ! piodg_nodal_scalar_max subroutines
+        ! Common to all nodal scalar max files
+
+        module subroutine piodg_nodal_scalar_max_open(self, piosystem, path, &
+            piotype, omode)
+            !! Open a nodal scalar max output file, and set all IDs
 
             implicit none
 
-            class(piodg_63), intent(inout) :: self
-            !! The wrapper object of the file
-        end subroutine piodg_63_close
-
-        module subroutine piodg_63_write_step(self, t, zeta, piodesc, sync)
-            !! Parallel timestep writing function for a fort.63.nc output file.
-
-            implicit none
-
-            class(piodg_63), intent(inout) :: self
-            !! The wrapper object being written to
-            real, intent(in) :: t
-            !! The current time
-            real, intent(in) :: zeta(:)
-            !! The current zeta values
-            type(io_desc_t), intent(inout) :: piodesc
-            !! An I/O parameter struct associated with a decomposition
-            logical, optional, intent(in) :: sync
-            !! Whether to write to disk immediately. Default is .false.
-        end subroutine piodg_63_write_step
-
-        ! piodg_64 subroutines
-        ! For fort.64.nc
-
-        module subroutine piodg_64_open(self, piosystem, path, piotype, omode)
-            !! Open a fort.64.nc output file, and set all IDs
-
-            implicit none
-
-            class(piodg_64), intent(inout) :: self
+            class(piodg_nodal_scalar_max), intent(inout) :: self
             !! The wrapper object of the file
             type(iosystem_desc_t), intent(inout), target :: piosystem
             !! The PIO system object
@@ -395,36 +458,39 @@ module piodg
             !! PIO file and I/O type. Default is pio_iotype_netcdf4p.
             integer, optional, intent(in) :: omode
             !! PIO open mode. Default is pio_nowrite.
-        end subroutine piodg_64_open
+        end subroutine piodg_nodal_scalar_max_open
 
-        module subroutine piodg_64_close(self)
-            !! Close a fort.64.nc output file, and flush all IDs.
+        module subroutine piodg_nodal_scalar_max_close(self)
+            !! Close a nodal scalar max output file, and flush all IDs.
 
             implicit none
 
-            class(piodg_64), intent(inout) :: self
+            class(piodg_nodal_scalar_max), intent(inout) :: self
             !! The wrapper object of the file
-        end subroutine piodg_64_close
+        end subroutine piodg_nodal_scalar_max_close
 
-        module subroutine piodg_64_write_step(self, t, u_vel, v_vel, &
-            piodesc, sync)
-            !! Parallel timestep writing function for a fort.64.nc output file.
+        module subroutine piodg_nodal_scalar_max_write_step(self, t, scalar, &
+            np, piodesc, compute_max, sync)
+            !! Timestep writing function for a nodal scalar max output file.
 
             implicit none
 
-            class(piodg_64), intent(inout) :: self
+            class(piodg_nodal_scalar_max), intent(inout) :: self
             !! The wrapper object being written to
             real, intent(in) :: t
             !! The current time
-            real, intent(in) :: u_vel(:)
-            !! The current u_vel values
-            real, intent(in) :: v_vel(:)
-            !! The current v_vel values
+            real, intent(in) :: scalar(:)
+            !! The current or current maximum scalar values
+            integer, intent(in) :: np
+            !! The total number of nodes on the current process
             type(io_desc_t), intent(inout) :: piodesc
             !! An I/O parameter struct associated with a decomposition
+            logical, optional, intent(in) :: compute_max
+            !! Whether to compute a new maximum, or overwrite everything with
+            !! the value in scalar. Default is .false.
             logical, optional, intent(in) :: sync
             !! Whether to write to disk immediately. Default is .false.
-        end subroutine piodg_64_write_step
+        end subroutine piodg_nodal_scalar_max_write_step
 
         ! piodg_maxele subroutines
         ! For maxele.63.nc
@@ -448,34 +514,83 @@ module piodg
             !! PIO open mode. Default is pio_nowrite.
         end subroutine piodg_maxele_open
 
-        module subroutine piodg_maxele_close(self)
-            !! Close a maxxele.63.nc output file, and flush all IDs.
+        ! piodg_nodal_vector subroutines
+        ! Common to all nodal vector files
+
+        module subroutine piodg_nodal_vector_open(self, piosystem, path, &
+            piotype, omode)
+            !! Open a nodal vector output file, and set all IDs
 
             implicit none
 
-            class(piodg_maxele), intent(inout) :: self
+            class(piodg_nodal_vector), intent(inout) :: self
             !! The wrapper object of the file
-        end subroutine piodg_maxele_close
+            type(iosystem_desc_t), intent(inout), target :: piosystem
+            !! The PIO system object
+            character(len=*), optional, intent(in) :: path
+            !! Path and name for the NetCDF file. Default is whatever path is
+            !! already set. If the path is not already set and nothing is provided,
+            !! the program will assume nodalvector.nc.
+            integer, optional, intent(in) :: piotype
+            !! PIO file and I/O type. Default is pio_iotype_netcdf4p.
+            integer, optional, intent(in) :: omode
+            !! PIO open mode. Default is pio_nowrite.
+        end subroutine piodg_nodal_vector_open
 
-        module subroutine piodg_maxele_write_step(self, t, zeta_max, np, &
-            piodesc, sync)
-            !! Timestep writing function for a maxele.63.nc output file.
+        module subroutine piodg_nodal_vector_close(self)
+            !! Close a nodal vector output file, and flush all IDs.
 
             implicit none
 
-            class(piodg_maxele), intent(inout) :: self
+            class(piodg_nodal_vector), intent(inout) :: self
+            !! The wrapper object of the file
+        end subroutine piodg_nodal_vector_close
+
+        module subroutine piodg_nodal_vector_write_step(self, t, vector_u, &
+            vector_v, piodesc, sync)
+            !! Parallel timestep writing function for a nodal vector output
+            !! file.
+
+            implicit none
+
+            class(piodg_nodal_vector), intent(inout) :: self
             !! The wrapper object being written to
             real, intent(in) :: t
             !! The current time
-            real, intent(in) :: zeta_max(:)
-            !! The current zeta_max values
-            integer, intent(in) :: np
-            !! The total number of nodes on the current process
+            real, intent(in) :: vector_u(:)
+            !! The current vector_u values
+            real, intent(in) :: vector_v(:)
+            !! The current vector_v values
             type(io_desc_t), intent(inout) :: piodesc
             !! An I/O parameter struct associated with a decomposition
             logical, optional, intent(in) :: sync
             !! Whether to write to disk immediately. Default is .false.
-        end subroutine piodg_maxele_write_step
+        end subroutine piodg_nodal_vector_write_step
+
+        ! piodg_64 subroutines
+        ! For fort.64.nc
+
+        module subroutine piodg_64_open(self, piosystem, path, piotype, omode)
+            !! Open a fort.64.nc output file, and set all IDs
+
+            implicit none
+
+            class(piodg_64), intent(inout) :: self
+            !! The wrapper object of the file
+            type(iosystem_desc_t), intent(inout), target :: piosystem
+            !! The PIO system object
+            character(len=*), optional, intent(in) :: path
+            !! Path and name for the NetCDF file. Default is whatever path is
+            !! already set. If the path is not already set and nothing is provided,
+            !! the program will assume fort.63.nc.
+            integer, optional, intent(in) :: piotype
+            !! PIO file and I/O type. Default is pio_iotype_netcdf4p.
+            integer, optional, intent(in) :: omode
+            !! PIO open mode. Default is pio_nowrite.
+        end subroutine piodg_64_open
+
+        ! piodg_station subroutines
+        ! Common to all station files
 
     end interface
 
