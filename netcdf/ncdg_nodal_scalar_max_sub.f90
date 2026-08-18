@@ -123,11 +123,14 @@ submodule (ncdg:ncdg_nodal_scalar_sub) ncdg_nodal_scalar_max_sub
         time_of_scalar_max = merge( &
             spread(t, 1, np), & ! Used if true: current time
             time_of_scalar_max, & ! Used if false: old time
-            scalar_max > scalar_max_old & ! Condition: new maximum is strictly greater
+            scalar_max > scalar_max_old & ! Condition: new scalar is strictly greater
         )
         ncstat = nf90_put_var(self%ncid, self%time_of_scalar_max_varid, &
             time_of_scalar_max)
         call ncfile_check_error(ncstat)
+
+        ! Deallocate arrays
+        deallocate(scalar_max)
         deallocate(scalar_max_old)
         deallocate(time_of_scalar_max)
 
