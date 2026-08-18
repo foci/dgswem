@@ -180,27 +180,6 @@ module ncdg
 
     end type ncdg_nodal
 
-    type, extends(ncdg_file) :: ncdg_station
-        !! Generic DGSWEM station file parent type. This contains data
-        !! common to all station files.
-
-        ! Dimension IDs
-
-        ! Dimension names
-
-        ! Variable IDs
-
-        ! Variable names
-
-        contains
-
-        procedure, public :: open => ncdg_station_open
-        procedure, public :: close => ncdg_station_close
-        procedure, public :: ncdg_station_set_metadata
-        ! procedure, public :: ncdg_station_write_stations
-
-    end type ncdg_station
-
     type, extends(ncdg_nodal) :: ncdg_nodal_scalar
         !! Generic nodal scalar file editing object
 
@@ -223,6 +202,17 @@ module ncdg
         procedure, public :: write_step => ncdg_nodal_scalar_write_step
 
     end type ncdg_nodal_scalar
+
+    type, extends(ncdg_nodal_scalar) :: ncdg_63
+        !! fort.63.nc file editing object
+
+        contains
+
+        procedure, public :: create => ncdg_63_create
+        procedure, public :: open => ncdg_63_open
+        procedure, public :: set_metadata => ncdg_63_set_metadata
+
+    end type ncdg_63
 
     type, extends (ncdg_nodal) :: ncdg_nodal_scalar_max
         !! Generic nodal scalar max file editing object
@@ -251,16 +241,16 @@ module ncdg
 
     end type ncdg_nodal_scalar_max
 
-    type, extends(ncdg_nodal_scalar) :: ncdg_63
-        !! fort.63.nc file editing object
+    type, extends(ncdg_nodal_scalar_max) :: ncdg_maxele
+        !! maxele.63 file editing object
 
         contains
 
-        procedure, public :: create => ncdg_63_create
-        procedure, public :: open => ncdg_63_open
-        procedure, public :: set_metadata => ncdg_63_set_metadata
+        procedure, public :: create => ncdg_maxele_create
+        procedure, public :: open => ncdg_maxele_open
+        procedure, public :: set_metadata => ncdg_maxele_set_metadata
 
-    end type ncdg_63
+    end type ncdg_maxele
 
     type, extends(ncdg_nodal) :: ncdg_nodal_vector
         !! Generic nodal vector file editing object
@@ -300,16 +290,26 @@ module ncdg
 
     end type ncdg_64
 
-    type, extends(ncdg_nodal_scalar_max) :: ncdg_maxele
-        !! maxele.63 file editing object
+    type, extends(ncdg_file) :: ncdg_station
+        !! Generic DGSWEM station file parent type. This contains data
+        !! common to all station files.
+
+        ! Dimension IDs
+
+        ! Dimension names
+
+        ! Variable IDs
+
+        ! Variable names
 
         contains
 
-        procedure, public :: create => ncdg_maxele_create
-        procedure, public :: open => ncdg_maxele_open
-        procedure, public :: set_metadata => ncdg_maxele_set_metadata
+        procedure, public :: open => ncdg_station_open
+        procedure, public :: close => ncdg_station_close
+        procedure, public :: ncdg_station_set_metadata
+        ! procedure, public :: ncdg_station_write_stations
 
-    end type ncdg_maxele
+    end type ncdg_station
 
     ! Begin interface
 
@@ -558,134 +558,6 @@ module ncdg
             !! Whether to write to disk immediately. Default is .false.
         end subroutine ncdg_nodal_scalar_write_step
 
-        ! ncdg_nodal_scalar_max subroutines
-        ! Common to all nodal vector files having a max variable
-
-        module subroutine ncdg_nodal_scalar_max_open(self, path, mode)
-            !! Open a nodal scalar max output file, and set all IDs.
-
-            implicit none
-
-            class(ncdg_nodal_scalar_max), intent(inout) :: self
-            !! The wrapper object of the file
-            character(len=*), optional, intent(in) :: path
-            !! Path and name for the NetCDF file. Default is whatever path is
-            !! already set. If the path is not already set and nothing is provided,
-            !! the program will assume nodalscalarmax.nc.
-            integer, optional, intent(in) :: mode
-            !! NetCDF open mode. Default is nf90_nowrite, i.e. read-only.
-        end subroutine ncdg_nodal_scalar_max_open
-
-        module subroutine ncdg_nodal_scalar_max_close(self)
-            !! Close a nodal scalar max output file, and flush all IDs.
-
-            implicit none
-
-            class(ncdg_nodal_scalar_max), intent(inout) :: self
-            !! The wrapper object of the file
-        end subroutine ncdg_nodal_scalar_max_close
-
-        module subroutine ncdg_nodal_scalar_max_write_step(self, t, &
-            scalar, compute_max, sync)
-            !! Timestep writing function for a nodal scalar max output file.
-
-            implicit none
-
-            class(ncdg_nodal_scalar_max), intent(inout) :: self
-            !! The wrapper object being written to
-            real, intent(in) :: t
-            !! The current time
-            real, intent(in) :: scalar(:)
-            !! The current or current maximum scalar values
-            logical, optional, intent(in) :: compute_max
-            !! Whether to compute a new maximum, or overwrite everything with
-            !! the value in scalar. Default is .false.
-            logical, optional, intent(in) :: sync
-            !! Whether to write to disk immediately. Default is .false.
-        end subroutine ncdg_nodal_scalar_max_write_step
-
-        ! ncdg_nodal_vector subroutines
-        ! Common to all nodal vector files
-
-        module subroutine ncdg_nodal_vector_open(self, path, mode)
-            !! Open a nodal vector output file, and set all IDs.
-
-            implicit none
-
-            class(ncdg_nodal_vector), intent(inout) :: self
-            !! The wrapper object of the file
-            character(len=*), optional, intent(in) :: path
-            !! Path and name for the NetCDF file. Default is whatever path is
-            !! already set. If the path is not already set and nothing is provided,
-            !! the program will assume nodalvector.nc.
-            integer, optional, intent(in) :: mode
-            !! NetCDF open mode. Default is nf90_nowrite, i.e. read-only.
-        end subroutine ncdg_nodal_vector_open
-
-        module subroutine ncdg_nodal_vector_close(self)
-            !! Close a nodal vector output file, and flush all IDs.
-
-            implicit none
-
-            class(ncdg_nodal_vector), intent(inout) :: self
-            !! The wrapper object of the file
-        end subroutine ncdg_nodal_vector_close
-
-        module subroutine ncdg_nodal_vector_write_step(self, t, vector_u, &
-            vector_v, sync)
-            !! Timestep writing function for a nodal vector output file.
-
-            implicit none
-
-            class(ncdg_nodal_vector), intent(inout) :: self
-            !! The wrapper object being written to
-            real, intent(in) :: t
-            !! The current time
-            real, intent(in) :: vector_u(:)
-            !! The current vector_u values
-            real, intent(in) :: vector_v(:)
-            !! The current vector_v values
-            logical, optional, intent(in) :: sync
-            !! Whether to write to disk immediately. Default is .false.
-        end subroutine ncdg_nodal_vector_write_step
-
-        ! ncdg_station subroutines
-        ! Common to all station files
-
-        module subroutine ncdg_station_open(self, path, mode)
-            !! Open a station output file, and set all IDs.
-
-            implicit none
-
-            class(ncdg_station), intent(inout) :: self
-            !! The wrapper object of the file
-            character(len=*), optional, intent(in) :: path
-            !! Path and name for the NetCDF file. Default is whatever path is
-            !! already set. If the path is not already set and nothing is provided,
-            !! the program will stop with an error.
-            integer, optional, intent(in) :: mode
-            !! NetCDF open mode. Default is nf90_nowrite, i.e. read-only.
-        end subroutine ncdg_station_open
-
-        module subroutine ncdg_station_close(self)
-            !! Close a station output file, and flush all IDs.
-
-            implicit none
-
-            class(ncdg_station), intent(inout) :: self
-            !! The wrapper object of the file
-        end subroutine ncdg_station_close
-
-        module subroutine ncdg_station_set_metadata(self)
-            !! Set variables, dimensions, and metadata for a nodal
-            !! output file.
-
-            implicit none
-
-            class(ncdg_station), intent(inout) :: self
-            !! The wrapper object of the file
-        end subroutine ncdg_station_set_metadata
-
         ! ncdg_63 subroutines
         ! For fort.63.nc
 
@@ -771,6 +643,183 @@ module ncdg
             !! Mesh type. This corresponds to
             !! [[global(module):ics(variable)]]
         end subroutine ncdg_63_set_metadata
+
+        ! ncdg_nodal_scalar_max subroutines
+        ! Common to all nodal vector files having a max variable
+
+        module subroutine ncdg_nodal_scalar_max_open(self, path, mode)
+            !! Open a nodal scalar max output file, and set all IDs.
+
+            implicit none
+
+            class(ncdg_nodal_scalar_max), intent(inout) :: self
+            !! The wrapper object of the file
+            character(len=*), optional, intent(in) :: path
+            !! Path and name for the NetCDF file. Default is whatever path is
+            !! already set. If the path is not already set and nothing is provided,
+            !! the program will assume nodalscalarmax.nc.
+            integer, optional, intent(in) :: mode
+            !! NetCDF open mode. Default is nf90_nowrite, i.e. read-only.
+        end subroutine ncdg_nodal_scalar_max_open
+
+        module subroutine ncdg_nodal_scalar_max_close(self)
+            !! Close a nodal scalar max output file, and flush all IDs.
+
+            implicit none
+
+            class(ncdg_nodal_scalar_max), intent(inout) :: self
+            !! The wrapper object of the file
+        end subroutine ncdg_nodal_scalar_max_close
+
+        module subroutine ncdg_nodal_scalar_max_write_step(self, t, &
+            scalar, compute_max, sync)
+            !! Timestep writing function for a nodal scalar max output file.
+
+            implicit none
+
+            class(ncdg_nodal_scalar_max), intent(inout) :: self
+            !! The wrapper object being written to
+            real, intent(in) :: t
+            !! The current time
+            real, intent(in) :: scalar(:)
+            !! The current or current maximum scalar values
+            logical, optional, intent(in) :: compute_max
+            !! Whether to compute a new maximum, or overwrite everything with
+            !! the value in scalar. Default is .false.
+            logical, optional, intent(in) :: sync
+            !! Whether to write to disk immediately. Default is .false.
+        end subroutine ncdg_nodal_scalar_max_write_step
+
+        ! ncdg_maxele subroutines
+        ! For maxele.63.nc
+
+        module subroutine ncdg_maxele_create(self, path, cmode)
+            !! Initialization function for
+            !! [[ncdg(module):ncdg_maxele(type)]]. Left in define mode.
+            !!
+            !! @warning "File Not Closed"
+            !! After initialization, the underlying file object is in
+            !! define mode. The user must remember to close it.
+            !! @endwarning
+
+            implicit none
+
+            class(ncdg_maxele), intent(inout) :: self
+            !! The wrapper object of the file
+            character(len=*), optional, intent(in) :: path
+            !! Path and name for the NetCDF file. Default is maxele.63.nc.
+            integer, optional, intent(in) :: cmode
+            !! NetCDF creation mode. Default is ior(nf90_noclobber, nf90_netcdf4).
+        end subroutine ncdg_maxele_create
+
+        module subroutine ncdg_maxele_open(self, path, mode)
+            !! Open a maxele.63.nc output file, and set all IDs.
+
+            implicit none
+
+            class(ncdg_maxele), intent(inout) :: self
+            !! The wrapper object of the file
+            character(len=*), optional, intent(in) :: path
+            !! Path and name for the NetCDF file. Default is whatever path is
+            !! already set. If the path is not already set and nothing is provided,
+            !! the program will assume maxele.63.nc.
+            integer, optional, intent(in) :: mode
+            !! NetCDF open mode. Default is nf90_nowrite, i.e. read-only.
+        end subroutine ncdg_maxele_open
+
+        module subroutine ncdg_maxele_set_metadata(self, nt, np, ne, &
+            nhy, nope, neta, max_nvdll, nbou, nvel, max_nvell, ics)
+            !! Set variables, dimensions, and metadata for a maxele.63.nc
+            !! output file.
+
+            implicit none
+
+            class(ncdg_maxele), intent(inout) :: self
+            !! The wrapper object of the file
+            integer, intent(in):: nt
+            !! Number of time steps. This corresponds to
+            !! [[global(module):nt(variable)]] or nf90_unlimited.
+            integer, intent(in):: np
+            !! Number of nodes. This corresponds to
+            !! [[global(module):np(variable)]].
+            integer, intent(in) :: ne
+            !! Number of elements. This corresponds to
+            !! [[global(module):ne(variable)]].
+            integer, intent(in) :: nhy
+            !! The number of vertices per element. This corresponds to
+            !! [[global(module):nhy(variable)]].
+            integer, intent(in) :: nope
+            !! The number of elevation boundary segments. This corresponds
+            !! to [[global(module):nope(variable)]].
+            integer, intent(in) :: neta
+            !! The number of elevation boundary nodes. This corresponds
+            !! to [[global(module):neta(variable)]].
+            integer, intent(in) :: max_nvdll
+            !! The maximum number of nodes in a given elevation
+            !! boundary segment. This corresponds the maximum value
+            !! of [[global(module):nvdll(variable)]].
+            integer, intent(in) :: nbou
+            !! The number of normal flow (discharge) boundary
+            !! segments. This corresponds to
+            !! [[global(module):nbou(variable)]].
+            integer, intent(in) :: nvel
+            !! The number of normal flow (discharge) boundary nodes.
+            !! This corresponds to
+            !! [[global(module):nvel(variable)]].
+            integer, intent(in) :: max_nvell
+            !! The maximum number of nodes in a given normal flow
+            !! (discharge) boundary segment. This corresponds to
+            !! the maximum value of
+            !! [[global(module):nvell(variable)]].
+            integer, intent(in) :: ics
+            !! Mesh type. This corresponds to
+            !! [[global(module):ics(variable)]]
+        end subroutine ncdg_maxele_set_metadata
+
+        ! ncdg_nodal_vector subroutines
+        ! Common to all nodal vector files
+
+        module subroutine ncdg_nodal_vector_open(self, path, mode)
+            !! Open a nodal vector output file, and set all IDs.
+
+            implicit none
+
+            class(ncdg_nodal_vector), intent(inout) :: self
+            !! The wrapper object of the file
+            character(len=*), optional, intent(in) :: path
+            !! Path and name for the NetCDF file. Default is whatever path is
+            !! already set. If the path is not already set and nothing is provided,
+            !! the program will assume nodalvector.nc.
+            integer, optional, intent(in) :: mode
+            !! NetCDF open mode. Default is nf90_nowrite, i.e. read-only.
+        end subroutine ncdg_nodal_vector_open
+
+        module subroutine ncdg_nodal_vector_close(self)
+            !! Close a nodal vector output file, and flush all IDs.
+
+            implicit none
+
+            class(ncdg_nodal_vector), intent(inout) :: self
+            !! The wrapper object of the file
+        end subroutine ncdg_nodal_vector_close
+
+        module subroutine ncdg_nodal_vector_write_step(self, t, vector_u, &
+            vector_v, sync)
+            !! Timestep writing function for a nodal vector output file.
+
+            implicit none
+
+            class(ncdg_nodal_vector), intent(inout) :: self
+            !! The wrapper object being written to
+            real, intent(in) :: t
+            !! The current time
+            real, intent(in) :: vector_u(:)
+            !! The current vector_u values
+            real, intent(in) :: vector_v(:)
+            !! The current vector_v values
+            logical, optional, intent(in) :: sync
+            !! Whether to write to disk immediately. Default is .false.
+        end subroutine ncdg_nodal_vector_write_step
 
         ! ncdg_64 subroutines
         ! For fort.64.nc
@@ -858,91 +907,42 @@ module ncdg
             !! [[global(module):ics(variable)]]
         end subroutine ncdg_64_set_metadata
 
-        ! ncdg_maxele subroutines
-        ! For maxele.63.nc
+        ! ncdg_station subroutines
+        ! Common to all station files
 
-        module subroutine ncdg_maxele_create(self, path, cmode)
-            !! Initialization function for
-            !! [[ncdg(module):ncdg_maxele(type)]]. Left in define mode.
-            !!
-            !! @warning "File Not Closed"
-            !! After initialization, the underlying file object is in
-            !! define mode. The user must remember to close it.
-            !! @endwarning
+        module subroutine ncdg_station_open(self, path, mode)
+            !! Open a station output file, and set all IDs.
 
             implicit none
 
-            class(ncdg_maxele), intent(inout) :: self
-            !! The wrapper object of the file
-            character(len=*), optional, intent(in) :: path
-            !! Path and name for the NetCDF file. Default is maxele.63.nc.
-            integer, optional, intent(in) :: cmode
-            !! NetCDF creation mode. Default is ior(nf90_noclobber, nf90_netcdf4).
-        end subroutine ncdg_maxele_create
-
-        module subroutine ncdg_maxele_open(self, path, mode)
-            !! Open a maxele.63.nc output file, and set all IDs.
-
-            implicit none
-
-            class(ncdg_maxele), intent(inout) :: self
+            class(ncdg_station), intent(inout) :: self
             !! The wrapper object of the file
             character(len=*), optional, intent(in) :: path
             !! Path and name for the NetCDF file. Default is whatever path is
             !! already set. If the path is not already set and nothing is provided,
-            !! the program will assume maxele.63.nc.
+            !! the program will stop with an error.
             integer, optional, intent(in) :: mode
             !! NetCDF open mode. Default is nf90_nowrite, i.e. read-only.
-        end subroutine ncdg_maxele_open
+        end subroutine ncdg_station_open
 
-        module subroutine ncdg_maxele_set_metadata(self, nt, np, ne, &
-            nhy, nope, neta, max_nvdll, nbou, nvel, max_nvell, ics)
-            !! Set variables, dimensions, and metadata for a maxele.63.nc
+        module subroutine ncdg_station_close(self)
+            !! Close a station output file, and flush all IDs.
+
+            implicit none
+
+            class(ncdg_station), intent(inout) :: self
+            !! The wrapper object of the file
+        end subroutine ncdg_station_close
+
+        module subroutine ncdg_station_set_metadata(self)
+            !! Set variables, dimensions, and metadata for a nodal
             !! output file.
 
             implicit none
 
-            class(ncdg_maxele), intent(inout) :: self
+            class(ncdg_station), intent(inout) :: self
             !! The wrapper object of the file
-            integer, intent(in):: nt
-            !! Number of time steps. This corresponds to
-            !! [[global(module):nt(variable)]] or nf90_unlimited.
-            integer, intent(in):: np
-            !! Number of nodes. This corresponds to
-            !! [[global(module):np(variable)]].
-            integer, intent(in) :: ne
-            !! Number of elements. This corresponds to
-            !! [[global(module):ne(variable)]].
-            integer, intent(in) :: nhy
-            !! The number of vertices per element. This corresponds to
-            !! [[global(module):nhy(variable)]].
-            integer, intent(in) :: nope
-            !! The number of elevation boundary segments. This corresponds
-            !! to [[global(module):nope(variable)]].
-            integer, intent(in) :: neta
-            !! The number of elevation boundary nodes. This corresponds
-            !! to [[global(module):neta(variable)]].
-            integer, intent(in) :: max_nvdll
-            !! The maximum number of nodes in a given elevation
-            !! boundary segment. This corresponds the maximum value
-            !! of [[global(module):nvdll(variable)]].
-            integer, intent(in) :: nbou
-            !! The number of normal flow (discharge) boundary
-            !! segments. This corresponds to
-            !! [[global(module):nbou(variable)]].
-            integer, intent(in) :: nvel
-            !! The number of normal flow (discharge) boundary nodes.
-            !! This corresponds to
-            !! [[global(module):nvel(variable)]].
-            integer, intent(in) :: max_nvell
-            !! The maximum number of nodes in a given normal flow
-            !! (discharge) boundary segment. This corresponds to
-            !! the maximum value of
-            !! [[global(module):nvell(variable)]].
-            integer, intent(in) :: ics
-            !! Mesh type. This corresponds to
-            !! [[global(module):ics(variable)]]
-        end subroutine ncdg_maxele_set_metadata
+        end subroutine ncdg_station_set_metadata
 
     end interface
 
