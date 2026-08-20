@@ -7,10 +7,12 @@ module piodg
     !!         - piog_nodal
     !!             - piodg_nodal_scalar
     !!                 - piodg_63
+    !!                 - piodg_73
     !!             - piodg_nodal_scalar_max
     !!                 - piodg_maxele
     !!             - piodg_nodal_vector
     !!                 - piodg_64
+    !!                 - piodg_74
     !!         - piodg_station
 
     use netcdf, only : nf90_enotindefine
@@ -23,7 +25,7 @@ module piodg
 
     ! Only these specific child types are exposed to the public. The
     ! parent types are just for organization, exploiting inheritance.
-    public :: piodg_63, piodg_64, piodg_maxele
+    public :: piodg_63, piodg_64, piodg_73, piodg_74, piodg_maxele
 
     ! Begin type definitions
 
@@ -205,6 +207,15 @@ module piodg
 
     end type piodg_63
 
+    type, extends(piodg_nodal_scalar) :: piodg_73
+        !! fort.73.nc file editing object
+
+        contains
+
+        procedure, public :: open => piodg_73_open
+
+    end type piodg_73
+
     type, extends(piodg_nodal) :: piodg_nodal_scalar_max
         !! Generic nodal scalar max file editing object
 
@@ -276,6 +287,15 @@ module piodg
         procedure, public :: open => piodg_64_open
 
     end type piodg_64
+
+    type, extends(piodg_nodal_vector) :: piodg_74
+        !! fort.74.nc file editing object
+
+        contains
+
+        procedure, public :: open => piodg_74_open
+
+    end type piodg_74
 
     ! type, extends(piodg_file) :: piodg_station
     !     !! Generic DGSWEM station file parent type. This contains data
@@ -437,6 +457,28 @@ module piodg
             !! PIO open mode. Default is pio_nowrite.
         end subroutine piodg_63_open
 
+        ! piodg_73 subroutines
+        ! For fort.73.nc
+
+        module subroutine piodg_73_open(self, piosystem, path, piotype, omode)
+            !! Open a fort.73.nc output file, and set all IDs
+
+            implicit none
+
+            class(piodg_73), intent(inout) :: self
+            !! The wrapper object of the file
+            type(iosystem_desc_t), intent(inout), target :: piosystem
+            !! The PIO system object
+            character(len=*), optional, intent(in) :: path
+            !! Path and name for the NetCDF file. Default is whatever path is
+            !! already set. If the path is not already set and nothing is provided,
+            !! the program will assume fort.73.nc.
+            integer, optional, intent(in) :: piotype
+            !! PIO file and I/O type. Default is pio_iotype_netcdf4p.
+            integer, optional, intent(in) :: omode
+            !! PIO open mode. Default is pio_nowrite.
+        end subroutine piodg_73_open
+
         ! piodg_nodal_scalar_max subroutines
         ! Common to all nodal scalar max files
 
@@ -582,12 +624,34 @@ module piodg
             character(len=*), optional, intent(in) :: path
             !! Path and name for the NetCDF file. Default is whatever path is
             !! already set. If the path is not already set and nothing is provided,
-            !! the program will assume fort.63.nc.
+            !! the program will assume fort.64.nc.
             integer, optional, intent(in) :: piotype
             !! PIO file and I/O type. Default is pio_iotype_netcdf4p.
             integer, optional, intent(in) :: omode
             !! PIO open mode. Default is pio_nowrite.
         end subroutine piodg_64_open
+
+        ! piodg_74 subroutines
+        ! For fort.74.nc
+
+        module subroutine piodg_74_open(self, piosystem, path, piotype, omode)
+            !! Open a fort.74.nc output file, and set all IDs
+
+            implicit none
+
+            class(piodg_74), intent(inout) :: self
+            !! The wrapper object of the file
+            type(iosystem_desc_t), intent(inout), target :: piosystem
+            !! The PIO system object
+            character(len=*), optional, intent(in) :: path
+            !! Path and name for the NetCDF file. Default is whatever path is
+            !! already set. If the path is not already set and nothing is provided,
+            !! the program will assume fort.74.nc.
+            integer, optional, intent(in) :: piotype
+            !! PIO file and I/O type. Default is pio_iotype_netcdf4p.
+            integer, optional, intent(in) :: omode
+            !! PIO open mode. Default is pio_nowrite.
+        end subroutine piodg_74_open
 
         ! piodg_station subroutines
         ! Common to all station files

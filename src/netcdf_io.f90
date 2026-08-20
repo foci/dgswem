@@ -18,13 +18,15 @@ module netcdf_io
     ! *gw: nodal air pressure/wind velocity
 
     use netcdf, only : nf90_unlimited, nf90_write
-    use ncdg, only : ncdg_63, ncdg_64, ncdg_maxele
+    use ncdg, only : ncdg_63, ncdg_64, ncdg_73, ncdg_74, ncdg_maxele
 
     implicit none
 
     ! Committing the sin of global variables, for now
     type(ncdg_63) :: my_63
     type(ncdg_64) :: my_64
+    type(ncdg_73) :: my_73
+    type(ncdg_74) :: my_74
     type(ncdg_maxele) :: my_maxele
 
     ! Output counters
@@ -231,6 +233,82 @@ module netcdf_io
 
         ! nodal air pressure/wind velocity
         if (abs(noutgw) == 3) then
+            ! Create or open fort.73
+            inquire(file="fort.73.nc", exist=file_exists)
+            if (noutgw == -3 .or. .not. file_exists) then ! create new
+                call my_73%create()
+                call my_73%set_metadata( &
+                    nt=nf90_unlimited, &
+                    np=np, &
+                    ne=ne, &
+                    nhy=nhy, &
+                    nope=nope, &
+                    neta=neta, &
+                    max_nvdll=maxval(nvdll), &
+                    nbou=nbou, &
+                    nvel=nvel, &
+                    max_nvell=maxval(nvell), &
+                    ics=ics &
+                )
+                call my_73%write_mesh( &
+                    x=x, &
+                    y=y, &
+                    dp=dp, &
+                    nm=nm, &
+                    nhy=nhy, &
+                    ne=ne, &
+                    nope=nope, &
+                    neta=neta, &
+                    ibtypee=ibtypee, &
+                    nvdll=nvdll, &
+                    nbdv=nbdv, &
+                    nbou=nbou, &
+                    nvel=nvel, &
+                    ibtype=ibtype, &
+                    nvell=nvell, &
+                    nbvv=nbvv(:, 1:) &
+                )
+            else if (noutgw == 3) then ! append to existing
+                call my_73%open(mode=nf90_write)
+            end if
+            ! Create or open fort.74.nc
+            inquire(file="fort.74.nc", exist=file_exists)
+            if (noutgw == -3 .or. .not. file_exists) then ! create new
+                call my_74%create()
+                call my_74%set_metadata( &
+                    nt=nf90_unlimited, &
+                    np=np, &
+                    ne=ne, &
+                    nhy=nhy, &
+                    nope=nope, &
+                    neta=neta, &
+                    max_nvdll=maxval(nvdll), &
+                    nbou=nbou, &
+                    nvel=nvel, &
+                    max_nvell=maxval(nvell), &
+                    ics=ics &
+                )
+                call my_74%write_mesh( &
+                    x=x, &
+                    y=y, &
+                    dp=dp, &
+                    nm=nm, &
+                    nhy=nhy, &
+                    ne=ne, &
+                    nope=nope, &
+                    neta=neta, &
+                    ibtypee=ibtypee, &
+                    nvdll=nvdll, &
+                    nbdv=nbdv, &
+                    nbou=nbou, &
+                    nvel=nvel, &
+                    ibtype=ibtype, &
+                    nvell=nvell, &
+                    nbvv=nbvv(:, 1:) &
+                )
+            else if (noutgw == 3) then ! append to existing
+                call my_74%open(mode=nf90_write)
+            end if
         end if
 
         deallocate(ibtypee)
@@ -242,6 +320,7 @@ module netcdf_io
 
         use global, only : &
             eta2, etamax, time_a, uu2, vv2, &
+            pr2, wvnxout, wvnyout, &
             noute, noutv, noutc, noutm, & ! Whether to write to NetCDF
             noutge, noutgv, noutgc, noutgw, &
             ntcyse, ntcysv, ntcysc, ntcysm, & ! Start iteration
@@ -357,6 +436,17 @@ module netcdf_io
             if ((it > ntcysgw) .and. (it <= ntcyfgw) .or. force_write) then
                 nscougw = nscougw + 1
                 if (nscougw == nspoolgw .or. force_write) then
+                    call my_73%write_step( &
+                        t=time_a, &
+                        scalar=pr2, &
+                        sync=.false. &
+                    )
+                    call my_74%write_step( &
+                        t=time_a, &
+                        vector_u=wvnxout, &
+                        vector_v=wvnyout, &
+                        sync=.false. &
+                    )
                     nscougw = 0
                 end if
             end if
@@ -407,6 +497,8 @@ module netcdf_io
 
         ! nodal air pressure/wind velocity
         if (abs(noutgw) == 3) then
+            call my_73%close()
+            call my_74%close()
         end if
     end subroutine netcdf_close_files_serial
 

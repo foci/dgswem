@@ -21,7 +21,7 @@ module parallelio_io
     use pio, only : iosystem_desc_t, io_desc_t, pio_init, pio_finalize, &
         pio_iotype_netcdf4p, pio_rearr_box, pio_rearr_subset, pio_write, &
         pio_double, pio_initdecomp
-    use piodg, only : piodg_63, piodg_64, piodg_maxele
+    use piodg, only : piodg_63, piodg_64, piodg_73, piodg_74, piodg_maxele
     use pioutil, only : piofile_check_error
 
     implicit none
@@ -31,6 +31,8 @@ module parallelio_io
     ! PIODG variables
     type(piodg_63) :: my_63
     type(piodg_64) :: my_64
+    type(piodg_73) :: my_73
+    type(piodg_74) :: my_74
     type(piodg_maxele) :: my_maxele
 
     ! PIO variables
@@ -203,6 +205,8 @@ module parallelio_io
 
             ! nodal air pressure/wind velocity
             if (abs(noutgw) == 3) then
+                call my_73%open(my_iosystem, omode=pio_write)
+                call my_74%open(my_iosystem, omode=pio_write)
             end if
         end if
     end subroutine parallelio_open_files_parallel
@@ -212,6 +216,7 @@ module parallelio_io
 
         use global, only : &
             eta2, etamax, np, time_a, uu2, vv2, &
+            pr2, wvnxout, wvnyout, &
             noute, noutv, noutc, noutm, & ! Whether to write to NetCDF
             noutge, noutgv, noutgc, noutgw, &
             ntcyse, ntcysv, ntcysc, ntcysm, & ! Start iteration
@@ -331,6 +336,19 @@ module parallelio_io
             if ((it > ntcysgw) .and. (it <= ntcyfgw) .or. force_write) then
                 nscougw = nscougw + 1
                 if (nscougw == nspoolgw .or. force_write) then
+                    call my_73%write_step( &
+                        t=time_a, &
+                        scalar=pr2(1:np), &
+                        piodesc=my_iodesc, &
+                        sync=.true. &
+                    )
+                    call my_74%write_step( &
+                        t=time_a, &
+                        vector_u=wvnxout(1:np), &
+                        vector_v=wvnyout(1:np), &
+                        piodesc=my_iodesc, &
+                        sync=.true. &
+                    )
                     nscougw = 0
                 end if
             end if
@@ -384,6 +402,8 @@ module parallelio_io
 
         ! nodal air pressure/wind velocity
         if (abs(noutgw) == 3) then
+            call my_73%close()
+            call my_74%close()
         end if
 
         ! Deallocate associated arrays
