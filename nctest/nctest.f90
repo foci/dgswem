@@ -1,13 +1,13 @@
 module nctest_util
 
-    use ncdg, only: ncdg_63, ncdg_64
+    use ncdg, only: ncdg_ele, ncdg_vel
 
     implicit none
 
     contains
 
-    subroutine print_metadata_63(file)
-        type(ncdg_63), intent(in) :: file
+    subroutine print_metadata_ele(file)
+        type(ncdg_ele), intent(in) :: file
 
         print *, "Printing metadata:"
 
@@ -48,10 +48,10 @@ module nctest_util
 
         print *, "fort.63.nc Variable IDs"
         print *, file%scalar_varname, file%scalar_varid
-    end subroutine print_metadata_63
+    end subroutine print_metadata_ele
 
-    subroutine print_metadata_64(file)
-        type(ncdg_64), intent(in) :: file
+    subroutine print_metadata_vel(file)
+        type(ncdg_vel), intent(in) :: file
 
         print *, "Printing metadata:"
 
@@ -93,7 +93,7 @@ module nctest_util
         print *, "fort.64.nc Variable IDs"
         print *, file%vector_u_varname, file%vector_u_varid
         print *, file%vector_v_varname, file%vector_v_varid
-    end subroutine print_metadata_64
+    end subroutine print_metadata_vel
 
 end module nctest_util
 
@@ -101,14 +101,14 @@ end module nctest_util
 
 program nctest
 
-    use ncdg, only : ncdg_63, ncdg_64, ncdg_maxele
+    use ncdg, only : ncdg_ele, ncdg_vel, ncdg_maxele
     use nctest_util
     use netcdf
 
     implicit none
 
-    type(ncdg_63) :: my_63
-    type(ncdg_64) :: my_64
+    type(ncdg_ele) :: my_ele
+    type(ncdg_vel) :: my_vel
     type(ncdg_maxele) :: my_maxele
     !type(ncdg_maxvel) :: my_maxvel
 
@@ -147,19 +147,19 @@ program nctest
 
     ! Test the NetCDF tools
     print *, "Creating fort.63.nc"
-    call my_63%create()
+    call my_ele%create()
     print *, "Creating fort.64.nc"
-    call my_64%create()
+    call my_vel%create()
     print *, "Creating maxele.63.nc"
     call my_maxele%create()
     !print *, "Creating maxvel.64.nc"
     !call my_maxvel%create()
     if (write_metadata) then
-        call print_metadata_63(my_63)
-        call print_metadata_64(my_64)
+        call print_metadata_ele(my_ele)
+        call print_metadata_vel(my_vel)
     endif
     print *, "Setting metadata"
-    call my_63%set_metadata( &
+    call my_ele%set_metadata( &
         nt=nf90_unlimited, &
         np=np, &
         ne=ne, &
@@ -172,7 +172,7 @@ program nctest
         max_nvell=maxval(nvell), &
         ics=ics &
     )
-    call my_64%set_metadata( &
+    call my_vel%set_metadata( &
         nt=nf90_unlimited, &
         np=np, &
         ne=ne, &
@@ -199,31 +199,31 @@ program nctest
         ics=ics &
     )
     if (write_metadata) then
-        call print_metadata_63(my_63)
-        call print_metadata_64(my_64)
+        call print_metadata_ele(my_ele)
+        call print_metadata_vel(my_vel)
     endif
     print *, "Closing fort.63.nc"
-    call my_63%close()
+    call my_ele%close()
     print *, "Closing fort.64.nc"
-    call my_64%close()
+    call my_vel%close()
     print *, "Closing maxele.63.nc"
     call my_maxele%close()
     if (write_metadata) then
-        call print_metadata_63(my_63)
-        call print_metadata_64(my_64)
+        call print_metadata_ele(my_ele)
+        call print_metadata_vel(my_vel)
     endif
     print *, "Opening fort.63.nc"
-    call my_63%open(mode=nf90_write)
+    call my_ele%open(mode=nf90_write)
     print *, "Opening fort.64.nc"
-    call my_64%open(mode=nf90_write)
+    call my_vel%open(mode=nf90_write)
     print *, "Opening maxele.63.nc"
     call my_maxele%open(mode=nf90_write)
     if (write_metadata) then
-        call print_metadata_63(my_63)
-        call print_metadata_64(my_64)
+        call print_metadata_ele(my_ele)
+        call print_metadata_vel(my_vel)
     endif
     print *, "Writing mesh data"
-    call my_63%write_mesh( &
+    call my_ele%write_mesh( &
         x=x, &
         y=y, &
         dp=dp, &
@@ -241,7 +241,7 @@ program nctest
         nvell=nvell, &
         nbvv=nbvv &
     )
-    call my_64%write_mesh( &
+    call my_vel%write_mesh( &
         x=x, &
         y=y, &
         dp=dp, &
@@ -278,11 +278,11 @@ program nctest
         nbvv=nbvv &
     )
     print *, "Writing step"
-    call my_63%write_step( &
+    call my_ele%write_step( &
         t=0.0, &
         scalar=[1.0, 2.0, 3.0] &
     )
-    call my_64%write_step( &
+    call my_vel%write_step( &
         t=0.0, &
         vector_u=[1.0, 2.0, 3.0], &
         vector_v=[4.0, 5.0, 6.0] &
@@ -292,11 +292,11 @@ program nctest
         scalar=[1.0, 2.0, 3.0] &
     )
     print *, "Writing step"
-    call my_63%write_step( &
+    call my_ele%write_step( &
         t=1.0, &
         scalar=[4.0, 5.0, 6.0] &
     )
-    call my_64%write_step( &
+    call my_vel%write_step( &
         t=1.0, &
         vector_u=[7.0, 8.0, 9.0], &
         vector_v=[10.0, 11.0, 12.0] &
@@ -306,11 +306,11 @@ program nctest
         scalar=[2.0, 2.0, 3.0] &
     )
     print *, "Writing step"
-    call my_63%write_step( &
+    call my_ele%write_step( &
         t=2.0, &
         scalar=[7.0, 8.0, 9.0] &
     )
-    call my_64%write_step( &
+    call my_vel%write_step( &
         t=2.0, &
         vector_u=[13.0, 14.0, 15.0], &
         vector_v=[16.0, 17.0, 18.0] &
@@ -320,9 +320,9 @@ program nctest
         scalar=[2.0, 1.0, 4.0] & ! Bad zeta_max update at position 2
     )
     print *, "Closing fort.63.nc"
-    call my_63%close()
+    call my_ele%close()
     print *, "Closing fort.64.nc"
-    call my_64%close()
+    call my_vel%close()
     print *, "Closing maxele.63.nc"
     call my_maxele%close()
     print *, "Program complete"

@@ -6,13 +6,13 @@ module piodg
     !!     - piodg_file
     !!         - piog_nodal
     !!             - piodg_nodal_scalar
-    !!                 - piodg_63
-    !!                 - piodg_73
+    !!                 - piodg_ele
+    !!                 - piodg_pr
     !!             - piodg_nodal_scalar_max
     !!                 - piodg_maxele
     !!             - piodg_nodal_vector
-    !!                 - piodg_64
-    !!                 - piodg_74
+    !!                 - piodg_vel
+    !!                 - piodg_wvel
     !!         - piodg_station
 
     use netcdf, only : nf90_enotindefine
@@ -25,7 +25,7 @@ module piodg
 
     ! Only these specific child types are exposed to the public. The
     ! parent types are just for organization, exploiting inheritance.
-    public :: piodg_63, piodg_64, piodg_73, piodg_74, piodg_maxele
+    public :: piodg_ele, piodg_vel, piodg_pr, piodg_wvel, piodg_maxele
 
     ! Begin type definitions
 
@@ -198,23 +198,23 @@ module piodg
 
     end type piodg_nodal_scalar
 
-    type, extends(piodg_nodal_scalar) :: piodg_63
+    type, extends(piodg_nodal_scalar) :: piodg_ele
         !! fort.63.nc file editing object
 
         contains
 
-        procedure, public :: open => piodg_63_open
+        procedure, public :: open => piodg_ele_open
 
-    end type piodg_63
+    end type piodg_ele
 
-    type, extends(piodg_nodal_scalar) :: piodg_73
+    type, extends(piodg_nodal_scalar) :: piodg_pr
         !! fort.73.nc file editing object
 
         contains
 
-        procedure, public :: open => piodg_73_open
+        procedure, public :: open => piodg_pr_open
 
-    end type piodg_73
+    end type piodg_pr
 
     type, extends(piodg_nodal) :: piodg_nodal_scalar_max
         !! Generic nodal scalar max file editing object
@@ -279,23 +279,23 @@ module piodg
 
     end type piodg_nodal_vector
 
-    type, extends(piodg_nodal_vector) :: piodg_64
+    type, extends(piodg_nodal_vector) :: piodg_vel
         !! fort.64.nc file editing object
 
         contains
 
-        procedure, public :: open => piodg_64_open
+        procedure, public :: open => piodg_vel_open
 
-    end type piodg_64
+    end type piodg_vel
 
-    type, extends(piodg_nodal_vector) :: piodg_74
+    type, extends(piodg_nodal_vector) :: piodg_wvel
         !! fort.74.nc file editing object
 
         contains
 
-        procedure, public :: open => piodg_74_open
+        procedure, public :: open => piodg_wvel_open
 
-    end type piodg_74
+    end type piodg_wvel
 
     ! type, extends(piodg_file) :: piodg_station
     !     !! Generic DGSWEM station file parent type. This contains data
@@ -435,15 +435,15 @@ module piodg
             !! Whether to write to disk immediately. Default is .false.
         end subroutine piodg_nodal_scalar_write_step
 
-        ! piodg_63 subroutines
+        ! piodg_ele subroutines
         ! For fort.63.nc
 
-        module subroutine piodg_63_open(self, piosystem, path, piotype, omode)
+        module subroutine piodg_ele_open(self, piosystem, path, piotype, omode)
             !! Open a fort.63.nc output file, and set all IDs
 
             implicit none
 
-            class(piodg_63), intent(inout) :: self
+            class(piodg_ele), intent(inout) :: self
             !! The wrapper object of the file
             type(iosystem_desc_t), intent(inout), target :: piosystem
             !! The PIO system object
@@ -455,17 +455,17 @@ module piodg
             !! PIO file and I/O type. Default is pio_iotype_netcdf4p.
             integer, optional, intent(in) :: omode
             !! PIO open mode. Default is pio_nowrite.
-        end subroutine piodg_63_open
+        end subroutine piodg_ele_open
 
-        ! piodg_73 subroutines
+        ! piodg_pr subroutines
         ! For fort.73.nc
 
-        module subroutine piodg_73_open(self, piosystem, path, piotype, omode)
+        module subroutine piodg_pr_open(self, piosystem, path, piotype, omode)
             !! Open a fort.73.nc output file, and set all IDs
 
             implicit none
 
-            class(piodg_73), intent(inout) :: self
+            class(piodg_pr), intent(inout) :: self
             !! The wrapper object of the file
             type(iosystem_desc_t), intent(inout), target :: piosystem
             !! The PIO system object
@@ -477,7 +477,7 @@ module piodg
             !! PIO file and I/O type. Default is pio_iotype_netcdf4p.
             integer, optional, intent(in) :: omode
             !! PIO open mode. Default is pio_nowrite.
-        end subroutine piodg_73_open
+        end subroutine piodg_pr_open
 
         ! piodg_nodal_scalar_max subroutines
         ! Common to all nodal scalar max files
@@ -609,15 +609,15 @@ module piodg
             !! Whether to write to disk immediately. Default is .false.
         end subroutine piodg_nodal_vector_write_step
 
-        ! piodg_64 subroutines
+        ! piodg_vel subroutines
         ! For fort.64.nc
 
-        module subroutine piodg_64_open(self, piosystem, path, piotype, omode)
+        module subroutine piodg_vel_open(self, piosystem, path, piotype, omode)
             !! Open a fort.64.nc output file, and set all IDs
 
             implicit none
 
-            class(piodg_64), intent(inout) :: self
+            class(piodg_vel), intent(inout) :: self
             !! The wrapper object of the file
             type(iosystem_desc_t), intent(inout), target :: piosystem
             !! The PIO system object
@@ -629,17 +629,17 @@ module piodg
             !! PIO file and I/O type. Default is pio_iotype_netcdf4p.
             integer, optional, intent(in) :: omode
             !! PIO open mode. Default is pio_nowrite.
-        end subroutine piodg_64_open
+        end subroutine piodg_vel_open
 
-        ! piodg_74 subroutines
+        ! piodg_wvel subroutines
         ! For fort.74.nc
 
-        module subroutine piodg_74_open(self, piosystem, path, piotype, omode)
+        module subroutine piodg_wvel_open(self, piosystem, path, piotype, omode)
             !! Open a fort.74.nc output file, and set all IDs
 
             implicit none
 
-            class(piodg_74), intent(inout) :: self
+            class(piodg_wvel), intent(inout) :: self
             !! The wrapper object of the file
             type(iosystem_desc_t), intent(inout), target :: piosystem
             !! The PIO system object
@@ -651,7 +651,7 @@ module piodg
             !! PIO file and I/O type. Default is pio_iotype_netcdf4p.
             integer, optional, intent(in) :: omode
             !! PIO open mode. Default is pio_nowrite.
-        end subroutine piodg_74_open
+        end subroutine piodg_wvel_open
 
         ! piodg_station subroutines
         ! Common to all station files

@@ -2,13 +2,13 @@ module netcdf_prep
     !! Module for initializing NetCDF files.
 
     use netcdf, only : nf90_unlimited
-    use ncdg, only : ncdg_63, ncdg_64, ncdg_maxele
+    use ncdg, only : ncdg_ele, ncdg_vel, ncdg_maxele
 
     implicit none
 
     ! Committing the sin of global variables, for now
-    type(ncdg_63) :: my_63
-    type(ncdg_64) :: my_64
+    type(ncdg_ele) :: my_ele
+    type(ncdg_vel) :: my_vel
     type(ncdg_maxele) :: my_maxele
 
     contains
@@ -59,8 +59,8 @@ module netcdf_prep
         ! nodal elevation
         if (abs(noutge) == 3) then
             ! Create fort.63
-            call my_63%create()
-            call my_63%set_metadata( &
+            call my_ele%create()
+            call my_ele%set_metadata( &
                 nt=nf90_unlimited, &
                 np=nnodg, &
                 ne=nelg, &
@@ -73,7 +73,7 @@ module netcdf_prep
                 max_nvell=maxval(nvell), &
                 ics=ics &
             )
-            call my_63%write_mesh( &
+            call my_ele%write_mesh( &
                 x=x, &
                 y=y, &
                 dp=dp, &
@@ -92,7 +92,7 @@ module netcdf_prep
                 nbvv=nbvv(:, 1:), &
                 transpose_nm=.false. &
             )
-            call my_63%close()
+            call my_ele%close()
             ! Create maxele.63
             call my_maxele%create()
             call my_maxele%set_metadata( &
@@ -133,8 +133,8 @@ module netcdf_prep
         ! nodal velocity
         if (abs(noutgv) == 3) then
             ! Create fort.64
-            call my_64%create()
-            call my_64%set_metadata( &
+            call my_vel%create()
+            call my_vel%set_metadata( &
                 nt=nf90_unlimited, &
                 np=nnodg, &
                 ne=nelg, &
@@ -147,7 +147,7 @@ module netcdf_prep
                 max_nvell=maxval(nvell), &
                 ics=ics &
             )
-            call my_64%write_mesh( &
+            call my_vel%write_mesh( &
                 x=x, &
                 y=y, &
                 dp=dp, &
@@ -166,7 +166,7 @@ module netcdf_prep
                 nbvv=nbvv(:, 1:), &
                 transpose_nm=.false. &
             )
-            call my_64%close()
+            call my_vel%close()
         end if
 
         ! nodal concentration

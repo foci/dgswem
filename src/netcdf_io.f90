@@ -18,15 +18,15 @@ module netcdf_io
     ! *gw: nodal air pressure/wind velocity
 
     use netcdf, only : nf90_unlimited, nf90_write
-    use ncdg, only : ncdg_63, ncdg_64, ncdg_73, ncdg_74, ncdg_maxele
+    use ncdg, only : ncdg_ele, ncdg_vel, ncdg_pr, ncdg_wvel, ncdg_maxele
 
     implicit none
 
     ! Committing the sin of global variables, for now
-    type(ncdg_63) :: my_63
-    type(ncdg_64) :: my_64
-    type(ncdg_73) :: my_73
-    type(ncdg_74) :: my_74
+    type(ncdg_ele) :: my_ele
+    type(ncdg_vel) :: my_vel
+    type(ncdg_pr) :: my_pr
+    type(ncdg_wvel) :: my_wvel
     type(ncdg_maxele) :: my_maxele
 
     ! Output counters
@@ -110,8 +110,8 @@ module netcdf_io
             ! Create or open fort.63
             inquire(file="fort.63.nc", exist=file_exists)
             if (noutge == -3 .or. .not. file_exists) then ! create new
-                call my_63%create()
-                call my_63%set_metadata( &
+                call my_ele%create()
+                call my_ele%set_metadata( &
                     nt=nf90_unlimited, &
                     np=np, &
                     ne=ne, &
@@ -124,7 +124,7 @@ module netcdf_io
                     max_nvell=maxval(nvell), &
                     ics=ics &
                 )
-                call my_63%write_mesh( &
+                call my_ele%write_mesh( &
                     x=x, &
                     y=y, &
                     dp=dp, &
@@ -143,7 +143,7 @@ module netcdf_io
                     nbvv=nbvv(:, 1:) &
                 )
             else if (noutge == 3) then ! append to existing
-                call my_63%open(mode=nf90_write)
+                call my_ele%open(mode=nf90_write)
             end if
             ! Create or open maxele.63
             inquire(file="maxele.63.nc", exist=file_exists)
@@ -190,8 +190,8 @@ module netcdf_io
             ! Create or open fort.64.nc
             inquire(file="fort.64.nc", exist=file_exists)
             if (noutgv == -3 .or. .not. file_exists) then ! create new
-                call my_64%create()
-                call my_64%set_metadata( &
+                call my_vel%create()
+                call my_vel%set_metadata( &
                     nt=nf90_unlimited, &
                     np=np, &
                     ne=ne, &
@@ -204,7 +204,7 @@ module netcdf_io
                     max_nvell=maxval(nvell), &
                     ics=ics &
                 )
-                call my_64%write_mesh( &
+                call my_vel%write_mesh( &
                     x=x, &
                     y=y, &
                     dp=dp, &
@@ -223,7 +223,7 @@ module netcdf_io
                     nbvv=nbvv(:, 1:) &
                 )
             else if (noutgv == 3) then ! append to existing
-                call my_64%open(mode=nf90_write)
+                call my_vel%open(mode=nf90_write)
             end if
         end if
 
@@ -236,8 +236,8 @@ module netcdf_io
             ! Create or open fort.73
             inquire(file="fort.73.nc", exist=file_exists)
             if (noutgw == -3 .or. .not. file_exists) then ! create new
-                call my_73%create()
-                call my_73%set_metadata( &
+                call my_pr%create()
+                call my_pr%set_metadata( &
                     nt=nf90_unlimited, &
                     np=np, &
                     ne=ne, &
@@ -250,7 +250,7 @@ module netcdf_io
                     max_nvell=maxval(nvell), &
                     ics=ics &
                 )
-                call my_73%write_mesh( &
+                call my_pr%write_mesh( &
                     x=x, &
                     y=y, &
                     dp=dp, &
@@ -269,13 +269,13 @@ module netcdf_io
                     nbvv=nbvv(:, 1:) &
                 )
             else if (noutgw == 3) then ! append to existing
-                call my_73%open(mode=nf90_write)
+                call my_pr%open(mode=nf90_write)
             end if
             ! Create or open fort.74.nc
             inquire(file="fort.74.nc", exist=file_exists)
             if (noutgw == -3 .or. .not. file_exists) then ! create new
-                call my_74%create()
-                call my_74%set_metadata( &
+                call my_wvel%create()
+                call my_wvel%set_metadata( &
                     nt=nf90_unlimited, &
                     np=np, &
                     ne=ne, &
@@ -288,7 +288,7 @@ module netcdf_io
                     max_nvell=maxval(nvell), &
                     ics=ics &
                 )
-                call my_74%write_mesh( &
+                call my_wvel%write_mesh( &
                     x=x, &
                     y=y, &
                     dp=dp, &
@@ -307,7 +307,7 @@ module netcdf_io
                     nbvv=nbvv(:, 1:) &
                 )
             else if (noutgw == 3) then ! append to existing
-                call my_74%open(mode=nf90_write)
+                call my_wvel%open(mode=nf90_write)
             end if
         end if
 
@@ -389,7 +389,7 @@ module netcdf_io
             if ((it > ntcysge) .and. (it <= ntcyfge) .or. force_write) then
                 nscouge = nscouge + 1
                 if (nscouge == nspoolge .or. force_write) then
-                    call my_63%write_step( &
+                    call my_ele%write_step( &
                         t=time_a, &
                         scalar=eta2, &
                         sync=.false. &
@@ -410,7 +410,7 @@ module netcdf_io
             if ((it > ntcysgv) .and. (it <= ntcyfgv) .or. force_write) then
                 nscougv = nscougv + 1
                 if (nscougv == nspoolgv .or. force_write) then
-                    call my_64%write_step( &
+                    call my_vel%write_step( &
                         t=time_a, &
                         vector_u=uu2, &
                         vector_v=vv2, &
@@ -436,12 +436,12 @@ module netcdf_io
             if ((it > ntcysgw) .and. (it <= ntcyfgw) .or. force_write) then
                 nscougw = nscougw + 1
                 if (nscougw == nspoolgw .or. force_write) then
-                    call my_73%write_step( &
+                    call my_pr%write_step( &
                         t=time_a, &
                         scalar=pr2, &
                         sync=.false. &
                     )
-                    call my_74%write_step( &
+                    call my_wvel%write_step( &
                         t=time_a, &
                         vector_u=wvnxout, &
                         vector_v=wvnyout, &
@@ -482,13 +482,13 @@ module netcdf_io
 
         ! nodal elevation
         if (abs(noutge) == 3) then
-            call my_63%close()
+            call my_ele%close()
             call my_maxele%close()
         end if
 
         ! nodal velocity
         if (abs(noutgv) == 3) then
-            call my_64%close()
+            call my_vel%close()
         end if
 
         ! nodal concentration
@@ -497,8 +497,8 @@ module netcdf_io
 
         ! nodal air pressure/wind velocity
         if (abs(noutgw) == 3) then
-            call my_73%close()
-            call my_74%close()
+            call my_pr%close()
+            call my_wvel%close()
         end if
     end subroutine netcdf_close_files_serial
 

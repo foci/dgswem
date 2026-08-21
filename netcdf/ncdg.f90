@@ -6,13 +6,13 @@ module ncdg
     !!     - ncdg_file
     !!         - ncdg_nodal
     !!             - ncdg_nodal_scalar
-    !!                 - ncdg_63
-    !!                 - ncdg_73
+    !!                 - ncdg_ele
+    !!                 - ncdg_pr
     !!             - ncdg_nodal_scalar_max
     !!                 - ncdg_maxele
     !!             - ncdg_nodal_vector
-    !!                 - ncdg_64
-    !!                 - ncdg_74
+    !!                 - ncdg_vel
+    !!                 - ncdg_wvel
     !!         - ncdg_station
 
     use netcdf
@@ -24,7 +24,7 @@ module ncdg
 
     ! Only these specific child types are exposed to the public. The
     ! parent types are just for organization, exploiting inheritance.
-    public :: ncdg_63, ncdg_64, ncdg_73, ncdg_74, ncdg_maxele
+    public :: ncdg_ele, ncdg_vel, ncdg_pr, ncdg_wvel, ncdg_maxele
 
     ! Intra-module constants
 
@@ -205,27 +205,27 @@ module ncdg
 
     end type ncdg_nodal_scalar
 
-    type, extends(ncdg_nodal_scalar) :: ncdg_63
+    type, extends(ncdg_nodal_scalar) :: ncdg_ele
         !! fort.63.nc file editing object
 
         contains
 
-        procedure, public :: create => ncdg_63_create
-        procedure, public :: open => ncdg_63_open
-        procedure, public :: set_metadata => ncdg_63_set_metadata
+        procedure, public :: create => ncdg_ele_create
+        procedure, public :: open => ncdg_ele_open
+        procedure, public :: set_metadata => ncdg_ele_set_metadata
 
-    end type ncdg_63
+    end type ncdg_ele
 
-    type, extends(ncdg_nodal_scalar) :: ncdg_73
+    type, extends(ncdg_nodal_scalar) :: ncdg_pr
         !! fort.73.nc file editing object
 
         contains
 
-        procedure, public :: create => ncdg_73_create
-        procedure, public :: open => ncdg_73_open
-        procedure, public :: set_metadata => ncdg_73_set_metadata
+        procedure, public :: create => ncdg_pr_create
+        procedure, public :: open => ncdg_pr_open
+        procedure, public :: set_metadata => ncdg_pr_set_metadata
 
-    end type ncdg_73
+    end type ncdg_pr
 
     type, extends (ncdg_nodal) :: ncdg_nodal_scalar_max
         !! Generic nodal scalar max file editing object
@@ -292,27 +292,27 @@ module ncdg
 
     end type ncdg_nodal_vector
 
-    type, extends(ncdg_nodal_vector) :: ncdg_64
+    type, extends(ncdg_nodal_vector) :: ncdg_vel
         !! fort.64.nc file editing object
 
         contains
 
-        procedure, public :: create => ncdg_64_create
-        procedure, public :: open => ncdg_64_open
-        procedure, public :: set_metadata => ncdg_64_set_metadata
+        procedure, public :: create => ncdg_vel_create
+        procedure, public :: open => ncdg_vel_open
+        procedure, public :: set_metadata => ncdg_vel_set_metadata
 
-    end type ncdg_64
+    end type ncdg_vel
 
-    type, extends(ncdg_nodal_vector) :: ncdg_74
+    type, extends(ncdg_nodal_vector) :: ncdg_wvel
         !! fort.74.nc file editing object
 
         contains
 
-        procedure, public :: create => ncdg_74_create
-        procedure, public :: open => ncdg_74_open
-        procedure, public :: set_metadata => ncdg_74_set_metadata
+        procedure, public :: create => ncdg_wvel_create
+        procedure, public :: open => ncdg_wvel_open
+        procedure, public :: set_metadata => ncdg_wvel_set_metadata
 
-    end type ncdg_74
+    end type ncdg_wvel
 
     type, extends(ncdg_file) :: ncdg_station
         !! Generic DGSWEM station file parent type. This contains data
@@ -582,12 +582,12 @@ module ncdg
             !! Whether to write to disk immediately. Default is .false.
         end subroutine ncdg_nodal_scalar_write_step
 
-        ! ncdg_63 subroutines
+        ! ncdg_ele subroutines
         ! For fort.63.nc
 
-        module subroutine ncdg_63_create(self, path, cmode)
+        module subroutine ncdg_ele_create(self, path, cmode)
             !! Initialization function for
-            !! [[ncdg(module):ncdg_63(type)]]. Left in define mode.
+            !! [[ncdg(module):ncdg_ele(type)]]. Left in define mode.
             !!
             !! @warning "File Not Closed"
             !! After initialization, the underlying file object is in
@@ -596,20 +596,20 @@ module ncdg
 
             implicit none
 
-            class(ncdg_63), intent(inout) :: self
+            class(ncdg_ele), intent(inout) :: self
             !! The wrapper object of the file
             character(len=*), optional, intent(in) :: path
             !! Path and name for the NetCDF file. Default is fort.63.nc.
             integer, optional, intent(in) :: cmode
             !! NetCDF creation mode. Default is ior(nf90_noclobber, nf90_netcdf4).
-        end subroutine ncdg_63_create
+        end subroutine ncdg_ele_create
 
-        module subroutine ncdg_63_open(self, path, mode)
+        module subroutine ncdg_ele_open(self, path, mode)
             !! Open a fort.63.nc output file, and set all IDs.
 
             implicit none
 
-            class(ncdg_63), intent(inout) :: self
+            class(ncdg_ele), intent(inout) :: self
             !! The wrapper object of the file
             character(len=*), optional, intent(in) :: path
             !! Path and name for the NetCDF file. Default is whatever path is
@@ -617,16 +617,16 @@ module ncdg
             !! the program will assume fort.63.nc.
             integer, optional, intent(in) :: mode
             !! NetCDF open mode. Default is nf90_nowrite, i.e. read-only.
-        end subroutine ncdg_63_open
+        end subroutine ncdg_ele_open
 
-        module subroutine ncdg_63_set_metadata(self, nt, np, ne, &
+        module subroutine ncdg_ele_set_metadata(self, nt, np, ne, &
             nhy, nope, neta, max_nvdll, nbou, nvel, max_nvell, ics)
             !! Set variables, dimensions, and metadata for a fort.63.nc
             !! output file.
 
             implicit none
 
-            class(ncdg_63), intent(inout) :: self
+            class(ncdg_ele), intent(inout) :: self
             !! The wrapper object of the file
             integer, intent(in):: nt
             !! Number of time steps. This corresponds to
@@ -666,14 +666,14 @@ module ncdg
             integer, intent(in) :: ics
             !! Mesh type. This corresponds to
             !! [[global(module):ics(variable)]]
-        end subroutine ncdg_63_set_metadata
+        end subroutine ncdg_ele_set_metadata
 
-        ! ncdg_73 subroutines
+        ! ncdg_pr subroutines
         ! For fort.73.nc
 
-        module subroutine ncdg_73_create(self, path, cmode)
+        module subroutine ncdg_pr_create(self, path, cmode)
             !! Initialization function for
-            !! [[ncdg(module):ncdg_73(type)]]. Left in define mode.
+            !! [[ncdg(module):ncdg_pr(type)]]. Left in define mode.
             !!
             !! @warning "File Not Closed"
             !! After initialization, the underlying file object is in
@@ -682,20 +682,20 @@ module ncdg
 
             implicit none
 
-            class(ncdg_73), intent(inout) :: self
+            class(ncdg_pr), intent(inout) :: self
             !! The wrapper object of the file
             character(len=*), optional, intent(in) :: path
             !! Path and name for the NetCDF file. Default is fort.73.nc.
             integer, optional, intent(in) :: cmode
             !! NetCDF creation mode. Default is ior(nf90_noclobber, nf90_netcdf4).
-        end subroutine ncdg_73_create
+        end subroutine ncdg_pr_create
 
-        module subroutine ncdg_73_open(self, path, mode)
+        module subroutine ncdg_pr_open(self, path, mode)
             !! Open a fort.73.nc output file, and set all IDs.
 
             implicit none
 
-            class(ncdg_73), intent(inout) :: self
+            class(ncdg_pr), intent(inout) :: self
             !! The wrapper object of the file
             character(len=*), optional, intent(in) :: path
             !! Path and name for the NetCDF file. Default is whatever path is
@@ -703,16 +703,16 @@ module ncdg
             !! the program will assume fort.73.nc.
             integer, optional, intent(in) :: mode
             !! NetCDF open mode. Default is nf90_nowrite, i.e. read-only.
-        end subroutine ncdg_73_open
+        end subroutine ncdg_pr_open
 
-        module subroutine ncdg_73_set_metadata(self, nt, np, ne, &
+        module subroutine ncdg_pr_set_metadata(self, nt, np, ne, &
             nhy, nope, neta, max_nvdll, nbou, nvel, max_nvell, ics)
             !! Set variables, dimensions, and metadata for a fort.73.nc
             !! output file.
 
             implicit none
 
-            class(ncdg_73), intent(inout) :: self
+            class(ncdg_pr), intent(inout) :: self
             !! The wrapper object of the file
             integer, intent(in):: nt
             !! Number of time steps. This corresponds to
@@ -752,7 +752,7 @@ module ncdg
             integer, intent(in) :: ics
             !! Mesh type. This corresponds to
             !! [[global(module):ics(variable)]]
-        end subroutine ncdg_73_set_metadata
+        end subroutine ncdg_pr_set_metadata
 
         ! ncdg_nodal_scalar_max subroutines
         ! Common to all nodal vector files having a max variable
@@ -931,12 +931,12 @@ module ncdg
             !! Whether to write to disk immediately. Default is .false.
         end subroutine ncdg_nodal_vector_write_step
 
-        ! ncdg_64 subroutines
+        ! ncdg_vel subroutines
         ! For fort.64.nc
 
-        module subroutine ncdg_64_create(self, path, cmode)
+        module subroutine ncdg_vel_create(self, path, cmode)
             !! Initialization function for
-            !! [[ncdg(module):ncdg_64(type)]]. Left in define mode.
+            !! [[ncdg(module):ncdg_vel(type)]]. Left in define mode.
             !!
             !! @warning "File Not Closed"
             !! After initialization, the underlying file object is in
@@ -945,20 +945,20 @@ module ncdg
 
             implicit none
 
-            class(ncdg_64), intent(inout) :: self
+            class(ncdg_vel), intent(inout) :: self
             !! The wrapper object of the file
             character(len=*), optional, intent(in) :: path
             !! Path and name for the NetCDF file. Default is fort.64.nc.
             integer, optional, intent(in) :: cmode
             !! NetCDF creation mode. Default is ior(nf90_noclobber, nf90_netcdf4).
-        end subroutine ncdg_64_create
+        end subroutine ncdg_vel_create
 
-        module subroutine ncdg_64_open(self, path, mode)
+        module subroutine ncdg_vel_open(self, path, mode)
             !! Open a fort.64.nc output file, and set all IDs.
 
             implicit none
 
-            class(ncdg_64), intent(inout) :: self
+            class(ncdg_vel), intent(inout) :: self
             !! The wrapper object of the file
             character(len=*), optional, intent(in) :: path
             !! Path and name for the NetCDF file. Default is whatever path is
@@ -966,16 +966,16 @@ module ncdg
             !! the program will assume fort.64.nc.
             integer, optional, intent(in) :: mode
             !! NetCDF open mode. Default is nf90_nowrite, i.e. read-only.
-        end subroutine ncdg_64_open
+        end subroutine ncdg_vel_open
 
-        module subroutine ncdg_64_set_metadata(self, nt, np, ne, &
+        module subroutine ncdg_vel_set_metadata(self, nt, np, ne, &
             nhy, nope, neta, max_nvdll, nbou, nvel, max_nvell, ics)
             !! Set variables, dimensions, and metadata for a fort.64.nc
             !! output file.
 
             implicit none
 
-            class(ncdg_64), intent(inout) :: self
+            class(ncdg_vel), intent(inout) :: self
             !! The wrapper object of the file
             integer, intent(in):: nt
             !! Number of time steps. This corresponds to
@@ -1015,14 +1015,14 @@ module ncdg
             integer, intent(in) :: ics
             !! Mesh type. This corresponds to
             !! [[global(module):ics(variable)]]
-        end subroutine ncdg_64_set_metadata
+        end subroutine ncdg_vel_set_metadata
 
-        ! ncdg_74 subroutines
+        ! ncdg_wvel subroutines
         ! For fort.74.nc
 
-        module subroutine ncdg_74_create(self, path, cmode)
+        module subroutine ncdg_wvel_create(self, path, cmode)
             !! Initialization function for
-            !! [[ncdg(module):ncdg_74(type)]]. Left in define mode.
+            !! [[ncdg(module):ncdg_wvel(type)]]. Left in define mode.
             !!
             !! @warning "File Not Closed"
             !! After initialization, the underlying file object is in
@@ -1031,20 +1031,20 @@ module ncdg
 
             implicit none
 
-            class(ncdg_74), intent(inout) :: self
+            class(ncdg_wvel), intent(inout) :: self
             !! The wrapper object of the file
             character(len=*), optional, intent(in) :: path
             !! Path and name for the NetCDF file. Default is fort.74.nc.
             integer, optional, intent(in) :: cmode
             !! NetCDF creation mode. Default is ior(nf90_noclobber, nf90_netcdf4).
-        end subroutine ncdg_74_create
+        end subroutine ncdg_wvel_create
 
-        module subroutine ncdg_74_open(self, path, mode)
+        module subroutine ncdg_wvel_open(self, path, mode)
             !! Open a fort.74.nc output file, and set all IDs.
 
             implicit none
 
-            class(ncdg_74), intent(inout) :: self
+            class(ncdg_wvel), intent(inout) :: self
             !! The wrapper object of the file
             character(len=*), optional, intent(in) :: path
             !! Path and name for the NetCDF file. Default is whatever path is
@@ -1052,16 +1052,16 @@ module ncdg
             !! the program will assume fort.74.nc.
             integer, optional, intent(in) :: mode
             !! NetCDF open mode. Default is nf90_nowrite, i.e. read-only.
-        end subroutine ncdg_74_open
+        end subroutine ncdg_wvel_open
 
-        module subroutine ncdg_74_set_metadata(self, nt, np, ne, &
+        module subroutine ncdg_wvel_set_metadata(self, nt, np, ne, &
             nhy, nope, neta, max_nvdll, nbou, nvel, max_nvell, ics)
             !! Set variables, dimensions, and metadata for a fort.74.nc
             !! output file.
 
             implicit none
 
-            class(ncdg_74), intent(inout) :: self
+            class(ncdg_wvel), intent(inout) :: self
             !! The wrapper object of the file
             integer, intent(in):: nt
             !! Number of time steps. This corresponds to
@@ -1101,7 +1101,7 @@ module ncdg
             integer, intent(in) :: ics
             !! Mesh type. This corresponds to
             !! [[global(module):ics(variable)]]
-        end subroutine ncdg_74_set_metadata
+        end subroutine ncdg_wvel_set_metadata
 
         ! ncdg_station subroutines
         ! Common to all station files

@@ -1,11 +1,11 @@
-submodule (ncdg:ncdg_nodal_vector_sub) ncdg_64_sub
+submodule (ncdg:ncdg_nodal_vector_sub) ncdg_vel_sub
 !! Implementation of fort.64.nc
 
     implicit none
 
     contains
 
-    module procedure ncdg_64_create
+    module procedure ncdg_vel_create
         ! See interface for arguments and documentation
 
         character(len=:), allocatable :: the_path ! For defaulting
@@ -33,9 +33,9 @@ submodule (ncdg:ncdg_nodal_vector_sub) ncdg_64_sub
         call self%ncfile%create(path=the_path, cmode=the_cmode)
 
         deallocate(the_path)
-    end procedure ncdg_64_create
+    end procedure ncdg_vel_create
 
-    module procedure ncdg_64_open
+    module procedure ncdg_vel_open
         ! See interface for arguments and documentation
 
         integer :: ncstat ! Status of most recent operation
@@ -62,9 +62,9 @@ submodule (ncdg:ncdg_nodal_vector_sub) ncdg_64_sub
 
         ! Call parent function
         call self%ncdg_nodal_vector%open(path=self%path, mode=the_mode)
-    end procedure ncdg_64_open
+    end procedure ncdg_vel_open
 
-    module procedure ncdg_64_set_metadata
+    module procedure ncdg_vel_set_metadata
         ! See interface for arguments and documentation
 
         integer :: ncstat ! Status of most recent operation
@@ -202,6 +202,6 @@ submodule (ncdg:ncdg_nodal_vector_sub) ncdg_64_sub
 
         ! Define global attributes
         ! N/A, for now
-    end procedure ncdg_64_set_metadata
+    end procedure ncdg_vel_set_metadata
 
-end submodule ncdg_64_sub
+end submodule ncdg_vel_sub

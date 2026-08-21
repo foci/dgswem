@@ -21,7 +21,7 @@ module parallelio_io
     use pio, only : iosystem_desc_t, io_desc_t, pio_init, pio_finalize, &
         pio_iotype_netcdf4p, pio_rearr_box, pio_rearr_subset, pio_write, &
         pio_double, pio_initdecomp
-    use piodg, only : piodg_63, piodg_64, piodg_73, piodg_74, piodg_maxele
+    use piodg, only : piodg_ele, piodg_vel, piodg_pr, piodg_wvel, piodg_maxele
     use pioutil, only : piofile_check_error
 
     implicit none
@@ -29,10 +29,10 @@ module parallelio_io
     ! Committing the sin of global variables, for now
 
     ! PIODG variables
-    type(piodg_63) :: my_63
-    type(piodg_64) :: my_64
-    type(piodg_73) :: my_73
-    type(piodg_74) :: my_74
+    type(piodg_ele) :: my_ele
+    type(piodg_vel) :: my_vel
+    type(piodg_pr) :: my_pr
+    type(piodg_wvel) :: my_wvel
     type(piodg_maxele) :: my_maxele
 
     ! PIO variables
@@ -190,13 +190,13 @@ module parallelio_io
 
             ! nodal elevation
             if (abs(noutge) == 3) then
-                call my_63%open(my_iosystem, omode=pio_write)
+                call my_ele%open(my_iosystem, omode=pio_write)
                 call my_maxele%open(my_iosystem, omode=pio_write)
             end if
 
             ! nodal velocity
             if (abs(noutgv) == 3) then
-                call my_64%open(my_iosystem, omode=pio_write)
+                call my_vel%open(my_iosystem, omode=pio_write)
             end if
 
             ! nodal concentration
@@ -205,8 +205,8 @@ module parallelio_io
 
             ! nodal air pressure/wind velocity
             if (abs(noutgw) == 3) then
-                call my_73%open(my_iosystem, omode=pio_write)
-                call my_74%open(my_iosystem, omode=pio_write)
+                call my_pr%open(my_iosystem, omode=pio_write)
+                call my_wvel%open(my_iosystem, omode=pio_write)
             end if
         end if
     end subroutine parallelio_open_files_parallel
@@ -285,7 +285,7 @@ module parallelio_io
             if ((it > ntcysge) .and. (it <= ntcyfge) .or. force_write) then
                 nscouge = nscouge + 1
                 if (nscouge == nspoolge .or. force_write) then
-                    call my_63%write_step( &
+                    call my_ele%write_step( &
                         t=time_a, &
                         scalar=eta2(1:np), &
                         piodesc=my_iodesc, &
@@ -309,7 +309,7 @@ module parallelio_io
             if ((it > ntcysgv) .and. (it <= ntcyfgv) .or. force_write) then
                 nscougv = nscougv + 1
                 if (nscougv == nspoolgv .or. force_write) then
-                    call my_64%write_step( &
+                    call my_vel%write_step( &
                         t=time_a, &
                         vector_u=uu2(1:np), &
                         vector_v=vv2(1:np), &
@@ -336,13 +336,13 @@ module parallelio_io
             if ((it > ntcysgw) .and. (it <= ntcyfgw) .or. force_write) then
                 nscougw = nscougw + 1
                 if (nscougw == nspoolgw .or. force_write) then
-                    call my_73%write_step( &
+                    call my_pr%write_step( &
                         t=time_a, &
                         scalar=pr2(1:np), &
                         piodesc=my_iodesc, &
                         sync=.true. &
                     )
-                    call my_74%write_step( &
+                    call my_wvel%write_step( &
                         t=time_a, &
                         vector_u=wvnxout(1:np), &
                         vector_v=wvnyout(1:np), &
@@ -387,13 +387,13 @@ module parallelio_io
 
         ! nodal elevation
         if (abs(noutge) == 3) then
-            call my_63%close()
+            call my_ele%close()
             call my_maxele%close()
         end if
 
         ! nodal velocity
         if (abs(noutgv) == 3) then
-            call my_64%close()
+            call my_vel%close()
         end if
 
         ! nodal concentration
@@ -402,8 +402,8 @@ module parallelio_io
 
         ! nodal air pressure/wind velocity
         if (abs(noutgw) == 3) then
-            call my_73%close()
-            call my_74%close()
+            call my_pr%close()
+            call my_wvel%close()
         end if
 
         ! Deallocate associated arrays

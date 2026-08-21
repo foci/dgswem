@@ -2,9 +2,9 @@ program nctest_parallel
 
     use mpi
     use netcdf, only: nf90_unlimited
-    use ncdg, only: ncdg_63, ncdg_64, ncdg_maxele
+    use ncdg, only: ncdg_ele, ncdg_vel, ncdg_maxele
     use pio
-    use piodg, only: piodg_63, piodg_64, piodg_maxele
+    use piodg, only: piodg_ele, piodg_vel, piodg_maxele
 
     implicit none
 
@@ -21,13 +21,13 @@ program nctest_parallel
     type(io_desc_t) :: my_iodesc
 
     ! NCDG variables
-    type(ncdg_63) :: my_n63
-    type(ncdg_64) :: my_n64
+    type(ncdg_ele) :: my_n63
+    type(ncdg_vel) :: my_n64
     type(ncdg_maxele) :: my_nmaxele
 
     ! PIODG variables
-    type(piodg_63) :: my_p63
-    type(piodg_64) :: my_p64
+    type(piodg_ele) :: my_p63
+    type(piodg_vel) :: my_p64
     type(piodg_maxele) :: my_pmaxele
 
     ! Mesh (local)

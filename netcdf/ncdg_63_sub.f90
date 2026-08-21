@@ -1,11 +1,11 @@
-submodule (ncdg:ncdg_nodal_scalar_sub) ncdg_63_sub
+submodule (ncdg:ncdg_nodal_scalar_sub) ncdg_ele_sub
 !! Implementation of fort.63.nc
 
     implicit none
 
     contains
 
-    module procedure ncdg_63_create
+    module procedure ncdg_ele_create
         ! See interface for arguments and documentation
 
         character(len=:), allocatable :: the_path ! For defaulting
@@ -32,9 +32,9 @@ submodule (ncdg:ncdg_nodal_scalar_sub) ncdg_63_sub
         call self%ncfile%create(path=the_path, cmode=the_cmode)
 
         deallocate(the_path)
-    end procedure ncdg_63_create
+    end procedure ncdg_ele_create
 
-    module procedure ncdg_63_open
+    module procedure ncdg_ele_open
         ! See interface for arguments and documentation
 
         integer :: ncstat ! Status of most recent operation
@@ -60,9 +60,9 @@ submodule (ncdg:ncdg_nodal_scalar_sub) ncdg_63_sub
 
         ! Call parent function
         call self%ncdg_nodal_scalar%open(path=self%path, mode=the_mode)
-    end procedure ncdg_63_open
+    end procedure ncdg_ele_open
 
-    module procedure ncdg_63_set_metadata
+    module procedure ncdg_ele_set_metadata
         ! See interface for arguments and documentation
 
         integer :: ncstat ! Status of most recent operation
@@ -122,6 +122,6 @@ submodule (ncdg:ncdg_nodal_scalar_sub) ncdg_63_sub
 
         ! Define global attributes
         ! N/A, for now
-    end procedure ncdg_63_set_metadata
+    end procedure ncdg_ele_set_metadata
 
-end submodule ncdg_63_sub
+end submodule ncdg_ele_sub

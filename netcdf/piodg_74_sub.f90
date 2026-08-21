@@ -1,11 +1,11 @@
-submodule (piodg:piodg_nodal_sub) piodg_74_sub
+submodule (piodg:piodg_nodal_sub) piodg_wvel_sub
     !! Implementation of fort.74.nc
 
     implicit none
 
     contains
 
-    module procedure piodg_74_open
+    module procedure piodg_wvel_open
         ! See interface for arguments and documentation
 
         integer :: piostat ! Status of most recent operation
@@ -41,6 +41,6 @@ submodule (piodg:piodg_nodal_sub) piodg_74_sub
         ! Call parent function
         call self%piodg_nodal_vector%open(piosystem, self%path, the_piotype, &
             the_omode)
-    end procedure piodg_74_open
+    end procedure piodg_wvel_open
 
-end submodule piodg_74_sub
+end submodule piodg_wvel_sub

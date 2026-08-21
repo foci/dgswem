@@ -1,4 +1,4 @@
-submodule (piodg:piodg_nodal_scalar_sub) piodg_63_sub
+submodule (piodg:piodg_nodal_scalar_sub) piodg_ele_sub
     !! Implementation of fort.63.nc
 
     use netcdf, only : nf90_enotindefine
@@ -7,7 +7,7 @@ submodule (piodg:piodg_nodal_scalar_sub) piodg_63_sub
 
     contains
 
-    module procedure piodg_63_open
+    module procedure piodg_ele_open
         ! See interface for arguments and documentation
 
         integer :: piostat ! Status of most recent operation
@@ -42,6 +42,6 @@ submodule (piodg:piodg_nodal_scalar_sub) piodg_63_sub
         ! Call parent function
         call self%piodg_nodal_scalar%open(piosystem, self%path, the_piotype, &
             the_omode)
-    end procedure piodg_63_open
+    end procedure piodg_ele_open
 
-end submodule piodg_63_sub
+end submodule piodg_ele_sub
