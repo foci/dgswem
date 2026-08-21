@@ -1,16 +1,16 @@
 
 C***********************************************************************
-C     
+C
 C     SUBROUTINE DG_HYDRO_TIMESTEP(IT)
-C     
+C
 C     This is the main subroutine for the DG hydro
-C     
+C
 C     Written by Ethan Kubatko (06-11-2004)
-C     
+C
 C-----------------------------------------------------------------------
-C     
+C
 C     Modification history on hp_DG_ADCIRC since v9_sb1
-C     
+C
 C     v??     - 08/05    - sb - parallelized
 C     v??     - 08/05    - sb - wetting/drying
 C     v10_sb5 - 10/05    - sb - wetting/drying algorithm is improved
@@ -18,19 +18,19 @@ C     v10_sb5 - 10/05    - sb - Ethan's slope limiter is consolidated
 C     v21     - 11/11    - cem - major update/p_enrich/slope/rkc etc
 C     v22     -  6/12    - cem - major update/sediment/diffusion/fluxes
 C     Moving to versioning control
-C     
+C
 C***********************************************************************
 
       SUBROUTINE DG_HYDRO_TIMESTEP(IT)
 
 C.....Use appropriate modules
-      
+
       USE GLOBAL
       USE DG
       use mod_internal_edge
 
 #ifdef CMPI
-      USE MESSENGER_ELEM 
+      USE MESSENGER_ELEM
 #endif
 
 #ifdef SWAN
@@ -40,7 +40,7 @@ Casey 101118: Add variables for coupling to SWAN.
 #endif
 
       IMPLICIT NONE
-      
+
 C.....Declare local variables
 
       real(sz) avg_rain
@@ -71,11 +71,67 @@ c$$$      ENDDO
 C.....Begin Runge-Kutta time stepper
 
       DO 100 IRK = 1,NRK
-         
+         CALL DG_HYDRO_TIMESTEP_STAGE(IT, IRK)
+ 100  CONTINUE
+
+C.....Update variables for next time step
+
+      CALL DG_HYDRO_TIMESTEP_FINALIZE(IT)
+
+      RETURN
+      END SUBROUTINE
+
+C***********************************************************************
+C
+C     SUBROUTINE DG_HYDRO_TIMESTEP_STAGE(IT, IRK_STAGE)
+C
+C     Extracted from the DO 100 IRK=1,NRK body of DG_HYDRO_TIMESTEP so
+C     that a single RK stage is independently callable -- each call
+C     becomes one schedulable unit of work (one StarPU task, under
+C     TASKPAR) instead of an iteration nested inside a driver loop.
+C     Behavior-preserving for existing serial/MPI builds: DG_HYDRO_TIMESTEP
+C     still runs all NRK stages back to back via its own DO loop above.
+C
+C***********************************************************************
+
+      SUBROUTINE DG_HYDRO_TIMESTEP_STAGE(IT, IRK_STAGE)
+
+C.....Use appropriate modules
+
+      USE GLOBAL
+      USE DG
+      use mod_internal_edge
+
+#ifdef CMPI
+      USE MESSENGER_ELEM
+#endif
+
+#ifdef SWAN
+Casey 101118: Add variables for coupling to SWAN.
+      USE Couple2Swan, ONLY: ComputeWaveDrivenForces,
+     &                       InterpoWeight
+#endif
+
+      IMPLICIT NONE
+
+C.....Declare local variables
+
+      real(sz) avg_rain
+
+      INTEGER IT,L,GED,NBOREL,NNBORS,NDRYNBORS,NQEDS,Istop,k,j,kk,i,mm
+      INTEGER Detected,flagger,store
+      REAL(SZ) QBCT1,QBCT2,QBC1,QBC2,ZP(3),QXP(3),QXP_OLD(3),
+     $     QYP(3),QYP_OLD(3),ZP_OLD(3),ell_1,ell_2,ell_3
+      REAL(SZ) DPAVG, ITDT, ARK, BRK, CRK, DRK, ERK,s,alph,eta,seta
+      Real(sz) tempx,tempy,rev,Ox,Oy,time_at,C_0,C_1,sig,sigma
+      INTEGER IRK_STAGE
+
+      IRK = IRK_STAGE
+
 C.......Compute the DG time and DG ramp
 
 #ifdef RKSSP
- 
+
          TIMEDG = TIME_A - DTDP + DTVD(IRK)*DTDP
          RAMPDG = 1.0
          RAMPExtFlux = 1.0
@@ -98,11 +154,11 @@ C.......Compute the DG time and DG ramp
             ENDIF
          ENDIF
          RAMP = RAMPDG
-         
+
 C.......Obtain the meteorological forcing
 
          IF (NWS.NE.0) CALL MET_FORCING(IT)
-        
+
         IF(NRS.GE.1) THEN
           IF(TIME_A.GT.RSTIME2) THEN
             RSTIME1=RSTIME2
@@ -116,8 +172,8 @@ Casey 090302: Added for coupling to SWAN.
             IF((NRS.EQ.3).AND.(IRK.EQ.1)) THEN
               InterpoWeight = 1.0
               CALL ComputeWaveDrivenForces
-Casey 090707: We want to extrapolate forward in time.  Load the latest 
-C             (current) forces into RSNX1/RSNY1, and then load the 
+Casey 090707: We want to extrapolate forward in time.  Load the latest
+C             (current) forces into RSNX1/RSNY1, and then load the
 C             future forces into RSNX2/RSNY2.
               DO I=1,NP
                 RSX = RSNX1(I)
@@ -143,7 +199,7 @@ Casey 090302: Added these lines for output to the rads.64 file.
 #endif
          ENDDO
       ENDIF
- 
+
 C.......Compute tidal potential terms
 
          IF (NTIP.NE.0) CALL TIDAL_POTENTIAL()
@@ -166,7 +222,7 @@ C.......For non-periodic elevation bcs
      &                                                   ESBIN1(I) ) )
            ENDDO
          ENDIF
-         
+
 C.......For non-periodic flux bcs
 
          IF (MNFFR.EQ.1 .AND. NFFR.EQ.0) THEN
@@ -177,7 +233,7 @@ C.......For non-periodic flux bcs
                QNIN1(J)=QNIN2(J)
                QNIN2(J)=0.0
                IF((LBCODEI(J).EQ.2).OR.(LBCODEI(J).EQ.12)
-     &                             .OR.(LBCODEI(J).EQ.22))    
+     &                             .OR.(LBCODEI(J).EQ.22))
      &         READ(20,*) QNIN2(J)
              END DO
            ENDIF
@@ -185,7 +241,7 @@ C.......For non-periodic flux bcs
            NQEDS = 0
            DO I = 1,NVEL
              IF((LBCODEI(I).EQ.2).OR.(LBCODEI(I).EQ.12)
-     &                             .OR.(LBCODEI(I).EQ.22)) THEN 
+     &                             .OR.(LBCODEI(I).EQ.22)) THEN
                NQEDS = NQEDS + 1
                IF (NQEDS .LE. NFEDS) THEN
                  QNAM_DG(1,NQEDS,1) = RAMPDG*( QNIN1(I) + QTRATIO*
@@ -197,12 +253,12 @@ C.......For non-periodic flux bcs
                ENDIF
              ENDIF
            ENDDO
-         ENDIF       
+         ENDIF
 
 C.......Compute LDG auxiliary equations
-         
+
          IF (artdif.eq.1) CALL LDG_HYDRO(IT)
-         
+
 C.......Compute elevation specified edges
 
          IF (NEEDS.GT.0)  CALL OCEAN_EDGE_HYDRO(IT)
@@ -213,7 +269,7 @@ C.......Compute no-normal flow edges
 
 C.......Compute non-zero flow edges
 
-         IF (NFEDS.GT.0)  CALL FLOW_EDGE_HYDRO(IT)    
+         IF (NFEDS.GT.0)  CALL FLOW_EDGE_HYDRO(IT)
 C.......Compute radiation edges
 
          IF (NREDS.GT.0)  CALL RADIATION_EDGE_HYDRO(IT)
@@ -221,17 +277,17 @@ C.......Compute radiation edges
 C.......Compute internal barrier edges
 
          IF (NIBEDS.GT.0) CALL IBARRIER_EDGE_HYDRO(IT)
-         
+
 C.......Compute external barrier edges
 
          IF (NEBEDS.GT.0) CALL EBARRIER_EDGE_HYDRO(IT)
-         
+
 C.......Compute internal edges
          CALL INTERNAL_EDGE_HYDRO(IT)
          call add_internal_flux()
 
 C.......Compute elements to finish building the rhs
-         
+
          CALL RHS_DG_HYDRO(IT)
 
 C.......SSP Runge-Kutta Time Scheme
@@ -244,8 +300,8 @@ C.......SSP Runge-Kutta Time Scheme
 
 #ifdef SED_LAY
 
-                  do l = 1,layers                
-                     bed(K,J,IRK+1,l) = bed(K,J,irk+1,l) 
+                  do l = 1,layers
+                     bed(K,J,IRK+1,l) = bed(K,J,irk+1,l)
      &                  + ARK*bed(K,J,I,l) + BRK*RHS_bed(K,J,I,l)
 
                      !adjust for state variable represenation
@@ -256,7 +312,7 @@ C.......SSP Runge-Kutta Time Scheme
 #endif
 
                   ZE(K,J,IRK+1) = ZE(K,J,irk+1) + ARK*ZE(K,J,I)
-     &                 + BRK*RHS_ZE(K,J,I) 
+     &                 + BRK*RHS_ZE(K,J,I)
                   QX(K,J,IRK+1) = QX(K,J,irk+1) + ARK*QX(K,J,I)
      &                 + BRK*RHS_QX(K,J,I)
                   QY(K,J,IRK+1) = QY(K,J,irk+1) + ATVD(IRK,I)*QY(K,J,I)
@@ -300,14 +356,14 @@ C.......Compute the dynamic pressure if flagged
             IF (NRAMP.EQ.1) THEN
                RAMPDG = TANH((2.0*(IT + RKC_c(IRK))*DTDP/86400.0)
      &            /DRAMP)
-               RAMPExtFlux = 
+               RAMPExtFlux =
      &              TANH((2.0*(IT + RKC_c(IRK))*DTDP/86400.0)
      &            /DRAMPExtFlux)
             ENDIF
             IF (NRAMP.EQ.2) THEN
                RAMPDG = TANH((2.0*(IT + RKC_c(IRK))*DTDP/86400.0)
      &            /DRAMP)
-               RAMPExtFlux = 
+               RAMPExtFlux =
      &              TANH((2.0*(IT + RKC_c(IRK))*DTDP/86400.0)
      &           /DRAMPExtFlux)
             ENDIF
@@ -317,19 +373,19 @@ C.......Compute the dynamic pressure if flagged
             ENDIF
          ENDIF
          RAMP = RAMPDG
-         
+
 C.......Obtain the meteorological forcing
 
          IF (NWS.NE.0) CALL MET_FORCING(IT)
-         
+
 C.......Compute tidal potential terms
 
          IF (NTIP.NE.0) CALL TIDAL_POTENTIAL()
 
 C.......Compute LDG auxiliary equations
-         
+
          IF (EVMSUM.NE.0.0.or.artdif.eq.1) CALL LDG_HYDRO(IT)
-         
+
 C.......Compute elevation specified edges
 
          IF (NEEDS.GT.0)  CALL OCEAN_EDGE_HYDRO(IT)
@@ -341,7 +397,7 @@ C.......Compute no-normal flow edges
 C.......Compute non-zero flow edges
 
          IF (NFEDS.GT.0)  CALL FLOW_EDGE_HYDRO(IT)
-         
+
 C.......Compute radiation edges
 
          IF (NREDS.GT.0)  CALL RADIATION_EDGE_HYDRO(IT)
@@ -349,17 +405,17 @@ C.......Compute radiation edges
 C.......Compute internal barrier edges
 
          IF (NIBEDS.GT.0) CALL IBARRIER_EDGE_HYDRO(IT)
-         
+
 C.......Compute external barrier edges
 
          IF (NEBEDS.GT.0) CALL EBARRIER_EDGE_HYDRO(IT)
-         
+
 C.......Compute internal edges
 
          CALL INTERNAL_EDGE_HYDRO(IT)
 
 C.......Compute elements to finish building the rhs
-         
+
          CALL RHS_DG_HYDRO(IT)
 
 C.......RKC Time Scheme
@@ -373,32 +429,32 @@ C.......RKC Time Scheme
 
 #ifdef SED_LAY
                   do l = 1,layers
-                     
-                     bed(K,J,IRK+1,l) = bed(K,J,irk+1,l) + bed(K,J,1,l) 
+
+                     bed(K,J,IRK+1,l) = bed(K,J,irk+1,l) + bed(K,J,1,l)
      &                    + BRK*RHS_bed(K,J,1,l)
 
                    !adjust for state variable represenation
                      ZE(K,J,IRK+1) = ZE(K,J,IRK+1)-BRK*RHS_bed(K,J,1,l)
-                     
+
                   enddo
 #endif
-                  
+
                   ZE(K,J,IRK+1) = ZE(K,J,irk+1) + ZE(K,J,1)
      &                 + BRK*RHS_ZE(K,J,1)
                   QX(K,J,IRK+1) = QX(K,J,irk+1) + QX(K,J,1)
      &                 + BRK*RHS_QX(K,J,1)
                   QY(K,J,IRK+1) = QY(K,J,irk+1)  + QY(K,J,1)
      &                 + BRK*RHS_QY(K,J,1)
-                  
+
 C.......Compute the transported tracer term if flagged
-                  
+
 #ifdef TRACE
                   iota(K,J,IRK+1) = iota(K,J,irk+1) + iota(K,J,1)
      &                 + BRK*RHS_iota(K,J,1)
 #endif
-                  
+
 C......Compute chemistry transported terms if flagged
-                  
+
 #ifdef CHEM
                   iota(K,J,IRK+1) = iota(K,J,irk+1) + iota(K,J,1)
      &                 + BRK*RHS_iota(K,J,1)
@@ -407,14 +463,14 @@ C......Compute chemistry transported terms if flagged
 #endif
 
 C.......Compute the dynamic pressure if flagged
-                  
+
 #ifdef DYNP
                   dynP(K,J,IRK+1) = dynP(K,J,irk+1) + dynP(K,J,1)
      &                 + BRK*RHS_dynP(K,J,1)
 #endif
                ENDDO
             ENDDO
-            
+
          else
 
             ARK = 1.0 - RKC_mu(irk)-RKC_nu(irk)
@@ -429,26 +485,26 @@ C.......Compute the dynamic pressure if flagged
 
 #ifdef SED_LAY
                   do l = 1,layers
-                     
-                     bed(K,J,IRK+1,l) = bed(K,J,irk+1,l) 
+
+                     bed(K,J,IRK+1,l) = bed(K,J,irk+1,l)
      &                   + ARK*bed(K,J,1,l) + CRK*bed(K,J,irk,l)
      &                   + DRK*bed(K,J,irk-1,l) + BRK*RHS_bed(K,J,irk,l)
      &                   + ERK*RHS_bed(K,J,1,l)
 
 
                    !adjust for state variable represenation
-                     ZE(K,J,IRK+1) = ZE(K,J,IRK+1) 
+                     ZE(K,J,IRK+1) = ZE(K,J,IRK+1)
      &                   - BRK*RHS_bed(K,J,irk,l) - ERK*RHS_bed(K,J,1,l)
-                     
+
                   enddo
 #endif
-                  ZE(K,J,IRK+1) = ZE(K,J,irk+1) + ARK*ZE(K,J,1) 
-     &                + CRK*ZE(K,J,irk) + DRK*ZE(K,J,irk-1) 
+                  ZE(K,J,IRK+1) = ZE(K,J,irk+1) + ARK*ZE(K,J,1)
+     &                + CRK*ZE(K,J,irk) + DRK*ZE(K,J,irk-1)
      &                + BRK*RHS_ZE(K,J,irk) + ERK*RHS_ZE(K,J,1)
                   QX(K,J,IRK+1) = QX(K,J,irk+1) + ARK*QX(K,J,1)
-     &                + CRK*QX(K,J,irk) + DRK*QX(K,J,irk-1) 
+     &                + CRK*QX(K,J,irk) + DRK*QX(K,J,irk-1)
      &                + BRK*RHS_QX(K,J,irk) + ERK*RHS_QX(K,J,1)
-                  QY(K,J,IRK+1) = QY(K,J,irk+1) + ARK*QY(K,J,1) 
+                  QY(K,J,IRK+1) = QY(K,J,irk+1) + ARK*QY(K,J,1)
      &                + CRK*QY(K,J,irk) + DRK*QY(K,J,irk-1)
      &                + BRK*RHS_QY(K,J,irk) + ERK*RHS_QY(K,J,1)
 
@@ -456,8 +512,8 @@ C.......Compute the dynamic pressure if flagged
 C.......Compute the transported tracer term if flagged
 
 #ifdef TRACE
-                  iota(K,J,IRK+1) = iota(K,J,irk+1) + ARK*iota(K,J,1) 
-     &                + CRK*iota(K,J,irk) + DRK*iota(K,J,irk-1) 
+                  iota(K,J,IRK+1) = iota(K,J,irk+1) + ARK*iota(K,J,1)
+     &                + CRK*iota(K,J,irk) + DRK*iota(K,J,irk-1)
      &                + BRK*RHS_iota(K,J,irk) + ERK*RHS_iota(K,J,1)
 
 #endif
@@ -465,11 +521,11 @@ C.......Compute the transported tracer term if flagged
 C......Compute chemistry transported terms if flagged
 
 #ifdef CHEM
-                  iota(K,J,IRK+1) =  iota(K,J,irk+1) + ARK*iota(K,J,1) 
-     &                 + CRK*iota(K,J,irk) + DRK*iota(K,J,irk-1) 
+                  iota(K,J,IRK+1) =  iota(K,J,irk+1) + ARK*iota(K,J,1)
+     &                 + CRK*iota(K,J,irk) + DRK*iota(K,J,irk-1)
      &                 + BRK*RHS_iota(K,J,irk) + ERK*RHS_iota(K,J,1)
                   iota2(K,J,IRK+1) = iota2(K,J,irk+1) + ARK*iota2(K,J,1)
-     &                 + CRK*iota2(K,J,irk) + DRK*iota2(K,J,irk-1) 
+     &                 + CRK*iota2(K,J,irk) + DRK*iota2(K,J,irk-1)
      &                 + BRK*RHS_iota2(K,J,irk) + ERK*RHS_iota2(K,J,1)
 
 #endif
@@ -477,8 +533,8 @@ C......Compute chemistry transported terms if flagged
 C.......Compute the dynamic pressure if flagged
 
 #ifdef DYNP
-                  dynP(K,J,IRK+1) = dynP(K,J,irk+1) + ARK*dynP(K,J,1) 
-     &                 + CRK*dynP(K,J,irk) + DRK*dynP(K,J,irk-1) 
+                  dynP(K,J,IRK+1) = dynP(K,J,irk+1) + ARK*dynP(K,J,1)
+     &                 + CRK*dynP(K,J,irk) + DRK*dynP(K,J,irk-1)
      &                 + BRK*RHS_dynP(K,J,irk) + ERK*RHS_dynP(K,J,1)
 
 #endif
@@ -490,7 +546,7 @@ C.......Compute the dynamic pressure if flagged
 
 #endif
 
-#ifdef CMPI
+#if defined(CMPI) && !defined(TASKPAR)
          CALL UPDATER_ELEM_MOD(ZE,QX,QY,IRK+1,3)
 #ifdef TRACE
          CALL UPDATER_ELEM_MOD(iota,iota2,QY,IRK+1,2 )
@@ -506,7 +562,7 @@ C.......Compute the dynamic pressure if flagged
 
 #ifdef SED_LAY
          do l = 1,layers
-            arrayfix => bed(:,:,:,l) 
+            arrayfix => bed(:,:,:,l)
             CALL UPDATER_ELEM_MOD(arrayfix,QX,QY,IRK+1,1 )
          enddo
 #endif
@@ -520,7 +576,7 @@ C.......Apply the slopelimiter if appropriate
 #endif
 
 #ifdef SLOPE5
-         CALL SLOPELIMITER() 
+         CALL SLOPELIMITER()
 #endif
 
 #ifdef STBLZR
@@ -543,19 +599,19 @@ c$$$         if (EVMSUM.NE.0.0.or.artdif.eq.1) then
 c$$$#ifdef SLOPEALL
 c$$$            CALL SLOPELIMITER()
 c$$$#endif
-c$$$            
+c$$$
 c$$$#ifdef SLOPE5
-c$$$            CALL SLOPELIMITER() 
+c$$$            CALL SLOPELIMITER()
 c$$$#endif
 c$$$         endif
 
 C...For parallel run update for dofs if slope limiter and/or wetting and
 C...drying is being used
 
-#ifdef CMPI
+#if defined(CMPI) && !defined(TASKPAR)
          if (SLOPEFLAG.NE.0.OR.NOLIFA.GE.2) THEN
             CALL UPDATER_ELEM_MOD(ZE,QX,QY,IRK+1,3)
-            
+
 #ifdef TRACE
             CALL UPDATER_ELEM_MOD(iota,iota2,QY,IRK+1,2 )
 #endif
@@ -584,7 +640,7 @@ C.......p_enrich soln and update
          if (irk+1.eq.2) then
             CALL p_enrichment(it,0)
          endif
-#ifdef CMPI
+#if defined(CMPI) && !defined(TASKPAR)
 
          CALL UPDATER_ELEM_MOD(ZE,QX,QY,IRK+1,3)
 
@@ -607,16 +663,58 @@ C.......p_enrich soln and update
          enddo
 #endif
 
-#endif 
+#endif
 
 #endif
 
- 100  CONTINUE
+      RETURN
+      END SUBROUTINE
+
+C***********************************************************************
+C
+C     SUBROUTINE DG_HYDRO_TIMESTEP_FINALIZE(IT)
+C
+C     Extracted from the tail of DG_HYDRO_TIMESTEP (after the RK-stage
+C     loop): stabilization filtering and the RK-slot shift/zero-reset
+C     that prepares state for the next timestep. Behavior-preserving.
+C
+C***********************************************************************
+
+      SUBROUTINE DG_HYDRO_TIMESTEP_FINALIZE(IT)
+
+C.....Use appropriate modules
+
+      USE GLOBAL
+      USE DG
+      use mod_internal_edge
+
+#ifdef CMPI
+      USE MESSENGER_ELEM
+#endif
+
+#ifdef SWAN
+Casey 101118: Add variables for coupling to SWAN.
+      USE Couple2Swan, ONLY: ComputeWaveDrivenForces,
+     &                       InterpoWeight
+#endif
+
+      IMPLICIT NONE
+
+C.....Declare local variables
+
+      real(sz) avg_rain
+
+      INTEGER IT,L,GED,NBOREL,NNBORS,NDRYNBORS,NQEDS,Istop,k,j,kk,i,mm
+      INTEGER Detected,flagger,store
+      REAL(SZ) QBCT1,QBCT2,QBC1,QBC2,ZP(3),QXP(3),QXP_OLD(3),
+     $     QYP(3),QYP_OLD(3),ZP_OLD(3),ell_1,ell_2,ell_3
+      REAL(SZ) DPAVG, ITDT, ARK, BRK, CRK, DRK, ERK,s,alph,eta,seta
+      Real(sz) tempx,tempy,rev,Ox,Oy,time_at,C_0,C_1,sig,sigma
 
 C.....Update variables for next time step
 
-#ifdef FILTER 
-      !Stabilization filtering 
+#ifdef FILTER
+      !Stabilization filtering
       DO J = 1,NE
          DO K = 2,DOFS(J)
 
@@ -632,11 +730,11 @@ C.....Update variables for next time step
             elseif (k.gt.11.and.k.le.15) then
                eta = 4.0 / ( pdg_el(j)+1.0 )
             elseif (k.gt.16.and.k.le.21) then
-               eta = 5.0 / ( pdg_el(j)+1.0 )       
+               eta = 5.0 / ( pdg_el(j)+1.0 )
             elseif (k.gt.22.and.k.le.28) then
-               eta = 6.0 / ( pdg_el(j)+1.0 )   
+               eta = 6.0 / ( pdg_el(j)+1.0 )
             elseif (k.gt.29.and.k.le.36) then
-               eta = 7.0 / ( pdg_el(j)+1.0 )               
+               eta = 7.0 / ( pdg_el(j)+1.0 )
             endif
 
             seta = eta**s
@@ -646,13 +744,13 @@ C.......Filter the layers if flagged
 
 #ifdef SED_LAY
             do l = 1,layers
-               
-               bed(K,J,NRK+1,l) = sigma * bed(K,J,nrk+1,l) 
-               
+
+               bed(K,J,NRK+1,l) = sigma * bed(K,J,nrk+1,l)
+
             enddo
 #endif
 
-            ZE(K,J,NRK+1) = sigma*ZE(K,J,nrk+1) 
+            ZE(K,J,NRK+1) = sigma*ZE(K,J,nrk+1)
             QX(K,J,NRK+1) = sigma*QX(K,J,nrk+1)
             QY(K,J,NRK+1) = sigma*QY(K,J,nrk+1)
 
@@ -667,15 +765,15 @@ C.......Filter the transported tracer term if flagged
 C......Filter chemistry transported terms if flagged
 
 #ifdef CHEM
-            iota(K,J,NRK+1) =  sigma*iota(K,J,nrk+1) 
-            iota2(K,J,NRK+1) = sigma*iota2(K,J,nrk+1) 
+            iota(K,J,NRK+1) =  sigma*iota(K,J,nrk+1)
+            iota2(K,J,NRK+1) = sigma*iota2(K,J,nrk+1)
 
 #endif
 
          ENDDO
       ENDDO
 #endif
-      
+
 !$acc parallel loop gang vector async(1) default(present)
       DO J = 1,MNE
          DO K = 1,DOFS(J)
