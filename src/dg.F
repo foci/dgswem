@@ -101,16 +101,26 @@ C.....Declare real variable arrays
       
 C.....Declare allocatable integer arrays
 
-      INTEGER, ALLOCATABLE :: DOFS(:), PCOUNT(:), PDG(:)
-      INTEGER, ALLOCATABLE :: NCOUNT(:)
-      INTEGER, ALLOCATABLE :: NEDEL(:,:), NEDNO(:,:), NEDSD(:,:), NEDNO1(:), NEDNO2(:)
-      INTEGER, ALLOCATABLE :: NIEDN(:), NLEDN(:), NEEDN(:)
-      INTEGER, ALLOCATABLE :: NFEDN(:), NREDN(:), NEBEDN(:), NIBEDN(:)
-      INTEGER, ALLOCATABLE :: NIBSEGN(:,:)
-      INTEGER, ALLOCATABLE :: NEBSEGN(:)
-      INTEGER, ALLOCATABLE :: EL_NBORS(:,:)
-      INTEGER, ALLOCATABLE :: BACKNODES(:,:)
-      INTEGER, ALLOCATABLE :: MARK(:)
+      INTEGER, ALLOCATABLE :: DOFS(:)                                         !> number of DOFs of elements
+      INTEGER, ALLOCATABLE :: PCOUNT(:), PDG(:)                               !> ? has to do with p-adaptation
+      INTEGER, ALLOCATABLE :: NCOUNT(:)                                       !> ? label of edges, 0 = interior
+      INTEGER, ALLOCATABLE :: NEDEL(:,:)                                      !> element on left/right of edges
+      INTEGER, ALLOCATABLE :: NEDSD(:,:)                                      !> element-local edge index in inner/outer element of edges  
+      INTEGER, ALLOCATABLE :: NEDNO(:,:)                                      !> incident nodes/vertices of edges
+      INTEGER, ALLOCATABLE :: NEDNO1(:), NEDNO2(:)                            !> unzip NEDNO into inner and outer
+      
+      INTEGER, ALLOCATABLE :: NIEDN(:)                                        !> interior edge index of edges 
+      INTEGER, ALLOCATABLE :: NLEDN(:)                                        !> land/no-normal flow index of edges 
+      INTEGER, ALLOCATABLE :: NEEDN(:)                                        !> elevation edge index of edges 
+      INTEGER, ALLOCATABLE :: NFEDN(:)                                        !> flow specified open edge index of edges 
+      INTEGER, ALLOCATABLE :: NREDN(:)                                        !> radiation edge index of edges 
+      INTEGER, ALLOCATABLE :: NEBEDN(:)                                       !> external barrier edge index of edges
+      INTEGER, ALLOCATABLE :: NIBEDN(:)                                       !> internal barrier edge index of edges
+      INTEGER, ALLOCATABLE :: NIBSEGN(:,:)                                    !> ?
+      INTEGER, ALLOCATABLE :: NEBSEGN(:)                                      !> ?
+      INTEGER, ALLOCATABLE :: EL_NBORS(:,:)                                   !> adjacent element by local edge of elements 
+      INTEGER, ALLOCATABLE :: BACKNODES(:,:)                                  !> ?
+      INTEGER, ALLOCATABLE :: MARK(:)                                         !> ?
 
 
 C.....Declare allocatable real arrays
