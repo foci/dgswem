@@ -25,7 +25,8 @@ module piodg
 
     ! Only these specific child types are exposed to the public. The
     ! parent types are just for organization, exploiting inheritance.
-    public :: piodg_ele, piodg_vel, piodg_pr, piodg_wvel, piodg_maxele
+    public :: piodg_ele, piodg_vel, piodg_pr, piodg_wvel, piodg_maxele, &
+        piodg_bathy, piodg_tracer
 
     ! Begin type definitions
 
@@ -215,6 +216,24 @@ module piodg
         procedure, public :: open => piodg_pr_open
 
     end type piodg_pr
+
+    type, extends(piodg_nodal_scalar) :: piodg_bathy
+        !! fort.84.nc file editing object
+
+        contains
+
+        procedure, public :: open => piodg_bathy_open
+
+    end type piodg_bathy
+
+    type, extends(piodg_nodal_scalar) :: piodg_tracer
+        !! fort.88.nc file editing object
+
+        contains
+
+        procedure, public :: open => piodg_tracer_open
+
+    end type piodg_tracer
 
     type, extends(piodg_nodal) :: piodg_nodal_scalar_max
         !! Generic nodal scalar max file editing object
@@ -478,6 +497,50 @@ module piodg
             integer, optional, intent(in) :: omode
             !! PIO open mode. Default is pio_nowrite.
         end subroutine piodg_pr_open
+
+        ! piodg_bathy subroutines
+        ! For fort.84.nc
+
+        module subroutine piodg_bathy_open(self, piosystem, path, piotype, omode)
+            !! Open a fort.63.nc output file, and set all IDs
+
+            implicit none
+
+            class(piodg_bathy), intent(inout) :: self
+            !! The wrapper object of the file
+            type(iosystem_desc_t), intent(inout), target :: piosystem
+            !! The PIO system object
+            character(len=*), optional, intent(in) :: path
+            !! Path and name for the NetCDF file. Default is whatever path is
+            !! already set. If the path is not already set and nothing is provided,
+            !! the program will assume fort.84.nc.
+            integer, optional, intent(in) :: piotype
+            !! PIO file and I/O type. Default is pio_iotype_netcdf4p.
+            integer, optional, intent(in) :: omode
+            !! PIO open mode. Default is pio_nowrite.
+        end subroutine piodg_bathy_open
+
+        ! piodg_tracer subroutines
+        ! For fort.88.nc
+
+        module subroutine piodg_tracer_open(self, piosystem, path, piotype, omode)
+            !! Open a fort.88.nc output file, and set all IDs
+
+            implicit none
+
+            class(piodg_tracer), intent(inout) :: self
+            !! The wrapper object of the file
+            type(iosystem_desc_t), intent(inout), target :: piosystem
+            !! The PIO system object
+            character(len=*), optional, intent(in) :: path
+            !! Path and name for the NetCDF file. Default is whatever path is
+            !! already set. If the path is not already set and nothing is provided,
+            !! the program will assume fort.88.nc.
+            integer, optional, intent(in) :: piotype
+            !! PIO file and I/O type. Default is pio_iotype_netcdf4p.
+            integer, optional, intent(in) :: omode
+            !! PIO open mode. Default is pio_nowrite.
+        end subroutine piodg_tracer_open
 
         ! piodg_nodal_scalar_max subroutines
         ! Common to all nodal scalar max files

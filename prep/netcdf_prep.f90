@@ -2,7 +2,7 @@ module netcdf_prep
     !! Module for initializing NetCDF files.
 
     use netcdf, only : nf90_unlimited
-    use ncdg, only : ncdg_ele, ncdg_vel, ncdg_maxele
+    use ncdg, only : ncdg_ele, ncdg_vel, ncdg_maxele, ncdg_bathy, ncdg_tracer
 
     implicit none
 
@@ -10,6 +10,8 @@ module netcdf_prep
     type(ncdg_ele) :: my_ele
     type(ncdg_vel) :: my_vel
     type(ncdg_maxele) :: my_maxele
+    type(ncdg_bathy) :: my_bathy
+    type(ncdg_tracer) :: my_tracer
 
     contains
 
@@ -25,6 +27,7 @@ module netcdf_prep
             nneg, nope, nnodg, nvel, nvdll, nvell, ibtype, x, y, &
             noute, noutv, noutc, noutm, & ! Whether to write to NetCDF
             noutge, noutgv, noutgc, noutgw
+        use presizes, only : sedflag
 
         implicit none
 
@@ -128,6 +131,44 @@ module netcdf_prep
                 transpose_nm=.false. &
             )
             call my_maxele%close()
+            ! If desired, create fort.84.nc
+            if (sedflag >= 1) then
+                ! Create fort.84
+                call my_bathy%create()
+                call my_bathy%set_metadata( &
+                    nt=nf90_unlimited, &
+                    np=nnodg, &
+                    ne=nelg, &
+                    nhy=nhy, &
+                    nope=nope, &
+                    neta=neta, &
+                    max_nvdll=maxval(nvdll), &
+                    nbou=nbou, &
+                    nvel=nvel, &
+                    max_nvell=maxval(nvell), &
+                    ics=ics &
+                )
+                call my_bathy%write_mesh( &
+                    x=x, &
+                    y=y, &
+                    dp=dp, &
+                    nm=nneg, &
+                    nhy=nhy, &
+                    ne=nelg, &
+                    nope=nope, &
+                    neta=neta, &
+                    ibtypee=ibtypee, &
+                    nvdll=nvdll, &
+                    nbdv=nbdv, &
+                    nbou=nbou, &
+                    nvel=nvel, &
+                    ibtype=ibtype, &
+                    nvell=nvell, &
+                    nbvv=nbvv(:, 1:), &
+                    transpose_nm=.false. &
+                )
+                call my_bathy%close()
+            end if
         end if
 
         ! nodal velocity

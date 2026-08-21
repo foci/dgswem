@@ -18,7 +18,8 @@ module netcdf_io
     ! *gw: nodal air pressure/wind velocity
 
     use netcdf, only : nf90_unlimited, nf90_write
-    use ncdg, only : ncdg_ele, ncdg_vel, ncdg_pr, ncdg_wvel, ncdg_maxele
+    use ncdg, only : ncdg_ele, ncdg_vel, ncdg_pr, ncdg_wvel, ncdg_maxele, &
+        ncdg_bathy, ncdg_tracer
 
     implicit none
 
@@ -28,6 +29,8 @@ module netcdf_io
     type(ncdg_pr) :: my_pr
     type(ncdg_wvel) :: my_wvel
     type(ncdg_maxele) :: my_maxele
+    type(ncdg_bathy) :: my_bathy
+    type(ncdg_tracer) :: my_tracer
 
     ! Output counters
     integer :: nscoue
@@ -61,7 +64,8 @@ module netcdf_io
         use global, only : dp, ics, nbdv, nbou, nbvv, ne, neta, &
             nhy, nm, nope, np, nvel, nvdll, nvell, segtype, x, y, &
             noute, noutv, noutc, noutm, & ! Whether to write to NetCDF
-            noutge, noutgv, noutgc, noutgw
+            noutge, noutgv, noutgc, noutgw, &
+            sedflag
 
         implicit none
 
@@ -182,6 +186,46 @@ module netcdf_io
                 )
             else if (noutge == 3) then ! append to existing
                 call my_maxele%open(mode=nf90_write)
+            end if
+            ! If desired, create or open fort.84.nc
+            if (sedflag >= 1) then
+                inquire(file="fort.84.nc", exist=file_exists)
+                if (noutge == -3 .or. .not. file_exists) then ! create new
+                    call my_bathy%create()
+                    call my_bathy%set_metadata( &
+                        nt=nf90_unlimited, &
+                        np=np, &
+                        ne=ne, &
+                        nhy=nhy, &
+                        nope=nope, &
+                        neta=neta, &
+                        max_nvdll=maxval(nvdll), &
+                        nbou=nbou, &
+                        nvel=nvel, &
+                        max_nvell=maxval(nvell), &
+                        ics=ics &
+                    )
+                    call my_bathy%write_mesh( &
+                        x=x, &
+                        y=y, &
+                        dp=dp, &
+                        nm=nm, &
+                        nhy=nhy, &
+                        ne=ne, &
+                        nope=nope, &
+                        neta=neta, &
+                        ibtypee=ibtypee, &
+                        nvdll=nvdll, &
+                        nbdv=nbdv, &
+                        nbou=nbou, &
+                        nvel=nvel, &
+                        ibtype=ibtype, &
+                        nvell=nvell, &
+                        nbvv=nbvv(:, 1:) &
+                    )
+                else if (noutge == 3) then ! append to existing
+                    call my_bathy%open(mode=nf90_write)
+                end if
             end if
         end if
 
@@ -320,7 +364,7 @@ module netcdf_io
 
         use global, only : &
             eta2, etamax, time_a, uu2, vv2, &
-            pr2, wvnxout, wvnyout, &
+            pr2, wvnxout, wvnyout, dp, &
             noute, noutv, noutc, noutm, & ! Whether to write to NetCDF
             noutge, noutgv, noutgc, noutgw, &
             ntcyse, ntcysv, ntcysc, ntcysm, & ! Start iteration
@@ -328,7 +372,8 @@ module netcdf_io
             ntcyfe, ntcyfv, ntcyfc, ntcyfm, & ! Stop iteration
             ntcyfge, ntcyfgv, ntcyfgc, ntcyfgw, &
             nspoole, nspoolv, nspoolc, nspoolm, & ! Write every
-            nspoolge, nspoolgv, nspoolgc, nspoolgw
+            nspoolge, nspoolgv, nspoolgc, nspoolgw, &
+            sedflag
 
         implicit none
 
@@ -400,6 +445,13 @@ module netcdf_io
                         compute_max=.false., &
                         sync=.false. &
                     )
+                    if (sedflag >= 1) then
+                        call my_bathy%write_step( &
+                            t=time_a, &
+                            scalar=dp, &
+                            sync=.false. &
+                        )
+                    end if
                     nscouge = 0
                 end if
             end if
@@ -458,7 +510,8 @@ module netcdf_io
 
         use global, only : &
             noute, noutv, noutc, noutm, & ! Whether to write to NetCDF
-            noutge, noutgv, noutgc, noutgw
+            noutge, noutgv, noutgc, noutgw, &
+            sedflag
 
         implicit none
 
@@ -484,6 +537,9 @@ module netcdf_io
         if (abs(noutge) == 3) then
             call my_ele%close()
             call my_maxele%close()
+            if (sedflag >= 1) then
+                call my_bathy%close()
+            end if
         end if
 
         ! nodal velocity

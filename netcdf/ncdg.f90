@@ -24,7 +24,8 @@ module ncdg
 
     ! Only these specific child types are exposed to the public. The
     ! parent types are just for organization, exploiting inheritance.
-    public :: ncdg_ele, ncdg_vel, ncdg_pr, ncdg_wvel, ncdg_maxele
+    public :: ncdg_ele, ncdg_vel, ncdg_pr, ncdg_wvel, ncdg_maxele, &
+        ncdg_bathy, ncdg_tracer
 
     ! Intra-module constants
 
@@ -226,6 +227,28 @@ module ncdg
         procedure, public :: set_metadata => ncdg_pr_set_metadata
 
     end type ncdg_pr
+
+    type, extends(ncdg_nodal_scalar) :: ncdg_bathy
+        !! fort.84.nc file editing object
+
+        contains
+
+        procedure, public :: create => ncdg_bathy_create
+        procedure, public :: open => ncdg_bathy_open
+        procedure, public :: set_metadata => ncdg_bathy_set_metadata
+
+    end type ncdg_bathy
+
+    type, extends(ncdg_nodal_scalar) :: ncdg_tracer
+        !! fort.88.nc file editing object
+
+        contains
+
+        procedure, public :: create => ncdg_tracer_create
+        procedure, public :: open => ncdg_tracer_open
+        procedure, public :: set_metadata => ncdg_tracer_set_metadata
+
+    end type ncdg_tracer
 
     type, extends (ncdg_nodal) :: ncdg_nodal_scalar_max
         !! Generic nodal scalar max file editing object
@@ -753,6 +776,178 @@ module ncdg
             !! Mesh type. This corresponds to
             !! [[global(module):ics(variable)]]
         end subroutine ncdg_pr_set_metadata
+
+        ! ncdg_bathy subroutines
+        ! For fort.84.nc
+
+        module subroutine ncdg_bathy_create(self, path, cmode)
+            !! Initialization function for
+            !! [[ncdg(module):ncdg_bathy(type)]]. Left in define mode.
+            !!
+            !! @warning "File Not Closed"
+            !! After initialization, the underlying file object is in
+            !! define mode. The user must remember to close it.
+            !! @endwarning
+
+            implicit none
+
+            class(ncdg_bathy), intent(inout) :: self
+            !! The wrapper object of the file
+            character(len=*), optional, intent(in) :: path
+            !! Path and name for the NetCDF file. Default is fort.84.nc.
+            integer, optional, intent(in) :: cmode
+            !! NetCDF creation mode. Default is ior(nf90_noclobber, nf90_netcdf4).
+        end subroutine ncdg_bathy_create
+
+        module subroutine ncdg_bathy_open(self, path, mode)
+            !! Open a fort.88.nc output file, and set all IDs.
+
+            implicit none
+
+            class(ncdg_bathy), intent(inout) :: self
+            !! The wrapper object of the file
+            character(len=*), optional, intent(in) :: path
+            !! Path and name for the NetCDF file. Default is whatever path is
+            !! already set. If the path is not already set and nothing is provided,
+            !! the program will assume fort.84.nc.
+            integer, optional, intent(in) :: mode
+            !! NetCDF open mode. Default is nf90_nowrite, i.e. read-only.
+        end subroutine ncdg_bathy_open
+
+        module subroutine ncdg_bathy_set_metadata(self, nt, np, ne, &
+            nhy, nope, neta, max_nvdll, nbou, nvel, max_nvell, ics)
+            !! Set variables, dimensions, and metadata for a fort.63.nc
+            !! output file.
+
+            implicit none
+
+            class(ncdg_bathy), intent(inout) :: self
+            !! The wrapper object of the file
+            integer, intent(in):: nt
+            !! Number of time steps. This corresponds to
+            !! [[global(module):nt(variable)]] or nf90_unlimited.
+            integer, intent(in):: np
+            !! Number of nodes. This corresponds to
+            !! [[global(module):np(variable)]].
+            integer, intent(in) :: ne
+            !! Number of elements. This corresponds to
+            !! [[global(module):ne(variable)]].
+            integer, intent(in) :: nhy
+            !! The number of vertices per element. This corresponds to
+            !! [[global(module):nhy(variable)]].
+            integer, intent(in) :: nope
+            !! The number of elevation boundary segments. This corresponds
+            !! to [[global(module):nope(variable)]].
+            integer, intent(in) :: neta
+            !! The number of elevation boundary nodes. This corresponds
+            !! to [[global(module):neta(variable)]].
+            integer, intent(in) :: max_nvdll
+            !! The maximum number of nodes in a given elevation
+            !! boundary segment. This corresponds the maximum value
+            !! of [[global(module):nvdll(variable)]].
+            integer, intent(in) :: nbou
+            !! The number of normal flow (discharge) boundary
+            !! segments. This corresponds to
+            !! [[global(module):nbou(variable)]].
+            integer, intent(in) :: nvel
+            !! The number of normal flow (discharge) boundary nodes.
+            !! This corresponds to
+            !! [[global(module):nvel(variable)]].
+            integer, intent(in) :: max_nvell
+            !! The maximum number of nodes in a given normal flow
+            !! (discharge) boundary segment. This corresponds to
+            !! the maximum value of
+            !! [[global(module):nvell(variable)]].
+            integer, intent(in) :: ics
+            !! Mesh type. This corresponds to
+            !! [[global(module):ics(variable)]]
+        end subroutine ncdg_bathy_set_metadata
+
+        ! ncdg_tracer subroutines
+        ! For fort.88.nc
+
+        module subroutine ncdg_tracer_create(self, path, cmode)
+            !! Initialization function for
+            !! [[ncdg(module):ncdg_tracer(type)]]. Left in define mode.
+            !!
+            !! @warning "File Not Closed"
+            !! After initialization, the underlying file object is in
+            !! define mode. The user must remember to close it.
+            !! @endwarning
+
+            implicit none
+
+            class(ncdg_tracer), intent(inout) :: self
+            !! The wrapper object of the file
+            character(len=*), optional, intent(in) :: path
+            !! Path and name for the NetCDF file. Default is fort.88.nc.
+            integer, optional, intent(in) :: cmode
+            !! NetCDF creation mode. Default is ior(nf90_noclobber, nf90_netcdf4).
+        end subroutine ncdg_tracer_create
+
+        module subroutine ncdg_tracer_open(self, path, mode)
+            !! Open a fort.88.nc output file, and set all IDs.
+
+            implicit none
+
+            class(ncdg_tracer), intent(inout) :: self
+            !! The wrapper object of the file
+            character(len=*), optional, intent(in) :: path
+            !! Path and name for the NetCDF file. Default is whatever path is
+            !! already set. If the path is not already set and nothing is provided,
+            !! the program will assume fort.88.nc.
+            integer, optional, intent(in) :: mode
+            !! NetCDF open mode. Default is nf90_nowrite, i.e. read-only.
+        end subroutine ncdg_tracer_open
+
+        module subroutine ncdg_tracer_set_metadata(self, nt, np, ne, &
+            nhy, nope, neta, max_nvdll, nbou, nvel, max_nvell, ics)
+            !! Set variables, dimensions, and metadata for a fort.63.nc
+            !! output file.
+
+            implicit none
+
+            class(ncdg_tracer), intent(inout) :: self
+            !! The wrapper object of the file
+            integer, intent(in):: nt
+            !! Number of time steps. This corresponds to
+            !! [[global(module):nt(variable)]] or nf90_unlimited.
+            integer, intent(in):: np
+            !! Number of nodes. This corresponds to
+            !! [[global(module):np(variable)]].
+            integer, intent(in) :: ne
+            !! Number of elements. This corresponds to
+            !! [[global(module):ne(variable)]].
+            integer, intent(in) :: nhy
+            !! The number of vertices per element. This corresponds to
+            !! [[global(module):nhy(variable)]].
+            integer, intent(in) :: nope
+            !! The number of elevation boundary segments. This corresponds
+            !! to [[global(module):nope(variable)]].
+            integer, intent(in) :: neta
+            !! The number of elevation boundary nodes. This corresponds
+            !! to [[global(module):neta(variable)]].
+            integer, intent(in) :: max_nvdll
+            !! The maximum number of nodes in a given elevation
+            !! boundary segment. This corresponds the maximum value
+            !! of [[global(module):nvdll(variable)]].
+            integer, intent(in) :: nbou
+            !! The number of normal flow (discharge) boundary
+            !! segments. This corresponds to
+            !! [[global(module):nbou(variable)]].
+            integer, intent(in) :: nvel
+            !! The number of normal flow (discharge) boundary nodes.
+            !! This corresponds to
+            !! [[global(module):nvel(variable)]].
+            integer, intent(in) :: max_nvell
+            !! The maximum number of nodes in a given normal flow
+            !! (discharge) boundary segment. This corresponds to
+            !! the maximum value of
+            !! [[global(module):nvell(variable)]].
+            integer, intent(in) :: ics
+            !! Mesh type. This corresponds to
+            !! [[global(module):ics(variable)]]
+        end subroutine ncdg_tracer_set_metadata
 
         ! ncdg_nodal_scalar_max subroutines
         ! Common to all nodal vector files having a max variable

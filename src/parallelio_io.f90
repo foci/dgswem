@@ -21,7 +21,8 @@ module parallelio_io
     use pio, only : iosystem_desc_t, io_desc_t, pio_init, pio_finalize, &
         pio_iotype_netcdf4p, pio_rearr_box, pio_rearr_subset, pio_write, &
         pio_double, pio_initdecomp
-    use piodg, only : piodg_ele, piodg_vel, piodg_pr, piodg_wvel, piodg_maxele
+    use piodg, only : piodg_ele, piodg_vel, piodg_pr, piodg_wvel, &
+        piodg_maxele, piodg_bathy, piodg_tracer
     use pioutil, only : piofile_check_error
 
     implicit none
@@ -34,6 +35,8 @@ module parallelio_io
     type(piodg_pr) :: my_pr
     type(piodg_wvel) :: my_wvel
     type(piodg_maxele) :: my_maxele
+    type(piodg_bathy) :: my_bathy
+    type(piodg_tracer) :: my_tracer
 
     ! PIO variables
     type(iosystem_desc_t) :: my_iosystem
@@ -152,7 +155,8 @@ module parallelio_io
 
         use global, only : &
             noute, noutv, noutc, noutm, & ! Whether to write to NetCDF
-            noutge, noutgv, noutgc, noutgw
+            noutge, noutgv, noutgc, noutgw, &
+            sedflag
         use sizes, only : myproc, nsubdom
 
         implicit none
@@ -192,6 +196,9 @@ module parallelio_io
             if (abs(noutge) == 3) then
                 call my_ele%open(my_iosystem, omode=pio_write)
                 call my_maxele%open(my_iosystem, omode=pio_write)
+                if (sedflag >= 1) then
+                    call my_bathy%open(my_iosystem, omode=pio_write)
+                end if
             end if
 
             ! nodal velocity
@@ -216,7 +223,7 @@ module parallelio_io
 
         use global, only : &
             eta2, etamax, np, time_a, uu2, vv2, &
-            pr2, wvnxout, wvnyout, &
+            pr2, wvnxout, wvnyout, dp, &
             noute, noutv, noutc, noutm, & ! Whether to write to NetCDF
             noutge, noutgv, noutgc, noutgw, &
             ntcyse, ntcysv, ntcysc, ntcysm, & ! Start iteration
@@ -224,7 +231,8 @@ module parallelio_io
             ntcyfe, ntcyfv, ntcyfc, ntcyfm, & ! Stop iteration
             ntcyfge, ntcyfgv, ntcyfgc, ntcyfgw, &
             nspoole, nspoolv, nspoolc, nspoolm, & ! Write every
-            nspoolge, nspoolgv, nspoolgc, nspoolgw
+            nspoolge, nspoolgv, nspoolgc, nspoolgw, &
+            sedflag
 
         implicit none
 
@@ -299,6 +307,14 @@ module parallelio_io
                         compute_max=.false., &
                         sync=.true. &
                     )
+                    if (sedflag >= 1) then
+                        call my_bathy%write_step( &
+                            t=time_a, &
+                            scalar=dp(1:np), &
+                            piodesc=my_iodesc, &
+                            sync=.true. &
+                        )
+                    end if
                     nscouge = 0
                 end if
             end if
@@ -360,7 +376,8 @@ module parallelio_io
 
         use global, only : &
             noute, noutv, noutc, noutm, &
-            noutge, noutgv, noutgc, noutgw
+            noutge, noutgv, noutgc, noutgw, &
+            sedflag
         use sizes, only : imap_nod, imap_nod_gh0, resnode_pio
 
         implicit none
@@ -389,6 +406,9 @@ module parallelio_io
         if (abs(noutge) == 3) then
             call my_ele%close()
             call my_maxele%close()
+            if (sedflag >= 1) then
+                call my_bathy%close()
+            end if
         end if
 
         ! nodal velocity
