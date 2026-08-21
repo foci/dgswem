@@ -72,17 +72,18 @@ if not cpp_dep.found()
 endif
   
 
-starpu_layer_src = files(['dagswem.f90', 'dagswem_cl.f90'])
-starpu_dep = dependency('starpu-1.4', required: false, fallback: ['starpu', 'starpu_dep'])
+starpu_layer_src = files(['dg_context.F', 'count_pe_dirs.cpp', 'dagswem_c_interface.f90',
+                          'dagswem.f90', 'dagswem_cl.f90'])
 
-if get_option('task-parallel') and starpu_dep.found()
+starpu_dep = dependency('starpu-1.4', required: get_option('task-parallel'), fallback: ['starpu', 'starpu_dep'])
+
+if get_option('task-parallel').enabled()
   fstarpu_mod_src = run_command(
     'pkg-config', '--variable=starpu_includedir', 'starpu-1.4',
     check: true
   ).stdout().strip() + '/fstarpu_mod.f90'
-    #need to add an error message catch here
   fstarpu_mod_lib = static_library('fstarpu_mod', fstarpu_mod_src,
     dependencies: starpu_dep,
   )
-endif 
+endif
 
