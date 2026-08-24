@@ -36,23 +36,23 @@ Casey 121128: Added variables for the output of global files from SWAN.
       TYPE OutputDataDescript_t
         CHARACTER(12) :: file_name
         CHARACTER(20) :: field_name
-        INTEGER,POINTER :: iarray(:)
-        INTEGER,POINTER :: iarray_g(:)
-        INTEGER,POINTER :: imap(:)
+        INTEGER,ALLOCATABLE :: iarray(:)
+        INTEGER,ALLOCATABLE :: iarray_g(:)
+        INTEGER,ALLOCATABLE :: imap(:)
         INTEGER :: int_initial_value
         INTEGER :: num_fd_records
         INTEGER :: num_items_per_record
         INTEGER :: num_records_this
         INTEGER :: specifier
         LOGICAL :: ConsiderWetDry
-        REAL(SZ),POINTER :: array(:)
-        REAL(SZ),POINTER :: array2(:)
-        REAL(SZ),POINTER :: array3(:)
-        REAL(SZ),POINTER :: array_g(:)
-        REAL(SZ),POINTER :: array2_g(:)
-        REAL(SZ),POINTER :: array3_g(:)
-        REAL(SZ),POINTER :: hotstart(:)
-        REAL(SZ),POINTER :: hotstart_g(:)
+        REAL(SZ),ALLOCATABLE :: array(:)
+        REAL(SZ),ALLOCATABLE :: array2(:)
+        REAL(SZ),ALLOCATABLE :: array3(:)
+        REAL(SZ),ALLOCATABLE :: array_g(:)
+        REAL(SZ),ALLOCATABLE :: array2_g(:)
+        REAL(SZ),ALLOCATABLE :: array3_g(:)
+        REAL(SZ),ALLOCATABLE :: hotstart(:)
+        REAL(SZ),ALLOCATABLE :: hotstart_g(:)
         REAL(SZ) :: initial_value
         real(SZ) :: alternate_value
       ENDTYPE OutputDataDescript_t
@@ -118,14 +118,14 @@ C     jgf46.08 Fine grained ramp functions (jgf46.21 split flux b.c.s)
 
 C.....Create allocatable arrays
 
-      REAL(SZ),ALLOCATABLE :: ANGTAB(:,:),CENTAB(:,:),ELETAB(:,:)
+      REAL(SZ),POINTER :: ANGTAB(:,:),CENTAB(:,:),ELETAB(:,:)
       REAL(SZ),ALLOCATABLE :: DG_ANG(:),DP_DG(:)
-      INTEGER, ALLOCATABLE :: EL_COUNT(:)
+      INTEGER, POINTER :: EL_COUNT(:)
       INTEGER, ALLOCATABLE :: NNOEL(:,:)
 
 Csb...Table that maps nodes to elements
-      INTEGER, ALLOCATABLE :: NNDEL(:)
-      INTEGER, ALLOCATABLE :: NDEL(:,:)
+      INTEGER, POINTER :: NNDEL(:)
+      INTEGER, POINTER :: NDEL(:,:)
 C--
       
 C.....Declare variables for DG SW
@@ -148,8 +148,8 @@ C.....Declare variables for DG SW
       REAL(SZ),ALLOCATABLE :: FX_MID(:,:),GX_MID(:,:),HX_MID(:,:)
       REAL(SZ),ALLOCATABLE :: FY_MID(:,:),GY_MID(:,:),HY_MID(:,:)
       REAL(SZ),ALLOCATABLE :: ZE_C(:),QX_C(:),QY_C(:),dynP_DG(:)
-      REAL(SZ),Allocatable :: iota2_DG(:),iota_DG(:),iotaa_DG(:)
-      REAL(SZ),Allocatable :: bed_DG(:,:), bed_N_int(:), bed_N_ext(:)
+      REAL(SZ),POINTER :: iota2_DG(:),iota_DG(:),iotaa_DG(:)
+      REAL(SZ),POINTER :: bed_DG(:,:), bed_N_int(:), bed_N_ext(:)
 C...
 C...DECLARE ALL ARRAYS
 C...
@@ -159,22 +159,22 @@ C...
       REAL(SZ),ALLOCATABLE ::   DGDUMY1(:,:,:),DGDUMY2(:,:,:)
 #endif
 
-      INTEGER, ALLOCATABLE ::   pdg_el(:)
-      REAL(SZ),ALLOCATABLE ::   ETAS(:),ETA1(:),ETA2(:),ETAMAX(:)
-      REAL(SZ),ALLOCATABLE ::   entrop(:,:)
-      Real(SZ),Allocatable::tracer(:),tracer2(:),MassMax(:),bed_int(:,:)
+      INTEGER, POINTER ::   pdg_el(:)
+      REAL(SZ),POINTER ::   ETAS(:),ETA1(:),ETA2(:),ETAMAX(:)
+      REAL(SZ),POINTER ::   entrop(:,:)
+      Real(SZ),POINTER::tracer(:),tracer2(:),MassMax(:),bed_int(:,:)
       REAL(SZ),ALLOCATABLE ::   UU1(:),UU2(:),VV1(:),VV2(:), dyn_P(:)
-      REAL(SZ),ALLOCATABLE ::   DP(:),DP0(:),DPe(:),SFAC(:) !,STARTDRY(:)
+      REAL(SZ),POINTER ::   DP(:),DP0(:),DPe(:),SFAC(:) !,STARTDRY(:)
       REAL(SZ),ALLOCATABLE ::   QU(:),QV(:),QW(:)
-      REAL(SZ),ALLOCATABLE ::   CORIF(:) !,EVM(:)
+      REAL(SZ),POINTER ::   CORIF(:) !,EVM(:)
       REAL(SZ),ALLOCATABLE ::   TPK(:),FFT(:)
       REAL(SZ),ALLOCATABLE ::   FACET(:),ETRF(:)
-      REAL(SZ),ALLOCATABLE ::   ESBIN1(:),ESBIN2(:)
+      REAL(SZ),POINTER ::   ESBIN1(:),ESBIN2(:)
       REAL(SZ),ALLOCATABLE ::   QTEMA(:,:),QTEMB(:,:),QN2(:)
       REAL(SZ),ALLOCATABLE ::   BNDLEN2O3(:)
       REAL(SZ),ALLOCATABLE ::   CSII(:),SIII(:)
       REAL(SZ),ALLOCATABLE ::   QNAM(:,:),QNPH(:,:)
-      REAL(SZ),ALLOCATABLE ::   QNIN1(:),QNIN2(:)
+      REAL(SZ),POINTER ::   QNIN1(:),QNIN2(:)
       REAL(SZ),ALLOCATABLE ::   CSI(:),SII(:)
 C      REAL(SZ),ALLOCATABLE ::   TAU0VAR(:)
       REAL(SZ),ALLOCATABLE ::   ET00(:),BT00(:)
@@ -190,13 +190,13 @@ C      REAL(SZ),ALLOCATABLE ::   TAU0VAR(:)
       REAL(SZ),ALLOCATABLE ::   STAIM1(:),STAIM2(:),STAIM3(:)
       REAL(SZ),ALLOCATABLE ::   CH1(:),QB(:),QA(:),SOURSIN(:)!,EVC(:)
       REAL(SZ),ALLOCATABLE ::   WSX1(:),WSY1(:),PR1(:)
-      REAL(SZ),ALLOCATABLE ::   WSX2(:),WSY2(:),PR2(:)
+      REAL(SZ),POINTER ::   WSX2(:),WSY2(:),PR2(:)
       REAL(SZ),ALLOCATABLE ::   WVNX1(:),WVNY1(:),PRN1(:)
       REAL(SZ),ALLOCATABLE ::   WVNX2(:),WVNY2(:),PRN2(:)
       REAL(SZ),ALLOCATABLE ::   RSNX1(:),RSNY1(:),RSNX2(:),RSNY2(:)
 #ifdef SWAN
 Casey 101118: Added the following arrays for output of radiation stress gradients.
-      REAL(SZ),ALLOCATABLE,TARGET :: RSNXOUT(:), RSNYOUT(:)
+      REAL(SZ),ALLOCATABLE :: RSNXOUT(:), RSNYOUT(:)
 #endif
 C.....Allocate additional variables for wave friction
       REAL(SZ),ALLOCATABLE ::WAVE_T1(:),WAVE_H1(:),WAVE_A1(:),WAVE_D1(:)
@@ -208,7 +208,7 @@ C.....Allocate additional variables for wave friction
       REAL(SZ),ALLOCATABLE ::    EMO(:,:),EFA(:,:)
       REAL(SZ),ALLOCATABLE ::    UMO(:,:),UFA(:,:),VMO(:,:),VFA(:,:)
       REAL(SZ),ALLOCATABLE ::    XEL(:),YEL(:),SLEL(:),SFEL(:)
-      REAL(SZ),ALLOCATABLE ::    AREAS(:),SFACDUB(:,:),YDUB(:,:,:)
+      REAL(SZ),POINTER ::    AREAS(:),SFACDUB(:,:),YDUB(:,:,:)
 
       !temp
       real(sz) ,ALLOCATABLE ::   RTEMP2(:)
@@ -219,7 +219,7 @@ C.....Allocate additional variables for wave friction
       REAL(SZ),ALLOCATABLE ::   AUV11(:),AUV12(:),AUV13(:),AUV14(:)
       REAL(SZ),ALLOCATABLE ::   AUVXX(:), AUVYY(:), AUVXY(:), AUVYX(:)
       REAL(SZ),ALLOCATABLE ::   DUU1(:),DUV1(:),DVV1(:),BSX1(:),BSY1(:)
-      REAL(SZ),ALLOCATABLE ::   TIP1(:),TIP2(:)
+      REAL(SZ),POINTER ::   TIP1(:),TIP2(:)
       REAL(SZ),ALLOCATABLE ::   SALTAMP(:,:),SALTPHA(:,:)
       REAL(SZ),ALLOCATABLE ::   OBCCOEF(:,:),COEF(:,:)
       REAL(SZ),ALLOCATABLE ::   WKSP(:),RPARM(:)
@@ -227,43 +227,43 @@ C.....Allocate additional variables for wave friction
       REAL(SZ),ALLOCATABLE ::   GRAVX(:),GRAVY(:)
 
       INTEGER,ALLOCATABLE ::    ME2GW(:)
-      INTEGER,ALLOCATABLE ::    NBV(:),LBCODEI(:)
-      INTEGER,ALLOCATABLE ::    NNODECODE(:),NODECODE(:),NODEREP(:)
+      INTEGER,POINTER ::    NBV(:),LBCODEI(:)
+      INTEGER,POINTER ::    NNODECODE(:),NODECODE(:),NODEREP(:)
       INTEGER,ALLOCATABLE ::    NIBCNT(:)
-      INTEGER,ALLOCATABLE ::    NM(:,:)
+      INTEGER,POINTER ::    NM(:,:)
       INTEGER,ALLOCATABLE ::    NNEIGH(:),MJU(:),NODELE(:)
-      INTEGER,ALLOCATABLE ::    NEITAB(:,:),NNEIGH_ELEM(:)
-      INTEGER,ALLOCATABLE ::    NIBNODECODE(:),NEIGH_ELEM(:,:)
+      INTEGER,POINTER ::    NEITAB(:,:),NNEIGH_ELEM(:)
+      INTEGER,POINTER ::    NIBNODECODE(:),NEIGH_ELEM(:,:)
       INTEGER,ALLOCATABLE ::    LBCODE(:)
       INTEGER,ALLOCATABLE ::    NNC(:)
       INTEGER,ALLOCATABLE ::    NNE(:)
       INTEGER,ALLOCATABLE ::    NNV(:)
       INTEGER,ALLOCATABLE ::    NNM(:)
       INTEGER,ALLOCATABLE ::    IWKSP(:),IPARM(:),IPV(:)
-      INTEGER,ALLOCATABLE ::    NVDLL(:),NBD(:)
-      INTEGER,ALLOCATABLE ::    NBDV(:,:)
-      INTEGER,ALLOCATABLE ::    NVELL(:)
-      INTEGER,ALLOCATABLE ::    NBVV(:,:)
-      INTEGER,ALLOCATABLE ::    NELED(:,:)
-      INTEGER,ALLOCATABLE ::    SEGTYPE(:)
-      INTEGER,ALLOCATABLE ::    NOT_AN_EDGE(:)
-      INTEGER,ALLOCATABLE ::    WEIR_BUDDY_NODE(:,:)
-      INTEGER,ALLOCATABLE ::    ONE_OR_TWO(:)
-      INTEGER,ALLOCATABLE ::    EDFLG(:,:)
+      INTEGER,POINTER ::    NVDLL(:),NBD(:)
+      INTEGER,POINTER ::    NBDV(:,:)
+      INTEGER,POINTER ::    NVELL(:)
+      INTEGER,POINTER ::    NBVV(:,:)
+      INTEGER,POINTER ::    NELED(:,:)
+      INTEGER,POINTER ::    SEGTYPE(:)
+      INTEGER,POINTER ::    NOT_AN_EDGE(:)
+      INTEGER,POINTER ::    WEIR_BUDDY_NODE(:,:)
+      INTEGER,POINTER ::    ONE_OR_TWO(:)
+      INTEGER,POINTER ::    EDFLG(:,:)
 
 C.....for internal barrier boundaries with flowthrough pipes
       REAL(SZ),ALLOCATABLE ::   BARLANHTR(:),BARLANCFSPR(:)
       REAL(SZ),ALLOCATABLE ::   BARINHTR(:),BARINCFSBR(:),BARINCFSPR(:)
       REAL(SZ),ALLOCATABLE ::   PIPEHTR(:),PIPECOEFR(:),PIPEDIAMR(:)
       REAL(SZ),ALLOCATABLE ::   BARLANHT(:),BARLANCFSP(:)
-      REAL(SZ),ALLOCATABLE ::   FFF(:),FFACE(:)
+      REAL(SZ),POINTER ::   FFF(:),FFACE(:)
       REAL(SZ),ALLOCATABLE ::   BTRAN3(:),BTRAN4(:),BTRAN5(:)
       REAL(SZ),ALLOCATABLE ::   BTRAN6(:),BTRAN7(:),BTRAN8(:)
-      REAL(SZ),ALLOCATABLE ::   BARINHT(:),BARINCFSB(:),BARINCFSP(:)
+      REAL(SZ),POINTER ::   BARINHT(:),BARINCFSB(:),BARINCFSP(:)
       REAL(SZ),ALLOCATABLE ::   PIPEHT(:),PIPECOEF(:),PIPEDIAM(:)
-      REAL(SZ),ALLOCATABLE ::   RBARWL1AVG(:),RBARWL2AVG(:)
+      REAL(SZ),POINTER ::   RBARWL1AVG(:),RBARWL2AVG(:)
       REAL(SZ),ALLOCATABLE ::   ELEXLEN(:,:)
-      INTEGER, ALLOCATABLE ::   IBCONN(:),IBCONNR(:),NTRAN1(:),NTRAN2(:)
+      INTEGER, POINTER ::   IBCONN(:),IBCONNR(:),NTRAN1(:),NTRAN2(:)
 
 C.....for bridge pilings
       REAL(SZ)                  POAN,Fr,FRICBP
@@ -301,10 +301,10 @@ C...
       real(sz) WREFTIM,WTIMED,WTIME2,WTIME1,WTIMINC,QTIME1,QTIME2
       real(sz) FTIMINC,ETIMINC,RSTIME1,RSTIME2,RSTIMINC
       real(sz) DELX,DELY,DIST,DELDIST,DELETA
-      real(sz),ALLOCATABLE :: AMIG(:),AMIGT(:),FAMIG(:)
-      real(sz),ALLOCATABLE :: PER(:),PERT(:),FPER(:)
-      real(sz),ALLOCATABLE :: FREQ(:),FF(:),FACE(:)
-      real(sz),ALLOCATABLE :: SLAM(:),SFEA(:),X(:),Y(:)
+      real(sz),POINTER :: AMIG(:),AMIGT(:),FAMIG(:)
+      real(sz),POINTER :: PER(:),PERT(:),FPER(:)
+      real(sz),POINTER :: FREQ(:),FF(:),FACE(:)
+      real(sz),POINTER :: SLAM(:),SFEA(:),X(:),Y(:)
 
 
       CHARACTER*32 RUNDES
