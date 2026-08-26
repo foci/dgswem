@@ -12,10 +12,10 @@ DaGSWEM^2 (Discontinous Adaptive Galerkin Shallow Water Equation Model/Directed 
 This version will focus on implementing a basic task-based execution model for the shallow water equations, such that dynamic load balancing can be acheived on a multi-core CPU. 
 
 ### Orchestrator Architecture
-This most primitive architecture will be almost 1-1 to the traditional flat MPI architecture of subdomains with ghost and resident data. A task will correspond roughly to a MPI rank. 
+This most primitive architecture will be almost 1-1 to the traditional flat MPI architecture of subdomains with ghost and resident data. A task will correspond roughly to doing some work on an MPI rank. 
 
 #### Data
--  State variables: For each subdomain, each one will get a StarPU handle respresenting that subdomain's state variables, including ghost and resident elements/nodes.  
+-  State variables: For each subdomain, each one will get a StarPU handle respresenting that subdomain's state variables, including ghost and resident elements/nodes. 
 -  Recv vectors: For each subdomain's neighbors, a StarPU vector will be declared that is intended to be read by the subdomain and written to by the neighbor. 
 
 #### Codelets
@@ -27,7 +27,3 @@ The codelets will be submitted in a loop and dependencies will be inferred from 
 #### What has been done so far
 - To reuse the `DG.F` header, state variables that are not temporary to an advance stage task have been changed from ALLOCATABLE, to POINTER, so that each StarPU worker will have its own copy. The `ADVANCE_STATE_DISTRIBUTED` codelet contains a header subroutine that redirects the workers' pointers to the one handled by StarPU, so that each task effectively has its own private copies. Non state variables are left untouched. 
 - `dagswem_cl.f90` has been filled out partially with a codelet stub and a `DG_STATE_ACTIVATE` subroutine that points the threadprivate declarations to the corresponding StarPU handles. 
-
-#### What needs to be done 
-- Fill out the routine to read the PE directories and construct the subdomain -> neighbor -> receiving vector (read) tree
-- Fill out the routine to read the PE directories and construct the subdomain -> neighbor -> send vector (matching write) tree
