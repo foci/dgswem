@@ -100,22 +100,23 @@ subdir('prep')
 
 # Serial DGSWEM Main Program
 executable('dgswem_serial',
-           sources: dgswem_src + c_interface_src,
+           sources: dg_src + dgswem_src + c_interface_src,
            dependencies: [cpp_dep] + netcdf_dep,
            link_language: 'fortran')
 
 # Parallel DGSWEM Main Program
 if get_option('parallel')
   mpi_dep = dependency('mpi', language: 'fortran')
-  executable('dgswem', sources: dgswem_src + mpi_handlers + c_interface_src,
+  executable('dgswem', sources: dg_src + dgswem_src + mpi_handlers + c_interface_src,
              dependencies: [mpi_dep] + cpp_dep + netcdf_dep,
              fortran_args: '-DCMPI',
              link_language: 'fortran')
 endif
 
 if get_option('task-parallel').enabled()
-  executable('dagswem', sources: dgswem_src + c_interface_src + starpu_layer_src,
+  executable('dagswem', sources: dg_src + c_interface_src + starpu_layer_src,
              dependencies: [starpu_dep] + cpp_dep + netcdf_dep,
+             fortran_args: '-DTASKPAR',
              link_language: 'fortran', 
              link_with: fstarpu_mod_lib)
 endif  

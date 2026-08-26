@@ -1,6 +1,6 @@
 # Kenton: Could do a glob here but I think it's better practice to be explicit (this isn't make!) 
 # Also promotes better code coverage. 
-dgswem_src = files([
+dg_src = files([
   'DG_hydro_timestep.F',
   'DG_timestep.F',
   'LDG_hydro.F',
@@ -10,7 +10,7 @@ dgswem_src = files([
   'cstart.F',
   'detector.F',
   'dg.F',
-  'dgswem.F',
+  'dgswem_utils.F',
   'diff45_41.F',
   'ebarrier_edge_hydro.F', 
   'edge_int_hydro.F',
@@ -59,6 +59,7 @@ dgswem_src = files([
   'write_output.F',
   'write_results.F'])
 
+dgswem_src = files(['dgswem.F'])
 mpi_handlers = files(['messenger.F', 'messenger_elem.F'])
 c_interface_src = files(['count_edges.cpp', 'c_interface.F90'])
 
@@ -72,11 +73,18 @@ if not cpp_dep.found()
 endif
   
 
-starpu_layer_src = files(['dagswem.f90', 'dagswem_cl.f90'])
-
 starpu_dep = dependency('starpu-1.4', required: get_option('task-parallel'), fallback: ['starpu', 'starpu_dep'])
 
 if get_option('task-parallel').enabled()
+  python_prog = find_program('python3', required: true)
+  dagswem_state_src = custom_target(
+    'dagswem_state.f90',
+    output: 'dagswem_state.f90',
+    input: ['dg.F', 'global.F'],
+    command: [python_prog, files('gen_context.py'), '@INPUT@', '@OUTPUT@']
+  )
+
+  starpu_layer_src = [files(['dagswem.f90', 'dagswem_cl.f90', 'starpu_tensor_wrappers.c']), dagswem_state_src]
   fstarpu_mod_src = run_command(
     'pkg-config', '--variable=starpu_includedir', 'starpu-1.4',
     check: true
