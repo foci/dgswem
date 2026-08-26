@@ -72,8 +72,7 @@ if not cpp_dep.found()
 endif
   
 
-starpu_layer_src = files(['dg_context.F', 'count_pe_dirs.cpp', 'dagswem_c_interface.f90',
-                          'dagswem.f90', 'dagswem_cl.f90'])
+starpu_layer_src = files(['dagswem.f90', 'dagswem_cl.f90'])
 
 starpu_dep = dependency('starpu-1.4', required: get_option('task-parallel'), fallback: ['starpu', 'starpu_dep'])
 
