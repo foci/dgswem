@@ -6,8 +6,11 @@ adcpost
 adcprep
 dgswem
 dgswem_serial
+.DS_Store
+tests/
 __pycache__
 .wraplock
+.ipynb_checkpoints
 PE* 
 *.16
 *.17
@@ -27,4 +30,3 @@ PE*
 metis_graph.txt
 maxele.63
 aps*
-

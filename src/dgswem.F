@@ -1,6 +1,6 @@
 C******************************************************************************
-C     DGSWEM RELEASE VERSION 1 11/2013   
-C     
+C     DGSWEM RELEASE VERSION 1 11/2013
+C
 C******************************************************************************
 
       PROGRAM DGSWEM
@@ -20,6 +20,16 @@ C     sb-disabled for Linux&Intel compiler
      &     NoLiBF, NWP, Tau0, HBreak, FTheta, FGamma, Tau, CF, IFNLBF,
      &     InitNAModule, ReadNodalAttr, InitNodalAttr, ESLM, ESLC,
      &     IFLINBF, IFHYBF
+#ifdef NETCDF
+#ifndef CMPI
+      use netcdf_io, only : netcdf_init_files_serial,
+     &    netcdf_close_files_serial
+#else
+      use parallelio_io, only : parallelio_init_parallel,
+     &    parallelio_open_files_parallel,
+     &    parallelio_close_files_parallel
+#endif
+#endif
 #ifdef SWAN
 Casey 110422: Create a new data structure with discontinuous information.
 Casey 121126: DEBUG.
@@ -32,10 +42,10 @@ Casey 101118: We need the following information to couple to unstructured SWAN.
 #endif
 #ifdef CMPI
       USE MESSENGER_ELEM
-C--   
+C--
       IMPLICIT NONE
       real(4) crain_time1, crain_time2, crain_timinc
-      
+
       INTEGER TESTFLAG,OUTITER,istop,i
 C     sb-PDG1
       REAL(4) CPU_TIME,CPU_SEC(2), ttime
@@ -51,10 +61,13 @@ c     nd
       ENDIF
       CALL MAKE_DIRNAME()       ! Establish Working Directory Name
       CALL READ_INPUT()         ! Establish sizes by reading fort.14 and fort.15
+#ifdef NETCDF
+      CALL PARALLELIO_INIT_PARALLEL()
+#endif
 #else
       IMPLICIT NONE
       real(4) crain_time1, crain_time2, crain_timinc
-      
+
       REAL(4) CPU_TIME,CPU_SEC(2)
       REAL(4) TARRAY(2), ttime
       INTEGER TESTFLAG,OUTITER,i
@@ -62,11 +75,11 @@ c     nd
 
       CALL MAKE_DIRNAME()       ! Establish Working Directory Name
       CALL READ_INPUT()         ! Establish sizes by reading fort.14 and fort.15
-#endif         
+#endif
 
 
       if (rainfall.gt.0) then
-        CALL alloc_precipitation() 
+        CALL alloc_precipitation()
       end if
 
       if (rainfall.eq.2) then
@@ -76,16 +89,16 @@ c     nd
         CRAIN_TIME1 = STATIM*86400.0
         CRAIN_TIME2 = CRAIN_TIME1 + CRAIN_TIMINC
       ENDIF
-      
-C...  
+
+C...
 C...  ******************* START PROGRAM SETUP SECTION ****************************
-C...  
+C...
 C
       ModetoNode = 1
 #ifdef OUT_TEC
       ! If tecplot is used then do not convert from modal to nodal values
       ModetoNode = 0
-      
+
 #endif
 
       IF (IHOT.EQ.0) THEN
@@ -95,10 +108,10 @@ C
       ENDIF
 
 
-C...  
-C...  DETERMINE THE NUMBER OF ACTIVE ELEMENTS (MJU) and total number of 
+C...
+C...  DETERMINE THE NUMBER OF ACTIVE ELEMENTS (MJU) and total number of
 C...  elements (NODELE) ATTACHED TO EACH NODE
-C...  
+C...
       DO I=1,NP
          MJU(I)=0
          NODELE(I)=0
@@ -121,11 +134,11 @@ C...
       DO I=1,NP
          IF(MJU(I).EQ.0) MJU(I)=1
       END DO
-      
-      
-C...  
+
+
+C...
 C...  ************* SET FLAGS AND COEFFICIENTS USED IN TIME STEPPING ***********
-C...  
+C...
 C...  NONLINEAR FLAGS
 
       IF(NOLIBF.EQ.0) THEN
@@ -171,7 +184,7 @@ C...  NONLINEAR FLAGS
 
       IFWIND=1
       IF(IM.EQ.1) IFWIND=0
- 
+
 C...  CONSTANT COEFFICIENTS
 cjj   w - version m10
 cjj   w      TT0L=((1.0+0.5*DT*TAU0)/DT)/DT
@@ -187,7 +200,7 @@ cjj   w      TT0R=((0.5*TAU0*DT-1.0)/DT)/DT
       DT2=DT*2.0
       GDTO2=G*DT/2.0
       SADVDTO3=IFNLCT*DT/3.0
-      
+
 C*************************DG SWEM*******************************
 
 c     write(200+myproc,*) 'call prep_dg'
@@ -202,7 +215,7 @@ c     write(200+myproc,*) 'back from prep_dg'
                                !cnd...for tecplot output
 !Casey 120813: Begin the OUT_TEC conditional.
 #ifdef OUT_TEC
-      
+
 
 #ifdef CMPI
       !CALL SYSTEM('mkdir'//'/'//'tecplot_output{00..'//'4'//'}')
@@ -226,16 +239,16 @@ c     write(200+myproc,*) 'back from prep_dg'
       write(777,*)  'TITLE = "dgswem output"'
 
       if (ModetoNode.eq.0) then
-         write(777,*) 
+         write(777,*)
      $        'VARIABLES = "x", "y", "b", "ze", "H", "u", "v", "|v|","|w|","p","iota","iota2","sum","diff"'
          write(777,*) 'ZONE ZONETYPE=FETRIANGLE ',
-     $        'NODES=', np, 
-     $        ' ELEMENTS=', ne, 
+     $        'NODES=', np,
+     $        ' ELEMENTS=', ne,
 !     $     ' DATAPACKING=POINT ','SOLUTIONTIME=',time_a
      $        ' DATAPACKING=BLOCK ',' VARLOCATION=([3,4,5,6,7,8,10,11,12,13,14]=CELLCENTERED) ',
-     $        'SOLUTIONTIME=',time_a 
+     $        'SOLUTIONTIME=',time_a
 
-c$$$  write(777,7777) x(i), y(i),  
+c$$$  write(777,7777) x(i), y(i),
 c$$$  $        dp(i), eta2(i), eta2(i)+dp(i),uu2(i),vv2(i),
 c$$$  $        sqrt(uu2(i)**2+vv2(i)**2),sqrt(wsx2(i)**2+wsy2(i)**2),
 c$$$  $        myproc,tracer(i),tracer2(i),abs(tracer(i)+tracer2(i)),
@@ -254,46 +267,46 @@ c$$$  enddo
          do i=1,ne
             write(777,7777)  eta2(i)
          enddo
-         do i=1,ne 
+         do i=1,ne
             write(777,7777)  eta2(i)+dpe(i)
          enddo
-         do i=1,ne 
+         do i=1,ne
             write(777,7777)  uu2(i)
          enddo
-         do i=1,ne 
+         do i=1,ne
             write(777,7777)  vv2(i)
          enddo
-         do i=1,ne 
+         do i=1,ne
             write(777,7777)  sqrt(uu2(i)**2+vv2(i)**2)
          enddo
-         do i=1,np 
+         do i=1,np
             write(777,7777)  sqrt(wsx2(i)**2+wsy2(i)**2)
          enddo
-         do i=1,ne 
+         do i=1,ne
             write(777,7777)  DBLE(pdg_el(i))
          enddo
-         do i=1,ne 
+         do i=1,ne
             write(777,7777)  tracer(i)
          enddo
-         do i=1,ne 
+         do i=1,ne
             write(777,7777)  tracer2(i)
          enddo
-         do i=1,ne 
+         do i=1,ne
             write(777,7777)  abs(tracer(i)+tracer2(i))
          enddo
-         do i=1,ne 
-            write(777,7777)  abs(tracer(i)-tracer2(i))    
+         do i=1,ne
+            write(777,7777)  abs(tracer(i)-tracer2(i))
          enddo
       else
-         write(777,*) 
+         write(777,*)
      $'VARIABLES = "x", "y", "b", "ze", "H", "u", "v", "|v|","|w|","PE"'
          write(777,*) 'ZONE ZONETYPE=FETRIANGLE ',
-     $        'NODES=', np, 
-     $        ' ELEMENTS=', ne, 
+     $        'NODES=', np,
+     $        ' ELEMENTS=', ne,
      $        ' DATAPACKING=POINT ','SOLUTIONTIME=',time_a
          do i=1,np
             if (ics.eq.2) then
-               write(777,7777) slam(i)/deg2rad, sfea(i)/deg2rad,  
+               write(777,7777) slam(i)/deg2rad, sfea(i)/deg2rad,
      $              dp(i), eta2(i), eta2(i)+dp(i),uu2(i),vv2(i),
      $            sqrt(uu2(i)**2+vv2(i)**2),sqrt(wsx2(i)**2+wsy2(i)**2),
      $              myproc
@@ -337,6 +350,20 @@ C     sb...Write initial conditions
 !     stop
 !     endif
 #endif
+
+C.....Initialize NetCDF files, if needed
+#ifdef NETCDF
+#ifndef CMPI
+      PRINT *, "NOW WITH NETCDF OUTPUT!"
+      PRINT *, "CREATING NETCDF FILES..."
+      CALL NETCDF_INIT_FILES_SERIAL()
+#else
+      IF (MYPROC == 0) PRINT *, "NOW WITH NETCDF OUTPUT, IN PARALLEL!"
+      IF (MYPROC == 0) PRINT *, "OPENING FILES..."
+      CALL PARALLELIO_OPEN_FILES_PARALLEL()
+#endif
+#endif
+
 C.....Begin time stepping
       DO 200 ITIME_A = ITHS+1,NT
 c$$$         if (mod(itime_a,1000).eq.1) then
@@ -374,20 +401,32 @@ Casey 121126: DEBUG.
 
  1112 FORMAT(/,1X,79('_'))
 17931 FORMAT(//,1X,'LIMITED RUNTIME INFORMATION SECTION ',//)
-      
 
-C...  
+
+C...
 C...  ****************** TIME STEPPING LOOP ENDS HERE ********************
-C...  
-C...  
+C...
+
+C.....Close NetCDF files, if needed
+#ifdef NETCDF
+#ifndef CMPI
+      PRINT *, "CLOSING NETCDF FILES..."
+      CALL NETCDF_CLOSE_FILES_SERIAL()
+#else
+      if (MYPROC == 0) PRINT *, "CLOSING NETCDF FILES..."
+      CALL PARALLELIO_CLOSE_FILES_PARALLEL()
+#endif
+#endif
+
+C...
 C...  IF IHARIND=1 SOLVE THE HARMONIC ANALYSIS PROBLEM AND WRITE OUTPUT
-C...  
+C...
       IF ((IHARIND.EQ.1).AND.(ITIME_A.GT.ITHAS)) THEN
 
 C...  LINES COMPUTE MEANS AND VARIANCES
 C...  FOR CHECKING THE HARMONIC ANALYSIS RESULTS.
 C...  ACCUMULATE VARIANCE AND MEAN OF RECORD AT NODES.
-C     
+C
          if (CHARMV) then
             IF (FMV.NE.0.) THEN
                DO I=1,NP
@@ -403,24 +442,24 @@ C
                WRITE(55,*) NP
             ENDIF
          endif                  !  charmv
-C...  
+C...
 C......Fill out and decompose the LHS harmonic analaysis matrix
-C...  
+C...
          CALL FULSOL(0)
-C...  
+C...
 C......Solve the harmonic analysis problem and write the output
-C...  
+C...
          IF(NHAGE.EQ.1) CALL LSQSOLEG(NP,DIRNAME,LNAME,ELAV,ELVA)
-C     
+C
          IF(NHAGV.EQ.1) CALL LSQSOLVG(NP,DIRNAME,LNAME,
      &        XVELAV,YVELAV,XVELVA,YVELVA)
-C     
+C
          IF(NHASE.EQ.1) CALL LSQSOLES(NSTAE,DIRNAME,LNAME)
-C     
+C
          IF(NHASV.EQ.1) CALL LSQSOLVS(NSTAV,DIRNAME,LNAME)
-C     
+C
       ENDIF
-      
+
 #ifdef SWAN
 Casey 101118: Let SWAN clean up stuff.
       CALL PADCSWAN_FINAL
@@ -429,8 +468,8 @@ Casey 101118: Let SWAN clean up stuff.
 #ifdef CMPI
       CALL MESSAGE_FINI()
 #endif
-C     
-C     
+C
+C
 #ifdef VF
 C     CALL ETIME(TARRAY)
 C     CPU_TIME = TARRAY(1) + TARRAY(2)
@@ -474,11 +513,11 @@ C     NEIMIN - 1+MINIMUM NUMBER OF NEIGHBORS FOR ANY NODE                   *
 C     NEIMAX - 1+MAXIMUM NUMBER OF NEIGHBORS FOR ANY NODE                   *
 C     *
 C******************************************************************************
-C     
+C
       SUBROUTINE NEIGHB(NE,NP,NM,NNEIGH,NEIGH,NEIMIN,NEIMAX,
      &     X,Y,NSCREEN,NNEIGH_ELEM,NEIGH_ELEM)
       USE SIZES
-C     
+C
       INTEGER NP,NE,NEIMIN,NEIMAX,NSCREEN,N,NN,EN1,EN2,EN3,I,J
       INTEGER :: NEIGH(MNP,MNEI),NNEIGH(MNP),NNEIGH_ELEM(MNP)
       INTEGER NM(MNE,3),NEIGH_ELEM(MNP,MNEI)
@@ -486,12 +525,12 @@ C
       real(sz) ANGLELOW,ANGLEMORE,RAD2DEG
       real(sz), ALLOCATABLE :: ANGLE(:)
       INTEGER,ALLOCATABLE :: NEITEM(:)
-C     
+C
       ALLOCATE ( ANGLE(MNEI) )
       ALLOCATE ( NEITEM(MNP) )
-C     
+C
       RAD2DEG=45.0/ATAN(1.0)
-C     
+C
       DO N=1,NP
          NNEIGH(N) = 0
          NNEIGH_ELEM(N) = 0
@@ -500,7 +539,7 @@ C
             NEIGH_ELEM(N,NN) = 0
          ENDDO
       ENDDO
-C     
+C
       DO 10 N=1,NE
          EN1 = NM(N,1)
          EN2 = NM(N,2)
@@ -533,9 +572,9 @@ C
                   NEIGH(EN2,NNEIGH(EN2))=EN3
                   NEIGH(EN3,NNEIGH(EN3))=EN2
  10            CONTINUE
-C     
+C
 C     INSERT NODE ITSELF IN PLACE #1 and SORT other NEIGHBORS by increasing cw angle from East
-C     
+C
                DO I=1,NP
                   DO J=1,NNEIGH(I)
                      NEITEM(J)=NEIGH(I,J)
@@ -569,16 +608,16 @@ C
                   NNEIGH(I)=NNEIGH(I)+1
                ENDDO
 
-C     
+C
 C     DETERMINE THE MAXIMUM AND MINIMUM NUMBER OF NEIGHBORS
-C     
+C
                NEIMAX = 0
                NEIMIN = 1000
                DO 60 N=1,NP
                   IF(NNEIGH(N).LT.NEIMIN) NEIMIN=NNEIGH(N)
                   IF(NNEIGH(N).GT.NEIMAX) NEIMAX=NNEIGH(N)
  60            CONTINUE
-C     
+C
                RETURN
 
 C     TERMINATE PROGRAM IF MAXIMUM NUMBER OF NEIGHBORS SET TOO SMALL
@@ -600,8 +639,8 @@ C     TERMINATE PROGRAM IF MAXIMUM NUMBER OF NEIGHBORS SET TOO SMALL
      &         ' HAVE THE SAME COORDINATES'
      &       //,1X,'!!!!!! EXECUTION WILL NOW BE TERMINATED !!!!!!',//)
                STOP
-               END         
-      
+               END
+
 
 
 C******************************************************************************

@@ -1,0 +1,14 @@
+name: dgswem-env
+channels:
+  - defaults
+dependencies:
+  - libnetcdf[version='>=4.9.2,<4.10.0',build=*openmpi*]
+  - gfortran
+  - openmpi
+  - parallelio
+  - gcc
+  - gxx
+  - netcdf-fortran[build=*openmpi*]
+  - meson
+  - pkg-config
+prefix: /Users/ashtoncole/.local/share/conda/envs/dgswem-env

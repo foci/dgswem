@@ -14,12 +14,12 @@ C***********************************************************************
 
       SUBROUTINE READ14()
 
-      USE PRE_GLOBAL 
+      USE PRE_GLOBAL
 
       INTEGER I, J, JW, K, IERROR, ITEMP, ITYPE
       INTEGER BBN, DISC, IBP, I1
       INTEGER MAXNEIGH
-      
+
 
 
       IERROR = 0
@@ -140,7 +140,7 @@ C....Construct List of WEIR nodes and their duals
       ENDDO
 !
 
-      
+
 
 C.....Close Global Grid file
 
@@ -173,10 +173,10 @@ C.....Error messages
         PRINT*, '*********** EXECUTION TERMINATED! ***********'
         STOP
       ENDIF
-      
+
       RETURN
       END SUBROUTINE READ14
-      
+
 C***********************************************************************
 C
 C     SUBROUTINE READ15()
@@ -372,7 +372,7 @@ C     sb46.28sb01 added NWS=12: OWI format
      &       (NWS.NE.3).AND.(ABS(NWS).NE.4) .AND.(ABS(NWS).NE.5).AND.
      &       (ABS(NWS).NE.45).AND.(ABS(NWS).NE.6).AND.
      &       (ABS(NWS).NE.8).AND.(ABS(NWS).NE.9).AND.
-     &       (ABS(NWS).NE.12).AND.(ABS(NWS).NE.19).AND. 
+     &       (ABS(NWS).NE.12).AND.(ABS(NWS).NE.19).AND.
      &       (ABS(NWS).NE.20))  THEN
            print *, "Value for NWS not supported by parallel code"
            stop
@@ -705,7 +705,7 @@ C...
 
       READ(15,80) STAEMSG
       READ(STAEMSG,*) NOUTE,TOUTSE,TOUTFE,NSPOOLE
-      IF (ABS(NOUTE).GT.2) THEN
+      IF (ABS(NOUTE).GT.3) THEN
         print *, "The value of NTOUTE is not allowed"
         stop
       ENDIF
@@ -742,7 +742,7 @@ C--Read Velocity Recording Stations
 C
       READ(15,80) STAVMSG
       READ(STAVMSG,*) NOUTV,TOUTSV,TOUTFV,NSPOOLV
-      IF (ABS(NOUTV).GT.2) THEN
+      IF (ABS(NOUTV).GT.3) THEN
         print *, "Value for NOUTV is not allowable"
         stop
       ENDIF
@@ -785,7 +785,7 @@ C
 C
         READ(15,80) STACMSG
         READ(STACMSG,*) NOUTC,TOUTSC,TOUTFC,NSPOOLC
-        IF (ABS(NOUTC).GT.2) THEN
+        IF (ABS(NOUTC).GT.3) THEN
           print *, "Value of NOUTC is not allowable"
           stop
         ENDIF
@@ -828,7 +828,7 @@ C
 C
          READ(15,80) STAMMSG
          READ(STAMMSG,*) NOUTM,TOUTSM,TOUTFM,NSPOOLM
-         IF (ABS(NOUTM).GT.2) THEN
+         IF (ABS(NOUTM).GT.3) THEN
             print *, "Value of NOUTM is not allowable"
             stop
          ENDIF
@@ -870,7 +870,7 @@ C--Read Global Elevation Data Output
 C
       READ(15,80) OUTGEMSG
       READ(OUTGEMSG,*) NOUTGE,TOUTSGE,TOUTFGE,NSPOOLGE
-      IF (ABS(NOUTGE).GT.2) THEN
+      IF (ABS(NOUTGE).GT.3) THEN
          print *, "NOUTGE does not have an allowable value"
          stop
       ENDIF
@@ -879,7 +879,7 @@ C--Read Global Velocity Data Output
 C
       READ(15,80) OUTGVMSG
       READ(OUTGVMSG,*) NOUTGV,TOUTSGV,TOUTFGV,NSPOOLGV
-      IF (ABS(NOUTGV).GT.2) THEN
+      IF (ABS(NOUTGV).GT.3) THEN
         print *, "NOUTGV does not have an allowable value"
         stop
       ENDIF
@@ -889,7 +889,7 @@ C
       IF (C2D_PTrans.or.C3D_PTrans) THEN
         READ(15,80) OUTGCMSG
         READ(OUTGCMSG,*) NOUTGC,TOUTSGC,TOUTFGC,NSPOOLGC
-        IF (ABS(NOUTGC).GT.2) THEN
+        IF (ABS(NOUTGC).GT.3) THEN
           print *, "NOUTGC does not have an allowable value"
           stop
         ENDIF
@@ -898,7 +898,7 @@ C
       IF (NWS.NE.0) THEN
         READ(15,80) OUTGWMSG
         READ(OUTGWMSG,*) NOUTGW,TOUTSGW,TOUTFGW,NSPOOLGW
-        IF (ABS(NOUTGW).GT.2) THEN
+        IF (ABS(NOUTGW).GT.3) THEN
           print *, "NOUTGW does not have an allowable value"
           stop
         ENDIF
@@ -1015,8 +1015,8 @@ C
       END
 
 
-      SUBROUTINE READ15_3DVS() 
-      USE PRE_GLOBAL 
+      SUBROUTINE READ15_3DVS()
+      USE PRE_GLOBAL
 C
 C----------------------------------------------------------------------
 C     Reads the 3DVS portion of the global ADCIRC Input Data File for
@@ -1187,10 +1187,10 @@ C
       END
 
       SUBROUTINE READHB()
-      USE PRE_GLOBAL 
+      USE PRE_GLOBAL
 C
 C----------------------------------------------------------------------
-C     Reads the hard bottom file (fort.hb) for data decomposition 
+C     Reads the hard bottom file (fort.hb) for data decomposition
 C     sb  9/15/05
 C---------------------------------------------------------------------
 C
@@ -1212,7 +1212,7 @@ C--Read Total Number of Elements and Nodes
 C
       READ(26,*)
 C
-C--Read Nodal Coordinates and Hard bottom Bathymetry 
+C--Read Nodal Coordinates and Hard bottom Bathymetry
 C
 #if 1
       DO I = 1,NNODG
@@ -1230,12 +1230,12 @@ C
 C
       RETURN
       END
-		
+
       SUBROUTINE READIC()
       USE PRE_GLOBAL
-      INTEGER P_READ,P_READ2		
-		
-		
+      INTEGER P_READ,P_READ2
+
+
       OPEN(163,FILE=DIRNAME//'/../'//'Initial_Conditions.163')
       OPEN(164,FILE=DIRNAME//'/../'//'Initial_Conditions.164')
       OPEN(114,FILE=DIRNAME//'/../'//'Initial_Bathymetry.114')
@@ -1244,7 +1244,7 @@ C
       READ(114,*) P_READ
 		DOFH = (P_READ + 1)*(P_READ + 2)/2
 		CALL ALLOC_IC()
-		
+
       DO J = 1,NELG
          DO K = 1,DOFH
             READ(163,*) ICZE(K,J)
@@ -1255,11 +1255,11 @@ C
       CLOSE(163)
       CLOSE(164)
       CLOSE(114)
-		
+
 		END
 C
 C----------------------------------------------------------------------
-C     Reads the hard bottom file (fort.hb) for data decomposition 
+C     Reads the hard bottom file (fort.hb) for data decomposition
 C     sb  9/15/05
 C---------------------------------------------------------------------
 C
@@ -1301,7 +1301,7 @@ C
       PHI=YYCP/R
       RETURN
       END
-      
+
 C-----------------------------------------------------------------------
 C          S U B R O U T I N E   C O O R D  T O  E L E
 C-----------------------------------------------------------------------
