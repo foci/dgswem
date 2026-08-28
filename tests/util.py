@@ -87,3 +87,39 @@ def run_parallel(binpath, testpath, rtol=0.05, atol=0.01, num_ranks = 2):
     d1, _ = last_snapshot(os.path.join(testpath , "fort.63.true"))
     d2, _ = last_snapshot(os.path.join(testpath , "fort.63"))
     np.testing.assert_allclose(d2, d1, rtol=rtol, atol=atol)
+
+
+def run_dagswem(binpath, testpath, rtol=0.05, atol=0.01, num_ranks=2):
+    if not os.path.exists(os.path.join(binpath, "dagswem")):
+        pytest.skip("dagswem executable not found. Skipping...")
+    if not os.path.exists(os.path.join(binpath, "adcprep")):
+        pytest.skip("adcprep executable not found. Skipping...")
+    if not os.path.exists(os.path.join(binpath, "adcpost")):
+        pytest.skip("adcpost executable not found. Skipping...")
+
+    with open(os.path.join(testpath, "in.prep"), "r") as file:
+        lines = file.readlines()
+
+    lines[0] = f"{num_ranks}\n"
+
+    with open(os.path.join(testpath, "in.prep"), "w") as file:
+        file.writelines(lines)
+
+    result = subprocess.run(os.path.join(binpath, "adcprep") + " < in.prep", check=False, cwd=testpath, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+    if result.returncode != 0:
+        print(result.stdout.decode())
+        sys.exit("ADCPREP failed. See output above.")
+
+    result = subprocess.run(os.path.join(binpath, "dagswem"), check=False, cwd=testpath, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+    if result.returncode != 0:
+        print(result.stdout.decode())
+        sys.exit("DAGSWEM run failed. See output above.")
+
+    result = subprocess.run(os.path.join(binpath, "adcpost") + " < out.prep", check=False, cwd=testpath, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+    if result.returncode != 0:
+        print(result.stdout.decode())
+        sys.exit("ADCPOST failed. See output above.")
+
+    d1, _ = last_snapshot(os.path.join(testpath, "fort.63.true"))
+    d2, _ = last_snapshot(os.path.join(testpath, "fort.63"))
+    np.testing.assert_allclose(d2, d1, rtol=rtol, atol=atol)

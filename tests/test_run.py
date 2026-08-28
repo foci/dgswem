@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 import pytest
-from util import run_serial, run_parallel
+from util import run_serial, run_parallel, run_dagswem
 import os
 
 
@@ -9,6 +9,9 @@ def test_quarter_annular(binpath):
 
 def test_quarter_annular_parallel(binpath):
     run_parallel(binpath, "quarter_annular", 0.05, 1e-7)
+
+def test_quarter_annular_dagswem(binpath):
+    run_dagswem(binpath, "quarter_annular", 0.05, 1e-7, num_ranks=2)
 
 def test_performance_quarter_annular(binpath, mpi_aps):
     run_parallel(binpath, "quarter_annular", 0.05, 1e-7, num_ranks=4)
