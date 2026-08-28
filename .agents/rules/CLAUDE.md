@@ -1,6 +1,6 @@
-# CLAUDE.md
-
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+---
+trigger: always_on
+---
 
 ## What This Is
 DG-SWEM (Discontinuous Galerkin Shallow Water Equation Model) — a Fortran/C++ computational model for simulating shallow water flow (coastal flooding, storm surge, compound flooding). Source files use fixed-form Fortran `.F` with preprocessor macros and free-form `.F90`/`.f90`.
