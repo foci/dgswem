@@ -249,6 +249,10 @@ C...
                 endif
                 IF(NCELE.EQ.0) BT00(I)=-99999.
               END DO
+#ifdef TASKPAR
+              OPEN(61, FILE=TRIM(DIRNAME)//'/fort.61', STATUS='OLD', POSITION='APPEND')
+              OPEN(82, FILE=TRIM(DIRNAME)//'/fort.82', STATUS='OLD', POSITION='APPEND')
+#endif
               IF(ABS(NOUTE).EQ.1) THEN
                 WRITE(61,2120) time_A,IT
                 WRITE(82,2120) time_A,IT
@@ -258,6 +262,10 @@ C...
                   END DO
                 IESTP = IESTP+1+NSTAE
                 ENDIF
+#ifdef TASKPAR
+              CLOSE(61)
+              CLOSE(82)
+#endif
               IF(ABS(NOUTE).EQ.2) THEN
                 WRITE(61,REC=IESTP+1) time_A
                 WRITE(61,REC=IESTP+2) IT
@@ -311,6 +319,9 @@ C...
                   VV00(I)= V11
                 endif                  
               END DO
+#ifdef TASKPAR
+              OPEN(62, FILE=TRIM(DIRNAME)//'/fort.62', STATUS='OLD', POSITION='APPEND')
+#endif
               IF(ABS(NOUTV).EQ.1) THEN
                 WRITE(62,2120) time_A,IT
                 DO I=1,NSTAV
@@ -318,6 +329,9 @@ C...
                   END DO
                 IVSTP = IVSTP+1+NSTAV
                 ENDIF
+#ifdef TASKPAR
+              CLOSE(62)
+#endif
               IF(ABS(NOUTV).EQ.2) THEN
                 WRITE(62,REC=IVSTP+1) time_A
                 WRITE(62,REC=IVSTP+2) IT
@@ -460,6 +474,14 @@ C.....time step falls within the specified window
           NSCOUGE = NSCOUGE + 1
           IF (NSCOUGE.EQ.NSPOOLGE.OR.FORCE_WRITE) THEN
             IF (ABS(NOUTGE).EQ.1) THEN
+#ifdef TASKPAR
+              OPEN(63, FILE=TRIM(DIRNAME)//'/fort.63', STATUS='OLD', POSITION='APPEND')
+              IF (ModetoNode.EQ.0) THEN
+                OPEN(88, FILE=TRIM(DIRNAME)//'/fort.88', STATUS='OLD', POSITION='APPEND')
+                OPEN(89, FILE=TRIM(DIRNAME)//'/fort.89', STATUS='OLD', POSITION='APPEND')
+                OPEN(4441, FILE=TRIM(DIRNAME)//'/fort.4l', STATUS='OLD', POSITION='APPEND')
+              ENDIF
+#endif
               WRITE(63,2120) TIME_A, IT
               WRITE(88,2120) TIME_A, IT
               WRITE(89,2120) TIME_A, IT
@@ -622,6 +644,14 @@ C.....Write DG.65 results, elemental statuses (wet/dry)
               enddo
  9633         format(f20.8)
               close(963)
+#ifdef TASKPAR
+              CLOSE(63)
+              IF (ModetoNode.EQ.0) THEN
+                CLOSE(88)
+                CLOSE(89)
+                CLOSE(4441)
+              ENDIF
+#endif
             ENDIF
             IF (ABS(NOUTGE).EQ.2) THEN
               WRITE(63,REC=IGEP+1) TIME_A
@@ -662,6 +692,9 @@ C...
           NSCOUGV=NSCOUGV+1
           IF (NSCOUGV.EQ.NSPOOLGV.OR.FORCE_WRITE) THEN
             IF(ABS(NOUTGV).EQ.1) THEN
+#ifdef TASKPAR
+              OPEN(64, FILE=TRIM(DIRNAME)//'/fort.64', STATUS='OLD', POSITION='APPEND')
+#endif
               WRITE(64,2120) TIME_A,IT
               WRITE(641,2120) TIME_A,IT
               if (ModetoNode.eq.1) then
@@ -689,6 +722,9 @@ C.....Write DG.64 results
               ENDDO
 #endif
               IGVP = IGVP + 1 + NP
+#ifdef TASKPAR
+              CLOSE(64)
+#endif
             ENDIF
             IF (ABS(NOUTGV).EQ.2) THEN
               WRITE(64,REC=IGVP+1) time_A

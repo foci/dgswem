@@ -84,7 +84,7 @@ if get_option('task-parallel').enabled()
     command: [python_prog, files('gen_context.py'), '@INPUT@', '@OUTPUT@']
   )
 
-  starpu_layer_src = [files(['dagswem.f90', 'dagswem_cl.f90', 'starpu_tensor_wrappers.c']), dagswem_state_src]
+  starpu_layer_src = [files(['dagswem.f90', 'dagswem_comm.f90', 'dagswem_cl.f90', 'starpu_tensor_wrappers.c']), dagswem_state_src]
   fstarpu_mod_src = run_command(
     'pkg-config', '--variable=starpu_includedir', 'starpu-1.4',
     check: true

@@ -1345,5 +1345,27 @@ C...
 
         ENDIF
           
+#ifdef TASKPAR
+      CLOSE(19, IOSTAT=I)
+      CLOSE(20, IOSTAT=I)
+      CLOSE(22, IOSTAT=I)
+      CLOSE(23, IOSTAT=I)
+      CLOSE(61, IOSTAT=I)
+      CLOSE(62, IOSTAT=I)
+      CLOSE(63, IOSTAT=I)
+      CLOSE(64, IOSTAT=I)
+      CLOSE(71, IOSTAT=I)
+      CLOSE(72, IOSTAT=I)
+      CLOSE(73, IOSTAT=I)
+      CLOSE(74, IOSTAT=I)
+      CLOSE(81, IOSTAT=I)
+      CLOSE(82, IOSTAT=I)
+      CLOSE(83, IOSTAT=I)
+      CLOSE(88, IOSTAT=I)
+      CLOSE(89, IOSTAT=I)
+      CLOSE(96, IOSTAT=I)
+      CLOSE(99, IOSTAT=I)
+      CLOSE(4441, IOSTAT=I)
+#endif
       RETURN
       END
