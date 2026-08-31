@@ -75,7 +75,7 @@ endif
 
 starpu_dep = dependency('starpu-1.4', required: get_option('task-parallel'), fallback: ['starpu', 'starpu_dep'])
 
-if get_option('task-parallel').enabled()
+if starpu_dep.found()
   python_prog = find_program('python3', required: true)
   dagswem_state_src = custom_target(
     'dagswem_state.f90',
