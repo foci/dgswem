@@ -63,7 +63,7 @@ CONTAINS
       comm_data%NEIGHPROC_S = NEIGHPROC_S
 
       ALLOCATE(comm_data%IPROC_R(NEIGHPROC_R), comm_data%NELEMRECV(NEIGHPROC_R))
-      ALLOCATE(comm_data%IRECVLOC(MNE, NEIGHPROC_R))
+      ALLOCATE(comm_data%IRECVLOC(NLOCAL, NEIGHPROC_R))
 
       DO JJ = 1, NEIGHPROC_R
          J = MOD(JJ - 1 + sub_id, NEIGHPROC_R) + 1
@@ -72,7 +72,7 @@ CONTAINS
       END DO
 
       ALLOCATE(comm_data%IPROC_S(NEIGHPROC_S), comm_data%NELEMSEND(NEIGHPROC_S))
-      ALLOCATE(comm_data%ISENDLOC(MNE, NEIGHPROC_S))
+      ALLOCATE(comm_data%ISENDLOC(NLOCAL, NEIGHPROC_S))
 
       DO JJ = 1, NEIGHPROC_S
          J = MOD(JJ - 1 + sub_id, NEIGHPROC_S) + 1
