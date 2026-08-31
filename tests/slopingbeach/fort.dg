@@ -1,20 +1,57 @@
-1         ! DGSWE, 0 = CG ADCIRC, 1 = DG ADCIRC
-1         ! P, Polynomial order of the DG approximation (0-8)
-2         | Numerical flux
-2,2       | RK stage, order
-1 2 3 1.0 1000 1.0 0.0     ! Lts Flag, Mbar, Ndom, dt_min0, dtcheck, cflfac, z0
-0         ! LTSmodflag 
-2         ! DG_TO_CG, 1 = Area Average, 2 = Angle Average
-0         ! MODAL_IC, 0 = cold start, 1 = hot start using modal dof
-0, 0      ! DGHOT, 0 = do not write H.S. file, 1 = write out H.S. file, DGHOTSPOOL = # of timesteps to write out hot start file
-5         ! SLOPEFLAG, 0 = slope limiter off, 1 = slope limiter on
-0         ! SEDFLAG, 0 = no sed, 1 = sed due to currents, 2 = sed due to waves
-10        ! MORPH - Morphological time step = MIT*(Hydro timestep)
-1000      ! MAG_SED - Magnification factor for sediment transport rates
-0.20      ! D50 - Median grain size (in mm)
-0.40      ! POROSITY - Bed porosity
-2650      ! RHOSED0 - Sediment density
-1035      ! RHOWAT0 - Water density
-20        ! TEMPC - Water temperature
-0         ! Hard Bottom
+! dgswem fort.dg in keyword format
+
+dgswe = 1
+dg_to_cg = 1
+modal_ic = 0
+
+! p enrichment options
+padapt = 0            ! padapt(1=on,0=off)
+pflag = 2             ! pflag(1=smooth,2=shocks)
+gflag = 1             ! gflag(0=fixed,1=dioristic)
+dis_tol = 8           ! dioristic tolerance (0-100)
+pl = 1                ! low p
+ph = 1                ! high p
+px = 1                ! fixed p
+slimit = 0.00005D0      ! epsilon tolerance in pflag=1 p_enrichment
+plimit = 10           ! integer timestep counter for p_enrichment
+k = 1                 ! pflag=2 tolerance:log((k*p)**(-L*2))-ks
+ks = 0.5
+L = 2
+nelem = 3564104         ! Number of total elements in mesh
+
+! flux option
+fluxtype = 2          ! 1=Roe, 2=LLF, 3=HLLC, 4=NCP
+
+! timestepping options
+rk_stage = 5          
+rk_order = 2
+
+! hot start options
+dghot = 0
+dghotspool = 43200
+
+! slopelimiting options
+slopeflag = 5        ! only 1,4-10 work; 5 is best/fast!
+weight = 1
+
+! sediment options
+sedflag = 0
+porosity = 0.0001
+sevdm = 0.00001  
+layers = 1            ! number of layers
+sed_equationX = (ZE_ROE+bed_ROE)**-1 *QX_ROE
+sed_equationY = (ZE_ROE+bed_ROE)**-1 *QY_ROE
+
+! chemistry options
+rxn_rate = 1          ! Reaction rate when chemistry is on (litres/(mol*days))
+
+! artificial diffusion options
+artdif = 0
+kappa = -1.0
+s0 = 0.0
+uniform_dif = 2.5e-6
+tune_by_hand = 0
+rainfall = 0
+
+
 
