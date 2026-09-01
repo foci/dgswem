@@ -14,7 +14,6 @@ C     sb-disabled for Linux&Intel compiler
       USE DFPORT
 #endif
       USE GLOBAL
-      USE HARM
       USE DG
       USE NodalAttributes, ONLY :
      &     NoLiBF, NWP, Tau0, HBreak, FTheta, FGamma, Tau, CF, IFNLBF,
@@ -380,46 +379,7 @@ C...
 C...  ****************** TIME STEPPING LOOP ENDS HERE ********************
 C...  
 C...  
-C...  IF IHARIND=1 SOLVE THE HARMONIC ANALYSIS PROBLEM AND WRITE OUTPUT
-C...  
-      IF ((IHARIND.EQ.1).AND.(ITIME_A.GT.ITHAS)) THEN
 
-C...  LINES COMPUTE MEANS AND VARIANCES
-C...  FOR CHECKING THE HARMONIC ANALYSIS RESULTS.
-C...  ACCUMULATE VARIANCE AND MEAN OF RECORD AT NODES.
-C     
-         if (CHARMV) then
-            IF (FMV.NE.0.) THEN
-               DO I=1,NP
-                  ELAV(I)   = ELAV(I)/NTSTEPS
-                  XVELAV(I) = XVELAV(I)/NTSTEPS
-                  YVELAV(I) = YVELAV(I)/NTSTEPS
-                  ELVA(I)   = ELVA(I)/NTSTEPS   - ELAV(I)*ELAV(I)
-                  XVELVA(I) = XVELVA(I)/NTSTEPS - XVELAV(I)*XVELAV(I)
-                  YVELVA(I) = YVELVA(I)/NTSTEPS - YVELAV(I)*YVELAV(I)
-               END DO
-               TIMEBEG=ITMV*DTDP + (STATIM-REFTIM)*86400.0
-               OPEN(55,FILE=DIRNAME//'/'//'fort.55')
-               WRITE(55,*) NP
-            ENDIF
-         endif                  !  charmv
-C...  
-C......Fill out and decompose the LHS harmonic analaysis matrix
-C...  
-         CALL FULSOL(0)
-C...  
-C......Solve the harmonic analysis problem and write the output
-C...  
-         IF(NHAGE.EQ.1) CALL LSQSOLEG(NP,DIRNAME,LNAME,ELAV,ELVA)
-C     
-         IF(NHAGV.EQ.1) CALL LSQSOLVG(NP,DIRNAME,LNAME,
-     &        XVELAV,YVELAV,XVELVA,YVELVA)
-C     
-         IF(NHASE.EQ.1) CALL LSQSOLES(NSTAE,DIRNAME,LNAME)
-C     
-         IF(NHASV.EQ.1) CALL LSQSOLVS(NSTAV,DIRNAME,LNAME)
-C     
-      ENDIF
       
 #ifdef SWAN
 Casey 101118: Let SWAN clean up stuff.

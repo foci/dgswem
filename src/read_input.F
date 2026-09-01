@@ -13,7 +13,6 @@ C***********************************************************************
 C.....Use appropriate modules
 
       USE GLOBAL
-      USE HARM
       USE WIND
       USE DG
       USE NodalAttributes, ONLY :
@@ -33,7 +32,7 @@ Casey 101118: Enable hot-start file generation by SWAN.
       
 C.....Declare local variables
 
-      INTEGER NIBP, IBN1, IK, NDISC, NBBN, NVEL2, II, i,j,jj,k
+      INTEGER NIBP, IBN1, IK, NDISC, NBBN, NVEL2, II, i,j,jj,k, NFREQ
       CHARACTER(256) LINE,LINE2
       
 C     sb-PDG1 added
@@ -88,7 +87,6 @@ C.....Initialize all runtime option logicals to false
       C3DVS  = .FALSE.
       CLUMP  = .FALSE.
       CTIP   = .FALSE.
-      CHARMV = .FALSE.
 
 C.....Open statement for unit 14, 15, and 25 (fort.dg) input files
 
@@ -4129,187 +4127,24 @@ C.......WRITE NOUTGW,TOUTSGW,TOUTFGW,NTCYSGW,NTCYFGW,NSPOOLGW TO UNIT 16
       ENDIF
 
 C...  
-C... READ AND CHECK INFORMATION ABOUT HARMONIC ANALYSIS OF MODEL RESULTS
+C... READ AND CHECK INFORMATION ABOUT HARMONIC ANALYSIS OF MODEL RESULTS (DEPRECATED)
 C...  
       READ(15,*) NFREQ 
-      WRITE(16,99392) NFREQ  
-99392 FORMAT(////,1X,'HARMONIC ANALYSIS INFORMATION OUTPUT : ',
-     &    //,5X,'HARMONIC ANALYSIS PERFORMED FOR ',I4,' CONSTITUENTS',/)
-      MNHARF = NFREQ
-
-      IF (NFREQ.EQ.0) MNHARF = 1
-
-C     Allocate harmonic analysis arrays
+      MNHARF = 1
 
       IF (NFREQ.GT.0) THEN
-         CALL ALLOC_HA()
-         CALL ALLOC_MAIN14()
-      ENDIF
-
-      IF(NFREQ.LT.0) THEN
-         IF(NSCREEN.EQ.1.AND.MYPROC.EQ.0) WRITE(6,99391)
-         WRITE(16,99391)
-99391    FORMAT(////,1X,'!!!!!!!!!!  WARNING - FATAL ERROR !!!!!!!!!',
-     &        //,1X,'YOUR SELECTION OF NHARFR (A UNIT 15 '
-     &        ,'INPUT PARAMETER) IS NOT AN ALLOWABLE VALUE',/,1X,
-     &        'PLEASE CHECK YOUR INPUT',
-     &        //,1X,'!!!!!! EXECUTION WILL NOW BE TERMINATED !!!!!!',//)
-         STOP
-      ENDIF
-      IF(NFREQ.GT.0) WRITE(16,2330)
- 2330 FORMAT(/,7X,'FREQUENCY',4X,'NODAL FACTOR',6X,'EQU.ARG(DEG)',
-     +     1X,'CONSTITUENT',/)
-      DO 1201 I=1,NFREQ  
-         READ(15,'(A10)') NAMEFR(I)
-         READ(15,*) HAFREQ(I),HAFF(I),HAFACE(I)
-         WRITE(16,2331) HAFREQ(I),HAFF(I),HAFACE(I),NAMEFR(I)
- 2331    FORMAT(4X,F15.12,2X,F10.7,5X,F10.3,7X,A10)
- 1201 CONTINUE
-
-C.... READ IN INTERVAL INFORMATION FOR HARMONIC ANALYSIS
-C.... COMPUTE THAS AND THAF IN TERMS OF THE NUMBER OF TIME STEPS
-
-      READ(15,*) THAS,THAF,NHAINC,FMV
-      ITHAS=INT((THAS-STATIM)*(86400.0/DTDP) + 0.5d0)
-      THAS=ITHAS*DTDP/86400.0 + STATIM
-      ITHAF=INT((THAF-STATIM)*(86400.0/DTDP) + 0.5d0)
-      THAF=ITHAF*DTDP/86400.0 + STATIM
-      ITMV = ITHAF - (ITHAF-ITHAS)*FMV
-      IF(NFREQ.GT.0) THEN
-         WRITE(16,34634) THAS,ITHAS,THAF,ITHAF,NHAINC
-34634    FORMAT(/,5X,'HARMONIC ANALYSIS WILL START AFTER THAS =',F8.3,
-     &        ' DAY(S) RELATIVE',/,9X,'TO THE STARTING TIME OR',I9,
-     &        ' TIME STEPS INTO THE SIMULATION',
-     &        //,5X,'HARMONIC ANALYSIS WILL STOP AFTER THAF =',F8.3,
-     &        ' DAY(S) RELATIVE',/,9X,'TO THE STARTING TIME OR',I9,
-     &        ' TIME STEPS INTO THE SIMULATION'
-     &        ,//,5X,'INFORMATION WILL BE ANALYZED EVERY ',
-     &        'NHAINC =',I8,' TIME STEPS.')
-         WRITE(16,34639) FMV*100.,ITMV
-34639    FORMAT(/,5X,'MEANS AND VARIANCES WILL BE COMPUTED FOR THE ',
-     &        'FINAL ',F10.5,' %',/9X,'OF THE HARMONIC ANALYSIS ',
-     &        'PERIOD OR AFTER ',I9,' TIME STEPS INTO THE ',
-     &        'SIMULATION.',/9X,' RESULTS ARE WRITTEN TO UNIT 55.')
-
-      ELSE
-         WRITE(16,34645)
-34645    FORMAT(///,5X,'NO HARMONIC ANALYSIS WILL BE DONE')
-      ENDIF
-
-      IF((FMV.GT.0.).AND.(NFREQ.GT.0).AND.(C2DDI)) CHARMV = .TRUE.
-
-C.... READ IN AND WRITE OUT INFORMATION ON WHERE HARMONIC ANALYSIS WILL BE DONE
-
-      READ(15,*) NHASE,NHASV,NHAGE,NHAGV
-      IF((NHASE.LT.0).OR.(NHASE.GT.1)) THEN
-         IF(NSCREEN.EQ.1.AND.MYPROC.EQ.0) WRITE(6,99661)
-         WRITE(16,99661)
-99661    FORMAT(////,1X,'!!!!!!!!!!  WARNING - NONFATAL ',
-     &        'INPUT ERROR  !!!!!!!!!',//
-     &        ,1X,'YOUR SELECTION OF NHASE (A UNIT 15 '
-     &        ,'INPUT PARAMETER) IS NOT AN ALLOWABLE VALUE',/,1X,
-     &        'PLEASE CHECK YOUR INPUT')
-         IF(NFOVER.EQ.1) THEN
-            IF(NSCREEN.EQ.1.AND.MYPROC.EQ.0) WRITE(6,99671)
-            WRITE(16,99671)
-99671       FORMAT(/,1X,'PROGRAM WILL OVERRIDE SPECIFIED INPUT',
-     &           ' AND SET NHASE EQUAL TO 0 ',
-     &           //,1X,'!!!!!! EXECUTION WILL CONTINUE !!!!!!',//)
-            NHASE=0
-         ELSE
-            IF(NSCREEN.EQ.1.AND.MYPROC.EQ.0) WRITE(6,9973)
-            WRITE(16,9973)
-            STOP
+         IF (MYPROC.EQ.0) THEN
+            WRITE(6,*) '*** WARNING: Harmonic Analysis (MODULE HARM) is deprecated and disabled in DAGSWEM. ***'
          ENDIF
-      ENDIF
-      IF(NHASE.EQ.1) THEN
-         WRITE(16,34641)
-34641    FORMAT(///,5X,'STATION ELEVATION HARMONIC ANAL WILL BE ',
-     &        'WRITTEN TO UNIT 51')
-      ENDIF
-      IF((NHASV.LT.0).OR.(NHASV.GT.1)) THEN
-         IF(NSCREEN.EQ.1.AND.MYPROC.EQ.0) WRITE(6,99662)
-         WRITE(16,99662)
-99662    FORMAT(////,1X,'!!!!!!!!!!  WARNING - NONFATAL ',
-     &        'INPUT ERROR  !!!!!!!!!',//
-     &        ,1X,'YOUR SELECTION OF NHASV (A UNIT 15 '
-     &        ,'INPUT PARAMETER) IS NOT AN ALLOWABLE VALUE',/,1X,
-     &        'PLEASE CHECK YOUR INPUT')
-         IF(NFOVER.EQ.1) THEN
-            IF(NSCREEN.EQ.1.AND.MYPROC.EQ.0) WRITE(6,99672)
-            WRITE(16,99672)
-99672       FORMAT(/,1X,'PROGRAM WILL OVERRIDE SPECIFIED INPUT',
-     &           ' AND SET NHASV EQUAL TO 0 ',
-     &           //,1X,'!!!!!! EXECUTION WILL CONTINUE !!!!!!',//)
-            NHASV=0
-         ELSE
-            IF(NSCREEN.EQ.1.AND.MYPROC.EQ.0) WRITE(6,9973)
-            WRITE(16,9973)
-            STOP
-         ENDIF
-      ENDIF
-      IF(NHASV.EQ.1) THEN
-         WRITE(16,34642)
-34642    FORMAT(///,5X,'STATION VELOCITY HARMONIC ANAL WILL BE ',
-     &        'WRITTEN TO UNIT 52')
-      ENDIF
-      IF((NHAGE.LT.0).OR.(NHAGE.GT.1)) THEN
-         IF(NSCREEN.EQ.1.AND.MYPROC.EQ.0) WRITE(6,99663)
-         WRITE(16,99663)
-99663    FORMAT(////,1X,'!!!!!!!!!!  WARNING - NONFATAL ',
-     &        'INPUT ERROR  !!!!!!!!!',//
-     &        ,1X,'YOUR SELECTION OF NHAGE (A UNIT 15 '
-     &        ,'INPUT PARAMETER) IS NOT AN ALLOWABLE VALUE',/,1X,
-     &        'PLEASE CHECK YOUR INPUT')
-         IF(NFOVER.EQ.1) THEN
-            IF(NSCREEN.EQ.1.AND.MYPROC.EQ.0) WRITE(6,99673)
-            WRITE(16,99673)
-99673       FORMAT(/,1X,'PROGRAM WILL OVERRIDE SPECIFIED INPUT',
-     &           ' AND SET NHAGE EQUAL TO 0 ',
-     &           //,1X,'!!!!!! EXECUTION WILL CONTINUE !!!!!!',//)
-            NHAGE=0
-         ELSE
-            IF(NSCREEN.EQ.1.AND.MYPROC.EQ.0) WRITE(6,9973)
-            WRITE(16,9973)
-            STOP
-         ENDIF
-      ENDIF
-      IF(NHAGE.EQ.1) THEN
-         WRITE(16,34643)
-34643    FORMAT(///,5X,'GLOBAL ELEVATION HARMONIC ANAL WILL BE ',
-     &        'WRITTEN TO UNIT 53')
-      ENDIF
-      IF((NHAGV.LT.0).OR.(NHAGV.GT.1)) THEN
-         IF(NSCREEN.EQ.1.AND.MYPROC.EQ.0) WRITE(6,99664)
-         WRITE(16,99664)
-99664    FORMAT(////,1X,'!!!!!!!!!!  WARNING - NONFATAL ',
-     &        'INPUT ERROR  !!!!!!!!!',//
-     &        ,1X,'YOUR SELECTION OF NHAGV (A UNIT 15 '
-     &        ,'INPUT PARAMETER) IS NOT AN ALLOWABLE VALUE',/,1X,
-     &        'PLEASE CHECK YOUR INPUT')
-         IF(NFOVER.EQ.1) THEN
-            IF(NSCREEN.EQ.1.AND.MYPROC.EQ.0) WRITE(6,99674)
-            WRITE(16,99674)
-99674       FORMAT(/,1X,'PROGRAM WILL OVERRIDE SPECIFIED INPUT',
-     &           ' AND SET NHAGV EQUAL TO 0 ',
-     &           //,1X,'!!!!!! EXECUTION WILL CONTINUE !!!!!!',//)
-            NHAGV=0
-         ELSE
-            IF(NSCREEN.EQ.1.AND.MYPROC.EQ.0) WRITE(6,9973)
-            WRITE(16,9973)
-            STOP
-         ENDIF
-      ENDIF
-      IF(NHAGV.EQ.1) THEN
-         WRITE(16,34644)
-34644    FORMAT(///,5X,'GLOBAL VELOCITY HARMONIC ANAL WILL BE ',
-     &        'WRITTEN TO UNIT 54')
+         WRITE(16,*) '*** WARNING: Harmonic Analysis (MODULE HARM) is deprecated and disabled in DAGSWEM. ***'
+         DO I=1,NFREQ  
+            READ(15,*)
+            READ(15,*)
+         ENDDO
       ENDIF
 
-C.... ESTABLISH INDICATOR OF WHETHER ANY HARMONIC ANALYSIS WILL BE DONE
-
-      IHARIND=NFREQ*(NHASE+NHASV+NHAGE+NHAGV)
-      IF(IHARIND.GT.0) IHARIND=1
+      READ(15,*)
+      READ(15,*)
 
 C...  
 C...  INPUT INFORMATION ABOUT HOT START OUTPUT
@@ -4501,8 +4336,7 @@ C.....Write table of parameter sizes (vjp 11/28/99)
       IF(NWS.EQ.19) WRITE(16,4019)      !rjw added nws = 19
       IF(NWS.EQ.20) WRITE(16,4028)      !EV added nws = 20
       IF(NWS.EQ.20) WRITE(16,4029)      !EV added nws = 20
-      IF ((NFREQ.EQ.0).OR.(FMV.EQ.0.)) WRITE(16,4021)
-      IF ((NFREQ.GE.1).AND.(FMV.NE.0.)) WRITE(16,4022)
+      WRITE(16,4021)
       IF (ILUMP.EQ.0) WRITE(16,4031)
       IF (ILUMP.EQ.1) WRITE(16,4032)
       IF (IM.EQ.0) WRITE(16,4101)

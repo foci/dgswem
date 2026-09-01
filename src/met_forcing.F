@@ -11,7 +11,6 @@ C***********************************************************************
       
       USE GLOBAL
       USE DG
-      USE HARM
       USE SIZES
       USE WIND
       USE OWIWIND,ONLY : NWS12INIT,NWS12GET

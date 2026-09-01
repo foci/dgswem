@@ -18,7 +18,6 @@ C.....Use appropriate modules
       USE precipitation, only: prec3
       USE GLOBAL
       USE DG
-      USE HARM
       use sizes, only:  myproc,layers
 #ifdef CMPI
       USE MESSENGER_ELEM
@@ -182,7 +181,6 @@ C.....to single nodal values
       USE GLOBAL
       USE DG
 !@cuf use cudafor
-      USE HARM
       use sizes, only:  myproc,layers
 #ifdef CMPI
       USE MESSENGER_ELEM
@@ -863,99 +861,7 @@ C...
           IF(IT.EQ.NTCYFGC) CLOSE(83)
         ENDIF
 
-C...
-C...IF IHARIND=1 AND THE TIME STEP FALLS WITHIN THE SPECIFIED WINDOW AND
-C...ON THE SPECIFIED INCREMENT, USE MODEL RESULTS TO UPDATE HARMONIC
-C...ANALYSIS MATRIX AND LOAD VECTORS.  NOTE: AN 8 BYTE RECORD SHOULD BE
-C...USED THROUGHOUT THE HARMONIC ANALYSIS SUBROUTINES, EVEN ON 32 BIT
-C...WORKSTATIONS, SINCE IN THAT CASE THE HARMONIC ANALYSIS IS DONE IN
-C...DOUBLE PRECISION.
-C...
-        IF(IHARIND.EQ.1) THEN
-          IF((IT.GT.ITHAS).AND.(IT.LE.ITHAF)) THEN
-            IF(ICHA.EQ.NHAINC) ICHA=0
-            ICHA=ICHA+1
-            IF(ICHA.EQ.NHAINC) THEN
-C...
-C.....UPDATE THE LHS MATRIX
-C...
-              CALL LSQUPDLHS(timeh,IT)
-C...
-C.....IF DESIRED COMPUTE ELEVATION STATION INFORMATION AND UPDATE LOAD VECTOR
-C...
-              IF(NHASE.EQ.1) THEN
-                DO I=1,NSTAE
-C                  EE1=ETA2(NM(NNE(I),1))
-C                  EE2=ETA2(NM(NNE(I),2))
-C                  EE3=ETA2(NM(NNE(I),3))
-C                  ET00(I)=EE1*STAIE1(I)+EE2*STAIE2(I)+EE3*STAIE3(I)
-                  ET00(I) = ZE(1,NNE(I),1)
-                  DO K = 2,DOFH
-                    ET00(I) = ET00(I) + ZE(K,NNE(I),1)*PHI_STAE(K,I)
-                  ENDDO
-                ENDDO
-                CALL LSQUPDES(ET00,NSTAE)
-              ENDIF
-C...
-C.....IF DESIRED COMPUTE VELOCITY STATION INFORMATION AND UPDATE LOAD VECTOR
-C...
-              IF(NHASV.EQ.1) THEN
-                DO I=1,NSTAV
-                  ZE00    = ZE(1,NNV(I),1)
-                  UU00(I) = QX(1,NNV(I),1)
-                  VV00(I) = QY(1,NNV(I),1)
-                  if (ModetoNode.eq.1) then
-                    DP1     = DP(NM(NNV(I),1))
-                    DP2     = DP(NM(NNV(I),2))
-                    DP3     = DP(NM(NNV(I),3))
-                    DP00    = DP1*STAIV1(I) + DP2*STAIV2(I) +DP3*STAIV3(I)
-                    DEPTH   = ZE00 + DP00
-                  else
-                    DP1     = DPE(nnv(i))
-                    DEPTH   = ZE00 + DP1 
-                  endif
-
-                  DO K = 2,DOFH
-                    ZE00    = ZE00    + ZE(K,NNV(I),1)*PHI_STAV(K,I)
-                    UU00(I) = UU00(I) + QX(K,NNV(I),1)*PHI_STAV(K,I)
-                    VV00(I) = VV00(I) + QY(K,NNV(I),1)*PHI_STAV(K,I)
-                  ENDDO
-                  FH_NL   = 1.0/(NLEQ*DEPTH + LEQ)
-                  UU00(I) = UU00(I)*FH_NL
-                  VV00(I) = VV00(I)*FH_NL
-                ENDDO
-                CALL LSQUPDVS(UU00,VV00,NSTAV)
-              ENDIF
-C...
-C.....IF DESIRED UPDATE GLOBAL ELEVATION LOAD VECTOR
-C...
-              IF(NHAGE.EQ.1) CALL LSQUPDEG(ETA2,NP)
-C...
-C.....IF DESIRED UPDATE GLOBAL VELOCITY LOAD VECTOR
-C...
-              IF(NHAGV.EQ.1) CALL LSQUPDVG(UU2,VV2,NP)
-
-              ENDIF
-            ENDIF
-
-C...LINES TO COMPUTE MEANS AND VARIANCES
-
-       if (CHARMV) then
-          IF(IT.GT.ITMV) THEN
-            NTSTEPS=NTSTEPS+1
-            DO I=1,NP
-              ELAV(I)=ELAV(I)+ETA2(I)
-              XVELAV(I)=XVELAV(I)+UU2(I)
-              YVELAV(I)=YVELAV(I)+VV2(I)
-              ELVA(I)=ELVA(I)+ETA2(I)*ETA2(I)
-              XVELVA(I)=XVELVA(I)+UU2(I)*UU2(I)
-              YVELVA(I)=YVELVA(I)+VV2(I)*VV2(I)
-              END DO
-            ENDIF
-        endif    !   charmv
-
-
-          ENDIF
+C
 
 C...
 C...WRITE OUT HOT START INFORMATION IF NHSTAR=1 AND AT CORRECT TIME STEP
@@ -1017,43 +923,7 @@ C...
             WRITE(IHSFIL,REC=IHOTSTP+2) IGWP
             WRITE(IHSFIL,REC=IHOTSTP+3) NSCOUGW
             IHOTSTP=IHOTSTP+3
-C...
-C...IF APPROPRIATE ADD HARMONIC ANALYSIS INFORMATION TO HOT START FILE
-C...
-            IF((IHARIND.EQ.1).AND.(IT.GT.ITHAS)) THEN
-              WRITE(IHSFIL,REC=IHOTSTP+1) ICHA
-              IHOTSTP = IHOTSTP + 1
-              CALL HAHOUT(NP,NSTAE,NSTAV,NHASE,NHASV,NHAGE,NHAGV,
-     &                   IHSFIL,IHOTSTP)
-C
-              IF(NHASE.EQ.1) CALL HAHOUTES(NSTAE,IHSFIL,IHOTSTP)
-              IF(NHASV.EQ.1) CALL HAHOUTVS(NSTAV,IHSFIL,IHOTSTP)
-              IF(NHAGE.EQ.1) CALL HAHOUTEG(NP,IHSFIL,IHOTSTP)
-              IF(NHAGV.EQ.1) CALL HAHOUTVG(NP,IHSFIL,IHOTSTP)
-              ENDIF
 
-        if( CHARMV) then
-            IF((IHARIND.EQ.1).AND.(IT.GT.ITMV)) THEN
-              IHOTSTP=IHOTSTP+1
-              WRITE(IHSFIL,REC=IHOTSTP) NTSTEPS
-              IF(NHAGE.EQ.1) THEN
-                DO I=1,NP
-                  WRITE(IHSFIL,REC=IHOTSTP+1) ELAV(I)
-                  WRITE(IHSFIL,REC=IHOTSTP+2) ELVA(I)
-                  IHOTSTP=IHOTSTP+2
-                  END DO
-              ENDIF
-              IF(NHAGV.EQ.1) THEN
-                DO I=1,NP
-                  WRITE(IHSFIL,REC=IHOTSTP+1) XVELAV(I)
-                  WRITE(IHSFIL,REC=IHOTSTP+2) YVELAV(I)
-                  WRITE(IHSFIL,REC=IHOTSTP+3) XVELVA(I)
-                  WRITE(IHSFIL,REC=IHOTSTP+4) YVELVA(I)
-                  IHOTSTP=IHOTSTP+4
-                  END DO
-                ENDIF
-             ENDIF
-         endif   !  charmv
 c
  
         IF (C3D) THEN

@@ -48,7 +48,7 @@ Csb-
          INTEGER MNNDEL
 C--
 
-         LOGICAL C2DDI,C3D,C3DDSS,C3DVS,CLUMP,CTIP,CHARMV
+         LOGICAL C2DDI,C3D,C3DDSS,C3DVS,CLUMP,CTIP
 C
 C For Definition of Working Directory
 C

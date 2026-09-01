@@ -23,7 +23,6 @@ C
       USE SIZES
       USE GLOBAL
       USE DG, only : rainfall
-      USE HARM
       USE WIND
       USE OWIWIND, ONLY : NWS12INIT, NWS12GET
       USE NodalAttributes, ONLY : STARTDRY, GeoidOffset, LoadGeoidOffset
@@ -1065,27 +1064,7 @@ C...
      &         ACCESS='DIRECT',RECL=NBYTE)
           ENDIF
 
-C...
-C....INITIALIZE HARMONIC ANALYSIS MATRICES, MEAN AND SQUARE VECTORS
-C...
-        IF (IHARIND.EQ.1) THEN
-           ICHA=0
-           CALL HACOLDS(HAFREQ)
-           IF(NHASE.EQ.1) CALL HACOLDSES(NSTAE)
-           IF(NHASV.EQ.1) CALL HACOLDSVS(NSTAV)
-           IF(NHAGE.EQ.1) CALL HACOLDSEG(NP)
-           IF(NHAGV.EQ.1) CALL HACOLDSVG(NP)
-           IF ( CHARMV) THEN
-             DO I=1,NP
-                ELAV(I)=0.0
-                XVELAV(I)=0.0
-                YVELAV(I)=0.0
-                ELVA(I)=0.0
-                XVELVA(I)=0.0
-                YVELVA(I)=0.0
-             ENDDO
-           ENDIF !  charmv
-        ENDIF
+
 C
  1112 FORMAT(/,1X,79('_'))
 
