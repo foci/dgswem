@@ -125,8 +125,11 @@ C.....Declare allocatable integer arrays
 
 C.....Declare allocatable real arrays
       
-      REAL(SZ), ALLOCATABLE :: ATVD(:,:), BTVD(:,:), CTVD(:,:)
-      REAL(SZ), ALLOCATABLE :: DTVD(:), MAX_BOA_DT(:),e1(:),balance(:)
+      REAL(SZ), ALLOCATABLE :: ATVD(:,:)                                      !> Shu-Osher A coefficient for stage of weight in TVD RK schemes
+      REAL(SZ), ALLOCATABLE :: BTVD(:,:)                                      !> Shu-Osher B coefficient for stage of weight in TVD RK schemes
+      REAL(SZ), ALLOCATABLE :: CTVD(:,:)                                      !> ? Some sort of modifying coefficient? Always = 0.
+      REAL(SZ), ALLOCATABLE :: DTVD(:)                                        !> Node coefficient for stage of of TVD RK scheme
+      REAL(SZ), ALLOCATABLE :: MAX_BOA_DT(:),e1(:),balance(:)
       Real(SZ), Allocatable :: RKC_T(:),RKC_U(:),RKC_Tprime(:)
       Real(SZ), Allocatable :: RKC_Tdprime(:),RKC_a(:),RKC_b(:),RKC_c(:)
       Real(SZ), Allocatable :: RKC_mu(:),RKC_tildemu(:),RKC_nu(:),
