@@ -23,7 +23,6 @@ C
 C***********************************************************************
 C
       USE GLOBAL
-      USE HARM
       USE WIND
       !USE SED
       USE OWIWIND,ONLY : NWS12INIT,NWS12GET
@@ -1675,78 +1674,7 @@ Casey 101118: Added the output of radiation stress gradients.
 #endif
 
 
-C...
-C......HOT START INFORMATION FOR HARMONIC ANALYSIS
-C...
-        IF(IHARIND.EQ.1) THEN
-          IHABEG=ITHAS+NHAINC
-C...
-C........IF HARMONIC ANALYSIS HAS NOT BEGUN, COLD START THE HARMONIC
-C........ANALYSIS
-          IF(ITHS.LT.IHABEG) THEN
-            ICHA=0
-            CALL HACOLDS(HAFREQ)
-            IF(NHASE.EQ.1) CALL HACOLDSES(NSTAE)
-            IF(NHASV.EQ.1) CALL HACOLDSVS(NSTAV)
-            IF(NHAGE.EQ.1) CALL HACOLDSEG(NP)
-            IF(NHAGV.EQ.1) CALL HACOLDSVG(NP)
-            IF ( CHARMV) THEN
-              DO I=1,NP
-                 ELAV(I)=0.0
-                 XVELAV(I)=0.0
-                 YVELAV(I)=0.0
-                 ELVA(I)=0.0
-                 XVELVA(I)=0.0
-                 YVELVA(I)=0.0
-              END DO
-             ENDIF   !   charmv
 
-           ENDIF
-
-C...
-C........IF HARMONIC ANALYSIS HAS ALREADY BEGUN, READ IN HOT START
-C........HARMONIC ANALYSIS, MEAN AND SQUARE INFO
-C...
-          IF(ITHS.GT.ITHAS) THEN
-            IHOTSTP=IHOTSTP+1
-            READ(IHOT,REC=IHOTSTP) ICHA
-            ENDIF
-          IF(ITHS.GE.IHABEG) THEN
-            CALL HAHOTS(NSTAE,NSTAV,NP,NHASE,NHASV,NHAGE,NHAGV,
-     &                  NSCREEN,IHOTSTP,IHOT,MYPROC)
-            IF(NHASE.EQ.1) CALL HAHOTSES(NSTAE,IHOTSTP,IHOT)
-            IF(NHASV.EQ.1) CALL HAHOTSVS(NSTAV,IHOTSTP,IHOT)
-            IF(NHAGE.EQ.1) CALL HAHOTSEG(NP,IHOTSTP,IHOT)
-            IF(NHAGV.EQ.1) CALL HAHOTSVG(NP,IHOTSTP,IHOT)
-          ENDIF
-
-C..Read in Means and Squares
-
-        if( CHARMV) then
-          IF((FMV.NE.0.).AND.(ITHS.GT.ITMV)) THEN
-            IHOTSTP=IHOTSTP+1
-            READ(IHOT,REC=IHOTSTP) NTSTEPS
-            IF(NHAGE.EQ.1) THEN
-              DO I=1,NP
-                READ(IHOT,REC=IHOTSTP+1) ELAV(I)
-                READ(IHOT,REC=IHOTSTP+2) ELVA(I)
-                IHOTSTP=IHOTSTP+2
-                ENDDO
-              ENDIF
-            IF(NHAGV.EQ.1) THEN
-              DO I=1,NP
-                READ(IHOT,REC=IHOTSTP+1) XVELAV(I)
-                READ(IHOT,REC=IHOTSTP+2) YVELAV(I)
-                READ(IHOT,REC=IHOTSTP+3) XVELVA(I)
-                READ(IHOT,REC=IHOTSTP+4) YVELVA(I)
-                IHOTSTP=IHOTSTP+4
-                ENDDO
-              ENDIF
-            ENDIF
-       endif   !  charmv
-
-
-          ENDIF
 
 
        if(C3DVS) then

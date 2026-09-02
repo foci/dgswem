@@ -84,7 +84,7 @@ C
       INTEGER I,PE,NWTYPE
       REAL TOL
       LOGICAL FOUND
-      CHARACTER DIRCMD*72,CMD*6,PENUM*6,PHASE*7,ISET*6,DIR1*80,DIR2*80,
+      CHARACTER DIRCMD*256,CMD*6,PENUM*6,PHASE*7,ISET*6,DIR1*80,DIR2*80,
      &    CONVDIR*6, JOB*80
 C
 #ifdef CMPI
@@ -268,6 +268,15 @@ C
            PENUM  = 'PE0000'
            CALL IWRITE(PENUM,3,6,PE)
            DIRCMD= CMD//PENUM  
+           CALL ISHELL(DIRCMD)
+
+C-- Instantiate empty write files for dagswem
+           DIRCMD = 'touch '//PENUM//'/fort.61 '//PENUM//'/fort.62 '//
+     &              PENUM//'/fort.63 '//PENUM//'/fort.64 '//
+     &              PENUM//'/fort.80 '//PENUM//'/fort.82 '//
+     &              PENUM//'/fort.88 '//PENUM//'/fort.89 '//
+     &              PENUM//'/fort.4l '//PENUM//'/fort.631 '//
+     &              PENUM//'/maxele.63'
            CALL ISHELL(DIRCMD)
         ENDDO
 C

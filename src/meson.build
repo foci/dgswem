@@ -21,7 +21,6 @@ dg_src = files([
   'global.F',
   'global_3dvs.F',
   'globalio.F',
-  'harm.F',
   'hstart.F',
   'ibarrier_edge_hydro.F',
   'ibarrier_fluxes.F',
@@ -78,9 +77,9 @@ starpu_dep = dependency('starpu-1.4', required: get_option('task-parallel'), fal
 if starpu_dep.found()
   python_prog = find_program('python3', required: true)
   dagswem_state_src = custom_target(
-    'dagswem_state.f90',
-    output: 'dagswem_state.f90',
-    input: ['dg.F', 'global.F'],
+    'dagswem_state.F90',
+    output: 'dagswem_state.F90',
+    input: ['dg.F', 'global.F', 'nodalattr.F'],
     command: [python_prog, files('gen_context.py'), '@INPUT@', '@OUTPUT@']
   )
 
