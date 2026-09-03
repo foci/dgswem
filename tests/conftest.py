@@ -13,10 +13,42 @@ def pytest_addoption(parser):
                      type=dir_path,
                      required=True)
 
+import shutil
+from pathlib import Path
+
 @pytest.fixture
 def binpath(request):
     p = request.config.getoption("--binpath")
     return dir_path(p)
+
+_test_workdirs = []
+
+@pytest.fixture
+def test_dir(tmp_path, request):
+    """
+    Copies a test case directory to a temporary path and records it.
+    """
+    def _copy_case(case_name: str) -> Path:
+        src = Path(request.config.rootpath) / case_name
+        dest = tmp_path / case_name
+        shutil.copytree(src, dest)
+        _test_workdirs.append((request.node.name, case_name, dest))
+        return dest
+
+    return _copy_case
+
+def pytest_terminal_summary(terminalreporter, exitstatus, config):
+    if _test_workdirs:
+        terminalreporter.section("Temporary Test Directories", yellow=True, bold=True)
+        terminalreporter.write_line("Outputs and runs from this session are stored in:")
+        for test_name, case_name, path in _test_workdirs:
+            terminalreporter.write_line(f"  [{test_name} ({case_name})]: {path}")
+        is_tmp = any(str(path).startswith("/tmp/") for _, _, path in _test_workdirs)
+        if is_tmp:
+            terminalreporter.write_line("\nNote: Pytest retains the most recent temporary directories under /tmp/pytest-of-<user>/.")
+            terminalreporter.write_line("To set your own temp directory, use the --basetemp option (no history) or set the TMPDIR env variable:\n")
+            terminalreporter.write_line("    pytest --basetemp=<your-directory>\n")
+            
 
 @pytest.fixture
 def mpi_aps(monkeypatch):
