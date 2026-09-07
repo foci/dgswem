@@ -36,14 +36,17 @@ C.....Declare integer variables
       INTEGER NAGP(8),NCHECK(8), NEGP(8), NEDGES, NRK !42 hardwires for ph=7
       INTEGER NIEDS, NLEDS, NEEDS, NFEDS, NREDS, NEBEDS, NIBEDS
       INTEGER NIBSEG, NEBSEG
-      INTEGER MNED, MNLED, MNSED, MNRAED, MNRIED
+      INTEGER MNED                                          !> Number of edges 
+      INTEGER MNLED, MNSED, MNRAED, MNRIED
       INTEGER, TARGET :: MODAL_IC
       INTEGER P_READ, P_READ2
       INTEGER, TARGET :: SLOPEFLAG
       INTEGER test_el
       INTEGER, TARGET :: FLUXTYPE
       INTEGER, TARGET :: RK_STAGE, RK_ORDER
-      Integer, TARGET :: padapt,pflag,pl,ph,px,lebesgueP, gflag
+      Integer, TARGET :: padapt,pflag,pl
+      INTEGER, TARGET :: ph                                 !> ? Parameter controlling quadrature order, hardwired to 7
+      INTEGER, TARGET :: px,lebesgueP, gflag
       INTEGER pa
       logical init_parser,stblzr
 c     
@@ -129,16 +132,31 @@ C.....Declare allocatable real arrays
       REAL(SZ), ALLOCATABLE :: BTVD(:,:)                                      !> Shu-Osher B coefficient for stage of weight in TVD RK schemes
       REAL(SZ), ALLOCATABLE :: CTVD(:,:)                                      !> ? Some sort of modifying coefficient? Always = 0.
       REAL(SZ), ALLOCATABLE :: DTVD(:)                                        !> Node coefficient for stage of of TVD RK scheme
-      REAL(SZ), ALLOCATABLE :: MAX_BOA_DT(:),e1(:),balance(:)
-      Real(SZ), Allocatable :: RKC_T(:),RKC_U(:),RKC_Tprime(:)
-      Real(SZ), Allocatable :: RKC_Tdprime(:),RKC_a(:),RKC_b(:),RKC_c(:)
-      Real(SZ), Allocatable :: RKC_mu(:),RKC_tildemu(:),RKC_nu(:),
-     & RKC_gamma(:)
-      REAL(SZ), ALLOCATABLE :: BATH(:,:,:),DBATHDX(:,:,:),DBATHDY(:,:,:)
-      REAL(SZ), ALLOCATABLE :: SFAC_ELEM(:,:,:)
-      REAL(SZ), ALLOCATABLE :: BATHED(:,:,:,:),SFACED(:,:,:,:)
-      REAL(SZ), ALLOCATABLE :: COSNX(:), SINNX(:)
-      REAL(SZ), ALLOCATABLE :: DP_NODE(:,:,:)
+      REAL(SZ), ALLOCATABLE :: MAX_BOA_DT(:)                                  !> Shu-Osher A/B ratio for each RK-stage 
+      REAL(SZ), ALLOCATABLE :: e1(:)                                          !> ?
+      REAL(SZ), ALLOCATABLE :: balance(:)                                     !> ? 
+     
+      Real(SZ), Allocatable :: RKC_T(:)                                       !> ? Fancy RK Chebyshev stuff
+      REAL(SZ), ALLOCATABLE :: RKC_U(:)                     
+      REAL(SZ), ALLOCATABLE :: RKC_Tprime(:)                
+      Real(SZ), Allocatable :: RKC_Tdprime(:)
+      REAL(SZ), ALLOCATABLE :: RKC_a(:)
+      REAL(SZ), ALLOCATABLE :: RKC_b(:)
+      REAL(SZ), ALLOCATABLE :: RKC_c(:)
+      Real(SZ), Allocatable :: RKC_mu(:)
+      REAL(SZ), ALLOCATABLE :: RKC_tildemu(:)
+      REAL(SZ), ALLOCATABLE :: RKC_nu(:)
+      REAL(SZ), ALLOCATABLE :: RKC_gamma(:)
+
+      REAL(SZ), ALLOCATABLE :: BATH(:,:,:)                                    !> Bathymetry by quadrature point in element by ph?
+      REAL(SZ), ALLOCATABLE :: DBATHDX(:,:,:)                                 !> x-component of gradient of bathymetry by quadrature point in element by ph? 
+      REAL(SZ), ALLOCATABLE :: DBATHDY(:,:,:)                                 !> y-component of gradient of bathymetry by quad point in element by ph? 
+      REAL(SZ), ALLOCATABLE :: SFAC_ELEM(:,:,:)                               !> ?
+      REAL(SZ), ALLOCATABLE :: BATHED(:,:,:,:)                                !> ?
+      REAL(SZ), ALLOCATABLE :: SFACED(:,:,:,:)                                !> ? 
+      REAL(SZ), ALLOCATABLE :: COSNX(:)                                       !> x-component of normal vector to edge 
+      REAL(SZ), ALLOCATABLE :: SINNX(:)                                       !> y-component of normal vector to edge
+      REAL(SZ), ALLOCATABLE :: DP_NODE(:,:,:)                                 !> 
       REAL(SZ), ALLOCATABLE :: DP_VOL(:,:)
       REAL(SZ), ALLOCATABLE :: DRPHI(:,:,:), DSPHI(:,:,:)
       REAL(SZ), ALLOCATABLE :: DRDX(:), DSDX(:), DRDY(:), DSDY(:)
@@ -146,10 +164,10 @@ C.....Declare allocatable real arrays
       REAL(SZ), ALLOCATABLE :: EFA_DG(:,:,:), EMO_DG(:,:,:)
       REAL(SZ), ALLOCATABLE :: UFA_DG(:,:,:), UMO_DG(:,:,:)
       REAL(SZ), ALLOCATABLE :: VFA_DG(:,:,:), VMO_DG(:,:,:)
-      REAL(SZ), ALLOCATABLE :: XLEN(:)
-      REAL(SZ), ALLOCATABLE :: HB(:,:,:)
-      REAL(SZ), ALLOCATABLE :: MANN(:,:)
-      REAL(SZ), ALLOCATABLE :: IBHT(:), EBHT(:)
+      REAL(SZ), ALLOCATABLE :: XLEN(:)                                        !> Length of each edge
+      REAL(SZ), ALLOCATABLE :: HB(:,:,:)                                      !> Water column height for DOF of element of RK-stage
+      REAL(SZ), ALLOCATABLE :: MANN(:,:)                                      !> Manning friction coefficient for DOF of element
+      REAL(SZ), ALLOCATABLE :: IBHT(:), EBHT(:)                               !> 
       REAL(SZ), ALLOCATABLE :: EBCFSP(:), IBCFSP(:), IBCFSB(:)
       REAL(SZ), ALLOCATABLE :: JACOBI(:,:,:,:)
       REAL(SZ), ALLOCATABLE :: M_INV(:,:),phi_edge_fixed(:,:,:)
@@ -163,9 +181,14 @@ C.....Declare allocatable real arrays
       REAL(SZ), ALLOCATABLE :: PSI1(:,:), PSI2(:,:), PSI3(:,:)
       REAL(SZ), ALLOCATABLE :: Q_HAT(:)
       REAL(SZ), ALLOCATABLE :: QIB(:)
-      REAL(SZ), ALLOCATABLE :: QX(:,:,:), QY(:,:,:), ZE(:,:,:)
-      REAL(SZ), ALLOCATABLE :: ze_edge(:,:,:), qx_edge(:,:,:), qy_edge(:,:,:)
-      integer, allocatable :: elem_edge(:,:), nieds_count(:)
+      REAL(SZ), ALLOCATABLE :: QX(:,:,:)                                      !> lateral differential X-momentum for DOF of element in rk-stage
+      REAL(SZ), ALLOCATABLE :: QY(:,:,:)                                      !> lateral differential Y-momentum for DOF of element in rk-stage 
+      REAL(SZ), ALLOCATABLE :: ZE(:,:,:)                                      !> Elevation of free surface above geoid for DOF of element in rk-stage
+      REAL(SZ), ALLOCATABLE :: ze_edge(:,:,:)                                 
+      REAL(SZ), ALLOCATABLE :: qx_edge(:,:,:)
+      REAL(SZ), ALLOCATABLE :: qy_edge(:,:,:)
+      integer, allocatable :: elem_edge(:,:)                                  !> Incident edge indices of elements (jagged) 
+      INTEGER, ALLOCATABLE :: nieds_count(:)                                  !> Number of adjacent internal edges for elements
       Real(SZ), ALLOCATABLE, target:: bed(:,:,:,:)
       Real(SZ), Allocatable :: dynP(:,:,:),dynP_MAX(:), dynP_MIN(:)
       Real(SZ), Allocatable :: iota(:,:,:),iotaa(:,:,:),iota2(:,:,:)
