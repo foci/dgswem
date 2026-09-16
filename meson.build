@@ -166,7 +166,7 @@ else
     executable(
         'dgswem_serial',
         sources: dgswem_src + c_interface_src,
-        dependencies: [cpp_dep] + netcdf_dep,
+        dependencies: [cpp_dep],
         link_language: 'fortran'
     )
 endif
