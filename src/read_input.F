@@ -74,9 +74,9 @@ C
       READ(80,*) idum80, nnodg
 #endif
       READ(80,*) nsubdom        !Read in NPROC
-      read(80,*) np_max80       !Read in maximum np across all processors
 #ifdef NETCDF
 
+      read(80,*) np_max80       !Read in maximum np across all processors
 C     For NetCDF, local-global maps are needed
 C     Only for compute processes, skip if writer
 
