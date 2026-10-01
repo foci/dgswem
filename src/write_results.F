@@ -1266,3 +1266,78 @@ C      ENDIF
         
       RETURN
       END
+
+C***********************************************************************
+C
+C     SUBROUTINE WRITE_GLOBAL_ELEVATION
+C
+C     Extracted fort.63 writing block intended to be run as an 
+C     independent task in the DAG. Assumes it is called only when
+C     output is actually scheduled.
+C
+C***********************************************************************
+
+      SUBROUTINE WRITE_GLOBAL_ELEVATION(IT, TIME_A_IN)
+      USE GLOBAL
+      USE DG
+      USE sizes, ONLY: layers
+      IMPLICIT NONE
+      
+      INTEGER IT, I, open_stat, u63, u88, u89, u4441
+      REAL(SZ) TIME_A_IN
+      
+      TIME_A = TIME_A_IN
+
+#ifdef TASKPAR
+      u63 = 6300 + MYPROC
+      u88 = 8800 + MYPROC
+      u89 = 8900 + MYPROC
+      u4441 = 444100 + MYPROC
+!$OMP CRITICAL(WRITE_ELEV_IO)
+      OPEN(u63, FILE=TRIM(DIRNAME)//'/fort.63', STATUS='OLD', POSITION='APPEND', IOSTAT=open_stat)
+      IF (ModetoNode.EQ.0) THEN
+        OPEN(u88, FILE=TRIM(DIRNAME)//'/fort.88', STATUS='OLD', POSITION='APPEND')
+        OPEN(u89, FILE=TRIM(DIRNAME)//'/fort.89', STATUS='OLD', POSITION='APPEND')
+        OPEN(u4441, FILE=TRIM(DIRNAME)//'/fort.4l', STATUS='OLD', POSITION='APPEND')
+      ENDIF
+#else
+      u63 = 63
+      u88 = 88
+      u89 = 89
+      u4441 = 4441
+#endif
+      WRITE(u63,2120) TIME_A, IT
+      ! Ignoring 631 and others that use direct access or aren't opened here
+2120  FORMAT(2X,E20.10,5X,I10)
+      
+      if (ModetoNode.eq.1) then
+!$acc update self(eta2)
+        DO I=1,NP
+          IF (ABS(ETA2(I)).LE.(10.0**(-30))) ETA2(I) = 0.0
+          IF (NOLIFA .EQ. 2) THEN
+            IF (NODECODE(I).EQ.1) WRITE(u63,2453) I,ETA2(I)
+            IF (NODECODE(I).EQ.0) WRITE(u63,2453) I,-99999.
+          ELSE
+            WRITE(u63,2453) I,ETA2(I)
+          ENDIF
+2453      FORMAT(2X,I8,2X,E16.8E3)
+        ENDDO
+      else
+        DO I=1,NE
+          IF (ABS(ETA2(I)).LE.(10.0**(-30))) ETA2(I) = 0.0
+          WRITE(u63,2453) I,ETA2(I)
+        ENDDO
+      ENDIF
+
+#ifdef TASKPAR
+      CLOSE(u63)
+      IF (ModetoNode.EQ.0) THEN
+        CLOSE(u88)
+        CLOSE(u89)
+        CLOSE(u4441)
+      ENDIF
+!$OMP END CRITICAL(WRITE_ELEV_IO)
+#endif
+
+      RETURN
+      END SUBROUTINE WRITE_GLOBAL_ELEVATION

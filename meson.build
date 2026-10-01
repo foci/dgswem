@@ -114,9 +114,22 @@ if get_option('parallel')
 endif
 
 if starpu_dep.found()
+  fargs = ['-DTASKPAR', '-qopenmp']
+  largs = ['-qopenmp']
+  if get_option('buildtype') == 'debug'
+    if compiler_name == 'intel-llvm'
+      if compiler.version().version_compare('<2026.1.0')
+        error('Intel compiler version must be >= 2026.1.0, for proper TLS debugging')
+      endif
+      fargs += ['-qopenmp-threadprivate=compat']
+      largs += ['-qopenmp-threadprivate=compat']
+    endif
+  endif  
+
   executable('dagswem', sources: dg_src + c_interface_src + starpu_layer_src,
              dependencies: [starpu_dep] + cpp_dep + netcdf_dep,
-             fortran_args: '-DTASKPAR',
+             fortran_args: fargs,
+             link_args : largs,
              link_language: 'fortran', 
              link_with: fstarpu_mod_lib)
 endif  

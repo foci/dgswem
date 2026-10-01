@@ -79,7 +79,7 @@ if starpu_dep.found()
   dagswem_state_src = custom_target(
     'dagswem_state.F90',
     output: 'dagswem_state.F90',
-    input: ['dg.F', 'global.F', 'nodalattr.F'],
+    input: ['sizes.F', 'dg.F', 'global.F', 'nodalattr.F'],
     command: [python_prog, files('gen_context.py'), '@INPUT@', '@OUTPUT@']
   )
 

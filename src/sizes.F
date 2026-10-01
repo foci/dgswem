@@ -68,6 +68,11 @@ C
          CHARACTER(2048), SAVE :: INPUTDIR, GLOBALDIR, LOCALDIR
          CHARACTER(2048), SAVE :: GBLINPUTDIR, HOTSTARTDIR
 
+         !$OMP THREADPRIVATE(MYPROC, DIRNAME, LNAME)
+         !$OMP THREADPRIVATE(MNE, MNP, MNEI, MNOPE, MNETA, MNBOU, MNVEL)
+         !$OMP THREADPRIVATE(MNTIF, MNBFR, MNFFR, MNSTAE, MNSTAV, MNSTAC, MNSTAM, MNHARF, MNNDEL)
+         !$OMP THREADPRIVATE(MNPROC, layers)
+         !$OMP THREADPRIVATE(ROOTDIR, INPUTDIR, GLOBALDIR, LOCALDIR, GBLINPUTDIR, HOTSTARTDIR)
 C---------------------end of data declarations--------------------------------C
 
 
@@ -92,7 +97,11 @@ C     WRITE_LOCAL_FILES = 1
             WRITE_LOCAL_HOT_START_FILES = .TRUE.
 
 #if defined(CMPI) || defined(TASKPAR)
-            WRITE(DIRNAME(3:6),'(I4.4)') MYPROC
+            DIRNAME = 'PE0000'
+            DIRNAME(3:3) = ACHAR(48 + MOD(MYPROC / 1000, 10))
+            DIRNAME(4:4) = ACHAR(48 + MOD(MYPROC / 100, 10))
+            DIRNAME(5:5) = ACHAR(48 + MOD(MYPROC / 10, 10))
+            DIRNAME(6:6) = ACHAR(48 + MOD(MYPROC, 10))
 #else
             MYPROC=0
 #endif
@@ -156,7 +165,7 @@ Casey 121128: Uncommented these lines.
                ROOTDIR = GLOBALDIR
             endif
 
-            WRITE(GLOBALDIR,'(A)') TRIM(ROOTDIR)
+            GLOBALDIR = TRIM(ROOTDIR)
 
 
 #ifdef CMPI

@@ -625,6 +625,14 @@ C.......Retrieve the elements which share the edge
          EL_IN = NEDEL(1,GED)
          EL_EX = NEDEL(2,GED)
 
+         if (LED_IN <= 0 .or. LED_EX <= 0) then
+            print *, "MYPROC=", MYPROC, " i=", i, " GED=", GED,
+     &               " EL_IN=", EL_IN, " EL_EX=", EL_EX,
+     &               " LED_IN=", LED_IN, " LED_EX=", LED_EX,
+     &               " NELED(:,EL_IN)=", NELED(:,EL_IN),
+     &               " NELED(:,EL_EX)=", NELED(:,EL_EX)
+         end if
+
          elem_edge(el_in, nieds_count(el_in)) = ged
          nieds_count(el_in) = nieds_count(el_in) + 1
          elem_edge(el_ex, nieds_count(el_ex)) = ged

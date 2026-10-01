@@ -9,7 +9,9 @@ math_dep = compiler.find_library('m', required: true)
 inc = include_directories('Lib') 
 
 c_args = []
-if compiler.get_id() == 'gcc'
+if compiler.get_id() == 'intel-llvm'
+    c_args = ['-Wno-incompatible-pointer-types']
+elif compiler.get_id() == 'gcc'
     c_args = ['-Wno-incompatible-pointer-types']
 endif
 

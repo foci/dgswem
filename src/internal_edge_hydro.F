@@ -106,6 +106,8 @@ C.......Retrieve the elements which share the edge
          EL_IN = NEDEL(1,GED)
          EL_EX = NEDEL(2,GED)
 
+
+
          EL = EL_EX
 
          if (DOFS(EL_EX).LT.DOFS(EL_IN)) then

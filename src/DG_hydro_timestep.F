@@ -259,11 +259,7 @@ C.......Compute LDG auxiliary equations
 
          IF (artdif.eq.1) CALL LDG_HYDRO(IT)
 
-C.......Compute elevation specified edges
-
          IF (NEEDS.GT.0)  CALL OCEAN_EDGE_HYDRO(IT)
-
-C.......Compute no-normal flow edges
 
          IF (NLEDS.GT.0)  CALL LAND_EDGE_HYDRO(IT)
 

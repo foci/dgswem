@@ -57,8 +57,6 @@ C.....Retrieve the elements which share the edge
 
          EL_IN = NEDEL(1,GED)
 
-         pa = PDG_EL(EL_IN)
-
 #ifdef P0
          if (pa.eq.0) then
             pa = 1

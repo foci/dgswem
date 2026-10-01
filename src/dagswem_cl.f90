@@ -7,7 +7,7 @@ MODULE DAGSWEM_CL
     use fstarpu_mod
     use dagswem_state
     use dagswem_comm
-    use iso_c_binding, only: c_ptr, c_f_pointer, c_loc, c_int
+    use iso_c_binding, only: c_ptr, c_f_pointer, c_loc, c_int, c_double
 
     implicit none 
 
@@ -18,14 +18,14 @@ MODULE DAGSWEM_CL
             TYPE(C_PTR), VALUE, INTENT(IN) :: BUFFERS
             TYPE(C_PTR), VALUE, INTENT(IN) :: CL_ARGS
             INTEGER(C_INT), TARGET :: it, irk, sub_id
+            REAL(C_DOUBLE), TARGET :: time_a_in
             INTEGER :: j, buf_idx
             REAL(SZ), POINTER :: in_vec(:), out_vec(:)
 
-            CALL fstarpu_unpack_arg(cl_args, (/ C_LOC(it), C_LOC(irk), C_LOC(sub_id) /))
+            CALL fstarpu_unpack_arg(cl_args, (/ C_LOC(it), C_LOC(time_a_in), C_LOC(irk), C_LOC(sub_id) /))
 
             CALL DGSWEM_STATE_ACTIVATE(buffers)
             MYPROC = sub_id
-            CALL MAKE_DIRNAME()
 
             ! Unpack ghost cell communication buffers from neighbors (if not first stage of initial timestep)
             IF (irk > 1 .OR. it > ITHS + 1) THEN
@@ -39,6 +39,7 @@ MODULE DAGSWEM_CL
             END IF
 
             ! Execute spatial and stage time advancement
+            TIME_A = time_a_in
             CALL DG_HYDRO_TIMESTEP_STAGE(it, irk)
 
             ! Pack resident element communication buffers for outgoing neighbors
@@ -58,17 +59,35 @@ MODULE DAGSWEM_CL
             TYPE(C_PTR), VALUE, INTENT(IN) :: BUFFERS
             TYPE(C_PTR), VALUE, INTENT(IN) :: CL_ARGS
             INTEGER(C_INT), TARGET :: it, sub_id
+            REAL(C_DOUBLE), TARGET :: time_a_in
 
-            CALL fstarpu_unpack_arg(cl_args, (/ C_LOC(it), C_LOC(sub_id) /))
+            CALL fstarpu_unpack_arg(cl_args, (/ C_LOC(it), C_LOC(time_a_in), C_LOC(sub_id) /))
+
+            CALL DGSWEM_STATE_ACTIVATE(buffers)
+            MYPROC = sub_id
+            TIME_A = time_a_in
+
+            CALL DG_HYDRO_TIMESTEP_FINALIZE(it)
+            CALL modal2nodal()
+
+        end subroutine FINALIZE_AND_IO
+
+
+        RECURSIVE SUBROUTINE WRITE_OUTPUT_DISTRIBUTED(buffers, cl_args) bind(C)
+            !! Write fort.63 independently
+            TYPE(C_PTR), VALUE, INTENT(IN) :: BUFFERS
+            TYPE(C_PTR), VALUE, INTENT(IN) :: CL_ARGS
+            INTEGER(C_INT), TARGET :: it, sub_id
+            REAL(C_DOUBLE), TARGET :: time_a_in
+
+            CALL fstarpu_unpack_arg(cl_args, (/ C_LOC(it), C_LOC(time_a_in), C_LOC(sub_id) /))
 
             CALL DGSWEM_STATE_ACTIVATE(buffers)
             MYPROC = sub_id
             CALL MAKE_DIRNAME()
 
-            CALL DG_HYDRO_TIMESTEP_FINALIZE(it)
-            CALL modal2nodal()
-            CALL WRITE_RESULTS(it, .FALSE.)
-
-        end subroutine FINALIZE_AND_IO
+            CALL WRITE_GLOBAL_ELEVATION(it, time_a_in)
+            
+        end subroutine WRITE_OUTPUT_DISTRIBUTED
 
 END MODULE DAGSWEM_CL

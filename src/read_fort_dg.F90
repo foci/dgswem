@@ -425,7 +425,7 @@
       
       INTEGER :: i
       INTEGER :: ncheck
-      CHARACTER(15) :: empty
+      CHARACTER(15) :: empty = " "
       CHARACTER(28) :: sedXdef,sedYdef
       
       ! initialize fortdg structure
@@ -514,10 +514,13 @@
           ncheck = ncheck + 1        
           fortdg(i)%vartype = 3        
         ENDIF
+        IF (fortdg(i)%vartype == 0 .AND. fortdg(i)%key /= empty) THEN
+          PRINT*, "Unassociated option: ", fortdg(i)%key
+        ENDIF
       ENDDO
       
-!       PRINT*, "Number of options = ", nopt
-!       PRINT*, "Number of pointer associations = ", ncheck
+      PRINT*, "Number of options = ", nopt
+      PRINT*, "Number of pointer associations = ", ncheck
       
       ! ensure user has associated each keyword pointer
       IF (nopt /= ncheck) THEN

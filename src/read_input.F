@@ -4228,7 +4228,7 @@ C...  LINES TO USE THE ITERATIVE MATRIX SOLVER
          ENDIF
       ENDIF
 
-#ifdef  CMPI
+#if defined(CMPI) || defined(TASKPAR)
 C     sb-PDG1 deleted
 C     READ(15,*) MNPROC
 C--   
