@@ -1,0 +1,43 @@
+# This is a Spack Environment file.
+#
+# It describes a set of packages to be installed, along with
+# configuration settings.
+spack:
+  # add package specs to the `specs` list
+  specs:
+  - meson
+  - netcdf-c
+  - netcdf-fortran
+  - starpu+debug
+  - intel-oneapi-mpi
+  - intel-oneapi-compilers 
+  - py-pytest
+  - py-numpy
+  - py-pandas
+  - py-pint
+  - linaro-forge@23.0.1 +accept-eula
+  packages:
+   intel-oneapi-compilers:
+#     externals:
+#     - spec: intel-oneapi-compilers@2025.2.1
+#       prefix: /opt/intel/oneapi/2025.2
+#     buildable: false
+     require: '@2026:'
+#   mpi:
+#     buildable: false
+#     require: [intel-oneapi-mpi@2021.16]
+#   intel-oneapi-mpi:
+#     externals:
+#     - spec: intel-oneapi-mpi@2021.16
+#       prefix: /opt/intel/oneapi
+  view: true
+  concretizer:
+    unify: true
+#    reuse:
+#     from:
+#     - type: local
+#       exclude: [intel-oneapi-compilers, intel-oneapi-mpi]
+#     - type: buildcache
+#       exclude: [intel-oneapi-compilers, intel-oneapi-mpi]
+#     - type: external
+#       include: [intel-oneapi-compilers, intel-oneapi-mpi]
