@@ -33,3 +33,17 @@ aps*
 sb*e*
 *log
 */tmp*
+*.tmp
+*.png
+*.inp
+*gmt*
+*.swp
+*.cpt
+*sb9*
+*sb16*
+*.latlon*
+dagswem
+dgswem
+*sbdag*
+*.pal
+
