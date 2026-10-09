@@ -12,6 +12,7 @@ vector<vector<pair<node, edge>>> Adj;
 extern "C" {
 
   void create_adj_list(int np, int nedges, int* nedno1, int* nedno2) {
+    Adj.clear();
     Adj.resize(np);
 
     for (int i = 0; i < nedges; i++) {
