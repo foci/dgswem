@@ -1,6 +1,6 @@
 name: dgswem-env
 channels:
-  - defaults
+  - conda-forge
 dependencies:
   - libnetcdf[version='>=4.9.2,<4.10.0',build=*openmpi*]
   - gfortran
