@@ -27,8 +27,10 @@ MODULE DAGSWEM_COMM
    END TYPE CommBuffer
 
    TYPE(SubdomainComm), ALLOCATABLE, TARGET :: sub_comm(:)
-   TYPE(C_PTR), ALLOCATABLE, TARGET :: comm_handles(:,:)      !! StarPU handle for writing from subdomains to neighbors
-   TYPE(CommBuffer), ALLOCATABLE, TARGET :: comm_bufs(:,:)    !! Write buffer for subdomains' neighbors
+   TYPE(C_PTR), ALLOCATABLE, TARGET :: comm_handles(:,:)      !! StarPU handles for final/postprocessed data
+   TYPE(CommBuffer), ALLOCATABLE, TARGET :: comm_bufs(:,:)    !! Write buffer for final/postprocessed data
+   TYPE(C_PTR), ALLOCATABLE, TARGET :: comm_handles_inter(:,:)!! StarPU handles for intermediate data
+   TYPE(CommBuffer), ALLOCATABLE, TARGET :: comm_bufs_inter(:,:)!! Write buffer for intermediate data
 
 CONTAINS
 

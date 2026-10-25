@@ -71,7 +71,70 @@ c$$$      ENDDO
 C.....Begin Runge-Kutta time stepper
 
       DO 100 IRK = 1,NRK
-         CALL DG_HYDRO_TIMESTEP_STAGE(IT, IRK)
+         CALL DG_HYDRO_TIMESTEP_STAGE_INTEGRATE(IT, IRK)
+
+#if defined(CMPI) && !defined(TASKPAR)
+         CALL UPDATER_ELEM_MOD(ZE,QX,QY,IRK+1,3)
+#ifdef TRACE
+         CALL UPDATER_ELEM_MOD(iota,iota2,QY,IRK+1,2 )
+#endif
+#ifdef DYNP
+         CALL UPDATER_ELEM_MOD(dynP,iota2,QY,IRK+1,2 )
+#endif
+#ifdef CHEM
+         CALL UPDATER_ELEM_MOD(iota,iota2,QY,IRK+1,2 )
+#endif
+#ifdef SED_LAY
+         do l = 1,layers
+            arrayfix => bed(:,:,:,l)
+            CALL UPDATER_ELEM_MOD(arrayfix,QX,QY,IRK+1,1 )
+         enddo
+#endif
+#endif
+
+         CALL DG_HYDRO_TIMESTEP_STAGE_POSTPROCESS(IT, IRK)
+
+#if defined(CMPI) && !defined(TASKPAR)
+         if (SLOPEFLAG.NE.0.OR.NOLIFA.GE.2) THEN
+            CALL UPDATER_ELEM_MOD(ZE,QX,QY,IRK+1,3)
+#ifdef TRACE
+            CALL UPDATER_ELEM_MOD(iota,iota2,QY,IRK+1,2 )
+#endif
+#ifdef CHEM
+            CALL UPDATER_ELEM_MOD(iota,iota2,QY,IRK+1,2 )
+#endif
+#ifdef DYNP
+            CALL UPDATER_ELEM_MOD(dynP,iota2,QY,IRK+1,2 )
+#endif
+#ifdef SED_LAY
+            do l = 1,layers
+               arrayfix => bed(:,:,:,l)
+               CALL UPDATER_ELEM_MOD(arrayfix,QX,QY,IRK+1,1 )
+            enddo
+#endif
+         endif
+
+#ifdef P_AD
+         if (irk+1.eq.2) then
+            CALL UPDATER_ELEM_MOD(ZE,QX,QY,IRK+1,3)
+#ifdef TRACE
+            CALL UPDATER_ELEM_MOD(iota,iota2,QY,IRK+1,2 )
+#endif
+#ifdef CHEM
+            CALL UPDATER_ELEM_MOD(iota,iota2,QY,IRK+1,2 )
+#endif
+#ifdef DYNP
+            CALL UPDATER_ELEM_MOD(dynP,iota2,QY,IRK+1,2 )
+#endif
+#ifdef SED_LAY
+            do l = 1,layers
+               arrayfix => bed(:,:,:,l)
+               CALL UPDATER_ELEM_MOD(arrayfix,QX,QY,IRK+1,1 )
+            enddo
+#endif
+         endif
+#endif
+#endif
  100  CONTINUE
 
 C.....Update variables for next time step
@@ -83,18 +146,14 @@ C.....Update variables for next time step
 
 C***********************************************************************
 C
-C     SUBROUTINE DG_HYDRO_TIMESTEP_STAGE(IT, IRK_STAGE)
+C     SUBROUTINE DG_HYDRO_TIMESTEP_STAGE_INTEGRATE(IT, IRK_STAGE)
 C
-C     Extracted from the DO 100 IRK=1,NRK body of DG_HYDRO_TIMESTEP so
-C     that a single RK stage is independently callable -- each call
-C     becomes one schedulable unit of work (one StarPU task, under
-C     TASKPAR) instead of an iteration nested inside a driver loop.
-C     Behavior-preserving for existing serial/MPI builds: DG_HYDRO_TIMESTEP
-C     still runs all NRK stages back to back via its own DO loop above.
+C     Computes spatial and time integration for a single RK stage (IRK).
+C     Updates state variables to stage index IRK+1.
 C
 C***********************************************************************
 
-      SUBROUTINE DG_HYDRO_TIMESTEP_STAGE(IT, IRK_STAGE)
+      SUBROUTINE DG_HYDRO_TIMESTEP_STAGE_INTEGRATE(IT, IRK_STAGE)
 
 C.....Use appropriate modules
 
@@ -542,46 +601,47 @@ C.......Compute the dynamic pressure if flagged
 
 #endif
 
-#if defined(CMPI) && !defined(TASKPAR)
-         CALL UPDATER_ELEM_MOD(ZE,QX,QY,IRK+1,3)
-#ifdef TRACE
-         CALL UPDATER_ELEM_MOD(iota,iota2,QY,IRK+1,2 )
-#endif
+      RETURN
+      END SUBROUTINE
 
-#ifdef DYNP
-         CALL UPDATER_ELEM_MOD(dynP,iota2,QY,IRK+1,2 )
-#endif
+C***********************************************************************
+C
+C     SUBROUTINE DG_HYDRO_TIMESTEP_STAGE_POSTPROCESS(IT, IRK_STAGE)
+C
+C     Applies slope limiter, wetting and drying treatment, and optional
+C     p-enrichment to state variables at stage index IRK+1.
+C
+C***********************************************************************
 
-#ifdef CHEM
-         CALL UPDATER_ELEM_MOD(iota,iota2,QY,IRK+1,2 )
-#endif
+      SUBROUTINE DG_HYDRO_TIMESTEP_STAGE_POSTPROCESS(IT, IRK_STAGE)
 
-#ifdef SED_LAY
-         do l = 1,layers
-            arrayfix => bed(:,:,:,l)
-            CALL UPDATER_ELEM_MOD(arrayfix,QX,QY,IRK+1,1 )
-         enddo
-#endif
+C.....Use appropriate modules
 
-#endif
+      USE GLOBAL
+      USE DG
+
+      IMPLICIT NONE
+
+      INTEGER IT, IRK_STAGE
+
+      IRK = IRK_STAGE
 
 C.......Apply the slopelimiter if appropriate
 
 #ifdef SLOPEALL
-         CALL SLOPELIMITER()
+      CALL SLOPELIMITER()
 #endif
 
 #ifdef SLOPE5
-         CALL SLOPELIMITER()
+      CALL SLOPELIMITER()
 #endif
 
 #ifdef STBLZR
-         if (.not.stblzr) then
-            CALL SLOPELIMITER()
-            stblzr = .true.
-         endif
+      if (.not.stblzr) then
+         CALL SLOPELIMITER()
+         stblzr = .true.
+      endif
 #endif
-
 
 C.......Apply the wet-dry algorithm if appropriate
 
@@ -589,78 +649,12 @@ C.......Apply the wet-dry algorithm if appropriate
          CALL WETDRY()
       ENDIF
 
-c$$$C...Apply the slopelimiter again if auxiliary variable is being used
-c$$$
-c$$$         if (EVMSUM.NE.0.0.or.artdif.eq.1) then
-c$$$#ifdef SLOPEALL
-c$$$            CALL SLOPELIMITER()
-c$$$#endif
-c$$$
-c$$$#ifdef SLOPE5
-c$$$            CALL SLOPELIMITER()
-c$$$#endif
-c$$$         endif
-
-C...For parallel run update for dofs if slope limiter and/or wetting and
-C...drying is being used
-
-#if defined(CMPI) && !defined(TASKPAR)
-         if (SLOPEFLAG.NE.0.OR.NOLIFA.GE.2) THEN
-            CALL UPDATER_ELEM_MOD(ZE,QX,QY,IRK+1,3)
-
-#ifdef TRACE
-            CALL UPDATER_ELEM_MOD(iota,iota2,QY,IRK+1,2 )
-#endif
-
-#ifdef CHEM
-            CALL UPDATER_ELEM_MOD(iota,iota2,QY,IRK+1,2 )
-#endif
-
-#ifdef DYNP
-            CALL UPDATER_ELEM_MOD(dynP,iota2,QY,IRK+1,2 )
-#endif
-
-
-#ifdef SED_LAY
-            do l = 1,layers
-               arrayfix => bed(:,:,:,l)
-               CALL UPDATER_ELEM_MOD(arrayfix,QX,QY,IRK+1,1 )
-            enddo
-#endif
-         endif
-#endif
-
 C.......p_enrich soln and update
 
 #ifdef P_AD
-         if (irk+1.eq.2) then
-            CALL p_enrichment(it,0)
-         endif
-#if defined(CMPI) && !defined(TASKPAR)
-
-         CALL UPDATER_ELEM_MOD(ZE,QX,QY,IRK+1,3)
-
-#ifdef TRACE
-         CALL UPDATER_ELEM_MOD(iota,iota2,QY,IRK+1,2 )
-#endif
-
-#ifdef CHEM
-         CALL UPDATER_ELEM_MOD(iota,iota2,QY,IRK+1,2 )
-#endif
-
-#ifdef DYNP
-         CALL UPDATER_ELEM_MOD(dynP,iota2,QY,IRK+1,2 )
-#endif
-
-#ifdef SED_LAY
-         do l = 1,layers
-            arrayfix => bed(:,:,:,l)
-            CALL UPDATER_ELEM_MOD(arrayfix,QX,QY,IRK+1,1 )
-         enddo
-#endif
-
-#endif
-
+      if (irk+1.eq.2) then
+         CALL p_enrichment(it,0)
+      endif
 #endif
 
       RETURN

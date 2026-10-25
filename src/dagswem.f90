@@ -20,15 +20,17 @@ PROGRAM DAGSWEM
    TYPE(SubdomainData), ALLOCATABLE, TARGET :: subdomains(:)
    LOGICAL :: fileFound
 
-   TYPE(C_PTR) :: cl_advance
-   TYPE(C_PTR) :: cl_finalize
+   TYPE(C_PTR) :: cl_integrate
+   TYPE(C_PTR) :: cl_postprocess
    TYPE(C_PTR) :: cl_io
    REAL(C_DOUBLE), TARGET :: time_a_c
    REAL(SZ) :: ITDT
    LOGICAL :: do_io
-   TYPE(C_PTR), ALLOCATABLE, TARGET :: descrs_advance(:)            !! StarPU handle/access info for subdomains
-   TYPE(C_PTR), ALLOCATABLE, TARGET :: descrs_finalize(:)
-   INTEGER(C_INT), ALLOCATABLE, TARGET :: nbuffers_advance(:)
+   LOGICAL :: use_postprocess
+   TYPE(C_PTR), ALLOCATABLE, TARGET :: descrs_integrate(:)         !! StarPU handles for integrate tasks
+   TYPE(C_PTR), ALLOCATABLE, TARGET :: descrs_postprocess(:)       !! StarPU handles for postprocess tasks
+   TYPE(C_PTR), ALLOCATABLE, TARGET :: descrs_io(:)                !! StarPU handles for IO tasks
+   INTEGER(C_INT), ALLOCATABLE, TARGET :: nbuffers_stage(:)
    INTEGER :: num_subdomains
    INTEGER :: iths_local, nt_local, nrk_local
    INTEGER :: noutge_local, ntcysge_local, ntcyfge_local, nspoolge_local, nscouge_local
@@ -125,10 +127,19 @@ PROGRAM DAGSWEM
       CALL DGSWEM_STATE_REGISTER(subdomains(I)%handles)
    END DO
 
+   ! Check if post-processing treatments (slope limiter or wet-dry) are active
+   use_postprocess = (SLOPEFLAG /= 0 .OR. NOLIFA >= 2)
+
    ! Allocate and register send-directed inter-subdomain data handles and buffers
    ALLOCATE(comm_handles(0:num_subdomains-1, 0:num_subdomains-1))
    ALLOCATE(comm_bufs(0:num_subdomains-1, 0:num_subdomains-1))
    comm_handles = C_NULL_PTR
+
+   IF (use_postprocess) THEN
+      ALLOCATE(comm_handles_inter(0:num_subdomains-1, 0:num_subdomains-1))
+      ALLOCATE(comm_bufs_inter(0:num_subdomains-1, 0:num_subdomains-1))
+      comm_handles_inter = C_NULL_PTR
+   END IF
 
    DO I = 0, num_subdomains - 1
       DO J = 1, sub_comm(I)%NEIGHPROC_S
@@ -140,19 +151,29 @@ PROGRAM DAGSWEM
          CALL fstarpu_vector_data_register(comm_handles(I, target_id), 0, &
             C_LOC(comm_bufs(I, target_id)%buf(1)), &
             buf_len, C_SIZEOF(comm_bufs(I, target_id)%buf(1)))
+
+         IF (use_postprocess) THEN
+            ALLOCATE(comm_bufs_inter(I, target_id)%buf(buf_len))
+            comm_bufs_inter(I, target_id)%buf = 0.0_SZ
+            CALL fstarpu_vector_data_register(comm_handles_inter(I, target_id), 0, &
+               C_LOC(comm_bufs_inter(I, target_id)%buf(1)), &
+               buf_len, C_SIZEOF(comm_bufs_inter(I, target_id)%buf(1)))
+         END IF
       END DO
    END DO
 
    ! Setup Codelets
-   cl_advance = fstarpu_codelet_allocate()
-   CALL fstarpu_codelet_set_name(cl_advance, C_CHAR_"ADVANCE_STAGE_DISTRIBUTED"//C_NULL_CHAR)
-   CALL fstarpu_codelet_add_cpu_func(cl_advance, C_FUNLOC(ADVANCE_STAGE_DISTRIBUTED))
-   CALL fstarpu_codelet_set_variable_nbuffers(cl_advance)
+   cl_integrate = fstarpu_codelet_allocate()
+   CALL fstarpu_codelet_set_name(cl_integrate, C_CHAR_"ADVANCE_STAGE_INTEGRATE"//C_NULL_CHAR)
+   CALL fstarpu_codelet_add_cpu_func(cl_integrate, C_FUNLOC(ADVANCE_STAGE_INTEGRATE))
+   CALL fstarpu_codelet_set_variable_nbuffers(cl_integrate)
 
-   cl_finalize = fstarpu_codelet_allocate()
-   CALL fstarpu_codelet_set_name(cl_finalize, C_CHAR_"FINALIZE_AND_IO"//C_NULL_CHAR)
-   CALL fstarpu_codelet_add_cpu_func(cl_finalize, C_FUNLOC(FINALIZE_AND_IO))
-   CALL fstarpu_codelet_set_variable_nbuffers(cl_finalize)
+   IF (use_postprocess) THEN
+      cl_postprocess = fstarpu_codelet_allocate()
+      CALL fstarpu_codelet_set_name(cl_postprocess, C_CHAR_"ADVANCE_STAGE_POSTPROCESS"//C_NULL_CHAR)
+      CALL fstarpu_codelet_add_cpu_func(cl_postprocess, C_FUNLOC(ADVANCE_STAGE_POSTPROCESS))
+      CALL fstarpu_codelet_set_variable_nbuffers(cl_postprocess)
+   END IF
 
    cl_io = fstarpu_codelet_allocate()
    CALL fstarpu_codelet_set_name(cl_io, C_CHAR_"WRITE_OUTPUT_DISTRIBUTED"//C_NULL_CHAR)
@@ -160,36 +181,73 @@ PROGRAM DAGSWEM
    CALL fstarpu_codelet_set_variable_nbuffers(cl_io)
 
    ! Pre-allocate task buffer descriptor arrays
-   ALLOCATE(descrs_advance(0:num_subdomains-1))
-   ALLOCATE(descrs_finalize(0:num_subdomains-1))
-   ALLOCATE(nbuffers_advance(0:num_subdomains-1))
+   ALLOCATE(descrs_integrate(0:num_subdomains-1))
+   IF (use_postprocess) ALLOCATE(descrs_postprocess(0:num_subdomains-1))
+   ALLOCATE(descrs_io(0:num_subdomains-1))
+   ALLOCATE(nbuffers_stage(0:num_subdomains-1))
 
    DO I = 0, num_subdomains - 1
       nbufs = NUM_STATE_HANDLES + sub_comm(I)%NEIGHPROC_R + sub_comm(I)%NEIGHPROC_S
-      nbuffers_advance(I) = nbufs
-      descrs_advance(I) = fstarpu_data_descr_array_alloc(nbufs)
+      nbuffers_stage(I) = nbufs
+      descrs_integrate(I) = fstarpu_data_descr_array_alloc(nbufs)
+      IF (use_postprocess) descrs_postprocess(I) = fstarpu_data_descr_array_alloc(nbufs)
 
       ! 1. State handles (RW)
       DO k = 0, NUM_STATE_HANDLES - 1
-         CALL fstarpu_data_descr_array_set(descrs_advance(I), k, subdomains(I)%handles(k + 1), FSTARPU_RW)
+         CALL fstarpu_data_descr_array_set(descrs_integrate(I), k, subdomains(I)%handles(k + 1), FSTARPU_RW)
+         IF (use_postprocess) THEN
+            CALL fstarpu_data_descr_array_set(descrs_postprocess(I), k, subdomains(I)%handles(k + 1), FSTARPU_RW)
+         END IF
       END DO
 
-      ! 2. Incoming comm handles (R)
+      IF (use_postprocess) THEN
+         ! Integrate: Recv from final/post handles (R), Send to intermediate handles (W)
+         DO J = 1, sub_comm(I)%NEIGHPROC_R
+            sender_id = sub_comm(I)%IPROC_R(J)
+            CALL fstarpu_data_descr_array_set(descrs_integrate(I), NUM_STATE_HANDLES + J - 1, &
+                                              comm_handles(sender_id, I), FSTARPU_R)
+         END DO
+         DO J = 1, sub_comm(I)%NEIGHPROC_S
+            receiver_id = sub_comm(I)%IPROC_S(J)
+            CALL fstarpu_data_descr_array_set(descrs_integrate(I), NUM_STATE_HANDLES + sub_comm(I)%NEIGHPROC_R + J - 1, &
+                                              comm_handles_inter(I, receiver_id), FSTARPU_W)
+         END DO
+
+         ! Postprocess: Recv from intermediate handles (R), Send to final/post handles (W)
+         DO J = 1, sub_comm(I)%NEIGHPROC_R
+            sender_id = sub_comm(I)%IPROC_R(J)
+            CALL fstarpu_data_descr_array_set(descrs_postprocess(I), NUM_STATE_HANDLES + J - 1, &
+                                              comm_handles_inter(sender_id, I), FSTARPU_R)
+         END DO
+         DO J = 1, sub_comm(I)%NEIGHPROC_S
+            receiver_id = sub_comm(I)%IPROC_S(J)
+            CALL fstarpu_data_descr_array_set(descrs_postprocess(I), NUM_STATE_HANDLES + sub_comm(I)%NEIGHPROC_R + J - 1, &
+                                              comm_handles(I, receiver_id), FSTARPU_W)
+         END DO
+      ELSE
+         ! Direct communication: Recv from comm_handles (R), Send to comm_handles (W)
+         DO J = 1, sub_comm(I)%NEIGHPROC_R
+            sender_id = sub_comm(I)%IPROC_R(J)
+            CALL fstarpu_data_descr_array_set(descrs_integrate(I), NUM_STATE_HANDLES + J - 1, &
+                                              comm_handles(sender_id, I), FSTARPU_R)
+         END DO
+         DO J = 1, sub_comm(I)%NEIGHPROC_S
+            receiver_id = sub_comm(I)%IPROC_S(J)
+            CALL fstarpu_data_descr_array_set(descrs_integrate(I), NUM_STATE_HANDLES + sub_comm(I)%NEIGHPROC_R + J - 1, &
+                                              comm_handles(I, receiver_id), FSTARPU_W)
+         END DO
+      END IF
+
+      ! IO task handles (RW resident state + R incoming comm buffers)
+      nbufs = NUM_STATE_HANDLES + sub_comm(I)%NEIGHPROC_R
+      descrs_io(I) = fstarpu_data_descr_array_alloc(nbufs)
+      DO k = 0, NUM_STATE_HANDLES - 1
+         CALL fstarpu_data_descr_array_set(descrs_io(I), k, subdomains(I)%handles(k + 1), FSTARPU_RW)
+      END DO
       DO J = 1, sub_comm(I)%NEIGHPROC_R
          sender_id = sub_comm(I)%IPROC_R(J)
-         CALL fstarpu_data_descr_array_set(descrs_advance(I), NUM_STATE_HANDLES + J - 1, comm_handles(sender_id, I), FSTARPU_R)
-      END DO
-
-      ! 3. Outgoing comm handles (W)
-      DO J = 1, sub_comm(I)%NEIGHPROC_S
-         receiver_id = sub_comm(I)%IPROC_S(J)
-         CALL fstarpu_data_descr_array_set(descrs_advance(I), NUM_STATE_HANDLES + sub_comm(I)%NEIGHPROC_R + J - 1, comm_handles(I, receiver_id), FSTARPU_W)
-      END DO
-
-      ! Finalize task handles (RW)
-      descrs_finalize(I) = fstarpu_data_descr_array_alloc(NUM_STATE_HANDLES)
-      DO k = 0, NUM_STATE_HANDLES - 1
-         CALL fstarpu_data_descr_array_set(descrs_finalize(I), k, subdomains(I)%handles(k + 1), FSTARPU_RW)
+         CALL fstarpu_data_descr_array_set(descrs_io(I), NUM_STATE_HANDLES + J - 1, &
+                                           comm_handles(sender_id, I), FSTARPU_R)
       END DO
    END DO
 
@@ -230,48 +288,60 @@ PROGRAM DAGSWEM
             END IF
          END IF
       END IF
+
       ! Loop over Runge-Kutta stages
       DO stage_idx = 1, nrk_local
+         ! 1. Stage Integrate Tasks
          DO I = 0, num_subdomains - 1
             it_c = IT
             irk_c = stage_idx
             sub_id_c = I
-            nbufs_c = nbuffers_advance(I)
+            nbufs_c = nbuffers_stage(I)
 
-            CALL fstarpu_task_insert((/ cl_advance, &
+            CALL fstarpu_task_insert((/ cl_integrate, &
                FSTARPU_VALUE, C_LOC(it_c), FSTARPU_SZ_C_INT, &
                FSTARPU_VALUE, C_LOC(time_a_c), FSTARPU_SZ_C_DOUBLE, &
                FSTARPU_VALUE, C_LOC(irk_c), FSTARPU_SZ_C_INT, &
                FSTARPU_VALUE, C_LOC(sub_id_c), FSTARPU_SZ_C_INT, &
-               FSTARPU_DATA_MODE_ARRAY, descrs_advance(I), C_LOC(nbufs_c), &
+               FSTARPU_DATA_MODE_ARRAY, descrs_integrate(I), C_LOC(nbufs_c), &
                C_NULL_PTR /))
          END DO
+
+         ! 2. Stage Postprocess Tasks (if slope limiter or wet-dry treatment is active)
+         IF (use_postprocess) THEN
+            DO I = 0, num_subdomains - 1
+               it_c = IT
+               irk_c = stage_idx
+               sub_id_c = I
+               nbufs_c = nbuffers_stage(I)
+
+               CALL fstarpu_task_insert((/ cl_postprocess, &
+                  FSTARPU_VALUE, C_LOC(it_c), FSTARPU_SZ_C_INT, &
+                  FSTARPU_VALUE, C_LOC(time_a_c), FSTARPU_SZ_C_DOUBLE, &
+                  FSTARPU_VALUE, C_LOC(irk_c), FSTARPU_SZ_C_INT, &
+                  FSTARPU_VALUE, C_LOC(sub_id_c), FSTARPU_SZ_C_INT, &
+                  FSTARPU_DATA_MODE_ARRAY, descrs_postprocess(I), C_LOC(nbufs_c), &
+                  C_NULL_PTR /))
+            END DO
+         END IF
       END DO
 
-      ! Finalize and I/O tasks for each subdomain
-      DO I = 0, num_subdomains - 1
-         it_c = IT
-         sub_id_c = I
-         nbufs_fin_c = NUM_STATE_HANDLES
+      ! Conditionally insert I/O tasks for each subdomain after the timestep is completed
+      IF (do_io) THEN
+         DO I = 0, num_subdomains - 1
+            it_c = IT
+            sub_id_c = I
+            nbufs_fin_c = NUM_STATE_HANDLES + sub_comm(I)%NEIGHPROC_R
 
-         CALL fstarpu_task_insert((/ cl_finalize, &
-            FSTARPU_VALUE, C_LOC(it_c), FSTARPU_SZ_C_INT, &
-            FSTARPU_VALUE, C_LOC(time_a_c), FSTARPU_SZ_C_DOUBLE, &
-            FSTARPU_VALUE, C_LOC(sub_id_c), FSTARPU_SZ_C_INT, &
-            FSTARPU_DATA_MODE_ARRAY, descrs_finalize(I), C_LOC(nbufs_fin_c), &
-            C_NULL_PTR /))
-
-         ! Conditionally insert I/O task
-         IF (do_io) THEN
             PRINT *, "ORCHESTRATOR: Inserting IO task for IT =", IT, " subdomain =", I
             CALL fstarpu_task_insert((/ cl_io, &
                FSTARPU_VALUE, C_LOC(it_c), FSTARPU_SZ_C_INT, &
                FSTARPU_VALUE, C_LOC(time_a_c), FSTARPU_SZ_C_DOUBLE, &
                FSTARPU_VALUE, C_LOC(sub_id_c), FSTARPU_SZ_C_INT, &
-               FSTARPU_DATA_MODE_ARRAY, descrs_finalize(I), C_LOC(nbufs_fin_c), &
+               FSTARPU_DATA_MODE_ARRAY, descrs_io(I), C_LOC(nbufs_fin_c), &
                C_NULL_PTR /))
-         END IF
-      END DO
+         END DO
+      END IF
    END DO
 
    ! Wait for all submitted tasks to complete
@@ -280,14 +350,20 @@ PROGRAM DAGSWEM
 
    ! Cleanup
    DO I = 0, num_subdomains - 1
-      CALL fstarpu_data_descr_array_free(descrs_advance(I))
-      CALL fstarpu_data_descr_array_free(descrs_finalize(I))
+      CALL fstarpu_data_descr_array_free(descrs_integrate(I))
+      IF (use_postprocess) CALL fstarpu_data_descr_array_free(descrs_postprocess(I))
+      CALL fstarpu_data_descr_array_free(descrs_io(I))
    END DO
 
    DO I = 0, num_subdomains - 1
       DO J = 0, num_subdomains - 1
          IF (C_ASSOCIATED(comm_handles(I, J))) THEN
             CALL fstarpu_data_unregister(comm_handles(I, J))
+         END IF
+         IF (use_postprocess) THEN
+            IF (C_ASSOCIATED(comm_handles_inter(I, J))) THEN
+               CALL fstarpu_data_unregister(comm_handles_inter(I, J))
+            END IF
          END IF
       END DO
    END DO
@@ -300,8 +376,8 @@ PROGRAM DAGSWEM
       END DO
    END DO
 
-   CALL fstarpu_codelet_free(cl_advance)
-   CALL fstarpu_codelet_free(cl_finalize)
+   CALL fstarpu_codelet_free(cl_integrate)
+   IF (use_postprocess) CALL fstarpu_codelet_free(cl_postprocess)
    CALL fstarpu_codelet_free(cl_io)
 
    CALL fstarpu_shutdown()
