@@ -413,6 +413,58 @@ def main():
         
         f.write("  END SUBROUTINE DGSWEM_STATE_ACTIVATE\n")
         f.write("\n")
+        f.write("  SUBROUTINE DGSWEM_STATE_DEACTIVATE(buffers)\n")
+        f.write("    TYPE(C_PTR), VALUE, INTENT(IN) :: buffers\n")
+        f.write("    TYPE(C_PTR) :: curr_ptr\n")
+        f.write("    INTEGER, POINTER :: SCALAR_INT_BUF(:)\n")
+        f.write("    REAL(SZ), POINTER :: SCALAR_REAL_BUF(:)\n")
+        f.write(f"    curr_ptr = fstarpu_vector_get_ptr(buffers, {num_ptrs})\n")
+        f.write(f"    CALL c_f_pointer(curr_ptr, SCALAR_INT_BUF, shape=[NUM_INT_SCALARS])\n")
+        offset = num_ptrs
+        for name, shape in unique_ints:
+            if shape:
+                dims = [int(d) for d in re.findall(r'\d+', shape)]
+                prod = 1
+                for d in dims: prod *= d
+                if len(dims) == 1:
+                    for idx_dim in range(1, dims[0] + 1):
+                        offset += 1
+                        f.write(f"    SCALAR_INT_BUF({offset}) = {name}({idx_dim})\n")
+                elif len(dims) == 2:
+                    for d2 in range(1, dims[1] + 1):
+                        for d1 in range(1, dims[0] + 1):
+                            offset += 1
+                            f.write(f"    SCALAR_INT_BUF({offset}) = {name}({d1},{d2})\n")
+            else:
+                offset += 1
+                f.write(f"    SCALAR_INT_BUF({offset}) = {name}\n")
+        f.write("    IF (vertexslope) THEN\n")
+        f.write(f"      SCALAR_INT_BUF({num_int_scalars}) = 1\n")
+        f.write("    ELSE\n")
+        f.write(f"      SCALAR_INT_BUF({num_int_scalars}) = 0\n")
+        f.write("    END IF\n")
+        f.write(f"    curr_ptr = fstarpu_vector_get_ptr(buffers, {num_ptrs + 1})\n")
+        f.write(f"    CALL c_f_pointer(curr_ptr, SCALAR_REAL_BUF, shape=[NUM_REAL_SCALARS])\n")
+        offset = 0
+        for name, shape in unique_reals:
+            if shape:
+                dims = [int(d) for d in re.findall(r'\d+', shape)]
+                prod = 1
+                for d in dims: prod *= d
+                if len(dims) == 1:
+                    for idx_dim in range(1, dims[0] + 1):
+                        offset += 1
+                        f.write(f"    SCALAR_REAL_BUF({offset}) = {name}({idx_dim})\n")
+                elif len(dims) == 2:
+                    for d2 in range(1, dims[1] + 1):
+                        for d1 in range(1, dims[0] + 1):
+                            offset += 1
+                            f.write(f"    SCALAR_REAL_BUF({offset}) = {name}({d1},{d2})\n")
+            else:
+                offset += 1
+                f.write(f"    SCALAR_REAL_BUF({offset}) = {name}\n")
+        f.write("  END SUBROUTINE DGSWEM_STATE_DEACTIVATE\n")
+        f.write("\n")
         
         f.write("  SUBROUTINE DGSWEM_DEALLOC_ALLOCATABLES()\n")
         seen_allocs = set()

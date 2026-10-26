@@ -50,6 +50,9 @@ contains
             sub_comm(sub_id)%ISENDLOC(:, j), irk + 1)
       END DO
 
+      ! Pack scalars back into StarPU buffers
+      CALL DGSWEM_STATE_DEACTIVATE(buffers)
+
    end subroutine ADVANCE_STAGE_INTEGRATE
 
 
@@ -96,6 +99,9 @@ contains
          CALL DG_HYDRO_TIMESTEP_FINALIZE(it)
       END IF
 
+      ! Pack scalars back into StarPU buffers
+      CALL DGSWEM_STATE_DEACTIVATE(buffers)
+
    end subroutine ADVANCE_STAGE_POSTPROCESS
 
 
@@ -128,6 +134,9 @@ contains
       CALL modal2nodal()
       CALL MAKE_DIRNAME()
       CALL WRITE_GLOBAL_ELEVATION(it, time_a_in)
+
+      ! Pack scalars back into StarPU buffers
+      CALL DGSWEM_STATE_DEACTIVATE(buffers)
 
    end subroutine WRITE_OUTPUT_DISTRIBUTED
 
