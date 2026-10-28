@@ -8,44 +8,80 @@ For reference, see
 - Dawson, Clint, Ethan J. Kubatko, Joannes J. Westerink, Corey Trahan, Christopher Mirabito, Craig Michoski, and Nishant Panda. 2011. “Discontinuous Galerkin Methods for Modeling Hurricane Storm Surge.” Advances in Water Resources 34 (9): 1165–76.
 - Wichitrnithed, Chayanon, Eirik Valseth, Ethan J. Kubatko, Younghun Kang, Mackenzie Hudson, and Clint Dawson. 2024. “A Discontinuous Galerkin Finite Element Model for Compound Flood Simulations.” Computer Methods in Applied Mechanics and Engineering 420 (February): 116707.
 
-Building
----
-DG-SWEM uses the [Meson build system](https://mesonbuild.com/) for configuration and compilation. It can be installed through `pip`:
+## 1. Environment
 
-    pip install meson
+DGSWEM was designed to be self-contained, and requires relatively few external dependencies.
 
-To build, use the Meson verse: 
+- Meson build system. 
+- Compilers for Fortran, C, and C++.
+- For parallel runs, MPI.
+- For NetCDF output, the [NetCDF Fortran](https://docs.unidata.ucar.edu/netcdf-fortran/current/) library, and for parallel NetCDF output, additionally the [ParallelIO](https://ncar.github.io/ParallelIO/) library.
 
-    meson setup <build> -D<option>=<value> 
-    cd build
-    meson compile 
+### Using Conda Environments
 
-Meson will detect and use system compilers and packages. To specify a specific compiler, set the environment variables. 
+The most reliable way to set up dependencies is with Conda or Mamba in a self-contained environment. Environment specification files are provided in [`envs`](envs). Adding optional features like NetCDF output is as simple as updating with the appropriate feature file.
 
-As a first example, first enter the root directory of this repo and run
+```
+conda env create -f envs/environment-gcc.yml
+conda env update -f envs/feat-netcdf-gcc.yml
+```
 
-    FC=gfortran CC=gcc CXX=g++ meson setup build-gcc
+If you are having trouble solving for the environment on your computer, or want maximum reproducibility, lock files are provided for certain systems. These record the build environment down to specific versions and build hashes.
 
-to create a build directory called `build-gcc` and use GNU compilers to build single-core DG-SWEM.
+### Using TACC Modules
 
-To also build the parallel DG-SWEM code, specify the MPI wrapper and enable the parallel option
+On HPC resources like the [Texas Advanced Computing Center](https://tacc.utexas.edu), dependencies can instead be managed with [Lmod](https://tacc.utexas.edu/research/tacc-research/lmod/).
 
-    FC=gfortran CC=gcc CXX=g++ MPIFC=mpif90 meson setup build-gcc -Dparallel=true
+#### Modules for Lonestar6 (GNU)
 
-Other compilers currently supported are:
+- `gcc/11.2.0`
+- `mvapich2/2.3.7`
+- `TACC`
 
-- Intel LLVM (`ifx`, `icx`, `icpx`, `mpiifx`)
-- NVIDIA HPC (`nvfortran`, `nvc`, `nvc++`, `mpif90`)
+#### Modules for Vista (Nvidia)
 
-**Note:** There is a bug in Intel oneAPI MPI >=2021.17 currently that breaks meson's detection of the right mpi wrappers. See (https://github.com/mesonbuild/meson/pull/16053) for reference. 
+- `nvidia/24.7`
+- `openmpi/5.0.5`
+- `TACC`
 
-For systems with multiple compilers, it may be best to specify the full path to the desired compilers.
+## 2. Building
 
-Options are specified in the format `-D<option>=<value>`. To see the available options for the above build, run
+DG-SWEM uses the [Meson build system](https://mesonbuild.com/) for configuration and compilation. From the main directory, the following commands set up a build folder, move into it, and compile DGSWEM binaries.
 
-    meson configure build-gcc
+```
+VARIABLE=value meson setup <build> -D<option>=<value> 
+cd build
+meson compile
+```
 
-Options specific to DG-SWEM are:
+To redo a build, say with a different configuration, go back to the root directory and run meson setup with the `--wipe` option.
+
+### Compiler Environment Variables
+
+Meson will detect and use system compilers and packages. To specify specific compilers, set environment variables before the meson command. If you use one of the Conda environment files, this is done for you already. For example, to create a build directory called `build-gcc` and use GNU compilers to build single-core DG-SWEM, use the following command.
+
+```
+FC=gfortran CC=gcc CXX=g++ meson setup build-gcc
+```
+
+The following compiler combinations are supported for DGSWEM.
+
+| Compiler type | Environment variables |
+| --- | ---|
+| GNU | `FC=gfortran CC=gcc CXX=g++ MPIFC=mpif90` |
+| Intel LLVM | `FC=ifx CC=icx CXX=icpx MPIFC=mpiifx` |
+| Nvidia HPC | `FC=nvfortran CC=nvc CXX=nvc++ MPIFC=mpif90` |
+
+- **Note:** There is a bug in Intel oneAPI MPI >=2021.17 currently that breaks meson's detection of the right mpi wrappers. See (https://github.com/mesonbuild/meson/pull/16053) for reference. 
+- For systems with multiple compilers, it may be best to specify the full path to the desired compilers.
+
+### Meson Build Options
+
+Several different build options are available to leverage different features of DGSWEM. Options are specified in the format `-D<option>=<value>`. To see the available options for the above build, run the following command or use the reference table.
+
+```
+meson configure build-gcc
+```
 
 | Option name | Description | Possible values | Default |
 | --- | --- | --- | --- |
@@ -54,20 +90,24 @@ Options specific to DG-SWEM are:
 | precision | Floating point precision | single, double | double |
 | netcdf | netcdf output | [meson feature](https://mesonbuild.com/Build-options.html#features) | auto |
 
+For example to also build the parallel version, specify the MPI wrapper and enable the parallel option.
+
+```
+FC=gfortran CC=gcc CXX=g++ MPIFC=mpif90 meson setup build-gcc -Dparallel=true
+```
+
+### Meson Compile
+
 Once configured, we can compile the program in the build directory:
 
-    cd build-gcc 
-    meson compile -v   # show compilation commands
+```
+cd build-gcc 
+meson compile -v   # show compilation commands
+```
 
 This will produce the executable `dgswem_serial`, and if `-Dparallel=true`, also `dgswem`, `adcprep`, and `adcpost`. 
 
-To redo a clean build, say with a different configuration, go back to the root directory and run
-
-    meson setup build-gcc [OPTIONS] --wipe
-
-and repeat the process.
-
-***Notes on building the GPU version***
+### Notes on building the GPU version
 
 DG-SWEM (both serial and parallel) can be configured to run on NVIDIA gpus through OpenACC using `-Dgpu=true`, but requires NVHPC and unified memory support. 
 To find out if your system supports this, run
@@ -78,14 +118,15 @@ If the output is `HMM` or `ATS`, then the GPU code can be built. Some systems li
 To enable `HMM` on a system with a consumer GPU like the RTX series, read https://forums.developer.nvidia.com/t/issue-activating-hmm-feature-on-nvidia-rtx-a4500-with-cuda-toolkit-12-4-on-debian-bookworm/285142/3 .
 
 
-Testing
----
+## 3. Testing
+
 Several test cases are contained in `tests`. This requires `pytest`. After having compiled the executables as above, go inside `tests` and run
 ```
 pytest test_run.py --binpath <build_dir>
 ```
-Running
----
+
+## 4. Running
+
 For the most part, ADCIRC input (`fort.14`, `fort.15`, etc.) will work minus some features like netCDF support. 
 Consult https://adcirc.org/home/documentation/users-manual-v53/input-file-descriptions/ for their formats.
 
@@ -98,7 +139,7 @@ An additional control file called
 - `rainfall = 3` : Use the R-CLIPER parametric model to compute rain (only `NWS=20` is supported)
 - `rainfall = 4`: Use the IPET parametric model to compute rain (only `NWS=20` is supported)
 
-**Serial run**
+### Serial run
 
 To run on a single CPU or GPU, use
 ```
@@ -107,7 +148,7 @@ To run on a single CPU or GPU, use
 in the same directory as the input files. Consult https://adcirc.org/home/documentation/users-manual-v53/output-file-descriptions/ for
 the output file formats.
 
-**Parallel run**
+### Parallel run
 
 To run on multiple CPUs or GPUs, first perform domain decomposition
 
@@ -122,30 +163,13 @@ Finally, to agglomerate the subdomain-specific output files into global ones we 
 
     ./adcpost
 
-Specific instructions for TACC systems
----
-**Lonestar6**
-
-Modules used (for compiling with GNU):
-
-- `gcc/11.2.0`
-- `mvapich2/2.3.7`
-- `TACC`
-
-**Vista**
-
-Modules used:
-
-- `nvidia/24.7`
-- `openmpi/5.0.5`
-- `TACC`
+### Specific instructions for TACC systems
 
 To run on multiple GPU nodes, set `-N` to be the number of GPUs and `--tasks-per-node` to 1; this
 assigns one CPU core per GPU. 
 
+## DGSWEM Software License 
 
-dgswem Software License
----    
 DG-SWEM - The Discontinuous Galerkin Shallow Water Equation Model
 
 This program is free software: you can redistribute it and/or modify
