@@ -613,6 +613,44 @@ C     p-enrichment to state variables at stage index IRK+1.
 C
 C***********************************************************************
 
+C***********************************************************************
+C
+C     SUBROUTINE DG_HYDRO_TIMESTEP_STAGE_SLOPELIM_PREP(IT, IRK_STAGE)
+C
+C     Computes nodal min and max for slope limiter on current RK stage.
+C
+C***********************************************************************
+
+      SUBROUTINE DG_HYDRO_TIMESTEP_STAGE_SLOPELIM_PREP(IT, IRK_STAGE)
+
+      USE GLOBAL
+      USE DG
+
+      IMPLICIT NONE
+
+      INTEGER IT, IRK_STAGE
+
+      IRK = IRK_STAGE
+
+#if defined(SLOPE5) || defined(STBLZR) || defined(SLOPEALL)
+      IF (SLOPEFLAG .NE. 0) THEN
+         CALL SLOPELIMITER5_PREP()
+      ENDIF
+#endif
+
+      RETURN
+      END SUBROUTINE
+
+
+C***********************************************************************
+C
+C     SUBROUTINE DG_HYDRO_TIMESTEP_STAGE_POSTPROCESS(IT, IRK_STAGE)
+C
+C     Applies slope limiter (apply phase) and wetting/drying treatment
+C     at the end of an RK stage.
+C
+C***********************************************************************
+
       SUBROUTINE DG_HYDRO_TIMESTEP_STAGE_POSTPROCESS(IT, IRK_STAGE)
 
 C.....Use appropriate modules
@@ -628,6 +666,11 @@ C.....Use appropriate modules
 
 C.......Apply the slopelimiter if appropriate
 
+#ifdef TASKPAR
+      IF (SLOPEFLAG .NE. 0) THEN
+         CALL SLOPELIMITER5_APPLY()
+      ENDIF
+#else
 #ifdef SLOPEALL
       CALL SLOPELIMITER()
 #endif
@@ -641,6 +684,7 @@ C.......Apply the slopelimiter if appropriate
          CALL SLOPELIMITER()
          stblzr = .true.
       endif
+#endif
 #endif
 
 C.......Apply the wet-dry algorithm if appropriate

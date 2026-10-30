@@ -56,10 +56,9 @@ contains
    end subroutine ADVANCE_STAGE_INTEGRATE
 
 
-   RECURSIVE SUBROUTINE ADVANCE_STAGE_POSTPROCESS(buffers, cl_args) bind(C)
-      !! Unpacks intermediate ghost elements (level irk+1), executes slope limiter
-      !! and wetting/drying treatment, packs postprocessed resident elements (level irk+1),
-      !! and if final stage (irk == NRK), updates state variables for next timestep.
+   RECURSIVE SUBROUTINE ADVANCE_STAGE_SLOPELIM_PREP(buffers, cl_args) bind(C)
+      !! Unpacks intermediate ghost elements (level irk+1), executes slope limiter prep
+      !! to compute nodal extrema, and packs nodal extrema into outgoing communication buffers.
       TYPE(C_PTR), VALUE, INTENT(IN) :: BUFFERS
       TYPE(C_PTR), VALUE, INTENT(IN) :: CL_ARGS
       INTEGER(C_INT), TARGET :: it, irk, sub_id
@@ -82,12 +81,71 @@ contains
             sub_comm(sub_id)%IRECVLOC(:, j), irk + 1)
       END DO
 
-      ! Apply post-processing treatments (slope limiter and wet/dry treatment)
+      ! Compute nodal min/max extrema
+      CALL DG_HYDRO_TIMESTEP_STAGE_SLOPELIM_PREP(it, irk)
+
+      ! Pack nodal extrema into outgoing buffers for neighbor subdomains
+      DO j = 1, sub_node_comm(sub_id)%NEIGHPROC_S
+         buf_idx = NUM_STATE_HANDLES + sub_comm(sub_id)%NEIGHPROC_R + j - 1
+         CALL c_f_pointer(fstarpu_vector_get_ptr(buffers, buf_idx), out_vec, &
+            shape=[fstarpu_vector_get_nx(buffers, buf_idx)])
+         CALL PACK_NODE_COMM_BUFFER(out_vec, sub_node_comm(sub_id)%NNODSEND(j), &
+            sub_node_comm(sub_id)%ISENDLOC(:, j))
+      END DO
+
+      ! Pack scalars back into StarPU buffers
+      CALL DGSWEM_STATE_DEACTIVATE(buffers)
+
+   end subroutine ADVANCE_STAGE_SLOPELIM_PREP
+
+
+   RECURSIVE SUBROUTINE ADVANCE_STAGE_POSTPROCESS(buffers, cl_args) bind(C)
+      !! Unpacks incoming nodal extrema into ghost nodes, executes slope limiter apply
+      !! and wetting/drying treatment, packs postprocessed resident elements (level irk+1),
+      !! and if final stage (irk == NRK), updates state variables for next timestep.
+      TYPE(C_PTR), VALUE, INTENT(IN) :: BUFFERS
+      TYPE(C_PTR), VALUE, INTENT(IN) :: CL_ARGS
+      INTEGER(C_INT), TARGET :: it, irk, sub_id
+      REAL(C_DOUBLE), TARGET :: time_a_in
+      INTEGER :: j, buf_idx
+      REAL(SZ), POINTER :: in_vec(:), out_vec(:)
+
+      CALL fstarpu_unpack_arg(cl_args, (/ C_LOC(it), C_LOC(time_a_in), C_LOC(irk), C_LOC(sub_id) /))
+
+      CALL DGSWEM_STATE_ACTIVATE(buffers)
+      MYPROC = sub_id
+      TIME_A = time_a_in
+
+      IF (SLOPEFLAG /= 0) THEN
+         ! Unpack incoming nodal extrema from neighbor subdomains into ghost nodes
+         DO j = 1, sub_node_comm(sub_id)%NEIGHPROC_R
+            buf_idx = NUM_STATE_HANDLES + j - 1
+            CALL c_f_pointer(fstarpu_vector_get_ptr(buffers, buf_idx), in_vec, &
+               shape=[fstarpu_vector_get_nx(buffers, buf_idx)])
+            CALL UNPACK_NODE_COMM_BUFFER(in_vec, sub_node_comm(sub_id)%NNODRECV(j), &
+               sub_node_comm(sub_id)%IRECVLOC(:, j))
+         END DO
+      ELSE
+         ! Unpack incoming intermediate ghost elements into level irk + 1
+         DO j = 1, sub_comm(sub_id)%NEIGHPROC_R
+            buf_idx = NUM_STATE_HANDLES + j - 1
+            CALL c_f_pointer(fstarpu_vector_get_ptr(buffers, buf_idx), in_vec, &
+               shape=[fstarpu_vector_get_nx(buffers, buf_idx)])
+            CALL UNPACK_COMM_BUFFER(in_vec, sub_comm(sub_id)%NELEMRECV(j), &
+               sub_comm(sub_id)%IRECVLOC(:, j), irk + 1)
+         END DO
+      END IF
+
+      ! Apply post-processing treatments (slope limiter apply and wet/dry treatment)
       CALL DG_HYDRO_TIMESTEP_STAGE_POSTPROCESS(it, irk)
 
       ! Pack post-processed resident elements into outgoing buffers for next stage/step
       DO j = 1, sub_comm(sub_id)%NEIGHPROC_S
-         buf_idx = NUM_STATE_HANDLES + sub_comm(sub_id)%NEIGHPROC_R + j - 1
+         IF (SLOPEFLAG /= 0) THEN
+            buf_idx = NUM_STATE_HANDLES + sub_node_comm(sub_id)%NEIGHPROC_R + j - 1
+         ELSE
+            buf_idx = NUM_STATE_HANDLES + sub_comm(sub_id)%NEIGHPROC_R + j - 1
+         END IF
          CALL c_f_pointer(fstarpu_vector_get_ptr(buffers, buf_idx), out_vec, &
             shape=[fstarpu_vector_get_nx(buffers, buf_idx)])
          CALL PACK_COMM_BUFFER(out_vec, sub_comm(sub_id)%NELEMSEND(j), &

@@ -176,6 +176,8 @@ C     The following variables are inputs from the unit 15 model param. file
       INTEGER  IFLINBF! flag to turn on linear bottom friction
       INTEGER  IFNLBF ! flag to turn on nonlinear bottom friction
       INTEGER  IFHYBF ! flag to turn on hybrid bottom friction
+C     TAU is used as per-element scratch in RHS_DG_HYDRO, so each worker needs its own
+      !$OMP THREADPRIVATE(TAU)
 C
 C     Nodal attributes.
       REAL(SZ), ALLOCATABLE :: STARTDRY(:) ! 1=nodes below geoid initially dry

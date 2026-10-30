@@ -1,0 +1,12 @@
+
+set pagination off
+set confirm off
+b DG_HYDRO_TIMESTEP_STAGE_INTEGRATE
+b DG_HYDRO_TIMESTEP_STAGE_POSTPROCESS
+run
+print "At stage integrate 1"
+print ZE(1, 1:MNE, 1)
+c
+print "At stage postprocess 1"
+print ZE(1, 1:MNE, 1)
+quit

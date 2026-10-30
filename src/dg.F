@@ -220,6 +220,8 @@ C.....These (below) are defined in slopelimiter.F
       Real(SZ),POINTER :: QXmax(:,:),QYmin(:,:),QYmax(:,:)
       Real(SZ),POINTER :: iotamin(:,:),iotamax(:,:)
       Real(SZ),POINTER :: iota2min(:,:),iota2max(:,:)
+      Real(SZ),POINTER :: ZE_MIN1(:),ZE_MAX1(:),QX_MIN1(:)
+      Real(SZ),POINTER :: QX_MAX1(:),QY_MIN1(:),QY_MAX1(:)
 
       Real(SZ),POINTER :: ZEtaylor(:,:,:),QXtaylor(:,:,:),
      & QYtaylor(:,:,:)
@@ -360,6 +362,8 @@ C.....These (below) are defined in slopelimiter.F
       !$OMP THREADPRIVATE(varsigma0, fv, g0v, varsigma0v, var2sigmag, var2sigmav, Nmatrix)
       !$OMP THREADPRIVATE(NmatrixInv, deltx, delty, pmatrix, ZEmin, ZEmax, QXmin, QXmax)
       !$OMP THREADPRIVATE(QYmin, QYmax, iotamin, iotamax, iota2min, iota2max, QYtaylor)
+      !$OMP THREADPRIVATE(valx, valy, DRPSI, DSPSI, VEC1, VEC2)
+      !$OMP THREADPRIVATE(ZE_MIN1, ZE_MAX1, QX_MIN1, QX_MAX1, QY_MIN1, QY_MAX1)
 
 C**********************END OF DATA DECLARATIONS ***********************
 
@@ -560,6 +564,8 @@ C.....These (below) are defined in slopelimiter.F (slopelimiter4)
       Allocate ( limitiota(MNE,dofh),limitiota2(MNE,dofh) )
       Allocate ( ZEconst(MNE,dofh),QXconst(MNE,dofh),QYconst(MNE,dofh) )
       Allocate ( iotaconst(MNE,dofh),iota2const(MNE,dofh) )
+      Allocate ( ZE_MIN1(MNP),ZE_MAX1(MNP),QX_MIN1(MNP) )
+      Allocate ( QX_MAX1(MNP),QY_MIN1(MNP),QY_MAX1(MNP) )
       RETURN
       END SUBROUTINE
 

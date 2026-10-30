@@ -1,0 +1,3 @@
+dg.F missing reals: []
+global.F missing ints: ['integerBuffer', 'integerResultBuffer', 'NP', 'NOLICA', 'NOLIFA', 'NSCREEN', 'IHOT', 'ICS']
+global.F missing reals: ['buf', 'resultBuf']

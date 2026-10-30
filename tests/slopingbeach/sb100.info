@@ -1,0 +1,13 @@
+Simple Mesh
+Number of nodes: 49
+Number of elements: 72
+Number of land boundaries: 21
+Number of open boundaries: 7
+Target metric resolution: 641985.095054 m
+Target angular resolution: 5.714286 deg
+Actual number of nodes: 49
+Actual number of elements: 72
+Actual number of land boundaries: 21
+Actual number of open boundaries: 7
+Actual number of boundary nodes: 28
+Actual number of boundary elements: 28
