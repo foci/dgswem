@@ -1,0 +1,7 @@
+channels:
+  - conda-forge
+dependencies:
+  - pkg-config # For finding the NetCDF package files
+  - libnetcdf[version='>=4.9.2,<4.10.0',build=*openmpi*] # Upper limit required due to hard-coded version check
+  - netcdf-fortran[build=*openmpi*]
+  - parallelio

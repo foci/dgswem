@@ -66,7 +66,11 @@ cpp = meson.get_compiler('cpp')
 # This should find the C++ standard library 90% of the time. 
 # The Fortran cross-language linking doesn't link in the C++ standard library by default, 
 # (only the C standard library) so we have to do it manually here.
-cpp_dep = cpp.find_library('stdc++', required: true)
+if host_machine.system() == 'darwin'
+    cpp_dep = cpp.find_library('c++', required: true)
+else
+    cpp_dep = cpp.find_library('stdc++', required: true)
+endif
 if not cpp_dep.found()
     error('Could not find C++ standard library using the name stdc++. You may need to specify the name using a native file.')
 endif

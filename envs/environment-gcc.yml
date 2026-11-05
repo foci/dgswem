@@ -1,0 +1,17 @@
+name: dgswem-env
+channels:
+  - conda-forge
+dependencies:
+  - meson
+  - ninja
+  - gfortran # Fortran compiler
+  - gcc # C compiler
+  - gxx # C++ compiler
+  - openmpi # MPI
+  - pytest # For testing
+  - pandas # For testing
+variables:
+  FC: "gfortran"
+  CC: "gcc"
+  CXX: "g++"
+  MPIFC: "mpif90"
